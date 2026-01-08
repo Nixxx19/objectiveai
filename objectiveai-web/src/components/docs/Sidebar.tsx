@@ -152,15 +152,15 @@ export function Sidebar({ className }: { className?: string }): ReactElement {
           <SidebarItemSpacer />
           <SidebarApiItem
             method="POST"
-            path="/functions/{fauthor}/{fid}/profiles/publish"
-            href="/docs/api/post/functions/fauthor/fid/profiles/publish"
+            path="/functions/{fauthor}/{fid}/{version}/profiles/publish"
+            href="/docs/api/post/functions/fauthor/fid/version/profiles/publish"
             description="Publish an inline ObjectiveAI Function Profile"
           />
           <SidebarItemSpacer />
           <SidebarApiItem
             method="POST"
-            path="/functions/{fauthor}/{fid}/profiles/compute"
-            href="/docs/api/post/functions/fauthor/fid/profiles/compute"
+            path="/functions/{fauthor}/{fid}/{version}/profiles/compute"
+            href="/docs/api/post/functions/fauthor/fid/version/profiles/compute"
             description="Compute an ObjectiveAI Function Profile from your data"
           />
 
