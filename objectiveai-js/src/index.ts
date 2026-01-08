@@ -2970,107 +2970,96 @@ export namespace Function {
     typeof VectorCompletionProfileSchema
   >;
 
-  export type FunctionProfileVersionRequired =
+  export type FunctionProfileCommitRequired =
     | {
-        function_author: string;
-        function_id: string;
-        author: string;
-        id: string;
-        version: number;
+        owner: string;
+        repository: string;
+        commit: string;
       }
-    | ProfileVersionRequired[];
-  export const FunctionProfileVersionRequiredSchema: z.ZodType<FunctionProfileVersionRequired> =
+    | ProfileCommitRequired[];
+  export const FunctionProfileCommitRequiredSchema: z.ZodType<FunctionProfileCommitRequired> =
     z
       .union([
         z.object({
-          function_author: z
+          owner: z
             .string()
             .describe(
-              "The author of the function the profile was published to."
+              "The owner of the GitHub repository containing the profile."
             ),
-          function_id: z
+          repository: z
             .string()
             .describe(
-              "The unique identifier of the function the profile was published to."
+              "The name of the GitHub repository containing the profile."
             ),
-          author: z.string().describe("The author of the profile."),
-          id: z.string().describe("The unique identifier of the profile."),
-          version: z.uint32().describe("The version of the profile."),
+          commit: z
+            .string()
+            .describe(
+              "The commit SHA of the GitHub repository containing the profile."
+            ),
         }),
         z.lazy(() =>
-          z.array(ProfileVersionRequiredSchema).meta({
-            title: "ProfileVersionRequiredArray",
+          z.array(ProfileCommitRequiredSchema).meta({
+            title: "ProfileCommitRequiredArray",
             recursive: true,
           })
         ),
       ])
       .describe(
-        "A function profile where remote profiles must specify a version."
+        "A function profile where remote profiles must specify a commit."
       );
 
-  export type FunctionProfileVersionOptional =
+  export type FunctionProfileCommitOptional =
     | {
-        function_author: string;
-        function_id: string;
-        author: string;
-        id: string;
-        version?: number | null;
+        owner: string;
+        repository: string;
+        commit?: string | null;
       }
-    | ProfileVersionOptional[];
-  export const FunctionProfileVersionOptionalSchema: z.ZodType<FunctionProfileVersionOptional> =
+    | ProfileCommitOptional[];
+  export const FunctionProfileCommitOptionalSchema: z.ZodType<FunctionProfileCommitOptional> =
     z
       .union([
         z.object({
-          function_author: z
+          owner: z
             .string()
             .describe(
-              "The author of the function the profile was published to."
+              "The owner of the GitHub repository containing the profile."
             ),
-          function_id: z
+          repository: z
             .string()
             .describe(
-              "The unique identifier of the function the profile was published to."
+              "The name of the GitHub repository containing the profile."
             ),
-          author: z.string().describe("The author of the profile."),
-          id: z.string().describe("The unique identifier of the profile."),
-          version: z
-            .uint32()
-            .optional()
-            .nullable()
-            .describe("The version of the profile."),
+          commit: z
+            .string()
+            .describe(
+              "The commit SHA of the GitHub repository containing the profile."
+            )
+            .optional(),
         }),
         z
-          .lazy(() => z.array(ProfileVersionOptionalSchema))
+          .lazy(() => z.array(ProfileCommitOptionalSchema))
           .meta({
-            title: "ProfileVersionOptionalArray",
+            title: "ProfileCommitOptionalArray",
             recursive: true,
           }),
       ])
-      .describe("A function profile where remote profiles may omit a version.");
+      .describe("A function profile where remote profiles may omit a commit.");
 
-  export type ProfileVersionRequired =
-    | FunctionProfileVersionRequired
+  export type ProfileCommitRequired =
+    | FunctionProfileCommitRequired
     | VectorCompletionProfile;
-  export const ProfileVersionRequiredSchema: z.ZodType<ProfileVersionRequired> =
-    z
-      .union([
-        FunctionProfileVersionRequiredSchema,
-        VectorCompletionProfileSchema,
-      ])
-      .describe(
-        "A profile where remote function profiles must specify a version."
-      );
+  export const ProfileCommitRequiredSchema: z.ZodType<ProfileCommitRequired> = z
+    .union([FunctionProfileCommitRequiredSchema, VectorCompletionProfileSchema])
+    .describe(
+      "A profile where remote function profiles must specify a commit."
+    );
 
-  export type ProfileVersionOptional =
-    | FunctionProfileVersionOptional
+  export type ProfileCommitOptional =
+    | FunctionProfileCommitOptional
     | VectorCompletionProfile;
-  export const ProfileVersionOptionalSchema: z.ZodType<ProfileVersionOptional> =
-    z
-      .union([
-        FunctionProfileVersionOptionalSchema,
-        VectorCompletionProfileSchema,
-      ])
-      .describe("A profile where remote function profiles may omit a version.");
+  export const ProfileCommitOptionalSchema: z.ZodType<ProfileCommitOptional> = z
+    .union([FunctionProfileCommitOptionalSchema, VectorCompletionProfileSchema])
+    .describe("A profile where remote function profiles may omit a commit.");
 
   export type InputSchema =
     | InputSchema.Object
@@ -3416,17 +3405,21 @@ export namespace Function {
     export const ScalarFunctionSchema = z
       .object({
         type: z.literal("scalar.function"),
-        author: z
-          .string()
-          .describe("The author of the remote published scalar function."),
-        id: z
+        owner: z
           .string()
           .describe(
-            "The unique identifier of the remote published scalar function."
+            "The owner of the GitHub repository containing the function."
           ),
-        version: z
-          .uint32()
-          .describe("The version of the remote published scalar function."),
+        repository: z
+          .string()
+          .describe(
+            "The name of the GitHub repository containing the function."
+          ),
+        commit: z
+          .string()
+          .describe(
+            "The commit SHA of the GitHub repository containing the function."
+          ),
         skip: SkipSchema.optional().nullable(),
         map: MapSchema.optional().nullable(),
         input: InputExpressionSchema,
@@ -3437,17 +3430,21 @@ export namespace Function {
     export const VectorFunctionSchema = z
       .object({
         type: z.literal("vector.function"),
-        author: z
-          .string()
-          .describe("The author of the remote published vector function."),
-        id: z
+        owner: z
           .string()
           .describe(
-            "The unique identifier of the remote published vector function."
+            "The owner of the GitHub repository containing the function."
           ),
-        version: z
-          .uint32()
-          .describe("The version of the remote published vector function."),
+        repository: z
+          .string()
+          .describe(
+            "The name of the GitHub repository containing the function."
+          ),
+        commit: z
+          .string()
+          .describe(
+            "The commit SHA of the GitHub repository containing the function."
+          ),
         skip: SkipSchema.optional().nullable(),
         map: MapSchema.optional().nullable(),
         input: InputExpressionSchema,
@@ -3491,9 +3488,6 @@ export namespace Function {
   export const ScalarSchema = z
     .object({
       type: z.literal("scalar.function"),
-      author: z.string().describe("The author of the scalar function."),
-      id: z.string().describe("The unique identifier of the scalar function."),
-      version: z.uint32().describe("The version of the scalar function."),
       description: z
         .string()
         .describe("The description of the scalar function."),
@@ -3518,9 +3512,6 @@ export namespace Function {
   export const VectorSchema = z
     .object({
       type: z.literal("vector.function"),
-      author: z.string().describe("The author of the vector function."),
-      id: z.string().describe("The unique identifier of the vector function."),
-      version: z.uint32().describe("The version of the vector function."),
       description: z
         .string()
         .describe("The description of the vector function."),
@@ -3552,435 +3543,259 @@ export namespace Function {
 
   export namespace Executions {
     export namespace Request {
-      export const FunctionExecutionParamsBaseSchema = z
-        .object({
-          retry_token: z
-            .string()
-            .optional()
-            .nullable()
-            .describe(
-              "The retry token provided by a previous incomplete or failed function execution."
-            ),
-          input: InputSchema_,
-          provider:
-            Chat.Completions.Request.ProviderSchema.optional().nullable(),
-          seed: Chat.Completions.Request.SeedSchema.optional().nullable(),
-          backoff_max_elapsed_time:
-            Chat.Completions.Request.BackoffMaxElapsedTimeSchema.optional().nullable(),
-          first_chunk_timeout:
-            Chat.Completions.Request.FirstChunkTimeoutSchema.optional().nullable(),
-          other_chunk_timeout:
-            Chat.Completions.Request.OtherChunkTimeoutSchema.optional().nullable(),
+      // Remote Function Remote Profile
+
+      export const FunctionExecutionParamsRemoteFunctionRemoteProfileBaseSchema =
+        z
+          .object({
+            retry_token: z
+              .string()
+              .optional()
+              .nullable()
+              .describe(
+                "The retry token provided by a previous incomplete or failed function execution."
+              ),
+            input: InputSchema_,
+            provider:
+              Chat.Completions.Request.ProviderSchema.optional().nullable(),
+            seed: Chat.Completions.Request.SeedSchema.optional().nullable(),
+            backoff_max_elapsed_time:
+              Chat.Completions.Request.BackoffMaxElapsedTimeSchema.optional().nullable(),
+            first_chunk_timeout:
+              Chat.Completions.Request.FirstChunkTimeoutSchema.optional().nullable(),
+            other_chunk_timeout:
+              Chat.Completions.Request.OtherChunkTimeoutSchema.optional().nullable(),
+          })
+          .describe(
+            "Base parameters for executing a remote function with a remote profile."
+          );
+      export type FunctionExecutionParamsRemoteFunctionRemoteProfileBase =
+        z.infer<
+          typeof FunctionExecutionParamsRemoteFunctionRemoteProfileBaseSchema
+        >;
+
+      export const FunctionExecutionParamsRemoteFunctionRemoteProfileStreamingSchema =
+        FunctionExecutionParamsRemoteFunctionRemoteProfileBaseSchema.extend({
+          stream: Chat.Completions.Request.StreamTrueSchema,
         })
-        .describe("Base parameters for executing a function.");
-      export type FunctionExecutionParamsBase = z.infer<
-        typeof FunctionExecutionParamsBaseSchema
+          .describe(
+            "Parameters for executing a remote function with a remote profile and streaming the response."
+          )
+          .meta({
+            title:
+              "FunctionExecutionParamsRemoteFunctionRemoteProfileStreaming",
+          });
+      export type FunctionExecutionParamsRemoteFunctionRemoteProfileStreaming =
+        z.infer<
+          typeof FunctionExecutionParamsRemoteFunctionRemoteProfileStreamingSchema
+        >;
+
+      export const FunctionExecutionParamsRemoteFunctionRemoteProfileNonStreamingSchema =
+        FunctionExecutionParamsRemoteFunctionRemoteProfileBaseSchema.extend({
+          stream:
+            Chat.Completions.Request.StreamFalseSchema.optional().nullable(),
+        })
+          .describe(
+            "Parameters for executing a remote function with a remote profile with a unary response."
+          )
+          .meta({
+            title:
+              "FunctionExecutionParamsRemoteFunctionRemoteProfileNonStreaming",
+          });
+      export type FunctionExecutionParamsRemoteFunctionRemoteProfileNonStreaming =
+        z.infer<
+          typeof FunctionExecutionParamsRemoteFunctionRemoteProfileNonStreamingSchema
+        >;
+
+      export const FunctionExecutionParamsRemoteFunctionRemoteProfileSchema = z
+        .union([
+          FunctionExecutionParamsRemoteFunctionRemoteProfileStreamingSchema,
+          FunctionExecutionParamsRemoteFunctionRemoteProfileNonStreamingSchema,
+        ])
+        .describe(
+          "Parameters for executing a remote function with a remote profile."
+        )
+        .meta({ title: "FunctionExecutionParamsRemoteFunctionRemoteProfile" });
+      export type FunctionExecutionParamsRemoteFunctionRemoteProfile = z.infer<
+        typeof FunctionExecutionParamsRemoteFunctionRemoteProfileSchema
       >;
 
-      // Execute Inline Function
+      // Remote Function Inline Profile
 
-      export const FunctionExecutionParamsExecuteInlineBaseSchema =
-        FunctionExecutionParamsBaseSchema.extend({
+      export const FunctionExecutionParamsRemoteFunctionInlineProfileBaseSchema =
+        FunctionExecutionParamsRemoteFunctionRemoteProfileBaseSchema.extend({
+          profile: FunctionProfileCommitOptionalSchema,
+        }).describe(
+          "Base parameters for executing a remote function with an inline profile."
+        );
+      export type FunctionExecutionParamsRemoteFunctionInlineProfileBase =
+        z.infer<
+          typeof FunctionExecutionParamsRemoteFunctionInlineProfileBaseSchema
+        >;
+
+      export const FunctionExecutionParamsRemoteFunctionInlineProfileStreamingSchema =
+        FunctionExecutionParamsRemoteFunctionInlineProfileBaseSchema.extend({
+          stream: Chat.Completions.Request.StreamTrueSchema,
+        })
+          .describe(
+            "Parameters for executing a remote function with an inline profile and streaming the response."
+          )
+          .meta({
+            title:
+              "FunctionExecutionParamsRemoteFunctionInlineProfileStreaming",
+          });
+      export type FunctionExecutionParamsRemoteFunctionInlineProfileStreaming =
+        z.infer<
+          typeof FunctionExecutionParamsRemoteFunctionInlineProfileStreamingSchema
+        >;
+
+      export const FunctionExecutionParamsRemoteFunctionInlineProfileNonStreamingSchema =
+        FunctionExecutionParamsRemoteFunctionInlineProfileBaseSchema.extend({
+          stream:
+            Chat.Completions.Request.StreamFalseSchema.optional().nullable(),
+        })
+          .describe(
+            "Parameters for executing a remote function with an inline profile with a unary response."
+          )
+          .meta({
+            title:
+              "FunctionExecutionParamsRemoteFunctionInlineProfileNonStreaming",
+          });
+      export type FunctionExecutionParamsRemoteFunctionInlineProfileNonStreaming =
+        z.infer<
+          typeof FunctionExecutionParamsRemoteFunctionInlineProfileNonStreamingSchema
+        >;
+
+      export const FunctionExecutionParamsRemoteFunctionInlineProfileSchema = z
+        .union([
+          FunctionExecutionParamsRemoteFunctionInlineProfileStreamingSchema,
+          FunctionExecutionParamsRemoteFunctionInlineProfileNonStreamingSchema,
+        ])
+        .describe(
+          "Parameters for executing a remote function with an inline profile."
+        )
+        .meta({ title: "FunctionExecutionParamsRemoteFunctionInlineProfile" });
+      export type FunctionExecutionParamsRemoteFunctionInlineProfile = z.infer<
+        typeof FunctionExecutionParamsRemoteFunctionInlineProfileSchema
+      >;
+
+      // Inline Function Remote Profile
+
+      export const FunctionExecutionParamsInlineFunctionRemoteProfileBaseSchema =
+        FunctionExecutionParamsRemoteFunctionRemoteProfileBaseSchema.extend({
           function: z.lazy(() => FunctionSchema),
-          profile: FunctionProfileVersionOptionalSchema,
-        }).describe("Base parameters for executing an inline function.");
-      export type FunctionExecutionParamsExecuteInlineBase = z.infer<
-        typeof FunctionExecutionParamsExecuteInlineBaseSchema
-      >;
-
-      export const FunctionExecutionParamsExecuteInlineStreamingSchema =
-        FunctionExecutionParamsExecuteInlineBaseSchema.extend({
-          stream: Chat.Completions.Request.StreamTrueSchema,
-        })
-          .describe(
-            "Parameters for executing an inline function and streaming the response."
-          )
-          .meta({ title: "FunctionExecutionParamsExecuteInlineStreaming" });
-      export type FunctionExecutionParamsExecuteInlineStreaming = z.infer<
-        typeof FunctionExecutionParamsExecuteInlineStreamingSchema
-      >;
-
-      export const FunctionExecutionParamsExecuteInlineNonStreamingSchema =
-        FunctionExecutionParamsExecuteInlineBaseSchema.extend({
-          stream:
-            Chat.Completions.Request.StreamFalseSchema.optional().nullable(),
-        })
-          .describe(
-            "Parameters for executing an inline function with a unary response."
-          )
-          .meta({ title: "FunctionExecutionParamsExecuteInlineNonStreaming" });
-      export type FunctionExecutionParamsExecuteInlineNonStreaming = z.infer<
-        typeof FunctionExecutionParamsExecuteInlineNonStreamingSchema
-      >;
-
-      export const FunctionExecutionParamsExecuteInlineSchema = z
-        .union([
-          FunctionExecutionParamsExecuteInlineStreamingSchema,
-          FunctionExecutionParamsExecuteInlineNonStreamingSchema,
-        ])
-        .describe("Parameters for executing an inline function.")
-        .meta({ title: "FunctionExecutionParamsExecuteInline" });
-      export type FunctionExecutionParamsExecuteInline = z.infer<
-        typeof FunctionExecutionParamsExecuteInlineSchema
-      >;
-
-      // Execute Published Function
-
-      export const FunctionExecutionParamsExecuteBaseSchema =
-        FunctionExecutionParamsBaseSchema.extend({
-          profile: FunctionProfileVersionOptionalSchema.optional().nullable(),
         }).describe(
-          "Base parameters for executing a remote published function."
+          "Base parameters for executing an inline function with a remote profile."
         );
-      export type FunctionExecutionParamsExecuteBase = z.infer<
-        typeof FunctionExecutionParamsExecuteBaseSchema
-      >;
-
-      export const FunctionExecutionParamsExecuteStreamingSchema =
-        FunctionExecutionParamsExecuteBaseSchema.extend({
-          stream: Chat.Completions.Request.StreamTrueSchema,
-        })
-          .describe(
-            "Parameters for executing a remote published function and streaming the response."
-          )
-          .meta({ title: "FunctionExecutionParamsExecuteStreaming" });
-      export type FunctionExecutionParamsExecuteStreaming = z.infer<
-        typeof FunctionExecutionParamsExecuteStreamingSchema
-      >;
-
-      export const FunctionExecutionParamsExecuteNonStreamingSchema =
-        FunctionExecutionParamsExecuteBaseSchema.extend({
-          stream:
-            Chat.Completions.Request.StreamFalseSchema.optional().nullable(),
-        })
-          .describe(
-            "Parameters for executing a remote published function with a unary response."
-          )
-          .meta({ title: "FunctionExecutionParamsExecuteNonStreaming" });
-      export type FunctionExecutionParamsExecuteNonStreaming = z.infer<
-        typeof FunctionExecutionParamsExecuteNonStreamingSchema
-      >;
-
-      export const FunctionExecutionParamsExecuteSchema = z
-        .union([
-          FunctionExecutionParamsExecuteStreamingSchema,
-          FunctionExecutionParamsExecuteNonStreamingSchema,
-        ])
-        .describe("Parameters for executing a remote published function.")
-        .meta({ title: "FunctionExecutionParamsExecute" });
-      export type FunctionExecutionParamsExecute = z.infer<
-        typeof FunctionExecutionParamsExecuteSchema
-      >;
-
-      // Publish Scalar Function
-
-      export const FunctionExecutionParamsPublishScalarFunctionBaseSchema =
-        FunctionExecutionParamsBaseSchema.extend({
-          function: ScalarSchema,
-          publish_function: z
-            .object({
-              description: z
-                .string()
-                .describe("The description of the published scalar function."),
-              changelog: z
-                .string()
-                .optional()
-                .nullable()
-                .describe(
-                  "When present, describes changes from the previous version or versions."
-                ),
-              input_schema: InputSchemaSchema,
-            })
-            .describe("Details about the scalar function to be published."),
-          profile: FunctionProfileVersionRequiredSchema,
-          publish_profile: z
-            .object({
-              id: z
-                .literal("default")
-                .describe(
-                  'The identifier of the profile to publish. Must be "default" when publishing a function.'
-                ),
-              version: z
-                .uint32()
-                .describe(
-                  "The version of the profile to publish. Must match the function's version."
-                ),
-              description: z
-                .string()
-                .describe("The description of the published profile."),
-              changelog: z
-                .string()
-                .optional()
-                .nullable()
-                .describe(
-                  "When present, describes changes from the previous version or versions."
-                ),
-            })
-            .describe("Details about the profile to be published."),
-        }).describe(
-          "Base parameters for executing and publishing an inline scalar function."
-        );
-      export type FunctionExecutionParamsPublishScalarFunctionBase = z.infer<
-        typeof FunctionExecutionParamsPublishScalarFunctionBaseSchema
-      >;
-
-      export const FunctionExecutionParamsPublishScalarFunctionStreamingSchema =
-        FunctionExecutionParamsPublishScalarFunctionBaseSchema.extend({
-          stream: Chat.Completions.Request.StreamTrueSchema,
-        })
-          .describe(
-            "Parameters for executing and publishing an inline scalar function and streaming the response."
-          )
-          .meta({
-            title: "FunctionExecutionParamsPublishScalarFunctionStreaming",
-          });
-      export type FunctionExecutionParamsPublishScalarFunctionStreaming =
+      export type FunctionExecutionParamsInlineFunctionRemoteProfileBase =
         z.infer<
-          typeof FunctionExecutionParamsPublishScalarFunctionStreamingSchema
+          typeof FunctionExecutionParamsInlineFunctionRemoteProfileBaseSchema
         >;
 
-      export const FunctionExecutionParamsPublishScalarFunctionNonStreamingSchema =
-        FunctionExecutionParamsPublishScalarFunctionBaseSchema.extend({
-          stream:
-            Chat.Completions.Request.StreamFalseSchema.optional().nullable(),
-        })
-          .describe(
-            "Parameters for executing and publishing an inline scalar function with a unary response."
-          )
-          .meta({
-            title: "FunctionExecutionParamsPublishScalarFunctionNonStreaming",
-          });
-      export type FunctionExecutionParamsPublishScalarFunctionNonStreaming =
-        z.infer<
-          typeof FunctionExecutionParamsPublishScalarFunctionNonStreamingSchema
-        >;
-
-      export const FunctionExecutionParamsPublishScalarFunctionSchema = z
-        .union([
-          FunctionExecutionParamsPublishScalarFunctionStreamingSchema,
-          FunctionExecutionParamsPublishScalarFunctionNonStreamingSchema,
-        ])
-        .describe(
-          "Parameters for executing and publishing an inline scalar function."
-        )
-        .meta({ title: "FunctionExecutionParamsPublishScalarFunction" });
-      export type FunctionExecutionParamsPublishScalarFunction = z.infer<
-        typeof FunctionExecutionParamsPublishScalarFunctionSchema
-      >;
-
-      // Publish Vector Function
-
-      export const FunctionExecutionParamsPublishVectorFunctionBaseSchema =
-        FunctionExecutionParamsBaseSchema.extend({
-          function: VectorSchema,
-          publish_function: z
-            .object({
-              description: z
-                .string()
-                .describe("The description of the published vector function."),
-              changelog: z
-                .string()
-                .optional()
-                .nullable()
-                .describe(
-                  "When present, describes changes from the previous version or versions."
-                ),
-              input_schema: InputSchemaSchema,
-              output_length: z
-                .union([
-                  z.uint32().describe("The fixed length of the output vector."),
-                  ExpressionSchema.describe(
-                    "An expression which evaluates to the length of the output vector. Will only be provided with the function input. The output length must be determinable from the input alone."
-                  ),
-                ])
-                .describe("The length of the output vector."),
-            })
-            .describe("Details about the vector function to be published."),
-          profile: FunctionProfileVersionRequiredSchema,
-          publish_profile: z
-            .object({
-              id: z
-                .literal("default")
-                .describe(
-                  'The identifier of the profile to publish. Must be "default" when publishing a function.'
-                ),
-              version: z
-                .uint32()
-                .describe(
-                  "The version of the profile to publish. Must match the function's version."
-                ),
-              description: z
-                .string()
-                .describe("The description of the published profile."),
-              changelog: z
-                .string()
-                .optional()
-                .nullable()
-                .describe(
-                  "When present, describes changes from the previous version or versions."
-                ),
-            })
-            .describe("Details about the profile to be published."),
-        }).describe(
-          "Base parameters for executing and publishing an inline vector function."
-        );
-      export type FunctionExecutionParamsPublishVectorFunctionBase = z.infer<
-        typeof FunctionExecutionParamsPublishVectorFunctionBaseSchema
-      >;
-
-      export const FunctionExecutionParamsPublishVectorFunctionStreamingSchema =
-        FunctionExecutionParamsPublishVectorFunctionBaseSchema.extend({
+      export const FunctionExecutionParamsInlineFunctionRemoteProfileStreamingSchema =
+        FunctionExecutionParamsInlineFunctionRemoteProfileBaseSchema.extend({
           stream: Chat.Completions.Request.StreamTrueSchema,
         })
           .describe(
-            "Parameters for executing and publishing an inline vector function and streaming the response."
+            "Parameters for executing an inline function with a remote profile and streaming the response."
           )
           .meta({
-            title: "FunctionExecutionParamsPublishVectorFunctionStreaming",
+            title:
+              "FunctionExecutionParamsInlineFunctionRemoteProfileStreaming",
           });
-      export type FunctionExecutionParamsPublishVectorFunctionStreaming =
+      export type FunctionExecutionParamsInlineFunctionRemoteProfileStreaming =
         z.infer<
-          typeof FunctionExecutionParamsPublishVectorFunctionStreamingSchema
+          typeof FunctionExecutionParamsInlineFunctionRemoteProfileStreamingSchema
         >;
 
-      export const FunctionExecutionParamsPublishVectorFunctionNonStreamingSchema =
-        FunctionExecutionParamsPublishVectorFunctionBaseSchema.extend({
+      export const FunctionExecutionParamsInlineFunctionRemoteProfileNonStreamingSchema =
+        FunctionExecutionParamsInlineFunctionRemoteProfileBaseSchema.extend({
           stream:
             Chat.Completions.Request.StreamFalseSchema.optional().nullable(),
         })
           .describe(
-            "Parameters for executing and publishing an inline vector function with a unary response."
+            "Parameters for executing an inline function with a remote profile with a unary response."
           )
           .meta({
-            title: "FunctionExecutionParamsPublishVectorFunctionNonStreaming",
+            title:
+              "FunctionExecutionParamsInlineFunctionRemoteProfileNonStreaming",
           });
-      export type FunctionExecutionParamsPublishVectorFunctionNonStreaming =
+      export type FunctionExecutionParamsInlineFunctionRemoteProfileNonStreaming =
         z.infer<
-          typeof FunctionExecutionParamsPublishVectorFunctionNonStreamingSchema
+          typeof FunctionExecutionParamsInlineFunctionRemoteProfileNonStreamingSchema
         >;
 
-      export const FunctionExecutionParamsPublishVectorFunctionSchema = z
+      export const FunctionExecutionParamsInlineFunctionRemoteProfileSchema = z
         .union([
-          FunctionExecutionParamsPublishVectorFunctionStreamingSchema,
-          FunctionExecutionParamsPublishVectorFunctionNonStreamingSchema,
+          FunctionExecutionParamsInlineFunctionRemoteProfileStreamingSchema,
+          FunctionExecutionParamsInlineFunctionRemoteProfileNonStreamingSchema,
         ])
         .describe(
-          "Parameters for executing and publishing an inline vector function."
+          "Parameters for executing an inline function with a remote profile."
         )
-        .meta({ title: "FunctionExecutionParamsPublishVectorFunction" });
-      export type FunctionExecutionParamsPublishVectorFunction = z.infer<
-        typeof FunctionExecutionParamsPublishVectorFunctionSchema
+        .meta({ title: "FunctionExecutionParamsInlineFunctionRemoteProfile" });
+      export type FunctionExecutionParamsInlineFunctionRemoteProfile = z.infer<
+        typeof FunctionExecutionParamsInlineFunctionRemoteProfileSchema
       >;
 
-      // Publish Function
+      // Inline Function Inline Profile
 
-      export const FunctionExecutionParamsPublishFunctionStreamingSchema = z
-        .union([
-          FunctionExecutionParamsPublishScalarFunctionStreamingSchema,
-          FunctionExecutionParamsPublishVectorFunctionStreamingSchema,
-        ])
-        .describe(
-          "Parameters for executing and publishing an inline function and streaming the response."
-        )
-        .meta({ title: "FunctionExecutionParamsPublishFunctionStreaming" });
-      export type FunctionExecutionParamsPublishFunctionStreaming = z.infer<
-        typeof FunctionExecutionParamsPublishFunctionStreamingSchema
-      >;
-
-      export const FunctionExecutionParamsPublishFunctionNonStreamingSchema = z
-        .union([
-          FunctionExecutionParamsPublishScalarFunctionNonStreamingSchema,
-          FunctionExecutionParamsPublishVectorFunctionNonStreamingSchema,
-        ])
-        .describe(
-          "Parameters for executing and publishing an inline function with a unary response."
-        )
-        .meta({ title: "FunctionExecutionParamsPublishFunctionNonStreaming" });
-      export type FunctionExecutionParamsPublishFunctionNonStreaming = z.infer<
-        typeof FunctionExecutionParamsPublishFunctionNonStreamingSchema
-      >;
-
-      export const FunctionExecutionParamsPublishFunctionSchema = z
-        .union([
-          FunctionExecutionParamsPublishScalarFunctionSchema,
-          FunctionExecutionParamsPublishVectorFunctionSchema,
-        ])
-        .describe("Parameters for executing and publishing an inline function.")
-        .meta({ title: "FunctionExecutionParamsPublishFunction" });
-      export type FunctionExecutionParamsPublishFunction = z.infer<
-        typeof FunctionExecutionParamsPublishFunctionSchema
-      >;
-
-      // Publish Profile
-
-      export const FunctionExecutionParamsPublishProfileBaseSchema =
-        FunctionExecutionParamsBaseSchema.extend({
-          profile: z
-            .array(ProfileVersionRequiredSchema)
-            .describe("The profile to publish."),
-          publish_profile: z
-            .object({
-              id: z
-                .string()
-                .describe("The unique identifier of the profile to publish."),
-              version: z
-                .uint32()
-                .describe("The version of the profile to publish."),
-              description: z
-                .string()
-                .describe("The description of the published profile."),
-              changelog: z
-                .string()
-                .optional()
-                .nullable()
-                .describe(
-                  "When present, describes changes from the previous version or versions."
-                ),
-            })
-            .describe("Details about the profile to be published."),
+      export const FunctionExecutionParamsInlineFunctionInlineProfileBaseSchema =
+        FunctionExecutionParamsRemoteFunctionRemoteProfileBaseSchema.extend({
+          function: z.lazy(() => FunctionSchema),
+          profile: FunctionProfileCommitOptionalSchema,
         }).describe(
-          "Base parameters for executing a remote published function and publishing a profile."
+          "Base parameters for executing an inline function with an inline profile."
         );
-      export type FunctionExecutionParamsPublishProfileBase = z.infer<
-        typeof FunctionExecutionParamsPublishProfileBaseSchema
-      >;
+      export type FunctionExecutionParamsInlineFunctionInlineProfileBase =
+        z.infer<
+          typeof FunctionExecutionParamsInlineFunctionInlineProfileBaseSchema
+        >;
 
-      export const FunctionExecutionParamsPublishProfileStreamingSchema =
-        FunctionExecutionParamsPublishProfileBaseSchema.extend({
+      export const FunctionExecutionParamsInlineFunctionInlineProfileStreamingSchema =
+        FunctionExecutionParamsInlineFunctionInlineProfileBaseSchema.extend({
           stream: Chat.Completions.Request.StreamTrueSchema,
         })
           .describe(
-            "Parameters for executing a remote published function, publishing a profile, and streaming the response."
+            "Parameters for executing an inline function with an inline profile and streaming the response."
           )
-          .meta({ title: "FunctionExecutionParamsPublishProfileStreaming" });
-      export type FunctionExecutionParamsPublishProfileStreaming = z.infer<
-        typeof FunctionExecutionParamsPublishProfileStreamingSchema
-      >;
+          .meta({
+            title:
+              "FunctionExecutionParamsInlineFunctionInlineProfileStreaming",
+          });
+      export type FunctionExecutionParamsInlineFunctionInlineProfileStreaming =
+        z.infer<
+          typeof FunctionExecutionParamsInlineFunctionInlineProfileStreamingSchema
+        >;
 
-      export const FunctionExecutionParamsPublishProfileNonStreamingSchema =
-        FunctionExecutionParamsPublishProfileBaseSchema.extend({
+      export const FunctionExecutionParamsInlineFunctionInlineProfileNonStreamingSchema =
+        FunctionExecutionParamsInlineFunctionInlineProfileBaseSchema.extend({
           stream:
             Chat.Completions.Request.StreamFalseSchema.optional().nullable(),
         })
           .describe(
-            "Parameters for executing a remote published function and publishing a profile with a unary response."
+            "Parameters for executing an inline function with an inline profile with a unary response."
           )
-          .meta({ title: "FunctionExecutionParamsPublishProfileNonStreaming" });
-      export type FunctionExecutionParamsPublishProfileNonStreaming = z.infer<
-        typeof FunctionExecutionParamsPublishProfileNonStreamingSchema
-      >;
+          .meta({
+            title:
+              "FunctionExecutionParamsInlineFunctionInlineProfileNonStreaming",
+          });
+      export type FunctionExecutionParamsInlineFunctionInlineProfileNonStreaming =
+        z.infer<
+          typeof FunctionExecutionParamsInlineFunctionInlineProfileNonStreamingSchema
+        >;
 
-      export const FunctionExecutionParamsPublishProfileSchema = z
+      export const FunctionExecutionParamsInlineFunctionInlineProfileSchema = z
         .union([
-          FunctionExecutionParamsPublishProfileStreamingSchema,
-          FunctionExecutionParamsPublishProfileNonStreamingSchema,
+          FunctionExecutionParamsInlineFunctionInlineProfileStreamingSchema,
+          FunctionExecutionParamsInlineFunctionInlineProfileNonStreamingSchema,
         ])
         .describe(
-          "Parameters for executing a remote published function and publishing a profile."
+          "Parameters for executing an inline function with an inline profile."
         )
-        .meta({ title: "FunctionExecutionParamsPublishProfile" });
-      export type FunctionExecutionParamsPublishProfile = z.infer<
-        typeof FunctionExecutionParamsPublishProfileSchema
+        .meta({ title: "FunctionExecutionParamsInlineFunctionInlineProfile" });
+      export type FunctionExecutionParamsInlineFunctionInlineProfile = z.infer<
+        typeof FunctionExecutionParamsInlineFunctionInlineProfileSchema
       >;
     }
 
@@ -4738,7 +4553,7 @@ export namespace Function {
                 "When true, indicates that one or more function executions encountered errors during profile computation."
               ),
             profile: z
-              .array(ProfileVersionRequiredSchema)
+              .array(ProfileCommitRequiredSchema)
               .optional()
               .describe("The computed function profile."),
             fitting_stats: FittingStatsSchema.optional(),
@@ -4805,7 +4620,7 @@ export namespace Function {
                 "When true, indicates that one or more function executions encountered errors during profile computation."
               ),
             profile: z
-              .array(ProfileVersionRequiredSchema)
+              .array(ProfileCommitRequiredSchema)
               .describe("The computed function profile."),
             fitting_stats: FittingStatsSchema,
             created: z
@@ -4831,17 +4646,17 @@ export namespace Function {
 
   export namespace Profile {
     export const ListItemSchema = z.object({
-      function_author: z
+      owner: z
         .string()
-        .describe("The author of the function the profile was published to."),
-      function_id: z
+        .describe("The owner of the GitHub repository containing the profile."),
+      repository: z
+        .string()
+        .describe("The name of the GitHub repository containing the profile."),
+      commit: z
         .string()
         .describe(
-          "The unique identifier of the function the profile was published to."
+          "The commit SHA of the GitHub repository containing the profile."
         ),
-      author: z.string().describe("The author of the profile."),
-      id: z.string().describe("The unique identifier of the profile."),
-      version: z.uint32().describe("The version of the profile."),
     });
     export type ListItem = z.infer<typeof ListItemSchema>;
 
@@ -4851,52 +4666,6 @@ export namespace Function {
     ): Promise<ListItem[]> {
       const response = await openai.get("/functions/profiles", options);
       return response as ListItem[];
-    }
-
-    export const RetrieveItemSchema = z.object({
-      created: z
-        .uint32()
-        .describe(
-          "The UNIX timestamp (in seconds) when the profile was created."
-        ),
-      shape: z
-        .string()
-        .describe(
-          "The shape of the profile. Unless Task Skip expressions work out favorably, profiles only work for functions with the same shape."
-        ),
-      function_author: z
-        .string()
-        .describe("The author of the function the profile was published to."),
-      function_id: z
-        .string()
-        .describe(
-          "The unique identifier of the function the profile was published to."
-        ),
-      author: z.string().describe("The author of the profile."),
-      id: z.string().describe("The unique identifier of the profile."),
-      version: z.uint32().describe("The version of the profile."),
-      profile: z
-        .array(Function.ProfileVersionRequiredSchema)
-        .describe("The function profile."),
-    });
-    export type RetrieveItem = z.infer<typeof RetrieveItemSchema>;
-
-    export async function retrieve(
-      openai: OpenAI,
-      function_author: string,
-      function_id: string,
-      author: string,
-      id: string,
-      version?: number | null | undefined,
-      options?: OpenAI.RequestOptions
-    ): Promise<RetrieveItem> {
-      const response = await openai.get(
-        version !== null && version !== undefined
-          ? `/functions/${function_author}/${function_id}/profiles/${author}/${id}/${version}`
-          : `/functions/${function_author}/${function_id}/profiles/${author}/${id}`,
-        options
-      );
-      return response as RetrieveItem;
     }
 
     export const HistoricalUsageSchema = z.object({
@@ -4923,36 +4692,34 @@ export namespace Function {
 
     export async function retrieveUsage(
       openai: OpenAI,
-      function_author: string,
-      function_id: string,
-      author: string,
-      id: string,
-      version?: number | null | undefined,
+      powner: string,
+      prepository: string,
+      pcommit: string | null | undefined,
       options?: OpenAI.RequestOptions
     ): Promise<HistoricalUsage> {
       const response = await openai.get(
-        version !== null && version !== undefined
-          ? `/functions/${function_author}/${function_id}/profiles/${author}/${id}/${version}/usage`
-          : `/functions/${function_author}/${function_id}/profiles/${author}/${id}/usage`,
+        pcommit !== null && pcommit !== undefined
+          ? `/functions/profiles/${powner}/${prepository}/${pcommit}/usage`
+          : `/functions/profiles/${powner}/${prepository}/usage`,
         options
       );
       return response as HistoricalUsage;
     }
   }
 
-  export async function executeInline(
+  export async function executeInlineFunctionInlineProfile(
     openai: OpenAI,
-    body: Executions.Request.FunctionExecutionParamsExecuteInlineStreaming,
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionInlineProfileStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<Stream<Executions.Response.Streaming.FunctionExecutionChunk>>;
-  export async function executeInline(
+  export async function executeInlineFunctionInlineProfile(
     openai: OpenAI,
-    body: Executions.Request.FunctionExecutionParamsExecuteInlineNonStreaming,
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionInlineProfileNonStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<Executions.Response.Unary.FunctionExecution>;
-  export async function executeInline(
+  export async function executeInlineFunctionInlineProfile(
     openai: OpenAI,
-    body: Executions.Request.FunctionExecutionParamsExecuteInline,
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionInlineProfile,
     options?: OpenAI.RequestOptions
   ): Promise<
     | Stream<Executions.Response.Streaming.FunctionExecutionChunk>
@@ -4968,37 +4735,37 @@ export namespace Function {
       | Executions.Response.Unary.FunctionExecution;
   }
 
-  export async function execute(
+  export async function executeRemoteFunctionInlineProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number | null | undefined,
-    body: Executions.Request.FunctionExecutionParamsExecuteStreaming,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsRemoteFunctionInlineProfileStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<Stream<Executions.Response.Streaming.FunctionExecutionChunk>>;
-  export async function execute(
+  export async function executeRemoteFunctionInlineProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number | null | undefined,
-    body: Executions.Request.FunctionExecutionParamsExecuteNonStreaming,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsRemoteFunctionInlineProfileNonStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<Executions.Response.Unary.FunctionExecution>;
-  export async function execute(
+  export async function executeRemoteFunctionInlineProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number | null | undefined,
-    body: Executions.Request.FunctionExecutionParamsExecute,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsRemoteFunctionInlineProfile,
     options?: OpenAI.RequestOptions
   ): Promise<
     | Stream<Executions.Response.Streaming.FunctionExecutionChunk>
     | Executions.Response.Unary.FunctionExecution
   > {
     const response = await openai.post(
-      version !== null && version !== undefined
-        ? `/functions/${author}/${id}/${version}`
-        : `/functions/${author}/${id}`,
+      fcommit !== null && fcommit !== undefined
+        ? `/functions/${fowner}/${frepository}/${fcommit}`
+        : `/functions/${fowner}/${frepository}`,
       {
         body,
         stream: body.stream ?? false,
@@ -5010,35 +4777,37 @@ export namespace Function {
       | Executions.Response.Unary.FunctionExecution;
   }
 
-  export async function publishFunction(
+  export async function executeInlineFunctionRemoteProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number,
-    body: Executions.Request.FunctionExecutionParamsPublishFunctionStreaming,
+    powner: string,
+    prepository: string,
+    pcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionRemoteProfileStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<Stream<Executions.Response.Streaming.FunctionExecutionChunk>>;
-  export async function publishFunction(
+  export async function executeInlineFunctionRemoteProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number,
-    body: Executions.Request.FunctionExecutionParamsPublishFunctionNonStreaming,
+    powner: string,
+    prepository: string,
+    pcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionRemoteProfileNonStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<Executions.Response.Unary.FunctionExecution>;
-  export async function publishFunction(
+  export async function executeInlineFunctionRemoteProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number,
-    body: Executions.Request.FunctionExecutionParamsPublishFunction,
+    powner: string,
+    prepository: string,
+    pcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionRemoteProfile,
     options?: OpenAI.RequestOptions
   ): Promise<
     | Stream<Executions.Response.Streaming.FunctionExecutionChunk>
     | Executions.Response.Unary.FunctionExecution
   > {
     const response = await openai.post(
-      `/functions/${author}/${id}/${version}/publish`,
+      pcommit !== null && pcommit !== undefined
+        ? `/functions/profiles/${powner}/${prepository}/${pcommit}`
+        : `/functions/profiles/${powner}/${prepository}`,
       {
         body,
         stream: body.stream ?? false,
@@ -5050,48 +4819,188 @@ export namespace Function {
       | Executions.Response.Unary.FunctionExecution;
   }
 
-  export async function publishProfile(
+  export async function executeRemoteFunctionRemoteProfile(
     openai: OpenAI,
-    function_author: string,
-    function_id: string,
-    body: Executions.Request.FunctionExecutionParamsPublishProfileStreaming,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
+    powner: string,
+    prepository: string,
+    pcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsRemoteFunctionRemoteProfileStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<Stream<Executions.Response.Streaming.FunctionExecutionChunk>>;
-  export async function publishProfile(
+  export async function executeRemoteFunctionRemoteProfile(
     openai: OpenAI,
-    function_author: string,
-    function_id: string,
-    body: Executions.Request.FunctionExecutionParamsPublishProfileNonStreaming,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
+    powner: string,
+    prepository: string,
+    pcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsRemoteFunctionRemoteProfileNonStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<Executions.Response.Unary.FunctionExecution>;
-  export async function publishProfile(
+  export async function executeRemoteFunctionRemoteProfile(
     openai: OpenAI,
-    function_author: string,
-    function_id: string,
-    body: Executions.Request.FunctionExecutionParamsPublishProfile,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
+    powner: string,
+    prepository: string,
+    pcommit: string | null | undefined,
+    body: Executions.Request.FunctionExecutionParamsRemoteFunctionRemoteProfile,
     options?: OpenAI.RequestOptions
   ): Promise<
     | Stream<Executions.Response.Streaming.FunctionExecutionChunk>
     | Executions.Response.Unary.FunctionExecution
   > {
-    const response = await openai.post(
-      `/functions/${function_author}/${function_id}/profiles/publish`,
-      {
-        body,
-        stream: body.stream ?? false,
-        ...options,
+    let url: string;
+    if (fcommit !== null && fcommit !== undefined) {
+      if (pcommit !== null && pcommit !== undefined) {
+        url = `/functions/${fowner}/${frepository}/${fcommit}/profiles/${powner}/${prepository}/${pcommit}`;
+      } else {
+        url = `/functions/${fowner}/${frepository}/${fcommit}/profiles/${powner}/${prepository}`;
       }
-    );
+    } else if (pcommit !== null && pcommit !== undefined) {
+      url = `/functions/${fowner}/${frepository}/profiles/${powner}/${prepository}/${pcommit}`;
+    } else {
+      url = `/functions/${fowner}/${frepository}/profiles/${powner}/${prepository}`;
+    }
+    const response = await openai.post(url, {
+      body,
+      stream: body.stream ?? false,
+      ...options,
+    });
     return response as
       | Stream<Executions.Response.Streaming.FunctionExecutionChunk>
       | Executions.Response.Unary.FunctionExecution;
+  }
+
+  export async function execute(
+    openai: OpenAI,
+    function_:
+      | Function
+      | {
+          owner: string;
+          repository: string;
+          commit?: string | null | undefined;
+        },
+    profile:
+      | FunctionProfileCommitOptional
+      | {
+          owner: string;
+          repository: string;
+          commit?: string | null | undefined;
+        },
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionInlineProfileStreaming,
+    options?: OpenAI.RequestOptions
+  ): Promise<Stream<Executions.Response.Streaming.FunctionExecutionChunk>>;
+  export async function execute(
+    openai: OpenAI,
+    function_:
+      | Function
+      | {
+          owner: string;
+          repository: string;
+          commit?: string | null | undefined;
+        },
+    profile:
+      | FunctionProfileCommitOptional
+      | {
+          owner: string;
+          repository: string;
+          commit?: string | null | undefined;
+        },
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionInlineProfileNonStreaming,
+    options?: OpenAI.RequestOptions
+  ): Promise<Executions.Response.Unary.FunctionExecution>;
+  export async function execute(
+    openai: OpenAI,
+    function_:
+      | Function
+      | {
+          owner: string;
+          repository: string;
+          commit?: string | null | undefined;
+        },
+    profile:
+      | FunctionProfileCommitOptional
+      | {
+          owner: string;
+          repository: string;
+          commit?: string | null | undefined;
+        },
+    body: Executions.Request.FunctionExecutionParamsInlineFunctionInlineProfile,
+    options?: OpenAI.RequestOptions
+  ): Promise<
+    | Stream<Executions.Response.Streaming.FunctionExecutionChunk>
+    | Executions.Response.Unary.FunctionExecution
+  > {
+    if ("owner" in function_ && "repository" in function_) {
+      if ("owner" in profile && "repository" in profile) {
+        const requestBody: Executions.Request.FunctionExecutionParamsRemoteFunctionRemoteProfile =
+          body;
+        return executeRemoteFunctionRemoteProfile(
+          openai,
+          function_.owner,
+          function_.repository,
+          function_.commit,
+          profile.owner,
+          profile.repository,
+          profile.commit,
+          requestBody as any,
+          options
+        );
+      } else {
+        const requestBody: Executions.Request.FunctionExecutionParamsRemoteFunctionInlineProfile =
+          {
+            ...body,
+            profile,
+          };
+        return executeRemoteFunctionInlineProfile(
+          openai,
+          function_.owner,
+          function_.repository,
+          function_.commit,
+          requestBody as any,
+          options
+        );
+      }
+    } else if ("owner" in profile && "repository" in profile) {
+      const requestBody: Executions.Request.FunctionExecutionParamsInlineFunctionRemoteProfile =
+        {
+          ...body,
+          function: function_,
+        };
+      return executeInlineFunctionRemoteProfile(
+        openai,
+        profile.owner,
+        profile.repository,
+        profile.commit,
+        requestBody as any,
+        options
+      );
+    } else {
+      const requestBody: Executions.Request.FunctionExecutionParamsInlineFunctionInlineProfile =
+        {
+          ...body,
+          function: function_,
+          profile,
+        };
+      return executeInlineFunctionInlineProfile(
+        openai,
+        requestBody as any,
+        options
+      );
+    }
   }
 
   export async function computeProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number | null | undefined,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
     body: ComputeProfile.Request.FunctionComputeProfileParamsStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<
@@ -5099,17 +5008,17 @@ export namespace Function {
   >;
   export async function computeProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number | null | undefined,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
     body: ComputeProfile.Request.FunctionComputeProfileParamsNonStreaming,
     options?: OpenAI.RequestOptions
   ): Promise<ComputeProfile.Response.Unary.FunctionComputeProfile>;
   export async function computeProfile(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version: number | null | undefined,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
     body: ComputeProfile.Request.FunctionComputeProfileParams,
     options?: OpenAI.RequestOptions
   ): Promise<
@@ -5117,9 +5026,9 @@ export namespace Function {
     | ComputeProfile.Response.Unary.FunctionComputeProfile
   > {
     const response = await openai.post(
-      version !== null && version !== undefined
-        ? `/functions/${author}/${id}/${version}/profiles/compute`
-        : `/functions/${author}/${id}/profiles/compute`,
+      fcommit !== null && fcommit !== undefined
+        ? `/functions/${fowner}/${frepository}/${fcommit}/profiles/compute`
+        : `/functions/${fowner}/${frepository}/profiles/compute`,
       {
         body,
         stream: body.stream ?? false,
@@ -5132,9 +5041,17 @@ export namespace Function {
   }
 
   export const ListItemSchema = z.object({
-    author: z.string().describe("The author of the function."),
-    id: z.string().describe("The unique identifier of the function."),
-    version: z.uint32().describe("The version of the function."),
+    owner: z
+      .string()
+      .describe("The owner of the GitHub repository containing the function."),
+    repository: z
+      .string()
+      .describe("The name of the GitHub repository containing the function."),
+    commit: z
+      .string()
+      .describe(
+        "The commit SHA of the GitHub repository containing the function."
+      ),
   });
   export type ListItem = z.infer<typeof ListItemSchema>;
 
@@ -5144,60 +5061,6 @@ export namespace Function {
   ): Promise<{ data: ListItem[] }> {
     const response = await openai.get("/functions", options);
     return response as { data: ListItem[] };
-  }
-
-  export const ScalarRetrieveItemSchema = ScalarSchema.extend({
-    created: z
-      .uint32()
-      .describe(
-        "The UNIX timestamp (in seconds) when the function was created."
-      ),
-    shape: z
-      .string()
-      .describe(
-        "The shape of the function. Unless Task Skip expressions work out favorably, functions only work with profiles that have the same shape."
-      ),
-  })
-    .describe("A retrieved scalar function.")
-    .meta({ title: "RetrievedScalarFunction" });
-  export type ScalarRetrieveItem = z.infer<typeof ScalarRetrieveItemSchema>;
-
-  export const VectorRetrieveItemSchema = VectorSchema.extend({
-    created: z
-      .uint32()
-      .describe(
-        "The UNIX timestamp (in seconds) when the function was created."
-      ),
-    shape: z
-      .string()
-      .describe(
-        "The shape of the function. Unless Task Skip expressions work out favorably, functions only work with profiles that have the same shape."
-      ),
-  })
-    .describe("A retrieved vector function.")
-    .meta({ title: "RetrievedVectorFunction" });
-  export type VectorRetrieveItem = z.infer<typeof VectorRetrieveItemSchema>;
-
-  export const RetrieveItemSchema = z.discriminatedUnion("type", [
-    ScalarRetrieveItemSchema,
-    VectorRetrieveItemSchema,
-  ]);
-  export type RetrieveItem = z.infer<typeof RetrieveItemSchema>;
-
-  export async function retrieve(
-    openai: OpenAI,
-    author: string,
-    id: string,
-    version?: number | null | undefined,
-    options?: OpenAI.RequestOptions
-  ): Promise<RetrieveItem> {
-    const response = await openai.get(
-      version !== null && version !== undefined
-        ? `/functions/${author}/${id}/${version}`
-        : `/functions/${author}/${id}`,
-      options
-    );
-    return response as RetrieveItem;
   }
 
   export const HistoricalUsageSchema = z.object({
@@ -5220,15 +5083,15 @@ export namespace Function {
 
   export async function retrieveUsage(
     openai: OpenAI,
-    author: string,
-    id: string,
-    version?: number | null | undefined,
+    fowner: string,
+    frepository: string,
+    fcommit: string | null | undefined,
     options?: OpenAI.RequestOptions
   ): Promise<HistoricalUsage> {
     const response = await openai.get(
-      version !== null && version !== undefined
-        ? `/functions/${author}/${id}/${version}/usage`
-        : `/functions/${author}/${id}/usage`,
+      fcommit !== null && fcommit !== undefined
+        ? `/functions/${fowner}/${frepository}/${fcommit}/usage`
+        : `/functions/${fowner}/${frepository}/usage`,
       options
     );
     return response as HistoricalUsage;
