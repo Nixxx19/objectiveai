@@ -183,7 +183,9 @@ export function Property({
           )}
           {schema.def.type === "literal" ? (
             <span className={cn("bg-background-code", "px-1", "py-0.5")}>
-              {`"${(schema as z.ZodLiteral).value}"`}
+              {typeof (schema as z.ZodLiteral).value === "string"
+                ? `"${(schema as z.ZodLiteral).value}"`
+                : `${(schema as z.ZodLiteral).value}`}
             </span>
           ) : (
             schema.def.type !== "lazy" && (
