@@ -182,20 +182,6 @@ export function Sidebar({ className }: { className?: string }): ReactElement {
           <SidebarItemSpacer />
           <SidebarApiItem
             method="GET"
-            path="/auth/username"
-            href="/docs/api/get/auth/username"
-            description="Retrieve your username"
-          />
-          <SidebarItemSpacer />
-          <SidebarApiItem
-            method="POST"
-            path="/auth/username"
-            href="/docs/api/post/auth/username"
-            description="Set your username"
-          />
-          <SidebarItemSpacer />
-          <SidebarApiItem
-            method="GET"
             path="/auth/keys"
             href="/docs/api/get/auth/keys"
             description="List your API keys"
