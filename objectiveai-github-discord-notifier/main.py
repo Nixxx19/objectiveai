@@ -119,7 +119,7 @@ async def handle_webhook(
     owner = repo_info.get("owner", {}).get("login", "")
     repo = repo_info.get("name", "")
 
-    if owner != GITHUB_REPOSITORY_OWNER or repo != GITHUB_REPOSITORY:
+    if owner.lower() != GITHUB_REPOSITORY_OWNER.lower() or repo.lower() != GITHUB_REPOSITORY.lower():
         return {"status": "ignored", "reason": "repository mismatch"}
 
     # Determine event type and action
