@@ -11,12 +11,22 @@ import uvicorn
 
 load_dotenv()
 
-DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
-DISCORD_CHANNEL_ID = int(os.environ["DISCORD_CHANNEL_ID"])
-GITHUB_REPOSITORY_OWNER = os.environ["GITHUB_REPOSITORY_OWNER"]
-GITHUB_REPOSITORY = os.environ["GITHUB_REPOSITORY"]
-GITHUB_SECRET = os.environ["GITHUB_SECRET"]
 
+def get_required_env(name: str) -> str:
+    """Retrieve a required environment variable or raise a clear error."""
+    value = os.environ.get(name)
+    if value is None:
+        raise RuntimeError(
+            f"Required environment variable '{name}' is not set."
+        )
+    return value
+
+
+DISCORD_TOKEN = get_required_env("DISCORD_TOKEN")
+DISCORD_CHANNEL_ID = int(get_required_env("DISCORD_CHANNEL_ID"))
+GITHUB_REPOSITORY_OWNER = get_required_env("GITHUB_REPOSITORY_OWNER")
+GITHUB_REPOSITORY = get_required_env("GITHUB_REPOSITORY")
+GITHUB_SECRET = get_required_env("GITHUB_SECRET")
 DISCORD_CHAR_LIMIT = 2000
 ELLIPSIS = "..."
 
