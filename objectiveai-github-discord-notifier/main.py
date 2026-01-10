@@ -27,6 +27,8 @@ DISCORD_CHANNEL_ID = int(get_required_env("DISCORD_CHANNEL_ID"))
 GITHUB_REPOSITORY_OWNER = get_required_env("GITHUB_REPOSITORY_OWNER")
 GITHUB_REPOSITORY = get_required_env("GITHUB_REPOSITORY")
 GITHUB_SECRET = get_required_env("GITHUB_SECRET")
+PORT = int(get_required_env("PORT"))
+ADDRESS = os.environ.get("ADDRESS", "0.0.0.0")
 DISCORD_CHAR_LIMIT = 2000
 ELLIPSIS = "..."
 
@@ -172,4 +174,4 @@ async def health_check():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=ADDRESS, port=PORT)

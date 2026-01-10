@@ -8,6 +8,8 @@ All secrets will be provided as environment variables. In some cases, they will 
 - GITHUB_REPOSITORY_OWNER
 - GITHUB_REPOSITORY
 - GITHUB_SECRET
+- PORT (required)
+- ADDRESS (optional, defaults to "0.0.0.0")
 If the assistant believes that additional secrets are needed, it will update this file accordingly.
 
 # Events
