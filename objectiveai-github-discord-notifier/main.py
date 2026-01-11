@@ -16,9 +16,7 @@ def get_required_env(name: str) -> str:
     """Retrieve a required environment variable or raise a clear error."""
     value = os.environ.get(name)
     if value is None:
-        raise RuntimeError(
-            f"Required environment variable '{name}' is not set."
-        )
+        raise RuntimeError(f"Required environment variable '{name}' is not set.")
     return value
 
 
@@ -46,9 +44,7 @@ def verify_signature(payload: bytes, signature: str) -> bool:
     """Verify GitHub webhook signature using HMAC SHA256."""
     if not signature.startswith("sha256="):
         return False
-    expected = hmac.new(
-        GITHUB_SECRET.encode(), payload, hashlib.sha256
-    ).hexdigest()
+    expected = hmac.new(GITHUB_SECRET.encode(), payload, hashlib.sha256).hexdigest()
     return hmac.compare_digest(f"sha256={expected}", signature)
 
 
@@ -62,25 +58,33 @@ def format_message(
 ) -> str:
     """Format Discord notification message, truncating if necessary."""
     # Build the base message structure
-    # Format: "[owner/repo](url) Event\nTitle\nDescription"
-    prefix = f"[{owner}/{repo}]({url}) {event}\n"
+    # Format: "[owner/repo](url)\n\n*event*: **Title**\n\nDescription"
+    header = f"[{owner}/{repo}]({url})\n\n"
+    # Account for event: ** ** markers (8 chars total)
+    event_title_prefix = f"{event}: **"
+    event_title_suffix = "**"
 
     # Calculate available space for title and description
-    # We need at least: prefix + title + newline
-    available_for_title = DISCORD_CHAR_LIMIT - len(prefix)
+    available_for_title = (
+        DISCORD_CHAR_LIMIT
+        - len(header)
+        - len(event_title_prefix)
+        - len(event_title_suffix)
+    )
 
     if len(title) > available_for_title:
         # Title is too long, truncate it and omit description
         truncated_title = title[: available_for_title - len(ELLIPSIS)] + ELLIPSIS
-        return prefix + truncated_title
+        return header + event_title_prefix + truncated_title + event_title_suffix
 
-    message_with_title = prefix + title
+    message_with_title = header + event_title_prefix + title + event_title_suffix
 
+    description = description.strip() if description else ""
     if not description:
         return message_with_title
 
-    # Add newline before description
-    message_with_title_and_newline = message_with_title + "\n"
+    # Add blank line before description
+    message_with_title_and_newline = message_with_title + "\n\n"
     available_for_description = DISCORD_CHAR_LIMIT - len(message_with_title_and_newline)
 
     if available_for_description <= len(ELLIPSIS):
@@ -138,7 +142,10 @@ async def handle_webhook(
     owner = repo_info.get("owner", {}).get("login", "")
     repo = repo_info.get("name", "")
 
-    if owner.lower() != GITHUB_REPOSITORY_OWNER.lower() or repo.lower() != GITHUB_REPOSITORY.lower():
+    if (
+        owner.lower() != GITHUB_REPOSITORY_OWNER.lower()
+        or repo.lower() != GITHUB_REPOSITORY.lower()
+    ):
         return {"status": "ignored", "reason": "repository mismatch"}
 
     # Determine event type and action
@@ -149,16 +156,16 @@ async def handle_webhook(
 
     if x_github_event == "pull_request":
         if action == "opened":
-            event_type = "Pull Request Opened"
+            event_type = "🟢 Pull Request Opened"
         elif action == "closed":
-            event_type = "Pull Request Closed"
+            event_type = "🔴 Pull Request Closed"
         item = data.get("pull_request", {})
         url = item.get("html_url", "")
     elif x_github_event == "issues":
         if action == "opened":
-            event_type = "Issue Opened"
+            event_type = "🟢 Issue Opened"
         elif action == "closed":
-            event_type = "Issue Closed"
+            event_type = "🔴 Issue Closed"
         item = data.get("issue", {})
         url = item.get("html_url", "")
 
@@ -166,7 +173,7 @@ async def handle_webhook(
         return {"status": "ignored", "reason": "unsupported event or action"}
 
     title = item.get("title", "")
-    description = item.get("body") or ""
+    description = "" if action == "closed" else (item.get("body") or "")
 
     message = format_message(owner, repo, url, event_type, title, description)
     await send_discord_notification(message)
