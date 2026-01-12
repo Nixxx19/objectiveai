@@ -6,3 +6,9 @@ pub mod error;
 pub mod functions;
 pub mod prefixed_uuid;
 pub mod vector;
+
+#[cfg(feature = "http")]
+mod http;
+
+#[cfg(feature = "http")]
+pub use http::*;

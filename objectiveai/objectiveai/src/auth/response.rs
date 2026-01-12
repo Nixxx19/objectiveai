@@ -19,8 +19,8 @@ pub struct ListApiKeyItem {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct GetOpenRouterApiKeyResponse {
+pub struct GetOpenRouterByokApiKeyResponse {
     pub api_key: Option<String>,
 }
 
-pub type SetOpenRouterApiKeyResponse = GetOpenRouterApiKeyResponse;
+pub type CreateOpenRouterByokApiKeyResponse = GetOpenRouterByokApiKeyResponse;

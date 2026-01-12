@@ -12,3 +12,9 @@ pub use provider::*;
 pub use reasoning::*;
 pub use stop::*;
 pub use verbosity::*;
+
+#[cfg(feature = "http")]
+mod http;
+
+#[cfg(feature = "http")]
+pub use http::*;

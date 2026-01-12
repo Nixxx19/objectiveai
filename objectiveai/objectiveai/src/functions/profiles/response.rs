@@ -13,7 +13,7 @@ pub struct ListProfileItem {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MetadataProfile {
+pub struct UsageProfile {
     pub requests: u64,
     pub completion_tokens: u64,
     pub prompt_tokens: u64,

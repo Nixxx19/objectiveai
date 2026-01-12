@@ -18,7 +18,7 @@ pub struct GetEnsembleLlm {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MetadataEnsembleLlm {
+pub struct UsageEnsembleLlm {
     pub requests: u64,
     pub completion_tokens: u64,
     pub prompt_tokens: u64,

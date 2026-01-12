@@ -18,7 +18,7 @@ pub struct GetEnsemble {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct MetadataEnsemble {
+pub struct UsageEnsemble {
     pub requests: u64,
     pub completion_tokens: u64,
     pub prompt_tokens: u64,
