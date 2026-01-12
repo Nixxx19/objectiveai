@@ -204,6 +204,63 @@ impl Function {
         // compiled output
         Ok(super::expression::CompiledFunctionOutput { output, valid })
     }
+
+    pub fn description(&self) -> Option<&str> {
+        match self {
+            Function::Remote(remote_function) => {
+                Some(remote_function.description())
+            }
+            Function::Inline(_) => None,
+        }
+    }
+
+    pub fn changelog(&self) -> Option<&str> {
+        match self {
+            Function::Remote(remote_function) => remote_function.changelog(),
+            Function::Inline(_) => None,
+        }
+    }
+
+    pub fn input_schema(&self) -> Option<&super::expression::InputSchema> {
+        match self {
+            Function::Remote(remote_function) => {
+                Some(remote_function.input_schema())
+            }
+            Function::Inline(_) => None,
+        }
+    }
+
+    pub fn input_maps(&self) -> Option<&super::expression::InputMaps> {
+        match self {
+            Function::Remote(remote_function) => remote_function.input_maps(),
+            Function::Inline(inline_function) => inline_function.input_maps(),
+        }
+    }
+
+    pub fn tasks(&self) -> &[super::TaskExpression] {
+        match self {
+            Function::Remote(remote_function) => remote_function.tasks(),
+            Function::Inline(inline_function) => inline_function.tasks(),
+        }
+    }
+
+    pub fn output(&self) -> &super::expression::Expression {
+        match self {
+            Function::Remote(remote_function) => remote_function.output(),
+            Function::Inline(inline_function) => inline_function.output(),
+        }
+    }
+
+    pub fn output_length(
+        &self,
+    ) -> Option<&super::expression::WithExpression<u64>> {
+        match self {
+            Function::Remote(remote_function) => {
+                remote_function.output_length()
+            }
+            Function::Inline(_) => None,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
