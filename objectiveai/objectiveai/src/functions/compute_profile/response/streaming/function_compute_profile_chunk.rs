@@ -17,7 +17,7 @@ pub struct FunctionComputeProfileChunk {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retry_token: Option<String>,
     pub created: u64,
-    pub function: String,
+    pub function: Option<String>,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub usage: Option<vector::completions::response::Usage>,

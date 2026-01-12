@@ -13,7 +13,7 @@ pub struct FunctionComputeProfile {
     pub fitting_stats: response::FittingStats,
     pub retry_token: Option<String>,
     pub created: u64,
-    pub function: String,
+    pub function: Option<String>,
     pub object: super::Object,
     pub usage: vector::completions::response::Usage,
 }
