@@ -28,6 +28,13 @@ pub struct ComputedProfile {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
+pub enum TaskProfile {
+    CommitRequired(TaskProfileCommitRequired),
+    CommitOptional(TaskProfileCommitOptional),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum TaskProfileCommitRequired {
     RemoteFunction {
         owner: String,
