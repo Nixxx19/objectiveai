@@ -21,12 +21,9 @@ impl RetryToken {
         base64::engine::general_purpose::STANDARD.encode(json)
     }
 
-    pub fn from_string(s: &str) -> Result<Self, super::Error> {
-        let json = base64::engine::general_purpose::STANDARD
-            .decode(s)
-            .map_err(|_| super::Error::InvalidRetryToken)?;
-        let token = serde_json::from_slice(&json)
-            .map_err(|_| super::Error::InvalidRetryToken)?;
-        Ok(token)
+    pub fn try_from_string(s: &str) -> Option<Self> {
+        let json = base64::engine::general_purpose::STANDARD.decode(s).ok()?;
+        let token = serde_json::from_slice(&json).ok()?;
+        Some(token)
     }
 }
