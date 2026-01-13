@@ -62,3 +62,41 @@ pub enum TaskProfileCommitOptional {
         profile: Vec<rust_decimal::Decimal>,
     },
 }
+
+impl TaskProfileCommitOptional {
+    pub fn try_into_commit_required(self) -> Option<TaskProfileCommitRequired> {
+        match self {
+            TaskProfileCommitOptional::RemoteFunction {
+                owner,
+                repository,
+                commit: Some(commit),
+            } => Some(TaskProfileCommitRequired::RemoteFunction {
+                owner,
+                repository,
+                commit,
+            }),
+            TaskProfileCommitOptional::RemoteFunction {
+                commit: None, ..
+            } => None,
+            TaskProfileCommitOptional::InlineFunction(tasks) => {
+                let mut required_tasks = Vec::with_capacity(tasks.len());
+                for task in tasks {
+                    if let Some(required_task) = task.try_into_commit_required()
+                    {
+                        required_tasks.push(required_task);
+                    } else {
+                        return None;
+                    }
+                }
+                Some(TaskProfileCommitRequired::InlineFunction(required_tasks))
+            }
+            TaskProfileCommitOptional::VectorCompletion {
+                ensemble,
+                profile,
+            } => Some(TaskProfileCommitRequired::VectorCompletion {
+                ensemble,
+                profile,
+            }),
+        }
+    }
+}
