@@ -5,12 +5,10 @@ mod function;
 mod profile;
 pub mod profiles;
 pub mod response;
-mod retry_token;
 mod task;
 
 pub use function::*;
 pub use profile::*;
-pub use retry_token::*;
 pub use task::*;
 
 #[cfg(feature = "http")]
