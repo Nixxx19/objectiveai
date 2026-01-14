@@ -13,6 +13,9 @@ pub struct FunctionRemoteRequestBody {
     // if present, reuses vector completion retries from previous request
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retry_token: Option<String>,
+    // if present, vector completions use cached votes when available
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub from_cache: Option<bool>,
 
     // core config
     #[serde(skip_serializing_if = "Option::is_none")]
