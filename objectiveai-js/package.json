@@ -7,11 +7,11 @@
     "type": "git",
     "url": "git+https://github.com/ObjectiveAI/objectiveai.git"
   },
+  "type": "module",
   "scripts": {
-    "build": "rimraf dist && npm run build:cjs && npm run build:esm",
-    "build:cjs": "tsc --project tsconfig.cjs.json && shx mv dist/index.js dist/index.cjs",
-    "build:esm": "tsc --project tsconfig.esm.json",
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsup && shx rm -f dist/*.d.mts",
+    "test": "node test/test-cjs.cjs && node test/test-esm.mjs",
+    "prepublishOnly": "npm test",
     "start": "node dist/index.js",
     "prepare": "npm run build"
   },
@@ -24,6 +24,7 @@
     "access": "public"
   },
   "license": "MIT",
+  "sideEffects": false,
   "dependencies": {
     "zod": "^4.3.5"
   },
@@ -31,6 +32,7 @@
     "openai": "^6.15.0",
     "rimraf": "^6.1.2",
     "shx": "^0.4.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
   "keywords": [
