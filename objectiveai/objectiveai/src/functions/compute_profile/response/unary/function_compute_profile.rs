@@ -9,7 +9,7 @@ pub struct FunctionComputeProfile {
     pub id: String,
     pub executions: Vec<super::FunctionExecution>,
     pub executions_errors: bool,
-    pub profile: functions::ComputedProfile,
+    pub profile: functions::InlineProfile,
     pub fitting_stats: response::FittingStats,
     pub retry_token: Option<String>,
     pub created: u64,
@@ -48,7 +48,7 @@ impl From<response::streaming::FunctionComputeProfileChunk>
                 .map(super::FunctionExecution::from)
                 .collect(),
             executions_errors: executions_errors.unwrap_or(false),
-            profile: profile.unwrap_or_else(|| functions::ComputedProfile {
+            profile: profile.unwrap_or_else(|| functions::InlineProfile {
                 tasks: Vec::new(),
             }),
             fitting_stats: fitting_stats
