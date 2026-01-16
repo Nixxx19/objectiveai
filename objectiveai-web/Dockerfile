@@ -30,6 +30,16 @@ ARG IP_RSA_PUBLIC_KEY
 ENV IP_RSA_PUBLIC_KEY=${IP_RSA_PUBLIC_KEY}
 ARG USER_IP_HEADER
 ENV USER_IP_HEADER=${USER_IP_HEADER}
+
+# --- install rust + wasm-pack ---
+RUN apt-get update \
+  && apt-get install -y curl build-essential pkg-config libssl-dev \
+  && curl https://sh.rustup.rs -sSf | sh -s -- -y \
+  && /root/.cargo/bin/rustup target add wasm32-unknown-unknown \
+  && /root/.cargo/bin/cargo install wasm-pack
+
+ENV PATH="/root/.cargo/bin:${PATH}"
+
 WORKDIR /root
 COPY . .
 WORKDIR /root/objectiveai-web
