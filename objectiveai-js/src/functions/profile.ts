@@ -74,7 +74,7 @@ export const InlineProfileSchema = z
       tasks: TaskProfilesSchema,
     })
   )
-  .describe("An function profile defined inline.")
+  .describe("A function profile defined inline.")
   .meta({ title: "InlineProfile" });
 export type InlineProfile = z.infer<typeof InlineProfileSchema>;
 

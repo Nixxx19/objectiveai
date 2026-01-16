@@ -21,7 +21,7 @@ export const FittingStatsSchema = z
     errors: z
       .uint32()
       .describe(
-        "The number of errors which occured while computing outputs during fitting."
+        "The number of errors which occurred while computing outputs during fitting."
       ),
   })
   .describe(
