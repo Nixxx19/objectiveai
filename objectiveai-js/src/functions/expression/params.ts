@@ -1,5 +1,7 @@
 import { JsonValueSchema } from "src/json";
 import { ScoresSchema } from "src/vector/completions/response/scores";
+import { VectorCompletionChunk } from "src/vector/completions/response/streaming";
+import { VectorCompletion } from "src/vector/completions/response/unary";
 import { VotesSchema } from "src/vector/completions/response/vote";
 import { WeightsSchema } from "src/vector/completions/response/weights";
 import z from "zod";
@@ -14,6 +16,16 @@ export const VectorCompletionOutputSchema = z
 export type VectorCompletionOutput = z.infer<
   typeof VectorCompletionOutputSchema
 >;
+
+export function compileVectorCompletionOutput(
+  completion: VectorCompletion | VectorCompletionChunk
+): VectorCompletionOutput {
+  return {
+    votes: completion.votes,
+    scores: completion.scores,
+    weights: completion.weights,
+  };
+}
 
 export const FunctionOutputSchema = z
   .union([
@@ -44,3 +56,8 @@ export const TaskOutputSchema = z
   ])
   .describe("The output of a task.");
 export type TaskOutput = z.infer<typeof TaskOutputSchema>;
+
+export const TaskOutputsSchema = z
+  .array(TaskOutputSchema)
+  .describe("The outputs of all tasks in a function.");
+export type TaskOutputs = z.infer<typeof TaskOutputsSchema>;

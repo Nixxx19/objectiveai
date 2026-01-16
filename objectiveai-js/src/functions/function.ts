@@ -3,7 +3,7 @@ import {
   InputMapsExpressionSchema,
   InputSchemaSchema,
 } from "./expression/input";
-import { TaskExpressionsSchema } from "./expression/task";
+import { TaskExpressionsSchema } from "./task";
 import { ExpressionSchema } from "./expression/expression";
 
 // Inline Function
