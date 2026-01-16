@@ -30,26 +30,38 @@ ARG IP_RSA_PUBLIC_KEY
 ENV IP_RSA_PUBLIC_KEY=${IP_RSA_PUBLIC_KEY}
 ARG USER_IP_HEADER
 ENV USER_IP_HEADER=${USER_IP_HEADER}
-
 # --- install rust + wasm-pack ---
 RUN apt-get update \
   && apt-get install -y curl build-essential pkg-config libssl-dev \
   && curl https://sh.rustup.rs -sSf | sh -s -- -y \
   && /root/.cargo/bin/rustup target add wasm32-unknown-unknown \
   && /root/.cargo/bin/cargo install wasm-pack
-
 ENV PATH="/root/.cargo/bin:${PATH}"
-
+# Install workspace
 WORKDIR /root
+COPY package.json package-lock.json ./
+COPY objectiveai/ objectiveai/
+COPY objectiveai-js/ objectiveai-js/
+COPY objectiveai-web/package.json objectiveai-web/
+RUN npm install
+# Build workspace
 COPY . .
-# Install all workspace packages from root - this installs deps and runs prepare scripts
-# Use --include=dev to ensure devDependencies are installed even if NODE_ENV=production
-RUN npm install --include=dev
-# Rebuild native modules in objectiveai-web to fix platform-specific bindings
+RUN npm run build --workspace=objectiveai-js
+RUN npm run build --workspace=objectiveai-web
+# Remove symlinks
 WORKDIR /root/objectiveai-web
-RUN npm rebuild
-# Build objectiveai-web
-RUN npm run build
+RUN rm -rf node_modules/objectiveai \
+  && mkdir -p node_modules/objectiveai \
+  && cp -R /root/objectiveai-js/dist/* node_modules/objectiveai/ \
+  && cp /root/objectiveai-js/package.json node_modules/objectiveai/package.json
+# 
+# # Install and build objectiveai-js
+# WORKDIR /root/objectiveai-js
+# RUN npm install --include=dev
+# RUN npm run build
+# # Install and build objectiveai-web. Install twice to fix a font issue. I don't know why it works
+# RUN npm install --include=optional
+# RUN npm run build
 
 # Runner
 FROM node:20-slim AS runner

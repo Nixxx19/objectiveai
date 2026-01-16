@@ -1,4 +1,4 @@
-import { validateEnsemble } from "#wasm-loader";
+import { validateEnsemble } from "../wasm/loader.js";
 import { Ensemble, EnsembleBase } from "./ensemble";
 
 export function validate(ensemble: EnsembleBase): Ensemble {

@@ -1,7 +1,7 @@
 import {
   compileFunctionOutput as wasmCompileFunctionOutput,
   compileFunctionTasks as wasmCompileFunctionTasks,
-} from "#wasm-loader";
+} from "../wasm/loader.js";
 import { Function } from "./function";
 import { CompiledFunctionOutput, InputValue, TaskOutputs } from "./expression";
 import { CompiledTasks } from "./task";

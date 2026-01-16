@@ -1,11 +1,5 @@
 const { spawnSync } = require("child_process");
-const {
-  mkdirSync,
-  copyFileSync,
-  writeFileSync,
-  rmSync,
-  existsSync,
-} = require("fs");
+const { mkdirSync, readFileSync, writeFileSync, rmSync, existsSync } = require("fs");
 const path = require("path");
 
 // Paths
@@ -13,162 +7,124 @@ const jsRoot = process.cwd(); // objectiveai-js
 const repoRoot = path.resolve(jsRoot, ".."); // objectiveai
 const wasmDir = path.join(repoRoot, "objectiveai", "objectiveai-wasm-js");
 const outDir = path.join(jsRoot, "src", "wasm");
-const nodejsOutDir = path.join(outDir, "nodejs");
-const bundlerOutDir = path.join(outDir, "bundler");
 
-// Build targets configuration
-const targets = [
-  { name: "nodejs", outDir: "pkg-nodejs" },
-  { name: "bundler", outDir: "pkg-bundler" },
-];
+// Clean up old files
+if (existsSync(outDir)) {
+  rmSync(outDir, { recursive: true });
+}
+mkdirSync(outDir, { recursive: true });
 
-// 0. Clean up old files in src/wasm (except .gitignore)
-const oldFiles = [
-  "objectiveai_wasm_js.js",
-  "objectiveai_wasm_js.d.ts",
-  "objectiveai_wasm_js_bg.js",
-  "objectiveai_wasm_js_bg.wasm",
-  "objectiveai_wasm_js_bg.wasm.d.ts",
-];
+// 1. Build nodejs target (we only need one target now - just need the glue code and .wasm)
+console.log("⚙ Building wasm-pack target: nodejs");
 
-for (const file of oldFiles) {
-  const filePath = path.join(outDir, file);
-  if (existsSync(filePath)) {
-    rmSync(filePath);
-    console.log(`✓ Removed old file: ${file}`);
+const result = spawnSync(
+  "wasm-pack",
+  ["build", "--target", "nodejs", "--release", "--out-dir", "pkg-nodejs"],
+  {
+    cwd: wasmDir,
+    stdio: "inherit",
+    shell: process.platform === "win32",
   }
-}
-
-// Clean nodejs and bundler directories
-if (existsSync(nodejsOutDir)) {
-  rmSync(nodejsOutDir, { recursive: true });
-}
-if (existsSync(bundlerOutDir)) {
-  rmSync(bundlerOutDir, { recursive: true });
-}
-
-// 1. Build both wasm-pack targets
-for (const target of targets) {
-  console.log(`⚙ Building wasm-pack target: ${target.name}`);
-
-  const result = spawnSync(
-    "wasm-pack",
-    ["build", "--target", target.name, "--release", "--out-dir", target.outDir],
-    {
-      cwd: wasmDir,
-      stdio: "inherit",
-      shell: process.platform === "win32",
-    }
-  );
-
-  if (result.status !== 0) {
-    console.error(`Failed to build ${target.name} target`);
-    process.exit(result.status ?? 1);
-  }
-}
-
-// 2. Create destination directories
-mkdirSync(nodejsOutDir, { recursive: true });
-mkdirSync(bundlerOutDir, { recursive: true });
-
-// 3. Copy nodejs target files (rename .js to .cjs for proper CJS handling)
-const nodejsPkgDir = path.join(wasmDir, "pkg-nodejs");
-
-// Copy and rename the main JS file to .cjs
-copyFileSync(
-  path.join(nodejsPkgDir, "objectiveai_wasm_js.js"),
-  path.join(nodejsOutDir, "objectiveai_wasm_js.cjs")
 );
-console.log("✓ Copied nodejs/objectiveai_wasm_js.cjs");
 
-// Copy other files
-const nodejsOtherFiles = [
-  "objectiveai_wasm_js.d.ts",
-  "objectiveai_wasm_js_bg.wasm",
-  "objectiveai_wasm_js_bg.wasm.d.ts",
-];
-
-for (const file of nodejsOtherFiles) {
-  const from = path.join(nodejsPkgDir, file);
-  const to = path.join(nodejsOutDir, file);
-  copyFileSync(from, to);
-  console.log(`✓ Copied nodejs/${file}`);
+if (result.status !== 0) {
+  console.error("Failed to build nodejs target");
+  process.exit(result.status ?? 1);
 }
 
-// 4. Copy bundler target files
-const bundlerFiles = [
-  "objectiveai_wasm_js.js",
-  "objectiveai_wasm_js.d.ts",
-  "objectiveai_wasm_js_bg.js",
-  "objectiveai_wasm_js_bg.wasm",
-  "objectiveai_wasm_js_bg.wasm.d.ts",
-];
+// 2. Read the generated files
+const nodejsPkgDir = path.join(wasmDir, "pkg-nodejs");
+const glueCode = readFileSync(
+  path.join(nodejsPkgDir, "objectiveai_wasm_js.js"),
+  "utf-8"
+);
+const wasmBinary = readFileSync(
+  path.join(nodejsPkgDir, "objectiveai_wasm_js_bg.wasm")
+);
+const wasmBase64 = wasmBinary.toString("base64");
 
-const bundlerPkgDir = path.join(wasmDir, "pkg-bundler");
-for (const file of bundlerFiles) {
-  const from = path.join(bundlerPkgDir, file);
-  const to = path.join(bundlerOutDir, file);
-  copyFileSync(from, to);
-  console.log(`✓ Copied bundler/${file}`);
+console.log(`✓ WASM binary size: ${wasmBinary.length} bytes`);
+console.log(`✓ WASM base64 size: ${wasmBase64.length} chars`);
+
+// 3. Modify the glue code to use embedded base64 instead of fs.readFileSync
+// Find and replace the WASM loading code at the end
+const fsLoadPattern = /const wasmPath[\s\S]*?wasm\.__wbindgen_start\(\);/;
+
+const universalLoaderCode = `
+// Universal base64-encoded WASM loader
+// Works in Node.js (ESM/CJS) and browsers without bundler configuration
+const WASM_BASE64 = "${wasmBase64}";
+
+function decodeBase64(base64) {
+  if (typeof Buffer !== 'undefined') {
+    // Node.js
+    return Buffer.from(base64, 'base64');
+  } else {
+    // Browser
+    const binaryString = atob(base64);
+    const bytes = new Uint8Array(binaryString.length);
+    for (let i = 0; i < binaryString.length; i++) {
+      bytes[i] = binaryString.charCodeAt(i);
+    }
+    return bytes;
+  }
 }
 
-// 5. Create the ESM loader with runtime detection
-const esmLoader = `// Auto-generated ESM loader with runtime detection
-// Detects Node.js vs Browser and loads appropriate WASM implementation
+const wasmBytes = decodeBase64(WASM_BASE64);
+const wasmModule = new WebAssembly.Module(wasmBytes);
+const wasm = exports.__wasm = new WebAssembly.Instance(wasmModule, imports).exports;
 
-const isNode =
-  typeof process !== "undefined" &&
-  process.versions != null &&
-  process.versions.node != null;
+wasm.__wbindgen_start();`;
 
-let wasm;
+// Also need to handle the decodeText function which uses TextDecoder
+// The nodejs target might use a Node.js-specific approach
+let modifiedGlue = glueCode.replace(fsLoadPattern, universalLoaderCode);
 
-if (isNode) {
-  // Node.js: dynamically import the nodejs target (CJS module with .cjs extension)
-  // Node.js ESM can import CJS modules via dynamic import
-  wasm = await import("./nodejs/objectiveai_wasm_js.cjs");
-} else {
-  // Browser: import the bundler target
-  // Bundlers (Webpack/Vite) will process this and handle the .wasm import
-  wasm = await import("./bundler/objectiveai_wasm_js.js");
+// Check if there's a require('util') for TextDecoder - make it universal
+if (modifiedGlue.includes("require('util')")) {
+  // Replace Node.js TextDecoder with universal version
+  modifiedGlue = modifiedGlue.replace(
+    /const \{ TextDecoder \} = require\('util'\);/g,
+    "const TextDecoder = typeof globalThis.TextDecoder !== 'undefined' ? globalThis.TextDecoder : require('util').TextDecoder;"
+  );
 }
 
-// Re-export all WASM functions
-export const validateEnsembleLlm = wasm.validateEnsembleLlm ?? wasm.default?.validateEnsembleLlm;
-export const validateEnsemble = wasm.validateEnsemble ?? wasm.default?.validateEnsemble;
-export const compileFunctionTasks = wasm.compileFunctionTasks ?? wasm.default?.compileFunctionTasks;
-export const compileFunctionOutput = wasm.compileFunctionOutput ?? wasm.default?.compileFunctionOutput;
-export const promptId = wasm.promptId ?? wasm.default?.promptId;
-export const toolsId = wasm.toolsId ?? wasm.default?.toolsId;
-export const vectorResponseId = wasm.vectorResponseId ?? wasm.default?.vectorResponseId;
+// 4. Write the CJS version (the modified glue code is already CJS)
+writeFileSync(path.join(outDir, "loader.cjs"), modifiedGlue);
+console.log("✓ Created loader.cjs (universal CJS loader)");
+
+// 5. Create ESM version by wrapping the CJS code in an IIFE
+// This avoids symbol conflicts with the function declarations inside
+const esmLoader = `// Universal ESM loader with embedded base64 WASM
+// Works in Node.js and browsers without bundler configuration
+
+const _wasm = (() => {
+  const exports = {};
+  const module = { exports };
+  ${modifiedGlue
+    .replace("imports['__wbindgen_placeholder__'] = module.exports;", "imports['__wbindgen_placeholder__'] = exports;")
+  }
+  return exports;
+})();
+
+export const validateEnsembleLlm = _wasm.validateEnsembleLlm;
+export const validateEnsemble = _wasm.validateEnsemble;
+export const compileFunctionTasks = _wasm.compileFunctionTasks;
+export const compileFunctionOutput = _wasm.compileFunctionOutput;
+export const promptId = _wasm.promptId;
+export const toolsId = _wasm.toolsId;
+export const vectorResponseId = _wasm.vectorResponseId;
 `;
 
 writeFileSync(path.join(outDir, "loader.js"), esmLoader);
-console.log("✓ Created loader.js (ESM)");
+console.log("✓ Created loader.js (universal ESM loader)");
 
-// 6. Create the CJS loader (assumes Node.js runtime)
-const cjsLoader = `// Auto-generated CJS loader for Node.js
-// CJS is only used in Node.js, so we directly use the nodejs target
-
-module.exports = require("./nodejs/objectiveai_wasm_js.cjs");
-`;
-
-writeFileSync(path.join(outDir, "loader.cjs"), cjsLoader);
-console.log("✓ Created loader.cjs (CJS)");
-
-// 7. Create TypeScript declaration for the loader
-const loaderDts = `// Auto-generated type declarations for WASM loader
-
-export function validateEnsembleLlm(llm: any): any;
-export function validateEnsemble(ensemble: any): any;
-export function compileFunctionTasks(_function: any, input: any): any;
-export function compileFunctionOutput(_function: any, input: any, task_outputs: any): any;
-export function promptId(prompt: any): string;
-export function toolsId(tools: any): string;
-export function vectorResponseId(response: any): string;
-`;
-
-writeFileSync(path.join(outDir, "loader.d.ts"), loaderDts);
+// 6. Copy type declarations
+const dtsContent = readFileSync(
+  path.join(nodejsPkgDir, "objectiveai_wasm_js.d.ts"),
+  "utf-8"
+);
+writeFileSync(path.join(outDir, "loader.d.ts"), dtsContent);
 console.log("✓ Created loader.d.ts");
 
-console.log("\n✅ WASM installation complete");
+console.log("\n✅ WASM installation complete (universal base64-embedded loader)");
