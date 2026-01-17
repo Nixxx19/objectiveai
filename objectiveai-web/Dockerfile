@@ -43,7 +43,7 @@ COPY package.json package-lock.json ./
 COPY objectiveai/ objectiveai/
 COPY objectiveai-js/ objectiveai-js/
 COPY objectiveai-web/package.json objectiveai-web/
-RUN npm install
+RUN npm install --include=dev
 # Build workspace
 COPY . .
 RUN npm run build --workspace=objectiveai-js
@@ -54,14 +54,6 @@ RUN rm -rf node_modules/objectiveai \
   && mkdir -p node_modules/objectiveai \
   && cp -R /root/objectiveai-js/dist/* node_modules/objectiveai/ \
   && cp /root/objectiveai-js/package.json node_modules/objectiveai/package.json
-# 
-# # Install and build objectiveai-js
-# WORKDIR /root/objectiveai-js
-# RUN npm install --include=dev
-# RUN npm run build
-# # Install and build objectiveai-web. Install twice to fix a font issue. I don't know why it works
-# RUN npm install --include=optional
-# RUN npm run build
 
 # Runner
 FROM node:20-slim AS runner
