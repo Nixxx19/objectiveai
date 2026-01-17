@@ -1,4 +1,4 @@
-# ObjectiveAI
+# {ai} | ObjectiveAI
 
 [![npm version](https://img.shields.io/npm/v/objectiveai.svg)](https://www.npmjs.com/package/objectiveai)
 [![Crates.io](https://img.shields.io/crates/v/objectiveai.svg)](https://crates.io/crates/objectiveai)
