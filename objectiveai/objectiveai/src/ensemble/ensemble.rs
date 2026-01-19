@@ -77,7 +77,7 @@ impl TryFrom<EnsembleBase> for Ensemble {
         let mut hasher = XxHash3_128::with_seed(0);
         for (full_id, llm) in &llms_with_full_id {
             hasher.write(full_id.as_bytes());
-            let count_bytes = count.to_le_bytes();
+            let count_bytes = llm.count.to_le_bytes();
             hasher.write(&count_bytes);
         }
         let id = format!("{:0>22}", base62::encode(hasher.finish_128()));
