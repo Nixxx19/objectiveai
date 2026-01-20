@@ -227,7 +227,7 @@ pub static JMESPATH_RUNTIME: LazyLock<jmespath::Runtime> = LazyLock::new(
         // https://jmespath.org/specification.html
         runtime.register_builtin_functions();
 
-        // math
+        // basic math
         runtime.register_function(
             "add",
             Box::new(CustomFunction::new(
@@ -307,7 +307,7 @@ pub static JMESPATH_RUNTIME: LazyLock<jmespath::Runtime> = LazyLock::new(
             )),
         );
 
-        // custom stuff
+        // parse JSON into native JMESPath variable
         runtime.register_function(
             "json_parse",
             Box::new(CustomFunction::new(
@@ -321,6 +321,8 @@ pub static JMESPATH_RUNTIME: LazyLock<jmespath::Runtime> = LazyLock::new(
                 }),
             )),
         );
+
+        // check if value is null
         runtime.register_function(
             "is_null",
             Box::new(CustomFunction::new(
@@ -331,6 +333,9 @@ pub static JMESPATH_RUNTIME: LazyLock<jmespath::Runtime> = LazyLock::new(
                 }),
             )),
         );
+
+        // conditional expression
+        // if(cond, then, else)
         runtime.register_function(
             "if",
             Box::new(CustomFunction::new(
@@ -354,6 +359,10 @@ pub static JMESPATH_RUNTIME: LazyLock<jmespath::Runtime> = LazyLock::new(
                 }),
             )),
         );
+
+        // input_value_switch function
+        // selects output based on the type of the input value
+        // evaluates exprefs if necessary
         runtime.register_function(
             "input_value_switch",
             Box::new(CustomFunction::new(
@@ -449,6 +458,50 @@ pub static JMESPATH_RUNTIME: LazyLock<jmespath::Runtime> = LazyLock::new(
                 }),
             )),
         );
+
+        // zips a 2D array and maps each column with an expref
+        // if sub-arrays are of different lengths, fills missing values with null
+        runtime.register_function(
+            "zip_map",
+            Box::new(CustomFunction::new(
+                Signature::new(
+                    vec![
+                        ArgumentType::TypedArray(Box::new(ArgumentType::Array)),
+                        ArgumentType::Expref,
+                    ],
+                    None,
+                ),
+                Box::new(|args: &[Rcvar], ctx: &mut Context| {
+                    let input_array = args[0].as_array().unwrap();
+                    let expref = args[1].as_expref().unwrap();
+                    let mut output_array = Vec::with_capacity(
+                        input_array
+                            .iter()
+                            .map(|v| v.as_array().unwrap().len())
+                            .max()
+                            .unwrap_or_default(),
+                    );
+                    for i in 0..output_array.capacity() {
+                        let mut column = Vec::with_capacity(input_array.len());
+                        for row in input_array.iter() {
+                            let row_array = row.as_array().unwrap();
+                            if let Some(value) = row_array.get(i) {
+                                column.push(value.clone());
+                            } else {
+                                column.push(Rc::new(Variable::Null));
+                            }
+                        }
+                        output_array.push(interpret(
+                            &Rc::new(Variable::Array(column)),
+                            &expref,
+                            ctx,
+                        )?);
+                    }
+                    Ok(Rc::new(Variable::Array(output_array)))
+                }),
+            )),
+        );
+
         runtime
     },
 );
