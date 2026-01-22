@@ -1,0 +1,6 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub struct Usage {
+    pub include: bool,
+}
