@@ -5,7 +5,7 @@ use std::sync::Arc;
 #[async_trait::async_trait]
 pub trait Client<CTXEXT> {
     async fn create_unary(
-        self: Arc<Self>,
+        &self,
         ctx: ctx::Context<CTXEXT>,
         request: Arc<objectiveai::functions::profiles::computations::request::Request>,
     ) -> Result<
@@ -14,7 +14,7 @@ pub trait Client<CTXEXT> {
     >;
 
     async fn create_streaming(
-        self: Arc<Self>,
+        &self,
         ctx: ctx::Context<CTXEXT>,
         request: Arc<objectiveai::functions::profiles::computations::request::Request>,
     ) -> Result<

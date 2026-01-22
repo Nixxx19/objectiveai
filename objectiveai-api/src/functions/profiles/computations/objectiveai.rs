@@ -18,7 +18,7 @@ where
     CTXEXT: Send + Sync + 'static,
 {
     async fn create_unary(
-        self: Arc<Self>,
+        &self,
         _ctx: ctx::Context<CTXEXT>,
         request: Arc<
             objectiveai::functions::profiles::computations::request::Request,
@@ -36,7 +36,7 @@ where
     }
 
     async fn create_streaming(
-        self: Arc<Self>,
+        &self,
         _ctx: ctx::Context<CTXEXT>,
         request: Arc<
             objectiveai::functions::profiles::computations::request::Request,
@@ -56,7 +56,6 @@ where
         )
         .await
         .map_err(|e| objectiveai::error::ResponseError::from(&e))?;
-        // drop(self);
         Ok(stream.map_err(|e| objectiveai::error::ResponseError::from(&e)))
     }
 }
