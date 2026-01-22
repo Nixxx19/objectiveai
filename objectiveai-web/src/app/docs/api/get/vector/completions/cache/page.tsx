@@ -23,8 +23,8 @@ export default async function Page() {
           ? Provider.TokenSession.fromSession(session)
           : ProviderServer.TokenSession.fromIpHeader(headers)
       }
-      requestBody={Vector.Completions.Cache.RetrieveRequestSchema}
-      responseBody={Vector.Completions.Cache.RetrieveSchema}
+      requestBody={Vector.Completions.Cache.Request.CacheVoteRequestSchema}
+      responseBody={Vector.Completions.Cache.Response.CacheVoteSchema}
     />
   );
 }
