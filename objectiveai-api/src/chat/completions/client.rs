@@ -73,10 +73,7 @@ where
             objectiveai::chat::completions::response::streaming::ChatCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_for_chat_handle_usage(
-                ctx.clone(),
-                request.clone(),
-            )
+            .create_streaming_for_chat_handle_usage(ctx, request)
             .await?;
         while let Some(chunk) = stream.try_next().await? {
             match &mut aggregate {

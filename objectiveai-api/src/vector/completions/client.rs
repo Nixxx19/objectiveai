@@ -74,9 +74,8 @@ where
         let mut aggregate: Option<
             objectiveai::vector::completions::response::streaming::VectorCompletionChunk,
         > = None;
-        let mut stream = self
-            .create_streaming_handle_usage(ctx.clone(), request.clone())
-            .await?;
+        let mut stream =
+            self.create_streaming_handle_usage(ctx, request).await?;
         while let Some(chunk) = stream.next().await {
             match &mut aggregate {
                 Some(aggregate) => aggregate.push(&chunk),
