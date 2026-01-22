@@ -20,8 +20,8 @@ where
     async fn fetch(
         &self,
         _ctx: ctx::Context<CTXEXT>,
-        model: &str,
-        models: Option<&[&str]>,
+        model: &objectiveai::chat::completions::request::Model,
+        models: Option<&[objectiveai::chat::completions::request::Model]>,
         messages: &[objectiveai::chat::completions::request::Message],
         tools: Option<&[objectiveai::chat::completions::request::Tool]>,
         responses: &[objectiveai::chat::completions::request::RichContent],
@@ -29,24 +29,15 @@ where
         Option<objectiveai::vector::completions::response::Vote>,
         objectiveai::error::ResponseError,
     > {
-        let request = objectiveai::vector::completions::cache::request::CacheVoteRequest {
-            model: objectiveai::chat::completions::request::Model::Id(
-                model.to_string(),
-            ),
-            models: models.map(|models| {
-                models
-                    .iter()
-                    .map(|model| {
-                        objectiveai::chat::completions::request::Model::Id(
-                            model.to_string(),
-                        )
-                    })
-                    .collect()
-            }),
-            messages: messages.to_vec(),
-            tools: tools.map(|tools| tools.to_vec()),
-            responses: responses.to_vec(),
-        };
+        let request = objectiveai::vector::completions::cache::request::CacheVoteRequest::Ref(
+            objectiveai::vector::completions::cache::request::CacheVoteRequestRef {
+                model,
+                models,
+                messages,
+                tools,
+                responses,
+            },
+        );
         match objectiveai::vector::completions::cache::get_cache_vote(
             &self.client,
             &request,
