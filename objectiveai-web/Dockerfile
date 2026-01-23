@@ -40,6 +40,7 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 # Install workspace
 WORKDIR /root
 COPY package.json package-lock.json Cargo.toml Cargo.lock ./
+COPY objectiveai-api/ objectiveai-api/
 COPY objectiveai-rs/ objectiveai-rs/
 COPY objectiveai-rs-wasm-js/ objectiveai-rs-wasm-js/
 COPY objectiveai-js/ objectiveai-js/
