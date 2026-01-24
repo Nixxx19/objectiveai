@@ -2,6 +2,10 @@
 
 Guidelines for working with the ObjectiveAI SDK in this project.
 
+## Design Context
+
+For design decisions, reference `planning/design-guidelines.md` and the visual assets in `planning/`. When more than 30% unsure about design intent, ask for clarification before proceeding.
+
 ## Documentation
 
 **Read documentation frequently.** ObjectiveAI is a complex system with many interrelated concepts. Before implementing features that use the SDK, read relevant documentation from:

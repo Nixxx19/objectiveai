@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import HeroText from "@/components/HeroText";
 
 // Featured functions data
 const FEATURED_FUNCTIONS = [
@@ -219,15 +220,17 @@ export default function Home() {
         minHeight: 'calc(60vh - 100px)',
         paddingTop: isMobile ? '40px' : '60px',
       }}>
-        <div className="container" style={{ textAlign: 'center' }}>
-          <h1 className="heading1" style={{ 
-            fontSize: isMobile ? '32px' : isTablet ? '56px' : '80px',
-            marginBottom: '48px',
+        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 32px' }}>
+          <div style={{ marginBottom: '32px', width: '100%' }}>
+            <HeroText />
+          </div>
+          <p style={{
+            fontSize: isMobile ? '16px' : '18px',
+            color: 'var(--text-muted)',
+            marginBottom: '32px',
           }}>
-            SCORE RANK
-            <br />
-            SIMULATE
-          </h1>
+            AI Scoring Primitives for Developers
+          </p>
           <div style={{
             display: 'flex',
             gap: '16px',
