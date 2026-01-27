@@ -475,6 +475,7 @@ where
 
             // fetch initial FTPs
             let mut ftp_futs = Vec::with_capacity(split_input.len() / pool + 1);
+            let mut pool_chunk_sizes: Vec<usize> = Vec::with_capacity(split_input.len() / pool + 1);
             let chunks = split_input.chunks(
                 if split_input.len() % pool == 1 {
                     pool + 1
@@ -483,6 +484,7 @@ where
                 }
             );
             for chunk in chunks {
+                pool_chunk_sizes.push(chunk.len());
                 let joined_input = input_merge.clone().compile_one(
                     &objectiveai::functions::expression::Params::Owned(
                         objectiveai::functions::expression::ParamsOwned {
@@ -668,7 +670,7 @@ where
                         vec![rust_decimal::Decimal::ZERO; num_items];
 
                     let mut position = 0usize;
-                    for pool_idx in 0..pool_outputs.len() {
+                    for (pool_idx, &chunk_size) in pool_chunk_sizes.iter().enumerate() {
                         if let Some(scores) = pool_outputs.get(&pool_idx) {
                             for (local_idx, &score) in scores.iter().enumerate() {
                                 let current_pos = position + local_idx;
@@ -678,17 +680,19 @@ where
                                     cumulative_scores[original_idx] += score;
                                 }
                             }
-                            position += scores.len();
                         }
+                        // always advance by expected chunk size, even if pool had no output
+                        position += chunk_size;
                     }
                     round_outputs.push(this_round_scores);
 
                     // if not last round, re-sort and prepare next round
                     if !is_last_round {
-                        // create sorted indices by cumulative score (descending)
+                        // create sorted indices by cumulative score (descending), with original index as tie-breaker
                         let mut sorted_indices: Vec<usize> = (0..num_items).collect();
                         sorted_indices.sort_by(|&a, &b| {
                             cumulative_scores[b].cmp(&cumulative_scores[a])
+                                .then_with(|| a.cmp(&b))
                         });
 
                         // update current_to_original mapping
@@ -710,8 +714,11 @@ where
                             }
                         );
 
+                        // update pool_chunk_sizes for this round
+                        pool_chunk_sizes.clear();
                         let mut ftp_futs = Vec::with_capacity(chunks.len());
                         for chunk in chunks {
+                            pool_chunk_sizes.push(chunk.len());
                             let joined_input = match input_merge.clone().compile_one(
                                 &objectiveai::functions::expression::Params::Owned(
                                     objectiveai::functions::expression::ParamsOwned {
