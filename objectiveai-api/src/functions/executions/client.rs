@@ -7,7 +7,12 @@ use crate::{
 };
 use futures::{Stream, StreamExt, TryStreamExt};
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, hash::Hasher, sync::{Arc, LazyLock}, time};
+use std::{
+    collections::HashMap,
+    hash::Hasher,
+    sync::{Arc, LazyLock},
+    time,
+};
 
 /// Generates a unique response ID for scalar Function executions.
 pub fn scalar_response_id(created: u64) -> String {
@@ -503,7 +508,61 @@ where
                 ));
             }
             let mut ftps = futures::future::try_join_all(ftp_futs).await?;
-            
+
+            // setup reasoning data for Swiss system
+            let (mut swiss_vector_completions, mut swiss_index_maps, swiss_confidence_responses) = if reasoning {
+                // extract confidence_responses from reasoning_data (built from original ftp)
+                let (_, (_, confidence_responses), _) = reasoning_data.take().unwrap();
+
+                // build index_maps for initial FTPs (round 1)
+                let mut index_maps: HashMap<(u64, usize), HashMap<Vec<u64>, Vec<usize>>> = HashMap::new();
+                for (pool_idx, ftp) in ftps.iter().enumerate() {
+                    let mut ftp_index_map: HashMap<Vec<u64>, Vec<usize>> = HashMap::new();
+                    for vector_completion_ftp in ftp
+                        .tasks
+                        .iter()
+                        .filter_map(|task| task.as_ref())
+                        .flat_map(|task| task.vector_completion_ftps())
+                    {
+                        let mut completion_index_map = Vec::with_capacity(
+                            vector_completion_ftp.responses.len(),
+                        );
+                        for response in &vector_completion_ftp.responses {
+                            let mut response = response.clone();
+                            response.prepare();
+                            let response_string =
+                                serde_json::to_string(&response).unwrap_or_default();
+                            if response_string.is_empty() {
+                                continue;
+                            }
+                            let mut hasher = ahash::AHasher::default();
+                            hasher.write(response_string.as_bytes());
+                            let response_hash = hasher.finish();
+                            // find matching confidence_response by hash
+                            for (i, confidence_response) in confidence_responses.iter().enumerate() {
+                                if confidence_response.response_hash == response_hash {
+                                    completion_index_map.push(i);
+                                    break;
+                                }
+                            }
+                        }
+                        ftp_index_map.insert(
+                            vector_completion_ftp.path.clone(),
+                            completion_index_map,
+                        );
+                    }
+                    index_maps.insert((1, pool_idx), ftp_index_map);
+                }
+
+                (
+                    Some(HashMap::<String, (u64, usize, objectiveai::functions::executions::response::streaming::VectorCompletionTaskChunk)>::new()),
+                    Some(index_maps),
+                    Some(confidence_responses),
+                )
+            } else {
+                (None, None, None)
+            };
+
             // identify the completion and get response type
             let (response_id, object) = match ftp.r#type {
                 functions::FunctionType::Vector { .. } => (
@@ -661,6 +720,22 @@ where
                                 if let Some(chunk_usage) = &chunk.inner.usage {
                                     usage.push(chunk_usage);
                                 }
+                                // aggregate for reasoning
+                                if let Some(vector_completions) = &mut swiss_vector_completions {
+                                    if !chunk.inner.id.is_empty() {
+                                        match vector_completions.get_mut(&chunk.inner.id) {
+                                            Some((_, _, existing_chunk)) => {
+                                                existing_chunk.push(&chunk);
+                                            }
+                                            None => {
+                                                vector_completions.insert(
+                                                    chunk.inner.id.clone(),
+                                                    (current_round as u64, pool_idx, chunk.clone()),
+                                                );
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
@@ -757,6 +832,48 @@ where
                             }
                         };
 
+                        // build index_maps for new FTPs (next round)
+                        if let (Some(index_maps), Some(confidence_responses)) = (&mut swiss_index_maps, &swiss_confidence_responses) {
+                            let next_round = current_round + 1;
+                            for (pool_idx, ftp) in ftps.iter().enumerate() {
+                                let mut ftp_index_map: HashMap<Vec<u64>, Vec<usize>> = HashMap::new();
+                                for vector_completion_ftp in ftp
+                                    .tasks
+                                    .iter()
+                                    .filter_map(|task| task.as_ref())
+                                    .flat_map(|task| task.vector_completion_ftps())
+                                {
+                                    let mut completion_index_map = Vec::with_capacity(
+                                        vector_completion_ftp.responses.len(),
+                                    );
+                                    for response in &vector_completion_ftp.responses {
+                                        let mut response = response.clone();
+                                        response.prepare();
+                                        let response_string =
+                                            serde_json::to_string(&response).unwrap_or_default();
+                                        if response_string.is_empty() {
+                                            continue;
+                                        }
+                                        let mut hasher = ahash::AHasher::default();
+                                        hasher.write(response_string.as_bytes());
+                                        let response_hash = hasher.finish();
+                                        // find matching confidence_response by hash
+                                        for (i, confidence_response) in confidence_responses.iter().enumerate() {
+                                            if confidence_response.response_hash == response_hash {
+                                                completion_index_map.push(i);
+                                                break;
+                                            }
+                                        }
+                                    }
+                                    ftp_index_map.insert(
+                                        vector_completion_ftp.path.clone(),
+                                        completion_index_map,
+                                    );
+                                }
+                                index_maps.insert((next_round as u64, pool_idx), ftp_index_map);
+                            }
+                        }
+
                         // reset retry token tracking for next round
                         retry_token_indices.clear();
                         retry_token_index = 0;
@@ -783,6 +900,136 @@ where
                         for score in &mut final_output {
                             *score /= total;
                         }
+                    }
+                }
+
+                // handle reasoning for Swiss system
+                if let (Some(vector_completions), Some(index_maps), Some(mut confidence_responses)) =
+                    (swiss_vector_completions, swiss_index_maps, swiss_confidence_responses)
+                {
+                    // unpack reasoning params
+                    let objectiveai::functions::executions::request::Reasoning {
+                        model,
+                        models,
+                    } = request.base().reasoning.as_ref().unwrap();
+
+                    // iterate over vector completion chunks
+                    for (_, (round, pool_idx, mut vector_completion)) in vector_completions.into_iter() {
+                        // get index_map for this round/pool
+                        if let Some(ftp_index_map) = index_maps.get(&(round, pool_idx)) {
+                            if let Some(indices) = ftp_index_map.get(&vector_completion.task_path) {
+                                for (i, score) in vector_completion
+                                    .inner
+                                    .scores
+                                    .iter()
+                                    .enumerate()
+                                {
+                                    if let Some(&idx) = indices.get(i) {
+                                        confidence_responses[idx].confidence += *score;
+                                    }
+                                }
+                                for vote in vector_completion.inner.votes {
+                                    if let Some(completion_index) = vote.completion_index {
+                                        let mut winning_index: usize = 0;
+                                        let mut highest_vote = rust_decimal::Decimal::ZERO;
+                                        for (i, &score) in vote.vote.iter().enumerate() {
+                                            if score > highest_vote {
+                                                highest_vote = score;
+                                                winning_index = i;
+                                            }
+                                        }
+                                        if let Some(&idx) = indices.get(winning_index) {
+                                            let confidence_response = &mut confidence_responses[idx];
+                                            let completion = vector_completion
+                                                .inner
+                                                .completions
+                                                .iter_mut()
+                                                .find(|c| c.index == completion_index)
+                                                .expect("missing completion for vote completion index");
+                                            let delta = &mut completion.inner.choices[0].delta;
+                                            if let Some(reasoning) = delta.reasoning.take() {
+                                                confidence_response.reasoning.push(reasoning);
+                                            }
+                                            if let Some(content) = delta.content.take()
+                                                && let Ok(vector::completions::ResponseKey {
+                                                    _think: Some(reasoning),
+                                                    ..
+                                                }) = serde_json::from_str(&content)
+                                            {
+                                                confidence_response.reasoning.push(reasoning);
+                                            }
+                                            if let Some(tool_calls) = delta.tool_calls.take() {
+                                                for tool_call in tool_calls {
+                                                    if let objectiveai::chat::completions::response::streaming::ToolCall {
+                                                        function: Some(
+                                                            objectiveai::chat::completions::response::streaming::ToolCallFunction {
+                                                                arguments: Some(arguments),
+                                                                ..
+                                                            }
+                                                        ),
+                                                        ..
+                                                    } = tool_call
+                                                        && let Ok(vector::completions::ResponseKey {
+                                                            _think: Some(reasoning),
+                                                            ..
+                                                        }) = serde_json::from_str(&arguments)
+                                                    {
+                                                        confidence_response.reasoning.push(reasoning);
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // normalize response confidences
+                    for confidence_response in &mut confidence_responses {
+                        if confidence_response.confidence_count > rust_decimal::Decimal::ONE {
+                            confidence_response.confidence /= confidence_response.confidence_count;
+                        }
+                    }
+
+                    // create a chat completion summarizing the reasoning
+                    let reasoning_stream = self.create_reasoning_summary_streaming(
+                        ctx,
+                        request.clone(),
+                        model.clone(),
+                        models.clone(),
+                        description,
+                        objectiveai::functions::expression::FunctionOutput::Vector(final_output.clone()),
+                        confidence_responses,
+                    ).await;
+
+                    // yield reasoning chunks
+                    futures::pin_mut!(reasoning_stream);
+                    while let Some(chunk) = reasoning_stream.next().await {
+                        // collect usage
+                        if let Some(chunk_usage) = &chunk.inner.usage {
+                            usage.push_chat_completion_usage(chunk_usage);
+                        }
+
+                        // yield chunk
+                        yield objectiveai::functions::executions::response::streaming::FunctionExecutionChunk {
+                            id: response_id.clone(),
+                            tasks: Vec::new(),
+                            tasks_errors: if tasks_errors {
+                                Some(true)
+                            } else {
+                                None
+                            },
+                            reasoning: Some(chunk),
+                            output: None,
+                            error: None,
+                            retry_token: None,
+                            created,
+                            function: function.clone(),
+                            profile: profile.clone(),
+                            object,
+                            usage: None,
+                        };
                     }
                 }
 
@@ -1144,8 +1391,9 @@ where
         swiss_pool_index: Option<u64>,
     ) -> futures::stream::BoxStream<'static, FtpStreamChunk> {
         match ftp {
-            functions::FlatTaskProfile::Function(function_ftp) => {
-                self.clone().execute_function_ftp_streaming(
+            functions::FlatTaskProfile::Function(function_ftp) => self
+                .clone()
+                .execute_function_ftp_streaming(
                     ctx,
                     request,
                     root_retry_token,
@@ -1156,10 +1404,10 @@ where
                     swiss_round,
                     swiss_pool_index,
                 )
-                .boxed()
-            }
-            functions::FlatTaskProfile::MapFunction(map_function_ftp) => {
-                self.clone().execute_map_function_ftp_streaming(
+                .boxed(),
+            functions::FlatTaskProfile::MapFunction(map_function_ftp) => self
+                .clone()
+                .execute_map_function_ftp_streaming(
                     ctx,
                     request,
                     root_retry_token,
@@ -1170,8 +1418,7 @@ where
                     swiss_round,
                     swiss_pool_index,
                 )
-                .boxed()
-            }
+                .boxed(),
             functions::FlatTaskProfile::VectorCompletion(vector_ftp) => {
                 futures::stream::once(
                     self.clone().execute_vector_ftp_streaming(
