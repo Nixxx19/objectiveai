@@ -58,13 +58,13 @@ export default function Home() {
         paddingTop: isMobile ? '32px' : '48px',
       }}>
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: '0 32px', maxWidth: '800px' }}>
-          <div style={{ marginBottom: '20px', width: '100%' }}>
+          <div style={{ marginBottom: '12px', width: '100%' }}>
             <HeroText />
           </div>
           <p style={{
-            fontSize: isMobile ? '16px' : '18px',
+            fontSize: isMobile ? '15px' : '17px',
             color: 'var(--text-muted)',
-            marginBottom: '28px',
+            marginBottom: '24px',
           }}>
             AI Scoring Primitives for Developers
           </p>
@@ -74,8 +74,12 @@ export default function Home() {
             justifyContent: 'center',
             flexWrap: 'wrap',
           }}>
-            <button className="pillBtn">Vibe-Native</button>
-            <button className="pillBtn">SDK-First</button>
+            <Link href="/vibe-native" className="pillBtn">
+              Vibe-Native
+            </Link>
+            <Link href="/sdk-first" className="pillBtn">
+              SDK-First
+            </Link>
           </div>
         </div>
       </section>

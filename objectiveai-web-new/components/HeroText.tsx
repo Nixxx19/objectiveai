@@ -11,7 +11,7 @@ export default function HeroText() {
 
   // Prevent hydration mismatch
   if (!mounted) {
-    return <div style={{ height: '200px' }} />;
+    return <div style={{ height: '140px' }} />;
   }
 
   return (
@@ -19,7 +19,7 @@ export default function HeroText() {
       viewBox="0 0 800 300"
       style={{
         width: '100%',
-        maxWidth: '700px',
+        maxWidth: '500px',
         height: 'auto',
       }}
       role="img"
