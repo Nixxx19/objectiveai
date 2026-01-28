@@ -10,6 +10,7 @@ import {
 import { Function } from "./function";
 import { CompiledFunctionOutput, InputValue, TaskOutputs } from "./expression";
 import { CompiledTasks } from "./task";
+import { mapsToRecords } from "src/mapsToRecords.js";
 
 export function validateFunctionInput(
   function_: Function,
@@ -24,14 +25,18 @@ export function compileFunctionInputMaps(
   input: InputValue,
 ): InputValue[][] | null {
   const result = wasmCompileFunctionInputMaps(function_, input);
-  return result === undefined ? null : result;
+  if (result === undefined) return null;
+  const unmapped = mapsToRecords(result);
+  return unmapped as InputValue[][];
 }
 
 export function compileFunctionTasks(
   function_: Function,
   input: InputValue,
 ): CompiledTasks {
-  return wasmCompileFunctionTasks(function_, input) as CompiledTasks;
+  const value = wasmCompileFunctionTasks(function_, input);
+  const unmapped = mapsToRecords(value);
+  return unmapped as CompiledTasks;
 }
 
 export function compileFunctionOutput(
@@ -39,11 +44,9 @@ export function compileFunctionOutput(
   input: InputValue,
   task_outputs: TaskOutputs,
 ): CompiledFunctionOutput {
-  return wasmCompileFunctionOutput(
-    function_,
-    input,
-    task_outputs,
-  ) as CompiledFunctionOutput;
+  const value = wasmCompileFunctionOutput(function_, input, task_outputs);
+  const unmapped = mapsToRecords(value);
+  return unmapped as CompiledFunctionOutput;
 }
 
 export function compileFunctionOutputLength(
@@ -59,7 +62,9 @@ export function compileFunctionInputSplit(
   input: InputValue,
 ): InputValue[] | null {
   const result = wasmCompileFunctionInputSplit(function_, input);
-  return result === undefined ? null : result;
+  if (result === undefined) return null;
+  const unmapped = mapsToRecords(result);
+  return unmapped as InputValue[];
 }
 
 export function compileFunctionInputMerge(
@@ -67,5 +72,7 @@ export function compileFunctionInputMerge(
   inputs: InputValue[],
 ): InputValue | null {
   const result = wasmCompileFunctionInputMerge(function_, inputs);
-  return result === undefined ? null : result;
+  if (result === undefined) return null;
+  const unmapped = mapsToRecords(result);
+  return unmapped as InputValue;
 }
