@@ -502,6 +502,26 @@ pub static JMESPATH_RUNTIME: LazyLock<jmespath::Runtime> = LazyLock::new(
             )),
         );
 
+        // Repeat given value n times in an array
+        runtime.register_function(
+            "repeat",
+            Box::new(CustomFunction::new(
+                Signature::new(
+                    vec![ArgumentType::Any, ArgumentType::Number],
+                    None,
+                ),
+                Box::new(|args: &[Rcvar], ctx: &mut Context| {
+                    let value = any_arg(args, ctx, 0, 2)?;
+                    let n = number_arg(args, ctx, 1, 2)? as usize;
+                    let mut array = Vec::with_capacity(n);
+                    for _ in 0..n {
+                        array.push(value.clone());
+                    }
+                    Ok(Rc::new(Variable::Array(array)))
+                }),
+            )),
+        );
+
         // L1 normalization of a number array
         runtime.register_function(
             "l1_normalize",
