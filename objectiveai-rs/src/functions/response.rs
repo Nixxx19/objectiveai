@@ -86,7 +86,7 @@ pub struct GetFunctionProfilePair {
     #[serde(flatten)]
     pub function: functions::RemoteFunction,
     /// The profile definition.
-    pub profile: functions::Profile,
+    pub profile: functions::RemoteProfile,
 }
 
 /// Usage statistics for a function-profile pair.
