@@ -4,6 +4,7 @@ import {
   RemoteScalarFunctionSchema,
   RemoteVectorFunctionSchema,
 } from "./function";
+import { RemoteProfileSchema } from "./profile";
 
 export const ListItemSchema = z.object({
   owner: z
@@ -87,4 +88,110 @@ export async function retrieve(
     options,
   );
   return response as Retrieve;
+}
+
+// Function-Profile Pairs
+
+export const ListPairItemSchema = z.object({
+  fowner: z
+    .string()
+    .describe(
+      "The owner of the GitHub repository containing the function.",
+    ),
+  frepository: z
+    .string()
+    .describe(
+      "The name of the GitHub repository containing the function.",
+    ),
+  fcommit: z
+    .string()
+    .describe(
+      "The commit SHA of the GitHub repository containing the function.",
+    ),
+  powner: z
+    .string()
+    .describe(
+      "The owner of the GitHub repository containing the profile.",
+    ),
+  prepository: z
+    .string()
+    .describe(
+      "The name of the GitHub repository containing the profile.",
+    ),
+  pcommit: z
+    .string()
+    .describe(
+      "The commit SHA of the GitHub repository containing the profile.",
+    ),
+});
+export type ListPairItem = z.infer<typeof ListPairItemSchema>;
+
+export const ListPairsSchema = z.object({
+  data: z.array(ListPairItemSchema).describe("A list of Function-Profile pairs."),
+});
+export type ListPairs = z.infer<typeof ListPairsSchema>;
+
+export async function listPairs(
+  openai: OpenAI,
+  options?: OpenAI.RequestOptions,
+): Promise<ListPairs> {
+  const response = await openai.get("/functions/profiles/pairs", options);
+  return response as ListPairs;
+}
+
+export const RetrievePairSchema = z.discriminatedUnion("type", [
+  RemoteScalarFunctionSchema.extend({
+    ...ListPairItemSchema.shape,
+    profile: RemoteProfileSchema,
+  }),
+  RemoteVectorFunctionSchema.extend({
+    ...ListPairItemSchema.shape,
+    profile: RemoteProfileSchema,
+  }),
+]);
+export type RetrievePair = z.infer<typeof RetrievePairSchema>;
+
+export async function retrievePair(
+  openai: OpenAI,
+  fowner: string,
+  frepository: string,
+  fcommit: string | null | undefined,
+  powner: string,
+  prepository: string,
+  pcommit: string | null | undefined,
+  options?: OpenAI.RequestOptions,
+): Promise<RetrievePair> {
+  let path = `/functions/${fowner}/${frepository}`;
+  if (fcommit !== null && fcommit !== undefined) {
+    path += `/${fcommit}`;
+  }
+  path += `/profiles/${powner}/${prepository}`;
+  if (pcommit !== null && pcommit !== undefined) {
+    path += `/${pcommit}`;
+  }
+  const response = await openai.get(path, options);
+  return response as RetrievePair;
+}
+
+export async function retrievePairUsage(
+  openai: OpenAI,
+  fowner: string,
+  frepository: string,
+  fcommit: string | null | undefined,
+  powner: string,
+  prepository: string,
+  pcommit: string | null | undefined,
+  options?: OpenAI.RequestOptions,
+): Promise<HistoricalUsage> {
+  let path = `/functions/${fowner}/${frepository}`;
+  if (fcommit !== null && fcommit !== undefined) {
+    path += `/${fcommit}`;
+  }
+  path += `/profiles/${powner}/${prepository}`;
+  if (pcommit !== null && pcommit !== undefined) {
+    path += `/${pcommit}`;
+  }
+  path += "/usage";
+  const response = await openai.get(path, options);
+  return response as HistoricalUsage;
 }

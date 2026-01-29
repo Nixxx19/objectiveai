@@ -240,6 +240,13 @@ async fn main() {
         ),
     ));
 
+    // Function-Profile Pairs Client
+    let pairs_client = Arc::new(
+        functions::pair_retrieval_client::ObjectiveAiClient::new(
+            objectiveai_http_client.clone(),
+        ),
+    );
+
     // Auth Client
     let auth_client = Arc::new(auth::ObjectiveAiClient::new(
         objectiveai_http_client.clone(),
@@ -673,6 +680,174 @@ async fn main() {
                     get_profile_usage(
                         profiles_client,
                         headers,
+                        powner,
+                        prepository,
+                        Some(pcommit),
+                    )
+                }
+            }),
+        )
+        // Function-Profile Pairs - list
+        .route(
+            "/functions/profiles/pairs",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap| list_function_profile_pairs(pairs_client, headers)
+            }),
+        )
+        // Function-Profile Pairs - get (no commits)
+        .route(
+            "/functions/{fowner}/{frepository}/profiles/{powner}/{prepository}",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap,
+                      Path((fowner, frepository, powner, prepository)): Path<(String, String, String, String)>| {
+                    get_function_profile_pair(
+                        pairs_client,
+                        headers,
+                        fowner,
+                        frepository,
+                        None,
+                        powner,
+                        prepository,
+                        None,
+                    )
+                }
+            }),
+        )
+        // Function-Profile Pairs - get (fcommit only)
+        .route(
+            "/functions/{fowner}/{frepository}/{fcommit}/profiles/{powner}/{prepository}",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap,
+                      Path((fowner, frepository, fcommit, powner, prepository)): Path<(String, String, String, String, String)>| {
+                    get_function_profile_pair(
+                        pairs_client,
+                        headers,
+                        fowner,
+                        frepository,
+                        Some(fcommit),
+                        powner,
+                        prepository,
+                        None,
+                    )
+                }
+            }),
+        )
+        // Function-Profile Pairs - get (pcommit only)
+        .route(
+            "/functions/{fowner}/{frepository}/profiles/{powner}/{prepository}/{pcommit}",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap,
+                      Path((fowner, frepository, powner, prepository, pcommit)): Path<(String, String, String, String, String)>| {
+                    get_function_profile_pair(
+                        pairs_client,
+                        headers,
+                        fowner,
+                        frepository,
+                        None,
+                        powner,
+                        prepository,
+                        Some(pcommit),
+                    )
+                }
+            }),
+        )
+        // Function-Profile Pairs - get (both commits)
+        .route(
+            "/functions/{fowner}/{frepository}/{fcommit}/profiles/{powner}/{prepository}/{pcommit}",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap,
+                      Path((fowner, frepository, fcommit, powner, prepository, pcommit)): Path<(String, String, String, String, String, String)>| {
+                    get_function_profile_pair(
+                        pairs_client,
+                        headers,
+                        fowner,
+                        frepository,
+                        Some(fcommit),
+                        powner,
+                        prepository,
+                        Some(pcommit),
+                    )
+                }
+            }),
+        )
+        // Function-Profile Pairs - get usage (no commits)
+        .route(
+            "/functions/{fowner}/{frepository}/profiles/{powner}/{prepository}/usage",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap,
+                      Path((fowner, frepository, powner, prepository)): Path<(String, String, String, String)>| {
+                    get_function_profile_pair_usage(
+                        pairs_client,
+                        headers,
+                        fowner,
+                        frepository,
+                        None,
+                        powner,
+                        prepository,
+                        None,
+                    )
+                }
+            }),
+        )
+        // Function-Profile Pairs - get usage (fcommit only)
+        .route(
+            "/functions/{fowner}/{frepository}/{fcommit}/profiles/{powner}/{prepository}/usage",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap,
+                      Path((fowner, frepository, fcommit, powner, prepository)): Path<(String, String, String, String, String)>| {
+                    get_function_profile_pair_usage(
+                        pairs_client,
+                        headers,
+                        fowner,
+                        frepository,
+                        Some(fcommit),
+                        powner,
+                        prepository,
+                        None,
+                    )
+                }
+            }),
+        )
+        // Function-Profile Pairs - get usage (pcommit only)
+        .route(
+            "/functions/{fowner}/{frepository}/profiles/{powner}/{prepository}/{pcommit}/usage",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap,
+                      Path((fowner, frepository, powner, prepository, pcommit)): Path<(String, String, String, String, String)>| {
+                    get_function_profile_pair_usage(
+                        pairs_client,
+                        headers,
+                        fowner,
+                        frepository,
+                        None,
+                        powner,
+                        prepository,
+                        Some(pcommit),
+                    )
+                }
+            }),
+        )
+        // Function-Profile Pairs - get usage (both commits)
+        .route(
+            "/functions/{fowner}/{frepository}/{fcommit}/profiles/{powner}/{prepository}/{pcommit}/usage",
+            axum::routing::get({
+                let pairs_client = pairs_client.clone();
+                move |headers: HeaderMap,
+                      Path((fowner, frepository, fcommit, powner, prepository, pcommit)): Path<(String, String, String, String, String, String)>| {
+                    get_function_profile_pair_usage(
+                        pairs_client,
+                        headers,
+                        fowner,
+                        frepository,
+                        Some(fcommit),
                         powner,
                         prepository,
                         Some(pcommit),
@@ -1237,6 +1412,90 @@ async fn get_profile_usage(
     {
         Ok(r) => Json(r).into_response(),
         Err(e) => ResponseError::from(&e).into_response(),
+    }
+}
+
+// Function-Profile Pairs
+
+async fn list_function_profile_pairs(
+    client: Arc<
+        impl functions::pair_retrieval_client::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+    >,
+    headers: HeaderMap,
+) -> axum::response::Response {
+    let ctx = context(&headers);
+    match client.list_function_profile_pairs(ctx).await {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_function_profile_pair(
+    client: Arc<
+        impl functions::pair_retrieval_client::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+    >,
+    headers: HeaderMap,
+    fowner: String,
+    frepository: String,
+    fcommit: Option<String>,
+    powner: String,
+    prepository: String,
+    pcommit: Option<String>,
+) -> axum::response::Response {
+    let ctx = context(&headers);
+    match client
+        .get_function_profile_pair(
+            ctx,
+            &fowner,
+            &frepository,
+            fcommit.as_deref(),
+            &powner,
+            &prepository,
+            pcommit.as_deref(),
+        )
+        .await
+    {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
+    }
+}
+
+async fn get_function_profile_pair_usage(
+    client: Arc<
+        impl functions::pair_retrieval_client::Client<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+    >,
+    headers: HeaderMap,
+    fowner: String,
+    frepository: String,
+    fcommit: Option<String>,
+    powner: String,
+    prepository: String,
+    pcommit: Option<String>,
+) -> axum::response::Response {
+    let ctx = context(&headers);
+    match client
+        .get_function_profile_pair_usage(
+            ctx,
+            &fowner,
+            &frepository,
+            fcommit.as_deref(),
+            &powner,
+            &prepository,
+            pcommit.as_deref(),
+        )
+        .await
+    {
+        Ok(r) => Json(r).into_response(),
+        Err(e) => e.into_response(),
     }
 }
 
