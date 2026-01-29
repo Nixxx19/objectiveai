@@ -35,7 +35,7 @@ struct Config {
         default = "https://openrouter.ai/api/v1"
     )]
     openrouter_api_base: String,
-    #[envconfig(from = "OPENROUTER_API_KEY")]
+    #[envconfig(from = "OPENROUTER_API_KEY", default = "")]
     openrouter_api_key: String,
     #[envconfig(from = "USER_AGENT")]
     user_agent: Option<String>,
@@ -114,13 +114,12 @@ async fn main() {
     ));
 
     // Ensemble LLM Fetcher
-    let ensemble_llm_fetcher = Arc::new(
-        ensemble_llm::fetcher::CachingFetcher::new(Arc::new(
+    let ensemble_llm_fetcher =
+        Arc::new(ensemble_llm::fetcher::CachingFetcher::new(Arc::new(
             ensemble_llm::fetcher::ObjectiveAiFetcher::new(
                 objectiveai_http_client.clone(),
             ),
-        )),
-    );
+        )));
 
     // Chat Completions Client
     let chat_completions_client = Arc::new(chat::completions::Client::<
@@ -155,13 +154,11 @@ async fn main() {
     ));
 
     // Ensemble Fetcher
-    let ensemble_fetcher = Arc::new(
-        ensemble::fetcher::CachingFetcher::new(Arc::new(
-            ensemble::fetcher::ObjectiveAiFetcher::new(
-                objectiveai_http_client.clone(),
-            ),
+    let ensemble_fetcher = Arc::new(ensemble::fetcher::CachingFetcher::new(
+        Arc::new(ensemble::fetcher::ObjectiveAiFetcher::new(
+            objectiveai_http_client.clone(),
         )),
-    );
+    ));
 
     // Vector Completion Votes Fetcher
     let completion_votes_fetcher = Arc::new(
@@ -241,11 +238,10 @@ async fn main() {
     ));
 
     // Function-Profile Pairs Client
-    let pairs_client = Arc::new(
-        functions::pair_retrieval_client::ObjectiveAiClient::new(
+    let pairs_client =
+        Arc::new(functions::pair_retrieval_client::ObjectiveAiClient::new(
             objectiveai_http_client.clone(),
-        ),
-    );
+        ));
 
     // Auth Client
     let auth_client = Arc::new(auth::ObjectiveAiClient::new(
@@ -1097,9 +1093,8 @@ async fn create_chat_completion(
     client: Arc<
         chat::completions::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<
-                ctx::DefaultContextExt,
-            > + Send
+            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
             + Sync
             + 'static,
             impl chat::completions::usage_handler::UsageHandler<
@@ -1157,9 +1152,8 @@ async fn create_vector_completion(
     client: Arc<
         vector::completions::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<
-                ctx::DefaultContextExt,
-            > + Send
+            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
             + Sync
             + 'static,
             impl chat::completions::usage_handler::UsageHandler<
@@ -1167,9 +1161,8 @@ async fn create_vector_completion(
             > + Send
             + Sync
             + 'static,
-            impl ensemble::fetcher::Fetcher<
-                ctx::DefaultContextExt,
-            > + Send
+            impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
             + Sync
             + 'static,
             impl vector::completions::completion_votes_fetcher::Fetcher<
@@ -1279,9 +1272,8 @@ async fn execute_function(
     client: Arc<
         functions::executions::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<
-                ctx::DefaultContextExt,
-            > + Send
+            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
             + Sync
             + 'static,
             impl chat::completions::usage_handler::UsageHandler<
@@ -1289,9 +1281,8 @@ async fn execute_function(
             > + Send
             + Sync
             + 'static,
-            impl ensemble::fetcher::Fetcher<
-                ctx::DefaultContextExt,
-            > + Send
+            impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
             + Sync
             + 'static,
             impl vector::completions::completion_votes_fetcher::Fetcher<
@@ -1420,9 +1411,9 @@ async fn get_profile_usage(
 async fn list_function_profile_pairs(
     client: Arc<
         impl functions::pair_retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
+        + Send
+        + Sync
+        + 'static,
     >,
     headers: HeaderMap,
 ) -> axum::response::Response {
@@ -1436,9 +1427,9 @@ async fn list_function_profile_pairs(
 async fn get_function_profile_pair(
     client: Arc<
         impl functions::pair_retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
+        + Send
+        + Sync
+        + 'static,
     >,
     headers: HeaderMap,
     fowner: String,
@@ -1469,9 +1460,9 @@ async fn get_function_profile_pair(
 async fn get_function_profile_pair_usage(
     client: Arc<
         impl functions::pair_retrieval_client::Client<ctx::DefaultContextExt>
-            + Send
-            + Sync
-            + 'static,
+        + Send
+        + Sync
+        + 'static,
     >,
     headers: HeaderMap,
     fowner: String,
@@ -1675,7 +1666,9 @@ async fn create_profile_computation(
 // Auth
 
 async fn create_api_key(
-    client: Arc<impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static>,
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
     headers: HeaderMap,
     body: objectiveai::auth::request::CreateApiKeyRequest,
 ) -> axum::response::Response {
@@ -1687,7 +1680,9 @@ async fn create_api_key(
 }
 
 async fn create_openrouter_byok_api_key(
-    client: Arc<impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static>,
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
     headers: HeaderMap,
     body: objectiveai::auth::request::CreateOpenRouterByokApiKeyRequest,
 ) -> axum::response::Response {
@@ -1699,7 +1694,9 @@ async fn create_openrouter_byok_api_key(
 }
 
 async fn disable_api_key(
-    client: Arc<impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static>,
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
     headers: HeaderMap,
     body: objectiveai::auth::request::DisableApiKeyRequest,
 ) -> axum::response::Response {
@@ -1711,7 +1708,9 @@ async fn disable_api_key(
 }
 
 async fn delete_openrouter_byok_api_key(
-    client: Arc<impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static>,
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
     headers: HeaderMap,
 ) -> axum::response::Response {
     let ctx = context(&headers);
@@ -1722,7 +1721,9 @@ async fn delete_openrouter_byok_api_key(
 }
 
 async fn list_api_keys(
-    client: Arc<impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static>,
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
     headers: HeaderMap,
 ) -> axum::response::Response {
     let ctx = context(&headers);
@@ -1733,7 +1734,9 @@ async fn list_api_keys(
 }
 
 async fn get_openrouter_byok_api_key(
-    client: Arc<impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static>,
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
     headers: HeaderMap,
 ) -> axum::response::Response {
     let ctx = context(&headers);
@@ -1744,7 +1747,9 @@ async fn get_openrouter_byok_api_key(
 }
 
 async fn get_credits(
-    client: Arc<impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static>,
+    client: Arc<
+        impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
+    >,
     headers: HeaderMap,
 ) -> axum::response::Response {
     let ctx = context(&headers);
@@ -1761,13 +1766,13 @@ async fn list_ensembles(
         ensemble::Client<
             ctx::DefaultContextExt,
             impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
             impl ensemble::retrieval_client::Client<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
         >,
     >,
     headers: HeaderMap,
@@ -1784,13 +1789,13 @@ async fn get_ensemble(
         ensemble::Client<
             ctx::DefaultContextExt,
             impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
             impl ensemble::retrieval_client::Client<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
         >,
     >,
     headers: HeaderMap,
@@ -1808,13 +1813,13 @@ async fn get_ensemble_usage(
         ensemble::Client<
             ctx::DefaultContextExt,
             impl ensemble::fetcher::Fetcher<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
             impl ensemble::retrieval_client::Client<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
         >,
     >,
     headers: HeaderMap,
@@ -1834,13 +1839,13 @@ async fn list_ensemble_llms(
         ensemble_llm::Client<
             ctx::DefaultContextExt,
             impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
             impl ensemble_llm::retrieval_client::Client<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
         >,
     >,
     headers: HeaderMap,
@@ -1857,13 +1862,13 @@ async fn get_ensemble_llm(
         ensemble_llm::Client<
             ctx::DefaultContextExt,
             impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
             impl ensemble_llm::retrieval_client::Client<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
         >,
     >,
     headers: HeaderMap,
@@ -1881,13 +1886,13 @@ async fn get_ensemble_llm_usage(
         ensemble_llm::Client<
             ctx::DefaultContextExt,
             impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
             impl ensemble_llm::retrieval_client::Client<ctx::DefaultContextExt>
-                + Send
-                + Sync
-                + 'static,
+            + Send
+            + Sync
+            + 'static,
         >,
     >,
     headers: HeaderMap,
