@@ -53,40 +53,19 @@ pub struct ListFunctionProfilePair {
 /// A function-profile pair in a list response.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ListFunctionProfilePairItem {
-    /// Function GitHub repository owner.
-    pub fowner: String,
-    /// Function GitHub repository name.
-    pub frepository: String,
-    /// Function Git commit SHA.
-    pub fcommit: String,
-    /// Profile GitHub repository owner.
-    pub powner: String,
-    /// Profile GitHub repository name.
-    pub prepository: String,
-    /// Profile Git commit SHA.
-    pub pcommit: String,
+    /// The function.
+    pub function: ListFunctionItem,
+    /// The profile.
+    pub profile: functions::profiles::response::ListProfileItem,
 }
 
 /// Response from getting a function-profile pair.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct GetFunctionProfilePair {
-    /// Function GitHub repository owner.
-    pub fowner: String,
-    /// Function GitHub repository name.
-    pub frepository: String,
-    /// Function Git commit SHA.
-    pub fcommit: String,
-    /// Profile GitHub repository owner.
-    pub powner: String,
-    /// Profile GitHub repository name.
-    pub prepository: String,
-    /// Profile Git commit SHA.
-    pub pcommit: String,
-    /// The function definition.
-    #[serde(flatten)]
-    pub function: functions::RemoteFunction,
-    /// The profile definition.
-    pub profile: functions::RemoteProfile,
+    /// The function.
+    pub function: GetFunction,
+    /// The profile.
+    pub profile: functions::profiles::response::GetProfile,
 }
 
 /// Usage statistics for a function-profile pair.

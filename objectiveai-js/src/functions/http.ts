@@ -4,7 +4,10 @@ import {
   RemoteScalarFunctionSchema,
   RemoteVectorFunctionSchema,
 } from "./function";
-import { RemoteProfileSchema } from "./profile";
+import {
+  ListItemSchema as ProfileListItemSchema,
+  RetrieveSchema as ProfileRetrieveSchema,
+} from "./profiles/http";
 
 export const ListItemSchema = z.object({
   owner: z
@@ -93,36 +96,8 @@ export async function retrieve(
 // Function-Profile Pairs
 
 export const ListPairItemSchema = z.object({
-  fowner: z
-    .string()
-    .describe(
-      "The owner of the GitHub repository containing the function.",
-    ),
-  frepository: z
-    .string()
-    .describe(
-      "The name of the GitHub repository containing the function.",
-    ),
-  fcommit: z
-    .string()
-    .describe(
-      "The commit SHA of the GitHub repository containing the function.",
-    ),
-  powner: z
-    .string()
-    .describe(
-      "The owner of the GitHub repository containing the profile.",
-    ),
-  prepository: z
-    .string()
-    .describe(
-      "The name of the GitHub repository containing the profile.",
-    ),
-  pcommit: z
-    .string()
-    .describe(
-      "The commit SHA of the GitHub repository containing the profile.",
-    ),
+  function: ListItemSchema.describe("The function."),
+  profile: ProfileListItemSchema.describe("The profile."),
 });
 export type ListPairItem = z.infer<typeof ListPairItemSchema>;
 
@@ -139,16 +114,10 @@ export async function listPairs(
   return response as ListPairs;
 }
 
-export const RetrievePairSchema = z.discriminatedUnion("type", [
-  RemoteScalarFunctionSchema.extend({
-    ...ListPairItemSchema.shape,
-    profile: RemoteProfileSchema,
-  }),
-  RemoteVectorFunctionSchema.extend({
-    ...ListPairItemSchema.shape,
-    profile: RemoteProfileSchema,
-  }),
-]);
+export const RetrievePairSchema = z.object({
+  function: RetrieveSchema.describe("The function."),
+  profile: ProfileRetrieveSchema.describe("The profile."),
+});
 export type RetrievePair = z.infer<typeof RetrievePairSchema>;
 
 export async function retrievePair(
