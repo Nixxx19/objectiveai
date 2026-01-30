@@ -20,14 +20,14 @@ import {
 // Task Expression
 
 export const TaskExpressionSkipSchema = ExpressionSchema.describe(
-  "An expression which evaluates to a boolean indicating whether to skip this task."
+  "An expression which evaluates to a boolean indicating whether to skip this task.",
 );
 export type TaskExpressionSkip = z.infer<typeof TaskExpressionSkipSchema>;
 
 export const TaskExpressionMapSchema = z
   .uint32()
   .describe(
-    "If present, indicates that this task should be ran once for each entry in the specified input map (input map is a 2D array indexed by this value)."
+    "If present, indicates that this task should be ran once for each entry in the specified input map (input map is a 2D array indexed by this value).",
   );
 export type TaskExpressionMap = z.infer<typeof TaskExpressionMapSchema>;
 
@@ -43,7 +43,7 @@ export const ScalarFunctionTaskExpressionSchema = z
     commit: z
       .string()
       .describe(
-        "The commit SHA of the GitHub repository containing the function."
+        "The commit SHA of the GitHub repository containing the function.",
       ),
     skip: TaskExpressionSkipSchema.optional().nullable(),
     map: TaskExpressionMapSchema.optional().nullable(),
@@ -66,7 +66,7 @@ export const VectorFunctionTaskExpressionSchema = z
     commit: z
       .string()
       .describe(
-        "The commit SHA of the GitHub repository containing the function."
+        "The commit SHA of the GitHub repository containing the function.",
       ),
     skip: TaskExpressionSkipSchema.optional().nullable(),
     map: TaskExpressionMapSchema.optional().nullable(),
@@ -86,7 +86,7 @@ export const VectorCompletionTaskExpressionSchema = z
     tools: ToolsExpressionSchema.optional()
       .nullable()
       .describe(
-        `${ToolsExpressionSchema.description} These are readonly and will only be useful for explaining prior tool calls or otherwise influencing behavior.`
+        `${ToolsExpressionSchema.description} These are readonly and will only be useful for explaining prior tool calls or otherwise influencing behavior.`,
       ),
     responses: VectorResponsesExpressionSchema,
   })
@@ -102,14 +102,14 @@ export const TaskExpressionSchema = z
     VectorCompletionTaskExpressionSchema,
   ])
   .describe(
-    "A task to be executed as part of the function. Will first be compiled using the parent function's input. May be skipped or mapped."
+    "A task to be executed as part of the function. Will first be compiled using the parent function's input. May be skipped or mapped.",
   );
 export type TaskExpression = z.infer<typeof TaskExpressionSchema>;
 
 export const TaskExpressionsSchema = z
   .array(TaskExpressionSchema)
   .describe(
-    "The list of tasks to be executed as part of the function. Each will first be compiled using the parent function's input."
+    "The list of tasks to be executed as part of the function. Each will first be compiled using the parent function's input.",
   );
 export type TaskExpressions = z.infer<typeof TaskExpressionsSchema>;
 
@@ -127,7 +127,7 @@ export const ScalarFunctionTaskSchema = z
     commit: z
       .string()
       .describe(
-        "The commit SHA of the GitHub repository containing the function."
+        "The commit SHA of the GitHub repository containing the function.",
       ),
     input: InputValueSchema,
   })
@@ -146,7 +146,7 @@ export const VectorFunctionTaskSchema = z
     commit: z
       .string()
       .describe(
-        "The commit SHA of the GitHub repository containing the function."
+        "The commit SHA of the GitHub repository containing the function.",
       ),
     input: InputValueSchema,
   })
@@ -181,10 +181,11 @@ export const CompiledTaskSchema = z
     z.null().describe("A task which was skipped."),
   ])
   .describe("A compiled task, which may be un-mapped, mapped, or skipped.");
+export type CompiledTask = z.infer<typeof CompiledTaskSchema>;
 
 export const CompiledTasksSchema = z
   .array(CompiledTaskSchema)
   .describe(
-    "The compiled list of tasks to be executed as part of the function."
+    "The compiled list of tasks to be executed as part of the function.",
   );
 export type CompiledTasks = z.infer<typeof CompiledTasksSchema>;
