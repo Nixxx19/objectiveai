@@ -2,66 +2,22 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import { getClient, Functions, deriveCategory, deriveDisplayName } from "../../lib/objectiveai";
 
-// Mock functions data - easily extendable
-const MOCK_FUNCTIONS = [
-  {
-    slug: "trip-must-see",
-    name: "Trip Must-See",
-    description: "Ranks tourist attractions by local authenticity and visitor satisfaction",
-    category: "Ranking",
-    tags: ["travel", "scoring", "ranking"],
-  },
-  {
-    slug: "email-classifier",
-    name: "Email Classifier",
-    description: "Categorizes emails by intent, urgency, and required action type",
-    category: "Scoring",
-    tags: ["text", "classification", "scoring"],
-  },
-  {
-    slug: "code-quality",
-    name: "Code Quality",
-    description: "Evaluates pull requests across maintainability and security metrics",
-    category: "Composite",
-    tags: ["code", "evaluation", "scoring"],
-  },
-  {
-    slug: "resume-matcher",
-    name: "Resume Matcher",
-    description: "Scores candidate resumes against job requirements with skill gap analysis",
-    category: "Ranking",
-    tags: ["hr", "matching", "ranking"],
-  },
-  {
-    slug: "content-ranker",
-    name: "Content Ranker",
-    description: "Ranks content by engagement potential, SEO value, and audience fit",
-    category: "Ranking",
-    tags: ["content", "seo", "ranking"],
-  },
-  {
-    slug: "sentiment-analyzer",
-    name: "Sentiment Analyzer",
-    description: "Analyzes text sentiment with confidence intervals and theme extraction",
-    category: "Scoring",
-    tags: ["text", "sentiment", "scoring"],
-  },
-  {
-    slug: "data-transformer",
-    name: "Data Transformer",
-    description: "Transforms unstructured data into structured formats with validation",
-    category: "Transformation",
-    tags: ["data", "transformation", "validation"],
-  },
-  {
-    slug: "model-benchmark",
-    name: "Model Benchmark",
-    description: "Benchmarks LLM outputs across quality, cost, and latency metrics",
-    category: "Composite",
-    tags: ["llm", "benchmark", "evaluation"],
-  },
-];
+// Function item type for UI
+interface FunctionItem {
+  slug: string;
+  owner: string;
+  repository: string;
+  commit: string;
+  profileOwner: string;
+  profileRepository: string;
+  profileCommit: string;
+  name: string;
+  description: string;
+  category: string;
+  tags: string[];
+}
 
 const CATEGORIES = ["All", "Pinned", "Scoring", "Ranking", "Transformation", "Composite"];
 
@@ -73,6 +29,9 @@ const INITIAL_VISIBLE_COUNT = 6;
 const LOAD_MORE_COUNT = 6;
 
 export default function FunctionsPage() {
+  const [functions, setFunctions] = useState<FunctionItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("name");
@@ -84,6 +43,69 @@ export default function FunctionsPage() {
   const [isTablet, setIsTablet] = useState(false);
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Fetch functions from API
+  useEffect(() => {
+    async function fetchFunctions() {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const client = getClient();
+
+        // Get all function-profile pairs
+        const pairs = await Functions.listPairs(client);
+
+        // Fetch details for each function
+        const functionItems: FunctionItem[] = await Promise.all(
+          pairs.data.map(async (pair) => {
+            const fn = pair.function;
+            const pf = pair.profile;
+
+            // Fetch full function details
+            const details = await Functions.retrieve(
+              client,
+              fn.owner,
+              fn.repository,
+              fn.commit
+            );
+
+            // Use -- separator for slug (single path segment)
+            const slug = `${fn.owner}--${fn.repository}`;
+            const category = deriveCategory(details);
+            const name = deriveDisplayName(fn.repository);
+
+            // Extract tags from repository name
+            const tags = fn.repository.split("-").filter(t => t.length > 2);
+            if (details.type === "vector.function") tags.push("ranking");
+            else tags.push("scoring");
+
+            return {
+              slug,
+              owner: fn.owner,
+              repository: fn.repository,
+              commit: fn.commit,
+              profileOwner: pf.owner,
+              profileRepository: pf.repository,
+              profileCommit: pf.commit,
+              name,
+              description: details.description || `${name} function`,
+              category,
+              tags,
+            };
+          })
+        );
+
+        setFunctions(functionItems);
+      } catch (err) {
+        console.error("Failed to fetch functions:", err);
+        setError(err instanceof Error ? err.message : "Failed to load functions");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchFunctions();
+  }, []);
 
   // Track viewport size
   useEffect(() => {
@@ -129,13 +151,13 @@ export default function FunctionsPage() {
   }, [searchQuery, selectedCategory, sortBy]);
 
   // Filter and sort functions
-  const filteredFunctions = MOCK_FUNCTIONS
+  const filteredFunctions = functions
     .filter(fn => {
       const matchesSearch = searchQuery === "" ||
         fn.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         fn.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         fn.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-      const matchesCategory = selectedCategory === "All" || 
+      const matchesCategory = selectedCategory === "All" ||
         (selectedCategory === "Pinned" ? pinnedFunctions.includes(fn.slug) : fn.category === selectedCategory);
       return matchesSearch && matchesCategory;
     })
@@ -149,7 +171,7 @@ export default function FunctionsPage() {
   const visibleFunctions = filteredFunctions.slice(0, visibleCount);
   const hasMore = visibleCount < filteredFunctions.length;
 
-  const recentFunctionsList = MOCK_FUNCTIONS.filter(fn => recentFunctions.includes(fn.slug));
+  const recentFunctionsList = functions.filter(fn => recentFunctions.includes(fn.slug));
 
   // Safe gap from CSS variable
   const safeGap = 24;
@@ -396,7 +418,38 @@ export default function FunctionsPage() {
               </button>
             )}
 
-            {filteredFunctions.length === 0 && (
+            {isLoading && (
+              <div style={{
+                textAlign: 'center',
+                padding: '60px 20px',
+                color: 'var(--text-muted)',
+              }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  border: '3px solid var(--border)',
+                  borderTopColor: 'var(--accent)',
+                  borderRadius: '50%',
+                  margin: '0 auto 16px',
+                  animation: 'spin 1s linear infinite',
+                }} />
+                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                <p>Loading functions...</p>
+              </div>
+            )}
+
+            {error && !isLoading && (
+              <div style={{
+                textAlign: 'center',
+                padding: '60px 20px',
+                color: 'var(--text-muted)',
+              }}>
+                <p style={{ color: '#ef4444', marginBottom: '8px' }}>Failed to load functions</p>
+                <p style={{ fontSize: '14px' }}>{error}</p>
+              </div>
+            )}
+
+            {!isLoading && !error && filteredFunctions.length === 0 && (
               <div style={{
                 textAlign: 'center',
                 padding: '60px 20px',
