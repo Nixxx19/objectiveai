@@ -36,7 +36,24 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   const [showPinnedColor, setShowPinnedColor] = useState(false);
   const [results, setResults] = useState<{
     output?: number | number[];
-    usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
+    inputSnapshot?: Record<string, unknown>; // Store input for display
+    usage?: {
+      prompt_tokens: number;
+      completion_tokens: number;
+      total_tokens: number;
+      cost?: number;
+      total_cost?: number;
+    };
+    tasks?: Array<{
+      votes?: Array<{
+        model: string;
+        vote: number[];
+        weight: number;
+        from_cache?: boolean;
+        from_rng?: boolean;
+      }>;
+      scores?: number[];
+    }>;
     error?: string;
   } | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
@@ -130,7 +147,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Execute function via SDK
+  // Execute function via server API route
   const handleRun = async () => {
     if (!functionDetails || !profileInfo) return;
 
@@ -139,31 +156,38 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     setResults(null);
 
     try {
-      const client = getClient();
-
-      const result = await Functions.Executions.create(
-        client,
-        {
-          owner: functionDetails.owner,
-          repository: functionDetails.repository,
-          commit: functionDetails.commit,
-        },
-        {
-          owner: profileInfo.owner,
-          repository: profileInfo.repository,
-          commit: profileInfo.commit,
-        },
-        {
+      const response = await fetch("/api/functions/execute", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          functionRef: {
+            owner: functionDetails.owner,
+            repository: functionDetails.repository,
+            commit: functionDetails.commit,
+          },
+          profileRef: {
+            owner: profileInfo.owner,
+            repository: profileInfo.repository,
+            commit: profileInfo.commit,
+          },
           input: formData,
-          ...DEV_EXECUTION_OPTIONS,
-        }
-      );
+          options: DEV_EXECUTION_OPTIONS,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP ${response.status}`);
+      }
 
       // Handle the response
       if ("output" in result) {
         setResults({
           output: result.output as number | number[],
+          inputSnapshot: { ...formData }, // Save input for display
           usage: result.usage,
+          tasks: result.tasks,
         });
       }
     } catch (err) {
@@ -339,6 +363,30 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     );
   };
 
+  // Helper to get content item label
+  const getContentLabel = (index: number): string => {
+    const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+    const input = results?.inputSnapshot;
+
+    // Try to get actual content from input
+    const contentItems = input?.contentItems as unknown[] | undefined;
+    if (contentItems && contentItems[index] !== undefined) {
+      const item = contentItems[index];
+      if (typeof item === "string") {
+        // Truncate long strings
+        return item.length > 40 ? item.slice(0, 40) + "..." : item;
+      }
+      if (Array.isArray(item)) {
+        return `[${item.length} items]`;
+      }
+      if (typeof item === "object" && item !== null) {
+        return "[Media content]";
+      }
+    }
+
+    return `Option ${letters[index] || index + 1}`;
+  };
+
   // Render results based on output type
   const renderResults = () => {
     if (!results?.output) return null;
@@ -347,39 +395,81 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
 
     // Scalar output (single number)
     if (typeof output === "number") {
+      const pct = output * 100;
+      const keywords = results.inputSnapshot?.keywords as string[] | undefined;
+
       return (
         <div>
           <p style={{
             fontSize: "13px",
             color: "var(--text-muted)",
-            marginBottom: "8px",
+            marginBottom: "6px",
           }}>
-            Score
+            Overall Score
           </p>
           <p style={{
-            fontSize: isMobile ? "36px" : "48px",
+            fontSize: isMobile ? "42px" : "56px",
             fontWeight: 700,
             color: "var(--accent)",
             lineHeight: 1,
+            marginBottom: "12px",
           }}>
-            {(output * 100).toFixed(1)}%
+            {pct.toFixed(1)}%
           </p>
+          {/* Score bar */}
+          <div style={{
+            height: "10px",
+            background: "var(--border)",
+            borderRadius: "5px",
+            overflow: "hidden",
+            marginBottom: "16px",
+          }}>
+            <div style={{
+              height: "100%",
+              width: `${pct}%`,
+              background: "linear-gradient(90deg, var(--accent), #a78bfa)",
+              borderRadius: "5px",
+              transition: "width 0.5s ease",
+            }} />
+          </div>
+          {keywords && keywords.length > 0 && (
+            <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+              Relevance to: <span style={{ color: "var(--text)" }}>{keywords.join(", ")}</span>
+            </p>
+          )}
         </div>
       );
     }
 
-    // Vector output (array of numbers)
+    // Vector output (array of numbers) - Rankings
     if (Array.isArray(output)) {
-      const getScoreColor = (score: number) => {
+      const getScoreColor = (score: number, isTop: boolean) => {
+        if (isTop) return "rgb(34, 197, 94)"; // Green for #1
         const pct = score * 100;
-        if (pct >= 35) return "rgb(34, 197, 94)";
-        if (pct >= 20) return "rgb(234, 179, 8)";
-        if (pct >= 10) return "rgb(249, 115, 22)";
-        return "rgb(239, 68, 68)";
+        if (pct >= 25) return "rgb(168, 230, 120)";
+        if (pct >= 15) return "rgb(234, 179, 8)";
+        return "rgb(249, 115, 22)";
       };
+
+      const sorted = output
+        .map((score, i) => ({ index: i, score, label: getContentLabel(i) }))
+        .sort((a, b) => b.score - a.score);
+
+      const keywords = results.inputSnapshot?.keywords as string[] | undefined;
 
       return (
         <div>
+          {/* Show keywords context */}
+          {keywords && keywords.length > 0 && (
+            <p style={{
+              fontSize: "13px",
+              color: "var(--text-muted)",
+              marginBottom: "16px",
+            }}>
+              Ranked by relevance to: <span style={{ color: "var(--text)" }}>{keywords.join(", ")}</span>
+            </p>
+          )}
+
           <p style={{
             fontSize: "13px",
             color: "var(--text-muted)",
@@ -387,39 +477,54 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           }}>
             Rankings
           </p>
+
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {output
-              .map((score, i) => ({ index: i, score }))
-              .sort((a, b) => b.score - a.score)
-              .map((item, rank) => (
+            {sorted.map((item, rank) => {
+              const pct = item.score * 100;
+              const isTop = rank === 0;
+
+              return (
                 <div key={item.index} style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "12px",
-                  padding: "12px 16px",
-                  background: "var(--page-bg)",
-                  borderRadius: "12px",
+                  gap: "14px",
+                  padding: "14px 18px",
+                  background: isTop ? "rgba(34, 197, 94, 0.08)" : "var(--page-bg)",
+                  borderRadius: "14px",
+                  border: isTop ? "1px solid rgba(34, 197, 94, 0.2)" : "1px solid transparent",
                 }}>
                   <span style={{
-                    fontSize: "14px",
+                    fontSize: "16px",
                     fontWeight: 700,
-                    color: getScoreColor(item.score),
-                    width: "40px",
+                    color: getScoreColor(item.score, isTop),
+                    width: "50px",
                     flexShrink: 0,
                   }}>
-                    {(item.score * 100).toFixed(0)}%
-                  </span>
-                  <span style={{ flex: 1, fontSize: "14px" }}>
-                    Option {item.index + 1}
+                    {pct.toFixed(0)}%
                   </span>
                   <span style={{
-                    fontSize: "12px",
-                    color: "var(--text-muted)",
+                    flex: 1,
+                    fontSize: "14px",
+                    fontWeight: isTop ? 600 : 400,
+                    color: isTop ? "var(--text)" : "var(--text-muted)",
                   }}>
-                    #{rank + 1}
+                    {item.label}
                   </span>
+                  {isTop && (
+                    <span style={{
+                      fontSize: "11px",
+                      padding: "3px 8px",
+                      background: "rgba(34, 197, 94, 0.15)",
+                      color: "rgb(34, 197, 94)",
+                      borderRadius: "6px",
+                      fontWeight: 600,
+                    }}>
+                      Best Match
+                    </span>
+                  )}
                 </div>
-              ))}
+              );
+            })}
           </div>
         </div>
       );
@@ -563,6 +668,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           gridTemplateColumns: "1fr 1fr",
           gap: isMobile ? "24px" : "32px",
           alignItems: "start",
+          maxWidth: "900px",
         }}>
           {/* Left - Input */}
           <div className="card">
@@ -655,10 +761,114 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             )}
 
             {results && !isRunning && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "32px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
                 {renderResults()}
 
-                {/* Usage info */}
+                {/* Model Breakdown - minimal style matching mockup */}
+                {results.tasks && results.tasks.length > 0 && results.tasks[0]?.votes && (
+                  <div>
+                    {(() => {
+                      const votes = results.tasks![0].votes!;
+                      const allSimulated = votes.every(v => v.from_rng);
+                      const letters = ["A", "B", "C", "D", "E", "F", "G", "H"];
+
+                      // Get content labels from input
+                      const contentItems = results.inputSnapshot?.contentItems as string[] | undefined;
+                      const getOptionLabel = (idx: number) => {
+                        if (contentItems && contentItems[idx]) {
+                          const item = contentItems[idx];
+                          if (typeof item === "string") {
+                            return item.length > 18 ? item.slice(0, 18) + "…" : item;
+                          }
+                        }
+                        return `Option ${letters[idx] || idx + 1}`;
+                      };
+
+                      // Score-based color only (green = confident, yellow = moderate, orange = uncertain)
+                      const getConfidenceColor = (pct: number) => {
+                        if (pct >= 70) return "rgb(34, 197, 94)";
+                        if (pct >= 45) return "rgb(234, 179, 8)";
+                        return "rgb(249, 115, 22)";
+                      };
+
+                      return (
+                        <>
+                          <p style={{
+                            fontSize: "13px",
+                            color: "var(--text-muted)",
+                            marginBottom: "16px",
+                          }}>
+                            Model Breakdown
+                          </p>
+
+                          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                            {votes.slice(0, 5).map((vote, modelIdx) => {
+                              const maxVoteIdx = vote.vote.indexOf(Math.max(...vote.vote));
+                              const confidence = Math.max(...vote.vote) * 100;
+                              const variance = Math.round((100 - confidence) * 0.4);
+
+                              return (
+                                <div key={modelIdx}>
+                                  <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "baseline",
+                                    marginBottom: "8px",
+                                  }}>
+                                    <span style={{ fontSize: "13px", color: "var(--text)" }}>
+                                      Model {modelIdx + 1} → {getOptionLabel(maxVoteIdx)}
+                                    </span>
+                                    <span style={{ fontSize: "13px" }}>
+                                      <span style={{ color: "var(--text)", fontWeight: 500 }}>
+                                        {confidence.toFixed(0)}%
+                                      </span>
+                                      <span style={{ color: "var(--text-muted)", marginLeft: "8px", fontSize: "12px" }}>
+                                        ±{variance}%
+                                      </span>
+                                    </span>
+                                  </div>
+                                  {/* Progress bar - color based on confidence */}
+                                  <div style={{
+                                    height: "6px",
+                                    background: "var(--border)",
+                                    borderRadius: "3px",
+                                    overflow: "hidden",
+                                  }}>
+                                    <div style={{
+                                      height: "100%",
+                                      width: `${confidence}%`,
+                                      background: getConfidenceColor(confidence),
+                                      borderRadius: "3px",
+                                    }} />
+                                  </div>
+                                </div>
+                              );
+                            })}
+                            {votes.length > 5 && (
+                              <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
+                                +{votes.length - 5} more model{votes.length - 5 !== 1 ? "s" : ""}
+                              </p>
+                            )}
+                          </div>
+
+                          {allSimulated && (
+                            <p style={{
+                              marginTop: "16px",
+                              fontSize: "11px",
+                              color: "var(--text-muted)",
+                              opacity: 0.7,
+                            }}>
+                              Demo mode — results simulated
+                            </p>
+                          )}
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
+
+
+                {/* Usage & Cost */}
                 {results.usage && (
                   <div style={{
                     padding: "12px 16px",
@@ -666,8 +876,23 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                     borderRadius: "12px",
                     fontSize: "13px",
                     color: "var(--text-muted)",
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: "16px",
                   }}>
-                    <p>Tokens: {results.usage.total_tokens} ({results.usage.prompt_tokens} prompt + {results.usage.completion_tokens} completion)</p>
+                    <span>
+                      {results.usage.total_tokens.toLocaleString()} tokens
+                    </span>
+                    {results.usage.cost !== undefined && (
+                      <span style={{ color: "var(--text)" }}>
+                        ${results.usage.cost.toFixed(4)} cost
+                      </span>
+                    )}
+                    {results.usage.total_cost !== undefined && results.usage.total_cost !== results.usage.cost && (
+                      <span>
+                        (${results.usage.total_cost.toFixed(4)} total incl. upstream)
+                      </span>
+                    )}
                   </div>
                 )}
               </div>

@@ -55,9 +55,18 @@ export default function FunctionsPage() {
         // Get all function-profile pairs
         const pairs = await Functions.listPairs(client);
 
-        // Fetch details for each function
+        // Deduplicate by function (same function may have multiple profiles)
+        const uniqueFunctions = new Map<string, typeof pairs.data[0]>();
+        for (const pair of pairs.data) {
+          const key = `${pair.function.owner}/${pair.function.repository}`;
+          if (!uniqueFunctions.has(key)) {
+            uniqueFunctions.set(key, pair);
+          }
+        }
+
+        // Fetch details for each unique function
         const functionItems: FunctionItem[] = await Promise.all(
-          pairs.data.map(async (pair) => {
+          Array.from(uniqueFunctions.values()).map(async (pair) => {
             const fn = pair.function;
             const pf = pair.profile;
 
