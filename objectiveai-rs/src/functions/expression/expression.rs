@@ -122,7 +122,7 @@ impl Expression {
             Expression::JMESPath(jmespath) => {
                 let expr = super::JMESPATH_RUNTIME.compile(jmespath)?;
                 let value = expr.search(params)?;
-                serde_json::to_value(value).unwrap()
+                serde_json::to_value(value)?
             }
             Expression::Starlark(starlark) => super::starlark_eval(starlark, params)?,
         };

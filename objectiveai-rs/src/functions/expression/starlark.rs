@@ -61,7 +61,8 @@ fn register_custom_functions(builder: &mut GlobalsBuilder) {
 /// Evaluate a Starlark expression with the given parameters.
 pub fn starlark_eval(code: &str, params: &super::Params) -> Result<Value, ExpressionError> {
     // Serialize params to JSON for injection
-    let params_json = serde_json::to_value(params).unwrap();
+    let params_json = serde_json::to_value(params)
+        .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?;
 
     // Create module and inject variables
     let module = Module::new();
@@ -80,13 +81,10 @@ pub fn starlark_eval(code: &str, params: &super::Params) -> Result<Value, Expres
             module.set("tasks", tasks_value);
         }
 
-        // Inject `map` (if present and not null)
-        if let Some(map) = params_json.get("map") {
-            if !map.is_null() {
-                let map_value = json_to_starlark(heap, map);
-                module.set("map", map_value);
-            }
-        }
+        // Inject `map` unconditionally, using None when null or missing
+        let map_json = params_json.get("map").cloned().unwrap_or(Value::Null);
+        let map_value = json_to_starlark(heap, &map_json);
+        module.set("map", map_value);
     }
 
     // Parse the expression directly
