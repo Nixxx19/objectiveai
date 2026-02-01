@@ -662,7 +662,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             Rankings
           </p>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "6px" : "8px" }}>
             {sorted.map((item, rank) => {
               const pct = item.score * 100;
               const isTop = rank === 0;
@@ -671,30 +671,33 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                 <div key={item.index} style={{
                   display: "flex",
                   alignItems: "center",
-                  gap: "14px",
-                  padding: "14px 18px",
+                  gap: isMobile ? "10px" : "14px",
+                  padding: isMobile ? "10px 12px" : "14px 18px",
                   background: isTop ? "rgba(34, 197, 94, 0.08)" : "var(--page-bg)",
-                  borderRadius: "14px",
+                  borderRadius: isMobile ? "10px" : "14px",
                   border: isTop ? "1px solid rgba(34, 197, 94, 0.2)" : "1px solid transparent",
                 }}>
                   <span style={{
-                    fontSize: "16px",
+                    fontSize: isMobile ? "14px" : "16px",
                     fontWeight: 700,
                     color: getScoreColor(pct),
-                    width: "50px",
+                    width: isMobile ? "42px" : "50px",
                     flexShrink: 0,
                   }}>
                     {pct.toFixed(0)}%
                   </span>
                   <span style={{
                     flex: 1,
-                    fontSize: "14px",
+                    fontSize: isMobile ? "13px" : "14px",
                     fontWeight: isTop ? 600 : 400,
                     color: isTop ? "var(--text)" : "var(--text-muted)",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
                   }}>
                     {item.label}
                   </span>
-                  {isTop && (
+                  {isTop && !isMobile && (
                     <span style={{
                       fontSize: "11px",
                       padding: "3px 8px",
@@ -850,16 +853,16 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           display: isMobile ? "flex" : "grid",
           flexDirection: "column",
           gridTemplateColumns: "1fr 1fr",
-          gap: isMobile ? "24px" : "32px",
-          alignItems: "start",
+          gap: isMobile ? "16px" : "32px",
+          alignItems: isMobile ? "stretch" : "start",
           maxWidth: "900px",
         }}>
           {/* Left - Input */}
-          <div className="card">
+          <div className="card" style={{ padding: isMobile ? "16px" : undefined }}>
             <h3 style={{
-              fontSize: "12px",
+              fontSize: isMobile ? "11px" : "12px",
               fontWeight: 600,
-              marginBottom: "24px",
+              marginBottom: isMobile ? "16px" : "24px",
               textTransform: "uppercase",
               letterSpacing: "0.05em",
               color: "var(--text-muted)",
@@ -867,7 +870,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
               Input
             </h3>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "24px" }}>
               {renderInputFields()}
             </div>
 
@@ -877,7 +880,8 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
               disabled={isRunning}
               style={{
                 width: "100%",
-                marginTop: "32px",
+                marginTop: isMobile ? "20px" : "32px",
+                padding: isMobile ? "12px 20px" : undefined,
                 opacity: isRunning ? 0.7 : 1,
               }}
             >
@@ -886,11 +890,11 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           </div>
 
           {/* Right - Results */}
-          <div className="card">
+          <div className="card" style={{ padding: isMobile ? "16px" : undefined }}>
             <h3 style={{
-              fontSize: "12px",
+              fontSize: isMobile ? "11px" : "12px",
               fontWeight: 600,
-              marginBottom: "24px",
+              marginBottom: isMobile ? "16px" : "24px",
               textTransform: "uppercase",
               letterSpacing: "0.05em",
               color: "var(--text-muted)",
@@ -945,7 +949,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             )}
 
             {results && !isRunning && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "24px" }}>
                 {renderResults()}
 
                 {/* Model Breakdown - minimal style matching mockup */}
@@ -971,14 +975,14 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                       return (
                         <>
                           <p style={{
-                            fontSize: "13px",
+                            fontSize: isMobile ? "12px" : "13px",
                             color: "var(--text-muted)",
-                            marginBottom: "16px",
+                            marginBottom: isMobile ? "12px" : "16px",
                           }}>
                             Model Breakdown
                           </p>
 
-                          <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                          <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "12px" : "16px" }}>
                             {(() => {
                               const displayedVotes = showAllModels ? votes : votes.slice(0, 5);
                               const completions = results.tasks?.[0]?.completions || [];
@@ -1002,7 +1006,9 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                                       style={{
                                         display: "flex",
                                         justifyContent: "space-between",
-                                        alignItems: "baseline",
+                                        alignItems: isMobile ? "flex-start" : "baseline",
+                                        flexDirection: isMobile ? "column" : "row",
+                                        gap: isMobile ? "4px" : "0",
                                         marginBottom: "8px",
                                         cursor: reasoningText ? "pointer" : "default",
                                       }}
@@ -1019,7 +1025,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                                         });
                                       }}
                                     >
-                                      <span style={{ fontSize: "13px", color: "var(--text)" }}>
+                                      <span style={{ fontSize: isMobile ? "12px" : "13px", color: "var(--text)" }}>
                                         {reasoningText && (
                                           <span style={{
                                             display: "inline-block",
@@ -1032,21 +1038,23 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                                         )}
                                         <span style={{
                                           fontFamily: isResolved ? "inherit" : "monospace",
-                                          fontSize: isResolved ? "13px" : "12px",
+                                          fontSize: isResolved ? (isMobile ? "12px" : "13px") : (isMobile ? "11px" : "12px"),
                                           color: isResolved ? "var(--text)" : "var(--text-muted)",
                                         }}>
                                           {displayName}
                                         </span>
                                         <span style={{ margin: "0 6px", color: "var(--text-muted)" }}>→</span>
-                                        {getOptionLabel(maxVoteIdx)}
+                                        {isMobile ? getOptionLabel(maxVoteIdx).slice(0, 15) + (getOptionLabel(maxVoteIdx).length > 15 ? "…" : "") : getOptionLabel(maxVoteIdx)}
                                       </span>
-                                      <span style={{ fontSize: "13px" }}>
+                                      <span style={{ fontSize: isMobile ? "12px" : "13px" }}>
                                         <span style={{ color: getScoreColor(confidence), fontWeight: 500 }}>
                                           {confidence.toFixed(0)}%
                                         </span>
-                                        <span style={{ color: "var(--text-muted)", marginLeft: "8px", fontSize: "11px" }}>
-                                          w:{vote.weight}
-                                        </span>
+                                        {!isMobile && (
+                                          <span style={{ color: "var(--text-muted)", marginLeft: "8px", fontSize: "11px" }}>
+                                            w:{vote.weight}
+                                          </span>
+                                        )}
                                       </span>
                                     </div>
                                     {/* Progress bar - muted fill, no color */}
@@ -1123,20 +1131,20 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                 {/* Reasoning Summary */}
                 {results.reasoning?.choices?.[0]?.message?.content && (
                   <div style={{
-                    padding: "16px",
+                    padding: isMobile ? "12px" : "16px",
                     background: "var(--page-bg)",
-                    borderRadius: "12px",
+                    borderRadius: isMobile ? "10px" : "12px",
                     border: "1px solid var(--border)",
                   }}>
                     <p style={{
-                      fontSize: "13px",
+                      fontSize: isMobile ? "12px" : "13px",
                       color: "var(--text-muted)",
-                      marginBottom: "12px",
+                      marginBottom: isMobile ? "8px" : "12px",
                     }}>
                       Reasoning Summary
                     </p>
                     <p style={{
-                      fontSize: "14px",
+                      fontSize: isMobile ? "13px" : "14px",
                       color: "var(--text)",
                       lineHeight: 1.6,
                       whiteSpace: "pre-wrap",
@@ -1149,26 +1157,26 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                 {/* Usage & Cost */}
                 {results.usage && (
                   <div style={{
-                    padding: "12px 16px",
+                    padding: isMobile ? "10px 12px" : "12px 16px",
                     background: "var(--page-bg)",
-                    borderRadius: "12px",
-                    fontSize: "13px",
+                    borderRadius: isMobile ? "10px" : "12px",
+                    fontSize: isMobile ? "12px" : "13px",
                     color: "var(--text-muted)",
                     display: "flex",
                     flexWrap: "wrap",
-                    gap: "16px",
+                    gap: isMobile ? "12px" : "16px",
                   }}>
                     <span>
                       {results.usage.total_tokens.toLocaleString()} tokens
                     </span>
                     {results.usage.cost !== undefined && (
                       <span style={{ color: "var(--text)" }}>
-                        ${results.usage.cost.toFixed(4)} cost
+                        ${results.usage.cost.toFixed(4)}
                       </span>
                     )}
-                    {results.usage.total_cost !== undefined && results.usage.total_cost !== results.usage.cost && (
+                    {!isMobile && results.usage.total_cost !== undefined && results.usage.total_cost !== results.usage.cost && (
                       <span>
-                        (${results.usage.total_cost.toFixed(4)} total incl. upstream)
+                        (${results.usage.total_cost.toFixed(4)} total)
                       </span>
                     )}
                   </div>

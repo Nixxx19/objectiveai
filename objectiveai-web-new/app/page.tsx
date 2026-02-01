@@ -3,34 +3,29 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroText from "@/components/HeroText";
+import { getClient, Functions, deriveCategory, deriveDisplayName } from "../lib/objectiveai";
 
-// Featured functions data
-const FEATURED_FUNCTIONS = [
-  {
-    slug: "trip-must-see",
-    name: "Trip Must-See",
-    description: "Ranks tourist attractions by local authenticity and visitor satisfaction",
-    category: "Ranking",
-    tags: ["travel", "scoring", "ranking"],
-  },
-  {
-    slug: "email-classifier",
-    name: "Email Classifier",
-    description: "Categorizes emails by intent, urgency, and required action type",
-    category: "Scoring",
-    tags: ["text", "classification", "scoring"],
-  },
-  {
-    slug: "code-quality",
-    name: "Code Quality",
-    description: "Evaluates pull requests across maintainability and security metrics",
-    category: "Composite",
-    tags: ["code", "evaluation", "scoring"],
-  },
-];
+// =============================================================================
+// FEATURED FUNCTIONS CONFIGURATION
+// -----------------------------------------------------------------------------
+// Number of functions to display on the landing page.
+// Functions are fetched from the API and the first N are shown.
+// To feature specific functions, they can be pinned in the functions page.
+// =============================================================================
+const FEATURED_COUNT = 3;
+
+interface FeaturedFunction {
+  slug: string;
+  name: string;
+  description: string;
+  category: string;
+  tags: string[];
+}
 
 export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
+  const [functions, setFunctions] = useState<FeaturedFunction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkViewport = () => {
@@ -40,6 +35,66 @@ export default function Home() {
     checkViewport();
     window.addEventListener('resize', checkViewport);
     return () => window.removeEventListener('resize', checkViewport);
+  }, []);
+
+  // Fetch functions from API
+  useEffect(() => {
+    async function fetchFunctions() {
+      try {
+        setIsLoading(true);
+        const client = getClient();
+        const result = await Functions.list(client);
+
+        // Deduplicate by owner/repository (same function may have multiple commits)
+        const uniqueFunctions = new Map<string, typeof result.data[0]>();
+        for (const fn of result.data) {
+          const key = `${fn.owner}/${fn.repository}`;
+          if (!uniqueFunctions.has(key)) {
+            uniqueFunctions.set(key, fn);
+          }
+        }
+
+        // Limit to FEATURED_COUNT
+        const limitedFunctions = Array.from(uniqueFunctions.values()).slice(0, FEATURED_COUNT);
+
+        const functionItems: FeaturedFunction[] = await Promise.all(
+          limitedFunctions.map(async (fn) => {
+            // Fetch full function details
+            const details = await Functions.retrieve(
+              client,
+              fn.owner,
+              fn.repository,
+              fn.commit
+            );
+
+            const slug = `${fn.owner}--${fn.repository}`;
+            const category = deriveCategory(details);
+            const name = deriveDisplayName(fn.repository);
+
+            // Extract tags from repository name
+            const tags = fn.repository.split("-").filter(t => t.length > 2);
+            if (details.type === "vector.function") tags.push("ranking");
+            else tags.push("scoring");
+
+            return {
+              slug,
+              name,
+              description: details.description || `${name} function`,
+              category,
+              tags,
+            };
+          })
+        );
+
+        setFunctions(functionItems);
+      } catch (err) {
+        console.error("Failed to fetch featured functions:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchFunctions();
   }, []);
 
   return (
@@ -119,84 +174,139 @@ export default function Home() {
 
           {/* Function Cards Grid */}
           <div className="gridThree">
-            {FEATURED_FUNCTIONS.map(fn => (
-              <Link
-                key={fn.slug}
-                href={`/functions/${fn.slug}`}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-              >
-                <div className="card" style={{
-                  cursor: 'pointer',
-                  height: '100%',
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: FEATURED_COUNT }).map((_, i) => (
+                <div key={i} className="card" style={{
+                  padding: '16px',
+                  height: '180px',
                   display: 'flex',
                   flexDirection: 'column',
-                  position: 'relative',
-                  padding: '16px',
+                  gap: '8px',
                 }}>
-                  <span className="tag" style={{
-                    alignSelf: 'flex-start',
-                    marginBottom: '8px',
-                    fontSize: '11px',
-                    padding: '4px 10px'
-                  }}>
-                    {fn.category}
-                  </span>
-                  <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>
-                    {fn.name}
-                  </h3>
-                  <p style={{
-                    fontSize: '13px',
-                    lineHeight: 1.5,
-                    color: 'var(--text-muted)',
-                    flex: 1,
-                    marginBottom: '12px',
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                  }}>
-                    {fn.description}
-                  </p>
                   <div style={{
-                    display: 'flex',
-                    flexWrap: 'wrap',
-                    gap: '4px',
-                    marginBottom: '10px',
-                  }}>
-                    {fn.tags.slice(0, 2).map(tag => (
-                      <span key={tag} style={{
-                        fontSize: '11px',
-                        padding: '3px 8px',
-                        background: 'var(--border)',
-                        borderRadius: '10px',
-                        color: 'var(--text-muted)',
-                      }}>
-                        {tag}
-                      </span>
-                    ))}
-                    {fn.tags.length > 2 && (
-                      <span style={{
-                        fontSize: '11px',
-                        padding: '3px 8px',
-                        color: 'var(--text-muted)',
-                      }}>
-                        +{fn.tags.length - 2}
-                      </span>
-                    )}
-                  </div>
+                    width: '60px',
+                    height: '20px',
+                    background: 'var(--border)',
+                    borderRadius: '10px',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                  }} />
                   <div style={{
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: 'var(--accent)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                  }}>
-                    Open <span>→</span>
-                  </div>
+                    width: '80%',
+                    height: '18px',
+                    background: 'var(--border)',
+                    borderRadius: '4px',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                  }} />
+                  <div style={{
+                    width: '100%',
+                    height: '32px',
+                    background: 'var(--border)',
+                    borderRadius: '4px',
+                    animation: 'pulse 1.5s ease-in-out infinite',
+                  }} />
                 </div>
-              </Link>
-            ))}
+              ))
+            ) : functions.length > 0 ? (
+              functions.map(fn => (
+                <Link
+                  key={fn.slug}
+                  href={`/functions/${fn.slug}`}
+                  style={{ textDecoration: 'none', color: 'inherit' }}
+                >
+                  <div className="card" style={{
+                    cursor: 'pointer',
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    position: 'relative',
+                    padding: '16px',
+                  }}>
+                    <span className="tag" style={{
+                      alignSelf: 'flex-start',
+                      marginBottom: '8px',
+                      fontSize: '11px',
+                      padding: '4px 10px'
+                    }}>
+                      {fn.category}
+                    </span>
+                    <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>
+                      {fn.name}
+                    </h3>
+                    <p style={{
+                      fontSize: '13px',
+                      lineHeight: 1.5,
+                      color: 'var(--text-muted)',
+                      flex: 1,
+                      marginBottom: '12px',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 2,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                    }}>
+                      {fn.description}
+                    </p>
+                    <div style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      gap: '4px',
+                      marginBottom: '10px',
+                    }}>
+                      {fn.tags.slice(0, 2).map(tag => (
+                        <span key={tag} style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          background: 'var(--border)',
+                          borderRadius: '10px',
+                          color: 'var(--text-muted)',
+                        }}>
+                          {tag}
+                        </span>
+                      ))}
+                      {fn.tags.length > 2 && (
+                        <span style={{
+                          fontSize: '11px',
+                          padding: '3px 8px',
+                          color: 'var(--text-muted)',
+                        }}>
+                          +{fn.tags.length - 2}
+                        </span>
+                      )}
+                    </div>
+                    <div style={{
+                      fontSize: '13px',
+                      fontWeight: 600,
+                      color: 'var(--accent)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                    }}>
+                      Open <span>→</span>
+                    </div>
+                  </div>
+                </Link>
+              ))
+            ) : (
+              // Empty state
+              <div style={{
+                gridColumn: '1 / -1',
+                textAlign: 'center',
+                padding: '48px 24px',
+                color: 'var(--text-muted)',
+              }}>
+                <p>No functions available yet.</p>
+                <Link
+                  href="/functions"
+                  style={{
+                    color: 'var(--accent)',
+                    textDecoration: 'none',
+                    fontWeight: 500,
+                  }}
+                >
+                  Browse all functions →
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       </section>

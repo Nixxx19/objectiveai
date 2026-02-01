@@ -10,9 +10,6 @@ interface FunctionItem {
   owner: string;
   repository: string;
   commit: string;
-  profileOwner: string;
-  profileRepository: string;
-  profileCommit: string;
   name: string;
   description: string;
   category: string;
@@ -52,24 +49,21 @@ export default function FunctionsPage() {
         setError(null);
         const client = getClient();
 
-        // Get all function-profile pairs
-        const pairs = await Functions.listPairs(client);
+        // Get all functions
+        const result = await Functions.list(client);
 
-        // Deduplicate by function (same function may have multiple profiles)
-        const uniqueFunctions = new Map<string, typeof pairs.data[0]>();
-        for (const pair of pairs.data) {
-          const key = `${pair.function.owner}/${pair.function.repository}`;
+        // Deduplicate by owner/repository (same function may have multiple commits)
+        const uniqueFunctions = new Map<string, typeof result.data[0]>();
+        for (const fn of result.data) {
+          const key = `${fn.owner}/${fn.repository}`;
           if (!uniqueFunctions.has(key)) {
-            uniqueFunctions.set(key, pair);
+            uniqueFunctions.set(key, fn);
           }
         }
 
         // Fetch details for each unique function
         const functionItems: FunctionItem[] = await Promise.all(
-          Array.from(uniqueFunctions.values()).map(async (pair) => {
-            const fn = pair.function;
-            const pf = pair.profile;
-
+          Array.from(uniqueFunctions.values()).map(async (fn) => {
             // Fetch full function details
             const details = await Functions.retrieve(
               client,
@@ -93,9 +87,6 @@ export default function FunctionsPage() {
               owner: fn.owner,
               repository: fn.repository,
               commit: fn.commit,
-              profileOwner: pf.owner,
-              profileRepository: pf.repository,
-              profileCommit: pf.commit,
               name,
               description: details.description || `${name} function`,
               category,
@@ -223,18 +214,16 @@ export default function FunctionsPage() {
           }}
         >
           {/* Filter/Sort Button - Left of Search Bar */}
-          {!isMobile && (
-            <button
-              className="iconBtn"
-              onClick={() => setFiltersOpen(!filtersOpen)}
-              aria-label={filtersOpen ? "Close filters" : "Open filters"}
-              style={{ flexShrink: 0 }}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M3 6h18M7 12h10M11 18h2" />
-              </svg>
-            </button>
-          )}
+          <button
+            className="iconBtn"
+            onClick={() => setFiltersOpen(!filtersOpen)}
+            aria-label={filtersOpen ? "Close filters" : "Open filters"}
+            style={{ flexShrink: 0 }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M3 6h18M7 12h10M11 18h2" />
+            </svg>
+          </button>
 
           {/* Search Bar - Full Pill Shape */}
           <div className="searchBarPill" style={{ flex: 1 }}>

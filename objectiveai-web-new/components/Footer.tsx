@@ -30,29 +30,29 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="footer" style={{ padding: '32px 0 6px' }}>
+    <footer className="footer" style={{ padding: isMobile ? '24px 0 6px' : '32px 0 6px' }}>
       {/* Footer Module Container */}
       <div style={{
         maxWidth: '1100px',
         margin: '0 auto',
-        padding: isMobile ? '0 20px' : '0 32px',
+        padding: isMobile ? '0 16px' : '0 32px',
       }}>
         <div style={{
-          padding: '12px 24px 4px',
+          padding: isMobile ? '8px 16px 4px' : '12px 24px 4px',
         }}>
           {/* ROW 1: Menu + Socials on same row */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
-            marginBottom: '28px',
+            marginBottom: isMobile ? '20px' : '28px',
             gap: '48px',
           }} className="footerMenuSocialRow">
-            {/* Pages Menu (3 groups) - LEFT */}
+            {/* Pages Menu (3 groups) - CENTERED */}
             <nav style={{
               display: 'flex',
               gap: '72px',
-              paddingLeft: '8px',
+              justifyContent: 'center',
             }} className="footerPageMenu">
               {/* GROUP 1: FUNCTIONS */}
               <div style={{ textAlign: 'left' }}>
@@ -289,18 +289,18 @@ export default function Footer() {
             {/* Social Icons - RIGHT */}
             <div style={{
               display: 'flex',
-              gap: '20px',
+              gap: isMobile ? '12px' : '20px',
               alignItems: 'flex-start',
               flexShrink: 0,
-              paddingRight: '8px',
+              paddingRight: isMobile ? '0' : '8px',
             }} className="footerSocialStrip">
               {socialIcons.map((social) => (
                 <a
                   key={social.name}
                   href={social.href}
                   style={{
-                    width: '40px',
-                    height: '40px',
+                    width: isMobile ? '36px' : '40px',
+                    height: isMobile ? '36px' : '40px',
                     borderRadius: '50%',
                     border: '1px solid var(--border)',
                     background: 'var(--card-bg)',
@@ -309,7 +309,7 @@ export default function Footer() {
                     justifyContent: 'center',
                     color: 'var(--text)',
                     textDecoration: 'none',
-                    fontSize: '14px',
+                    fontSize: isMobile ? '12px' : '14px',
                     fontWeight: 600,
                     transition: 'all 0.2s',
                     flexShrink: 0,
@@ -334,8 +334,8 @@ export default function Footer() {
 
           {/* ROW 2: Support Bar */}
           <div style={{
-            paddingTop: '8px',
-            marginBottom: '28px',
+            paddingTop: isMobile ? '4px' : '8px',
+            marginBottom: isMobile ? '20px' : '28px',
           }} className="footerSupportBar">
             <label style={{
               display: 'block',
@@ -412,21 +412,23 @@ export default function Footer() {
             gap: 48px !important;
           }
         }
-        
+
         @media (max-width: 640px) {
           .footerMenuSocialRow {
             flex-direction: column !important;
-            gap: 24px !important;
-          }
-          
-          .footerSocialStrip {
-            flex-wrap: wrap;
-            gap: 10px !important;
-          }
-          
-          .footerPageMenu {
-            flex-direction: column !important;
+            align-items: stretch !important;
             gap: 16px !important;
+          }
+
+          .footerSocialStrip {
+            justify-content: space-between !important;
+            width: 100% !important;
+          }
+
+          .footerPageMenu {
+            flex-direction: row !important;
+            gap: 0 !important;
+            justify-content: space-between !important;
           }
         }
       `}</style>

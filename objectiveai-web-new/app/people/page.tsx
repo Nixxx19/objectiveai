@@ -29,7 +29,7 @@ const FOUNDERS: TeamMember[] = [
     title: "Chief Executive Officer & Co-Founder",
     bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.",
     focusAreas: ["Strategy", "Product Vision", "Partnerships"],
-    contactEmail: "ceo@objectiveai.com",
+    contactEmail: "admin@objective-ai.io",
     socials: {
       x: "#",
       linkedin: "#",
@@ -42,7 +42,7 @@ const FOUNDERS: TeamMember[] = [
     title: "Chief Operating Officer & Co-Founder",
     bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.",
     focusAreas: ["Operations", "Engineering", "Growth"],
-    contactEmail: "coo@objectiveai.com",
+    contactEmail: "admin@objective-ai.io",
     socials: {
       x: "#",
       linkedin: "#",
@@ -308,7 +308,7 @@ export default function PeoplePage() {
         </div>
 
         {/* Founders Section */}
-        <section style={{ marginBottom: isMobile ? '48px' : '80px' }}>
+        <section style={{ marginBottom: isMobile ? '32px' : '40px' }}>
           <div className="gridTwo">
             {FOUNDERS.map((founder) => (
               <PersonCard key={founder.id} person={founder} isMobile={isMobile} />
@@ -374,10 +374,10 @@ export default function PeoplePage() {
             }}>
               Or reach out directly at{' '}
               <a 
-                href="mailto:careers@objectiveai.com"
+                href="mailto:admin@objective-ai.io"
                 style={{ color: 'var(--accent)', textDecoration: 'none' }}
               >
-                careers@objectiveai.com
+                admin@objective-ai.io
               </a>
             </p>
           </div>
