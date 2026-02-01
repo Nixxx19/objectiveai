@@ -11,11 +11,7 @@
 //! - `if(cond, then, else)` - Conditional expression
 
 use crate::chat;
-use jmespath::{
-    Context, ErrorReason, JmespathError, Rcvar, RuntimeError, Variable,
-    ast::Ast,
-};
-use std::{collections::BTreeMap, sync::LazyLock};
+use std::sync::LazyLock;
 
 /// Global JMESPath runtime instance with custom functions.
 pub static JMESPATH_RUNTIME: LazyLock<jmespath::Runtime> = LazyLock::new(

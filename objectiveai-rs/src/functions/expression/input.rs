@@ -296,10 +296,10 @@ impl Input {
     }
 }
 
-/// An input value that may contain JMESPath expressions (pre-compilation).
+/// An input value that may contain expressions (pre-compilation).
 ///
 /// Similar to [`Input`] but object values and array elements can be
-/// expressions that are evaluated during compilation.
+/// expressions (JMESPath or Starlark) that are evaluated during compilation.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum InputExpression {
@@ -653,17 +653,13 @@ impl ObjectInputSchema {
     pub fn validate_input(&self, input: &Input) -> bool {
         match input {
             Input::Object(map) => {
+                let required = self.required.as_deref().unwrap_or(&[]);
                 self.properties.iter().all(|(key, schema)| {
-                    map.get(key)
-                        .map(|value| schema.validate_input(value))
-                        .unwrap_or(false)
-                }) && {
-                    if let Some(required) = &self.required {
-                        required.iter().all(|key| map.contains_key(key))
-                    } else {
-                        true
+                    match map.get(key) {
+                        Some(value) => schema.validate_input(value),
+                        None => !required.contains(key),
                     }
-                }
+                })
             }
             _ => false,
         }
