@@ -3,6 +3,7 @@
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
 import { getClient, Functions, deriveDisplayName, DEV_EXECUTION_OPTIONS } from "../../../lib/objectiveai";
+import ArrayInput from "../../../components/ArrayInput";
 
 interface FunctionDetails {
   owner: string;
@@ -441,7 +442,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     // Parse input_schema to generate fields
     const schema = functionDetails.inputSchema as {
       type?: string;
-      properties?: Record<string, { type?: string; description?: string }>;
+      properties?: Record<string, { type?: string; description?: string; items?: { type?: string } }>;
     };
 
     if (schema.type === "object" && schema.properties) {
@@ -491,29 +492,12 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           )}
 
           {prop.type === "array" && (
-            <div className="aiTextField">
-              <textarea
-                placeholder={`Enter ${key} (comma-separated or JSON array)...`}
-                value={(formData[key + "_raw"] as string) ?? (Array.isArray(formData[key]) ? formData[key].join(", ") : "")}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  // Store raw value for display
-                  setFormData(prev => ({ ...prev, [key + "_raw"]: val }));
-                  // Try to parse as JSON array, otherwise split by comma
-                  try {
-                    const parsed = JSON.parse(val);
-                    if (Array.isArray(parsed)) {
-                      setFormData(prev => ({ ...prev, [key]: parsed }));
-                    }
-                  } catch {
-                    // Split by comma for simple input
-                    const items = val.split(",").map(s => s.trim()).filter(Boolean);
-                    setFormData(prev => ({ ...prev, [key]: items }));
-                  }
-                }}
-                rows={3}
-              />
-            </div>
+            <ArrayInput
+              value={Array.isArray(formData[key]) ? formData[key] : []}
+              onChange={(items) => setFormData(prev => ({ ...prev, [key]: items }))}
+              isMobile={isMobile}
+              textOnly={prop.items?.type === "string"}
+            />
           )}
 
           {/* Fallback for unknown types */}
