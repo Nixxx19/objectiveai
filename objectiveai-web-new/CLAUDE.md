@@ -2,6 +2,41 @@
 
 Guidelines for working with the ObjectiveAI SDK in this project.
 
+## Team Context
+
+**Maya Gore** - COO & Co-Founder. Handles UI/UX, creative direction, and frontend work. This is her workspace.
+
+**Ronald Riggles** - CEO & Co-Founder. Handles backend, API, SDK, and technical architecture.
+
+### When to Ask Ronald
+
+Ask Ronald (or mark as placeholder) for:
+- **Backend/API questions** - How endpoints work, data structures, authentication
+- **SDK behavior** - Expected responses, edge cases, error handling
+- **Content that represents the product** - Hyperprompts, official descriptions, technical explanations
+- **Anything you'd need to make up** - If it's not in the codebase, don't guess
+
+When unsure about technical accuracy, use obvious placeholders like `[Placeholder: Description from Ronald]` or lorem ipsum rather than inventing content that could be mistaken for real.
+
+## Finding SDK Information
+
+The TypeScript SDK source is at `objectiveai-js/`. Key locations:
+
+```
+objectiveai-js/
+├── src/
+│   ├── auth/
+│   │   ├── api_key/api_key.ts    # Auth.ApiKey.list(), create(), disable()
+│   │   └── credits/credits.ts     # Auth.Credits.retrieve()
+│   ├── functions/                 # Functions.list(), retrieve(), Executions.create()
+│   ├── ensemble_llm/              # EnsembleLlm.retrieve()
+│   └── http.ts                    # Response wrapper structure ({ data: [...] })
+```
+
+**API response structure**: Most list endpoints return `{ data: [...] }`. Check `http.ts` for the wrapper types.
+
+**To find SDK method signatures**: Read the corresponding `.ts` file in `objectiveai-js/src/`.
+
 ## Design Context
 
 For design decisions, reference `planning/design-guidelines.md` and the visual assets in `planning/`. When more than 30% unsure about design intent, ask for clarification before proceeding.
@@ -38,3 +73,9 @@ const result = await client.functions.executions.create("owner/repo", {
 This means the system first checks for retry token votes, then cached votes, then falls back to RNG. Setting both flags ensures you never make actual LLM calls during development unless explicitly needed.
 
 Only disable these flags when you need real LLM responses (e.g., testing actual model behavior, production deployments).
+
+## Current State Notes
+
+- **Auth bypass**: Account pages (keys, credits) have `BYPASS_AUTH = true` for development. Remove when auth is working.
+- **API key in .env**: The `.env` file contains `OBJECTIVEAI_API_KEY`. This file is gitignored - never commit it.
+- **Vibe-native hyperprompt**: Currently lorem ipsum placeholder. Needs real content from Ronald.

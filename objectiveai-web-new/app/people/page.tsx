@@ -25,28 +25,28 @@ interface TeamMember {
 const FOUNDERS: TeamMember[] = [
   {
     id: "ceo",
-    name: "First Last",
-    title: "Chief Executive Officer & Co-Founder",
-    bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.",
-    focusAreas: ["Strategy", "Product Vision", "Partnerships"],
-    contactEmail: "admin@objective-ai.io",
+    name: "Ronald Riggles",
+    title: "CEO & Co-Founder",
+    bio: "Building the infrastructure for objective AI evaluation. Previously worked on distributed systems and machine learning pipelines. Passionate about making AI more transparent and accountable through ensemble methods.",
+    focusAreas: ["Software Engineer", "Programmer", "AI Architect"],
+    contactEmail: "", // Removed for now
     socials: {
-      x: "#",
-      linkedin: "#",
-      github: "#",
+      x: "https://x.com/ronald_obj_ai",
+      linkedin: "https://www.linkedin.com/in/ronald-riggles-908a29235/",
+      github: "https://github.com/WiggidyW",
     },
   },
   {
     id: "coo",
-    name: "First Last",
-    title: "Chief Operating Officer & Co-Founder",
-    bio: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore.",
-    focusAreas: ["Operations", "Engineering", "Growth"],
-    contactEmail: "admin@objective-ai.io",
+    name: "Maya Gore",
+    title: "COO & Co-Founder",
+    bio: "Designing experiences that make complex AI systems feel intuitive. Background in product design and creative technology. Believes great tools should be invisible, letting users focus on what matters.",
+    focusAreas: ["User Interface", "Creative Direction", "Vibe Coder"],
+    contactEmail: "", // Removed for now
     socials: {
-      x: "#",
-      linkedin: "#",
-      github: "#",
+      x: "https://x.com/mkgores",
+      linkedin: "https://www.linkedin.com/in/maya-gore-4ab87b301/",
+      github: "https://github.com/mayagore",
     },
   },
 ];
@@ -107,8 +107,8 @@ function PersonCard({ person, isMobile }: { person: TeamMember; isMobile: boolea
           overflow: 'hidden',
         }}>
           {person.photoUrl ? (
-            <img 
-              src={person.photoUrl} 
+            <img
+              src={person.photoUrl}
               alt={person.name}
               style={{
                 width: '100%',
@@ -117,7 +117,14 @@ function PersonCard({ person, isMobile }: { person: TeamMember; isMobile: boolea
               }}
             />
           ) : (
-            <span style={{ opacity: 0.5 }}>Photo</span>
+            <span style={{
+              fontSize: isMobile ? '28px' : '32px',
+              fontWeight: 600,
+              color: 'var(--text-muted)',
+              opacity: 0.6,
+            }}>
+              {person.name.split(' ').map(n => n[0]).join('')}
+            </span>
           )}
         </div>
 
@@ -167,46 +174,50 @@ function PersonCard({ person, isMobile }: { person: TeamMember; isMobile: boolea
         </div>
       </div>
 
-      {/* Bio */}
-      <p style={{
-        fontSize: '14px',
-        lineHeight: 1.7,
-        color: 'var(--text)',
-        opacity: 0.85,
-      }}>
-        {person.bio}
-      </p>
+      {/* Bio - only show if not empty */}
+      {person.bio && (
+        <p style={{
+          fontSize: '14px',
+          lineHeight: 1.7,
+          color: 'var(--text)',
+          opacity: 0.85,
+        }}>
+          {person.bio}
+        </p>
+      )}
 
-      {/* Contact + Socials Row */}
+      {/* Socials Row */}
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: person.contactEmail ? 'space-between' : 'flex-end',
         alignItems: 'center',
         marginTop: 'auto',
         paddingTop: '4px',
       }}>
-        {/* Contact Link */}
-        <a
-          href={`mailto:${person.contactEmail}`}
-          style={{
-            fontSize: '13px',
-            color: 'var(--accent)',
-            textDecoration: 'none',
-            fontWeight: 500,
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            transition: 'opacity 0.2s',
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-          onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-        >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
-            <polyline points="22,6 12,13 2,6"/>
-          </svg>
-          Contact
-        </a>
+        {/* Contact Link - only show if email exists */}
+        {person.contactEmail && (
+          <a
+            href={`mailto:${person.contactEmail}`}
+            style={{
+              fontSize: '13px',
+              color: 'var(--accent)',
+              textDecoration: 'none',
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              transition: 'opacity 0.2s',
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+            onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            Contact
+          </a>
+        )}
 
         {/* Social Icons */}
         <div style={{

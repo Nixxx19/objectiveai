@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 
 export default function SdkFirstPage() {
   const [isMobile, setIsMobile] = useState(false);
+  const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     const checkViewport = () => setIsMobile(window.innerWidth <= 640);
@@ -12,33 +14,236 @@ export default function SdkFirstPage() {
     return () => window.removeEventListener('resize', checkViewport);
   }, []);
 
+  const copyCode = (code: string, index: number) => {
+    navigator.clipboard.writeText(code);
+    setCopiedIndex(index);
+    setTimeout(() => setCopiedIndex(null), 2000);
+  };
+
+  const installCode = "npm install objectiveai";
+
+  const quickStartCode = `import { ObjectiveAI, Functions } from "objectiveai";
+
+const client = new ObjectiveAI({
+  apiKey: process.env.OBJECTIVEAI_API_KEY,
+});
+
+const result = await Functions.Executions.create(
+  client,
+  { owner: "objective-ai", repository: "is-spam" },
+  null,
+  { input: { text: "Hello world" } }
+);
+
+console.log(result.output);`;
+
   return (
-    <div className="page" style={{
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      minHeight: '50vh',
-      padding: isMobile ? '40px 20px' : '60px 32px',
-      textAlign: 'center',
+    <div className="page">
+      <div className="container">
+        {/* Header */}
+        <div style={{ marginBottom: '48px' }}>
+          <span className="tag" style={{ marginBottom: '12px', display: 'inline-block' }}>
+            TypeScript SDK
+          </span>
+          <h1 className="heading1" style={{ marginBottom: '12px' }}>
+            SDK-First
+          </h1>
+          <p style={{
+            color: 'var(--text-muted)',
+            fontSize: '16px',
+            maxWidth: '600px',
+            lineHeight: 1.6,
+          }}>
+            Integrate ObjectiveAI into your applications with the TypeScript SDK.
+          </p>
+        </div>
+
+        {/* Links */}
+        <div style={{
+          display: 'flex',
+          gap: '12px',
+          marginBottom: '32px',
+          flexWrap: 'wrap',
+        }}>
+          <a
+            href="https://www.npmjs.com/package/objectiveai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pillBtn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: 600,
+              background: 'var(--accent)',
+              color: 'var(--color-light)',
+              textDecoration: 'none',
+            }}
+          >
+            npm
+          </a>
+          <a
+            href="https://github.com/anthropics/objectiveai-js"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pillBtn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: 600,
+              background: 'transparent',
+              color: 'var(--text)',
+              border: '1px solid var(--border)',
+              textDecoration: 'none',
+            }}
+          >
+            GitHub
+          </a>
+        </div>
+
+        {/* Install */}
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{
+            fontSize: isMobile ? '16px' : '18px',
+            fontWeight: 600,
+            marginBottom: '12px',
+          }}>
+            Install
+          </h2>
+          <CodeBlock
+            code={installCode}
+            language="bash"
+            index={0}
+            copiedIndex={copiedIndex}
+            onCopy={copyCode}
+            isMobile={isMobile}
+          />
+        </div>
+
+        {/* Quick Start */}
+        <div style={{ marginBottom: '32px' }}>
+          <h2 style={{
+            fontSize: isMobile ? '16px' : '18px',
+            fontWeight: 600,
+            marginBottom: '12px',
+          }}>
+            Quick Start
+          </h2>
+          <CodeBlock
+            code={quickStartCode}
+            language="typescript"
+            index={1}
+            copiedIndex={copiedIndex}
+            onCopy={copyCode}
+            isMobile={isMobile}
+          />
+        </div>
+
+        {/* Get API Key */}
+        <div className="card" style={{
+          padding: isMobile ? '20px' : '24px',
+          background: 'var(--nav-surface)',
+        }}>
+          <p style={{
+            fontSize: '14px',
+            color: 'var(--text-muted)',
+            marginBottom: '16px',
+          }}>
+            You need an API key to make requests.
+          </p>
+          <Link
+            href="/account/keys"
+            className="pillBtn"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '12px 20px',
+              fontSize: '14px',
+              fontWeight: 600,
+              background: 'var(--accent)',
+              color: 'var(--color-light)',
+              textDecoration: 'none',
+            }}
+          >
+            Get API Key
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CodeBlock({
+  code,
+  language,
+  index,
+  copiedIndex,
+  onCopy,
+  isMobile
+}: {
+  code: string;
+  language: string;
+  index: number;
+  copiedIndex: number | null;
+  onCopy: (code: string, index: number) => void;
+  isMobile: boolean;
+}) {
+  return (
+    <div style={{
+      position: 'relative',
+      background: 'var(--nav-surface)',
+      border: '1px solid var(--border)',
+      borderRadius: '12px',
+      overflow: 'hidden',
     }}>
-      <span className="tag" style={{ marginBottom: '16px' }}>
-        Coming Soon
-      </span>
-      <h1 style={{
-        fontSize: isMobile ? '28px' : '32px',
-        fontWeight: 700,
-        marginBottom: '12px',
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '8px 16px',
+        borderBottom: '1px solid var(--border)',
+        background: 'var(--card-bg)',
       }}>
-        SDK-First
-      </h1>
-      <p style={{
-        color: 'var(--text-muted)',
-        fontSize: isMobile ? '14px' : '16px',
-        maxWidth: '400px',
+        <span style={{
+          fontSize: '12px',
+          color: 'var(--text-muted)',
+          fontFamily: 'var(--font-mono)',
+        }}>
+          {language}
+        </span>
+        <button
+          onClick={() => onCopy(code, index)}
+          style={{
+            background: 'none',
+            border: 'none',
+            padding: '4px 8px',
+            cursor: 'pointer',
+            color: copiedIndex === index ? 'var(--accent)' : 'var(--text-muted)',
+            fontSize: '12px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+          }}
+        >
+          {copiedIndex === index ? 'Copied' : 'Copy'}
+        </button>
+      </div>
+      <pre style={{
+        margin: 0,
+        padding: isMobile ? '16px' : '20px',
+        overflow: 'auto',
+        fontSize: isMobile ? '12px' : '13px',
+        lineHeight: 1.6,
+        fontFamily: 'var(--font-mono)',
       }}>
-        Integrate ObjectiveAI into your applications with TypeScript.
-      </p>
+        <code>{code}</code>
+      </pre>
     </div>
   );
 }

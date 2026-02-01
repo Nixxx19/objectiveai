@@ -6,6 +6,7 @@
 // Re-export from the SDK
 export { ObjectiveAI } from "objectiveai";
 export { Functions } from "objectiveai";
+export { Auth } from "objectiveai";
 
 // Import for internal use
 import { ObjectiveAI } from "objectiveai";

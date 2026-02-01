@@ -1,24 +1,53 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 
 interface ApiKey {
-  id: string;
+  api_key: string;
   name: string;
-  prefix: string;
-  createdAt: string;
-  lastUsed: string | null;
+  created: string;
+  expires: string | null;
+  disabled: string | null;
+  description: string | null;
+  cost: number;
 }
+
+// TODO: Remove this bypass when auth is working
+const BYPASS_AUTH = true;
 
 export default function ApiKeysPage() {
   const { user, isLoading } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
   const [keys, setKeys] = useState<ApiKey[]>([]);
+  const [keysLoading, setKeysLoading] = useState(true);
+  const [keysError, setKeysError] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newKeyName, setNewKeyName] = useState("");
+  const [newKeyExpires, setNewKeyExpires] = useState("");
+  const [newKeyDescription, setNewKeyDescription] = useState("");
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [isDisabling, setIsDisabling] = useState<string | null>(null);
+
+  // Fetch keys from API
+  const fetchKeys = useCallback(async () => {
+    try {
+      setKeysLoading(true);
+      setKeysError(null);
+      const response = await fetch('/api/auth/keys');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch keys');
+      }
+      setKeys(data.data || []);
+    } catch (error) {
+      setKeysError(error instanceof Error ? error.message : 'Failed to fetch keys');
+    } finally {
+      setKeysLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const checkViewport = () => setIsMobile(window.innerWidth <= 640);
@@ -27,25 +56,66 @@ export default function ApiKeysPage() {
     return () => window.removeEventListener('resize', checkViewport);
   }, []);
 
-  const handleCreateKey = () => {
-    if (!newKeyName.trim()) return;
+  // Fetch keys when user is authenticated (or bypass enabled)
+  useEffect(() => {
+    if ((user || BYPASS_AUTH) && !isLoading) {
+      fetchKeys();
+    }
+  }, [user, isLoading, fetchKeys]);
 
-    // Placeholder - will connect to API
-    const newKey: ApiKey = {
-      id: `key_${Date.now()}`,
-      name: newKeyName,
-      prefix: 'sk-obj-...xxxx',
-      createdAt: new Date().toISOString(),
-      lastUsed: null,
-    };
+  const handleCreateKey = async () => {
+    if (!newKeyName.trim() || isCreating) return;
 
-    setKeys([...keys, newKey]);
-    setNewlyCreatedKey('sk-obj-example-key-value-here');
-    setNewKeyName("");
+    try {
+      setIsCreating(true);
+      const response = await fetch('/api/auth/keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newKeyName,
+          expires: newKeyExpires || undefined,
+          description: newKeyDescription || undefined,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to create key');
+      }
+      // Show the full key to user (only time it's visible)
+      setNewlyCreatedKey(data.api_key);
+      setNewKeyName("");
+      setNewKeyExpires("");
+      setNewKeyDescription("");
+      // Refresh the keys list
+      fetchKeys();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to create key');
+    } finally {
+      setIsCreating(false);
+    }
   };
 
-  const handleDeleteKey = (keyId: string) => {
-    setKeys(keys.filter(k => k.id !== keyId));
+  const handleDisableKey = async (apiKey: string) => {
+    if (isDisabling) return;
+
+    try {
+      setIsDisabling(apiKey);
+      const response = await fetch('/api/auth/keys', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ api_key: apiKey }),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to disable key');
+      }
+      // Refresh the keys list
+      fetchKeys();
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Failed to disable key');
+    } finally {
+      setIsDisabling(null);
+    }
   };
 
   const handleCopyKey = () => {
@@ -57,10 +127,14 @@ export default function ApiKeysPage() {
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
+    return new Date(dateString).toLocaleString('en-US', {
       year: 'numeric',
-      month: 'short',
+      month: 'numeric',
       day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true,
     });
   };
 
@@ -82,7 +156,7 @@ export default function ApiKeysPage() {
     );
   }
 
-  if (!user) {
+  if (!user && !BYPASS_AUTH) {
     return (
       <div className="page">
         <div className="container" style={{
@@ -176,7 +250,74 @@ export default function ApiKeysPage() {
         </button>
 
         {/* Keys List */}
-        {keys.length === 0 ? (
+        {keysLoading ? (
+          <div className="card" style={{
+            padding: isMobile ? '40px 20px' : '60px 32px',
+            textAlign: 'center',
+          }}>
+            <div style={{
+              width: '32px',
+              height: '32px',
+              border: '3px solid var(--border)',
+              borderTopColor: 'var(--accent)',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 16px',
+            }} />
+            <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+              Loading API keys...
+            </p>
+          </div>
+        ) : keysError ? (
+          <div className="card" style={{
+            padding: isMobile ? '40px 20px' : '60px 32px',
+            textAlign: 'center',
+          }}>
+            <svg
+              width="48"
+              height="48"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="rgb(239, 68, 68)"
+              strokeWidth="1.5"
+              style={{ marginBottom: '16px', opacity: 0.6 }}
+            >
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: 600,
+              marginBottom: '8px',
+            }}>
+              Failed to load keys
+            </h3>
+            <p style={{
+              color: 'var(--text-muted)',
+              fontSize: '14px',
+              maxWidth: '300px',
+              margin: '0 auto 16px',
+            }}>
+              {keysError}
+            </p>
+            <button
+              onClick={fetchKeys}
+              style={{
+                padding: '8px 16px',
+                fontSize: '13px',
+                fontWeight: 500,
+                color: 'var(--accent)',
+                background: 'transparent',
+                border: '1px solid var(--accent)',
+                borderRadius: '8px',
+                cursor: 'pointer',
+              }}
+            >
+              Try Again
+            </button>
+          </div>
+        ) : keys.length === 0 ? (
           <div className="card" style={{
             padding: isMobile ? '40px 20px' : '60px 32px',
             textAlign: 'center',
@@ -212,7 +353,7 @@ export default function ApiKeysPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {keys.map((key) => (
               <div
-                key={key.id}
+                key={key.api_key}
                 className="card"
                 style={{
                   padding: isMobile ? '16px' : '20px',
@@ -221,6 +362,7 @@ export default function ApiKeysPage() {
                   alignItems: 'center',
                   gap: '16px',
                   flexWrap: 'wrap',
+                  opacity: key.disabled ? 0.5 : 1,
                 }}
               >
                 <div style={{ flex: 1, minWidth: '200px' }}>
@@ -235,42 +377,86 @@ export default function ApiKeysPage() {
                     fontSize: '13px',
                     color: 'var(--text-muted)',
                     fontFamily: 'monospace',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
                   }}>
-                    {key.prefix}
+                    {key.api_key}
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(key.api_key);
+                      }}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        padding: '4px',
+                        cursor: 'pointer',
+                        color: 'var(--text-muted)',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                      title="Copy to clipboard"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                      </svg>
+                    </button>
                   </div>
+                  {key.description && (
+                    <div style={{
+                      fontSize: '12px',
+                      color: 'var(--text-muted)',
+                      marginTop: '4px',
+                    }}>
+                      {key.description}
+                    </div>
+                  )}
                 </div>
                 <div style={{
                   fontSize: '12px',
                   color: 'var(--text-muted)',
                   textAlign: isMobile ? 'left' : 'right',
                 }}>
-                  <div>Created {formatDate(key.createdAt)}</div>
-                  <div>
-                    {key.lastUsed ? `Last used ${formatDate(key.lastUsed)}` : 'Never used'}
-                  </div>
+                  <div>created {formatDate(key.created)}</div>
+                  <div>expires {key.expires ? formatDate(key.expires) : 'never'}</div>
                 </div>
-                <button
-                  onClick={() => handleDeleteKey(key.id)}
-                  style={{
+                {key.disabled ? (
+                  <span style={{
                     padding: '8px 16px',
                     fontSize: '13px',
                     fontWeight: 500,
-                    color: 'rgb(239, 68, 68)',
-                    background: 'transparent',
-                    border: '1px solid rgb(239, 68, 68)',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'transparent';
-                  }}
-                >
-                  Delete
-                </button>
+                    color: 'var(--text-muted)',
+                  }}>
+                    disabled
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => handleDisableKey(key.api_key)}
+                    disabled={isDisabling === key.api_key}
+                    style={{
+                      padding: '8px 16px',
+                      fontSize: '13px',
+                      fontWeight: 500,
+                      color: isDisabling === key.api_key ? 'var(--text-muted)' : 'rgb(239, 68, 68)',
+                      background: 'transparent',
+                      border: `1px solid ${isDisabling === key.api_key ? 'var(--border)' : 'rgb(239, 68, 68)'}`,
+                      borderRadius: '8px',
+                      cursor: isDisabling === key.api_key ? 'not-allowed' : 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (isDisabling !== key.api_key) {
+                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'transparent';
+                    }}
+                  >
+                    {isDisabling === key.api_key ? 'Disabling...' : 'disable'}
+                  </button>
+                )}
               </div>
             ))}
           </div>
@@ -302,10 +488,10 @@ export default function ApiKeysPage() {
             paddingLeft: '20px',
             margin: 0,
           }}>
-            <li>Keys are only shown once at creation time</li>
             <li>Store your keys securely and never share them publicly</li>
-            <li>Delete keys immediately if they are compromised</li>
+            <li>Disable keys immediately if they are compromised</li>
             <li>Use environment variables to store keys in your applications</li>
+            <li>You can copy your keys from the list at any time</li>
           </ul>
         </div>
       </div>
@@ -348,6 +534,7 @@ export default function ApiKeysPage() {
                   fontSize: '20px',
                   fontWeight: 700,
                   marginBottom: '8px',
+                  color: 'var(--accent)',
                 }}>
                   Key Created
                 </h2>
@@ -356,7 +543,7 @@ export default function ApiKeysPage() {
                   color: 'var(--text-muted)',
                   marginBottom: '20px',
                 }}>
-                  Copy your key now. You won't be able to see it again.
+                  Your new API key is ready. You can also copy it from the list anytime.
                 </p>
                 <div style={{
                   background: 'var(--nav-surface)',
@@ -413,22 +600,17 @@ export default function ApiKeysPage() {
                 <h2 style={{
                   fontSize: '20px',
                   fontWeight: 700,
-                  marginBottom: '8px',
+                  marginBottom: '20px',
+                  color: 'var(--accent)',
                 }}>
                   Create API Key
                 </h2>
-                <p style={{
-                  fontSize: '14px',
-                  color: 'var(--text-muted)',
-                  marginBottom: '20px',
-                }}>
-                  Give your key a name to help you identify it later.
-                </p>
+                {/* Name field */}
                 <input
                   type="text"
                   value={newKeyName}
                   onChange={(e) => setNewKeyName(e.target.value)}
-                  placeholder="e.g., Production, Development, Testing"
+                  placeholder="name"
                   style={{
                     width: '100%',
                     padding: '12px 16px',
@@ -436,7 +618,7 @@ export default function ApiKeysPage() {
                     background: 'var(--nav-surface)',
                     border: '1px solid var(--border)',
                     borderRadius: '8px',
-                    marginBottom: '20px',
+                    marginBottom: '12px',
                     color: 'var(--text)',
                     outline: 'none',
                     boxSizing: 'border-box',
@@ -449,42 +631,94 @@ export default function ApiKeysPage() {
                   }}
                   autoFocus
                 />
-                <div style={{ display: 'flex', gap: '12px' }}>
-                  <button
-                    onClick={handleCreateKey}
-                    disabled={!newKeyName.trim()}
-                    style={{
-                      flex: 1,
-                      padding: '12px',
-                      fontSize: '14px',
-                      fontWeight: 600,
-                      background: newKeyName.trim() ? 'var(--accent)' : 'var(--border)',
-                      color: newKeyName.trim() ? 'var(--color-light)' : 'var(--text-muted)',
-                      border: 'none',
-                      borderRadius: '8px',
-                      cursor: newKeyName.trim() ? 'pointer' : 'not-allowed',
-                    }}
-                  >
-                    Create Key
-                  </button>
+                {/* Expires field */}
+                <input
+                  type="text"
+                  value={newKeyExpires}
+                  onChange={(e) => setNewKeyExpires(e.target.value)}
+                  placeholder="expires (optional)"
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    fontSize: '15px',
+                    background: 'var(--nav-surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    marginBottom: '12px',
+                    color: 'var(--text)',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
+                />
+                {/* Description field */}
+                <textarea
+                  value={newKeyDescription}
+                  onChange={(e) => setNewKeyDescription(e.target.value)}
+                  placeholder="description (optional)"
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    fontSize: '15px',
+                    background: 'var(--nav-surface)',
+                    border: '1px solid var(--border)',
+                    borderRadius: '8px',
+                    marginBottom: '20px',
+                    color: 'var(--text)',
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    resize: 'vertical',
+                    fontFamily: 'inherit',
+                  }}
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--accent)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = 'var(--border)';
+                  }}
+                />
+                <div style={{ display: 'flex', gap: '12px', justifyContent: 'space-between' }}>
                   <button
                     onClick={() => {
                       setShowCreateModal(false);
                       setNewKeyName("");
+                      setNewKeyExpires("");
+                      setNewKeyDescription("");
                     }}
                     style={{
-                      flex: 1,
-                      padding: '12px',
+                      padding: '10px 20px',
                       fontSize: '14px',
                       fontWeight: 600,
-                      background: 'transparent',
-                      color: 'var(--text)',
-                      border: '1px solid var(--border)',
+                      background: 'var(--accent)',
+                      color: 'var(--color-light)',
+                      border: 'none',
                       borderRadius: '8px',
                       cursor: 'pointer',
                     }}
                   >
                     Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateKey}
+                    disabled={!newKeyName.trim() || isCreating}
+                    style={{
+                      padding: '10px 20px',
+                      fontSize: '14px',
+                      fontWeight: 600,
+                      background: 'transparent',
+                      color: newKeyName.trim() && !isCreating ? 'var(--text)' : 'var(--text-muted)',
+                      border: '1px solid var(--border)',
+                      borderRadius: '8px',
+                      cursor: newKeyName.trim() && !isCreating ? 'pointer' : 'not-allowed',
+                    }}
+                  >
+                    {isCreating ? 'Creating...' : 'Confirm'}
                   </button>
                 </div>
               </>

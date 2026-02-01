@@ -1,12 +1,42 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import Link from "next/link";
+
+interface CreditsData {
+  credits: number;
+  total_credits_purchased: number;
+  total_credits_used: number;
+}
+
+// TODO: Remove this bypass when auth is working
+const BYPASS_AUTH = true;
 
 export default function CreditsPage() {
   const { user, isLoading } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
+  const [creditsData, setCreditsData] = useState<CreditsData | null>(null);
+  const [creditsLoading, setCreditsLoading] = useState(true);
+  const [creditsError, setCreditsError] = useState<string | null>(null);
+
+  // Fetch credits from API
+  const fetchCredits = useCallback(async () => {
+    try {
+      setCreditsLoading(true);
+      setCreditsError(null);
+      const response = await fetch('/api/auth/credits');
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to fetch credits');
+      }
+      setCreditsData(data);
+    } catch (error) {
+      setCreditsError(error instanceof Error ? error.message : 'Failed to fetch credits');
+    } finally {
+      setCreditsLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const checkViewport = () => setIsMobile(window.innerWidth <= 640);
@@ -15,12 +45,12 @@ export default function CreditsPage() {
     return () => window.removeEventListener('resize', checkViewport);
   }, []);
 
-  // Placeholder data - will be connected to API
-  const creditsData = {
-    balance: 0,
-    lifetimePurchased: 0,
-    lifetimeUsed: 0,
-  };
+  // Fetch credits when user is authenticated (or bypass enabled)
+  useEffect(() => {
+    if ((user || BYPASS_AUTH) && !isLoading) {
+      fetchCredits();
+    }
+  }, [user, isLoading, fetchCredits]);
 
   if (isLoading) {
     return (
@@ -40,7 +70,7 @@ export default function CreditsPage() {
     );
   }
 
-  if (!user) {
+  if (!user && !BYPASS_AUTH) {
     return (
       <div className="page">
         <div className="container" style={{
@@ -115,31 +145,88 @@ export default function CreditsPage() {
           marginBottom: '24px',
           textAlign: 'center',
         }}>
-          <p style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            color: 'var(--text-muted)',
-            marginBottom: '8px',
-          }}>
-            Current Balance
-          </p>
-          <div style={{
-            fontSize: isMobile ? '48px' : '56px',
-            fontWeight: 700,
-            color: 'var(--accent)',
-            marginBottom: '4px',
-            fontVariantNumeric: 'tabular-nums',
-          }}>
-            {creditsData.balance.toLocaleString()}
-          </div>
-          <p style={{
-            fontSize: '14px',
-            color: 'var(--text-muted)',
-          }}>
-            credits available
-          </p>
+          {creditsLoading ? (
+            <>
+              <div style={{
+                width: '32px',
+                height: '32px',
+                border: '3px solid var(--border)',
+                borderTopColor: 'var(--accent)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+                margin: '0 auto 16px',
+              }} />
+              <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
+                Loading credits...
+              </p>
+            </>
+          ) : creditsError ? (
+            <>
+              <svg
+                width="40"
+                height="40"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="rgb(239, 68, 68)"
+                strokeWidth="1.5"
+                style={{ marginBottom: '12px', opacity: 0.6 }}
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+              <p style={{
+                color: 'var(--text-muted)',
+                fontSize: '14px',
+                marginBottom: '12px',
+              }}>
+                {creditsError}
+              </p>
+              <button
+                onClick={fetchCredits}
+                style={{
+                  padding: '8px 16px',
+                  fontSize: '13px',
+                  fontWeight: 500,
+                  color: 'var(--accent)',
+                  background: 'transparent',
+                  border: '1px solid var(--accent)',
+                  borderRadius: '8px',
+                  cursor: 'pointer',
+                }}
+              >
+                Try Again
+              </button>
+            </>
+          ) : (
+            <>
+              <p style={{
+                fontSize: '13px',
+                fontWeight: 600,
+                textTransform: 'uppercase',
+                letterSpacing: '0.05em',
+                color: 'var(--text-muted)',
+                marginBottom: '8px',
+              }}>
+                Current Balance
+              </p>
+              <div style={{
+                fontSize: isMobile ? '48px' : '56px',
+                fontWeight: 700,
+                color: 'var(--accent)',
+                marginBottom: '4px',
+                fontVariantNumeric: 'tabular-nums',
+              }}>
+                {(creditsData?.credits ?? 0).toLocaleString()}
+              </div>
+              <p style={{
+                fontSize: '14px',
+                color: 'var(--text-muted)',
+              }}>
+                credits available
+              </p>
+            </>
+          )}
         </div>
 
         {/* Purchase Button */}
@@ -171,55 +258,57 @@ export default function CreditsPage() {
         </div>
 
         {/* Usage Stats */}
-        <div style={{ marginBottom: '40px' }}>
-          <h2 style={{
-            fontSize: '18px',
-            fontWeight: 600,
-            marginBottom: '16px',
-          }}>
-            Usage History
-          </h2>
-          <div className="gridTwo" style={{ gap: '16px' }}>
-            <div className="card" style={{ padding: isMobile ? '20px' : '24px' }}>
-              <p style={{
-                fontSize: '12px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: 'var(--text-muted)',
-                marginBottom: '8px',
-              }}>
-                Lifetime Purchased
-              </p>
-              <div style={{
-                fontSize: '28px',
-                fontWeight: 700,
-                fontVariantNumeric: 'tabular-nums',
-              }}>
-                {creditsData.lifetimePurchased.toLocaleString()}
+        {!creditsLoading && !creditsError && creditsData && (
+          <div style={{ marginBottom: '40px' }}>
+            <h2 style={{
+              fontSize: '18px',
+              fontWeight: 600,
+              marginBottom: '16px',
+            }}>
+              Usage History
+            </h2>
+            <div className="gridTwo" style={{ gap: '16px' }}>
+              <div className="card" style={{ padding: isMobile ? '20px' : '24px' }}>
+                <p style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: 'var(--text-muted)',
+                  marginBottom: '8px',
+                }}>
+                  Lifetime Purchased
+                </p>
+                <div style={{
+                  fontSize: '28px',
+                  fontWeight: 700,
+                  fontVariantNumeric: 'tabular-nums',
+                }}>
+                  {creditsData.total_credits_purchased.toLocaleString()}
+                </div>
               </div>
-            </div>
-            <div className="card" style={{ padding: isMobile ? '20px' : '24px' }}>
-              <p style={{
-                fontSize: '12px',
-                fontWeight: 600,
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                color: 'var(--text-muted)',
-                marginBottom: '8px',
-              }}>
-                Lifetime Used
-              </p>
-              <div style={{
-                fontSize: '28px',
-                fontWeight: 700,
-                fontVariantNumeric: 'tabular-nums',
-              }}>
-                {creditsData.lifetimeUsed.toLocaleString()}
+              <div className="card" style={{ padding: isMobile ? '20px' : '24px' }}>
+                <p style={{
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.05em',
+                  color: 'var(--text-muted)',
+                  marginBottom: '8px',
+                }}>
+                  Lifetime Used
+                </p>
+                <div style={{
+                  fontSize: '28px',
+                  fontWeight: 700,
+                  fontVariantNumeric: 'tabular-nums',
+                }}>
+                  {creditsData.total_credits_used.toLocaleString()}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Info Section */}
         <div className="card" style={{
