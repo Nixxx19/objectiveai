@@ -167,11 +167,13 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
 
   // Fetch model names when results contain votes
   useEffect(() => {
-    if (!results?.tasks) return;
+    if (!results?.tasks || !Array.isArray(results.tasks) || results.tasks.length === 0) return;
 
-    const allVotes = results.tasks.flatMap(t => t.votes || []);
-    const uniqueIds = [...new Set(allVotes.map(v => v.model))];
-    const idsToFetch = uniqueIds.filter(id => !modelNames[id]);
+    const allVotes = results.tasks.flatMap(t => (t && t.votes) ? t.votes : []);
+    if (allVotes.length === 0) return;
+
+    const uniqueIds = [...new Set(allVotes.filter(v => v?.model).map(v => v.model))];
+    const idsToFetch = uniqueIds.filter(id => id && !modelNames[id]);
 
     if (idsToFetch.length === 0) return;
 
@@ -200,7 +202,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     });
   }, [results?.tasks, modelNames]);
 
-  // Execute function via server API route
+  // Execute function via server API route with streaming
   const handleRun = async () => {
     if (!functionDetails || !profileInfo) return;
 
@@ -230,21 +232,86 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
         }),
       });
 
-      const result = await response.json();
-
       if (!response.ok) {
-        throw new Error(result.error || `HTTP ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error || `HTTP ${response.status}`);
       }
 
-      // Handle the response
-      if ("output" in result) {
-        setResults({
-          output: result.output as number | number[],
-          inputSnapshot: { ...formData }, // Save input for display
-          usage: result.usage,
-          tasks: result.tasks,
-          reasoning: result.reasoning,
-        });
+      // Check if streaming response
+      const contentType = response.headers.get("content-type");
+      if (contentType?.includes("text/event-stream")) {
+        // Handle SSE streaming
+        const reader = response.body?.getReader();
+        const decoder = new TextDecoder();
+        let buffer = "";
+        let accumulatedOutput: number | number[] | undefined;
+        let accumulatedTasks: typeof results extends { tasks?: infer T } ? T : undefined;
+        let accumulatedUsage: typeof results extends { usage?: infer U } ? U : undefined;
+        let accumulatedReasoningContent = "";
+
+        while (reader) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          if (!value) continue;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n\n");
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            if (line.startsWith("data: ")) {
+              const data = line.slice(6).trim();
+              if (data === "[DONE]") continue;
+              if (!data) continue;
+
+              try {
+                const chunk = JSON.parse(data);
+                if (chunk.error) {
+                  throw new Error(chunk.error);
+                }
+
+                // Merge chunk into accumulated result
+                if (chunk.output !== undefined) accumulatedOutput = chunk.output;
+                if (chunk.tasks) accumulatedTasks = chunk.tasks;
+                if (chunk.usage) accumulatedUsage = chunk.usage;
+
+                // Handle streaming reasoning content
+                if (chunk.reasoning?.choices?.[0]?.delta?.content) {
+                  accumulatedReasoningContent += chunk.reasoning.choices[0].delta.content;
+                } else if (chunk.reasoning?.choices?.[0]?.message?.content) {
+                  accumulatedReasoningContent = chunk.reasoning.choices[0].message.content;
+                }
+
+                // Only update UI if we have output
+                if (accumulatedOutput !== undefined) {
+                  setResults({
+                    output: accumulatedOutput,
+                    inputSnapshot: { ...formData },
+                    usage: accumulatedUsage,
+                    tasks: accumulatedTasks,
+                    reasoning: accumulatedReasoningContent ? {
+                      choices: [{ message: { content: accumulatedReasoningContent } }]
+                    } : undefined,
+                  });
+                }
+              } catch (parseErr) {
+                console.error("Failed to parse chunk:", parseErr);
+              }
+            }
+          }
+        }
+      } else {
+        // Non-streaming fallback
+        const result = await response.json();
+        if ("output" in result) {
+          setResults({
+            output: result.output as number | number[],
+            inputSnapshot: { ...formData },
+            usage: result.usage,
+            tasks: result.tasks,
+            reasoning: result.reasoning,
+          });
+        }
       }
     } catch (err) {
       console.error("Function execution failed:", err);
@@ -801,7 +868,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
               </div>
             )}
 
-            {runError && !isRunning && (
+            {runError && !isRunning && !results && (
               <div style={{
                 textAlign: "center",
                 padding: isMobile ? "40px 20px" : "60px 20px",
@@ -822,7 +889,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                 {renderResults()}
 
                 {/* Model Breakdown - minimal style matching mockup */}
-                {results.tasks && results.tasks.length > 0 && results.tasks[0]?.votes && (
+                {results.tasks && Array.isArray(results.tasks) && results.tasks.length > 0 && results.tasks[0]?.votes && results.tasks[0].votes.length > 0 && (
                   <div>
                     {(() => {
                       const votes = results.tasks![0].votes!;

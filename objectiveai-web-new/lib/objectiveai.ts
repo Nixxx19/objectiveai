@@ -24,6 +24,7 @@ export function getClient(): ObjectiveAI {
 export const DEV_EXECUTION_OPTIONS = {
   from_cache: true,
   from_rng: true,
+  stream: false, // Disabled - streaming chunks have different structure, needs more work
   reasoning: {
     model: "openai/gpt-4o-mini", // Fast, cheap model for reasoning summary
   },
