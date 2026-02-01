@@ -192,9 +192,12 @@ export default function FunctionsPage() {
   return (
     <div className="page">
       <div style={{
+        width: '100%',
         maxWidth: '1400px',
-        margin: '0 auto',
+        marginLeft: 'auto',
+        marginRight: 'auto',
         padding: isMobile ? '0 20px' : '0 32px',
+        boxSizing: 'border-box',
       }}>
         {/* Header */}
         <div style={{ marginBottom: isMobile ? '24px' : '32px' }}>
@@ -254,6 +257,7 @@ export default function FunctionsPage() {
           gridTemplateColumns: filtersOpen ? (isTablet ? '220px 1fr' : '280px 1fr') : undefined,
           gap: isTablet ? '24px' : '32px',
           alignItems: 'start',
+          width: '100%',
         }}>
           {/* Left Sidebar - Filters - Collapsible */}
           {!isMobile && filtersOpen && (
@@ -315,19 +319,27 @@ export default function FunctionsPage() {
           )}
 
           {/* Function Cards Grid - Compact tiles */}
-          <div>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: isMobile 
-                ? '1fr' 
-                : isTablet 
-                  ? 'repeat(2, 1fr)' 
-                  : filtersOpen 
+          <div style={{
+            minHeight: '400px',
+            display: 'flex',
+            flexDirection: 'column',
+            width: '100%',
+          }}>
+            {/* Only render grid when we have results */}
+            {!isLoading && !error && visibleFunctions.length > 0 && (
+            <>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile
+                  ? '1fr'
+                  : isTablet
                     ? 'repeat(2, 1fr)'
-                    : 'repeat(3, 1fr)',
-              gap: isMobile ? '12px' : '16px',
-            }}>
-              {visibleFunctions.map(fn => (
+                    : filtersOpen
+                      ? 'repeat(2, 1fr)'
+                      : 'repeat(3, 1fr)',
+                gap: isMobile ? '12px' : '16px',
+              }}>
+                {visibleFunctions.map(fn => (
                 <Link
                   key={fn.slug}
                   href={`/functions/${fn.slug}`}
@@ -399,32 +411,34 @@ export default function FunctionsPage() {
                     </div>
                   </div>
                 </Link>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {/* Load More */}
-            {hasMore && (
-              <button
-                onClick={() => setVisibleCount(prev => prev + LOAD_MORE_COUNT)}
-                style={{
-                  display: 'block',
-                  width: '100%',
-                  padding: '16px',
-                  marginTop: '24px',
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '14px',
-                  fontWeight: 600,
-                  color: 'var(--accent)',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                  transition: 'opacity 0.2s',
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
-                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
-              >
-                Load more ({filteredFunctions.length - visibleCount} remaining)
-              </button>
+              {/* Load More */}
+              {hasMore && (
+                <button
+                  onClick={() => setVisibleCount(prev => prev + LOAD_MORE_COUNT)}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '16px',
+                    marginTop: '24px',
+                    background: 'none',
+                    border: 'none',
+                    fontSize: '14px',
+                    fontWeight: 600,
+                    color: 'var(--accent)',
+                    cursor: 'pointer',
+                    textAlign: 'center',
+                    transition: 'opacity 0.2s',
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.opacity = '0.7'}
+                  onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+                >
+                  Load more ({filteredFunctions.length - visibleCount} remaining)
+                </button>
+              )}
+            </>
             )}
 
             {isLoading && (
@@ -432,6 +446,11 @@ export default function FunctionsPage() {
                 textAlign: 'center',
                 padding: '60px 20px',
                 color: 'var(--text-muted)',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}>
                 <div style={{
                   width: '40px',
@@ -452,6 +471,11 @@ export default function FunctionsPage() {
                 textAlign: 'center',
                 padding: '60px 20px',
                 color: 'var(--text-muted)',
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}>
                 <p style={{ color: '#ef4444', marginBottom: '8px' }}>Failed to load functions</p>
                 <p style={{ fontSize: '14px' }}>{error}</p>
@@ -463,6 +487,10 @@ export default function FunctionsPage() {
                 textAlign: 'center',
                 padding: '60px 20px',
                 color: 'var(--text-muted)',
+                flex: 1,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
               }}>
                 No functions found matching your criteria
               </div>
