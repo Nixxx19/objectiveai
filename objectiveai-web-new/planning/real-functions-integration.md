@@ -98,3 +98,46 @@ const result = await client.functions.executions.create("owner/repo", {
 2. **Modify:** `app/functions/page.tsx` - Replace MOCK_FUNCTIONS
 3. **Modify:** `app/functions/[slug]/page.tsx` - Replace handleRun() mock
 4. **New:** `lib/objectiveai.ts` - SDK client wrapper with from_cache/from_rng defaults
+
+## Backend Reference (IMPORTANT)
+
+**Always check the Rust backend when debugging data format issues.**
+
+Key files:
+- `objectiveai-rs/src/functions/expression/input.rs` - Input type definitions
+- `objectiveai-rs/src/chat/completions/request/message.rs` - RichContentPart types
+
+The backend `Input` enum uses `#[serde(untagged)]` which tries variants in order:
+```rust
+pub enum Input {
+    RichContentPart(...),  // Images, audio, video, files - sent DIRECTLY
+    Object(...),
+    Array(...),
+    String(...),
+    // ...
+}
+```
+
+**Key insight:** Content items must be valid `RichContent` because they're used as vector responses.
+
+`RichContent` is `#[serde(untagged)]` with two variants (tried in order):
+1. `Text(String)` - matches plain strings like `"hello"`
+2. `Parts(Vec<RichContentPart>)` - matches arrays like `[{ type: "file", ... }]`
+
+A direct object `{ type: "file", ... }` matches **NEITHER** variant! So media/files MUST be wrapped in arrays.
+
+Note: The `Input` enum (for function input) CAN accept direct RichContentParts, but when those inputs are used as vector responses, they need to be valid `RichContent`. Since vector functions use `input.contentItems` as responses, we must format them as RichContent from the start.
+
+## File Upload Status
+
+**Current status:** File uploads disabled (text-only mode)
+
+**Findings:**
+- Text-only inputs work correctly with vector functions ✓
+- File uploads cause `OneOrMany` deserialization errors in expression compilation
+- The existing functions' expressions expect string arrays, not mixed RichContent
+
+**To enable file uploads:**
+1. Function definitions need to explicitly support media in their input_schema (using `anyOf` with file/image/audio/video types)
+2. Function expressions need to handle RichContent::Parts format, not just strings
+3. May require backend changes to expression compilation for media support

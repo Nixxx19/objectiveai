@@ -496,7 +496,10 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
               value={Array.isArray(formData[key]) ? formData[key] : []}
               onChange={(items) => setFormData(prev => ({ ...prev, [key]: items }))}
               isMobile={isMobile}
-              textOnly={prop.items?.type === "string"}
+              // TODO: Re-enable file uploads once function input format is verified
+              // The function's expression system expects specific RichContent format
+              // For now, only allow text inputs which are known to work
+              textOnly={true}
             />
           )}
 
@@ -564,13 +567,19 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     if (contentItems && contentItems[index] !== undefined) {
       const item = contentItems[index];
       if (typeof item === "string") {
-        // Truncate long strings
+        // RichContent::Text - plain string
         return item.length > 40 ? item.slice(0, 40) + "..." : item;
       }
-      if (Array.isArray(item)) {
-        return `[${item.length} items]`;
-      }
-      if (typeof item === "object" && item !== null) {
+      // RichContent::Parts - array of RichContentPart
+      // See: objectiveai-rs/src/chat/completions/request/message.rs
+      if (Array.isArray(item) && item.length > 0) {
+        const part = item[0] as { type?: string; file?: { filename?: string } };
+        if (part?.type === "file" && part?.file?.filename) {
+          return part.file.filename;
+        }
+        if (part?.type === "image_url") return "[Image]";
+        if (part?.type === "input_audio") return "[Audio]";
+        if (part?.type === "video_url") return "[Video]";
         return "[Media content]";
       }
     }

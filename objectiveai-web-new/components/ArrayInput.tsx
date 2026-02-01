@@ -2,13 +2,23 @@
 
 import { useRef } from "react";
 
-// Content item types matching ObjectiveAI SDK RichContent
+// Content item types - must be valid RichContent for vector function responses
+// See: objectiveai-rs/src/chat/completions/request/message.rs
+//
+// RichContent is #[serde(untagged)] with these variants (tried in order):
+//   1. Text(String) - plain string like "hello"
+//   2. Parts(Vec<RichContentPart>) - array like [{ type: "file", ... }]
+//
+// A direct object { type: "file", ... } matches NEITHER variant!
+// So media/files MUST be wrapped in arrays to match RichContent::Parts.
 type TextItem = string;
-type ImageItem = { type: "image_url"; image_url: { url: string } };
-type AudioItem = { type: "input_audio"; input_audio: { data: string; format: "wav" | "mp3" } };
-type VideoItem = { type: "video_url"; video_url: { url: string } };
-type FileItem = { type: "file"; file: { file_data: string; filename: string } };
-type ContentItem = TextItem | ImageItem | AudioItem | VideoItem | FileItem;
+type ImagePart = { type: "image_url"; image_url: { url: string } };
+type AudioPart = { type: "input_audio"; input_audio: { data: string; format: "wav" | "mp3" } };
+type VideoPart = { type: "video_url"; video_url: { url: string } };
+type FilePart = { type: "file"; file: { file_data: string; filename: string } };
+type RichContentPart = ImagePart | AudioPart | VideoPart | FilePart;
+// ContentItem: string (RichContent::Text) or array of parts (RichContent::Parts)
+type ContentItem = TextItem | RichContentPart[];
 
 interface ArrayInputProps {
   label?: string;
@@ -130,36 +140,37 @@ export default function ArrayInput({ label, description, value, onChange, isMobi
     const fileType = getFileType(file.name);
     const base64 = await fileToBase64(file);
 
-    let contentItem: ContentItem;
+    let contentPart: RichContentPart;
 
     switch (fileType) {
       case "image":
-        contentItem = {
+        contentPart = {
           type: "image_url",
           image_url: { url: `data:${file.type};base64,${base64}` },
         };
         break;
       case "audio":
-        contentItem = {
+        contentPart = {
           type: "input_audio",
           input_audio: { data: base64, format: getAudioFormat(file.name) },
         };
         break;
       case "video":
-        contentItem = {
+        contentPart = {
           type: "video_url",
           video_url: { url: `data:${file.type};base64,${base64}` },
         };
         break;
       default:
-        contentItem = {
+        contentPart = {
           type: "file",
           file: { file_data: base64, filename: file.name },
         };
     }
 
+    // Wrap in array - RichContent::Parts requires Vec<RichContentPart>
     const updated = [...value];
-    updated[index] = contentItem;
+    updated[index] = [contentPart];
     onChange(updated);
   };
 
@@ -248,7 +259,7 @@ export default function ArrayInput({ label, description, value, onChange, isMobi
                   />
                 </div>
               ) : (
-                // File preview
+                // Media preview (item is RichContent::Parts = array of RichContentPart)
                 <div
                   style={{
                     padding: "12px 14px",
@@ -260,52 +271,66 @@ export default function ArrayInput({ label, description, value, onChange, isMobi
                     gap: "10px",
                   }}
                 >
-                  {item.type === "image_url" && (
-                    <>
-                      <img
-                        src={item.image_url.url}
-                        alt={`Item ${index + 1}`}
-                        style={{
-                          width: "48px",
-                          height: "48px",
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                          flexShrink: 0,
-                        }}
-                      />
-                      <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>Image</span>
-                    </>
-                  )}
-                  {item.type === "input_audio" && (
-                    <>
-                      <span style={{ color: "var(--text-muted)", flexShrink: 0 }}><AudioIcon /></span>
-                      <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
-                        Audio ({item.input_audio.format.toUpperCase()})
-                      </span>
-                    </>
-                  )}
-                  {item.type === "video_url" && (
-                    <>
-                      <span style={{ color: "var(--text-muted)", flexShrink: 0 }}><VideoIcon /></span>
-                      <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>Video</span>
-                    </>
-                  )}
-                  {item.type === "file" && (
-                    <>
-                      <span style={{ color: "var(--text-muted)", flexShrink: 0 }}><FileIcon /></span>
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          color: "var(--text-muted)",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        {item.file.filename}
-                      </span>
-                    </>
-                  )}
+                  {(() => {
+                    const part = item[0]; // First part in the array
+                    if (!part) return null;
+
+                    if (part.type === "image_url") {
+                      return (
+                        <>
+                          <img
+                            src={part.image_url.url}
+                            alt={`Item ${index + 1}`}
+                            style={{
+                              width: "48px",
+                              height: "48px",
+                              objectFit: "cover",
+                              borderRadius: "4px",
+                              flexShrink: 0,
+                            }}
+                          />
+                          <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>Image</span>
+                        </>
+                      );
+                    }
+                    if (part.type === "input_audio") {
+                      return (
+                        <>
+                          <span style={{ color: "var(--text-muted)", flexShrink: 0 }}><AudioIcon /></span>
+                          <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+                            Audio ({part.input_audio.format.toUpperCase()})
+                          </span>
+                        </>
+                      );
+                    }
+                    if (part.type === "video_url") {
+                      return (
+                        <>
+                          <span style={{ color: "var(--text-muted)", flexShrink: 0 }}><VideoIcon /></span>
+                          <span style={{ fontSize: "13px", color: "var(--text-muted)" }}>Video</span>
+                        </>
+                      );
+                    }
+                    if (part.type === "file") {
+                      return (
+                        <>
+                          <span style={{ color: "var(--text-muted)", flexShrink: 0 }}><FileIcon /></span>
+                          <span
+                            style={{
+                              fontSize: "13px",
+                              color: "var(--text-muted)",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {part.file.filename}
+                          </span>
+                        </>
+                      );
+                    }
+                    return null;
+                  })()}
                 </div>
               )}
             </div>
