@@ -14,6 +14,9 @@ const baseConfig: Options = {
       src: path.resolve(__dirname, "src"),
     };
   },
+  loader: {
+    ".txt": "text",
+  },
 };
 
 export default defineConfig([
