@@ -229,22 +229,24 @@ export default function CreditsPage() {
           )}
         </div>
 
-        {/* Purchase Button */}
+        {/* Purchase Button - Coming Soon */}
         <div style={{ marginBottom: '40px' }}>
           <button
             className="pillBtn"
+            disabled
             style={{
               width: '100%',
               padding: '16px 24px',
               fontSize: '16px',
               fontWeight: 600,
-              background: 'var(--accent)',
-              color: 'var(--color-light)',
+              background: 'var(--border)',
+              color: 'var(--text-muted)',
               border: 'none',
-              cursor: 'pointer',
+              cursor: 'not-allowed',
+              opacity: 0.6,
             }}
           >
-            Purchase Credits
+            Purchase Credits — Coming Soon
           </button>
           <p style={{
             fontSize: '12px',
@@ -253,7 +255,7 @@ export default function CreditsPage() {
             marginTop: '12px',
             opacity: 0.7,
           }}>
-            Payments processed securely via Stripe
+            Credit purchases will be available soon
           </p>
         </div>
 

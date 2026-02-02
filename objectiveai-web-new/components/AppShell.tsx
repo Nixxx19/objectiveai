@@ -82,8 +82,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       label: "Functions",
       subLinks: [
         { href: "/functions", label: "Browse" },
-        { href: "/vibe-native", label: "Vibe-Native" },
-        { href: "/sdk-first", label: "SDK-First" },
+        { href: "/profiles", label: "Profiles" },
+        { href: "/ensembles", label: "Ensembles" },
+        { href: "/ensemble-llms", label: "Ensemble LLMs" },
       ],
     },
     {
@@ -97,7 +98,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       href: "/resources",
       label: "Resources",
       subLinks: [
-        { href: "/resources", label: "Overview" },
+        { href: "/vibe-native", label: "Vibe-Native" },
+        { href: "/sdk-first", label: "SDK-First" },
+        { href: "/faq", label: "FAQ" },
         { href: "/legal/terms", label: "Terms" },
         { href: "/legal/privacy", label: "Privacy" },
       ],

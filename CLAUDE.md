@@ -373,3 +373,45 @@ Check `objectiveai-web-new/planning/` before making design decisions:
 - `objectiveai-planning-moodboard.png` - Visual tone
 - `objectiveai-planning-color-system.png` - Official palette
 - `objectiveai-planning-wireframes-figma.png` - Page layouts
+
+### Navigation Structure
+
+```
+Functions → Browse, Profiles, Ensembles, Ensemble LLMs
+People → Team
+Resources → Vibe-Native, SDK-First, FAQ, Terms, Privacy
+```
+
+### Browse Pages Pattern
+
+All browse pages (Functions, Profiles, Ensembles, Ensemble LLMs) follow a consistent pattern:
+- **Filter button** left of search bar (toggles `filtersOpen` state)
+- **Sticky search bar** with filter toggle
+- **Collapsible sidebar** on desktop when filters open (categories/owner filter + sort dropdown)
+- **Mobile filter overlay** (bottom sheet) when filters open on mobile
+- **Load more pagination** instead of showing all items
+- **Responsive grid** that adapts when filters are open/closed
+
+Reference implementation: `app/functions/page.tsx`
+
+### API Routes
+
+```
+/api/functions          - List functions
+/api/profiles           - List profiles (returns {owner, repository, commit}[])
+/api/ensembles          - List ensembles (returns {id}[])
+/api/ensemble-llms      - List ensemble LLMs (returns {id}[])
+/api/ensemble-llms/[id] - Get ensemble LLM details
+/api/ensembles/[id]     - Get ensemble details
+```
+
+Note: Profiles list endpoint only returns identifiers. To get `description`/`changelog`, individual fetches are required (N+1 pattern).
+
+### Authentication
+
+OAuth providers (Google, GitHub, X, Reddit) via standard auth provider. Email sign-in/sign-up temporarily disabled.
+
+### Disabled Features
+
+- **Purchase Credits** button disabled until payment integration exists
+- **File uploads** disabled pending function expression support

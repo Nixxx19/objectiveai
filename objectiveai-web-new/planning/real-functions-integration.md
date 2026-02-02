@@ -6,8 +6,8 @@
 ## Current State
 
 ### Web-new (Mock Data)
-- `app/functions/page.tsx` - `MOCK_FUNCTIONS` array (8 hardcoded items)
-- `app/functions/[slug]/page.tsx` - `FUNCTION_DATA` object + `handleRun()` with `setTimeout` mock
+- [app/functions/page.tsx](../app/functions/page.tsx) - `MOCK_FUNCTIONS` array (8 hardcoded items)
+- [app/functions/[slug]/page.tsx](../app/functions/[slug]/page.tsx) - `FUNCTION_DATA` object + `handleRun()` with `setTimeout` mock
 
 ### SDK Capabilities
 - Functions execute via `client.functions.executions.create()`
@@ -62,7 +62,7 @@
 
 ## SDK Usage Pattern
 
-From `objectiveai-web-new/CLAUDE.md`:
+From [CLAUDE.md](../CLAUDE.md):
 
 ```typescript
 const result = await client.functions.executions.create("owner/repo", {
@@ -94,18 +94,18 @@ const result = await client.functions.executions.create("owner/repo", {
 
 ## Files to Modify
 
-1. **New:** `app/api/functions/execute/route.ts` - Server-side API route
-2. **Modify:** `app/functions/page.tsx` - Replace MOCK_FUNCTIONS
-3. **Modify:** `app/functions/[slug]/page.tsx` - Replace handleRun() mock
-4. **New:** `lib/objectiveai.ts` - SDK client wrapper with from_cache/from_rng defaults
+1. **New:** [app/api/functions/execute/route.ts](../app/api/functions/execute/route.ts) - Server-side API route
+2. **Modify:** [app/functions/page.tsx](../app/functions/page.tsx) - Replace MOCK_FUNCTIONS
+3. **Modify:** [app/functions/[slug]/page.tsx](../app/functions/[slug]/page.tsx) - Replace handleRun() mock
+4. **New:** [lib/objectiveai.ts](../lib/objectiveai.ts) - SDK client wrapper with from_cache/from_rng defaults
 
 ## Backend Reference (IMPORTANT)
 
 **Always check the Rust backend when debugging data format issues.**
 
 Key files:
-- `objectiveai-rs/src/functions/expression/input.rs` - Input type definitions
-- `objectiveai-rs/src/chat/completions/request/message.rs` - RichContentPart types
+- [objectiveai-rs/src/functions/expression/input.rs](../../objectiveai-rs/src/functions/expression/input.rs) - Input type definitions
+- [objectiveai-rs/src/chat/completions/request/message.rs](../../objectiveai-rs/src/chat/completions/request/message.rs) - RichContentPart types
 
 The backend `Input` enum uses `#[serde(untagged)]` which tries variants in order:
 ```rust
