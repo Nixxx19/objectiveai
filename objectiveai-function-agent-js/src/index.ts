@@ -5,3 +5,5 @@
  */
 
 export * as Claude from "./claude";
+export { init, type InitOptions } from "./init";
+export { assets } from "./assets";

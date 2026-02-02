@@ -1,0 +1,42 @@
+// Function assets
+import functionDescription from "../assets/function/description.json.txt";
+import functionInputMaps from "../assets/function/input_maps.json.txt";
+import functionInputMerge from "../assets/function/input_merge.json.txt";
+import functionInputSchema from "../assets/function/input_schema.json.txt";
+import functionInputSplit from "../assets/function/input_split.json.txt";
+import functionOutput from "../assets/function/output.json.txt";
+import functionOutputLength from "../assets/function/output_length.json.txt";
+import functionTasks from "../assets/function/tasks.json.txt";
+import functionType from "../assets/function/type.json.txt";
+
+// GitHub assets
+import githubDescription from "../assets/github/description.json.txt";
+import githubName from "../assets/github/name.json.txt";
+
+// Root assets
+import gitignore from "../assets/.gitignore.txt";
+import buildTs from "../assets/build.ts.txt";
+import packageJson from "../assets/package.json.txt";
+import readmeMd from "../assets/README.md.txt";
+import testTs from "../assets/test.ts.txt";
+import tsconfigJson from "../assets/tsconfig.json.txt";
+
+export const assets: Record<string, string> = {
+  "function/description.json": functionDescription,
+  "function/input_maps.json": functionInputMaps,
+  "function/input_merge.json": functionInputMerge,
+  "function/input_schema.json": functionInputSchema,
+  "function/input_split.json": functionInputSplit,
+  "function/output.json": functionOutput,
+  "function/output_length.json": functionOutputLength,
+  "function/tasks.json": functionTasks,
+  "function/type.json": functionType,
+  "github/description.json": githubDescription,
+  "github/name.json": githubName,
+  ".gitignore": gitignore,
+  "build.ts": buildTs,
+  "package.json": packageJson,
+  "README.md": readmeMd,
+  "test.ts": testTs,
+  "tsconfig.json": tsconfigJson,
+};

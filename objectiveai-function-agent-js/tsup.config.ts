@@ -12,6 +12,7 @@ const baseConfig: Options = {
   esbuildOptions(options) {
     options.alias = {
       src: path.resolve(__dirname, "src"),
+      assets: path.resolve(__dirname, "assets"),
     };
   },
   loader: {
