@@ -3,3 +3,5 @@
  *
  * This SDK provides tools for building and executing ObjectiveAI function agents.
  */
+
+export * as Claude from "./claude";
