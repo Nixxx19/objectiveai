@@ -65,10 +65,7 @@ export default function PrivacyPage() {
         </div>
 
         {/* Content */}
-        <div style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-        }}>
+        <div>
           <div style={sectionStyle}>
             <p style={paragraphStyle}>
               Objective Artificial Intelligence, Inc. ("ObjectiveAI," "we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our API and website (together, the "Service"). By using our Service, you agree to the practices described in this policy. If you do not agree, you may not use the Service.
@@ -209,14 +206,14 @@ export default function PrivacyPage() {
               ← Terms of Service
             </Link>
             <Link
-              href="/resources"
+              href="/legal"
               style={{
                 color: 'var(--text-muted)',
                 textDecoration: 'none',
                 fontSize: '14px',
               }}
             >
-              Back to Resources
+              Back to Legal
             </Link>
           </div>
         </div>

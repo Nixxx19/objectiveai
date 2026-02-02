@@ -65,10 +65,7 @@ export default function TermsPage() {
         </div>
 
         {/* Content */}
-        <div style={{
-          maxWidth: '800px',
-          margin: '0 auto',
-        }}>
+        <div>
           <div style={sectionStyle}>
             <p style={paragraphStyle}>
               Welcome to Objective Artificial Intelligence, Inc. ("ObjectiveAI," "we," "our," or "us"). These Terms of Service ("Terms") govern your access to and use of our API and website (together, the "Service"). Please read them carefully. By accessing or using the Service, you agree to be bound by these Terms and our Privacy Policy. If you do not agree, you may not use the Service.
@@ -212,14 +209,14 @@ export default function TermsPage() {
               Privacy Policy →
             </Link>
             <Link
-              href="/resources"
+              href="/legal"
               style={{
                 color: 'var(--text-muted)',
                 textDecoration: 'none',
                 fontSize: '14px',
               }}
             >
-              Back to Resources
+              Back to Legal
             </Link>
           </div>
         </div>

@@ -148,8 +148,6 @@ export default function FAQPage() {
           display: 'flex',
           flexDirection: 'column',
           gap: '48px',
-          maxWidth: '800px',
-          margin: '0 auto',
         }}>
           {faqSections.map((section, sectionIdx) => (
             <div key={sectionIdx}>
@@ -242,8 +240,6 @@ export default function FAQPage() {
           background: 'var(--card-bg)',
           borderRadius: '20px',
           border: '1px solid var(--border)',
-          maxWidth: '600px',
-          margin: '80px auto 0',
         }}>
           <h3 style={{
             fontSize: '18px',
@@ -267,8 +263,8 @@ export default function FAQPage() {
             justifyContent: 'center',
             flexWrap: 'wrap',
           }}>
-            <Link href="/resources" className="pillBtn">
-              Resources
+            <Link href="/information" className="pillBtn">
+              Information
             </Link>
             <a
               href="mailto:admin@objective-ai.io"

@@ -358,6 +358,41 @@ console.log(details.model); // "openai/gpt-4o"
 
 **Key rule:** Brand colors (purple) for interactive elements. Warm colors (green→red) for scores/data only.
 
+### Container Layout Standards
+
+**CRITICAL:** Always use the `.container` class for page content wrappers. Never use inline `maxWidth` or custom padding styles that duplicate container behavior.
+
+```jsx
+// CORRECT - Use container class
+<div className="page">
+  <div className="container">
+    {/* Page content */}
+  </div>
+</div>
+
+// WRONG - Don't use inline width/padding overrides
+<div className="page">
+  <div style={{ maxWidth: '800px', margin: '0 auto', padding: '0 32px' }}>
+    {/* This causes inconsistent layouts */}
+  </div>
+</div>
+```
+
+**Container specs (from globals.css):**
+- `max-width: 1100px` (standard pages)
+- `padding: 0 32px` (desktop)
+- `padding: 0 24px` (tablet @1024px)
+- `padding: 0 16px` (mobile @640px)
+
+**Exceptions:**
+- Browse pages (functions, profiles, ensembles, ensemble-llms) intentionally use `maxWidth: '1400px'` for wider grid layouts
+- These are the ONLY pages that should override container width
+
+**Common mistakes to avoid:**
+- Adding `maxWidth` to content sections inside `.container` (causes narrower content)
+- Duplicating padding values inline instead of relying on container
+- Using different maxWidth values across similar page types
+
 ### Server-Side API Routes
 
 API keys must stay server-side. Use Next.js API routes:
@@ -377,9 +412,9 @@ Check `objectiveai-web-new/planning/` before making design decisions:
 ### Navigation Structure
 
 ```
-Functions → Browse, Profiles, Ensembles, Ensemble LLMs
-People → Team
-Resources → Vibe-Native, SDK-First, FAQ, Terms, Privacy
+Functions → Browse, Profiles
+Ensembles → Browse, LLMs
+Information → Team, Docs, Legal
 ```
 
 ### Browse Pages Pattern

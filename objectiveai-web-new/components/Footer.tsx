@@ -211,7 +211,7 @@ export default function Footer() {
               {/* GROUP 3: INFORMATION */}
               <div style={{ textAlign: 'left' }}>
                 <Link
-                  href="/docs"
+                  href="/information"
                   style={{
                     display: 'block',
                     fontSize: '10px',
@@ -262,7 +262,7 @@ export default function Footer() {
                   Team
                 </Link>
                 <Link
-                  href="/docs"
+                  href="/information"
                   style={{
                     fontSize: '12px',
                     fontWeight: 400,

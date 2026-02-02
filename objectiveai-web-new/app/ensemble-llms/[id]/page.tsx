@@ -73,7 +73,7 @@ export default function EnsembleLlmDetailPage({ params }: { params: Promise<{ id
   if (error || !llm) {
     return (
       <div className="page">
-        <div className="container" style={{ padding: isMobile ? "0 16px" : "0 32px" }}>
+        <div className="container" >
           <Link href="/ensemble-llms" style={{ color: "var(--accent)", textDecoration: "none", fontSize: "14px" }}>
             ← Back to Ensemble LLMs
           </Link>
@@ -87,7 +87,7 @@ export default function EnsembleLlmDetailPage({ params }: { params: Promise<{ id
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: isMobile ? "0 16px" : "0 32px" }}>
+      <div className="container" >
         {/* Back link */}
         <Link
           href="/ensemble-llms"

@@ -94,11 +94,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       ],
     },
     {
-      href: "/docs",
+      href: "/information",
       label: "Information",
       subLinks: [
         { href: "/people", label: "Team" },
-        { href: "/docs", label: "Docs" },
+        { href: "/information", label: "Docs" },
         { href: "/legal", label: "Legal" },
       ],
     },

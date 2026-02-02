@@ -81,7 +81,7 @@ export default function EnsembleDetailPage({ params }: { params: Promise<{ id: s
   if (error || !ensemble) {
     return (
       <div className="page">
-        <div className="container" style={{ padding: isMobile ? "0 16px" : "0 32px" }}>
+        <div className="container" >
           <Link href="/ensembles" style={{ color: "var(--accent)", textDecoration: "none", fontSize: "14px" }}>
             ← Back to Ensembles
           </Link>
@@ -95,7 +95,7 @@ export default function EnsembleDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: isMobile ? "0 16px" : "0 32px" }}>
+      <div className="container" >
         {/* Back link */}
         <Link
           href="/ensembles"
