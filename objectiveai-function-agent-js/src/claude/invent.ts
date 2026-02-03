@@ -343,7 +343,7 @@ export async function invent(options: AgentOptions = {}): Promise<void> {
   const log = options.log ?? createFileLogger().log;
 
   // Run preparation (init + steps 1-8)
-  const sessionId = await prepare(options);
+  const sessionId = await prepare({ ...options, log });
 
   // Run invent loop
   log("=== Invent Loop: Creating new function ===");

@@ -334,7 +334,7 @@ export async function handleIssues(options: AgentOptions = {}): Promise<void> {
   const log = options.log ?? createFileLogger().log;
 
   // Run preparation (init + steps 1-8) - but spec already exists
-  const sessionId = await prepare(options);
+  const sessionId = await prepare({ ...options, log });
 
   // Run issue loop
   log("=== Issue Loop: Handling issues on existing function ===");
