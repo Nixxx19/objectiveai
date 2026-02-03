@@ -38,6 +38,10 @@ import plansGitkeep from "../assets/plans/.gitkeep.txt";
 // Logs assets
 import logsGitkeep from "../assets/logs/.gitkeep.txt";
 
+// Markdown assets
+import essayMd from "../assets/ESSAY.md.txt";
+import essayTasksMd from "../assets/ESSAY_TASKS.md.txt";
+
 // Sub-functions assets
 import subFunctionsGitignore from "../assets/sub_functions/.gitignore.txt";
 
@@ -73,4 +77,6 @@ export const assets: Record<string, string> = {
   "logs/.gitkeep": logsGitkeep,
   "sub_functions/.gitignore": subFunctionsGitignore,
   "inputs.json": inputsJson,
+  "ESSAY.md": essayMd,
+  "ESSAY_TASKS.md": essayTasksMd,
 };

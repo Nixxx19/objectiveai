@@ -26,7 +26,7 @@ async function inventLoop(log: LogFn, sessionId?: string): Promise<string | unde
   const maxAttempts = 3;
   let attempt = 0;
   let success = false;
-  let lastFailureReason = "";
+  let lastFailureReasons: string[] = [];
 
   while (attempt < maxAttempts && !success) {
     attempt++;
@@ -186,7 +186,8 @@ Once all tests pass:
 `;
     } else {
       // On retry, send a short message about what failed
-      prompt = `Your previous attempt failed: ${lastFailureReason}
+      prompt = `Your previous attempt failed:
+${lastFailureReasons.map((r) => `- ${r}`).join("\n")}
 
 Please try again. Remember to:
 1. Run \`ts-node build.ts\` to compile and test
@@ -299,25 +300,46 @@ Please try again. Remember to:
     }
 
     // Verify success conditions
+    lastFailureReasons = [];
+
+    if (!buildSuccess) {
+      lastFailureReasons.push(
+        "Build or tests failed. Read serverLog.txt and compiledTasks.json for details.",
+      );
+      log("Failed: Build or tests failed.");
+    }
+
     const hasChanges = hasUncommittedChanges() || hasUntrackedFiles();
+    if (hasChanges) {
+      lastFailureReasons.push(
+        "There are uncommitted changes or untracked files. Commit them with ts-node commitAndPush.ts <message>.",
+      );
+      log("Failed: There are uncommitted changes or untracked files.");
+    }
+
     const descriptionPath = "github/description.json";
     const hasDescription =
       existsSync(descriptionPath) &&
       readFileSync(descriptionPath, "utf-8").trim().length > 0;
-
-    if (!buildSuccess) {
-      lastFailureReason =
-        "Build or tests failed. Read serverLog.txt and compiledTasks.json for details.";
-      log("Failed: Build or tests failed.");
-    } else if (hasChanges) {
-      lastFailureReason =
-        "There are uncommitted changes or untracked files. Commit them with ts-node commitAndPush.ts <message>.";
-      log("Failed: There are uncommitted changes or untracked files.");
-    } else if (!hasDescription) {
-      lastFailureReason =
-        "github/description.json is empty. Write a description for the GitHub repository.";
+    if (!hasDescription) {
+      lastFailureReasons.push(
+        "github/description.json is empty. Write a description for the GitHub repository.",
+      );
       log("Failed: github/description.json is empty.");
-    } else {
+    }
+
+    const readmePath = "README.md";
+    const hasReadme =
+      existsSync(readmePath) &&
+      readFileSync(readmePath, "utf-8").trim().length > 0;
+    if (!hasReadme) {
+      lastFailureReasons.push(
+        "README.md is empty. Write a README for the repository.",
+      );
+      log("Failed: README.md is empty.");
+    }
+
+    if (lastFailureReasons.length === 0) {
       success = true;
       log("Success: All conditions met.");
     }

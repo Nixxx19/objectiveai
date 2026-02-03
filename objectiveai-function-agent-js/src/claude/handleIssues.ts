@@ -31,7 +31,7 @@ async function handleIssuesLoop(
   const maxAttempts = 3;
   let attempt = 0;
   let success = false;
-  let lastFailureReason = "";
+  let lastFailureReasons: string[] = [];
 
   while (attempt < maxAttempts && !success) {
     attempt++;
@@ -149,7 +149,8 @@ Once all tests pass and issues are handled:
 `;
     } else {
       // On retry, send a short message about what failed
-      prompt = `Your previous attempt failed: ${lastFailureReason}
+      prompt = `Your previous attempt failed:
+${lastFailureReasons.map((r) => `- ${r}`).join("\n")}
 
 Please try again. Remember to:
 1. Run \`ts-node build.ts\` to compile and test
@@ -267,7 +268,14 @@ Please try again. Remember to:
     }
 
     // Verify success conditions
-    const hasChanges = hasUncommittedChanges() || hasUntrackedFiles();
+    lastFailureReasons = [];
+
+    if (!buildSuccess) {
+      lastFailureReasons.push(
+        "Build or tests failed. Read serverLog.txt and compiledTasks.json for details.",
+      );
+      log("Failed: Build or tests failed.");
+    }
 
     // Check that all open issues have been marked as resolved
     const resolvedIssuesPath = "resolvedIssues.json";
@@ -279,20 +287,23 @@ Please try again. Remember to:
     const unresolvedIssues = openIssues.filter(
       (issue) => !resolvedIssues.includes(issue.number),
     );
-
-    if (!buildSuccess) {
-      lastFailureReason =
-        "Build or tests failed. Read serverLog.txt and compiledTasks.json for details.";
-      log("Failed: Build or tests failed.");
-    } else if (unresolvedIssues.length > 0) {
+    if (unresolvedIssues.length > 0) {
       const nums = unresolvedIssues.map((i) => `#${i.number}`).join(", ");
-      lastFailureReason = `There are unresolved GitHub issues: ${nums}. Mark them resolved with ts-node closeIssue.ts <number>.`;
+      lastFailureReasons.push(
+        `There are unresolved GitHub issues: ${nums}. Mark them resolved with ts-node closeIssue.ts <number>.`,
+      );
       log(`Failed: Unresolved issues: ${nums}`);
-    } else if (hasChanges) {
-      lastFailureReason =
-        "There are uncommitted changes or untracked files. Commit them with ts-node commitAndPush.ts <message>.";
+    }
+
+    const hasChanges = hasUncommittedChanges() || hasUntrackedFiles();
+    if (hasChanges) {
+      lastFailureReasons.push(
+        "There are uncommitted changes or untracked files. Commit them with ts-node commitAndPush.ts <message>.",
+      );
       log("Failed: There are uncommitted changes or untracked files.");
-    } else {
+    }
+
+    if (lastFailureReasons.length === 0) {
       success = true;
       log("Success: All conditions met.");
     }
