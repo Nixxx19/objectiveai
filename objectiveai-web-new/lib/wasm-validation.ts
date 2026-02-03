@@ -16,6 +16,7 @@ interface WasmModule {
   compileFunctionTasks: (func: unknown, input: unknown) => unknown;
   compileFunctionOutput: (func: unknown, input: unknown, taskOutputs: unknown) => unknown;
   compileFunctionInputMaps: (func: unknown, input: unknown) => unknown | null;
+  compileFunctionInputSplit: (func: unknown, input: unknown) => unknown | null;
   promptId: (prompt: unknown) => string;
 }
 
@@ -242,6 +243,40 @@ export async function compileFunctionInputMaps(
   try {
     const result = wasm.compileFunctionInputMaps(func, input);
     return { success: true, data: result as unknown[][] | null };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
+/**
+ * Compile the input_split expression to get the items being ranked.
+ *
+ * For vector functions, this returns the array of items that will be scored.
+ * The index of each item matches the corresponding score in the output.
+ *
+ * @param func - The Function definition
+ * @param input - The function input
+ * @returns Array of split inputs, or null for scalar functions or functions without input_split
+ */
+export async function compileFunctionInputSplit(
+  func: unknown,
+  input: unknown
+): Promise<ValidationResult<unknown[] | null>> {
+  const wasm = await loadWasm();
+
+  if (!wasm) {
+    return {
+      success: false,
+      error: "WASM validation not available"
+    };
+  }
+
+  try {
+    const result = wasm.compileFunctionInputSplit(func, input);
+    return { success: true, data: result as unknown[] | null };
   } catch (error) {
     return {
       success: false,
