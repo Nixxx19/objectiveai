@@ -158,10 +158,10 @@ export default function VectorCompletionsPage() {
 
   // Score color gradient
   const getScoreColor = (percentage: number): string => {
-    if (percentage >= 66) return "rgb(34, 197, 94)";   // green
-    if (percentage >= 33) return "rgb(234, 179, 8)";   // yellow
-    if (percentage >= 15) return "rgb(249, 115, 22)";  // orange
-    return "rgb(239, 68, 68)";                          // red
+    if (percentage >= 66) return "var(--color-success)"; // green
+    if (percentage >= 33) return "var(--color-warning)"; // yellow
+    if (percentage >= 15) return "var(--color-danger)";  // orange
+    return "var(--color-error)";                          // red
   };
 
   // Helper to get label from ContentItem
@@ -237,7 +237,7 @@ export default function VectorCompletionsPage() {
                     fontSize: "11px",
                     padding: "3px 8px",
                     background: "rgba(34, 197, 94, 0.15)",
-                    color: "rgb(34, 197, 94)",
+                    color: "var(--color-success)",
                     borderRadius: "6px",
                     fontWeight: 600,
                   }}>
@@ -383,11 +383,7 @@ export default function VectorCompletionsPage() {
     <div className="page">
       <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
 
-      <div style={{
-        maxWidth: "1100px",
-        margin: "0 auto",
-        padding: isMobile ? "0 16px" : "0 32px",
-      }}>
+      <div className="container">
         {/* Breadcrumb */}
         <nav style={{
           display: "flex",
@@ -614,7 +610,7 @@ export default function VectorCompletionsPage() {
                 textAlign: "center",
                 padding: isMobile ? "40px 20px" : "60px 20px",
               }}>
-                <p style={{ color: "#ef4444", marginBottom: "8px" }}>
+                <p style={{ color: "var(--color-error)", marginBottom: "8px" }}>
                   {runError.includes("401") ? "Not authenticated" : "Execution failed"}
                 </p>
                 <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>

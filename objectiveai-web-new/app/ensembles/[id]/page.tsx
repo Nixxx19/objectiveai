@@ -86,7 +86,7 @@ export default function EnsembleDetailPage({ params }: { params: Promise<{ id: s
             ← Back to Ensembles
           </Link>
           <div className="card" style={{ padding: "40px", textAlign: "center", marginTop: "24px" }}>
-            <p style={{ color: "rgb(239, 68, 68)" }}>{error || "Ensemble not found"}</p>
+            <p style={{ color: "var(--color-error)" }}>{error || "Ensemble not found"}</p>
           </div>
         </div>
       </div>

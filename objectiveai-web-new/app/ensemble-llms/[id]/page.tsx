@@ -78,7 +78,7 @@ export default function EnsembleLlmDetailPage({ params }: { params: Promise<{ id
             ← Back to Ensemble LLMs
           </Link>
           <div className="card" style={{ padding: "40px", textAlign: "center", marginTop: "24px" }}>
-            <p style={{ color: "rgb(239, 68, 68)" }}>{error || "Ensemble LLM not found"}</p>
+            <p style={{ color: "var(--color-error)" }}>{error || "Ensemble LLM not found"}</p>
           </div>
         </div>
       </div>

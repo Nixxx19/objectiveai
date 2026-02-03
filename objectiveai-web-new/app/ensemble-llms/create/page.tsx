@@ -560,7 +560,7 @@ export default function CreateEnsembleLlmPage() {
                   />
                 )}
                 {computedId && !isValidating && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgb(34, 197, 94)" strokeWidth="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
@@ -573,7 +573,7 @@ export default function CreateEnsembleLlmPage() {
                   padding: "12px",
                   fontFamily: "monospace",
                   fontSize: "13px",
-                  color: validationError ? "rgb(239, 68, 68)" : computedId ? "var(--accent)" : "var(--text-muted)",
+                  color: validationError ? "var(--color-error)" : computedId ? "var(--accent)" : "var(--text-muted)",
                   wordBreak: "break-all",
                 }}
               >

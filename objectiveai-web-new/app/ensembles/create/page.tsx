@@ -50,7 +50,7 @@ export default function CreateEnsemblePage() {
   const [isValidating, setIsValidating] = useState(false);
 
   useEffect(() => {
-    const checkViewport = () => setIsMobile(window.innerWidth <= 768);
+    const checkViewport = () => setIsMobile(window.innerWidth <= 640);
     checkViewport();
     window.addEventListener("resize", checkViewport);
     return () => window.removeEventListener("resize", checkViewport);
@@ -300,8 +300,8 @@ export default function CreateEnsemblePage() {
                       title="Remove LLM"
                       onMouseEnter={(e) => {
                         if (entries.length > 1) {
-                          e.currentTarget.style.borderColor = "rgb(239, 68, 68)";
-                          e.currentTarget.style.color = "rgb(239, 68, 68)";
+                          e.currentTarget.style.borderColor = "var(--color-error)";
+                          e.currentTarget.style.color = "var(--color-error)";
                         }
                       }}
                       onMouseLeave={(e) => {
@@ -369,7 +369,7 @@ export default function CreateEnsemblePage() {
                     fontWeight: 600,
                     color:
                       totalCount < 1 || totalCount > 128
-                        ? "rgb(239, 68, 68)"
+                        ? "var(--color-error)"
                         : "var(--text)",
                   }}
                 >
@@ -383,7 +383,7 @@ export default function CreateEnsemblePage() {
                   style={{
                     marginTop: "12px",
                     fontSize: "13px",
-                    color: "rgb(239, 68, 68)",
+                    color: "var(--color-error)",
                   }}
                 >
                   Total count cannot exceed 128. Please reduce the count values.
@@ -419,7 +419,7 @@ export default function CreateEnsemblePage() {
                   />
                 )}
                 {computedId && !isValidating && (
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgb(34, 197, 94)" strokeWidth="2">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" strokeWidth="2">
                     <polyline points="20 6 9 17 4 12" />
                   </svg>
                 )}
@@ -432,7 +432,7 @@ export default function CreateEnsemblePage() {
                   padding: "12px",
                   fontFamily: "monospace",
                   fontSize: "13px",
-                  color: validationError ? "rgb(239, 68, 68)" : computedId ? "var(--accent)" : "var(--text-muted)",
+                  color: validationError ? "var(--color-error)" : computedId ? "var(--accent)" : "var(--text-muted)",
                   wordBreak: "break-all",
                 }}
               >

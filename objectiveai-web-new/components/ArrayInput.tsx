@@ -375,8 +375,8 @@ export default function ArrayInput({ label, description, value, onChange, isMobi
               style={iconButtonStyle}
               title="Remove item"
               onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgb(239, 68, 68)";
-                e.currentTarget.style.color = "rgb(239, 68, 68)";
+                e.currentTarget.style.borderColor = "var(--color-error)";
+                e.currentTarget.style.color = "var(--color-error)";
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.borderColor = "var(--border)";

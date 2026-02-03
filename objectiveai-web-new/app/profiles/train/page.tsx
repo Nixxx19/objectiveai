@@ -388,7 +388,7 @@ export default function ProfileTrainPage() {
                           padding: "4px 8px",
                           background: "none",
                           border: "none",
-                          color: "rgb(239, 68, 68)",
+                          color: "var(--color-error)",
                           fontSize: "12px",
                           cursor: "pointer",
                         }}

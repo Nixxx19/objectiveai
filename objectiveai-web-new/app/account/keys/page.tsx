@@ -278,7 +278,7 @@ export default function ApiKeysPage() {
               height="48"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="rgb(239, 68, 68)"
+              stroke="var(--color-error)"
               strokeWidth="1.5"
               style={{ marginBottom: '16px', opacity: 0.6 }}
             >
@@ -438,9 +438,9 @@ export default function ApiKeysPage() {
                       padding: '8px 16px',
                       fontSize: '13px',
                       fontWeight: 500,
-                      color: isDisabling === key.api_key ? 'var(--text-muted)' : 'rgb(239, 68, 68)',
+                      color: isDisabling === key.api_key ? 'var(--text-muted)' : 'var(--color-error)',
                       background: 'transparent',
-                      border: `1px solid ${isDisabling === key.api_key ? 'var(--border)' : 'rgb(239, 68, 68)'}`,
+                      border: `1px solid ${isDisabling === key.api_key ? 'var(--border)' : 'var(--color-error)'}`,
                       borderRadius: '8px',
                       cursor: isDisabling === key.api_key ? 'not-allowed' : 'pointer',
                       transition: 'all 0.2s',

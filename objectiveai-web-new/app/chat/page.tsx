@@ -317,7 +317,7 @@ export default function ChatPage() {
             background: "rgba(239, 68, 68, 0.1)",
             border: "1px solid rgba(239, 68, 68, 0.2)",
             borderRadius: "12px",
-            color: "rgb(239, 68, 68)",
+            color: "var(--color-error)",
             fontSize: "14px",
           }}>
             {error.includes("401")

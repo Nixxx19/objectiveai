@@ -144,7 +144,7 @@ export default function LoginModal({ isOpen, onClose }: LoginModalProps) {
               padding: "12px 16px",
               marginBottom: "20px",
               fontSize: "14px",
-              color: "#ef4444",
+              color: "var(--color-error)",
             }}
           >
             {authError.message}

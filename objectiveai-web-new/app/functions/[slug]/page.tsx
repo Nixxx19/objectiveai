@@ -578,10 +578,10 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
 
   // Score color gradient: green (100%) → yellow (66%) → orange (33%) → red (0%)
   const getScoreColor = (percentage: number): string => {
-    if (percentage >= 66) return "rgb(34, 197, 94)";   // green
-    if (percentage >= 33) return "rgb(234, 179, 8)";   // yellow
-    if (percentage >= 15) return "rgb(249, 115, 22)";  // orange
-    return "rgb(239, 68, 68)";                          // red
+    if (percentage >= 66) return "var(--color-success)"; // green
+    if (percentage >= 33) return "var(--color-warning)"; // yellow
+    if (percentage >= 15) return "var(--color-danger)";  // orange
+    return "var(--color-error)";                          // red
   };
 
   // Helper to get content item label
@@ -738,7 +738,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                       fontSize: "11px",
                       padding: "3px 8px",
                       background: "rgba(34, 197, 94, 0.15)",
-                      color: "rgb(34, 197, 94)",
+                      color: "var(--color-success)",
                       borderRadius: "6px",
                       fontWeight: 600,
                     }}>
@@ -767,15 +767,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     return (
       <div className="page">
         <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
-        <div style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          paddingTop: "100px",
-          paddingRight: "32px",
-          paddingBottom: "0",
-          paddingLeft: "32px",
-          textAlign: "center",
-        }}>
+        <div className="container" style={{ paddingTop: "100px", textAlign: "center" }}>
           <div style={{
             width: "40px",
             height: "40px",
@@ -795,16 +787,8 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   if (loadError || !functionDetails) {
     return (
       <div className="page">
-        <div style={{
-          maxWidth: "1400px",
-          margin: "0 auto",
-          paddingTop: "100px",
-          paddingRight: "32px",
-          paddingBottom: "0",
-          paddingLeft: "32px",
-          textAlign: "center",
-        }}>
-          <p style={{ color: "#ef4444", marginBottom: "8px" }}>Failed to load function</p>
+        <div className="container" style={{ paddingTop: "100px", textAlign: "center" }}>
+          <p style={{ color: "var(--color-error)", marginBottom: "8px" }}>Failed to load function</p>
           <p style={{ color: "var(--text-muted)", marginBottom: "24px" }}>{loadError}</p>
           <Link href="/functions" style={{ color: "var(--accent)" }}>
             Back to Functions
@@ -818,11 +802,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     <div className="page">
       <style dangerouslySetInnerHTML={{ __html: spinnerStyle }} />
 
-      <div style={{
-        maxWidth: "1400px",
-        margin: "0 auto",
-        padding: isMobile ? "0 16px" : "0 32px",
-      }}>
+      <div className="container">
         {/* Breadcrumb Row with Pin */}
         <div style={{
           display: "flex",
@@ -1086,7 +1066,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                 textAlign: "center",
                 padding: isMobile ? "40px 20px" : "60px 20px",
               }}>
-                <p style={{ color: "#ef4444", marginBottom: "8px" }}>
+                <p style={{ color: "var(--color-error)", marginBottom: "8px" }}>
                   {runError.includes("401") ? "Not authenticated" : "Execution failed"}
                 </p>
                 <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>

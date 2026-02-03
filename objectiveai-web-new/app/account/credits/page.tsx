@@ -167,7 +167,7 @@ export default function CreditsPage() {
                 height="40"
                 viewBox="0 0 24 24"
                 fill="none"
-                stroke="rgb(239, 68, 68)"
+                stroke="var(--color-error)"
                 strokeWidth="1.5"
                 style={{ marginBottom: '12px', opacity: 0.6 }}
               >

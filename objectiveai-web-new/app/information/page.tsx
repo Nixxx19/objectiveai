@@ -452,7 +452,7 @@ export default function InformationPage() {
                         lineHeight: 1,
                         color: endpoint.method === 'GET' ? '#10b981' :
                                endpoint.method === 'POST' ? 'var(--accent)' :
-                               endpoint.method === 'DELETE' ? '#ef4444' : 'var(--text)',
+                               endpoint.method === 'DELETE' ? 'var(--color-error)' : 'var(--text)',
                       }}>
                         {endpoint.method}
                       </span>

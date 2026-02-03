@@ -55,7 +55,7 @@ export default function FunctionCreatePage() {
   const [activeTaskIndex, setActiveTaskIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    const checkMobile = () => setIsMobile(window.innerWidth <= 640);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
@@ -290,7 +290,7 @@ export default function FunctionCreatePage() {
                     border: "1px solid var(--border)",
                     borderRadius: "4px",
                     cursor: "pointer",
-                    color: "rgb(239, 68, 68)",
+                    color: "var(--color-error)",
                   }}
                 >
                   Remove
@@ -640,7 +640,7 @@ export default function FunctionCreatePage() {
                           border: "1px solid var(--border)",
                           borderRadius: "4px",
                           cursor: "pointer",
-                          color: "rgb(239, 68, 68)",
+                          color: "var(--color-error)",
                           marginTop: "8px",
                         }}
                       >
@@ -722,7 +722,7 @@ export default function FunctionCreatePage() {
                             height: "28px",
                             borderRadius: "6px",
                             background: task.type === "vector" ? "rgba(34, 197, 94, 0.1)" : "rgba(107, 92, 255, 0.1)",
-                            color: task.type === "vector" ? "rgb(34, 197, 94)" : "var(--accent)",
+                            color: task.type === "vector" ? "var(--color-success)" : "var(--accent)",
                             display: "flex",
                             alignItems: "center",
                             justifyContent: "center",
@@ -767,7 +767,7 @@ export default function FunctionCreatePage() {
                               background: "none",
                               border: "none",
                               cursor: "pointer",
-                              color: "rgb(239, 68, 68)",
+                              color: "var(--color-error)",
                             }}
                           >
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -855,7 +855,7 @@ export default function FunctionCreatePage() {
                   padding: "12px 16px",
                   fontSize: "14px",
                   fontWeight: 600,
-                  background: copied ? "rgb(34, 197, 94)" : "var(--accent)",
+                  background: copied ? "var(--color-success)" : "var(--accent)",
                   color: "white",
                   border: "none",
                   borderRadius: "8px",

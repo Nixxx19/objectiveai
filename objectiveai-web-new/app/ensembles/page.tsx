@@ -300,7 +300,7 @@ export default function EnsemblesPage() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                <p style={{ color: '#ef4444', marginBottom: '8px' }}>Failed to load ensembles</p>
+                <p style={{ color: 'var(--color-error)', marginBottom: '8px' }}>Failed to load ensembles</p>
                 <p style={{ fontSize: '14px' }}>{error}</p>
               </div>
             )}

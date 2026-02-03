@@ -329,7 +329,7 @@ export default function EnsembleLlmsPage() {
                 alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                <p style={{ color: '#ef4444', marginBottom: '8px' }}>Failed to load ensemble LLMs</p>
+                <p style={{ color: 'var(--color-error)', marginBottom: '8px' }}>Failed to load ensemble LLMs</p>
                 <p style={{ fontSize: '14px' }}>{error}</p>
               </div>
             )}
