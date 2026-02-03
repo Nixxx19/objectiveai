@@ -32,12 +32,6 @@ async function inventLoop(log: LogFn, sessionId?: string): Promise<string | unde
     attempt++;
     log(`Invent loop attempt ${attempt}/${maxAttempts}`);
 
-    // Reset to initial revision if this is a retry
-    if (attempt > 1) {
-      log(`Resetting to initial revision: ${initialRevision}`);
-      resetToRevision(initialRevision);
-    }
-
     // Build the prompt - full on first attempt, short on retry
     let prompt: string;
 
