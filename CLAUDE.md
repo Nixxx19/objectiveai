@@ -450,3 +450,247 @@ OAuth providers (Google, GitHub, X, Reddit) via standard auth provider. Email si
 
 - **Purchase Credits** button disabled until payment integration exists
 - **File uploads** disabled pending function expression support
+
+### Web-New Current State (~80% Complete)
+
+**Production-Ready Pages:**
+- `/` - Landing with featured functions
+- `/functions`, `/profiles`, `/ensembles`, `/ensemble-llms` - Browse pages with search/filter/sort
+- `/people` - Team page with founder bios
+- `/information` - FAQ (24 Q&As), API docs, SDK links
+- `/legal` - Terms + Privacy (expandable cards)
+- `/sdk-first`, `/vibe-native` - Onboarding guides
+
+**Partial/Incomplete:**
+- `/account/keys` - API keys (`BYPASS_AUTH = true` for dev)
+- `/functions/[slug]`, `/ensembles/[id]`, `/ensemble-llms/[id]` - Detail pages
+- Payment integration, real OAuth, file uploads
+
+### Key Web-New Files
+
+| File | Purpose |
+|------|---------|
+| `app/globals.css` | Design system (831 lines) |
+| `components/AppShell.tsx` | Navigation, theme toggle, mobile menu |
+| `lib/objectiveai.ts` | SDK wrapper with dev defaults (`from_cache: true`, `from_rng: true`) |
+| `contexts/AuthContext.tsx` | Auth provider (placeholder stubs) |
+| `planning/` | Wireframes, moodboards, design guidelines |
+
+---
+
+## Deep Technical Reference
+
+### Content-Addressed ID Computation
+
+**Algorithm:** XXHash3-128 → base62 → pad to 22 characters
+
+```rust
+// From objectiveai-rs/src/ensemble_llm/ensemble_llm.rs
+fn id(&self) -> String {
+    let mut hasher = XxHash3_128::with_seed(0);
+    hasher.write(serde_json::to_string(self).unwrap().as_bytes());
+    format!("{:0>22}", base62::encode(hasher.finish_128()))
+}
+```
+
+**Critical:** Structure must be normalized before hashing (defaults removed, collections sorted).
+
+### Ensemble LLM Validation Rules
+
+| Field | Range | Notes |
+|-------|-------|-------|
+| `model` | non-empty | e.g., `openai/gpt-4o` |
+| `temperature` | [0, 2] | Default 1.0 removed before hashing |
+| `top_p` | [0, 1] | Default 1.0 removed |
+| `top_logprobs` | [2, 20] | Enables probabilistic voting |
+| `frequency_penalty` | [-2, 2] | |
+| `presence_penalty` | [-2, 2] | |
+
+### Ensemble Validation
+
+- Total LLM count (sum of all `count` fields): [1, 128]
+- No duplicate primary+fallback ID combinations
+- LLMs with `count: 0` are skipped
+
+### Probabilistic Voting (Prefix Tree)
+
+**Location:** `objectiveai-api/src/vector/completions/pfx.rs`
+
+**How it works:**
+1. Set `top_logprobs` (2-20) on Ensemble LLM
+2. Responses get prefixed keys: `` `A` ``, `` `B` ``, etc.
+3. For >20 responses, nested prefixes: `` `A` `` `` `A` ``, `` `A` `` `` `B` ``
+4. Extract logprobs from final token to get probability distribution
+5. Tree is randomized per-request to prevent position bias
+
+**Vote calculation:**
+```
+weights[i] += sum(vote[i] * llm.weight for each LLM)
+scores = weights / sum(weights)  // Normalize to sum ≈ 1
+```
+
+### Vote Priority (Cache Behavior)
+
+1. **Retry votes** - From previous execution via `retry_token`
+2. **Cache votes** - Global ObjectiveAI cache (`from_cache: true`)
+3. **RNG votes** - Simulated, free (`from_rng: true`)
+4. **Fresh votes** - Actual LLM inference
+
+### Function Flattening
+
+**Location:** `objectiveai-api/src/functions/flat_task_profile.rs`
+
+Nested functions are flattened for parallel execution:
+```
+Function A
+├─ Task 1: VectorCompletion  ──→  Parallel batch
+├─ Task 2: Function B
+│  ├─ Task 2.1: VectorCompletion  ──→  Same batch
+│  └─ Task 2.2: VectorCompletion  ──→  Same batch
+└─ Task 3: VectorCompletion  ──→  Same batch
+```
+
+All leaf vector completions execute in parallel, results aggregate up the tree.
+
+### Expression Context Variables
+
+| Variable | Available In | Description |
+|----------|--------------|-------------|
+| `input` | Everywhere | Function input data |
+| `tasks` | Output expression only | Array of task outputs (null if skipped) |
+| `map` | Mapped task expressions | Current element from `input_maps` |
+
+### Expression Custom Functions
+
+**JMESPath** (from `objectiveai-rs/src/functions/expression/runtime.rs`):
+- Math: `add(a,b)`, `subtract(a,b)`, `multiply(a,b)`, `divide(a,b)`, `mod(a,b)`
+- Utilities: `json_parse(s)`, `is_null(v)`, `if(cond, then, else)`
+- Advanced: `l1_normalize(array)`, `zip_map(expref, array)`, `repeat(value, n)`
+
+**Starlark** (from `objectiveai-rs/src/functions/expression/starlark.rs`):
+- `sum(list)`, `abs(x)`, `float(x)`, `round(x)`
+- Full list comprehensions, dictionary comprehensions
+
+### Output Validation
+
+**Scalar functions:** Output must be in [0, 1]
+
+**Vector functions:**
+- Sum must be ~1 (tolerance: 0.99-1.01)
+- Length must match `output_length` if specified
+
+### TypeScript SDK Key Types
+
+```typescript
+// Vote contains cryptic 22-char ID
+interface Vote {
+  model: string;        // e.g., "0QMZqudstCDbls4uoQOhEC"
+  vote: number[];       // Distribution over responses
+  weight: number;       // LLM's influence [0, 1]
+  from_cache?: boolean;
+  from_rng?: boolean;
+}
+
+// To get readable model name:
+const details = await EnsembleLlm.retrieve(client, vote.model);
+console.log(details.model); // "openai/gpt-4o"
+```
+
+### Request Context (BYOK Support)
+
+**Location:** `objectiveai-api/src/ctx/`
+
+The `Context` struct enables:
+- Per-request ensemble/LLM caching (prevents N+1 queries)
+- BYOK (Bring Your Own Key) via `ContextExt` trait
+- Cost tracking per user
+
+### Swiss System Strategy
+
+For vector functions, enables tournament-style ranking:
+1. Split input into pools (default size 10)
+2. Score each pool
+3. Re-sort by cumulative scores
+4. Re-pool and score again
+5. Repeat for N rounds (default 3)
+6. Average scores across rounds
+
+---
+
+## Web-New Feature Gap Audit
+
+### What's Implemented ✅
+
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Browse Functions | Complete | Search, filter, pagination |
+| Execute Functions | Complete | Streaming, results visualization, model breakdown |
+| Browse Profiles/Ensembles/LLMs | Complete | List views with search |
+| Detail Pages | Complete | Function, Ensemble, Ensemble LLM details |
+| API Key Management | Complete | Create, view, disable |
+| Credit Balance | View-only | Purchase disabled |
+| Media Input Component | Ready | `ArrayInput.tsx` supports images, audio, video, files |
+
+### What's Missing ❌
+
+| Feature | Impact | Backend Capability |
+|---------|--------|-------------------|
+| **Profile Training** | High | `Functions.Profiles.Computations.create()` exists |
+| **Ensemble/LLM Creation** | High | Validation + ID computation in SDK |
+| **Function Definition Editor** | High | Expression system fully supported |
+| **Direct Chat Completions** | Medium | `Chat.Completions.create()` available |
+| **Direct Vector Completions** | Medium | `Vector.Completions.create()` available |
+| **File Uploads** | Medium | Component ready, disabled via `textOnly={true}` |
+| **Reasoning Model Selector** | Low | Hardcoded to `gpt-4o-mini` |
+| **Profile Selector** | Low | Function-profile pairs hardcoded |
+
+### WASM Bindings (Unused)
+
+Web-new does NOT use any WASM functions. These enable **zero-cost client-side validation**:
+
+| Function | Purpose |
+|----------|---------|
+| `validateEnsembleLlm(llm)` | Validate LLM config, compute ID |
+| `validateEnsemble(ensemble)` | Validate ensemble, compute ID |
+| `validateFunctionInput(func, input)` | Validate input against schema |
+| `compileFunctionTasks(func, input)` | Preview which tasks will run |
+| `compileFunctionOutput(func, input, taskOutputs)` | Preview final output |
+
+**Recommendation:** Add WASM validation for real-time feedback during authoring.
+
+### Backend Endpoints Not Exposed
+
+| Endpoint | Purpose |
+|----------|---------|
+| `POST /functions/.../profiles/compute` | Train profile weights |
+| `GET /functions/profiles/pairs` | List function-profile pairs |
+| `POST /vector/completions` | Direct vector voting |
+| `POST /chat/completions` | Direct chat |
+| `GET /.../usage` | Per-resource usage stats |
+
+### Architectural Gap
+
+Web-new is **read-only for definitions**:
+- ✅ Can execute functions
+- ✅ Can view profiles, ensembles, LLMs
+- ❌ Cannot create any of the above
+
+All definitions must exist on GitHub first.
+
+---
+
+## Development Workflow
+
+### Merging from Main
+
+**CRITICAL:** Any merge from `main` warrants full understanding of its contents and implications. Before merging:
+
+1. Review all changed files and understand the scope
+2. Check for changes to:
+   - API contracts (request/response types)
+   - SDK methods and signatures
+   - WASM bindings exports
+   - Design system (globals.css, components)
+3. Update this CLAUDE.md if backend capabilities change
+4. Test affected web-new pages after merge
+5. Verify no regressions in browse/execute flows
