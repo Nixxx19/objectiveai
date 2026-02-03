@@ -47,6 +47,22 @@
   /* Accent variants for backgrounds */
   --accent-light: rgba(107, 92, 255, 0.1);
   --accent-lighter: rgba(107, 92, 255, 0.05);
+
+  /* Spacing Scale */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+
+  /* Border Radius Scale */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 50px;
 }
 
 /* Dark Theme Variables */
@@ -201,7 +217,7 @@ body {
 
 .navLink:hover {
   color: var(--text);
-  background: rgba(107, 92, 255, 0.1);
+  background: var(--accent-light);
 }
 
 .navLink.active {
@@ -240,7 +256,7 @@ body {
 
 .aiTextField:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(107, 92, 255, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
 
 .aiTextField input,
@@ -291,7 +307,7 @@ body {
 
 .humanTextField:focus-within {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(107, 92, 255, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
 
 .humanTextField input,
@@ -375,13 +391,50 @@ body {
 
 .iconBtn:hover {
   border-color: var(--accent);
-  background: rgba(107, 92, 255, 0.05);
+  background: var(--accent-lighter);
   color: var(--accent);
 }
 
 .iconBtn svg {
   width: 18px;
   height: 18px;
+}
+
+/* IconButton Size Variants */
+.iconBtn--sm {
+  width: 32px;
+  height: 32px;
+}
+
+.iconBtn--sm svg {
+  width: 14px;
+  height: 14px;
+}
+
+.iconBtn--lg {
+  width: 48px;
+  height: 48px;
+}
+
+.iconBtn--lg svg {
+  width: 22px;
+  height: 22px;
+}
+
+/* IconButton Style Variants */
+.iconBtn--ghost {
+  border: none;
+  background: transparent;
+}
+
+.iconBtn--ghost:hover {
+  background: var(--accent-lighter);
+}
+
+.iconBtn--danger:hover {
+  border-color: var(--color-error);
+  color: var(--color-error);
+  background: rgba(239, 68, 68, 0.05);
 }
 
 /* Mobile Menu */
@@ -487,7 +540,24 @@ body {
 
 .pillBtnGhost:hover {
   border-color: var(--accent);
-  background: rgba(107, 92, 255, 0.05);
+  background: var(--accent-lighter);
+}
+
+/* Disabled States */
+.pillBtn:disabled,
+.pillBtnGhost:disabled,
+.iconBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.input:disabled,
+.textarea:disabled,
+.select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  background: var(--border);
 }
 
 /* Cards */
@@ -535,7 +605,7 @@ body {
 .input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(107, 92, 255, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
 
 .textarea {
@@ -555,7 +625,7 @@ body {
 .textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(107, 92, 255, 0.1);
+  box-shadow: 0 0 0 3px var(--accent-light);
 }
 
 .select {
@@ -577,20 +647,20 @@ body {
 }
 
 /* Typography */
-.heading1 {
+.headingHero {
   font-size: clamp(60px, 12vw, 160px);
   font-weight: 900;
   line-height: 0.9;
   letter-spacing: -0.02em;
 }
 
-.heading2 {
+.headingHero2 {
   font-size: clamp(32px, 5vw, 48px);
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-.heading3 {
+.headingHero3 {
   font-size: clamp(18px, 3vw, 24px);
   font-weight: 600;
 }
@@ -602,7 +672,7 @@ body {
   font-size: 13px;
   font-weight: 500;
   color: var(--accent);
-  background: rgba(107, 92, 255, 0.1);
+  background: var(--accent-light);
   border-radius: 20px;
 }
 
@@ -621,7 +691,7 @@ body {
 
 .filterChip:hover {
   border-color: var(--accent);
-  background: rgba(107, 92, 255, 0.05);
+  background: var(--accent-lighter);
 }
 
 .filterChip.active {
@@ -842,4 +912,81 @@ body {
   .sectionGap {
     margin-bottom: 60px;
   }
+}
+
+/* Hover Utility Classes */
+/* Footer link styles - replaces JS onMouseEnter/onMouseLeave handlers */
+.footerGroupTitle {
+  display: block;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  text-decoration: none;
+  margin-bottom: 6px;
+  opacity: 0.8;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.footerGroupTitle:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.footerLink {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--text-muted);
+  text-decoration: none;
+  opacity: 0.7;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.footerLink:hover {
+  color: var(--accent);
+  opacity: 1;
+}
+
+.socialIconLink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
+}
+
+.socialIconLink:hover {
+  background: var(--accent);
+  color: var(--color-light);
+}
+
+.footerSocialIcon {
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.footerSocialIcon:hover {
+  border-color: var(--accent);
+  background: var(--accent-lighter);
+  color: var(--accent);
+}
+
+/* General hover utilities */
+.hoverAccent:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }

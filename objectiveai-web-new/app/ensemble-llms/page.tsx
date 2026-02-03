@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useResponsive } from "../../hooks/useResponsive";
 import { NAV_HEIGHT_CALCULATION_DELAY_MS } from "../../lib/constants";
 
 interface EnsembleLlmItem {
@@ -17,8 +17,7 @@ export default function EnsembleLlmsPage() {
   const [llms, setLlms] = useState<EnsembleLlmItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isMobile = useIsMobile();
-  const [isTablet, setIsTablet] = useState(false);
+  const { isMobile, isTablet } = useResponsive();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("id");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -41,16 +40,6 @@ export default function EnsembleLlmsPage() {
       }
     }
     fetchLlms();
-  }, []);
-
-  // Track tablet viewport size
-  useEffect(() => {
-    const checkViewport = () => {
-      setIsTablet(window.innerWidth <= 1024);
-    };
-    checkViewport();
-    window.addEventListener("resize", checkViewport);
-    return () => window.removeEventListener("resize", checkViewport);
   }, []);
 
   useEffect(() => {

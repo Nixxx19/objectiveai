@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { deriveCategory, deriveDisplayName } from "../../lib/objectiveai";
 import { NAV_HEIGHT_CALCULATION_DELAY_MS } from "../../lib/constants";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useResponsive } from "../../hooks/useResponsive";
 
 // Function item type for UI
 interface FunctionItem {
@@ -38,8 +38,7 @@ export default function FunctionsPage() {
   const [pinnedFunctions, setPinnedFunctions] = useState<string[]>([]);
   const [recentFunctions, setRecentFunctions] = useState<string[]>([]);
   const [navOffset, setNavOffset] = useState(96);
-  const isMobile = useIsMobile();
-  const [isTablet, setIsTablet] = useState(false);
+  const { isMobile, isTablet } = useResponsive();
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const searchRef = useRef<HTMLDivElement>(null);
 
@@ -106,16 +105,6 @@ export default function FunctionsPage() {
     }
 
     fetchFunctions();
-  }, []);
-
-  // Track tablet viewport size
-  useEffect(() => {
-    const checkViewport = () => {
-      setIsTablet(window.innerWidth <= 1024);
-    };
-    checkViewport();
-    window.addEventListener('resize', checkViewport);
-    return () => window.removeEventListener('resize', checkViewport);
   }, []);
 
   // Load pinned and recent from localStorage
@@ -588,6 +577,28 @@ export default function FunctionsPage() {
             </div>
           </>
         )}
+
+        {/* Info Card */}
+        <div
+          className="card"
+          style={{
+            padding: '24px',
+            marginTop: '40px',
+            background: 'var(--nav-surface)',
+          }}
+        >
+          <h3 style={{ fontSize: '15px', fontWeight: 600, marginBottom: '12px' }}>
+            What are Functions?
+          </h3>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.6, marginBottom: '12px' }}>
+            Functions are composable scoring pipelines. Data in, score(s) out. Each function
+            executes a list of tasks, where each task is either a Vector Completion or another Function.
+          </p>
+          <p style={{ fontSize: '14px', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            Functions are hosted on GitHub as <code style={{ background: 'var(--card-bg)', padding: '2px 6px', borderRadius: '4px' }}>function.json</code> at
+            the repository root. Reference by <code style={{ background: 'var(--card-bg)', padding: '2px 6px', borderRadius: '4px' }}>owner/repo</code> with optional commit SHA for immutability.
+          </p>
+        </div>
       </div>
     </div>
   );

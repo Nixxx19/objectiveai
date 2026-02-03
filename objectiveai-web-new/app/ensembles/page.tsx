@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { NAV_HEIGHT_CALCULATION_DELAY_MS } from "../../lib/constants";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useResponsive } from "../../hooks/useResponsive";
 
 interface EnsembleItem {
   id: string;
@@ -17,8 +17,7 @@ export default function EnsemblesPage() {
   const [ensembles, setEnsembles] = useState<EnsembleItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isMobile = useIsMobile();
-  const [isTablet, setIsTablet] = useState(false);
+  const { isMobile, isTablet } = useResponsive();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("id");
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -41,16 +40,6 @@ export default function EnsemblesPage() {
       }
     }
     fetchEnsembles();
-  }, []);
-
-  // Track tablet viewport size
-  useEffect(() => {
-    const checkViewport = () => {
-      setIsTablet(window.innerWidth <= 1024);
-    };
-    checkViewport();
-    window.addEventListener("resize", checkViewport);
-    return () => window.removeEventListener("resize", checkViewport);
   }, []);
 
   useEffect(() => {

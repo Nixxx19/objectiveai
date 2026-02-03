@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useResponsive } from "../../hooks/useResponsive";
 import { NAV_HEIGHT_CALCULATION_DELAY_MS } from "../../lib/constants";
 
 interface ProfileItem {
@@ -18,8 +18,7 @@ export default function ProfilesPage() {
   const [profiles, setProfiles] = useState<ProfileItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const isMobile = useIsMobile();
-  const [isTablet, setIsTablet] = useState(false);
+  const { isMobile, isTablet } = useResponsive();
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState("name");
   const [selectedOwner, setSelectedOwner] = useState("All");
@@ -43,16 +42,6 @@ export default function ProfilesPage() {
       }
     }
     fetchProfiles();
-  }, []);
-
-  // Track tablet viewport size
-  useEffect(() => {
-    const checkViewport = () => {
-      setIsTablet(window.innerWidth <= 1024);
-    };
-    checkViewport();
-    window.addEventListener("resize", checkViewport);
-    return () => window.removeEventListener("resize", checkViewport);
   }, []);
 
   // Dynamic sticky offset calculation based on nav height
