@@ -14,15 +14,15 @@ export async function createFunctionTypeJson(
     if (!existsSync(functionTypePath)) {
       return false;
     }
-    try {
-      const content = readFileSync(functionTypePath, "utf-8");
-      const parsed = JSON.parse(content);
-      return (
-        parsed.type === "scalar.function" || parsed.type === "vector.function"
-      );
-    } catch {
+    let content = readFileSync(functionTypePath, "utf-8").trim();
+    if (!content || content === "null") {
       return false;
     }
+    // Remove surrounding quotes if both present
+    if (content.startsWith('"') && content.endsWith('"')) {
+      content = content.slice(1, -1);
+    }
+    return content === "scalar.function" || content === "vector.function";
   };
 
   // Query

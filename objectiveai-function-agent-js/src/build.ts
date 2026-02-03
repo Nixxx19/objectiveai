@@ -49,6 +49,23 @@ function readJsonFile(path: string): unknown {
   return JSON.parse(content);
 }
 
+// Read JSON file that should contain a string value
+// Handles both quoted ("value") and unquoted (value) content
+function readStringJsonFile(path: string): string | null {
+  if (!existsSync(path)) {
+    return null;
+  }
+  let content = readFileSync(path, "utf-8").trim();
+  if (!content || content === "null") {
+    return null;
+  }
+  // Remove surrounding quotes if both present (only one pair)
+  if (content.startsWith('"') && content.endsWith('"')) {
+    content = content.slice(1, -1);
+  }
+  return content;
+}
+
 export interface FunctionFields {
   type?: unknown;
   description?: unknown;
@@ -65,8 +82,8 @@ export function buildFunction(fields?: FunctionFields): Record<string, unknown> 
   const func: Record<string, unknown> = {};
 
   // Use provided fields or read from files
-  const type = fields?.type ?? readJsonFile("function/type.json");
-  const description = fields?.description ?? readJsonFile("function/description.json");
+  const type = fields?.type ?? readStringJsonFile("function/type.json");
+  const description = fields?.description ?? readStringJsonFile("function/description.json");
   const inputMaps = fields?.input_maps ?? readJsonFile("function/input_maps.json");
   const inputSchema = fields?.input_schema ?? readJsonFile("function/input_schema.json");
   const tasks = fields?.tasks ?? readJsonFile("function/tasks.json");
@@ -105,7 +122,7 @@ export function buildProfile(options: ProfileOptions = {}): Functions.RemoteProf
   } = options;
 
   // Use provided values or read from files
-  const name = options.name ?? readJsonFile("github/name.json") as string | null;
+  const name = options.name ?? readStringJsonFile("github/name.json");
   const tasks = options.tasks ?? readJsonFile("function/tasks.json") as Functions.Task[] | null;
 
   const profileTasks: Functions.TaskProfile[] = [];

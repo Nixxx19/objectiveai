@@ -156,13 +156,21 @@ export function closeIssue(issueNumber: number): void {
   gh(`issue close ${issueNumber}`);
 }
 
-// Read JSON file, return null if it doesn't exist
-function readJsonFile(path: string): unknown {
+// Read JSON file that should contain a string value
+// Handles both quoted ("value") and unquoted (value) content
+function readStringJsonFile(path: string): string | null {
   if (!existsSync(path)) {
     return null;
   }
-  const content = readFileSync(path, "utf-8");
-  return JSON.parse(content);
+  let content = readFileSync(path, "utf-8").trim();
+  if (!content || content === "null") {
+    return null;
+  }
+  // Remove surrounding quotes if both present (only one pair)
+  if (content.startsWith('"') && content.endsWith('"')) {
+    content = content.slice(1, -1);
+  }
+  return content;
 }
 
 export interface CreateRepositoryOptions {
@@ -174,13 +182,13 @@ export interface CreateRepositoryOptions {
 // Create a GitHub repository
 export function createRepository(options: CreateRepositoryOptions = {}): string {
   // Get name from options or fallback to github/name.json
-  const name = options.name ?? (readJsonFile("github/name.json") as string | null);
+  const name = options.name ?? readStringJsonFile("github/name.json");
   if (!name) {
     throw new Error("Repository name is required. Provide it as option or in github/name.json");
   }
 
   // Get description from options or fallback to github/description.json
-  const description = options.description ?? (readJsonFile("github/description.json") as string | null);
+  const description = options.description ?? readStringJsonFile("github/description.json");
 
   // Build the command
   let cmd = `repo create ${name}`;

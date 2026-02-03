@@ -318,9 +318,15 @@ Please try again. Remember to:
     }
 
     const descriptionPath = "github/description.json";
-    const hasDescription =
-      existsSync(descriptionPath) &&
-      readFileSync(descriptionPath, "utf-8").trim().length > 0;
+    const hasDescription = (() => {
+      if (!existsSync(descriptionPath)) return false;
+      let content = readFileSync(descriptionPath, "utf-8").trim();
+      if (!content || content === "null") return false;
+      if (content.startsWith('"') && content.endsWith('"')) {
+        content = content.slice(1, -1);
+      }
+      return content.length > 0;
+    })();
     if (!hasDescription) {
       lastFailureReasons.push(
         "github/description.json is empty. Write a description for the GitHub repository.",

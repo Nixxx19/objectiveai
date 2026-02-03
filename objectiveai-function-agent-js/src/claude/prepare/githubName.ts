@@ -15,7 +15,14 @@ export async function createGitHubNameJson(
       writeFileSync(githubNamePath, "");
       return false;
     }
-    const content = readFileSync(githubNamePath, "utf-8").trim();
+    let content = readFileSync(githubNamePath, "utf-8").trim();
+    if (!content || content === "null") {
+      return false;
+    }
+    // Remove surrounding quotes if both present
+    if (content.startsWith('"') && content.endsWith('"')) {
+      content = content.slice(1, -1);
+    }
     return content.length > 0;
   };
 
