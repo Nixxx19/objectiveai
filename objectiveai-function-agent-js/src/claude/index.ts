@@ -940,6 +940,45 @@ Write your implementation plan to \`${planPath}\`. Include:
 
 Create a TODO list and execute each item:
 
+### Task Structure Decision
+
+Analyze ESSAY_TASKS.md to determine the task structure:
+
+**Option A: Single Vector Completion Task**
+If the function can be implemented with a single evaluation (mapped or unmapped):
+- Create an inline vector completion task in \`function/tasks.json\`
+- Use \`map\` if the task needs to iterate over input items
+- The task's prompt and responses define what gets evaluated
+
+**Option B: Multiple Sub-Functions**
+If ESSAY_TASKS.md describes multiple distinct evaluations that each warrant their own function:
+1. Create a spec for each sub-function describing:
+   - What it evaluates (purpose, not implementation details)
+   - The input schema it expects
+   - Whether it's scalar or vector
+   - Key evaluation criteria
+2. Run \`ts-node spawnFunctionAgents.ts '<json_array_of_specs>'\`
+   - Example: \`ts-node spawnFunctionAgents.ts '["Spec for task 0...", "Spec for task 1..."]'\`
+3. Parse the output after \`=== SPAWN_RESULTS ===\` to get \`{owner, repository, commit}\` for each
+4. Create function tasks in \`function/tasks.json\` referencing those sub-functions:
+   \`\`\`json
+   {
+     "type": "scalar.function",
+     "owner": "<owner>",
+     "repository": "<repository>",
+     "commit": "<commit>",
+     "input": {"$starlark": "..."}
+   }
+   \`\`\`
+5. Handle any errors in the spawn results
+
+**Retrying Failed Sub-Functions**
+If a sub-function fails (result contains \`{error: "..."}\`), you can retry specific indices:
+- Pass \`null\` for indices that succeeded and should be skipped
+- Example: \`ts-node spawnFunctionAgents.ts '[null, "Retry spec for task 1", null]'\`
+- This deletes \`sub_functions/1/\` and re-spawns only that agent
+- Results will show \`{skipped: true}\` for null indices
+
 ### Function Definition
 - Edit files in \`function/\` directory to define the function
 - **Use Starlark expressions** (\`{"$starlark": "..."}\`) for most expressions - it's Python-like and more readable
@@ -1019,6 +1058,7 @@ Please try again. Remember to:
           "Bash(ts-node commentOnIssue.ts *)",
           "Bash(ts-node closeIssue.ts *)",
           "Bash(ts-node commitAndPush.ts *)",
+          "Bash(ts-node spawnFunctionAgents.ts *)",
           "Bash(ts-node installRustLogs.ts)",
           "Glob",
           "Grep",

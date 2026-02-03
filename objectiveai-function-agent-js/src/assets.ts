@@ -27,8 +27,14 @@ import commentOnIssueTs from "../assets/commentOnIssue.ts.txt";
 import closeIssueTs from "../assets/closeIssue.ts.txt";
 import commitAndPushTs from "../assets/commitAndPush.ts.txt";
 
+// Agent spawning assets
+import spawnFunctionAgentsTs from "../assets/spawnFunctionAgents.ts.txt";
+
 // Plans assets
 import plansGitkeep from "../assets/plans/.gitkeep.txt";
+
+// Sub-functions assets
+import subFunctionsGitignore from "../assets/sub_functions/.gitignore.txt";
 
 // Inputs asset
 import inputsJson from "../assets/inputs.json.txt";
@@ -55,6 +61,8 @@ export const assets: Record<string, string> = {
   "commentOnIssue.ts": commentOnIssueTs,
   "closeIssue.ts": closeIssueTs,
   "commitAndPush.ts": commitAndPushTs,
+  "spawnFunctionAgents.ts": spawnFunctionAgentsTs,
   "plans/.gitkeep": plansGitkeep,
+  "sub_functions/.gitignore": subFunctionsGitignore,
   "inputs.json": inputsJson,
 };
