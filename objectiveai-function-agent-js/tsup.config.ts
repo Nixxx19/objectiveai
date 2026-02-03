@@ -36,4 +36,16 @@ export default defineConfig([
     clean: false,
     dts: false,
   },
+  // CLI build
+  {
+    ...baseConfig,
+    entry: ["src/cli.ts"],
+    format: ["esm"],
+    outExtension: () => ({ js: ".js" }),
+    clean: false,
+    dts: false,
+    banner: {
+      js: "#!/usr/bin/env node",
+    },
+  },
 ]);
