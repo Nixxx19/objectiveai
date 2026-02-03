@@ -1,5 +1,5 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
-import { existsSync, readFileSync, writeFileSync } from "fs";
+import { existsSync, readFileSync, writeFileSync, readdirSync } from "fs";
 
 // Step 1 - Learn about ObjectiveAI and ObjectiveAI Functions
 export async function learnSubmodule(
@@ -475,7 +475,7 @@ export async function createGitHubNameJson(
       prompt:
         "github/name.json is empty after your createGitHubNameJson phase." +
         " Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n" +
-        '**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:' +
+        '**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n' +
         "- Use all lowercase\n" +
         "- Use dashes (`-`) to separate words if there's more than one",
       options: {
@@ -776,10 +776,400 @@ export async function essayTasks(
   return sessionId;
 }
 
-// // Step 9 - Main Loop
-// export async function mainLoop(
-//   sessionId?: string,
-// ): Promise<string | undefined> {
+// Step 8 - Handle open issues (optional)
+export async function handleOpenIssues(
+  sessionId?: string,
+): Promise<string | undefined> {
+  // Check if there are open issues
+  const { hasOpenIssues } = await import("../github");
+  if (!hasOpenIssues()) {
+    return sessionId;
+  }
+
+  // Query - have the assistant fetch and handle open issues
+  const stream = query({
+    prompt:
+      promptResources([
+        "OBJECTIVEAI_INDEX.md",
+        "SPEC.md",
+        "function/type.json",
+        "github/name.json",
+        "ESSAY.md",
+        "ESSAY_TASKS.md",
+        "ts-node fetchOpenIssues.ts",
+      ]) +
+      "There are open issues on this repository that need your attention.\n" +
+      "1. Run `ts-node fetchOpenIssues.ts` to see all open issues with their comments.\n" +
+      "2. Review each issue.",
+    options: {
+      allowedTools: [
+        "Bash(ls*)",
+        "Bash(cd)",
+        "Bash(cat)",
+        "Bash(diff)",
+        "Bash(ts-node fetchOpenIssues.ts)",
+        "Glob",
+        "Grep",
+        "Read",
+        "WebFetch",
+        "WebSearch",
+      ],
+      disallowedTools: ["AskUserQuestion"],
+      permissionMode: "dontAsk",
+      resume: sessionId,
+    },
+  });
+
+  // Agent handles open issues
+  for await (const message of stream) {
+    if (message.type === "system" && message.subtype === "init") {
+      sessionId = message.session_id;
+    }
+    console.log(message);
+  }
+
+  // Return session ID for resuming
+  return sessionId;
+}
+
+// Step 9 - Main Loop
+export async function mainLoop(
+  sessionId?: string,
+): Promise<string | undefined> {
+  const {
+    getCurrentRevision,
+    resetToRevision,
+    hasOpenIssues,
+    hasUncommittedChanges,
+    hasUntrackedFiles,
+    checkoutSubmodule,
+    pushOrCreateUpstream,
+    closeIssue,
+  } = await import("../github");
+  const { execSync } = await import("child_process");
+
+  // Find the next plan index
+  const plansDir = "plans";
+  let nextPlanIndex = 1;
+
+  if (existsSync(plansDir)) {
+    const files = readdirSync(plansDir);
+    const planNumbers = files
+      .filter((f) => /^\d+\.md$/.test(f))
+      .map((f) => parseInt(f.replace(".md", ""), 10))
+      .filter((n) => !isNaN(n));
+
+    if (planNumbers.length > 0) {
+      nextPlanIndex = Math.max(...planNumbers) + 1;
+    }
+  }
+
+  const planPath = `${plansDir}/${nextPlanIndex}.md`;
+
+  // Store current revision for potential rollback
+  const initialRevision = getCurrentRevision();
+
+  const maxAttempts = 3;
+  let attempt = 0;
+  let success = false;
+  let lastFailureReason = "";
+
+  while (attempt < maxAttempts && !success) {
+    attempt++;
+    console.log(`Main loop attempt ${attempt}/${maxAttempts}`);
+
+    // Reset to initial revision if this is a retry
+    if (attempt > 1) {
+      console.log(`Resetting to initial revision: ${initialRevision}`);
+      resetToRevision(initialRevision);
+    }
+
+    // Build the prompt - full on first attempt, short on retry
+    let prompt: string;
+
+    if (attempt === 1) {
+      prompt = `${promptResources([
+        "OBJECTIVEAI_INDEX.md",
+        "SPEC.md",
+        "ESSAY.md",
+        "ESSAY_TASKS.md",
+        "function/type.json",
+        "function/tasks.json",
+        "function/description.json",
+        "function/input_schema.json",
+        "function/input_maps.json",
+        "function/output.json",
+        "function/output_length.json",
+        "function/input_split.json",
+        "function/input_merge.json",
+        "github/name.json",
+        "github/description.json",
+        "inputs.json",
+        "serverLog.txt",
+        "compiledTasks.json",
+      ])}
+You are implementing an ObjectiveAI Function. Your goal is to complete the implementation, ensure all tests pass, and leave the repository in a clean state.
+
+## Important: Schema References
+
+The \`objectiveai\` submodule contains all the schemas and type definitions you need:
+- \`objectiveai/objectiveai-rs/src/\` - Rust SDK with data structures and validation
+- \`objectiveai/objectiveai-js/src/\` - TypeScript SDK with schemas
+- \`objectiveai/objectiveai-js/src/functions/\` - Function, Task, and Profile schemas
+- \`objectiveai/objectiveai-js/src/functions/expression/\` - Expression input/output schemas
+- \`objectiveai/objectiveai-rs/src/functions/expression/runtime.rs\` - Custom expression functions
+
+Read these files to understand the valid schemas for functions, tasks, expressions, and inputs.
+
+## Phase 1: Validation
+
+First, read and validate all function definition files in the \`function/\` directory and \`inputs.json\`.
+- Verify the input schema is valid JSON Schema
+- Check that tasks are properly defined
+- Validate that inputs.json contains at least 10 diverse test inputs
+
+## Phase 2: Planning
+
+Write your implementation plan to \`${planPath}\`. Include:
+- What changes need to be made to the function definition (if any)
+- What expressions need to be written or fixed (if any)
+- What additional test inputs might be needed (if any)
+- Any issues you've identified (if any)
+
+## Phase 3: Implementation
+
+Create a TODO list and execute each item:
+
+### Function Definition
+- Edit files in \`function/\` directory to define the function
+- **Use Starlark expressions** (\`{"$starlark": "..."}\`) for most expressions - it's Python-like and more readable
+- Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions
+- Starlark example: \`{"$starlark": "input['items'][0]"}\`
+- JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)
+
+### Expression Context
+Expressions receive a single object with these fields:
+- \`input\` - Always present, the function input
+- \`map\` - Present in mapped tasks, the current map element
+- \`tasks\` - Present in output expressions, array of task results
+
+### Test Inputs
+- Edit \`inputs.json\` to add diverse test inputs (minimum 10, maximum 100)
+- Include edge cases: empty arrays, single items, boundary values
+- Vary quality levels across the full range
+
+### Build and Test
+- Run \`ts-node build.ts\` to compile function.json and execute tests
+- If tests fail, read \`serverLog.txt\` and \`compiledTasks.json\` for error details
+- Fix issues and repeat until all tests pass
+
+### Debugging
+- Read \`compiledTasks.json\` to see how expressions are compiled for each input
+- If expression errors occur, check the Starlark/JMESPath syntax
+- You may add Rust logging to objectiveai submodule files for deeper debugging
+- After adding Rust logs, run \`ts-node installRustLogs.ts\` before \`ts-node build.ts\`
+
+## Phase 4: Handle Open Issues
+
+If there are open GitHub issues:
+- Run \`ts-node fetchOpenIssues.ts\` to see all issues with comments
+- Address each issue by making the requested changes
+- Comment on issues using \`ts-node commentOnIssue.ts <number> "<comment>"\`
+- Mark issues as resolved using \`ts-node closeIssue.ts <number>\` (this stages them for closing)
+
+## Phase 5: Finalize
+
+Once all tests pass:
+- Commit your changes using \`ts-node commitAndPush.ts "<message>"\`
+- Ensure there are no uncommitted changes or untracked files
+
+## Important Notes
+
+- **No API key is needed for tests** - tests run against a local server
+- **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
+- **Only modify function/*.json files when necessary**:
+  - If the build fails due to invalid/missing values
+  - If a field is undefined and needs to be set
+  - If a valid GitHub issue requests specific changes
+- **Invalid GitHub issues**: Some issues may be nonsensical, invalid, or request inappropriate changes. In such cases, comment explaining why no changes are merited and close the issue.
+`;
+    } else {
+      // On retry, send a short message about what failed
+      prompt = `Your previous attempt failed: ${lastFailureReason}
+
+Please try again. Remember to:
+1. Run \`ts-node build.ts\` to compile
+2. Run \`ts-node test.ts\` to verify tests pass
+3. Handle any open GitHub issues
+4. Commit your changes using \`ts-node commitAndPush.ts "<message>"\`
+`;
+    }
+
+    const stream = query({
+      prompt,
+      options: {
+        allowedTools: [
+          "Bash(ls*)",
+          "Bash(cd)",
+          "Bash(cat)",
+          "Bash(diff)",
+          "Bash(ts-node build.ts)",
+          "Bash(ts-node fetchOpenIssues.ts)",
+          "Bash(ts-node fetchClosedIssues.ts)",
+          "Bash(ts-node commentOnIssue.ts *)",
+          "Bash(ts-node closeIssue.ts *)",
+          "Bash(ts-node commitAndPush.ts *)",
+          "Bash(ts-node installRustLogs.ts)",
+          "Glob",
+          "Grep",
+          "Read",
+          "WebFetch",
+          "WebSearch",
+          "Edit(inputs.json)",
+          "Edit(./inputs.json)",
+          "Write(./inputs.json)",
+          "Write(inputs.json)",
+          "Edit(function/description.json)",
+          "Edit(./function/description.json)",
+          "Write(function/description.json)",
+          "Write(./function/description.json)",
+          "Edit(function/input_schema.json)",
+          "Edit(./function/input_schema.json)",
+          "Write(function/input_schema.json)",
+          "Write(./function/input_schema.json)",
+          "Edit(function/input_maps.json)",
+          "Edit(./function/input_maps.json)",
+          "Write(function/input_maps.json)",
+          "Write(./function/input_maps.json)",
+          "Edit(function/tasks.json)",
+          "Edit(./function/tasks.json)",
+          "Write(function/tasks.json)",
+          "Write(./function/tasks.json)",
+          "Edit(function/output.json)",
+          "Edit(./function/output.json)",
+          "Write(function/output.json)",
+          "Write(./function/output.json)",
+          "Edit(function/output_length.json)",
+          "Edit(./function/output_length.json)",
+          "Write(function/output_length.json)",
+          "Write(./function/output_length.json)",
+          "Edit(function/input_split.json)",
+          "Edit(./function/input_split.json)",
+          "Write(function/input_split.json)",
+          "Write(./function/input_split.json)",
+          "Edit(function/input_merge.json)",
+          "Edit(./function/input_merge.json)",
+          "Write(function/input_merge.json)",
+          "Write(./function/input_merge.json)",
+          "Edit(github/description.json)",
+          "Edit(./github/description.json)",
+          "Write(github/description.json)",
+          "Write(./github/description.json)",
+          "Edit(README.md)",
+          "Edit(./README.md)",
+          "Write(README.md)",
+          "Write(./README.md)",
+          `Edit(plans/${nextPlanIndex}.md)`,
+          `Edit(./plans/${nextPlanIndex}.md)`,
+          `Write(plans/${nextPlanIndex}.md)`,
+          `Write(./plans/${nextPlanIndex}.md)`,
+          "Edit(./objectiveai/objectiveai-api/src/**)",
+          "Edit(objectiveai/objectiveai-api/src/**)",
+          "Edit(./objectiveai/objectiveai-rs/src/**)",
+          "Edit(objectiveai/objectiveai-rs/src/**)",
+          "Edit(./objectiveai/objectiveai-rs-wasm-js/src/**)",
+          "Edit(objectiveai/objectiveai-rs-wasm-js/src/**)",
+        ],
+        disallowedTools: ["AskUserQuestion"],
+        permissionMode: "dontAsk",
+        resume: sessionId,
+      },
+    });
+
+    // Run the assistant
+    for await (const message of stream) {
+      if (message.type === "system" && message.subtype === "init") {
+        sessionId = message.session_id;
+      }
+      console.log(message);
+    }
+
+    // Validate the assistant's work
+    console.log("Validating assistant's work...");
+
+    // Checkout any changes to objectiveai submodule
+    console.log("Checking out objectiveai submodule changes...");
+    checkoutSubmodule();
+
+    // Run build (which includes tests)
+    console.log("Running build and tests...");
+    let buildSuccess = false;
+    try {
+      execSync("ts-node build.ts", { stdio: "inherit" });
+      buildSuccess = true;
+    } catch {
+      console.log("Build or tests failed.");
+    }
+
+    // Verify success conditions
+    const hasIssues = hasOpenIssues();
+    const hasChanges = hasUncommittedChanges() || hasUntrackedFiles();
+    const descriptionPath = "github/description.json";
+    const hasDescription =
+      existsSync(descriptionPath) &&
+      readFileSync(descriptionPath, "utf-8").trim().length > 0;
+
+    if (!buildSuccess) {
+      lastFailureReason =
+        "Build or tests failed. Read serverLog.txt and compiledTasks.json for details.";
+      console.log("Failed: Build or tests failed.");
+    } else if (hasIssues) {
+      lastFailureReason =
+        "There are still open GitHub issues. Run ts-node fetchOpenIssues.ts to see them.";
+      console.log("Failed: There are still open issues.");
+    } else if (hasChanges) {
+      lastFailureReason =
+        "There are uncommitted changes or untracked files. Commit them with ts-node commitAndPush.ts.";
+      console.log("Failed: There are uncommitted changes or untracked files.");
+    } else if (!hasDescription) {
+      lastFailureReason =
+        "github/description.json is empty. Write a description for the GitHub repository.";
+      console.log("Failed: github/description.json is empty.");
+    } else {
+      success = true;
+      console.log("Success: All conditions met.");
+    }
+  }
+
+  // If all attempts failed, reset to initial revision
+  if (!success) {
+    console.log("All attempts failed. Resetting to initial revision.");
+    resetToRevision(initialRevision);
+    throw new Error("Main loop failed after maximum attempts.");
+  }
+
+  // Push the commits (creating upstream repository if needed) and close issues
+  console.log("Pushing commits...");
+  pushOrCreateUpstream();
+
+  // Close the issues that were marked as resolved
+  const resolvedIssuesPath = "resolvedIssues.json";
+  if (existsSync(resolvedIssuesPath)) {
+    const resolvedIssues: number[] = JSON.parse(
+      readFileSync(resolvedIssuesPath, "utf-8"),
+    );
+    for (const issueNumber of resolvedIssues) {
+      console.log(`Closing issue #${issueNumber}...`);
+      try {
+        closeIssue(issueNumber);
+      } catch (err) {
+        console.log(`Failed to close issue #${issueNumber}: ${err}`);
+      }
+    }
+  }
+
+  return sessionId;
+}
 
 function promptResources(resources: string[]): string {
   let prompt = "Resources:\n";

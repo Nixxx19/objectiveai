@@ -1,4 +1,4 @@
-import { GitHub } from "@objectiveai/function-agent";
+import { execSync } from "child_process";
 
 const message = process.argv[2];
 
@@ -7,5 +7,18 @@ if (!message) {
   process.exit(1);
 }
 
-GitHub.commitAndPush({ message });
-console.log("Committed and pushed successfully.");
+// Discard any changes to the objectiveai submodule
+execSync("git checkout -- objectiveai", { stdio: "inherit" });
+
+// Stage all changes
+execSync("git add -A", { stdio: "pipe" });
+
+// Check if there are changes to commit
+try {
+  execSync("git diff --cached --quiet", { stdio: "pipe" });
+  console.log("No changes to commit.");
+} catch {
+  // There are changes, commit them
+  execSync(`git commit -m "${message.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
+  console.log("Committed and pushed successfully.");
+}

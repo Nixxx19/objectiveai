@@ -1,6 +1,12 @@
 import { execSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 
+export interface IssueComment {
+  body: string;
+  created_at: string;
+  user: { login: string } | null;
+}
+
 export interface Issue {
   number: number;
   title: string;
@@ -11,6 +17,7 @@ export interface Issue {
   updated_at: string;
   closed_at: string | null;
   user: { login: string } | null;
+  comments?: IssueComment[];
 }
 
 // Execute gh command and return output
@@ -30,6 +37,20 @@ function getUpstream(): string | null {
   }
 }
 
+// Fetch comments for an issue
+export function fetchIssueComments(issueNumber: number): IssueComment[] {
+  const result = gh(
+    `issue view ${issueNumber} --json comments`,
+  );
+  const raw = JSON.parse(result);
+
+  return (raw.comments || []).map((comment: Record<string, unknown>) => ({
+    body: comment.body,
+    created_at: comment.createdAt,
+    user: comment.author ? { login: (comment.author as { login: string }).login } : null,
+  }));
+}
+
 // Check if there are any open issues
 export function hasOpenIssues(): boolean {
   const upstream = getUpstream();
@@ -46,7 +67,7 @@ export function hasOpenIssues(): boolean {
   }
 }
 
-// Fetch all open issues
+// Fetch all open issues (with comments)
 export function fetchOpenIssues(): Issue[] {
   const upstream = getUpstream();
   if (!upstream) {
@@ -68,10 +89,11 @@ export function fetchOpenIssues(): Issue[] {
     updated_at: issue.updatedAt,
     closed_at: issue.closedAt,
     user: issue.author ? { login: (issue.author as { login: string }).login } : null,
+    comments: fetchIssueComments(issue.number as number),
   }));
 }
 
-// Fetch all closed issues
+// Fetch all closed issues (with comments)
 export function fetchClosedIssues(): Issue[] {
   const upstream = getUpstream();
   if (!upstream) {
@@ -93,6 +115,7 @@ export function fetchClosedIssues(): Issue[] {
     updated_at: issue.updatedAt,
     closed_at: issue.closedAt,
     user: issue.author ? { login: (issue.author as { login: string }).login } : null,
+    comments: fetchIssueComments(issue.number as number),
   }));
 }
 
@@ -111,7 +134,19 @@ export function commentOnIssue(issueNumber: number, comment: string): void {
   });
 }
 
-// Close an issue
+// Mark an issue as ready to close (doesn't actually close it)
+// Returns the issue number for later closing
+export function markIssueResolved(issueNumber: number): number {
+  const upstream = getUpstream();
+  if (!upstream) {
+    throw new Error("No upstream remote found. Cannot mark issue resolved.");
+  }
+  // Just validate the issue exists
+  gh(`issue view ${issueNumber} --json number`);
+  return issueNumber;
+}
+
+// Actually close an issue (call this after successful build/test)
 export function closeIssue(issueNumber: number): void {
   const upstream = getUpstream();
   if (!upstream) {
@@ -169,14 +204,12 @@ export interface CommitAndPushOptions {
   message: string;
   name?: string;
   description?: string;
+  dryRun?: boolean; // If true, commit but don't push
 }
 
-// Commit all changes and push, creating repository if needed
+// Commit all changes and optionally push
 export function commitAndPush(options: CommitAndPushOptions): void {
-  const { message } = options;
-
-  // Check if there's an upstream remote
-  const upstream = getUpstream();
+  const { message, dryRun = false } = options;
 
   // Stage all changes
   execSync("git add -A", { stdio: "pipe" });
@@ -186,10 +219,20 @@ export function commitAndPush(options: CommitAndPushOptions): void {
     execSync("git diff --cached --quiet", { stdio: "pipe" });
     // No changes to commit
     console.log("No changes to commit.");
+    return;
   } catch {
     // There are changes, commit them
     execSync(`git commit -m "${message.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
   }
+
+  // If dry run, don't push
+  if (dryRun) {
+    console.log("Dry run: commit created but not pushed.");
+    return;
+  }
+
+  // Check if there's an upstream remote
+  const upstream = getUpstream();
 
   // If no upstream, create repository
   if (!upstream) {
@@ -201,6 +244,65 @@ export function commitAndPush(options: CommitAndPushOptions): void {
     // Push to existing remote
     execSync("git push", { stdio: "inherit" });
   }
+}
+
+// Commit only (no push) - for use in mainLoop
+export function commitOnly(message: string): void {
+  commitAndPush({ message, dryRun: true });
+}
+
+// Push existing commits
+export function push(): void {
+  const upstream = getUpstream();
+  if (!upstream) {
+    throw new Error("No upstream remote found. Cannot push.");
+  }
+  execSync("git push", { stdio: "inherit" });
+}
+
+// Push existing commits, creating upstream repository if needed
+export function pushOrCreateUpstream(options: CreateRepositoryOptions = {}): void {
+  const upstream = getUpstream();
+  if (!upstream) {
+    // No upstream, create repository (this also pushes)
+    createRepository(options);
+  } else {
+    // Push to existing remote
+    execSync("git push", { stdio: "inherit" });
+  }
+}
+
+// Get the current commit hash
+export function getCurrentRevision(): string {
+  return execSync("git rev-parse HEAD", {
+    encoding: "utf-8",
+    stdio: "pipe",
+  }).trim();
+}
+
+// Reset to a specific revision (discards all commits after it)
+export function resetToRevision(revision: string): void {
+  execSync(`git reset --hard ${revision}`, { stdio: "inherit" });
+}
+
+// Check if there are uncommitted changes
+export function hasUncommittedChanges(): boolean {
+  try {
+    execSync("git diff --quiet", { stdio: "pipe" });
+    execSync("git diff --cached --quiet", { stdio: "pipe" });
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+// Check if there are untracked files
+export function hasUntrackedFiles(): boolean {
+  const result = execSync("git ls-files --others --exclude-standard", {
+    encoding: "utf-8",
+    stdio: "pipe",
+  }).trim();
+  return result.length > 0;
 }
 
 // Checkout/discard changes in the objectiveai submodule
