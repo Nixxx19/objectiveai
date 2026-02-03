@@ -61,6 +61,11 @@ async function inventLoop(log: LogFn, sessionId?: string): Promise<string | unde
         "inputs.json",
         "serverLog.txt",
         "compiledTasks.json",
+        "ts-node build.ts",
+        "ts-node commitAndPush.ts <message>",
+        "ts-node spawnFunctionAgents.ts <json_array>",
+        "ts-node getSubFunctionCommits.ts",
+        "ts-node installRustLogs.ts",
       ])}
 You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and leave the repository in a clean state.
 

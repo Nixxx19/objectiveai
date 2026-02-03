@@ -67,6 +67,14 @@ async function handleIssuesLoop(
         "serverLog.txt",
         "compiledTasks.json",
         "function.json (available after ts-node build.ts)",
+        "ts-node build.ts",
+        "ts-node fetchOpenIssues.ts",
+        "ts-node fetchClosedIssues.ts",
+        "ts-node commentOnIssue.ts <number> <comment>",
+        "ts-node closeIssue.ts <number>",
+        "ts-node commitAndPush.ts <message>",
+        "ts-node cloneSubFunctions.ts [--latest]",
+        "ts-node installRustLogs.ts",
       ])}
 You are maintaining an existing ObjectiveAI Function. There are open GitHub issues that need your attention. Your goal is to address these issues, ensure all tests pass, and leave the repository in a clean state.
 
