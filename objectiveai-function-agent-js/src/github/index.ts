@@ -280,17 +280,29 @@ export function pushOrCreateUpstream(options: CreateRepositoryOptions = {}): voi
   }
 }
 
-// Get the current commit hash
-export function getCurrentRevision(): string {
-  return execSync("git rev-parse HEAD", {
-    encoding: "utf-8",
-    stdio: "pipe",
-  }).trim();
+// Get the current commit hash (returns null if no commits exist)
+export function getCurrentRevision(): string | null {
+  try {
+    return execSync("git rev-parse HEAD", {
+      encoding: "utf-8",
+      stdio: "pipe",
+    }).trim();
+  } catch {
+    // No commits yet
+    return null;
+  }
 }
 
 // Reset to a specific revision (discards all commits after it)
-export function resetToRevision(revision: string): void {
-  execSync(`git reset --hard ${revision}`, { stdio: "inherit" });
+// If revision is null (no commits existed), just clean up uncommitted changes
+export function resetToRevision(revision: string | null): void {
+  if (revision === null) {
+    // No commits existed - just clean up any staged/unstaged changes
+    execSync("git checkout -- .", { stdio: "inherit" });
+    execSync("git clean -fd", { stdio: "inherit" });
+  } else {
+    execSync(`git reset --hard ${revision}`, { stdio: "inherit" });
+  }
 }
 
 // Check if there are uncommitted changes
