@@ -254,14 +254,14 @@ export async function init(options: InitOptions = {}): Promise<void> {
     updateSubmodules();
   }
 
-  // Step 2: npm install
+  // Step 2: Write asset files (including package.json)
+  writeAssets();
+
+  // Step 3: npm install
   runNpmInstall();
 
-  // Step 3: Fetch examples if needed
+  // Step 4: Fetch examples if needed
   await fetchExamples(options.apiBase);
-
-  // Step 4: Write asset files
-  writeAssets();
 
   // Step 5: Write SPEC.md if provided
   if (options.spec) {
