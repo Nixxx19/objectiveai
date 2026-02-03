@@ -631,51 +631,45 @@ For vector functions, enables tournament-style ranking:
 | Credit Balance | View-only | Purchase disabled |
 | Media Input Component | Ready | `ArrayInput.tsx` supports images, audio, video, files |
 
-### What's Missing ❌
+### Recently Implemented ✅ (Feb 2026)
 
-| Feature | Impact | Backend Capability |
-|---------|--------|-------------------|
-| **Profile Training** | High | `Functions.Profiles.Computations.create()` exists |
-| **Ensemble/LLM Creation** | High | Validation + ID computation in SDK |
-| **Function Definition Editor** | High | Expression system fully supported |
-| **Direct Chat Completions** | Medium | `Chat.Completions.create()` available |
-| **Direct Vector Completions** | Medium | `Vector.Completions.create()` available |
-| **File Uploads** | Medium | Component ready, disabled via `textOnly={true}` |
-| **Reasoning Model Selector** | Low | Hardcoded to `gpt-4o-mini` |
-| **Profile Selector** | Low | Function-profile pairs hardcoded |
+| Feature | Status | Notes |
+|---------|--------|-------|
+| Profile Selector | Complete | Dropdown when multiple profiles exist |
+| Reasoning Model Selector | Complete | Toggle + model dropdown (GPT-4o Mini, GPT-4o, Claude 3 Haiku/Sonnet) |
+| Direct Chat Completions | Complete | `/chat` page with streaming, `/api/chat/completions` route |
+| Direct Vector Completions | Complete | `/vector` page with score viz, `/api/vector/completions` route |
+| File Uploads | Complete | Removed `textOnly` restriction from ArrayInput |
+| Ensemble LLM Creation | Complete | `/ensemble-llms/create` with WASM validation |
+| Ensemble Creation | Complete | `/ensembles/create` with WASM validation |
+| Function Definition Editor | Complete | `/functions/create` with task builder, expressions |
+| Profile Training UI | Complete | `/profiles/train` (backend returns 501 - coming soon) |
+| WASM Validation | Complete | `lib/wasm-validation.ts` for real-time ID computation |
 
-### WASM Bindings (Unused)
+### WASM Bindings
 
-Web-new does NOT use any WASM functions. These enable **zero-cost client-side validation**:
+Now integrated via `lib/wasm-validation.ts`. Used in creation pages for real-time validation:
 
-| Function | Purpose |
+| Function | Used In |
 |----------|---------|
-| `validateEnsembleLlm(llm)` | Validate LLM config, compute ID |
-| `validateEnsemble(ensemble)` | Validate ensemble, compute ID |
-| `validateFunctionInput(func, input)` | Validate input against schema |
-| `compileFunctionTasks(func, input)` | Preview which tasks will run |
-| `compileFunctionOutput(func, input, taskOutputs)` | Preview final output |
+| `validateEnsembleLlm(llm)` | `/ensemble-llms/create` |
+| `validateEnsemble(ensemble)` | `/ensembles/create` |
 
-**Recommendation:** Add WASM validation for real-time feedback during authoring.
+Module loads gracefully - shows "Enter model to see ID" when WASM unavailable.
 
-### Backend Endpoints Not Exposed
+### Backend Endpoints Now Exposed
 
-| Endpoint | Purpose |
-|----------|---------|
-| `POST /functions/.../profiles/compute` | Train profile weights |
-| `GET /functions/profiles/pairs` | List function-profile pairs |
-| `POST /vector/completions` | Direct vector voting |
-| `POST /chat/completions` | Direct chat |
-| `GET /.../usage` | Per-resource usage stats |
+| Endpoint | Route | Status |
+|----------|-------|--------|
+| `POST /chat/completions` | `/api/chat/completions` | Working |
+| `POST /vector/completions` | `/api/vector/completions` | Working |
+| `POST /profiles/train` | `/api/profiles/train` | Returns 501 (backend pending) |
 
-### Architectural Gap
+### Remaining Gaps
 
-Web-new is **read-only for definitions**:
-- ✅ Can execute functions
-- ✅ Can view profiles, ensembles, LLMs
-- ❌ Cannot create any of the above
-
-All definitions must exist on GitHub first.
+- Profile training backend integration (endpoint returns 501)
+- Payment integration for credits purchase
+- Real OAuth (currently using `BYPASS_AUTH = true`)
 
 ---
 
