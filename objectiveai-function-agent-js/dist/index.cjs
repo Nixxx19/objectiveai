@@ -1568,6 +1568,7 @@ async function inventFunctionTasksLoop(log, sessionId) {
         "ts-node commitAndPush.ts <message>",
         "ts-node spawnFunctionAgents.ts <json_array>",
         "ts-node getSubFunctionCommits.ts",
+        "ts-node cloneSubFunctions.ts [--latest]",
         "ts-node installRustLogs.ts"
       ])}
 You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and leave the repository in a clean state.
@@ -1656,6 +1657,13 @@ Expressions receive a single object with these fields:
 - If tests fail, read \`serverLog.txt\` and \`compiledTasks.json\` for error details
 - Fix issues and repeat until all tests pass
 
+### Inspecting Sub-Functions
+If the function references sub-functions (tasks with type \`scalar.function\` or \`vector.function\`):
+- Run \`ts-node cloneSubFunctions.ts\` to clone them to \`sub_functions/<owner>/<repository>/<commit>/\`
+- Run \`ts-node cloneSubFunctions.ts --latest\` to clone the latest version instead
+- Read their \`function.json\` and source files to understand how they work
+- This can be used to fetch specific functions from GitHub
+
 ### Debugging
 - Read \`compiledTasks.json\` to see how expressions are compiled for each input
 - If expression errors occur, check the Starlark/JMESPath syntax
@@ -1741,6 +1749,18 @@ Please try again. Remember to:
           `Bash(cd ${backslashCwd} && ts-node installRustLogs.ts)`,
           `Bash(cd ${slashCwd} && npx ts-node installRustLogs.ts)`,
           `Bash(cd ${backslashCwd} && npx ts-node installRustLogs.ts)`,
+          "Bash(ts-node cloneSubFunctions.ts)",
+          "Bash(npx ts-node cloneSubFunctions.ts)",
+          `Bash(cd ${slashCwd} && ts-node cloneSubFunctions.ts)`,
+          `Bash(cd ${backslashCwd} && ts-node cloneSubFunctions.ts)`,
+          `Bash(cd ${slashCwd} && npx ts-node cloneSubFunctions.ts)`,
+          `Bash(cd ${backslashCwd} && npx ts-node cloneSubFunctions.ts)`,
+          "Bash(ts-node cloneSubFunctions.ts --latest)",
+          "Bash(npx ts-node cloneSubFunctions.ts --latest)",
+          `Bash(cd ${slashCwd} && ts-node cloneSubFunctions.ts --latest)`,
+          `Bash(cd ${backslashCwd} && ts-node cloneSubFunctions.ts --latest)`,
+          `Bash(cd ${slashCwd} && npx ts-node cloneSubFunctions.ts --latest)`,
+          `Bash(cd ${backslashCwd} && npx ts-node cloneSubFunctions.ts --latest)`,
           "Glob",
           "Grep",
           "Read",
