@@ -146,7 +146,7 @@ function initializeGit() {
 }
 function updateSubmodules() {
   console.log("Updating git submodules...");
-  execLog("git submodule update --init --recursive");
+  execLog("git submodule update --init --recursive --remote");
 }
 function runNpmInstall() {
   console.log("Installing dependencies...");

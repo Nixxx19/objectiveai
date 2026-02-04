@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import './chunk-RWTUUBCP.js';
-import './chunk-Q4XFX4UX.js';
-import { prepare, createFileLogger, promptResources } from './chunk-F6D3TR6N.js';
+import './chunk-LSPDGKKK.js';
+import { prepare, createFileLogger, promptResources } from './chunk-JEW4WGHU.js';
 import { __export } from './chunk-K3NQKI34.js';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync, readFileSync, readdirSync } from 'fs';
@@ -360,7 +360,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function invent(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-ZHXQLT2D.js');
+  const { prepare: prepare2 } = await import('./prepare-HSXWBDRR.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -668,7 +668,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function handleIssues(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-ZHXQLT2D.js');
+  const { prepare: prepare2 } = await import('./prepare-HSXWBDRR.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Issue Loop: Handling issues on existing function ===");

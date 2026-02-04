@@ -716,7 +716,7 @@ async function handleOpenIssues(log, sessionId) {
 
 // src/claude/prepare/index.ts
 async function prepare(options = {}) {
-  const { init } = await import('./init-LNGXFX73.js');
+  const { init } = await import('./init-VYVQTYHI.js');
   const log = options.log ?? createFileLogger().log;
   log("=== Initializing workspace ===");
   await init({ spec: options.spec, apiBase: options.apiBase });
