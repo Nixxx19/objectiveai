@@ -1,7 +1,7 @@
 export { github_exports as GitHub } from './chunk-HNOJIQ7Y.js';
-export { assets, init } from './chunk-22QP76PH.js';
-import { prepare, createFileLogger, promptResources } from './chunk-XBSRDDDQ.js';
-export { createFileLogger, getLatestLogPath } from './chunk-XBSRDDDQ.js';
+export { assets, init } from './chunk-5WM7KJHT.js';
+import { prepare, createFileLogger, promptResources } from './chunk-34NGPXD6.js';
+export { createFileLogger, getLatestLogPath } from './chunk-34NGPXD6.js';
 import { __export } from './chunk-MLKGABMK.js';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync, readFileSync, readdirSync, writeFileSync, unlinkSync, createWriteStream } from 'fs';
@@ -370,7 +370,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function invent(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-YK4UBN6O.js');
+  const { prepare: prepare2 } = await import('./prepare-SAOOCKQ4.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -688,7 +688,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function handleIssues(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-YK4UBN6O.js');
+  const { prepare: prepare2 } = await import('./prepare-SAOOCKQ4.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Issue Loop: Handling issues on existing function ===");

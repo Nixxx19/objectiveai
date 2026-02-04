@@ -1413,6 +1413,13 @@ var init_exports = {};
 __export(init_exports, {
   init: () => init
 });
+function exec(command) {
+  try {
+    return child_process.execSync(command, { encoding: "utf-8", stdio: "pipe" }).trim();
+  } catch {
+    return "";
+  }
+}
 function execLog(command) {
   console.log(`> ${command}`);
   child_process.execSync(command, { stdio: "inherit" });
@@ -1435,6 +1442,23 @@ function updateSubmodules() {
 function runNpmInstall() {
   console.log("Installing dependencies...");
   execLog("npm install");
+}
+function hasChanges() {
+  const status = exec("git status --porcelain");
+  return status.length > 0;
+}
+function isFirstCommit() {
+  const result = exec("git rev-parse HEAD");
+  return result.length === 0;
+}
+function commitChanges() {
+  if (!hasChanges()) {
+    return;
+  }
+  const message = isFirstCommit() ? "initial commit" : "update sandbox";
+  console.log(`Creating commit: ${message}...`);
+  execLog("git add -A");
+  execLog(`git commit -m "${message}"`);
 }
 function getFunctionPath(ref) {
   return path.join(
@@ -1598,6 +1622,7 @@ async function init(options = {}) {
       fs.writeFileSync(specPath, options.spec);
     }
   }
+  commitChanges();
   console.log("Initialization complete.");
 }
 var init_init = __esm({
@@ -1968,8 +1993,8 @@ Please try again. Remember to:
       );
       log("Failed: Build or tests failed.");
     }
-    const hasChanges = hasUncommittedChanges2() || hasUntrackedFiles2();
-    if (hasChanges) {
+    const hasChanges2 = hasUncommittedChanges2() || hasUntrackedFiles2();
+    if (hasChanges2) {
       lastFailureReasons.push(
         "There are uncommitted changes or untracked files. Commit them with ts-node commitAndPush.ts <message>."
       );
@@ -2300,8 +2325,8 @@ Please try again. Remember to:
       );
       log(`Failed: Unresolved issues: ${nums}`);
     }
-    const hasChanges = hasUncommittedChanges2() || hasUntrackedFiles2();
-    if (hasChanges) {
+    const hasChanges2 = hasUncommittedChanges2() || hasUntrackedFiles2();
+    if (hasChanges2) {
       lastFailureReasons.push(
         "There are uncommitted changes or untracked files. Commit them with ts-node commitAndPush.ts <message>."
       );

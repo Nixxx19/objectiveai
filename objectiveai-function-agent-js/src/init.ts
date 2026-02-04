@@ -46,6 +46,29 @@ function runNpmInstall(): void {
   execLog("npm install");
 }
 
+// Check if there are any uncommitted changes or untracked files
+function hasChanges(): boolean {
+  const status = exec("git status --porcelain");
+  return status.length > 0;
+}
+
+// Check if this is the first commit
+function isFirstCommit(): boolean {
+  const result = exec("git rev-parse HEAD");
+  return result.length === 0;
+}
+
+// Create commit if there are changes
+function commitChanges(): void {
+  if (!hasChanges()) {
+    return;
+  }
+  const message = isFirstCommit() ? "initial commit" : "update sandbox";
+  console.log(`Creating commit: ${message}...`);
+  execLog("git add -A");
+  execLog(`git commit -m "${message}"`);
+}
+
 // Types for function/profile references
 type FunctionRef = { owner: string; repository: string; commit: string };
 type ProfileRef = { owner: string; repository: string; commit: string };
@@ -280,6 +303,9 @@ export async function init(options: InitOptions = {}): Promise<void> {
       writeFileSync(specPath, options.spec);
     }
   }
+
+  // Step 6: Commit changes if any
+  commitChanges();
 
   console.log("Initialization complete.");
 }

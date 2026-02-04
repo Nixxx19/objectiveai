@@ -1,9 +1,8 @@
+#!/usr/bin/env node
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { ObjectiveAI, Functions } from 'objectiveai';
-
-// src/init.ts
 
 // assets/function/description.json.txt
 var description_json_default = "null";
@@ -130,6 +129,13 @@ var assets = {
 };
 
 // src/init.ts
+function exec(command) {
+  try {
+    return execSync(command, { encoding: "utf-8", stdio: "pipe" }).trim();
+  } catch {
+    return "";
+  }
+}
 function execLog(command) {
   console.log(`> ${command}`);
   execSync(command, { stdio: "inherit" });
@@ -152,6 +158,23 @@ function updateSubmodules() {
 function runNpmInstall() {
   console.log("Installing dependencies...");
   execLog("npm install");
+}
+function hasChanges() {
+  const status = exec("git status --porcelain");
+  return status.length > 0;
+}
+function isFirstCommit() {
+  const result = exec("git rev-parse HEAD");
+  return result.length === 0;
+}
+function commitChanges() {
+  if (!hasChanges()) {
+    return;
+  }
+  const message = isFirstCommit() ? "initial commit" : "update sandbox";
+  console.log(`Creating commit: ${message}...`);
+  execLog("git add -A");
+  execLog(`git commit -m "${message}"`);
 }
 function getFunctionPath(ref) {
   return join(
@@ -315,7 +338,8 @@ async function init(options = {}) {
       writeFileSync(specPath, options.spec);
     }
   }
+  commitChanges();
   console.log("Initialization complete.");
 }
 
-export { assets, init };
+export { init };
