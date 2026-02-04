@@ -230,14 +230,22 @@ function writeAssets(): void {
   console.log("Writing asset files...");
 
   for (const [relativePath, content] of Object.entries(assets)) {
-    if (!existsSync(relativePath)) {
-      const dir = dirname(relativePath);
-      if (dir !== ".") {
-        mkdirSync(dir, { recursive: true });
-      }
-      writeFileSync(relativePath, content);
-      console.log(`  Created: ${relativePath}`);
+    const dir = dirname(relativePath);
+    if (dir !== ".") {
+      mkdirSync(dir, { recursive: true });
     }
+
+    // For empty files or "null" JSON files, only write if file doesn't exist
+    // For all other assets with content, always overwrite
+    const trimmed = content.trim();
+    const isEmpty = trimmed === "" || trimmed === "null";
+    if (isEmpty && existsSync(relativePath)) {
+      continue;
+    }
+
+    const exists = existsSync(relativePath);
+    writeFileSync(relativePath, content);
+    console.log(`  ${exists ? "Updated" : "Created"}: ${relativePath}`);
   }
 }
 
