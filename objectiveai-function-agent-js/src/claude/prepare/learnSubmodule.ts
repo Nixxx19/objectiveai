@@ -1,6 +1,7 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
+import { getSlashCwd, getBackslashCwd } from "../../util";
 
 // Step 1 - Learn about ObjectiveAI and ObjectiveAI Functions
 export async function learnSubmodule(
@@ -19,6 +20,9 @@ export async function learnSubmodule(
   })();
 
   // Query
+  const slashCwd = getSlashCwd();
+  const backslashCwd = getBackslashCwd();
+
   const stream = (() => {
     if (indexNonEmpty) {
       return query({
@@ -52,8 +56,7 @@ export async function learnSubmodule(
           " Learn about ObjectiveAI and ObjectiveAI Functions." +
           " Investigate the 'objectiveai' folder to familiarize yourself with what ObjectiveAI Functions are." +
           " Read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to." +
-          " Create OBJECTIVEAI_INDEX.md with links to files and your learnings.\n\n" +
-          "**Always use relative paths** when editing or writing files (e.g., `OBJECTIVEAI_INDEX.md`, not the full absolute path).",
+          " Create OBJECTIVEAI_INDEX.md with links to files and your learnings.",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -67,8 +70,12 @@ export async function learnSubmodule(
             "WebSearch",
             "Edit(OBJECTIVEAI_INDEX.md)",
             "Edit(./OBJECTIVEAI_INDEX.md)",
+            `Edit(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
+            `Edit(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
             "Write(OBJECTIVEAI_INDEX.md)",
             "Write(./OBJECTIVEAI_INDEX.md)",
+            `Write(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
+            `Write(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
           ],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
@@ -95,8 +102,7 @@ export async function learnSubmodule(
       const stream = query({
         prompt:
           "OBJECTIVEAI_INDEX.md is empty after your learn phase." +
-          " Create OBJECTIVEAI_INDEX.md with links to files and your learnings about ObjectiveAI and ObjectiveAI Functions.\n\n" +
-          "**Always use relative paths** when editing or writing files (e.g., `OBJECTIVEAI_INDEX.md`, not the full absolute path).",
+          " Create OBJECTIVEAI_INDEX.md with links to files and your learnings about ObjectiveAI and ObjectiveAI Functions.",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -110,8 +116,12 @@ export async function learnSubmodule(
             "WebSearch",
             "Edit(OBJECTIVEAI_INDEX.md)",
             "Edit(./OBJECTIVEAI_INDEX.md)",
+            `Edit(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
+            `Edit(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
             "Write(OBJECTIVEAI_INDEX.md)",
             "Write(./OBJECTIVEAI_INDEX.md)",
+            `Write(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
+            `Write(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
           ],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",

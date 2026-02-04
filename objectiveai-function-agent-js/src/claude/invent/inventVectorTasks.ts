@@ -14,6 +14,7 @@ import { promptResources } from "../promptResources";
 import { getNextPlanIndex, getPlanPath } from "../planIndex";
 import { createFileLogger } from "../../logging";
 import { prepare } from "../prepare";
+import { getSlashCwd, getBackslashCwd } from "../../util";
 
 // Main loop for inventing a new function (no issues)
 async function inventVectorTasksLoop(
@@ -143,7 +144,6 @@ Once all tests pass and SPEC.md compliance is verified:
 - **Only modify function/*.json files when necessary**:
   - If the build fails due to invalid/missing values
   - If a field is undefined and needs to be set
-- **Always use relative paths** - when editing or writing files, use paths like \`inputs.json\` or \`function/tasks.json\`, never absolute paths
 `;
     } else {
       // On retry, send a short message about what failed
@@ -156,6 +156,9 @@ Please try again. Remember to:
 `;
     }
 
+    const slashCwd = getSlashCwd();
+    const backslashCwd = getBackslashCwd();
+
     const stream = query({
       prompt,
       options: {
@@ -166,10 +169,22 @@ Please try again. Remember to:
           "Bash(diff)",
           "Bash(ts-node build.ts)",
           "Bash(npx ts-node build.ts)",
+          `Bash(cd ${slashCwd} && ts-node build.ts)`,
+          `Bash(cd ${backslashCwd} && ts-node build.ts)`,
+          `Bash(cd ${slashCwd} && npx ts-node build.ts)`,
+          `Bash(cd ${backslashCwd} && npx ts-node build.ts)`,
           "Bash(ts-node commitAndPush.ts *)",
           "Bash(npx ts-node commitAndPush.ts *)",
+          `Bash(cd ${slashCwd} && ts-node commitAndPush.ts *)`,
+          `Bash(cd ${backslashCwd} && ts-node commitAndPush.ts *)`,
+          `Bash(cd ${slashCwd} && npx ts-node commitAndPush.ts *)`,
+          `Bash(cd ${backslashCwd} && npx ts-node commitAndPush.ts *)`,
           "Bash(ts-node installRustLogs.ts)",
           "Bash(npx ts-node installRustLogs.ts)",
+          `Bash(cd ${slashCwd} && ts-node installRustLogs.ts)`,
+          `Bash(cd ${backslashCwd} && ts-node installRustLogs.ts)`,
+          `Bash(cd ${slashCwd} && npx ts-node installRustLogs.ts)`,
+          `Bash(cd ${backslashCwd} && npx ts-node installRustLogs.ts)`,
           "Glob",
           "Grep",
           "Read",
@@ -177,58 +192,112 @@ Please try again. Remember to:
           "WebSearch",
           "Edit(inputs.json)",
           "Edit(./inputs.json)",
+          `Edit(${slashCwd}/inputs.json)`,
+          `Edit(${backslashCwd}\\inputs.json)`,
           "Write(inputs.json)",
           "Write(./inputs.json)",
+          `Write(${slashCwd}/inputs.json)`,
+          `Write(${backslashCwd}\\inputs.json)`,
           "Edit(function/description.json)",
           "Edit(./function/description.json)",
+          `Edit(${slashCwd}/function/description.json)`,
+          `Edit(${backslashCwd}\\function\\description.json)`,
           "Write(function/description.json)",
           "Write(./function/description.json)",
+          `Write(${slashCwd}/function/description.json)`,
+          `Write(${backslashCwd}\\function\\description.json)`,
           "Edit(function/input_schema.json)",
           "Edit(./function/input_schema.json)",
+          `Edit(${slashCwd}/function/input_schema.json)`,
+          `Edit(${backslashCwd}\\function\\input_schema.json)`,
           "Write(function/input_schema.json)",
           "Write(./function/input_schema.json)",
+          `Write(${slashCwd}/function/input_schema.json)`,
+          `Write(${backslashCwd}\\function\\input_schema.json)`,
           "Edit(function/input_maps.json)",
           "Edit(./function/input_maps.json)",
+          `Edit(${slashCwd}/function/input_maps.json)`,
+          `Edit(${backslashCwd}\\function\\input_maps.json)`,
           "Write(function/input_maps.json)",
           "Write(./function/input_maps.json)",
+          `Write(${slashCwd}/function/input_maps.json)`,
+          `Write(${backslashCwd}\\function\\input_maps.json)`,
           "Edit(function/tasks.json)",
           "Edit(./function/tasks.json)",
+          `Edit(${slashCwd}/function/tasks.json)`,
+          `Edit(${backslashCwd}\\function\\tasks.json)`,
           "Write(function/tasks.json)",
           "Write(./function/tasks.json)",
+          `Write(${slashCwd}/function/tasks.json)`,
+          `Write(${backslashCwd}\\function\\tasks.json)`,
           "Edit(function/output.json)",
           "Edit(./function/output.json)",
+          `Edit(${slashCwd}/function/output.json)`,
+          `Edit(${backslashCwd}\\function\\output.json)`,
           "Write(function/output.json)",
           "Write(./function/output.json)",
+          `Write(${slashCwd}/function/output.json)`,
+          `Write(${backslashCwd}\\function\\output.json)`,
           "Edit(function/output_length.json)",
           "Edit(./function/output_length.json)",
+          `Edit(${slashCwd}/function/output_length.json)`,
+          `Edit(${backslashCwd}\\function\\output_length.json)`,
           "Write(function/output_length.json)",
           "Write(./function/output_length.json)",
+          `Write(${slashCwd}/function/output_length.json)`,
+          `Write(${backslashCwd}\\function\\output_length.json)`,
           "Edit(function/input_split.json)",
           "Edit(./function/input_split.json)",
+          `Edit(${slashCwd}/function/input_split.json)`,
+          `Edit(${backslashCwd}\\function\\input_split.json)`,
           "Write(function/input_split.json)",
           "Write(./function/input_split.json)",
+          `Write(${slashCwd}/function/input_split.json)`,
+          `Write(${backslashCwd}\\function\\input_split.json)`,
           "Edit(function/input_merge.json)",
           "Edit(./function/input_merge.json)",
+          `Edit(${slashCwd}/function/input_merge.json)`,
+          `Edit(${backslashCwd}\\function\\input_merge.json)`,
           "Write(function/input_merge.json)",
           "Write(./function/input_merge.json)",
+          `Write(${slashCwd}/function/input_merge.json)`,
+          `Write(${backslashCwd}\\function\\input_merge.json)`,
           "Edit(github/description.json)",
           "Edit(./github/description.json)",
+          `Edit(${slashCwd}/github/description.json)`,
+          `Edit(${backslashCwd}\\github\\description.json)`,
           "Write(github/description.json)",
           "Write(./github/description.json)",
+          `Write(${slashCwd}/github/description.json)`,
+          `Write(${backslashCwd}\\github\\description.json)`,
           "Edit(README.md)",
           "Edit(./README.md)",
+          `Edit(${slashCwd}/README.md)`,
+          `Edit(${backslashCwd}\\README.md)`,
           "Write(README.md)",
           "Write(./README.md)",
+          `Write(${slashCwd}/README.md)`,
+          `Write(${backslashCwd}\\README.md)`,
           `Edit(plans/${nextPlanIndex}.md)`,
           `Edit(./plans/${nextPlanIndex}.md)`,
+          `Edit(${slashCwd}/plans/${nextPlanIndex}.md)`,
+          `Edit(${backslashCwd}\\plans\\${nextPlanIndex}.md)`,
           `Write(plans/${nextPlanIndex}.md)`,
           `Write(./plans/${nextPlanIndex}.md)`,
+          `Write(${slashCwd}/plans/${nextPlanIndex}.md)`,
+          `Write(${backslashCwd}\\plans\\${nextPlanIndex}.md)`,
           "Edit(./objectiveai/objectiveai-api/src/**)",
           "Edit(objectiveai/objectiveai-api/src/**)",
+          `Edit(${slashCwd}/objectiveai/objectiveai-api/src/**)`,
+          `Edit(${backslashCwd}\\objectiveai\\objectiveai-api\\src\\**)`,
           "Edit(./objectiveai/objectiveai-rs/src/**)",
           "Edit(objectiveai/objectiveai-rs/src/**)",
+          `Edit(${slashCwd}/objectiveai/objectiveai-rs/src/**)`,
+          `Edit(${backslashCwd}\\objectiveai\\objectiveai-rs\\src\\**)`,
           "Edit(./objectiveai/objectiveai-rs-wasm-js/src/**)",
           "Edit(objectiveai/objectiveai-rs-wasm-js/src/**)",
+          `Edit(${slashCwd}/objectiveai/objectiveai-rs-wasm-js/src/**)`,
+          `Edit(${backslashCwd}\\objectiveai\\objectiveai-rs-wasm-js\\src\\**)`,
         ],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
@@ -328,7 +397,9 @@ Please try again. Remember to:
 }
 
 // Main entry point for inventing a new function
-export async function inventVectorTasks(options: AgentOptions = {}): Promise<void> {
+export async function inventVectorTasks(
+  options: AgentOptions = {},
+): Promise<void> {
   const log = options.log ?? createFileLogger().log;
 
   // Run preparation (init + steps 1-8)

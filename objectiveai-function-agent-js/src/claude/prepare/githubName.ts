@@ -2,6 +2,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { promptResources } from "../promptResources";
+import { getSlashCwd, getBackslashCwd } from "../../util";
 
 // Step 5 - Create github/name.json (if needed)
 export async function createGitHubNameJson(
@@ -27,6 +28,9 @@ export async function createGitHubNameJson(
   };
 
   // Query
+  const slashCwd = getSlashCwd();
+  const backslashCwd = getBackslashCwd();
+
   if (!githubNameNonEmpty()) {
     const stream = query({
       prompt:
@@ -38,8 +42,7 @@ export async function createGitHubNameJson(
         "Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n" +
         '**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n' +
         "- Use all lowercase\n" +
-        "- Use dashes (`-`) to separate words if there's more than one\n\n" +
-        "**Always use relative paths** when editing or writing files (e.g., `github/name.json`, not the full absolute path).",
+        "- Use dashes (`-`) to separate words if there's more than one",
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -53,8 +56,12 @@ export async function createGitHubNameJson(
           "WebSearch",
           "Edit(github/name.json)",
           "Edit(./github/name.json)",
+          `Edit(${slashCwd}/github/name.json)`,
+          `Edit(${backslashCwd}\\github\\name.json)`,
           "Write(github/name.json)",
           "Write(./github/name.json)",
+          `Write(${slashCwd}/github/name.json)`,
+          `Write(${backslashCwd}\\github\\name.json)`,
         ],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
@@ -84,8 +91,7 @@ export async function createGitHubNameJson(
         " Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n" +
         '**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n' +
         "- Use all lowercase\n" +
-        "- Use dashes (`-`) to separate words if there's more than one\n\n" +
-        "**Always use relative paths** when editing or writing files (e.g., `github/name.json`, not the full absolute path).",
+        "- Use dashes (`-`) to separate words if there's more than one",
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -99,8 +105,12 @@ export async function createGitHubNameJson(
           "WebSearch",
           "Edit(github/name.json)",
           "Edit(./github/name.json)",
+          `Edit(${slashCwd}/github/name.json)`,
+          `Edit(${backslashCwd}\\github\\name.json)`,
           "Write(github/name.json)",
           "Write(./github/name.json)",
+          `Write(${slashCwd}/github/name.json)`,
+          `Write(${backslashCwd}\\github\\name.json)`,
         ],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",

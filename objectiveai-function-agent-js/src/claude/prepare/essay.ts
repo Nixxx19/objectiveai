@@ -2,6 +2,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { promptResources } from "../promptResources";
+import { getSlashCwd, getBackslashCwd } from "../../util";
 
 // Step 6 - Read or Create ESSAY.md
 export async function essay(
@@ -20,6 +21,9 @@ export async function essay(
   })();
 
   // Query
+  const slashCwd = getSlashCwd();
+  const backslashCwd = getBackslashCwd();
+
   const stream = (() => {
     if (essayNonEmpty) {
       return query({
@@ -53,8 +57,7 @@ export async function essay(
           "Create ESSAY.md describing the ObjectiveAI Function you are building." +
           " Explore the purpose, inputs, outputs, and use-cases of the function in detail." +
           " Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function." +
-          " This essay will guide the development of the function and underpins its philosophy.\n\n" +
-          "**Always use relative paths** when editing or writing files (e.g., `ESSAY.md`, not the full absolute path).",
+          " This essay will guide the development of the function and underpins its philosophy.",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -68,8 +71,12 @@ export async function essay(
             "WebSearch",
             "Edit(ESSAY.md)",
             "Edit(./ESSAY.md)",
+            `Edit(${slashCwd}/ESSAY.md)`,
+            `Edit(${backslashCwd}\\ESSAY.md)`,
             "Write(ESSAY.md)",
             "Write(./ESSAY.md)",
+            `Write(${slashCwd}/ESSAY.md)`,
+            `Write(${backslashCwd}\\ESSAY.md)`,
           ],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
@@ -99,8 +106,7 @@ export async function essay(
           " Create ESSAY.md describing the ObjectiveAI Function you are building." +
           " Explore the purpose, inputs, outputs, and use-cases of the function in detail." +
           " Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function." +
-          " This essay will guide the development of the function and underpins its philosophy.\n\n" +
-          "**Always use relative paths** when editing or writing files (e.g., `ESSAY.md`, not the full absolute path).",
+          " This essay will guide the development of the function and underpins its philosophy.",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -114,8 +120,12 @@ export async function essay(
             "WebSearch",
             "Edit(ESSAY.md)",
             "Edit(./ESSAY.md)",
+            `Edit(${slashCwd}/ESSAY.md)`,
+            `Edit(${backslashCwd}\\ESSAY.md)`,
             "Write(ESSAY.md)",
             "Write(./ESSAY.md)",
+            `Write(${slashCwd}/ESSAY.md)`,
+            `Write(${backslashCwd}\\ESSAY.md)`,
           ],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",

@@ -1,6 +1,7 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
+import { getSlashCwd, getBackslashCwd } from "../../util";
 
 // Step 3 - Read or Create SPEC.md
 export async function spec(
@@ -19,6 +20,9 @@ export async function spec(
   })();
 
   // Query
+  const slashCwd = getSlashCwd();
+  const backslashCwd = getBackslashCwd();
+
   const stream = (() => {
     if (specNonEmpty) {
       return query({
@@ -48,8 +52,7 @@ export async function spec(
           " Think deeply about what function to invent:\n" +
           "- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n" +
           "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
-          "Be creative and describe a function with plain language.\n\n" +
-          "**Always use relative paths** when editing or writing files (e.g., `SPEC.md`, not the full absolute path).",
+          "Be creative and describe a function with plain language.",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -63,8 +66,12 @@ export async function spec(
             "WebSearch",
             "Edit(SPEC.md)",
             "Edit(./SPEC.md)",
+            `Edit(${slashCwd}/SPEC.md)`,
+            `Edit(${backslashCwd}\\SPEC.md)`,
             "Write(SPEC.md)",
             "Write(./SPEC.md)",
+            `Write(${slashCwd}/SPEC.md)`,
+            `Write(${backslashCwd}\\SPEC.md)`,
           ],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
@@ -95,8 +102,7 @@ export async function spec(
           " Think deeply about what function to invent:\n" +
           "- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n" +
           "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
-          "Be creative and describe a function with plain language.\n\n" +
-          "**Always use relative paths** when editing or writing files (e.g., `SPEC.md`, not the full absolute path).",
+          "Be creative and describe a function with plain language.",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -110,8 +116,12 @@ export async function spec(
             "WebSearch",
             "Edit(SPEC.md)",
             "Edit(./SPEC.md)",
+            `Edit(${slashCwd}/SPEC.md)`,
+            `Edit(${backslashCwd}\\SPEC.md)`,
             "Write(SPEC.md)",
             "Write(./SPEC.md)",
+            `Write(${slashCwd}/SPEC.md)`,
+            `Write(${backslashCwd}\\SPEC.md)`,
           ],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
