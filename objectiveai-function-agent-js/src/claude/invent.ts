@@ -6,7 +6,10 @@ import { getNextPlanIndex, getPlanPath } from "./planIndex";
 import { createFileLogger } from "../logging";
 
 // Main loop for inventing a new function (no issues)
-async function inventLoop(log: LogFn, sessionId?: string): Promise<string | undefined> {
+async function inventLoop(
+  log: LogFn,
+  sessionId?: string,
+): Promise<string | undefined> {
   const {
     getCurrentRevision,
     resetToRevision,
@@ -186,6 +189,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **Only modify function/*.json files when necessary**:
   - If the build fails due to invalid/missing values
   - If a field is undefined and needs to be set
+- **Always use relative paths** - when editing or writing files, use paths like \`inputs.json\` or \`function/tasks.json\`, never absolute paths
 `;
     } else {
       // On retry, send a short message about what failed
@@ -223,8 +227,8 @@ Please try again. Remember to:
           "WebSearch",
           "Edit(inputs.json)",
           "Edit(./inputs.json)",
-          "Write(./inputs.json)",
           "Write(inputs.json)",
+          "Write(./inputs.json)",
           "Edit(function/description.json)",
           "Edit(./function/description.json)",
           "Write(function/description.json)",

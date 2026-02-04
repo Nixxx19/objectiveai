@@ -52,7 +52,8 @@ export async function essayTasks(
             "ESSAY.md",
           ]) +
           "Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md." +
-          " Each task is a plain language description of a task which will go into the function's `tasks` array.",
+          " Each task is a plain language description of a task which will go into the function's `tasks` array.\n\n" +
+          "**Always use relative paths** when editing or writing files (e.g., `ESSAY_TASKS.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -98,7 +99,8 @@ export async function essayTasks(
         prompt:
           "ESSAY_TASKS.md is empty after your essayTasks phase." +
           " Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md." +
-          " Each task is a plain language description of a task which will go into the function's `tasks` array.",
+          " Each task is a plain language description of a task which will go into the function's `tasks` array.\n\n" +
+          "**Always use relative paths** when editing or writing files (e.g., `ESSAY_TASKS.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",

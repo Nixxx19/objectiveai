@@ -80,8 +80,8 @@ var getSubFunctionCommits_ts_default = 'import { execSync } from "child_process"
 // assets/plans/.gitkeep.txt
 var gitkeep_default = "";
 
-// assets/logs/.gitkeep.txt
-var gitkeep_default2 = "";
+// assets/logs/.gitignore.txt
+var gitignore_default2 = "*\n!.gitignore\n";
 
 // assets/ESSAY.md.txt
 var ESSAY_md_default = "";
@@ -90,7 +90,7 @@ var ESSAY_md_default = "";
 var ESSAY_TASKS_md_default = "";
 
 // assets/sub_functions/.gitignore.txt
-var gitignore_default2 = "*\n!.gitignore\n";
+var gitignore_default3 = "*\n!.gitignore\n";
 
 // assets/inputs.json.txt
 var inputs_json_default = "[]\n";
@@ -122,8 +122,8 @@ var assets = {
   "cloneSubFunctions.ts": cloneSubFunctions_ts_default,
   "getSubFunctionCommits.ts": getSubFunctionCommits_ts_default,
   "plans/.gitkeep": gitkeep_default,
-  "logs/.gitkeep": gitkeep_default2,
-  "sub_functions/.gitignore": gitignore_default2,
+  "logs/.gitignore": gitignore_default2,
+  "sub_functions/.gitignore": gitignore_default3,
   "inputs.json": inputs_json_default,
   "ESSAY.md": ESSAY_md_default,
   "ESSAY_TASKS.md": ESSAY_TASKS_md_default

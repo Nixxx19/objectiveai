@@ -30,7 +30,8 @@ export async function createFunctionTypeJson(
     const stream = query({
       prompt:
         promptResources(["OBJECTIVEAI_INDEX.md", "SPEC.md"]) +
-        'Create function/type.json specifying the function type ("scalar.function" or "vector.function").',
+        'Create function/type.json specifying the function type ("scalar.function" or "vector.function").\n\n' +
+        "**Always use relative paths** when editing or writing files (e.g., `function/type.json`, not the full absolute path).",
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -72,7 +73,8 @@ export async function createFunctionTypeJson(
     const stream = query({
       prompt:
         "function/type.json is invalid after your createFunctionTypeJson phase." +
-        ' Create function/type.json specifying the function type ("scalar.function" or "vector.function") based on SPEC.md.',
+        ' Create function/type.json specifying the function type ("scalar.function" or "vector.function") based on SPEC.md.\n\n' +
+        "**Always use relative paths** when editing or writing files (e.g., `function/type.json`, not the full absolute path).",
       options: {
         allowedTools: [
           "Bash(ls*)",

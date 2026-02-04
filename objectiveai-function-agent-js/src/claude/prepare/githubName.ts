@@ -36,9 +36,10 @@ export async function createGitHubNameJson(
           "function/type.json",
         ]) +
         "Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n" +
-        '**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:' +
+        '**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n' +
         "- Use all lowercase\n" +
-        "- Use dashes (`-`) to separate words if there's more than one",
+        "- Use dashes (`-`) to separate words if there's more than one\n\n" +
+        "**Always use relative paths** when editing or writing files (e.g., `github/name.json`, not the full absolute path).",
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -83,7 +84,8 @@ export async function createGitHubNameJson(
         " Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n" +
         '**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n' +
         "- Use all lowercase\n" +
-        "- Use dashes (`-`) to separate words if there's more than one",
+        "- Use dashes (`-`) to separate words if there's more than one\n\n" +
+        "**Always use relative paths** when editing or writing files (e.g., `github/name.json`, not the full absolute path).",
       options: {
         allowedTools: [
           "Bash(ls*)",

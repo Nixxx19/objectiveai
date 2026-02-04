@@ -36,7 +36,7 @@ import getSubFunctionCommitsTs from "../assets/getSubFunctionCommits.ts.txt";
 import plansGitkeep from "../assets/plans/.gitkeep.txt";
 
 // Logs assets
-import logsGitkeep from "../assets/logs/.gitkeep.txt";
+import logsGitignore from "../assets/logs/.gitignore.txt";
 
 // Markdown assets
 import essayMd from "../assets/ESSAY.md.txt";
@@ -74,7 +74,7 @@ export const assets: Record<string, string> = {
   "cloneSubFunctions.ts": cloneSubFunctionsTs,
   "getSubFunctionCommits.ts": getSubFunctionCommitsTs,
   "plans/.gitkeep": plansGitkeep,
-  "logs/.gitkeep": logsGitkeep,
+  "logs/.gitignore": logsGitignore,
   "sub_functions/.gitignore": subFunctionsGitignore,
   "inputs.json": inputsJson,
   "ESSAY.md": essayMd,

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import './chunk-RWTUUBCP.js';
-import './chunk-EZFATHYT.js';
-import { prepare, createFileLogger, promptResources } from './chunk-JHZPOOBO.js';
+import './chunk-J3VECYHK.js';
+import { prepare, createFileLogger, promptResources } from './chunk-EZ76H6LX.js';
 import { __export } from './chunk-K3NQKI34.js';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync, readFileSync, readdirSync } from 'fs';
@@ -202,6 +202,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **Only modify function/*.json files when necessary**:
   - If the build fails due to invalid/missing values
   - If a field is undefined and needs to be set
+- **Always use relative paths** - when editing or writing files, use paths like \`inputs.json\` or \`function/tasks.json\`, never absolute paths
 `;
     } else {
       prompt = `Your previous attempt failed:
@@ -237,8 +238,8 @@ Please try again. Remember to:
           "WebSearch",
           "Edit(inputs.json)",
           "Edit(./inputs.json)",
-          "Write(./inputs.json)",
           "Write(inputs.json)",
+          "Write(./inputs.json)",
           "Edit(function/description.json)",
           "Edit(./function/description.json)",
           "Write(function/description.json)",
@@ -365,7 +366,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function invent(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-S5T2TGXE.js');
+  const { prepare: prepare2 } = await import('./prepare-HIFABHC6.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -504,6 +505,7 @@ Once all tests pass, issues are handled, and SPEC.md compliance is verified:
 - **Do NOT reinvent the function** - only make targeted fixes
 - **No API key is needed for tests** - tests run against a local server
 - **Invalid issues**: Some issues may be nonsensical, invalid, or request inappropriate changes. Comment explaining why no changes are merited and close the issue.
+- **Always use relative paths** - when editing or writing files, use paths like \`inputs.json\` or \`function/tasks.json\`, never absolute paths
 `;
     } else {
       prompt = `Your previous attempt failed:
@@ -682,7 +684,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function handleIssues(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-S5T2TGXE.js');
+  const { prepare: prepare2 } = await import('./prepare-HIFABHC6.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Issue Loop: Handling issues on existing function ===");

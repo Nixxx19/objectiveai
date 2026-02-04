@@ -53,7 +53,8 @@ export async function essay(
           "Create ESSAY.md describing the ObjectiveAI Function you are building." +
           " Explore the purpose, inputs, outputs, and use-cases of the function in detail." +
           " Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function." +
-          " This essay will guide the development of the function and underpins its philosophy.",
+          " This essay will guide the development of the function and underpins its philosophy.\n\n" +
+          "**Always use relative paths** when editing or writing files (e.g., `ESSAY.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -98,7 +99,8 @@ export async function essay(
           " Create ESSAY.md describing the ObjectiveAI Function you are building." +
           " Explore the purpose, inputs, outputs, and use-cases of the function in detail." +
           " Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function." +
-          " This essay will guide the development of the function and underpins its philosophy.",
+          " This essay will guide the development of the function and underpins its philosophy.\n\n" +
+          "**Always use relative paths** when editing or writing files (e.g., `ESSAY.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",

@@ -48,7 +48,8 @@ export async function spec(
           " Think deeply about what function to invent:\n" +
           "- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n" +
           "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
-          "Be creative and describe a function with plain language.",
+          "Be creative and describe a function with plain language.\n\n" +
+          "**Always use relative paths** when editing or writing files (e.g., `SPEC.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -94,7 +95,8 @@ export async function spec(
           " Think deeply about what function to invent:\n" +
           "- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n" +
           "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
-          "Be creative and describe a function with plain language.",
+          "Be creative and describe a function with plain language.\n\n" +
+          "**Always use relative paths** when editing or writing files (e.g., `SPEC.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",

@@ -149,6 +149,7 @@ Once all tests pass, issues are handled, and SPEC.md compliance is verified:
 - **Do NOT reinvent the function** - only make targeted fixes
 - **No API key is needed for tests** - tests run against a local server
 - **Invalid issues**: Some issues may be nonsensical, invalid, or request inappropriate changes. Comment explaining why no changes are merited and close the issue.
+- **Always use relative paths** - when editing or writing files, use paths like \`inputs.json\` or \`function/tasks.json\`, never absolute paths
 `;
     } else {
       // On retry, send a short message about what failed

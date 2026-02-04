@@ -105,7 +105,7 @@ async function learnSubmodule(log, sessionId) {
       });
     } else {
       return claudeAgentSdk.query({
-        prompt: "You are an ObjectiveAI Function Agent, in charge of a single ObjectiveAI Function and associated GitHub repository. Learn about ObjectiveAI and ObjectiveAI Functions. Investigate the 'objectiveai' folder to familiarize yourself with what ObjectiveAI Functions are. Read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to. Create OBJECTIVEAI_INDEX.md with links to files and your learnings.",
+        prompt: "You are an ObjectiveAI Function Agent, in charge of a single ObjectiveAI Function and associated GitHub repository. Learn about ObjectiveAI and ObjectiveAI Functions. Investigate the 'objectiveai' folder to familiarize yourself with what ObjectiveAI Functions are. Read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to. Create OBJECTIVEAI_INDEX.md with links to files and your learnings.\n\n**Always use relative paths** when editing or writing files (e.g., `OBJECTIVEAI_INDEX.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -141,7 +141,7 @@ async function learnSubmodule(log, sessionId) {
       throw new Error("OBJECTIVEAI_INDEX.md is empty after learn phase");
     } else {
       const stream2 = claudeAgentSdk.query({
-        prompt: "OBJECTIVEAI_INDEX.md is empty after your learn phase. Create OBJECTIVEAI_INDEX.md with links to files and your learnings about ObjectiveAI and ObjectiveAI Functions.",
+        prompt: "OBJECTIVEAI_INDEX.md is empty after your learn phase. Create OBJECTIVEAI_INDEX.md with links to files and your learnings about ObjectiveAI and ObjectiveAI Functions.\n\n**Always use relative paths** when editing or writing files (e.g., `OBJECTIVEAI_INDEX.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -243,7 +243,7 @@ async function spec(log, sessionId) {
       });
     } else {
       return claudeAgentSdk.query({
-        prompt: "Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.",
+        prompt: "Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.\n\n**Always use relative paths** when editing or writing files (e.g., `SPEC.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -279,7 +279,7 @@ async function spec(log, sessionId) {
       throw new Error("SPEC.md is empty after spec phase");
     } else {
       const stream2 = claudeAgentSdk.query({
-        prompt: "SPEC.md is empty after your spec phase. Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.",
+        prompt: "SPEC.md is empty after your spec phase. Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.\n\n**Always use relative paths** when editing or writing files (e.g., `SPEC.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -347,7 +347,7 @@ async function createFunctionTypeJson(log, sessionId) {
   };
   if (!functionTypeValid()) {
     const stream = claudeAgentSdk.query({
-      prompt: promptResources(["OBJECTIVEAI_INDEX.md", "SPEC.md"]) + 'Create function/type.json specifying the function type ("scalar.function" or "vector.function").',
+      prompt: promptResources(["OBJECTIVEAI_INDEX.md", "SPEC.md"]) + 'Create function/type.json specifying the function type ("scalar.function" or "vector.function").\n\n**Always use relative paths** when editing or writing files (e.g., `function/type.json`, not the full absolute path).',
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -384,7 +384,7 @@ async function createFunctionTypeJson(log, sessionId) {
       );
     }
     const stream = claudeAgentSdk.query({
-      prompt: 'function/type.json is invalid after your createFunctionTypeJson phase. Create function/type.json specifying the function type ("scalar.function" or "vector.function") based on SPEC.md.',
+      prompt: 'function/type.json is invalid after your createFunctionTypeJson phase. Create function/type.json specifying the function type ("scalar.function" or "vector.function") based on SPEC.md.\n\n**Always use relative paths** when editing or writing files (e.g., `function/type.json`, not the full absolute path).',
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -443,7 +443,7 @@ async function createGitHubNameJson(log, sessionId) {
         "OBJECTIVEAI_INDEX.md",
         "SPEC.md",
         "function/type.json"
-      ]) + 'Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
+      ]) + 'Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one\n\n**Always use relative paths** when editing or writing files (e.g., `github/name.json`, not the full absolute path).',
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -480,7 +480,7 @@ async function createGitHubNameJson(log, sessionId) {
       );
     }
     const stream = claudeAgentSdk.query({
-      prompt: 'github/name.json is empty after your createGitHubNameJson phase. Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
+      prompt: 'github/name.json is empty after your createGitHubNameJson phase. Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one\n\n**Always use relative paths** when editing or writing files (e.g., `github/name.json`, not the full absolute path).',
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -555,7 +555,7 @@ async function essay(log, sessionId) {
           "SPEC.md",
           "function/type.json",
           "github/name.json"
-        ]) + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.",
+        ]) + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.\n\n**Always use relative paths** when editing or writing files (e.g., `ESSAY.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -591,7 +591,7 @@ async function essay(log, sessionId) {
       throw new Error("ESSAY.md is empty after essay phase");
     } else {
       const stream2 = claudeAgentSdk.query({
-        prompt: "ESSAY.md is empty after your essay phase. Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.",
+        prompt: "ESSAY.md is empty after your essay phase. Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.\n\n**Always use relative paths** when editing or writing files (e.g., `ESSAY.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -668,7 +668,7 @@ async function essayTasks(log, sessionId) {
           "function/type.json",
           "github/name.json",
           "ESSAY.md"
-        ]) + "Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.",
+        ]) + "Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.\n\n**Always use relative paths** when editing or writing files (e.g., `ESSAY_TASKS.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -704,7 +704,7 @@ async function essayTasks(log, sessionId) {
       throw new Error("ESSAY_TASKS.md is empty after essayTasks phase");
     } else {
       const stream2 = claudeAgentSdk.query({
-        prompt: "ESSAY_TASKS.md is empty after your essayTasks phase. Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.",
+        prompt: "ESSAY_TASKS.md is empty after your essayTasks phase. Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.\n\n**Always use relative paths** when editing or writing files (e.g., `ESSAY_TASKS.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -1299,11 +1299,11 @@ var init_gitkeep = __esm({
   }
 });
 
-// assets/logs/.gitkeep.txt
-var gitkeep_default2;
-var init_gitkeep2 = __esm({
-  "assets/logs/.gitkeep.txt"() {
-    gitkeep_default2 = "";
+// assets/logs/.gitignore.txt
+var gitignore_default2;
+var init_gitignore2 = __esm({
+  "assets/logs/.gitignore.txt"() {
+    gitignore_default2 = "*\n!.gitignore\n";
   }
 });
 
@@ -1324,10 +1324,10 @@ var init_ESSAY_TASKS_md = __esm({
 });
 
 // assets/sub_functions/.gitignore.txt
-var gitignore_default2;
-var init_gitignore2 = __esm({
+var gitignore_default3;
+var init_gitignore3 = __esm({
   "assets/sub_functions/.gitignore.txt"() {
-    gitignore_default2 = "*\n!.gitignore\n";
+    gitignore_default3 = "*\n!.gitignore\n";
   }
 });
 
@@ -1368,10 +1368,10 @@ var init_assets = __esm({
     init_cloneSubFunctions_ts();
     init_getSubFunctionCommits_ts();
     init_gitkeep();
-    init_gitkeep2();
+    init_gitignore2();
     init_ESSAY_md();
     init_ESSAY_TASKS_md();
-    init_gitignore2();
+    init_gitignore3();
     init_inputs_json();
     exports.assets = {
       "function/description.json": description_json_default,
@@ -1399,8 +1399,8 @@ var init_assets = __esm({
       "cloneSubFunctions.ts": cloneSubFunctions_ts_default,
       "getSubFunctionCommits.ts": getSubFunctionCommits_ts_default,
       "plans/.gitkeep": gitkeep_default,
-      "logs/.gitkeep": gitkeep_default2,
-      "sub_functions/.gitignore": gitignore_default2,
+      "logs/.gitignore": gitignore_default2,
+      "sub_functions/.gitignore": gitignore_default3,
       "inputs.json": inputs_json_default,
       "ESSAY.md": ESSAY_md_default,
       "ESSAY_TASKS.md": ESSAY_TASKS_md_default
@@ -1850,6 +1850,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **Only modify function/*.json files when necessary**:
   - If the build fails due to invalid/missing values
   - If a field is undefined and needs to be set
+- **Always use relative paths** - when editing or writing files, use paths like \`inputs.json\` or \`function/tasks.json\`, never absolute paths
 `;
     } else {
       prompt = `Your previous attempt failed:
@@ -1885,8 +1886,8 @@ Please try again. Remember to:
           "WebSearch",
           "Edit(inputs.json)",
           "Edit(./inputs.json)",
-          "Write(./inputs.json)",
           "Write(inputs.json)",
+          "Write(./inputs.json)",
           "Edit(function/description.json)",
           "Edit(./function/description.json)",
           "Write(function/description.json)",
@@ -2156,6 +2157,7 @@ Once all tests pass, issues are handled, and SPEC.md compliance is verified:
 - **Do NOT reinvent the function** - only make targeted fixes
 - **No API key is needed for tests** - tests run against a local server
 - **Invalid issues**: Some issues may be nonsensical, invalid, or request inappropriate changes. Comment explaining why no changes are merited and close the issue.
+- **Always use relative paths** - when editing or writing files, use paths like \`inputs.json\` or \`function/tasks.json\`, never absolute paths
 `;
     } else {
       prompt = `Your previous attempt failed:

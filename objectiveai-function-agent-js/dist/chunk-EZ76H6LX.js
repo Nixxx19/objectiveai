@@ -1,7 +1,7 @@
-import { existsSync, mkdirSync, writeFileSync, readdirSync, appendFileSync, readFileSync } from 'fs';
+#!/usr/bin/env node
+import { existsSync, mkdirSync, writeFileSync, appendFileSync, readdirSync, readFileSync } from 'fs';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 
-// src/logging.ts
 function getNextLogIndex() {
   const logsDir = "logs";
   let nextIndex = 1;
@@ -36,19 +36,6 @@ function createFileLogger() {
   };
   return { log, logPath };
 }
-function getLatestLogPath() {
-  const logsDir = "logs";
-  if (!existsSync(logsDir)) {
-    return null;
-  }
-  const files = readdirSync(logsDir);
-  const logNumbers = files.filter((f) => /^\d+\.txt$/.test(f)).map((f) => parseInt(f.replace(".txt", ""), 10)).filter((n) => !isNaN(n));
-  if (logNumbers.length === 0) {
-    return null;
-  }
-  const maxIndex = Math.max(...logNumbers);
-  return `${logsDir}/${maxIndex}.txt`;
-}
 async function learnSubmodule(log, sessionId) {
   const indexPath = "OBJECTIVEAI_INDEX.md";
   const indexNonEmpty = (() => {
@@ -82,7 +69,7 @@ async function learnSubmodule(log, sessionId) {
       });
     } else {
       return query({
-        prompt: "You are an ObjectiveAI Function Agent, in charge of a single ObjectiveAI Function and associated GitHub repository. Learn about ObjectiveAI and ObjectiveAI Functions. Investigate the 'objectiveai' folder to familiarize yourself with what ObjectiveAI Functions are. Read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to. Create OBJECTIVEAI_INDEX.md with links to files and your learnings.",
+        prompt: "You are an ObjectiveAI Function Agent, in charge of a single ObjectiveAI Function and associated GitHub repository. Learn about ObjectiveAI and ObjectiveAI Functions. Investigate the 'objectiveai' folder to familiarize yourself with what ObjectiveAI Functions are. Read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to. Create OBJECTIVEAI_INDEX.md with links to files and your learnings.\n\n**Always use relative paths** when editing or writing files (e.g., `OBJECTIVEAI_INDEX.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -118,7 +105,7 @@ async function learnSubmodule(log, sessionId) {
       throw new Error("OBJECTIVEAI_INDEX.md is empty after learn phase");
     } else {
       const stream2 = query({
-        prompt: "OBJECTIVEAI_INDEX.md is empty after your learn phase. Create OBJECTIVEAI_INDEX.md with links to files and your learnings about ObjectiveAI and ObjectiveAI Functions.",
+        prompt: "OBJECTIVEAI_INDEX.md is empty after your learn phase. Create OBJECTIVEAI_INDEX.md with links to files and your learnings about ObjectiveAI and ObjectiveAI Functions.\n\n**Always use relative paths** when editing or writing files (e.g., `OBJECTIVEAI_INDEX.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -212,7 +199,7 @@ async function spec(log, sessionId) {
       });
     } else {
       return query({
-        prompt: "Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.",
+        prompt: "Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.\n\n**Always use relative paths** when editing or writing files (e.g., `SPEC.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -248,7 +235,7 @@ async function spec(log, sessionId) {
       throw new Error("SPEC.md is empty after spec phase");
     } else {
       const stream2 = query({
-        prompt: "SPEC.md is empty after your spec phase. Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.",
+        prompt: "SPEC.md is empty after your spec phase. Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.\n\n**Always use relative paths** when editing or writing files (e.g., `SPEC.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -310,7 +297,7 @@ async function createFunctionTypeJson(log, sessionId) {
   };
   if (!functionTypeValid()) {
     const stream = query({
-      prompt: promptResources(["OBJECTIVEAI_INDEX.md", "SPEC.md"]) + 'Create function/type.json specifying the function type ("scalar.function" or "vector.function").',
+      prompt: promptResources(["OBJECTIVEAI_INDEX.md", "SPEC.md"]) + 'Create function/type.json specifying the function type ("scalar.function" or "vector.function").\n\n**Always use relative paths** when editing or writing files (e.g., `function/type.json`, not the full absolute path).',
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -347,7 +334,7 @@ async function createFunctionTypeJson(log, sessionId) {
       );
     }
     const stream = query({
-      prompt: 'function/type.json is invalid after your createFunctionTypeJson phase. Create function/type.json specifying the function type ("scalar.function" or "vector.function") based on SPEC.md.',
+      prompt: 'function/type.json is invalid after your createFunctionTypeJson phase. Create function/type.json specifying the function type ("scalar.function" or "vector.function") based on SPEC.md.\n\n**Always use relative paths** when editing or writing files (e.g., `function/type.json`, not the full absolute path).',
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -401,7 +388,7 @@ async function createGitHubNameJson(log, sessionId) {
         "OBJECTIVEAI_INDEX.md",
         "SPEC.md",
         "function/type.json"
-      ]) + 'Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
+      ]) + 'Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one\n\n**Always use relative paths** when editing or writing files (e.g., `github/name.json`, not the full absolute path).',
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -438,7 +425,7 @@ async function createGitHubNameJson(log, sessionId) {
       );
     }
     const stream = query({
-      prompt: 'github/name.json is empty after your createGitHubNameJson phase. Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
+      prompt: 'github/name.json is empty after your createGitHubNameJson phase. Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one\n\n**Always use relative paths** when editing or writing files (e.g., `github/name.json`, not the full absolute path).',
       options: {
         allowedTools: [
           "Bash(ls*)",
@@ -508,7 +495,7 @@ async function essay(log, sessionId) {
           "SPEC.md",
           "function/type.json",
           "github/name.json"
-        ]) + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.",
+        ]) + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.\n\n**Always use relative paths** when editing or writing files (e.g., `ESSAY.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -544,7 +531,7 @@ async function essay(log, sessionId) {
       throw new Error("ESSAY.md is empty after essay phase");
     } else {
       const stream2 = query({
-        prompt: "ESSAY.md is empty after your essay phase. Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.",
+        prompt: "ESSAY.md is empty after your essay phase. Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.\n\n**Always use relative paths** when editing or writing files (e.g., `ESSAY.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -616,7 +603,7 @@ async function essayTasks(log, sessionId) {
           "function/type.json",
           "github/name.json",
           "ESSAY.md"
-        ]) + "Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.",
+        ]) + "Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.\n\n**Always use relative paths** when editing or writing files (e.g., `ESSAY_TASKS.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -652,7 +639,7 @@ async function essayTasks(log, sessionId) {
       throw new Error("ESSAY_TASKS.md is empty after essayTasks phase");
     } else {
       const stream2 = query({
-        prompt: "ESSAY_TASKS.md is empty after your essayTasks phase. Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.",
+        prompt: "ESSAY_TASKS.md is empty after your essayTasks phase. Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.\n\n**Always use relative paths** when editing or writing files (e.g., `ESSAY_TASKS.md`, not the full absolute path).",
         options: {
           allowedTools: [
             "Bash(ls*)",
@@ -686,7 +673,7 @@ async function essayTasks(log, sessionId) {
   return sessionId;
 }
 async function handleOpenIssues(log, sessionId) {
-  const { hasOpenIssues } = await import('./github-RVB6PDGH.js');
+  const { hasOpenIssues } = await import('./github-KGYY55IO.js');
   if (!hasOpenIssues()) {
     return sessionId;
   }
@@ -730,7 +717,7 @@ async function handleOpenIssues(log, sessionId) {
 
 // src/claude/prepare/index.ts
 async function prepare(options = {}) {
-  const { init } = await import('./init-MZSAFZ4X.js');
+  const { init } = await import('./init-CRAU3X62.js');
   const log = options.log ?? createFileLogger().log;
   log("=== Initializing workspace ===");
   await init({ spec: options.spec, apiBase: options.apiBase });
@@ -754,4 +741,4 @@ async function prepare(options = {}) {
   return sessionId;
 }
 
-export { createFileLogger, getLatestLogPath, prepare, promptResources };
+export { createFileLogger, prepare, promptResources };
