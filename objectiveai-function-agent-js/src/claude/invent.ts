@@ -26,7 +26,7 @@ async function inventLoop(
   // Store current revision for potential rollback
   const initialRevision = getCurrentRevision();
 
-  const maxAttempts = 3;
+  const maxAttempts = 5;
   let attempt = 0;
   let success = false;
   let lastFailureReasons: string[] = [];
