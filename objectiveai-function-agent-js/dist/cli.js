@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import './chunk-RWTUUBCP.js';
-import './chunk-3I3JHXEG.js';
-import { prepare, createFileLogger, promptResources } from './chunk-5LLFB64S.js';
+import './chunk-QVTDRMFZ.js';
+import './chunk-WXSFRJ6K.js';
+import { prepare, createFileLogger, promptResources } from './chunk-EIX3YCHZ.js';
 import { __export } from './chunk-K3NQKI34.js';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync, readFileSync, readdirSync } from 'fs';
@@ -38,7 +38,7 @@ async function inventLoop(log, sessionId) {
     hasUntrackedFiles,
     checkoutSubmodule,
     pushOrCreateUpstream
-  } = await import('./github-KGYY55IO.js');
+  } = await import('./github-LSQGDLDW.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -366,7 +366,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function invent(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-CIQAYUEF.js');
+  const { prepare: prepare2 } = await import('./prepare-S6AJMDMY.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -383,7 +383,7 @@ async function handleIssuesLoop(log, sessionId) {
     checkoutSubmodule,
     pushOrCreateUpstream,
     closeIssue
-  } = await import('./github-KGYY55IO.js');
+  } = await import('./github-LSQGDLDW.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -684,7 +684,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function handleIssues(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-CIQAYUEF.js');
+  const { prepare: prepare2 } = await import('./prepare-S6AJMDMY.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Issue Loop: Handling issues on existing function ===");

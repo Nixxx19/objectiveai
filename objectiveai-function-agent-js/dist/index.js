@@ -1,7 +1,7 @@
-export { github_exports as GitHub } from './chunk-HNOJIQ7Y.js';
-export { assets, init } from './chunk-35YUPIS7.js';
-import { prepare, createFileLogger, promptResources } from './chunk-EAR7TZVE.js';
-export { createFileLogger, getLatestLogPath } from './chunk-EAR7TZVE.js';
+export { github_exports as GitHub } from './chunk-2IPT7JDB.js';
+export { assets, init } from './chunk-NUI24HNI.js';
+import { prepare, createFileLogger, promptResources } from './chunk-YR4LMQWM.js';
+export { createFileLogger, getLatestLogPath } from './chunk-YR4LMQWM.js';
 import { __export } from './chunk-MLKGABMK.js';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync, readFileSync, readdirSync, writeFileSync, unlinkSync, createWriteStream } from 'fs';
@@ -42,7 +42,7 @@ async function inventLoop(log, sessionId) {
     hasUntrackedFiles,
     checkoutSubmodule,
     pushOrCreateUpstream
-  } = await import('./github-RVB6PDGH.js');
+  } = await import('./github-6SAU5HSY.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -370,7 +370,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function invent(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-JJBQXYJG.js');
+  const { prepare: prepare2 } = await import('./prepare-BY7NRNCQ.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -387,7 +387,7 @@ async function handleIssuesLoop(log, sessionId) {
     checkoutSubmodule,
     pushOrCreateUpstream,
     closeIssue
-  } = await import('./github-RVB6PDGH.js');
+  } = await import('./github-6SAU5HSY.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -688,7 +688,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function handleIssues(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-JJBQXYJG.js');
+  const { prepare: prepare2 } = await import('./prepare-BY7NRNCQ.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Issue Loop: Handling issues on existing function ===");

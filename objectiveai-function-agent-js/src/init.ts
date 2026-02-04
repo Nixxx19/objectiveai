@@ -45,7 +45,7 @@ function runNpmInstall(): void {
   console.log("Installing dependencies...");
   execLog("npm install");
   // Reset submodule to discard any line ending changes from npm
-  exec("git checkout -- objectiveai");
+  exec("git -C objectiveai checkout -- .");
 }
 
 // Check if there are any uncommitted changes or untracked files

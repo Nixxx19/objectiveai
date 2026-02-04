@@ -686,7 +686,7 @@ async function essayTasks(log, sessionId) {
   return sessionId;
 }
 async function handleOpenIssues(log, sessionId) {
-  const { hasOpenIssues } = await import('./github-RVB6PDGH.js');
+  const { hasOpenIssues } = await import('./github-6SAU5HSY.js');
   if (!hasOpenIssues()) {
     return sessionId;
   }
@@ -730,7 +730,7 @@ async function handleOpenIssues(log, sessionId) {
 
 // src/claude/prepare/index.ts
 async function prepare(options = {}) {
-  const { init } = await import('./init-HNAJLG3X.js');
+  const { init } = await import('./init-4NIXSBTO.js');
   const log = options.log ?? createFileLogger().log;
   log("=== Initializing workspace ===");
   await init({ spec: options.spec, apiBase: options.apiBase });

@@ -981,7 +981,7 @@ function hasUntrackedFiles() {
   return result.length > 0;
 }
 function checkoutSubmodule() {
-  child_process.execSync("git checkout -- objectiveai", { stdio: "inherit" });
+  child_process.execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
 }
 function getLatestCommit(owner, repository) {
   const result = gh(`api repos/${owner}/${repository}/commits/HEAD --jq .sha`);
@@ -1199,7 +1199,7 @@ var init_gitignore = __esm({
 var build_ts_default;
 var init_build_ts = __esm({
   "assets/build.ts.txt"() {
-    build_ts_default = 'import { writeFunctionJson, writeProfileJson, spawnApiServer, createLocalObjectiveAI, runTests } from "@objectiveai/function-agent";\nimport { execSync } from "child_process";\nimport "dotenv/config";\n\nasync function main(): Promise<void> {\n  // Discard any changes to the objectiveai submodule\n  execSync("git checkout -- objectiveai", { stdio: "inherit" });\n\n  // Install dependencies\n  execSync("npm install", { stdio: "inherit" });\n\n  // Build\n  writeFunctionJson();\n  writeProfileJson();\n\n  // Test\n  const apiBase = process.env.ONLY_SET_IF_YOU_KNOW_WHAT_YOURE_DOING;\n  const port = Math.floor(Math.random() * 50000) + 10000;\n\n  const apiProcess = await spawnApiServer({ apiBase, port });\n  const objectiveai = createLocalObjectiveAI({ apiBase, port });\n\n  try {\n    await runTests({ objectiveai });\n  } finally {\n    apiProcess?.kill();\n  }\n}\n\nmain().catch((err) => {\n  console.error(err);\n  process.exit(1);\n});\n';
+    build_ts_default = 'import { writeFunctionJson, writeProfileJson, spawnApiServer, createLocalObjectiveAI, runTests } from "@objectiveai/function-agent";\nimport { execSync } from "child_process";\nimport "dotenv/config";\n\nasync function main(): Promise<void> {\n  // Discard any changes to the objectiveai submodule\n  execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });\n\n  // Install dependencies\n  execSync("npm install", { stdio: "inherit" });\n\n  // Build\n  writeFunctionJson();\n  writeProfileJson();\n\n  // Test\n  const apiBase = process.env.ONLY_SET_IF_YOU_KNOW_WHAT_YOURE_DOING;\n  const port = Math.floor(Math.random() * 50000) + 10000;\n\n  const apiProcess = await spawnApiServer({ apiBase, port });\n  const objectiveai = createLocalObjectiveAI({ apiBase, port });\n\n  try {\n    await runTests({ objectiveai });\n  } finally {\n    apiProcess?.kill();\n  }\n}\n\nmain().catch((err) => {\n  console.error(err);\n  process.exit(1);\n});\n';
   }
 });
 
@@ -1263,7 +1263,7 @@ var init_closeIssue_ts = __esm({
 var commitAndPush_ts_default;
 var init_commitAndPush_ts = __esm({
   "assets/commitAndPush.ts.txt"() {
-    commitAndPush_ts_default = 'import { execSync } from "child_process";\n\nconst message = process.argv[2];\n\nif (!message) {\n  console.error("Usage: ts-node commitAndPush.ts <commit_message>");\n  process.exit(1);\n}\n\n// Discard any changes to the objectiveai submodule\nexecSync("git checkout -- objectiveai", { stdio: "inherit" });\n\n// Stage all changes\nexecSync("git add -A", { stdio: "pipe" });\n\n// Check if there are changes to commit\ntry {\n  execSync("git diff --cached --quiet", { stdio: "pipe" });\n  console.log("No changes to commit.");\n} catch {\n  // There are changes, commit them\n  execSync(`git commit -m "${message.replace(/"/g, \'\\\\"\')}"`, { stdio: "inherit" });\n  console.log("Committed and pushed successfully.");\n}\n';
+    commitAndPush_ts_default = 'import { execSync } from "child_process";\n\nconst message = process.argv[2];\n\nif (!message) {\n  console.error("Usage: ts-node commitAndPush.ts <commit_message>");\n  process.exit(1);\n}\n\n// Discard any changes to the objectiveai submodule\nexecSync("git -C objectiveai checkout -- .", { stdio: "inherit" });\n\n// Stage all changes\nexecSync("git add -A", { stdio: "pipe" });\n\n// Check if there are changes to commit\ntry {\n  execSync("git diff --cached --quiet", { stdio: "pipe" });\n  console.log("No changes to commit.");\n} catch {\n  // There are changes, commit them\n  execSync(`git commit -m "${message.replace(/"/g, \'\\\\"\')}"`, { stdio: "inherit" });\n  console.log("Committed and pushed successfully.");\n}\n';
   }
 });
 
@@ -1452,7 +1452,7 @@ function updateSubmodules() {
 function runNpmInstall() {
   console.log("Installing dependencies...");
   execLog("npm install");
-  exec("git checkout -- objectiveai");
+  exec("git -C objectiveai checkout -- .");
 }
 function hasChanges() {
   const status = exec("git status --porcelain");

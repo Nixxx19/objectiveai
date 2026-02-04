@@ -218,7 +218,7 @@ function hasUntrackedFiles() {
   return result.length > 0;
 }
 function checkoutSubmodule() {
-  execSync("git checkout -- objectiveai", { stdio: "inherit" });
+  execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
 }
 function getLatestCommit(owner, repository) {
   const result = gh(`api repos/${owner}/${repository}/commits/HEAD --jq .sha`);

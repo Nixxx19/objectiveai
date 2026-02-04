@@ -8,7 +8,7 @@ if (!message) {
 }
 
 // Discard any changes to the objectiveai submodule
-execSync("git checkout -- objectiveai", { stdio: "inherit" });
+execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
 
 // Stage all changes
 execSync("git add -A", { stdio: "pipe" });

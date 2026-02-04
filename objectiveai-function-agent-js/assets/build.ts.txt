@@ -4,7 +4,7 @@ import "dotenv/config";
 
 async function main(): Promise<void> {
   // Discard any changes to the objectiveai submodule
-  execSync("git checkout -- objectiveai", { stdio: "inherit" });
+  execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
 
   // Install dependencies
   execSync("npm install", { stdio: "inherit" });

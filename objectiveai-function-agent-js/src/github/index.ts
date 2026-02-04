@@ -327,7 +327,7 @@ export function hasUntrackedFiles(): boolean {
 
 // Checkout/discard changes in the objectiveai submodule
 export function checkoutSubmodule(): void {
-  execSync("git checkout -- objectiveai", { stdio: "inherit" });
+  execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
 }
 
 export interface FunctionTask {
