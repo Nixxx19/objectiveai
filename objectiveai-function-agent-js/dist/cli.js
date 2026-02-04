@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-import './chunk-QVTDRMFZ.js';
+import './chunk-CGJPRIF7.js';
 import './chunk-4GYYBQYY.js';
-import { prepare, createFileLogger, promptResources } from './chunk-TYH2GW5H.js';
+import { prepare, createFileLogger, promptResources } from './chunk-WUEJJMRU.js';
 import { __export } from './chunk-K3NQKI34.js';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync, readFileSync, readdirSync } from 'fs';
@@ -38,9 +38,9 @@ async function inventFunctionTasksLoop(log, sessionId) {
     resetToRevision,
     hasUncommittedChanges,
     hasUntrackedFiles,
-    checkoutSubmodule,
+    resetAndUpdateSubmodule,
     pushOrCreateUpstream
-  } = await import('./github-LSQGDLDW.js');
+  } = await import('./github-E5PJHMMI.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -301,8 +301,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule();
     log("Running build and tests...");
     let buildSuccess = false;
     try {
@@ -364,7 +364,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function inventFunctionTasks(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-ZBKUXIAM.js');
+  const { prepare: prepare2 } = await import('./prepare-APZQK7IF.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -377,9 +377,9 @@ async function inventVectorTasksLoop(log, sessionId) {
     resetToRevision,
     hasUncommittedChanges,
     hasUntrackedFiles,
-    checkoutSubmodule,
+    resetAndUpdateSubmodule,
     pushOrCreateUpstream
-  } = await import('./github-LSQGDLDW.js');
+  } = await import('./github-E5PJHMMI.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -594,8 +594,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule();
     log("Running build and tests...");
     let buildSuccess = false;
     try {
@@ -657,7 +657,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function inventVectorTasks(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-ZBKUXIAM.js');
+  const { prepare: prepare2 } = await import('./prepare-APZQK7IF.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -681,10 +681,10 @@ async function handleIssuesLoop(log, sessionId) {
     fetchOpenIssues,
     hasUncommittedChanges,
     hasUntrackedFiles,
-    checkoutSubmodule,
+    resetAndUpdateSubmodule,
     pushOrCreateUpstream,
     closeIssue
-  } = await import('./github-LSQGDLDW.js');
+  } = await import('./github-E5PJHMMI.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -916,8 +916,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule();
     log("Running build and tests...");
     let buildSuccess = false;
     try {
@@ -985,7 +985,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function handleIssues(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-ZBKUXIAM.js');
+  const { prepare: prepare2 } = await import('./prepare-APZQK7IF.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Issue Loop: Handling issues on existing function ===");

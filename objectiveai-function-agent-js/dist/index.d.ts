@@ -82,6 +82,7 @@ declare function resetToRevision(revision: string | null): void;
 declare function hasUncommittedChanges(): boolean;
 declare function hasUntrackedFiles(): boolean;
 declare function checkoutSubmodule(): void;
+declare function resetAndUpdateSubmodule(): void;
 interface FunctionTask {
     type: string;
     owner?: string;
@@ -123,9 +124,10 @@ declare const index_hasUntrackedFiles: typeof hasUntrackedFiles;
 declare const index_markIssueResolved: typeof markIssueResolved;
 declare const index_push: typeof push;
 declare const index_pushOrCreateUpstream: typeof pushOrCreateUpstream;
+declare const index_resetAndUpdateSubmodule: typeof resetAndUpdateSubmodule;
 declare const index_resetToRevision: typeof resetToRevision;
 declare namespace index {
-  export { type index_CloneSubFunctionsOptions as CloneSubFunctionsOptions, type index_ClonedSubFunction as ClonedSubFunction, type index_CommitAndPushOptions as CommitAndPushOptions, type index_CreateRepositoryOptions as CreateRepositoryOptions, type index_FunctionTask as FunctionTask, type index_Issue as Issue, type index_IssueComment as IssueComment, index_checkoutSubmodule as checkoutSubmodule, index_cloneSubFunctions as cloneSubFunctions, index_closeIssue as closeIssue, index_commentOnIssue as commentOnIssue, index_commitAndPush as commitAndPush, index_commitOnly as commitOnly, index_createRepository as createRepository, index_fetchClosedIssues as fetchClosedIssues, index_fetchIssueComments as fetchIssueComments, index_fetchOpenIssues as fetchOpenIssues, index_getCurrentRevision as getCurrentRevision, index_hasOpenIssues as hasOpenIssues, index_hasUncommittedChanges as hasUncommittedChanges, index_hasUntrackedFiles as hasUntrackedFiles, index_markIssueResolved as markIssueResolved, index_push as push, index_pushOrCreateUpstream as pushOrCreateUpstream, index_resetToRevision as resetToRevision };
+  export { type index_CloneSubFunctionsOptions as CloneSubFunctionsOptions, type index_ClonedSubFunction as ClonedSubFunction, type index_CommitAndPushOptions as CommitAndPushOptions, type index_CreateRepositoryOptions as CreateRepositoryOptions, type index_FunctionTask as FunctionTask, type index_Issue as Issue, type index_IssueComment as IssueComment, index_checkoutSubmodule as checkoutSubmodule, index_cloneSubFunctions as cloneSubFunctions, index_closeIssue as closeIssue, index_commentOnIssue as commentOnIssue, index_commitAndPush as commitAndPush, index_commitOnly as commitOnly, index_createRepository as createRepository, index_fetchClosedIssues as fetchClosedIssues, index_fetchIssueComments as fetchIssueComments, index_fetchOpenIssues as fetchOpenIssues, index_getCurrentRevision as getCurrentRevision, index_hasOpenIssues as hasOpenIssues, index_hasUncommittedChanges as hasUncommittedChanges, index_hasUntrackedFiles as hasUntrackedFiles, index_markIssueResolved as markIssueResolved, index_push as push, index_pushOrCreateUpstream as pushOrCreateUpstream, index_resetAndUpdateSubmodule as resetAndUpdateSubmodule, index_resetToRevision as resetToRevision };
 }
 
 interface Parameters {

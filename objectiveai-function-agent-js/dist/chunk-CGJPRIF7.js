@@ -1,29 +1,7 @@
-import { __export } from './chunk-MLKGABMK.js';
+#!/usr/bin/env node
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, mkdirSync, rmSync } from 'fs';
 
-// src/github/index.ts
-var github_exports = {};
-__export(github_exports, {
-  checkoutSubmodule: () => checkoutSubmodule,
-  cloneSubFunctions: () => cloneSubFunctions,
-  closeIssue: () => closeIssue,
-  commentOnIssue: () => commentOnIssue,
-  commitAndPush: () => commitAndPush,
-  commitOnly: () => commitOnly,
-  createRepository: () => createRepository,
-  fetchClosedIssues: () => fetchClosedIssues,
-  fetchIssueComments: () => fetchIssueComments,
-  fetchOpenIssues: () => fetchOpenIssues,
-  getCurrentRevision: () => getCurrentRevision,
-  hasOpenIssues: () => hasOpenIssues,
-  hasUncommittedChanges: () => hasUncommittedChanges,
-  hasUntrackedFiles: () => hasUntrackedFiles,
-  markIssueResolved: () => markIssueResolved,
-  push: () => push,
-  pushOrCreateUpstream: () => pushOrCreateUpstream,
-  resetToRevision: () => resetToRevision
-});
 function gh(args) {
   return execSync(`gh ${args}`, { encoding: "utf-8", stdio: "pipe" }).trim();
 }
@@ -242,6 +220,21 @@ function hasUntrackedFiles() {
 function checkoutSubmodule() {
   execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
 }
+function resetAndUpdateSubmodule() {
+  execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
+  execSync("git submodule update --init --recursive --remote --force", {
+    stdio: "inherit"
+  });
+  const status = execSync("git status --porcelain", {
+    encoding: "utf-8",
+    stdio: "pipe"
+  }).trim();
+  if (status === " M objectiveai" || status === "M  objectiveai") {
+    execSync('git add objectiveai && git commit -m "update submodule"', {
+      stdio: "inherit"
+    });
+  }
+}
 function getLatestCommit(owner, repository) {
   const result = gh(`api repos/${owner}/${repository}/commits/HEAD --jq .sha`);
   return result.trim();
@@ -307,4 +300,4 @@ function cloneSubFunctions(options = {}) {
   return cloned;
 }
 
-export { checkoutSubmodule, cloneSubFunctions, closeIssue, commentOnIssue, commitAndPush, commitOnly, createRepository, fetchClosedIssues, fetchIssueComments, fetchOpenIssues, getCurrentRevision, github_exports, hasOpenIssues, hasUncommittedChanges, hasUntrackedFiles, markIssueResolved, push, pushOrCreateUpstream, resetToRevision };
+export { checkoutSubmodule, cloneSubFunctions, closeIssue, commentOnIssue, commitAndPush, commitOnly, createRepository, fetchClosedIssues, fetchIssueComments, fetchOpenIssues, getCurrentRevision, hasOpenIssues, hasUncommittedChanges, hasUntrackedFiles, markIssueResolved, push, pushOrCreateUpstream, resetAndUpdateSubmodule, resetToRevision };

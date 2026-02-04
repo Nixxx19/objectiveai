@@ -1,7 +1,7 @@
-export { github_exports as GitHub } from './chunk-2IPT7JDB.js';
+export { github_exports as GitHub } from './chunk-BU2FSXOU.js';
 export { assets, init } from './chunk-PYPU5N5U.js';
-import { prepare, createFileLogger, promptResources } from './chunk-M3ILGK65.js';
-export { createFileLogger, getLatestLogPath } from './chunk-M3ILGK65.js';
+import { prepare, createFileLogger, promptResources } from './chunk-WFONNMGB.js';
+export { createFileLogger, getLatestLogPath } from './chunk-WFONNMGB.js';
 import { __export } from './chunk-MLKGABMK.js';
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { existsSync, readFileSync, readdirSync, writeFileSync, unlinkSync, createWriteStream } from 'fs';
@@ -42,9 +42,9 @@ async function inventFunctionTasksLoop(log, sessionId) {
     resetToRevision,
     hasUncommittedChanges,
     hasUntrackedFiles,
-    checkoutSubmodule,
+    resetAndUpdateSubmodule,
     pushOrCreateUpstream
-  } = await import('./github-6SAU5HSY.js');
+  } = await import('./github-XYO4L7BM.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -305,8 +305,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule();
     log("Running build and tests...");
     let buildSuccess = false;
     try {
@@ -368,7 +368,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function inventFunctionTasks(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-OIZY5VWW.js');
+  const { prepare: prepare2 } = await import('./prepare-IWRSZ5I7.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -381,9 +381,9 @@ async function inventVectorTasksLoop(log, sessionId) {
     resetToRevision,
     hasUncommittedChanges,
     hasUntrackedFiles,
-    checkoutSubmodule,
+    resetAndUpdateSubmodule,
     pushOrCreateUpstream
-  } = await import('./github-6SAU5HSY.js');
+  } = await import('./github-XYO4L7BM.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -598,8 +598,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule();
     log("Running build and tests...");
     let buildSuccess = false;
     try {
@@ -661,7 +661,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function inventVectorTasks(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-OIZY5VWW.js');
+  const { prepare: prepare2 } = await import('./prepare-IWRSZ5I7.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Invent Loop: Creating new function ===");
@@ -685,10 +685,10 @@ async function handleIssuesLoop(log, sessionId) {
     fetchOpenIssues,
     hasUncommittedChanges,
     hasUntrackedFiles,
-    checkoutSubmodule,
+    resetAndUpdateSubmodule,
     pushOrCreateUpstream,
     closeIssue
-  } = await import('./github-6SAU5HSY.js');
+  } = await import('./github-XYO4L7BM.js');
   const { execSync } = await import('child_process');
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -920,8 +920,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule();
     log("Running build and tests...");
     let buildSuccess = false;
     try {
@@ -989,7 +989,7 @@ Please try again. Remember to:
   return sessionId;
 }
 async function handleIssues(options = {}) {
-  const { prepare: prepare2 } = await import('./prepare-OIZY5VWW.js');
+  const { prepare: prepare2 } = await import('./prepare-IWRSZ5I7.js');
   const log = options.log ?? createFileLogger().log;
   const sessionId = await prepare2({ ...options, log });
   log("=== Issue Loop: Handling issues on existing function ===");

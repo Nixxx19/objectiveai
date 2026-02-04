@@ -763,6 +763,7 @@ __export(github_exports, {
   markIssueResolved: () => markIssueResolved,
   push: () => push,
   pushOrCreateUpstream: () => pushOrCreateUpstream,
+  resetAndUpdateSubmodule: () => resetAndUpdateSubmodule,
   resetToRevision: () => resetToRevision
 });
 function gh(args) {
@@ -982,6 +983,21 @@ function hasUntrackedFiles() {
 }
 function checkoutSubmodule() {
   child_process.execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
+}
+function resetAndUpdateSubmodule() {
+  child_process.execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
+  child_process.execSync("git submodule update --init --recursive --remote --force", {
+    stdio: "inherit"
+  });
+  const status = child_process.execSync("git status --porcelain", {
+    encoding: "utf-8",
+    stdio: "pipe"
+  }).trim();
+  if (status === " M objectiveai" || status === "M  objectiveai") {
+    child_process.execSync('git add objectiveai && git commit -m "update submodule"', {
+      stdio: "inherit"
+    });
+  }
 }
 function getLatestCommit(owner, repository) {
   const result = gh(`api repos/${owner}/${repository}/commits/HEAD --jq .sha`);
@@ -1725,7 +1741,7 @@ async function inventFunctionTasksLoop(log, sessionId) {
     resetToRevision: resetToRevision2,
     hasUncommittedChanges: hasUncommittedChanges2,
     hasUntrackedFiles: hasUntrackedFiles2,
-    checkoutSubmodule: checkoutSubmodule2,
+    resetAndUpdateSubmodule: resetAndUpdateSubmodule2,
     pushOrCreateUpstream: pushOrCreateUpstream2
   } = await Promise.resolve().then(() => (init_github(), github_exports));
   const { execSync: execSync3 } = await import('child_process');
@@ -1988,8 +2004,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule2();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule2();
     log("Running build and tests...");
     let buildSuccess = false;
     try {
@@ -2068,7 +2084,7 @@ async function inventVectorTasksLoop(log, sessionId) {
     resetToRevision: resetToRevision2,
     hasUncommittedChanges: hasUncommittedChanges2,
     hasUntrackedFiles: hasUntrackedFiles2,
-    checkoutSubmodule: checkoutSubmodule2,
+    resetAndUpdateSubmodule: resetAndUpdateSubmodule2,
     pushOrCreateUpstream: pushOrCreateUpstream2
   } = await Promise.resolve().then(() => (init_github(), github_exports));
   const { execSync: execSync3 } = await import('child_process');
@@ -2285,8 +2301,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule2();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule2();
     log("Running build and tests...");
     let buildSuccess = false;
     try {
@@ -2376,7 +2392,7 @@ async function handleIssuesLoop(log, sessionId) {
     fetchOpenIssues: fetchOpenIssues2,
     hasUncommittedChanges: hasUncommittedChanges2,
     hasUntrackedFiles: hasUntrackedFiles2,
-    checkoutSubmodule: checkoutSubmodule2,
+    resetAndUpdateSubmodule: resetAndUpdateSubmodule2,
     pushOrCreateUpstream: pushOrCreateUpstream2,
     closeIssue: closeIssue2
   } = await Promise.resolve().then(() => (init_github(), github_exports));
@@ -2611,8 +2627,8 @@ Please try again. Remember to:
       log(message);
     }
     log("Validating assistant's work...");
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule2();
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule2();
     log("Running build and tests...");
     let buildSuccess = false;
     try {

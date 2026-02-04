@@ -16,7 +16,7 @@ async function handleIssuesLoop(
     fetchOpenIssues,
     hasUncommittedChanges,
     hasUntrackedFiles,
-    checkoutSubmodule,
+    resetAndUpdateSubmodule,
     pushOrCreateUpstream,
     closeIssue,
   } = await import("../github");
@@ -266,9 +266,9 @@ Please try again. Remember to:
     // Validate the assistant's work
     log("Validating assistant's work...");
 
-    // Checkout any changes to objectiveai submodule
-    log("Checking out objectiveai submodule changes...");
-    checkoutSubmodule();
+    // Reset and update objectiveai submodule
+    log("Resetting and updating objectiveai submodule...");
+    resetAndUpdateSubmodule();
 
     // Run build (which includes tests)
     log("Running build and tests...");

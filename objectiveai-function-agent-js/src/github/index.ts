@@ -330,6 +330,30 @@ export function checkoutSubmodule(): void {
   execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
 }
 
+// Reset submodule, update it, and commit if it's the only change
+export function resetAndUpdateSubmodule(): void {
+  // Checkout/discard any local changes
+  execSync("git -C objectiveai checkout -- .", { stdio: "inherit" });
+
+  // Update submodule with all flags
+  execSync("git submodule update --init --recursive --remote --force", {
+    stdio: "inherit",
+  });
+
+  // Check if submodule is the only change
+  const status = execSync("git status --porcelain", {
+    encoding: "utf-8",
+    stdio: "pipe",
+  }).trim();
+
+  // If only change is the submodule, commit it
+  if (status === " M objectiveai" || status === "M  objectiveai") {
+    execSync('git add objectiveai && git commit -m "update submodule"', {
+      stdio: "inherit",
+    });
+  }
+}
+
 export interface FunctionTask {
   type: string;
   owner?: string;
