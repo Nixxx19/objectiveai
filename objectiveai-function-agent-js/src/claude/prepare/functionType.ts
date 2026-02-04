@@ -2,7 +2,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { promptResources } from "../promptResources";
-import { getSlashCwd, getBackslashCwd } from "../../util";
+import { allowedTools } from "../allowedTools";
 
 // Step 4 - Create function/type.json (if needed)
 export async function createFunctionTypeJson(
@@ -26,35 +26,15 @@ export async function createFunctionTypeJson(
     return content === "scalar.function" || content === "vector.function";
   };
 
-  // Query
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
-
   if (!functionTypeValid()) {
     const stream = query({
       prompt:
         promptResources(["OBJECTIVEAI_INDEX.md", "SPEC.md"]) +
         'Create function/type.json specifying the function type ("scalar.function" or "vector.function").',
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(function/type.json)",
-          "Edit(./function/type.json)",
-          `Edit(${slashCwd}/function/type.json)`,
-          `Edit(${backslashCwd}\\function\\type.json)`,
-          "Write(function/type.json)",
-          "Write(./function/type.json)",
-          `Write(${slashCwd}/function/type.json)`,
-          `Write(${backslashCwd}\\function\\type.json)`,
-        ],
+        allowedTools: allowedTools([
+          { kind: "write-edit", value: "function/type.json" },
+        ]),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId,
@@ -82,25 +62,9 @@ export async function createFunctionTypeJson(
         "function/type.json is invalid after your createFunctionTypeJson phase." +
         ' Create function/type.json specifying the function type ("scalar.function" or "vector.function") based on SPEC.md.',
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(function/type.json)",
-          "Edit(./function/type.json)",
-          `Edit(${slashCwd}/function/type.json)`,
-          `Edit(${backslashCwd}\\function\\type.json)`,
-          "Write(function/type.json)",
-          "Write(./function/type.json)",
-          `Write(${slashCwd}/function/type.json)`,
-          `Write(${backslashCwd}\\function\\type.json)`,
-        ],
+        allowedTools: allowedTools([
+          { kind: "write-edit", value: "function/type.json" },
+        ]),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId,

@@ -1,7 +1,7 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
-import { getSlashCwd, getBackslashCwd } from "../../util";
+import { allowedTools } from "../allowedTools";
 
 // Step 3 - Read or Create SPEC.md
 export async function spec(
@@ -19,27 +19,13 @@ export async function spec(
     return content.length > 0;
   })();
 
-  // Query
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
-
   const stream = (() => {
     if (specNonEmpty) {
       return query({
         prompt:
           "Read SPEC.md to understand the ObjectiveAI Function specification.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-          ],
+          allowedTools: allowedTools([]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
@@ -54,25 +40,9 @@ export async function spec(
           "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
           "Be creative and describe a function with plain language.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(SPEC.md)",
-            "Edit(./SPEC.md)",
-            `Edit(${slashCwd}/SPEC.md)`,
-            `Edit(${backslashCwd}\\SPEC.md)`,
-            "Write(SPEC.md)",
-            "Write(./SPEC.md)",
-            `Write(${slashCwd}/SPEC.md)`,
-            `Write(${backslashCwd}\\SPEC.md)`,
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "SPEC.md" },
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
@@ -104,25 +74,9 @@ export async function spec(
           "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
           "Be creative and describe a function with plain language.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(SPEC.md)",
-            "Edit(./SPEC.md)",
-            `Edit(${slashCwd}/SPEC.md)`,
-            `Edit(${backslashCwd}\\SPEC.md)`,
-            "Write(SPEC.md)",
-            "Write(./SPEC.md)",
-            `Write(${slashCwd}/SPEC.md)`,
-            `Write(${backslashCwd}\\SPEC.md)`,
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "SPEC.md" },
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,

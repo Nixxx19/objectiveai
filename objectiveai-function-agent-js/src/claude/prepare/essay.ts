@@ -2,7 +2,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { promptResources } from "../promptResources";
-import { getSlashCwd, getBackslashCwd } from "../../util";
+import { allowedTools } from "../allowedTools";
 
 // Step 6 - Read or Create ESSAY.md
 export async function essay(
@@ -20,26 +20,12 @@ export async function essay(
     return content.length > 0;
   })();
 
-  // Query
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
-
   const stream = (() => {
     if (essayNonEmpty) {
       return query({
         prompt: "Read ESSAY.md to understand the ObjectiveAI Function essay.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-          ],
+          allowedTools: allowedTools([]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
@@ -59,25 +45,9 @@ export async function essay(
           " Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function." +
           " This essay will guide the development of the function and underpins its philosophy.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(ESSAY.md)",
-            "Edit(./ESSAY.md)",
-            `Edit(${slashCwd}/ESSAY.md)`,
-            `Edit(${backslashCwd}\\ESSAY.md)`,
-            "Write(ESSAY.md)",
-            "Write(./ESSAY.md)",
-            `Write(${slashCwd}/ESSAY.md)`,
-            `Write(${backslashCwd}\\ESSAY.md)`,
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "ESSAY.md" },
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
@@ -108,25 +78,9 @@ export async function essay(
           " Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function." +
           " This essay will guide the development of the function and underpins its philosophy.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(ESSAY.md)",
-            "Edit(./ESSAY.md)",
-            `Edit(${slashCwd}/ESSAY.md)`,
-            `Edit(${backslashCwd}\\ESSAY.md)`,
-            "Write(ESSAY.md)",
-            "Write(./ESSAY.md)",
-            `Write(${slashCwd}/ESSAY.md)`,
-            `Write(${backslashCwd}\\ESSAY.md)`,
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "ESSAY.md" },
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,

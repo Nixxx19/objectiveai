@@ -2,7 +2,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { promptResources } from "../promptResources";
-import { getSlashCwd, getBackslashCwd } from "../../util";
+import { allowedTools } from "../allowedTools";
 
 // Step 5 - Create github/name.json (if needed)
 export async function createGitHubNameJson(
@@ -27,10 +27,6 @@ export async function createGitHubNameJson(
     return content.length > 0;
   };
 
-  // Query
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
-
   if (!githubNameNonEmpty()) {
     const stream = query({
       prompt:
@@ -44,25 +40,9 @@ export async function createGitHubNameJson(
         "- Use all lowercase\n" +
         "- Use dashes (`-`) to separate words if there's more than one",
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(github/name.json)",
-          "Edit(./github/name.json)",
-          `Edit(${slashCwd}/github/name.json)`,
-          `Edit(${backslashCwd}\\github\\name.json)`,
-          "Write(github/name.json)",
-          "Write(./github/name.json)",
-          `Write(${slashCwd}/github/name.json)`,
-          `Write(${backslashCwd}\\github\\name.json)`,
-        ],
+        allowedTools: allowedTools([
+          { kind: "write-edit", value: "github/name.json" },
+        ]),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId,
@@ -93,25 +73,9 @@ export async function createGitHubNameJson(
         "- Use all lowercase\n" +
         "- Use dashes (`-`) to separate words if there's more than one",
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(github/name.json)",
-          "Edit(./github/name.json)",
-          `Edit(${slashCwd}/github/name.json)`,
-          `Edit(${backslashCwd}\\github\\name.json)`,
-          "Write(github/name.json)",
-          "Write(./github/name.json)",
-          `Write(${slashCwd}/github/name.json)`,
-          `Write(${backslashCwd}\\github\\name.json)`,
-        ],
+        allowedTools: allowedTools([
+          { kind: "write-edit", value: "github/name.json" },
+        ]),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId,

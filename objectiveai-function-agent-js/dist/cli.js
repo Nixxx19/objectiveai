@@ -400,13 +400,80 @@ async function init(options = {}) {
   commitChanges();
   console.log("Initialization complete.");
 }
-
-// src/util.ts
 function getSlashCwd() {
   return process.cwd().replace(/\\/g, "/");
 }
 function getBackslashCwd() {
   return process.cwd().replace(/\//g, "\\");
+}
+function getGitBashCwd() {
+  return execSync('bash -c "pwd"', { encoding: "utf-8" }).trim();
+}
+
+// src/claude/allowedTools.ts
+function allowedTools(tools) {
+  const slashCwd = getSlashCwd();
+  const backslashCwd = getBackslashCwd();
+  const gitBashCwd = getGitBashCwd();
+  const result = [
+    "Bash(ls*)",
+    "Bash(cd)",
+    "Bash(cat)",
+    "Bash(diff)",
+    "Glob",
+    "Grep",
+    "Read",
+    "WebFetch",
+    "WebSearch"
+  ];
+  for (const tool of tools) {
+    switch (tool.kind) {
+      case "ts-node": {
+        const script = tool.value;
+        result.push(
+          `Bash(ts-node ${script})`,
+          `Bash(npx ts-node ${script})`,
+          `Bash(cd ${slashCwd} && ts-node ${script})`,
+          `Bash(cd ${backslashCwd} && ts-node ${script})`,
+          `Bash(cd ${gitBashCwd} && ts-node ${script})`,
+          `Bash(cd ${slashCwd} && npx ts-node ${script})`,
+          `Bash(cd ${backslashCwd} && npx ts-node ${script})`,
+          `Bash(cd ${gitBashCwd} && npx ts-node ${script})`
+        );
+        break;
+      }
+      case "write-edit": {
+        const file = tool.value;
+        const backslashFile = file.replace(/\//g, "\\");
+        result.push(
+          `Edit(${file})`,
+          `Edit(./${file})`,
+          `Edit(${slashCwd}/${file})`,
+          `Edit(${backslashCwd}\\${backslashFile})`,
+          `Edit(${gitBashCwd}/${file})`,
+          `Write(${file})`,
+          `Write(./${file})`,
+          `Write(${slashCwd}/${file})`,
+          `Write(${backslashCwd}\\${backslashFile})`,
+          `Write(${gitBashCwd}/${file})`
+        );
+        break;
+      }
+      case "edit-glob": {
+        const pattern = tool.value;
+        const backslashPattern = pattern.replace(/\//g, "\\");
+        result.push(
+          `Edit(${pattern})`,
+          `Edit(./${pattern})`,
+          `Edit(${slashCwd}/${pattern})`,
+          `Edit(${backslashCwd}\\${backslashPattern})`,
+          `Edit(${gitBashCwd}/${pattern})`
+        );
+        break;
+      }
+    }
+  }
+  return result;
 }
 
 // src/claude/prepare/learnSubmodule.ts
@@ -420,24 +487,12 @@ async function learnSubmodule(log, sessionId) {
     const content = readFileSync(indexPath, "utf-8").trim();
     return content.length > 0;
   })();
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
   const stream = (() => {
     if (indexNonEmpty) {
       return query({
         prompt: "You are an ObjectiveAI Function Agent, in charge of a single ObjectiveAI Function and associated GitHub repository. Learn about ObjectiveAI and ObjectiveAI Functions. Investigate the 'objectiveai' folder to familiarize yourself with what ObjectiveAI Functions are. First, read OBJECTIVEAI_INDEX.md. Then, read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch"
-          ],
+          allowedTools: allowedTools([]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -447,25 +502,9 @@ async function learnSubmodule(log, sessionId) {
       return query({
         prompt: "You are an ObjectiveAI Function Agent, in charge of a single ObjectiveAI Function and associated GitHub repository. Learn about ObjectiveAI and ObjectiveAI Functions. Investigate the 'objectiveai' folder to familiarize yourself with what ObjectiveAI Functions are. Read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to. Create OBJECTIVEAI_INDEX.md with links to files and your learnings.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(OBJECTIVEAI_INDEX.md)",
-            "Edit(./OBJECTIVEAI_INDEX.md)",
-            `Edit(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
-            `Edit(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
-            "Write(OBJECTIVEAI_INDEX.md)",
-            "Write(./OBJECTIVEAI_INDEX.md)",
-            `Write(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
-            `Write(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "OBJECTIVEAI_INDEX.md" }
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -487,25 +526,9 @@ async function learnSubmodule(log, sessionId) {
       const stream2 = query({
         prompt: "OBJECTIVEAI_INDEX.md is empty after your learn phase. Create OBJECTIVEAI_INDEX.md with links to files and your learnings about ObjectiveAI and ObjectiveAI Functions.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(OBJECTIVEAI_INDEX.md)",
-            "Edit(./OBJECTIVEAI_INDEX.md)",
-            `Edit(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
-            `Edit(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
-            "Write(OBJECTIVEAI_INDEX.md)",
-            "Write(./OBJECTIVEAI_INDEX.md)",
-            `Write(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
-            `Write(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "OBJECTIVEAI_INDEX.md" }
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -560,24 +583,12 @@ async function spec(log, sessionId) {
     const content = readFileSync(specPath, "utf-8").trim();
     return content.length > 0;
   })();
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
   const stream = (() => {
     if (specNonEmpty) {
       return query({
         prompt: "Read SPEC.md to understand the ObjectiveAI Function specification.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch"
-          ],
+          allowedTools: allowedTools([]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -587,25 +598,9 @@ async function spec(log, sessionId) {
       return query({
         prompt: "Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(SPEC.md)",
-            "Edit(./SPEC.md)",
-            `Edit(${slashCwd}/SPEC.md)`,
-            `Edit(${backslashCwd}\\SPEC.md)`,
-            "Write(SPEC.md)",
-            "Write(./SPEC.md)",
-            `Write(${slashCwd}/SPEC.md)`,
-            `Write(${backslashCwd}\\SPEC.md)`
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "SPEC.md" }
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -627,25 +622,9 @@ async function spec(log, sessionId) {
       const stream2 = query({
         prompt: "SPEC.md is empty after your spec phase. Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(SPEC.md)",
-            "Edit(./SPEC.md)",
-            `Edit(${slashCwd}/SPEC.md)`,
-            `Edit(${backslashCwd}\\SPEC.md)`,
-            "Write(SPEC.md)",
-            "Write(./SPEC.md)",
-            `Write(${slashCwd}/SPEC.md)`,
-            `Write(${backslashCwd}\\SPEC.md)`
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "SPEC.md" }
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -689,31 +668,13 @@ async function createFunctionTypeJson(log, sessionId) {
     }
     return content === "scalar.function" || content === "vector.function";
   };
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
   if (!functionTypeValid()) {
     const stream = query({
       prompt: promptResources(["OBJECTIVEAI_INDEX.md", "SPEC.md"]) + 'Create function/type.json specifying the function type ("scalar.function" or "vector.function").',
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(function/type.json)",
-          "Edit(./function/type.json)",
-          `Edit(${slashCwd}/function/type.json)`,
-          `Edit(${backslashCwd}\\function\\type.json)`,
-          "Write(function/type.json)",
-          "Write(./function/type.json)",
-          `Write(${slashCwd}/function/type.json)`,
-          `Write(${backslashCwd}\\function\\type.json)`
-        ],
+        allowedTools: allowedTools([
+          { kind: "write-edit", value: "function/type.json" }
+        ]),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId
@@ -736,25 +697,9 @@ async function createFunctionTypeJson(log, sessionId) {
     const stream = query({
       prompt: 'function/type.json is invalid after your createFunctionTypeJson phase. Create function/type.json specifying the function type ("scalar.function" or "vector.function") based on SPEC.md.',
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(function/type.json)",
-          "Edit(./function/type.json)",
-          `Edit(${slashCwd}/function/type.json)`,
-          `Edit(${backslashCwd}\\function\\type.json)`,
-          "Write(function/type.json)",
-          "Write(./function/type.json)",
-          `Write(${slashCwd}/function/type.json)`,
-          `Write(${backslashCwd}\\function\\type.json)`
-        ],
+        allowedTools: allowedTools([
+          { kind: "write-edit", value: "function/type.json" }
+        ]),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId
@@ -786,8 +731,6 @@ async function createGitHubNameJson(log, sessionId) {
     }
     return content.length > 0;
   };
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
   if (!githubNameNonEmpty()) {
     const stream = query({
       prompt: promptResources([
@@ -796,25 +739,9 @@ async function createGitHubNameJson(log, sessionId) {
         "function/type.json"
       ]) + 'Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(github/name.json)",
-          "Edit(./github/name.json)",
-          `Edit(${slashCwd}/github/name.json)`,
-          `Edit(${backslashCwd}\\github\\name.json)`,
-          "Write(github/name.json)",
-          "Write(./github/name.json)",
-          `Write(${slashCwd}/github/name.json)`,
-          `Write(${backslashCwd}\\github\\name.json)`
-        ],
+        allowedTools: allowedTools([
+          { kind: "write-edit", value: "github/name.json" }
+        ]),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId
@@ -837,25 +764,9 @@ async function createGitHubNameJson(log, sessionId) {
     const stream = query({
       prompt: 'github/name.json is empty after your createGitHubNameJson phase. Create github/name.json specifying the GitHub repository name for the ObjectiveAI Function.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(github/name.json)",
-          "Edit(./github/name.json)",
-          `Edit(${slashCwd}/github/name.json)`,
-          `Edit(${backslashCwd}\\github\\name.json)`,
-          "Write(github/name.json)",
-          "Write(./github/name.json)",
-          `Write(${slashCwd}/github/name.json)`,
-          `Write(${backslashCwd}\\github\\name.json)`
-        ],
+        allowedTools: allowedTools([
+          { kind: "write-edit", value: "github/name.json" }
+        ]),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId
@@ -881,24 +792,12 @@ async function essay(log, sessionId) {
     const content = readFileSync(essayPath, "utf-8").trim();
     return content.length > 0;
   })();
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
   const stream = (() => {
     if (essayNonEmpty) {
       return query({
         prompt: "Read ESSAY.md to understand the ObjectiveAI Function essay.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch"
-          ],
+          allowedTools: allowedTools([]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -913,25 +812,9 @@ async function essay(log, sessionId) {
           "github/name.json"
         ]) + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(ESSAY.md)",
-            "Edit(./ESSAY.md)",
-            `Edit(${slashCwd}/ESSAY.md)`,
-            `Edit(${backslashCwd}\\ESSAY.md)`,
-            "Write(ESSAY.md)",
-            "Write(./ESSAY.md)",
-            `Write(${slashCwd}/ESSAY.md)`,
-            `Write(${backslashCwd}\\ESSAY.md)`
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "ESSAY.md" }
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -953,25 +836,9 @@ async function essay(log, sessionId) {
       const stream2 = query({
         prompt: "ESSAY.md is empty after your essay phase. Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(ESSAY.md)",
-            "Edit(./ESSAY.md)",
-            `Edit(${slashCwd}/ESSAY.md)`,
-            `Edit(${backslashCwd}\\ESSAY.md)`,
-            "Write(ESSAY.md)",
-            "Write(./ESSAY.md)",
-            `Write(${slashCwd}/ESSAY.md)`,
-            `Write(${backslashCwd}\\ESSAY.md)`
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "ESSAY.md" }
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -998,24 +865,12 @@ async function essayTasks(log, sessionId) {
     const content = readFileSync(essayTasksPath, "utf-8").trim();
     return content.length > 0;
   })();
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
   const stream = (() => {
     if (essayTasksNonEmpty) {
       return query({
         prompt: "Read ESSAY_TASKS.md to understand the Function's tasks.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch"
-          ],
+          allowedTools: allowedTools([]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -1031,25 +886,9 @@ async function essayTasks(log, sessionId) {
           "ESSAY.md"
         ]) + "Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(ESSAY_TASKS.md)",
-            "Edit(./ESSAY_TASKS.md)",
-            `Edit(${slashCwd}/ESSAY_TASKS.md)`,
-            `Edit(${backslashCwd}\\ESSAY_TASKS.md)`,
-            "Write(ESSAY_TASKS.md)",
-            "Write(./ESSAY_TASKS.md)",
-            `Write(${slashCwd}/ESSAY_TASKS.md)`,
-            `Write(${backslashCwd}\\ESSAY_TASKS.md)`
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "ESSAY_TASKS.md" }
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -1071,25 +910,9 @@ async function essayTasks(log, sessionId) {
       const stream2 = query({
         prompt: "ESSAY_TASKS.md is empty after your essayTasks phase. Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(ESSAY_TASKS.md)",
-            "Edit(./ESSAY_TASKS.md)",
-            `Edit(${slashCwd}/ESSAY_TASKS.md)`,
-            `Edit(${backslashCwd}\\ESSAY_TASKS.md)`,
-            "Write(ESSAY_TASKS.md)",
-            "Write(./ESSAY_TASKS.md)",
-            `Write(${slashCwd}/ESSAY_TASKS.md)`,
-            `Write(${backslashCwd}\\ESSAY_TASKS.md)`
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "ESSAY_TASKS.md" }
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId
@@ -1346,6 +1169,32 @@ function getPlanPath(index) {
 }
 
 // src/claude/invent/inventFunctionTasks.ts
+function getInventFunctionTools(planIndex) {
+  return [
+    { kind: "ts-node", value: "build.ts" },
+    { kind: "ts-node", value: "commitAndPush.ts *" },
+    { kind: "ts-node", value: "spawnFunctionAgents.ts *" },
+    { kind: "ts-node", value: "getSubFunctionCommits.ts" },
+    { kind: "ts-node", value: "installRustLogs.ts" },
+    { kind: "ts-node", value: "cloneSubFunctions.ts" },
+    { kind: "ts-node", value: "cloneSubFunctions.ts --latest" },
+    { kind: "write-edit", value: "inputs.json" },
+    { kind: "write-edit", value: "function/description.json" },
+    { kind: "write-edit", value: "function/input_schema.json" },
+    { kind: "write-edit", value: "function/input_maps.json" },
+    { kind: "write-edit", value: "function/tasks.json" },
+    { kind: "write-edit", value: "function/output.json" },
+    { kind: "write-edit", value: "function/output_length.json" },
+    { kind: "write-edit", value: "function/input_split.json" },
+    { kind: "write-edit", value: "function/input_merge.json" },
+    { kind: "write-edit", value: "github/description.json" },
+    { kind: "write-edit", value: "README.md" },
+    { kind: "write-edit", value: `plans/${planIndex}.md` },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-api/src/**" },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-rs/src/**" },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-rs-wasm-js/src/**" }
+  ];
+}
 async function inventFunctionTasksLoop(log, sessionId) {
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -1523,172 +1372,10 @@ Please try again. Remember to:
 2. Commit your changes using \`ts-node commitAndPush.ts "<message>"\`
 `;
     }
-    const slashCwd = getSlashCwd();
-    const backslashCwd = getBackslashCwd();
     const stream = query({
       prompt,
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Bash(ts-node build.ts)",
-          "Bash(npx ts-node build.ts)",
-          `Bash(cd ${slashCwd} && ts-node build.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node build.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node build.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node build.ts)`,
-          "Bash(ts-node commitAndPush.ts *)",
-          "Bash(npx ts-node commitAndPush.ts *)",
-          `Bash(cd ${slashCwd} && ts-node commitAndPush.ts *)`,
-          `Bash(cd ${backslashCwd} && ts-node commitAndPush.ts *)`,
-          `Bash(cd ${slashCwd} && npx ts-node commitAndPush.ts *)`,
-          `Bash(cd ${backslashCwd} && npx ts-node commitAndPush.ts *)`,
-          "Bash(ts-node spawnFunctionAgents.ts *)",
-          "Bash(npx ts-node spawnFunctionAgents.ts *)",
-          `Bash(cd ${slashCwd} && ts-node spawnFunctionAgents.ts *)`,
-          `Bash(cd ${backslashCwd} && ts-node spawnFunctionAgents.ts *)`,
-          `Bash(cd ${slashCwd} && npx ts-node spawnFunctionAgents.ts *)`,
-          `Bash(cd ${backslashCwd} && npx ts-node spawnFunctionAgents.ts *)`,
-          "Bash(ts-node getSubFunctionCommits.ts)",
-          "Bash(npx ts-node getSubFunctionCommits.ts)",
-          `Bash(cd ${slashCwd} && ts-node getSubFunctionCommits.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node getSubFunctionCommits.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node getSubFunctionCommits.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node getSubFunctionCommits.ts)`,
-          "Bash(ts-node installRustLogs.ts)",
-          "Bash(npx ts-node installRustLogs.ts)",
-          `Bash(cd ${slashCwd} && ts-node installRustLogs.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node installRustLogs.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node installRustLogs.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node installRustLogs.ts)`,
-          "Bash(ts-node cloneSubFunctions.ts)",
-          "Bash(npx ts-node cloneSubFunctions.ts)",
-          `Bash(cd ${slashCwd} && ts-node cloneSubFunctions.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node cloneSubFunctions.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node cloneSubFunctions.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node cloneSubFunctions.ts)`,
-          "Bash(ts-node cloneSubFunctions.ts --latest)",
-          "Bash(npx ts-node cloneSubFunctions.ts --latest)",
-          `Bash(cd ${slashCwd} && ts-node cloneSubFunctions.ts --latest)`,
-          `Bash(cd ${backslashCwd} && ts-node cloneSubFunctions.ts --latest)`,
-          `Bash(cd ${slashCwd} && npx ts-node cloneSubFunctions.ts --latest)`,
-          `Bash(cd ${backslashCwd} && npx ts-node cloneSubFunctions.ts --latest)`,
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(inputs.json)",
-          "Edit(./inputs.json)",
-          `Edit(${slashCwd}/inputs.json)`,
-          `Edit(${backslashCwd}\\inputs.json)`,
-          "Write(inputs.json)",
-          "Write(./inputs.json)",
-          `Write(${slashCwd}/inputs.json)`,
-          `Write(${backslashCwd}\\inputs.json)`,
-          "Edit(function/description.json)",
-          "Edit(./function/description.json)",
-          `Edit(${slashCwd}/function/description.json)`,
-          `Edit(${backslashCwd}\\function\\description.json)`,
-          "Write(function/description.json)",
-          "Write(./function/description.json)",
-          `Write(${slashCwd}/function/description.json)`,
-          `Write(${backslashCwd}\\function\\description.json)`,
-          "Edit(function/input_schema.json)",
-          "Edit(./function/input_schema.json)",
-          `Edit(${slashCwd}/function/input_schema.json)`,
-          `Edit(${backslashCwd}\\function\\input_schema.json)`,
-          "Write(function/input_schema.json)",
-          "Write(./function/input_schema.json)",
-          `Write(${slashCwd}/function/input_schema.json)`,
-          `Write(${backslashCwd}\\function\\input_schema.json)`,
-          "Edit(function/input_maps.json)",
-          "Edit(./function/input_maps.json)",
-          `Edit(${slashCwd}/function/input_maps.json)`,
-          `Edit(${backslashCwd}\\function\\input_maps.json)`,
-          "Write(function/input_maps.json)",
-          "Write(./function/input_maps.json)",
-          `Write(${slashCwd}/function/input_maps.json)`,
-          `Write(${backslashCwd}\\function\\input_maps.json)`,
-          "Edit(function/tasks.json)",
-          "Edit(./function/tasks.json)",
-          `Edit(${slashCwd}/function/tasks.json)`,
-          `Edit(${backslashCwd}\\function\\tasks.json)`,
-          "Write(function/tasks.json)",
-          "Write(./function/tasks.json)",
-          `Write(${slashCwd}/function/tasks.json)`,
-          `Write(${backslashCwd}\\function\\tasks.json)`,
-          "Edit(function/output.json)",
-          "Edit(./function/output.json)",
-          `Edit(${slashCwd}/function/output.json)`,
-          `Edit(${backslashCwd}\\function\\output.json)`,
-          "Write(function/output.json)",
-          "Write(./function/output.json)",
-          `Write(${slashCwd}/function/output.json)`,
-          `Write(${backslashCwd}\\function\\output.json)`,
-          "Edit(function/output_length.json)",
-          "Edit(./function/output_length.json)",
-          `Edit(${slashCwd}/function/output_length.json)`,
-          `Edit(${backslashCwd}\\function\\output_length.json)`,
-          "Write(function/output_length.json)",
-          "Write(./function/output_length.json)",
-          `Write(${slashCwd}/function/output_length.json)`,
-          `Write(${backslashCwd}\\function\\output_length.json)`,
-          "Edit(function/input_split.json)",
-          "Edit(./function/input_split.json)",
-          `Edit(${slashCwd}/function/input_split.json)`,
-          `Edit(${backslashCwd}\\function\\input_split.json)`,
-          "Write(function/input_split.json)",
-          "Write(./function/input_split.json)",
-          `Write(${slashCwd}/function/input_split.json)`,
-          `Write(${backslashCwd}\\function\\input_split.json)`,
-          "Edit(function/input_merge.json)",
-          "Edit(./function/input_merge.json)",
-          `Edit(${slashCwd}/function/input_merge.json)`,
-          `Edit(${backslashCwd}\\function\\input_merge.json)`,
-          "Write(function/input_merge.json)",
-          "Write(./function/input_merge.json)",
-          `Write(${slashCwd}/function/input_merge.json)`,
-          `Write(${backslashCwd}\\function\\input_merge.json)`,
-          "Edit(github/description.json)",
-          "Edit(./github/description.json)",
-          `Edit(${slashCwd}/github/description.json)`,
-          `Edit(${backslashCwd}\\github\\description.json)`,
-          "Write(github/description.json)",
-          "Write(./github/description.json)",
-          `Write(${slashCwd}/github/description.json)`,
-          `Write(${backslashCwd}\\github\\description.json)`,
-          "Edit(README.md)",
-          "Edit(./README.md)",
-          `Edit(${slashCwd}/README.md)`,
-          `Edit(${backslashCwd}\\README.md)`,
-          "Write(README.md)",
-          "Write(./README.md)",
-          `Write(${slashCwd}/README.md)`,
-          `Write(${backslashCwd}\\README.md)`,
-          `Edit(plans/${nextPlanIndex}.md)`,
-          `Edit(./plans/${nextPlanIndex}.md)`,
-          `Edit(${slashCwd}/plans/${nextPlanIndex}.md)`,
-          `Edit(${backslashCwd}\\plans\\${nextPlanIndex}.md)`,
-          `Write(plans/${nextPlanIndex}.md)`,
-          `Write(./plans/${nextPlanIndex}.md)`,
-          `Write(${slashCwd}/plans/${nextPlanIndex}.md)`,
-          `Write(${backslashCwd}\\plans\\${nextPlanIndex}.md)`,
-          "Edit(./objectiveai/objectiveai-api/src/**)",
-          "Edit(objectiveai/objectiveai-api/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-api/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-api\\src\\**)`,
-          "Edit(./objectiveai/objectiveai-rs/src/**)",
-          "Edit(objectiveai/objectiveai-rs/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-rs/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-rs\\src\\**)`,
-          "Edit(./objectiveai/objectiveai-rs-wasm-js/src/**)",
-          "Edit(objectiveai/objectiveai-rs-wasm-js/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-rs-wasm-js/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-rs-wasm-js\\src\\**)`
-        ],
+        allowedTools: allowedTools(getInventFunctionTools(nextPlanIndex)),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId
@@ -1769,6 +1456,28 @@ async function inventFunctionTasks(options = {}) {
   log("=== Invent Loop: Creating new function ===");
   await inventFunctionTasksLoop(log, sessionId);
   log("=== ObjectiveAI Function invention complete ===");
+}
+function getInventTools(planIndex) {
+  return [
+    { kind: "ts-node", value: "build.ts" },
+    { kind: "ts-node", value: "commitAndPush.ts *" },
+    { kind: "ts-node", value: "installRustLogs.ts" },
+    { kind: "write-edit", value: "inputs.json" },
+    { kind: "write-edit", value: "function/description.json" },
+    { kind: "write-edit", value: "function/input_schema.json" },
+    { kind: "write-edit", value: "function/input_maps.json" },
+    { kind: "write-edit", value: "function/tasks.json" },
+    { kind: "write-edit", value: "function/output.json" },
+    { kind: "write-edit", value: "function/output_length.json" },
+    { kind: "write-edit", value: "function/input_split.json" },
+    { kind: "write-edit", value: "function/input_merge.json" },
+    { kind: "write-edit", value: "github/description.json" },
+    { kind: "write-edit", value: "README.md" },
+    { kind: "write-edit", value: `plans/${planIndex}.md` },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-api/src/**" },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-rs/src/**" },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-rs-wasm-js/src/**" }
+  ];
 }
 async function inventVectorTasksLoop(log, sessionId) {
   const nextPlanIndex = getNextPlanIndex();
@@ -1897,148 +1606,10 @@ Please try again. Remember to:
 2. Commit your changes using \`ts-node commitAndPush.ts "<message>"\`
 `;
     }
-    const slashCwd = getSlashCwd();
-    const backslashCwd = getBackslashCwd();
     const stream = query({
       prompt,
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Bash(ts-node build.ts)",
-          "Bash(npx ts-node build.ts)",
-          `Bash(cd ${slashCwd} && ts-node build.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node build.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node build.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node build.ts)`,
-          "Bash(ts-node commitAndPush.ts *)",
-          "Bash(npx ts-node commitAndPush.ts *)",
-          `Bash(cd ${slashCwd} && ts-node commitAndPush.ts *)`,
-          `Bash(cd ${backslashCwd} && ts-node commitAndPush.ts *)`,
-          `Bash(cd ${slashCwd} && npx ts-node commitAndPush.ts *)`,
-          `Bash(cd ${backslashCwd} && npx ts-node commitAndPush.ts *)`,
-          "Bash(ts-node installRustLogs.ts)",
-          "Bash(npx ts-node installRustLogs.ts)",
-          `Bash(cd ${slashCwd} && ts-node installRustLogs.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node installRustLogs.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node installRustLogs.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node installRustLogs.ts)`,
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(inputs.json)",
-          "Edit(./inputs.json)",
-          `Edit(${slashCwd}/inputs.json)`,
-          `Edit(${backslashCwd}\\inputs.json)`,
-          "Write(inputs.json)",
-          "Write(./inputs.json)",
-          `Write(${slashCwd}/inputs.json)`,
-          `Write(${backslashCwd}\\inputs.json)`,
-          "Edit(function/description.json)",
-          "Edit(./function/description.json)",
-          `Edit(${slashCwd}/function/description.json)`,
-          `Edit(${backslashCwd}\\function\\description.json)`,
-          "Write(function/description.json)",
-          "Write(./function/description.json)",
-          `Write(${slashCwd}/function/description.json)`,
-          `Write(${backslashCwd}\\function\\description.json)`,
-          "Edit(function/input_schema.json)",
-          "Edit(./function/input_schema.json)",
-          `Edit(${slashCwd}/function/input_schema.json)`,
-          `Edit(${backslashCwd}\\function\\input_schema.json)`,
-          "Write(function/input_schema.json)",
-          "Write(./function/input_schema.json)",
-          `Write(${slashCwd}/function/input_schema.json)`,
-          `Write(${backslashCwd}\\function\\input_schema.json)`,
-          "Edit(function/input_maps.json)",
-          "Edit(./function/input_maps.json)",
-          `Edit(${slashCwd}/function/input_maps.json)`,
-          `Edit(${backslashCwd}\\function\\input_maps.json)`,
-          "Write(function/input_maps.json)",
-          "Write(./function/input_maps.json)",
-          `Write(${slashCwd}/function/input_maps.json)`,
-          `Write(${backslashCwd}\\function\\input_maps.json)`,
-          "Edit(function/tasks.json)",
-          "Edit(./function/tasks.json)",
-          `Edit(${slashCwd}/function/tasks.json)`,
-          `Edit(${backslashCwd}\\function\\tasks.json)`,
-          "Write(function/tasks.json)",
-          "Write(./function/tasks.json)",
-          `Write(${slashCwd}/function/tasks.json)`,
-          `Write(${backslashCwd}\\function\\tasks.json)`,
-          "Edit(function/output.json)",
-          "Edit(./function/output.json)",
-          `Edit(${slashCwd}/function/output.json)`,
-          `Edit(${backslashCwd}\\function\\output.json)`,
-          "Write(function/output.json)",
-          "Write(./function/output.json)",
-          `Write(${slashCwd}/function/output.json)`,
-          `Write(${backslashCwd}\\function\\output.json)`,
-          "Edit(function/output_length.json)",
-          "Edit(./function/output_length.json)",
-          `Edit(${slashCwd}/function/output_length.json)`,
-          `Edit(${backslashCwd}\\function\\output_length.json)`,
-          "Write(function/output_length.json)",
-          "Write(./function/output_length.json)",
-          `Write(${slashCwd}/function/output_length.json)`,
-          `Write(${backslashCwd}\\function\\output_length.json)`,
-          "Edit(function/input_split.json)",
-          "Edit(./function/input_split.json)",
-          `Edit(${slashCwd}/function/input_split.json)`,
-          `Edit(${backslashCwd}\\function\\input_split.json)`,
-          "Write(function/input_split.json)",
-          "Write(./function/input_split.json)",
-          `Write(${slashCwd}/function/input_split.json)`,
-          `Write(${backslashCwd}\\function\\input_split.json)`,
-          "Edit(function/input_merge.json)",
-          "Edit(./function/input_merge.json)",
-          `Edit(${slashCwd}/function/input_merge.json)`,
-          `Edit(${backslashCwd}\\function\\input_merge.json)`,
-          "Write(function/input_merge.json)",
-          "Write(./function/input_merge.json)",
-          `Write(${slashCwd}/function/input_merge.json)`,
-          `Write(${backslashCwd}\\function\\input_merge.json)`,
-          "Edit(github/description.json)",
-          "Edit(./github/description.json)",
-          `Edit(${slashCwd}/github/description.json)`,
-          `Edit(${backslashCwd}\\github\\description.json)`,
-          "Write(github/description.json)",
-          "Write(./github/description.json)",
-          `Write(${slashCwd}/github/description.json)`,
-          `Write(${backslashCwd}\\github\\description.json)`,
-          "Edit(README.md)",
-          "Edit(./README.md)",
-          `Edit(${slashCwd}/README.md)`,
-          `Edit(${backslashCwd}\\README.md)`,
-          "Write(README.md)",
-          "Write(./README.md)",
-          `Write(${slashCwd}/README.md)`,
-          `Write(${backslashCwd}\\README.md)`,
-          `Edit(plans/${nextPlanIndex}.md)`,
-          `Edit(./plans/${nextPlanIndex}.md)`,
-          `Edit(${slashCwd}/plans/${nextPlanIndex}.md)`,
-          `Edit(${backslashCwd}\\plans\\${nextPlanIndex}.md)`,
-          `Write(plans/${nextPlanIndex}.md)`,
-          `Write(./plans/${nextPlanIndex}.md)`,
-          `Write(${slashCwd}/plans/${nextPlanIndex}.md)`,
-          `Write(${backslashCwd}\\plans\\${nextPlanIndex}.md)`,
-          "Edit(./objectiveai/objectiveai-api/src/**)",
-          "Edit(objectiveai/objectiveai-api/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-api/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-api\\src\\**)`,
-          "Edit(./objectiveai/objectiveai-rs/src/**)",
-          "Edit(objectiveai/objectiveai-rs/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-rs/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-rs\\src\\**)`,
-          "Edit(./objectiveai/objectiveai-rs-wasm-js/src/**)",
-          "Edit(objectiveai/objectiveai-rs-wasm-js/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-rs-wasm-js/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-rs-wasm-js\\src\\**)`
-        ],
+        allowedTools: allowedTools(getInventTools(nextPlanIndex)),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId
@@ -2129,6 +1700,34 @@ async function invent(options = {}) {
   } else {
     await inventFunctionTasks(options);
   }
+}
+function getIssueHandlingTools(planIndex) {
+  return [
+    { kind: "ts-node", value: "build.ts" },
+    { kind: "ts-node", value: "fetchOpenIssues.ts" },
+    { kind: "ts-node", value: "fetchClosedIssues.ts" },
+    { kind: "ts-node", value: "commentOnIssue.ts *" },
+    { kind: "ts-node", value: "closeIssue.ts *" },
+    { kind: "ts-node", value: "commitAndPush.ts *" },
+    { kind: "ts-node", value: "cloneSubFunctions.ts" },
+    { kind: "ts-node", value: "cloneSubFunctions.ts --latest" },
+    { kind: "ts-node", value: "installRustLogs.ts" },
+    { kind: "write-edit", value: "inputs.json" },
+    { kind: "write-edit", value: "function/description.json" },
+    { kind: "write-edit", value: "function/input_schema.json" },
+    { kind: "write-edit", value: "function/input_maps.json" },
+    { kind: "write-edit", value: "function/tasks.json" },
+    { kind: "write-edit", value: "function/output.json" },
+    { kind: "write-edit", value: "function/output_length.json" },
+    { kind: "write-edit", value: "function/input_split.json" },
+    { kind: "write-edit", value: "function/input_merge.json" },
+    { kind: "write-edit", value: "github/description.json" },
+    { kind: "write-edit", value: "README.md" },
+    { kind: "write-edit", value: `plans/${planIndex}.md` },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-api/src/**" },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-rs/src/**" },
+    { kind: "edit-glob", value: "objectiveai/objectiveai-rs-wasm-js/src/**" }
+  ];
 }
 async function handleIssuesLoop(log, sessionId) {
   const nextPlanIndex = getNextPlanIndex();
@@ -2262,184 +1861,10 @@ Please try again. Remember to:
 3. Commit your changes using \`ts-node commitAndPush.ts "<message>"\`
 `;
     }
-    const slashCwd = getSlashCwd();
-    const backslashCwd = getBackslashCwd();
     const stream = query({
       prompt,
       options: {
-        allowedTools: [
-          "Bash(ls*)",
-          "Bash(cd)",
-          "Bash(cat)",
-          "Bash(diff)",
-          "Bash(ts-node build.ts)",
-          "Bash(npx ts-node build.ts)",
-          `Bash(cd ${slashCwd} && ts-node build.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node build.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node build.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node build.ts)`,
-          "Bash(ts-node fetchOpenIssues.ts)",
-          "Bash(npx ts-node fetchOpenIssues.ts)",
-          `Bash(cd ${slashCwd} && ts-node fetchOpenIssues.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node fetchOpenIssues.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node fetchOpenIssues.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node fetchOpenIssues.ts)`,
-          "Bash(ts-node fetchClosedIssues.ts)",
-          "Bash(npx ts-node fetchClosedIssues.ts)",
-          `Bash(cd ${slashCwd} && ts-node fetchClosedIssues.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node fetchClosedIssues.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node fetchClosedIssues.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node fetchClosedIssues.ts)`,
-          "Bash(ts-node commentOnIssue.ts *)",
-          "Bash(npx ts-node commentOnIssue.ts *)",
-          `Bash(cd ${slashCwd} && ts-node commentOnIssue.ts *)`,
-          `Bash(cd ${backslashCwd} && ts-node commentOnIssue.ts *)`,
-          `Bash(cd ${slashCwd} && npx ts-node commentOnIssue.ts *)`,
-          `Bash(cd ${backslashCwd} && npx ts-node commentOnIssue.ts *)`,
-          "Bash(ts-node closeIssue.ts *)",
-          "Bash(npx ts-node closeIssue.ts *)",
-          `Bash(cd ${slashCwd} && ts-node closeIssue.ts *)`,
-          `Bash(cd ${backslashCwd} && ts-node closeIssue.ts *)`,
-          `Bash(cd ${slashCwd} && npx ts-node closeIssue.ts *)`,
-          `Bash(cd ${backslashCwd} && npx ts-node closeIssue.ts *)`,
-          "Bash(ts-node commitAndPush.ts *)",
-          "Bash(npx ts-node commitAndPush.ts *)",
-          `Bash(cd ${slashCwd} && ts-node commitAndPush.ts *)`,
-          `Bash(cd ${backslashCwd} && ts-node commitAndPush.ts *)`,
-          `Bash(cd ${slashCwd} && npx ts-node commitAndPush.ts *)`,
-          `Bash(cd ${backslashCwd} && npx ts-node commitAndPush.ts *)`,
-          "Bash(ts-node cloneSubFunctions.ts)",
-          "Bash(npx ts-node cloneSubFunctions.ts)",
-          `Bash(cd ${slashCwd} && ts-node cloneSubFunctions.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node cloneSubFunctions.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node cloneSubFunctions.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node cloneSubFunctions.ts)`,
-          "Bash(ts-node cloneSubFunctions.ts --latest)",
-          "Bash(npx ts-node cloneSubFunctions.ts --latest)",
-          `Bash(cd ${slashCwd} && ts-node cloneSubFunctions.ts --latest)`,
-          `Bash(cd ${backslashCwd} && ts-node cloneSubFunctions.ts --latest)`,
-          `Bash(cd ${slashCwd} && npx ts-node cloneSubFunctions.ts --latest)`,
-          `Bash(cd ${backslashCwd} && npx ts-node cloneSubFunctions.ts --latest)`,
-          "Bash(ts-node installRustLogs.ts)",
-          "Bash(npx ts-node installRustLogs.ts)",
-          `Bash(cd ${slashCwd} && ts-node installRustLogs.ts)`,
-          `Bash(cd ${backslashCwd} && ts-node installRustLogs.ts)`,
-          `Bash(cd ${slashCwd} && npx ts-node installRustLogs.ts)`,
-          `Bash(cd ${backslashCwd} && npx ts-node installRustLogs.ts)`,
-          "Glob",
-          "Grep",
-          "Read",
-          "WebFetch",
-          "WebSearch",
-          "Edit(inputs.json)",
-          "Edit(./inputs.json)",
-          `Edit(${slashCwd}/inputs.json)`,
-          `Edit(${backslashCwd}\\inputs.json)`,
-          "Write(inputs.json)",
-          "Write(./inputs.json)",
-          `Write(${slashCwd}/inputs.json)`,
-          `Write(${backslashCwd}\\inputs.json)`,
-          "Edit(function/description.json)",
-          "Edit(./function/description.json)",
-          `Edit(${slashCwd}/function/description.json)`,
-          `Edit(${backslashCwd}\\function\\description.json)`,
-          "Write(function/description.json)",
-          "Write(./function/description.json)",
-          `Write(${slashCwd}/function/description.json)`,
-          `Write(${backslashCwd}\\function\\description.json)`,
-          "Edit(function/input_schema.json)",
-          "Edit(./function/input_schema.json)",
-          `Edit(${slashCwd}/function/input_schema.json)`,
-          `Edit(${backslashCwd}\\function\\input_schema.json)`,
-          "Write(function/input_schema.json)",
-          "Write(./function/input_schema.json)",
-          `Write(${slashCwd}/function/input_schema.json)`,
-          `Write(${backslashCwd}\\function\\input_schema.json)`,
-          "Edit(function/input_maps.json)",
-          "Edit(./function/input_maps.json)",
-          `Edit(${slashCwd}/function/input_maps.json)`,
-          `Edit(${backslashCwd}\\function\\input_maps.json)`,
-          "Write(function/input_maps.json)",
-          "Write(./function/input_maps.json)",
-          `Write(${slashCwd}/function/input_maps.json)`,
-          `Write(${backslashCwd}\\function\\input_maps.json)`,
-          "Edit(function/tasks.json)",
-          "Edit(./function/tasks.json)",
-          `Edit(${slashCwd}/function/tasks.json)`,
-          `Edit(${backslashCwd}\\function\\tasks.json)`,
-          "Write(function/tasks.json)",
-          "Write(./function/tasks.json)",
-          `Write(${slashCwd}/function/tasks.json)`,
-          `Write(${backslashCwd}\\function\\tasks.json)`,
-          "Edit(function/output.json)",
-          "Edit(./function/output.json)",
-          `Edit(${slashCwd}/function/output.json)`,
-          `Edit(${backslashCwd}\\function\\output.json)`,
-          "Write(function/output.json)",
-          "Write(./function/output.json)",
-          `Write(${slashCwd}/function/output.json)`,
-          `Write(${backslashCwd}\\function\\output.json)`,
-          "Edit(function/output_length.json)",
-          "Edit(./function/output_length.json)",
-          `Edit(${slashCwd}/function/output_length.json)`,
-          `Edit(${backslashCwd}\\function\\output_length.json)`,
-          "Write(function/output_length.json)",
-          "Write(./function/output_length.json)",
-          `Write(${slashCwd}/function/output_length.json)`,
-          `Write(${backslashCwd}\\function\\output_length.json)`,
-          "Edit(function/input_split.json)",
-          "Edit(./function/input_split.json)",
-          `Edit(${slashCwd}/function/input_split.json)`,
-          `Edit(${backslashCwd}\\function\\input_split.json)`,
-          "Write(function/input_split.json)",
-          "Write(./function/input_split.json)",
-          `Write(${slashCwd}/function/input_split.json)`,
-          `Write(${backslashCwd}\\function\\input_split.json)`,
-          "Edit(function/input_merge.json)",
-          "Edit(./function/input_merge.json)",
-          `Edit(${slashCwd}/function/input_merge.json)`,
-          `Edit(${backslashCwd}\\function\\input_merge.json)`,
-          "Write(function/input_merge.json)",
-          "Write(./function/input_merge.json)",
-          `Write(${slashCwd}/function/input_merge.json)`,
-          `Write(${backslashCwd}\\function\\input_merge.json)`,
-          "Edit(github/description.json)",
-          "Edit(./github/description.json)",
-          `Edit(${slashCwd}/github/description.json)`,
-          `Edit(${backslashCwd}\\github\\description.json)`,
-          "Write(github/description.json)",
-          "Write(./github/description.json)",
-          `Write(${slashCwd}/github/description.json)`,
-          `Write(${backslashCwd}\\github\\description.json)`,
-          "Edit(README.md)",
-          "Edit(./README.md)",
-          `Edit(${slashCwd}/README.md)`,
-          `Edit(${backslashCwd}\\README.md)`,
-          "Write(README.md)",
-          "Write(./README.md)",
-          `Write(${slashCwd}/README.md)`,
-          `Write(${backslashCwd}\\README.md)`,
-          `Edit(plans/${nextPlanIndex}.md)`,
-          `Edit(./plans/${nextPlanIndex}.md)`,
-          `Edit(${slashCwd}/plans/${nextPlanIndex}.md)`,
-          `Edit(${backslashCwd}\\plans\\${nextPlanIndex}.md)`,
-          `Write(plans/${nextPlanIndex}.md)`,
-          `Write(./plans/${nextPlanIndex}.md)`,
-          `Write(${slashCwd}/plans/${nextPlanIndex}.md)`,
-          `Write(${backslashCwd}\\plans\\${nextPlanIndex}.md)`,
-          "Edit(./objectiveai/objectiveai-api/src/**)",
-          "Edit(objectiveai/objectiveai-api/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-api/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-api\\src\\**)`,
-          "Edit(./objectiveai/objectiveai-rs/src/**)",
-          "Edit(objectiveai/objectiveai-rs/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-rs/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-rs\\src\\**)`,
-          "Edit(./objectiveai/objectiveai-rs-wasm-js/src/**)",
-          "Edit(objectiveai/objectiveai-rs-wasm-js/src/**)",
-          `Edit(${slashCwd}/objectiveai/objectiveai-rs-wasm-js/src/**)`,
-          `Edit(${backslashCwd}\\objectiveai\\objectiveai-rs-wasm-js\\src\\**)`
-        ],
+        allowedTools: allowedTools(getIssueHandlingTools(nextPlanIndex)),
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId

@@ -2,7 +2,7 @@ import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { promptResources } from "../promptResources";
-import { getSlashCwd, getBackslashCwd } from "../../util";
+import { allowedTools } from "../allowedTools";
 
 // Step 7 - Read or Create ESSAY_TASKS.md
 export async function essayTasks(
@@ -20,26 +20,12 @@ export async function essayTasks(
     return content.length > 0;
   })();
 
-  // Query
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
-
   const stream = (() => {
     if (essayTasksNonEmpty) {
       return query({
         prompt: "Read ESSAY_TASKS.md to understand the Function's tasks.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-          ],
+          allowedTools: allowedTools([]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
@@ -58,25 +44,9 @@ export async function essayTasks(
           "Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md." +
           " Each task is a plain language description of a task which will go into the function's `tasks` array.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(ESSAY_TASKS.md)",
-            "Edit(./ESSAY_TASKS.md)",
-            `Edit(${slashCwd}/ESSAY_TASKS.md)`,
-            `Edit(${backslashCwd}\\ESSAY_TASKS.md)`,
-            "Write(ESSAY_TASKS.md)",
-            "Write(./ESSAY_TASKS.md)",
-            `Write(${slashCwd}/ESSAY_TASKS.md)`,
-            `Write(${backslashCwd}\\ESSAY_TASKS.md)`,
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "ESSAY_TASKS.md" },
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
@@ -108,25 +78,9 @@ export async function essayTasks(
           " Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md." +
           " Each task is a plain language description of a task which will go into the function's `tasks` array.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(ESSAY_TASKS.md)",
-            "Edit(./ESSAY_TASKS.md)",
-            `Edit(${slashCwd}/ESSAY_TASKS.md)`,
-            `Edit(${backslashCwd}\\ESSAY_TASKS.md)`,
-            "Write(ESSAY_TASKS.md)",
-            "Write(./ESSAY_TASKS.md)",
-            `Write(${slashCwd}/ESSAY_TASKS.md)`,
-            `Write(${backslashCwd}\\ESSAY_TASKS.md)`,
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "ESSAY_TASKS.md" },
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,

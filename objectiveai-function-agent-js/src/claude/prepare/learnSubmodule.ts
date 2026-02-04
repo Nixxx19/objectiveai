@@ -1,7 +1,7 @@
 import { query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
-import { getSlashCwd, getBackslashCwd } from "../../util";
+import { allowedTools } from "../allowedTools";
 
 // Step 1 - Learn about ObjectiveAI and ObjectiveAI Functions
 export async function learnSubmodule(
@@ -19,10 +19,6 @@ export async function learnSubmodule(
     return content.length > 0;
   })();
 
-  // Query
-  const slashCwd = getSlashCwd();
-  const backslashCwd = getBackslashCwd();
-
   const stream = (() => {
     if (indexNonEmpty) {
       return query({
@@ -33,17 +29,7 @@ export async function learnSubmodule(
           " First, read OBJECTIVEAI_INDEX.md." +
           " Then, read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-          ],
+          allowedTools: allowedTools([]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
@@ -58,25 +44,9 @@ export async function learnSubmodule(
           " Read key files in `objectiveai/objectiveai-rs`, `objectiveai/objectiveai-api`, `objectiveai/objectiveai-js`, and `objectiveai/objectiveai-rs-wasm-js` and any other interesting files they import or link to." +
           " Create OBJECTIVEAI_INDEX.md with links to files and your learnings.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(OBJECTIVEAI_INDEX.md)",
-            "Edit(./OBJECTIVEAI_INDEX.md)",
-            `Edit(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
-            `Edit(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
-            "Write(OBJECTIVEAI_INDEX.md)",
-            "Write(./OBJECTIVEAI_INDEX.md)",
-            `Write(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
-            `Write(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "OBJECTIVEAI_INDEX.md" },
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
@@ -104,25 +74,9 @@ export async function learnSubmodule(
           "OBJECTIVEAI_INDEX.md is empty after your learn phase." +
           " Create OBJECTIVEAI_INDEX.md with links to files and your learnings about ObjectiveAI and ObjectiveAI Functions.",
         options: {
-          allowedTools: [
-            "Bash(ls*)",
-            "Bash(cd)",
-            "Bash(cat)",
-            "Bash(diff)",
-            "Glob",
-            "Grep",
-            "Read",
-            "WebFetch",
-            "WebSearch",
-            "Edit(OBJECTIVEAI_INDEX.md)",
-            "Edit(./OBJECTIVEAI_INDEX.md)",
-            `Edit(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
-            `Edit(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
-            "Write(OBJECTIVEAI_INDEX.md)",
-            "Write(./OBJECTIVEAI_INDEX.md)",
-            `Write(${slashCwd}/OBJECTIVEAI_INDEX.md)`,
-            `Write(${backslashCwd}\\OBJECTIVEAI_INDEX.md)`,
-          ],
+          allowedTools: allowedTools([
+            { kind: "write-edit", value: "OBJECTIVEAI_INDEX.md" },
+          ]),
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
           resume: sessionId,
