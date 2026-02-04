@@ -31,6 +31,7 @@ import commitAndPushTs from "../assets/commitAndPush.ts.txt";
 import spawnFunctionAgentsTs from "../assets/spawnFunctionAgents.ts.txt";
 import cloneSubFunctionsTs from "../assets/cloneSubFunctions.ts.txt";
 import getSubFunctionCommitsTs from "../assets/getSubFunctionCommits.ts.txt";
+import installRustLogsTs from "../assets/installRustLogs.ts.txt";
 
 // Plans assets
 import plansGitkeep from "../assets/plans/.gitkeep.txt";
@@ -73,6 +74,7 @@ export const assets: Record<string, string> = {
   "spawnFunctionAgents.ts": spawnFunctionAgentsTs,
   "cloneSubFunctions.ts": cloneSubFunctionsTs,
   "getSubFunctionCommits.ts": getSubFunctionCommitsTs,
+  "installRustLogs.ts": installRustLogsTs,
   "plans/.gitkeep": plansGitkeep,
   "logs/.gitignore": logsGitignore,
   "sub_functions/.gitignore": subFunctionsGitignore,

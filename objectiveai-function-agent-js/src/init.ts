@@ -44,6 +44,8 @@ function updateSubmodules(): void {
 function runNpmInstall(): void {
   console.log("Installing dependencies...");
   execLog("npm install");
+  // Reset submodule to discard any line ending changes from npm
+  exec("git checkout -- objectiveai");
 }
 
 // Check if there are any uncommitted changes or untracked files
@@ -288,7 +290,7 @@ export async function init(options: InitOptions = {}): Promise<void> {
   // Step 2: Write asset files (including package.json)
   writeAssets();
 
-  // Step 3: npm install
+  // Step 3: npm install (also resets submodule after)
   runNpmInstall();
 
   // Step 4: Fetch examples if needed

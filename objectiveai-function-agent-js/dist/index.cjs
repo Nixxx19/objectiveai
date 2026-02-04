@@ -1291,6 +1291,14 @@ var init_getSubFunctionCommits_ts = __esm({
   }
 });
 
+// assets/installRustLogs.ts.txt
+var installRustLogs_ts_default;
+var init_installRustLogs_ts = __esm({
+  "assets/installRustLogs.ts.txt"() {
+    installRustLogs_ts_default = 'import { execSync } from "child_process";\n\n// Rebuild the ObjectiveAI packages with any changes made to the Rust source\n// This rebuilds objectiveai-js (which includes WASM) and objectiveai-function-agent-js\n\nconsole.log("Rebuilding ObjectiveAI packages...");\n\n// Install dependencies in the submodule workspace\nexecSync("npm install", { cwd: "objectiveai", stdio: "inherit" });\n\n// Build objectiveai-js first (includes WASM rebuild)\nexecSync("npm run build -w objectiveai-js", { cwd: "objectiveai", stdio: "inherit" });\n\n// Build objectiveai-function-agent-js (depends on objectiveai-js)\nexecSync("npm run build -w objectiveai-function-agent-js", { cwd: "objectiveai", stdio: "inherit" });\n\n// Reinstall in function workspace to pick up the rebuilt packages\nexecSync("npm install", { stdio: "inherit" });\n\nconsole.log("Rebuild complete. Run ts-node build.ts to test.");\n';
+  }
+});
+
 // assets/plans/.gitkeep.txt
 var gitkeep_default;
 var init_gitkeep = __esm({
@@ -1367,6 +1375,7 @@ var init_assets = __esm({
     init_spawnFunctionAgents_ts();
     init_cloneSubFunctions_ts();
     init_getSubFunctionCommits_ts();
+    init_installRustLogs_ts();
     init_gitkeep();
     init_gitignore2();
     init_ESSAY_md();
@@ -1398,6 +1407,7 @@ var init_assets = __esm({
       "spawnFunctionAgents.ts": spawnFunctionAgents_ts_default,
       "cloneSubFunctions.ts": cloneSubFunctions_ts_default,
       "getSubFunctionCommits.ts": getSubFunctionCommits_ts_default,
+      "installRustLogs.ts": installRustLogs_ts_default,
       "plans/.gitkeep": gitkeep_default,
       "logs/.gitignore": gitignore_default2,
       "sub_functions/.gitignore": gitignore_default3,
@@ -1442,6 +1452,7 @@ function updateSubmodules() {
 function runNpmInstall() {
   console.log("Installing dependencies...");
   execLog("npm install");
+  exec("git checkout -- objectiveai");
 }
 function hasChanges() {
   const status = exec("git status --porcelain");

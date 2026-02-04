@@ -76,6 +76,9 @@ var cloneSubFunctions_ts_default = 'import { GitHub } from "@objectiveai/functio
 // assets/getSubFunctionCommits.ts.txt
 var getSubFunctionCommits_ts_default = 'import { execSync } from "child_process";\nimport { existsSync, readdirSync, readFileSync } from "fs";\n\ninterface SubFunctionInfo {\n  index: number;\n  owner: string;\n  repository: string;\n  commit: string;\n  path: string;\n}\n\nfunction main(): void {\n  const subFunctionsDir = "sub_functions";\n\n  if (!existsSync(subFunctionsDir)) {\n    console.log("No sub_functions directory found.");\n    console.log("\\n=== SUB_FUNCTION_COMMITS ===");\n    console.log("[]");\n    return;\n  }\n\n  const entries = readdirSync(subFunctionsDir);\n  const results: SubFunctionInfo[] = [];\n\n  for (const entry of entries) {\n    // Skip non-numeric directories (like .gitignore)\n    const index = parseInt(entry, 10);\n    if (isNaN(index)) continue;\n\n    const subFunctionPath = `${subFunctionsDir}/${entry}`;\n\n    // Get the commit SHA from git\n    let commit: string;\n    try {\n      commit = execSync("git rev-parse HEAD", {\n        cwd: subFunctionPath,\n        encoding: "utf-8",\n        stdio: "pipe",\n      }).trim();\n    } catch {\n      console.log(`Failed to get commit for ${subFunctionPath}`);\n      continue;\n    }\n\n    // Get owner/repository from github/name.json if it exists\n    let owner = "";\n    let repository = "";\n    const namePath = `${subFunctionPath}/github/name.json`;\n    if (existsSync(namePath)) {\n      const name = JSON.parse(readFileSync(namePath, "utf-8")) as string;\n      const parts = name.split("/");\n      if (parts.length === 2) {\n        owner = parts[0];\n        repository = parts[1];\n      }\n    }\n\n    results.push({\n      index,\n      owner,\n      repository,\n      commit,\n      path: subFunctionPath,\n    });\n  }\n\n  // Sort by index\n  results.sort((a, b) => a.index - b.index);\n\n  console.log("\\n=== SUB_FUNCTION_COMMITS ===");\n  console.log(JSON.stringify(results, null, 2));\n}\n\nmain();\n';
 
+// assets/installRustLogs.ts.txt
+var installRustLogs_ts_default = 'import { execSync } from "child_process";\n\n// Rebuild the ObjectiveAI packages with any changes made to the Rust source\n// This rebuilds objectiveai-js (which includes WASM) and objectiveai-function-agent-js\n\nconsole.log("Rebuilding ObjectiveAI packages...");\n\n// Install dependencies in the submodule workspace\nexecSync("npm install", { cwd: "objectiveai", stdio: "inherit" });\n\n// Build objectiveai-js first (includes WASM rebuild)\nexecSync("npm run build -w objectiveai-js", { cwd: "objectiveai", stdio: "inherit" });\n\n// Build objectiveai-function-agent-js (depends on objectiveai-js)\nexecSync("npm run build -w objectiveai-function-agent-js", { cwd: "objectiveai", stdio: "inherit" });\n\n// Reinstall in function workspace to pick up the rebuilt packages\nexecSync("npm install", { stdio: "inherit" });\n\nconsole.log("Rebuild complete. Run ts-node build.ts to test.");\n';
+
 // assets/plans/.gitkeep.txt
 var gitkeep_default = "";
 
@@ -120,6 +123,7 @@ var assets = {
   "spawnFunctionAgents.ts": spawnFunctionAgents_ts_default,
   "cloneSubFunctions.ts": cloneSubFunctions_ts_default,
   "getSubFunctionCommits.ts": getSubFunctionCommits_ts_default,
+  "installRustLogs.ts": installRustLogs_ts_default,
   "plans/.gitkeep": gitkeep_default,
   "logs/.gitignore": gitignore_default2,
   "sub_functions/.gitignore": gitignore_default3,
@@ -158,6 +162,7 @@ function updateSubmodules() {
 function runNpmInstall() {
   console.log("Installing dependencies...");
   execLog("npm install");
+  exec("git checkout -- objectiveai");
 }
 function hasChanges() {
   const status = exec("git status --porcelain");
