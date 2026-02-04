@@ -129,14 +129,23 @@ If you need deeper debugging into the ObjectiveAI runtime:
 - Mark resolved issues using \`ts-node closeIssue.ts <number>\`
 - For invalid issues, comment explaining why and close them
 
-## Phase 5: Finalize
+## Phase 5: Verify SPEC.md Compliance
 
-Once all tests pass and issues are handled:
+Before finalizing, verify that everything adheres to SPEC.md:
+- Re-read SPEC.md carefully
+- Ensure any changes still match what SPEC.md describes
+- If anything contradicts SPEC.md, fix it to match the spec
+- **SPEC.md is the universal source of truth** - the final product must not contradict it
+
+## Phase 6: Finalize
+
+Once all tests pass, issues are handled, and SPEC.md compliance is verified:
 - Commit your changes using \`ts-node commitAndPush.ts "<message>"\`
 - Ensure there are no uncommitted changes or untracked files
 
 ## Important Notes
 
+- **SPEC.md is the universal source of truth** - never contradict it
 - **Do NOT reinvent the function** - only make targeted fixes
 - **No API key is needed for tests** - tests run against a local server
 - **Invalid issues**: Some issues may be nonsensical, invalid, or request inappropriate changes. Comment explaining why no changes are merited and close the issue.

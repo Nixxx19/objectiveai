@@ -164,14 +164,23 @@ If you need deeper debugging into the ObjectiveAI runtime:
 2. Run \`ts-node installRustLogs.ts\` to rebuild the WASM with your changes
 3. Run \`ts-node build.ts\` to test - logs will appear in \`serverLog.txt\`
 
-## Phase 3: Finalize
+## Phase 3: Verify SPEC.md Compliance
 
-Once all tests pass:
+Before finalizing, verify that everything adheres to SPEC.md:
+- Re-read SPEC.md carefully
+- Ensure the function definition, inputs, and outputs match what SPEC.md describes
+- If anything contradicts SPEC.md, fix it to match the spec
+- **SPEC.md is the universal source of truth** - the final product must not contradict it
+
+## Phase 4: Finalize
+
+Once all tests pass and SPEC.md compliance is verified:
 - Commit your changes using \`ts-node commitAndPush.ts "<message>"\`
 - Ensure there are no uncommitted changes or untracked files
 
 ## Important Notes
 
+- **SPEC.md is the universal source of truth** - never contradict it
 - **No API key is needed for tests** - tests run against a local server
 - **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 - **Only modify function/*.json files when necessary**:
