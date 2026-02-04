@@ -1,3 +1,3 @@
 #!/usr/bin/env node
-export { init } from './chunk-LSPDGKKK.js';
+export { prepare } from './chunk-WL4KEOOQ.js';
 import './chunk-K3NQKI34.js';

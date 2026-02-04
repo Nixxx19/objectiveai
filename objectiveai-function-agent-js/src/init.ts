@@ -37,7 +37,7 @@ function initializeGit(): void {
 // Update submodules
 function updateSubmodules(): void {
   console.log("Updating git submodules...");
-  execLog("git submodule update --init --recursive --remote");
+  execLog("git submodule update --init --recursive --remote --force");
 }
 
 // Install npm dependencies

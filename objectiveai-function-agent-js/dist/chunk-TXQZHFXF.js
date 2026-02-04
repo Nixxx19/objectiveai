@@ -1,8 +1,9 @@
-#!/usr/bin/env node
 import { execSync } from 'child_process';
 import { existsSync, readFileSync, writeFileSync, mkdirSync } from 'fs';
 import { dirname, join } from 'path';
 import { ObjectiveAI, Functions } from 'objectiveai';
+
+// src/init.ts
 
 // assets/function/description.json.txt
 var description_json_default = "null";
@@ -146,7 +147,7 @@ function initializeGit() {
 }
 function updateSubmodules() {
   console.log("Updating git submodules...");
-  execLog("git submodule update --init --recursive --remote");
+  execLog("git submodule update --init --recursive --remote --force");
 }
 function runNpmInstall() {
   console.log("Installing dependencies...");
@@ -317,4 +318,4 @@ async function init(options = {}) {
   console.log("Initialization complete.");
 }
 
-export { init };
+export { assets, init };
