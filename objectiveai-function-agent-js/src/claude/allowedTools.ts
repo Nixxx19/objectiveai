@@ -15,6 +15,10 @@ export function allowedTools(tools: AllowedTool[]): string[] {
   const slashCwd = getSlashCwd();
   const backslashCwd = getBackslashCwd();
   const gitBashCwd = getGitBashCwd();
+  // Some Git Bash configs use /mnt/d/... while others use /d/...
+  const gitBashCwdNoMnt = gitBashCwd.startsWith("/mnt")
+    ? gitBashCwd.slice(4)
+    : null;
 
   // Universal base tools
   const result: string[] = [
@@ -43,6 +47,12 @@ export function allowedTools(tools: AllowedTool[]): string[] {
           `Bash(cd ${backslashCwd} && npx ts-node ${script})`,
           `Bash(cd ${gitBashCwd} && npx ts-node ${script})`,
         );
+        if (gitBashCwdNoMnt) {
+          result.push(
+            `Bash(cd ${gitBashCwdNoMnt} && ts-node ${script})`,
+            `Bash(cd ${gitBashCwdNoMnt} && npx ts-node ${script})`,
+          );
+        }
         break;
       }
       case "write-edit": {
@@ -61,6 +71,12 @@ export function allowedTools(tools: AllowedTool[]): string[] {
           `Write(${backslashCwd}\\${backslashFile})`,
           `Write(${gitBashCwd}/${file})`,
         );
+        if (gitBashCwdNoMnt) {
+          result.push(
+            `Edit(${gitBashCwdNoMnt}/${file})`,
+            `Write(${gitBashCwdNoMnt}/${file})`,
+          );
+        }
         break;
       }
       case "edit-glob": {
@@ -74,6 +90,9 @@ export function allowedTools(tools: AllowedTool[]): string[] {
           `Edit(${backslashCwd}\\${backslashPattern})`,
           `Edit(${gitBashCwd}/${pattern})`,
         );
+        if (gitBashCwdNoMnt) {
+          result.push(`Edit(${gitBashCwdNoMnt}/${pattern})`);
+        }
         break;
       }
     }

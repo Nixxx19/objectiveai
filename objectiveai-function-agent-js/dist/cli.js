@@ -415,6 +415,7 @@ function allowedTools(tools) {
   const slashCwd = getSlashCwd();
   const backslashCwd = getBackslashCwd();
   const gitBashCwd = getGitBashCwd();
+  const gitBashCwdNoMnt = gitBashCwd.startsWith("/mnt") ? gitBashCwd.slice(4) : null;
   const result = [
     "Bash(ls*)",
     "Bash(cd)",
@@ -440,6 +441,12 @@ function allowedTools(tools) {
           `Bash(cd ${backslashCwd} && npx ts-node ${script})`,
           `Bash(cd ${gitBashCwd} && npx ts-node ${script})`
         );
+        if (gitBashCwdNoMnt) {
+          result.push(
+            `Bash(cd ${gitBashCwdNoMnt} && ts-node ${script})`,
+            `Bash(cd ${gitBashCwdNoMnt} && npx ts-node ${script})`
+          );
+        }
         break;
       }
       case "write-edit": {
@@ -457,6 +464,12 @@ function allowedTools(tools) {
           `Write(${backslashCwd}\\${backslashFile})`,
           `Write(${gitBashCwd}/${file})`
         );
+        if (gitBashCwdNoMnt) {
+          result.push(
+            `Edit(${gitBashCwdNoMnt}/${file})`,
+            `Write(${gitBashCwdNoMnt}/${file})`
+          );
+        }
         break;
       }
       case "edit-glob": {
@@ -469,6 +482,9 @@ function allowedTools(tools) {
           `Edit(${backslashCwd}\\${backslashPattern})`,
           `Edit(${gitBashCwd}/${pattern})`
         );
+        if (gitBashCwdNoMnt) {
+          result.push(`Edit(${gitBashCwdNoMnt}/${pattern})`);
+        }
         break;
       }
     }
