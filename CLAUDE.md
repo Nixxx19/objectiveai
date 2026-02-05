@@ -14,7 +14,9 @@ objectiveai/
 ├── objectiveai-api/                # API server (self-hostable, or import as library)
 ├── objectiveai-rs-wasm-js/         # WASM bindings for browser/Node.js
 ├── objectiveai-js/                 # TypeScript SDK (npm: objectiveai)
-└── objectiveai-web/                # Next.js web interface
+├── objectiveai-web/                # Next.js web interface (legacy, being replaced)
+├── objectiveai-web-new/            # Next.js web interface (active development)
+└── coding-agent-scratch/           # Scratch folder for testing SDK calls
 ```
 
 ## Core Concepts
@@ -87,6 +89,12 @@ Functions produce either:
 #### GitHub-Hosted Functions
 
 Functions are hosted on GitHub as `function.json` at repository root. Reference by `owner/repo` (optionally with commit SHA for immutability).
+
+**Important:** There is no server-side function creation. When a function is executed via the API (e.g., `Functions.Executions.create`), the server fetches `function.json` from the GitHub repository. Any execution that incurs usage causes the function to be indexed and discoverable via the list endpoint. This means anyone can create a function, publish it to GitHub, execute it via the API, and it becomes an indexed function.
+
+The `/functions/create` page in web-new is a **JSON builder/editor tool** that helps users construct `function.json` files to save to their own repositories—it does not create functions on the server.
+
+**Content Policy:** The service is 18+ only. Report functionality for inappropriate functions is planned for the future.
 
 ### Profiles
 
@@ -340,6 +348,8 @@ console.log(details.model); // "openai/gpt-4o"
 
 ## Web Interface (`objectiveai-web-new`)
 
+**`objectiveai-web-new` is fully replacing `objectiveai-web`.** Eventually web-new should contain all functionality from web. Reference web for patterns (auth, Stripe, etc.) but implement in web-new.
+
 ### Scope
 
 **UI/UX only.** Never modify files outside of `objectiveai-web-new/`. Backend is off-limits.
@@ -444,12 +454,20 @@ Note: Profiles list endpoint only returns identifiers. To get `description`/`cha
 
 ### Authentication
 
-OAuth providers (Google, GitHub, X, Reddit) via standard auth provider. Email sign-in/sign-up temporarily disabled.
+OAuth providers (Google, GitHub, X, Reddit) via NextAuth. Auth is fully functional—reference `objectiveai-web` for implementation patterns:
+- Auth route: `app/api/auth/[...nextauth]/route.ts`
+- Provider module: `lib/provider.ts` (token session management with refresh logic)
+- Auth context: `contexts/AuthContext.tsx`
+- Common patterns: See `openAi` function in web's `Common.tsx` for SDK client initialization with auth
+
+**Anonymous execution:** Backend provides ~5¢ free credit for anonymous users. To show remaining credits, call `Auth.Credits.retrieve(client)` with the SDK.
+
+**No user tiers:** There are no free/pro/enterprise tiers. All users have the same access level.
 
 ### Disabled Features
 
-- **Purchase Credits** button disabled until payment integration exists
-- **File uploads** disabled pending function expression support
+- **Purchase Credits** button disabled until Stripe integration is migrated from `objectiveai-web`
+- **Profile training** endpoint returns 501 (backend pending)—keep UI with "coming soon" messaging
 
 ### Web-New Current State (~80% Complete)
 
@@ -462,9 +480,10 @@ OAuth providers (Google, GitHub, X, Reddit) via standard auth provider. Email si
 - `/sdk-first`, `/vibe-native` - Onboarding guides
 
 **Partial/Incomplete:**
-- `/account/keys` - API keys (`BYPASS_AUTH = true` for dev)
+- `/account/keys` - API keys management
+- `/account/credits` - Credit balance (view-only, purchase pending Stripe migration)
 - `/functions/[slug]`, `/ensembles/[id]`, `/ensemble-llms/[id]` - Detail pages
-- Payment integration, real OAuth, file uploads
+- Stripe payment integration (migrate from `objectiveai-web`)
 
 ### Key Web-New Files
 
@@ -473,7 +492,9 @@ OAuth providers (Google, GitHub, X, Reddit) via standard auth provider. Email si
 | `app/globals.css` | Design system (831 lines) |
 | `components/AppShell.tsx` | Navigation, theme toggle, mobile menu |
 | `lib/objectiveai.ts` | SDK wrapper with dev defaults (`from_cache: true`, `from_rng: true`) |
-| `contexts/AuthContext.tsx` | Auth provider (placeholder stubs) |
+| `lib/provider.ts` | Token session management with OAuth refresh logic |
+| `contexts/AuthContext.tsx` | Auth provider with NextAuth integration |
+| `app/api/auth/[...nextauth]/route.ts` | NextAuth route (Google, GitHub, X, Reddit) |
 | `planning/` | Wireframes, moodboards, design guidelines |
 
 ---
@@ -615,6 +636,8 @@ For vector functions, enables tournament-style ranking:
 5. Repeat for N rounds (default 3)
 6. Average scores across rounds
 
+**Note:** Swiss system strategy is handled entirely server-side. Client code handles responses from both strategies identically—no UI configuration needed.
+
 ---
 
 ## Web-New Feature Gap Audit
@@ -642,7 +665,7 @@ For vector functions, enables tournament-style ranking:
 | File Uploads | Complete | Removed `textOnly` restriction from ArrayInput |
 | Ensemble LLM Creation | Complete | `/ensemble-llms/create` with WASM validation |
 | Ensemble Creation | Complete | `/ensembles/create` with WASM validation |
-| Function Definition Editor | Complete | `/functions/create` with task builder, expressions |
+| Function JSON Builder | Complete | `/functions/create` - JSON editor for creating `function.json` files (not server-side creation) |
 | Profile Training UI | Complete | `/profiles/train` (backend returns 501 - coming soon) |
 | WASM Validation | Complete | `lib/wasm-validation.ts` for real-time ID computation |
 
@@ -679,9 +702,18 @@ Module loads gracefully - shows "Enter model to see ID" when WASM unavailable.
 
 ### Remaining Gaps
 
-- Profile training backend integration (endpoint returns 501)
-- Payment integration for credits purchase
-- Real OAuth (currently using `BYPASS_AUTH = true`)
+- Profile training backend integration (endpoint returns 501—keep UI with "coming soon")
+- Stripe payment integration (migrate from `objectiveai-web/src/components/account/credits/Credits.tsx`)
+- Credits display showing remaining balance via `Auth.Credits.retrieve`
+
+### Stripe Integration Notes
+
+Reference `objectiveai-web/src/components/account/credits/Credits.tsx` for the complete Stripe implementation:
+- Uses `@stripe/stripe-js` and `@stripe/react-stripe-js`
+- Customer session management via `/stripe/customer` endpoint
+- Payment intent creation via `/stripe/payment_intent` endpoint
+- **Important:** 10-second delay after user sets billing address before payment can be computed (429 rate limit with retry)
+- Use `fetch` client-side for Stripe endpoints—these are NOT in the SDK
 
 ---
 
@@ -695,9 +727,19 @@ When asked to "standardize" or "apply patterns from X to Y", preserve existing f
 
 After declaring work "complete" on multi-page tasks, enumerate all affected pages and verify each one was touched before finishing.
 
+### Testing Guidelines
+
+- **No network-hitting tests:** Tests should not hit the backend API directly
+- Tests should mock API responses or use local test data
+- Focus on component rendering, user interactions, and state management
+
 ---
 
 ## Development Workflow
+
+### SDK Testing
+
+Use `coding-agent-scratch/` folder for testing SDK calls and exploring API behavior. Create test scripts to verify CORS, client-side SDK usage, and API responses.
 
 ### Merging from Main
 
