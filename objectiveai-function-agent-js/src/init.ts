@@ -30,7 +30,7 @@ function initializeGit(): void {
   console.log("Initializing git repository...");
   execLog("git init");
   execLog(
-    "git submodule add -b function-agent-js https://github.com/ObjectiveAI/objectiveai objectiveai",
+    "git submodule add https://github.com/ObjectiveAI/objectiveai objectiveai",
   );
   execLog("git submodule update --init --recursive");
 }
