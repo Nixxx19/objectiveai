@@ -403,12 +403,12 @@ export type FunctionType = "scalar.function" | "vector.function";
 /**
  * A remote function reference.
  */
-export interface FunctionRef extends GitHubRef {}
+export type FunctionRef = GitHubRef;
 
 /**
  * A remote profile reference.
  */
-export interface ProfileRef extends GitHubRef {}
+export type ProfileRef = GitHubRef;
 
 /**
  * Expression type for JMESPath or Starlark expressions.
@@ -648,12 +648,12 @@ export interface ListResponse<T> {
 /**
  * Function list item (returned from /api/functions).
  */
-export interface FunctionListItem extends GitHubRef {}
+export type FunctionListItem = GitHubRef;
 
 /**
  * Profile list item (returned from /api/profiles).
  */
-export interface ProfileListItem extends GitHubRef {}
+export type ProfileListItem = GitHubRef;
 
 /**
  * Ensemble list item (returned from /api/ensembles).

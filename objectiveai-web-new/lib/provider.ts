@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-namespace */
 import { Mutex } from "async-mutex";
 import { DefaultSession, Session } from "next-auth";
 import { getSession } from "next-auth/react";

@@ -138,7 +138,7 @@ export default function LegalPage() {
 
                 <div style={sectionStyle}>
                   <p style={paragraphStyle}>
-                    Welcome to Objective Artificial Intelligence, Inc. ("ObjectiveAI," "we," "our," or "us"). These Terms of Service ("Terms") govern your access to and use of our API and website (together, the "Service"). Please read them carefully. By accessing or using the Service, you agree to be bound by these Terms and our Privacy Policy. If you do not agree, you may not use the Service.
+                    Welcome to Objective Artificial Intelligence, Inc. (&ldquo;ObjectiveAI,&rdquo; &ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;). These Terms of Service (&ldquo;Terms&rdquo;) govern your access to and use of our API and website (together, the &ldquo;Service&rdquo;). Please read them carefully. By accessing or using the Service, you agree to be bound by these Terms and our Privacy Policy. If you do not agree, you may not use the Service.
                   </p>
                 </div>
 
@@ -196,7 +196,7 @@ export default function LegalPage() {
                 <div style={sectionStyle}>
                   <h4 style={headingStyle}>7. Service Availability</h4>
                   <p style={paragraphStyle}>
-                    We strive to maintain reliable access but do not guarantee uptime. Service availability may depend on upstream providers. The Service is provided "as is" and "as available."
+                    We strive to maintain reliable access but do not guarantee uptime. Service availability may depend on upstream providers. The Service is provided &ldquo;as is&rdquo; and &ldquo;as available.&rdquo;
                   </p>
                 </div>
 
@@ -210,8 +210,8 @@ export default function LegalPage() {
                 <div style={sectionStyle}>
                   <h4 style={headingStyle}>9. Disclaimers and Limitation of Liability</h4>
                   <ul style={listStyle}>
-                    <li><strong>Disclaimers:</strong> The Service is provided "as is" without warranties of any kind, express or implied, including fitness for a particular purpose or non-infringement.</li>
-                    <li><strong>Liability Cap:</strong> To the maximum extent permitted by law, ObjectiveAI's total liability for any claim is limited to the greater of: (a) the amount you paid us in the 12 months prior to the event giving rise to the claim, or (b) $100.</li>
+                    <li><strong>Disclaimers:</strong> The Service is provided &ldquo;as is&rdquo; without warranties of any kind, express or implied, including fitness for a particular purpose or non-infringement.</li>
+                    <li><strong>Liability Cap:</strong> To the maximum extent permitted by law, ObjectiveAI&apos;s total liability for any claim is limited to the greater of: (a) the amount you paid us in the 12 months prior to the event giving rise to the claim, or (b) $100.</li>
                   </ul>
                 </div>
 
@@ -240,7 +240,7 @@ export default function LegalPage() {
                 <div style={sectionStyle}>
                   <h4 style={headingStyle}>13. Changes to These Terms</h4>
                   <p style={paragraphStyle}>
-                    We may update these Terms from time to time. Updated versions will be posted on our website with a new "Last Updated" date. Continued use of the Service after updates constitutes acceptance of the revised Terms.
+                    We may update these Terms from time to time. Updated versions will be posted on our website with a new &ldquo;Last Updated&rdquo; date. Continued use of the Service after updates constitutes acceptance of the revised Terms.
                   </p>
                 </div>
 
@@ -333,7 +333,7 @@ export default function LegalPage() {
 
                 <div style={sectionStyle}>
                   <p style={paragraphStyle}>
-                    Objective Artificial Intelligence, Inc. ("ObjectiveAI," "we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our API and website (together, the "Service"). By using our Service, you agree to the practices described in this policy. If you do not agree, you may not use the Service.
+                    Objective Artificial Intelligence, Inc. (&ldquo;ObjectiveAI,&rdquo; &ldquo;we,&rdquo; &ldquo;our,&rdquo; or &ldquo;us&rdquo;) is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our API and website (together, the &ldquo;Service&rdquo;). By using our Service, you agree to the practices described in this policy. If you do not agree, you may not use the Service.
                   </p>
                 </div>
 
@@ -432,7 +432,7 @@ export default function LegalPage() {
                 <div style={sectionStyle}>
                   <h4 style={headingStyle}>9. Changes</h4>
                   <p style={paragraphStyle}>
-                    We may update this Privacy Policy from time to time. Updates will be posted on this page with a new "Last Updated" date. Continued use of the Service means you accept the updated policy.
+                    We may update this Privacy Policy from time to time. Updates will be posted on this page with a new &ldquo;Last Updated&rdquo; date. Continued use of the Service means you accept the updated policy.
                   </p>
                 </div>
 
