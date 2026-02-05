@@ -46,6 +46,9 @@ import essayTasksMd from "../assets/ESSAY_TASKS.md.txt";
 // Sub-functions assets
 import subFunctionsGitignore from "../assets/sub_functions/.gitignore.txt";
 
+// Cloned functions assets
+import clonedFunctionsGitignore from "../assets/cloned_functions/.gitignore.txt";
+
 // Inputs asset
 import inputsJson from "../assets/inputs.json.txt";
 
@@ -78,6 +81,7 @@ export const assets: Record<string, string> = {
   "plans/.gitkeep": plansGitkeep,
   "logs/.gitignore": logsGitignore,
   "sub_functions/.gitignore": subFunctionsGitignore,
+  "cloned_functions/.gitignore": clonedFunctionsGitignore,
   "inputs.json": inputsJson,
   "ESSAY.md": essayMd,
   "ESSAY_TASKS.md": essayTasksMd,

@@ -182,7 +182,7 @@ Expressions receive a single object with these fields:
 
 ### Inspecting Sub-Functions
 If the function references sub-functions (tasks with type \`scalar.function\` or \`vector.function\`):
-- Run \`ts-node cloneSubFunctions.ts\` to clone them to \`sub_functions/<owner>/<repository>/<commit>/\`
+- Run \`ts-node cloneSubFunctions.ts\` to clone them to \`cloned_functions/<owner>/<repository>/<commit>/\`
 - Run \`ts-node cloneSubFunctions.ts --latest\` to clone the latest version instead
 - Read their \`function.json\` and source files to understand how they work
 - This can be used to fetch specific functions from GitHub
