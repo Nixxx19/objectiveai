@@ -26,13 +26,36 @@ export default function ProfileTrainPage() {
   const [trainingExamples, setTrainingExamples] = useState<TrainingExample[]>([
     { input: {}, expectedOutput: 0.5 }
   ]);
+  const [exampleJsonErrors, setExampleJsonErrors] = useState<{ [key: number]: string | null }>({});
 
   // Training parameters
   const [learningRate, setLearningRate] = useState("0.01");
   const [iterations, setIterations] = useState("100");
 
+  // Validation errors
+  const [learningRateError, setLearningRateError] = useState<string | null>(null);
+  const [iterationsError, setIterationsError] = useState<string | null>(null);
+
   // UI state
   const [showJsonPreview, setShowJsonPreview] = useState(false);
+
+  // Validate learning rate
+  const validateLearningRate = (value: string): string | null => {
+    const num = parseFloat(value);
+    if (isNaN(num)) return "Must be a valid number";
+    if (num < 0.0001) return "Minimum value is 0.0001";
+    if (num > 1) return "Maximum value is 1";
+    return null;
+  };
+
+  // Validate iterations
+  const validateIterations = (value: string): string | null => {
+    const num = parseInt(value, 10);
+    if (isNaN(num)) return "Must be a valid integer";
+    if (num < 10) return "Minimum value is 10";
+    if (num > 10000) return "Maximum value is 10000";
+    return null;
+  };
 
   // Fetch available functions
   useEffect(() => {
@@ -89,6 +112,19 @@ export default function ProfileTrainPage() {
   // Remove training example
   const removeExample = (index: number) => {
     setTrainingExamples(trainingExamples.filter((_, i) => i !== index));
+    // Remove the error for this index and shift remaining errors
+    setExampleJsonErrors((prev) => {
+      const newErrors: { [key: number]: string | null } = {};
+      Object.keys(prev).forEach((key) => {
+        const keyNum = parseInt(key, 10);
+        if (keyNum < index) {
+          newErrors[keyNum] = prev[keyNum];
+        } else if (keyNum > index) {
+          newErrors[keyNum - 1] = prev[keyNum];
+        }
+      });
+      return newErrors;
+    });
   };
 
   // Update example input (as JSON string)
@@ -96,9 +132,14 @@ export default function ProfileTrainPage() {
     const updated = [...trainingExamples];
     try {
       updated[index] = { ...updated[index], input: JSON.parse(jsonString) };
+      setExampleJsonErrors((prev) => ({ ...prev, [index]: null }));
     } catch {
       // Invalid JSON, store as raw for editing
       updated[index] = { ...updated[index], input: { _raw: jsonString } };
+      setExampleJsonErrors((prev) => ({
+        ...prev,
+        [index]: jsonString.trim().length > 0 ? "Invalid JSON format" : null,
+      }));
     }
     setTrainingExamples(updated);
   };
@@ -263,13 +304,16 @@ export default function ProfileTrainPage() {
 
               <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
                 <div>
-                  <label style={{
-                    display: "block",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    marginBottom: "8px",
-                    color: "var(--text)",
-                  }}>
+                  <label
+                    htmlFor="learning-rate"
+                    style={{
+                      display: "block",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      marginBottom: "8px",
+                      color: "var(--text)",
+                    }}
+                  >
                     Learning Rate
                     <span style={{
                       fontWeight: 400,
@@ -279,27 +323,57 @@ export default function ProfileTrainPage() {
                       Step size for weight updates
                     </span>
                   </label>
-                  <div className="aiTextField">
+                  <div
+                    className="aiTextField"
+                    style={{
+                      borderColor: learningRateError ? "var(--color-error)" : undefined,
+                    }}
+                  >
                     <input
+                      id="learning-rate"
                       type="number"
                       step="0.001"
                       min="0.0001"
                       max="1"
                       value={learningRate}
-                      onChange={(e) => setLearningRate(e.target.value)}
+                      onChange={(e) => {
+                        setLearningRate(e.target.value);
+                        setLearningRateError(validateLearningRate(e.target.value));
+                      }}
+                      onBlur={(e) => setLearningRateError(validateLearningRate(e.target.value))}
                       placeholder="0.01"
+                      aria-invalid={!!learningRateError}
+                      aria-describedby={learningRateError ? "learning-rate-error" : undefined}
+                      style={{
+                        borderColor: learningRateError ? "var(--color-error)" : undefined,
+                      }}
                     />
                   </div>
+                  {learningRateError && (
+                    <p
+                      id="learning-rate-error"
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--color-error)",
+                        marginTop: "6px",
+                      }}
+                    >
+                      {learningRateError}
+                    </p>
+                  )}
                 </div>
 
                 <div>
-                  <label style={{
-                    display: "block",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    marginBottom: "8px",
-                    color: "var(--text)",
-                  }}>
+                  <label
+                    htmlFor="iterations"
+                    style={{
+                      display: "block",
+                      fontSize: "14px",
+                      fontWeight: 600,
+                      marginBottom: "8px",
+                      color: "var(--text)",
+                    }}
+                  >
                     Iterations
                     <span style={{
                       fontWeight: 400,
@@ -309,17 +383,44 @@ export default function ProfileTrainPage() {
                       Training rounds
                     </span>
                   </label>
-                  <div className="aiTextField">
+                  <div
+                    className="aiTextField"
+                    style={{
+                      borderColor: iterationsError ? "var(--color-error)" : undefined,
+                    }}
+                  >
                     <input
+                      id="iterations"
                       type="number"
                       step="10"
                       min="10"
                       max="10000"
                       value={iterations}
-                      onChange={(e) => setIterations(e.target.value)}
+                      onChange={(e) => {
+                        setIterations(e.target.value);
+                        setIterationsError(validateIterations(e.target.value));
+                      }}
+                      onBlur={(e) => setIterationsError(validateIterations(e.target.value))}
                       placeholder="100"
+                      aria-invalid={!!iterationsError}
+                      aria-describedby={iterationsError ? "iterations-error" : undefined}
+                      style={{
+                        borderColor: iterationsError ? "var(--color-error)" : undefined,
+                      }}
                     />
                   </div>
+                  {iterationsError && (
+                    <p
+                      id="iterations-error"
+                      style={{
+                        fontSize: "12px",
+                        color: "var(--color-error)",
+                        marginTop: "6px",
+                      }}
+                    >
+                      {iterationsError}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -393,17 +494,26 @@ export default function ProfileTrainPage() {
 
                   {/* Input */}
                   <div style={{ marginBottom: "12px" }}>
-                    <label style={{
-                      display: "block",
-                      fontSize: "12px",
-                      fontWeight: 500,
-                      marginBottom: "6px",
-                      color: "var(--text-muted)",
-                    }}>
+                    <label
+                      htmlFor={`example-input-${index}`}
+                      style={{
+                        display: "block",
+                        fontSize: "12px",
+                        fontWeight: 500,
+                        marginBottom: "6px",
+                        color: "var(--text-muted)",
+                      }}
+                    >
                       Input (JSON)
                     </label>
-                    <div className="aiTextField">
+                    <div
+                      className="aiTextField"
+                      style={{
+                        borderColor: exampleJsonErrors[index] ? "var(--color-error)" : undefined,
+                      }}
+                    >
                       <textarea
+                        id={`example-input-${index}`}
                         value={formatInputForDisplay(example.input)}
                         onChange={(e) => updateExampleInput(index, e.target.value)}
                         placeholder='{"text": "example input"}'
@@ -411,9 +521,24 @@ export default function ProfileTrainPage() {
                         style={{
                           fontFamily: "monospace",
                           fontSize: "13px",
+                          borderColor: exampleJsonErrors[index] ? "var(--color-error)" : undefined,
                         }}
+                        aria-invalid={!!exampleJsonErrors[index]}
+                        aria-describedby={exampleJsonErrors[index] ? `example-error-${index}` : undefined}
                       />
                     </div>
+                    {exampleJsonErrors[index] && (
+                      <p
+                        id={`example-error-${index}`}
+                        style={{
+                          fontSize: "12px",
+                          color: "var(--color-error)",
+                          marginTop: "6px",
+                        }}
+                      >
+                        {exampleJsonErrors[index]}
+                      </p>
+                    )}
                   </div>
 
                   {/* Expected Output */}

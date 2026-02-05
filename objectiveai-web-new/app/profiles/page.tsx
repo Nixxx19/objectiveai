@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useResponsive } from "../../hooks/useResponsive";
 import { NAV_HEIGHT_CALCULATION_DELAY_MS } from "../../lib/constants";
+import { LoadingSpinner, ErrorAlert, EmptyState } from "../../components/ui";
 
 interface ProfileItem {
   owner: string;
@@ -297,60 +298,19 @@ export default function ProfilesPage() {
             )}
 
             {isLoading && (
-              <div style={{
-                textAlign: 'center',
-                padding: '60px 20px',
-                color: 'var(--text-muted)',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  border: '3px solid var(--border)',
-                  borderTopColor: 'var(--accent)',
-                  borderRadius: '50%',
-                  margin: '0 auto 16px',
-                  animation: 'spin 1s linear infinite',
-                }} />
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                <p>Loading profiles...</p>
-              </div>
+              <LoadingSpinner fullPage message="Loading profiles..." />
             )}
 
             {error && !isLoading && (
-              <div style={{
-                textAlign: 'center',
-                padding: '60px 20px',
-                color: 'var(--text-muted)',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <p style={{ color: 'var(--color-error)', marginBottom: '8px' }}>Failed to load profiles</p>
-                <p style={{ fontSize: '14px' }}>{error}</p>
-              </div>
+              <ErrorAlert title="Failed to load profiles" message={error} />
             )}
 
             {!isLoading && !error && filteredProfiles.length === 0 && (
-              <div style={{
-                textAlign: 'center',
-                padding: '60px 20px',
-                color: 'var(--text-muted)',
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                {searchQuery || selectedOwner !== "All"
+              <EmptyState
+                message={searchQuery || selectedOwner !== "All"
                   ? "No profiles match your criteria"
                   : "No profiles found"}
-              </div>
+              />
             )}
           </div>
         </div>

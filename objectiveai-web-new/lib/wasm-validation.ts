@@ -5,26 +5,172 @@
  * Provides zero-cost validation and ID computation without server round-trips.
  */
 
-// WASM module instance
-let wasmModule: WasmModule | null = null;
-let loadingPromise: Promise<WasmModule | null> | null = null;
+// ============================================================================
+// Type Definitions
+// ============================================================================
 
-interface WasmModule {
-  validateEnsembleLlm: (llm: unknown) => unknown;
-  validateEnsemble: (ensemble: unknown) => unknown;
-  validateFunctionInput: (func: unknown, input: unknown) => boolean | null;
-  compileFunctionTasks: (func: unknown, input: unknown) => unknown;
-  compileFunctionOutput: (func: unknown, input: unknown, taskOutputs: unknown) => unknown;
-  compileFunctionInputMaps: (func: unknown, input: unknown) => unknown | null;
-  compileFunctionInputSplit: (func: unknown, input: unknown) => unknown | null;
-  promptId: (prompt: unknown) => string;
+/**
+ * Ensemble LLM configuration - a fully-specified single LLM with parameters.
+ * Content-addressed: IDs are computed deterministically from the definition.
+ */
+export interface EnsembleLlmConfig {
+  model: string;
+  temperature?: number;
+  top_p?: number;
+  top_logprobs?: number;
+  frequency_penalty?: number;
+  presence_penalty?: number;
+  prefix_messages?: ChatMessage[];
+  suffix_messages?: ChatMessage[];
+  output_mode?: "instruction" | "json_schema" | "tool_call";
+  [key: string]: unknown;
 }
 
-interface ValidationResult<T> {
+/**
+ * Ensemble LLM with computed ID
+ */
+export interface EnsembleLlmWithId extends EnsembleLlmConfig {
+  id: string;
+}
+
+/**
+ * Chat message format
+ */
+export interface ChatMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+/**
+ * Entry in an Ensemble - references an Ensemble LLM by ID with a vote count
+ */
+export interface EnsembleLlmEntry {
+  ensemble_llm: string;
+  count: number;
+}
+
+/**
+ * Ensemble configuration - collection of Ensemble LLMs used together for voting
+ */
+export interface EnsembleConfig {
+  ensemble_llms: EnsembleLlmEntry[];
+}
+
+/**
+ * Ensemble with computed ID
+ */
+export interface EnsembleWithId extends EnsembleConfig {
+  id: string;
+}
+
+/**
+ * Function type - scalar (single score) or vector (array of scores)
+ */
+export type FunctionType = "scalar.function" | "vector.function";
+
+/**
+ * Task type - vector completion or nested function call
+ */
+export type TaskType = "vector.completion" | "scalar.function" | "vector.function";
+
+/**
+ * JMESPath or Starlark expression
+ */
+export type Expression =
+  | { $jmespath: string }
+  | { $starlark: string }
+  | string
+  | number
+  | boolean
+  | null;
+
+/**
+ * Function task definition
+ */
+export interface FunctionTask {
+  type: TaskType;
+  skip?: Expression;
+  map?: number;
+  input?: Expression;
+  output?: Expression;
+  prompt?: Expression;
+  responses?: Expression;
+  ensemble?: Expression;
+  profile?: Expression;
+  function?: {
+    owner: string;
+    repository: string;
+    commit?: string;
+  };
+  [key: string]: unknown;
+}
+
+/**
+ * Function definition
+ */
+export interface FunctionConfig {
+  type: FunctionType;
+  description?: string;
+  input_schema?: Record<string, unknown>;
+  input_split?: Expression;
+  input_maps?: Expression[];
+  output_length?: number;
+  tasks: FunctionTask[];
+  output?: Expression;
+}
+
+/**
+ * Compiled task output
+ */
+export interface CompiledTask {
+  type: TaskType;
+  prompt?: unknown;
+  responses?: unknown[];
+  ensemble?: unknown;
+  profile?: unknown;
+  function?: {
+    owner: string;
+    repository: string;
+    commit?: string;
+  };
+  input?: unknown;
+}
+
+/**
+ * Compiled function output result
+ */
+export interface CompiledFunctionOutput {
+  output: number | number[];
+  valid: boolean;
+}
+
+/**
+ * Generic validation result with typed data
+ */
+export interface ValidationResult<T> {
   success: boolean;
   data?: T;
   error?: string;
 }
+
+// ============================================================================
+// WASM Module Interface
+// ============================================================================
+
+interface WasmModule {
+  validateEnsembleLlm: (llm: EnsembleLlmConfig) => EnsembleLlmWithId;
+  validateEnsemble: (ensemble: EnsembleConfig) => EnsembleWithId;
+  validateFunctionInput: (func: FunctionConfig, input: unknown) => boolean | null;
+  compileFunctionTasks: (func: FunctionConfig, input: unknown) => CompiledTask[];
+  compileFunctionOutput: (func: FunctionConfig, input: unknown, taskOutputs: unknown[]) => CompiledFunctionOutput;
+  compileFunctionInputMaps: (func: FunctionConfig, input: unknown) => unknown[][] | null;
+  compileFunctionInputSplit: (func: FunctionConfig, input: unknown) => unknown[] | null;
+  promptId: (prompt: ChatMessage[]) => string;
+}
+
+// WASM module instance
+let wasmModule: WasmModule | null = null;
+let loadingPromise: Promise<WasmModule | null> | null = null;
 
 /**
  * Load the WASM module dynamically.
@@ -74,10 +220,13 @@ export function isWasmAvailable(): boolean {
 /**
  * Validate an Ensemble LLM and compute its content-addressed ID.
  *
- * @param llm - The Ensemble LLM configuration object
+ * Accepts any object with a `model` field. Additional fields (temperature, top_p, etc.)
+ * will be validated by the WASM module.
+ *
+ * @param llm - The Ensemble LLM configuration object (must have at least a `model` field)
  * @returns Validation result with the LLM including computed ID, or error
  */
-export async function validateEnsembleLlm(llm: unknown): Promise<ValidationResult<{ id: string } & Record<string, unknown>>> {
+export async function validateEnsembleLlm<T extends { model: string }>(llm: T): Promise<ValidationResult<EnsembleLlmWithId>> {
   const wasm = await loadWasm();
 
   if (!wasm) {
@@ -88,8 +237,8 @@ export async function validateEnsembleLlm(llm: unknown): Promise<ValidationResul
   }
 
   try {
-    const result = wasm.validateEnsembleLlm(llm);
-    return { success: true, data: result as { id: string } & Record<string, unknown> };
+    const result = wasm.validateEnsembleLlm(llm as EnsembleLlmConfig);
+    return { success: true, data: result };
   } catch (error) {
     return {
       success: false,
@@ -101,10 +250,15 @@ export async function validateEnsembleLlm(llm: unknown): Promise<ValidationResul
 /**
  * Validate an Ensemble and compute its content-addressed ID.
  *
+ * Accepts any object with an `ensemble_llms` array. Each entry must have
+ * `ensemble_llm` (string) and `count` (number) fields.
+ *
  * @param ensemble - The Ensemble configuration object
  * @returns Validation result with the Ensemble including computed ID, or error
  */
-export async function validateEnsemble(ensemble: unknown): Promise<ValidationResult<{ id: string } & Record<string, unknown>>> {
+export async function validateEnsemble<T extends { ensemble_llms: Array<{ ensemble_llm: string; count: number }> }>(
+  ensemble: T
+): Promise<ValidationResult<EnsembleWithId>> {
   const wasm = await loadWasm();
 
   if (!wasm) {
@@ -115,8 +269,8 @@ export async function validateEnsemble(ensemble: unknown): Promise<ValidationRes
   }
 
   try {
-    const result = wasm.validateEnsemble(ensemble);
-    return { success: true, data: result as { id: string } & Record<string, unknown> };
+    const result = wasm.validateEnsemble(ensemble as EnsembleConfig);
+    return { success: true, data: result };
   } catch (error) {
     return {
       success: false,
@@ -133,7 +287,7 @@ export async function validateEnsemble(ensemble: unknown): Promise<ValidationRes
  * @returns true if valid, false if invalid, null for inline functions
  */
 export async function validateFunctionInput(
-  func: unknown,
+  func: FunctionConfig,
   input: unknown
 ): Promise<ValidationResult<boolean | null>> {
   const wasm = await loadWasm();
@@ -164,9 +318,9 @@ export async function validateFunctionInput(
  * @returns Compiled tasks array
  */
 export async function compileFunctionTasks(
-  func: unknown,
+  func: FunctionConfig,
   input: unknown
-): Promise<ValidationResult<unknown[]>> {
+): Promise<ValidationResult<CompiledTask[]>> {
   const wasm = await loadWasm();
 
   if (!wasm) {
@@ -178,7 +332,7 @@ export async function compileFunctionTasks(
 
   try {
     const result = wasm.compileFunctionTasks(func, input);
-    return { success: true, data: result as unknown[] };
+    return { success: true, data: result };
   } catch (error) {
     return {
       success: false,
@@ -196,10 +350,10 @@ export async function compileFunctionTasks(
  * @returns Compiled output with validation status
  */
 export async function compileFunctionOutput(
-  func: unknown,
+  func: FunctionConfig,
   input: unknown,
-  taskOutputs: unknown
-): Promise<ValidationResult<{ output: number | number[]; valid: boolean }>> {
+  taskOutputs: unknown[]
+): Promise<ValidationResult<CompiledFunctionOutput>> {
   const wasm = await loadWasm();
 
   if (!wasm) {
@@ -211,7 +365,7 @@ export async function compileFunctionOutput(
 
   try {
     const result = wasm.compileFunctionOutput(func, input, taskOutputs);
-    return { success: true, data: result as { output: number | number[]; valid: boolean } };
+    return { success: true, data: result };
   } catch (error) {
     return {
       success: false,
@@ -228,7 +382,7 @@ export async function compileFunctionOutput(
  * @returns Compiled input maps (2D array) or null if no input_maps
  */
 export async function compileFunctionInputMaps(
-  func: unknown,
+  func: FunctionConfig,
   input: unknown
 ): Promise<ValidationResult<unknown[][] | null>> {
   const wasm = await loadWasm();
@@ -242,7 +396,7 @@ export async function compileFunctionInputMaps(
 
   try {
     const result = wasm.compileFunctionInputMaps(func, input);
-    return { success: true, data: result as unknown[][] | null };
+    return { success: true, data: result };
   } catch (error) {
     return {
       success: false,
@@ -262,7 +416,7 @@ export async function compileFunctionInputMaps(
  * @returns Array of split inputs, or null for scalar functions or functions without input_split
  */
 export async function compileFunctionInputSplit(
-  func: unknown,
+  func: FunctionConfig,
   input: unknown
 ): Promise<ValidationResult<unknown[] | null>> {
   const wasm = await loadWasm();
@@ -276,7 +430,34 @@ export async function compileFunctionInputSplit(
 
   try {
     const result = wasm.compileFunctionInputSplit(func, input);
-    return { success: true, data: result as unknown[] | null };
+    return { success: true, data: result };
+  } catch (error) {
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : String(error)
+    };
+  }
+}
+
+/**
+ * Compute the content-addressed ID for a prompt (array of messages).
+ *
+ * @param prompt - Array of chat messages
+ * @returns The computed prompt ID
+ */
+export async function computePromptId(prompt: ChatMessage[]): Promise<ValidationResult<string>> {
+  const wasm = await loadWasm();
+
+  if (!wasm) {
+    return {
+      success: false,
+      error: "WASM validation not available"
+    };
+  }
+
+  try {
+    const result = wasm.promptId(prompt);
+    return { success: true, data: result };
   } catch (error) {
     return {
       success: false,

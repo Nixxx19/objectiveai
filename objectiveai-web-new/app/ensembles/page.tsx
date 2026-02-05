@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { NAV_HEIGHT_CALCULATION_DELAY_MS } from "../../lib/constants";
 import { useResponsive } from "../../hooks/useResponsive";
+import { LoadingSpinner, ErrorAlert, EmptyState } from "../../components/ui";
 
 interface EnsembleItem {
   id: string;
@@ -80,11 +81,40 @@ export default function EnsemblesPage() {
     <div className="page">
       <div className="containerWide">
         {/* Header */}
-        <div style={{ marginBottom: isMobile ? "24px" : "32px" }}>
-          <h1 className="heading2" style={{ marginBottom: "8px" }}>Ensembles</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: isMobile ? "15px" : "17px" }}>
-            Collections of Ensemble LLMs that vote together
-          </p>
+        <div style={{
+          marginBottom: isMobile ? "24px" : "32px",
+          display: "flex",
+          flexDirection: isMobile ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: isMobile ? "flex-start" : "flex-end",
+          gap: isMobile ? "16px" : "24px",
+        }}>
+          <div>
+            <h1 className="heading2" style={{ marginBottom: "8px" }}>Ensembles</h1>
+            <p style={{ color: "var(--text-muted)", fontSize: isMobile ? "15px" : "17px" }}>
+              Collections of Ensemble LLMs that vote together
+            </p>
+          </div>
+          <Link
+            href="/ensembles/create"
+            className="pillBtn"
+            style={{
+              padding: "12px 24px",
+              fontSize: "14px",
+              fontWeight: 600,
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              textDecoration: "none",
+              flexShrink: 0,
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Create New
+          </Link>
         </div>
 
         {/* Sticky Search Bar Row with Filter Button */}
@@ -249,58 +279,17 @@ export default function EnsemblesPage() {
             )}
 
             {isLoading && (
-              <div style={{
-                textAlign: 'center',
-                padding: '60px 20px',
-                color: 'var(--text-muted)',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  border: '3px solid var(--border)',
-                  borderTopColor: 'var(--accent)',
-                  borderRadius: '50%',
-                  margin: '0 auto 16px',
-                  animation: 'spin 1s linear infinite',
-                }} />
-                <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-                <p>Loading ensembles...</p>
-              </div>
+              <LoadingSpinner fullPage message="Loading ensembles..." />
             )}
 
             {error && !isLoading && (
-              <div style={{
-                textAlign: 'center',
-                padding: '60px 20px',
-                color: 'var(--text-muted)',
-                flex: 1,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                <p style={{ color: 'var(--color-error)', marginBottom: '8px' }}>Failed to load ensembles</p>
-                <p style={{ fontSize: '14px' }}>{error}</p>
-              </div>
+              <ErrorAlert title="Failed to load ensembles" message={error} />
             )}
 
             {!isLoading && !error && filteredEnsembles.length === 0 && (
-              <div style={{
-                textAlign: 'center',
-                padding: '60px 20px',
-                color: 'var(--text-muted)',
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                {searchQuery ? "No ensembles match your search" : "No ensembles found"}
-              </div>
+              <EmptyState
+                message={searchQuery ? "No ensembles match your search" : "No ensembles found"}
+              />
             )}
           </div>
         </div>

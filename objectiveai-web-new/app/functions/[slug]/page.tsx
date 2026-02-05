@@ -258,7 +258,25 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     computeSplitItems();
   }, [results?.output, results?.inputSnapshot, functionDetails]);
 
-  // Execute function via client-side SDK with streaming
+  /**
+   * Execute the function with streaming results.
+   *
+   * This function:
+   * 1. Gets an authenticated SDK client (or anonymous client for non-logged-in users)
+   * 2. Builds execution options including streaming, caching, and optional reasoning
+   * 3. Calls Functions.Executions.create with the selected profile
+   * 4. Processes streaming chunks, merging completions and tasks progressively
+   * 5. Updates UI state as chunks arrive for real-time feedback
+   *
+   * Chunk merging strategy:
+   * - `output`: Takes the latest value (replaced on each chunk)
+   * - `tasks`: Merged by index, with completions content concatenated
+   * - `usage`: Takes the latest value
+   * - `reasoning`: Concatenates content across chunks
+   *
+   * Error handling: Catches execution errors and displays them in the UI.
+   * The user can retry by clicking Execute again.
+   */
   const handleRun = async () => {
     const selectedProfile = availableProfiles[selectedProfileIndex];
     if (!functionDetails || !selectedProfile) return;

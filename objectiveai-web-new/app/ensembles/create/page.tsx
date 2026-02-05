@@ -12,6 +12,10 @@ interface EnsembleLlmEntry {
   count: number;
 }
 
+interface FieldError {
+  [key: string]: string | null;
+}
+
 // SVG Icons
 const PlusIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -50,6 +54,19 @@ export default function CreateEnsemblePage() {
   const [computedId, setComputedId] = useState<string | null>(null);
   const [validationError, setValidationError] = useState<string | null>(null);
   const [isValidating, setIsValidating] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<FieldError>({});
+
+  // Validate a single Ensemble LLM ID
+  const validateEnsembleLlmId = (value: string, entryId: string): string | null => {
+    if (value.trim().length === 0) return null; // Empty is OK, just not filled in yet
+    if (value.trim().length !== 22) {
+      return "Ensemble LLM ID must be exactly 22 characters";
+    }
+    if (!/^[a-zA-Z0-9]+$/.test(value.trim())) {
+      return "ID must contain only alphanumeric characters";
+    }
+    return null;
+  };
 
   // Load WASM on mount
   useEffect(() => {
@@ -146,6 +163,12 @@ export default function CreateEnsemblePage() {
           : e
       )
     );
+
+    // Validate field on change
+    if (field === "ensemble_llm") {
+      const error = validateEnsembleLlmId(String(value), id);
+      setFieldErrors((prev) => ({ ...prev, [id]: error }));
+    }
   };
 
   const copyToClipboard = async () => {
@@ -243,15 +266,41 @@ export default function CreateEnsemblePage() {
                     {/* Fields */}
                     <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px" }}>
                       {/* Ensemble LLM ID */}
-                      <div className="aiTextField">
+                      <div
+                        className="aiTextField"
+                        style={{
+                          borderColor: fieldErrors[entry.id] ? "var(--color-error)" : undefined,
+                        }}
+                      >
                         <input
                           type="text"
                           placeholder="Ensemble LLM ID (22 characters)"
                           value={entry.ensemble_llm}
                           onChange={(e) => updateEntry(entry.id, "ensemble_llm", e.target.value)}
-                          style={{ fontFamily: "monospace" }}
+                          onBlur={(e) => {
+                            const error = validateEnsembleLlmId(e.target.value, entry.id);
+                            setFieldErrors((prev) => ({ ...prev, [entry.id]: error }));
+                          }}
+                          style={{
+                            fontFamily: "monospace",
+                            borderColor: fieldErrors[entry.id] ? "var(--color-error)" : undefined,
+                          }}
+                          aria-invalid={!!fieldErrors[entry.id]}
+                          aria-describedby={fieldErrors[entry.id] ? `error-${entry.id}` : undefined}
                         />
                       </div>
+                      {fieldErrors[entry.id] && (
+                        <p
+                          id={`error-${entry.id}`}
+                          style={{
+                            fontSize: "12px",
+                            color: "var(--color-error)",
+                            marginTop: "2px",
+                          }}
+                        >
+                          {fieldErrors[entry.id]}
+                        </p>
+                      )}
 
                       {/* Count */}
                       <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
