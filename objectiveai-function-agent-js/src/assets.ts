@@ -48,6 +48,9 @@ import subFunctionsGitignore from "../assets/sub_functions/.gitignore.txt";
 // Cloned functions assets
 import clonedFunctionsGitignore from "../assets/cloned_functions/.gitignore.txt";
 
+// Agent functions assets
+import agentFunctionsGitignore from "../assets/agent_functions/.gitignore.txt";
+
 // Inputs asset
 import inputsJson from "../assets/inputs.json.txt";
 
@@ -80,6 +83,7 @@ export const assets: Record<string, string> = {
   "logs/.gitignore": logsGitignore,
   "sub_functions/.gitignore": subFunctionsGitignore,
   "cloned_functions/.gitignore": clonedFunctionsGitignore,
+  "agent_functions/.gitignore": agentFunctionsGitignore,
   "inputs.json": inputsJson,
   "ESSAY.md": essayMd,
   "ESSAY_TASKS.md": essayTasksMd,

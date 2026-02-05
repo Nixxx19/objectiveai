@@ -159,6 +159,9 @@ var gitignore_default3 = "*\r\n!.gitignore\r\n";
 // assets/cloned_functions/.gitignore.txt
 var gitignore_default4 = "*\r\n!.gitignore\r\n";
 
+// assets/agent_functions/.gitignore.txt
+var gitignore_default5 = "*\r\n!.gitignore\r\n";
+
 // assets/inputs.json.txt
 var inputs_json_default = "[]\r\n";
 
@@ -192,6 +195,7 @@ var assets = {
   "logs/.gitignore": gitignore_default2,
   "sub_functions/.gitignore": gitignore_default3,
   "cloned_functions/.gitignore": gitignore_default4,
+  "agent_functions/.gitignore": gitignore_default5,
   "inputs.json": inputs_json_default,
   "ESSAY.md": ESSAY_md_default,
   "ESSAY_TASKS.md": ESSAY_TASKS_md_default
