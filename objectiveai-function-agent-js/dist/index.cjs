@@ -2670,10 +2670,10 @@ function spawnApiServer(options = {}) {
         resolved = true;
         killApiProcess();
         reject(
-          new Error("Timeout: API server did not start within 300 seconds")
+          new Error("Timeout: API server did not start within 600 seconds")
         );
       }
-    }, 3e5);
+    }, 6e5);
     const onData = (data) => {
       const output = data.toString();
       logStream.write(output);
