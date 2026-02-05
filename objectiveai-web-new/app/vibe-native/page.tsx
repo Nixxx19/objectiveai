@@ -75,19 +75,23 @@ export default function VibeNativePage() {
   return (
     <div className="page">
       <div className="container">
-        {/* Header */}
-        <div style={{ marginBottom: '48px' }}>
-          <span className="tag" style={{ marginBottom: '12px', display: 'inline-block' }}>
-            No-Code Path
-          </span>
-          <h1 className="heading1" style={{ marginBottom: '12px' }}>
+        {/* Hero */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: isMobile ? '32px' : '40px',
+        }}>
+          <h1 style={{
+            fontSize: isMobile ? '28px' : '32px',
+            fontWeight: 700,
+            marginBottom: '8px',
+            color: 'var(--text)',
+          }}>
             Vibe-Native
           </h1>
           <p style={{
+            fontSize: isMobile ? '14px' : '16px',
             color: 'var(--text-muted)',
-            fontSize: '16px',
-            maxWidth: '600px',
-            lineHeight: 1.6,
+            lineHeight: 1.5,
           }}>
             Use ObjectiveAI functions without writing code. Try functions directly in the browser or use the Claude hyperprompt below.
           </p>
@@ -139,11 +143,7 @@ export default function VibeNativePage() {
 
         {/* Claude Hyperprompt */}
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{
-            fontSize: isMobile ? '18px' : '20px',
-            fontWeight: 600,
-            marginBottom: '12px',
-          }}>
+          <h2 className="heading2" style={{ marginBottom: '12px' }}>
             Claude Hyperprompt
           </h2>
           <p style={{

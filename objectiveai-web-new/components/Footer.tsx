@@ -79,12 +79,27 @@ export default function Footer() {
                   <Link href="/ensembles/create" className="footerLink">Create</Link>
                   <Link href="/ensemble-llms" className="footerLink">LLMs</Link>
                   <Link href="/ensemble-llms/create" className="footerLink">Create LLM</Link>
+                </div>
+              </div>
+
+              {/* GROUP 3: FREEFORM */}
+              <div style={{ textAlign: 'left' }}>
+                <Link href="/sdk-first" className="footerGroupTitle">
+                  Freeform
+                </Link>
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '3px',
+                }}>
+                  <Link href="/sdk-first" className="footerLink">SDK-First</Link>
+                  <Link href="/vibe-native" className="footerLink">Vibe-Native</Link>
                   <Link href="/chat" className="footerLink">Chat</Link>
                   <Link href="/vector" className="footerLink">Vector</Link>
                 </div>
               </div>
 
-              {/* GROUP 3: INFORMATION */}
+              {/* GROUP 4: INFORMATION */}
               <div style={{ textAlign: 'left' }}>
                 <Link href="/information" className="footerGroupTitle">
                   Information

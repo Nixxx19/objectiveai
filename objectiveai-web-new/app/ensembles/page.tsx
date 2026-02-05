@@ -81,55 +81,47 @@ export default function EnsemblesPage() {
     <div className="page">
       <div className="containerWide">
         {/* Header */}
-        <div style={{
-          marginBottom: isMobile ? "24px" : "32px",
-          display: "flex",
-          flexDirection: isMobile ? "column" : "row",
-          justifyContent: "space-between",
-          alignItems: isMobile ? "flex-start" : "flex-end",
-          gap: isMobile ? "16px" : "24px",
-        }}>
+        <div className="pageHeader">
           <div>
             <h1 className="heading2" style={{ marginBottom: "8px" }}>Ensembles</h1>
             <p style={{ color: "var(--text-muted)", fontSize: isMobile ? "15px" : "17px" }}>
               Collections of Ensemble LLMs that vote together
             </p>
           </div>
-          <Link
-            href="/ensembles/create"
-            className="pillBtn"
-            style={{
-              padding: "12px 24px",
-              fontSize: "14px",
-              fontWeight: 600,
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              textDecoration: "none",
-              flexShrink: 0,
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-            Create New
-          </Link>
+          <div className="pageHeaderActions">
+            <Link
+              href="/ensembles/create"
+              className="pillBtn"
+              style={{
+                padding: "12px 24px",
+                fontSize: "14px",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                textDecoration: "none",
+                flexShrink: 0,
+              }}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+              Create New
+            </Link>
+          </div>
         </div>
 
         {/* Sticky Search Bar Row with Filter Button */}
         <div
           ref={searchRef}
+          className="stickySearchBar"
           style={{
-            position: 'sticky',
             top: `${searchBarTop}px`,
-            zIndex: 100,
             display: 'flex',
             alignItems: 'center',
             gap: '12px',
             marginBottom: safeGap,
-            background: 'var(--page-bg)',
-            padding: '8px 0',
           }}
         >
           <button

@@ -35,19 +35,23 @@ console.log(result.output);`;
   return (
     <div className="page">
       <div className="container">
-        {/* Header */}
-        <div style={{ marginBottom: '48px' }}>
-          <span className="tag" style={{ marginBottom: '12px', display: 'inline-block' }}>
-            TypeScript SDK
-          </span>
-          <h1 className="heading1" style={{ marginBottom: '12px' }}>
+        {/* Hero */}
+        <div style={{
+          textAlign: 'center',
+          marginBottom: isMobile ? '32px' : '40px',
+        }}>
+          <h1 style={{
+            fontSize: isMobile ? '28px' : '32px',
+            fontWeight: 700,
+            marginBottom: '8px',
+            color: 'var(--text)',
+          }}>
             SDK-First
           </h1>
           <p style={{
+            fontSize: isMobile ? '14px' : '16px',
             color: 'var(--text-muted)',
-            fontSize: '16px',
-            maxWidth: '600px',
-            lineHeight: 1.6,
+            lineHeight: 1.5,
           }}>
             Integrate ObjectiveAI into your applications with the TypeScript SDK.
           </p>
@@ -125,11 +129,7 @@ console.log(result.output);`;
 
         {/* Install */}
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{
-            fontSize: isMobile ? '16px' : '18px',
-            fontWeight: 600,
-            marginBottom: '12px',
-          }}>
+          <h2 className="heading2" style={{ marginBottom: '12px' }}>
             Install
           </h2>
           <CodeBlock
@@ -144,11 +144,7 @@ console.log(result.output);`;
 
         {/* Quick Start */}
         <div style={{ marginBottom: '32px' }}>
-          <h2 style={{
-            fontSize: isMobile ? '16px' : '18px',
-            fontWeight: 600,
-            marginBottom: '12px',
-          }}>
+          <h2 className="heading2" style={{ marginBottom: '12px' }}>
             Quick Start
           </h2>
           <CodeBlock

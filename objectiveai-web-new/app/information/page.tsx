@@ -179,8 +179,9 @@ export default function InformationPage() {
     {
       lang: "JavaScript / TypeScript",
       links: [
-        { label: "npm", url: "#", available: true },
-        { label: "GitHub", url: "#", available: true }
+        { label: "Getting Started", url: "/sdk-first", available: true },
+        { label: "npm", url: "https://www.npmjs.com/package/objectiveai", available: true },
+        { label: "GitHub", url: "https://github.com/ObjectiveAI/objectiveai-js", available: true }
       ]
     },
     {
@@ -242,6 +243,69 @@ export default function InformationPage() {
           }}>
             Documentation, SDKs, and guides to help you build with ObjectiveAI.
           </p>
+        </div>
+
+        {/* Getting Started */}
+        <div style={{ marginBottom: isMobile ? '60px' : '100px' }}>
+          <h2 className="heading2" style={{ marginBottom: isMobile ? '24px' : '32px' }}>Getting Started</h2>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
+            gap: '16px',
+          }}>
+            <Link
+              href="/sdk-first"
+              className="card"
+              style={{
+                padding: isMobile ? '20px' : '24px',
+                textDecoration: 'none',
+                display: 'block',
+              }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '18px' : '20px',
+                fontWeight: 600,
+                marginBottom: '8px',
+                color: 'var(--text)',
+              }}>
+                SDK-First
+              </h3>
+              <p style={{
+                fontSize: isMobile ? '14px' : '15px',
+                color: 'var(--text-muted)',
+                lineHeight: 1.6,
+                margin: 0,
+              }}>
+                Integrate ObjectiveAI into your applications with the TypeScript SDK.
+              </p>
+            </Link>
+            <Link
+              href="/vibe-native"
+              className="card"
+              style={{
+                padding: isMobile ? '20px' : '24px',
+                textDecoration: 'none',
+                display: 'block',
+              }}
+            >
+              <h3 style={{
+                fontSize: isMobile ? '18px' : '20px',
+                fontWeight: 600,
+                marginBottom: '8px',
+                color: 'var(--text)',
+              }}>
+                Vibe-Native
+              </h3>
+              <p style={{
+                fontSize: isMobile ? '14px' : '15px',
+                color: 'var(--text-muted)',
+                lineHeight: 1.6,
+                margin: 0,
+              }}>
+                Use ObjectiveAI functions without writing code.
+              </p>
+            </Link>
+          </div>
         </div>
 
         {/* FAQ Card */}

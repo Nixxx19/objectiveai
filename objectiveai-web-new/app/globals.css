@@ -164,6 +164,87 @@ body {
   }
 }
 
+/* Layout Guardrails - Prevent width inconsistencies */
+.page > .container,
+.page > .containerWide {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.page > .container > *,
+.page > .containerWide > * {
+  max-width: 100%;
+}
+
+/* Cards must fill their container width */
+.container .card,
+.containerWide .card {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Code blocks must fill container */
+.container pre,
+.containerWide pre {
+  max-width: 100%;
+}
+
+/* Page Header - Title + Action Button Layout */
+.pageHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+
+@media (max-width: 640px) {
+  .pageHeader {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .pageHeader .pageHeaderActions {
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+/* Sticky Search Bar with Gap Fill */
+.stickySearchBar {
+  position: sticky;
+  z-index: 100;
+  background: var(--page-bg);
+  padding: 8px 0;
+}
+
+.stickySearchBar::before {
+  content: '';
+  position: absolute;
+  top: -24px;
+  left: -32px;
+  right: -32px;
+  height: 24px;
+  background: var(--page-bg);
+  z-index: -1;
+}
+
+@media (max-width: 1024px) {
+  .stickySearchBar::before {
+    left: -24px;
+    right: -24px;
+  }
+}
+
+@media (max-width: 640px) {
+  .stickySearchBar::before {
+    left: -16px;
+    right: -16px;
+  }
+}
+
 /* Navigation - Official Style (REFERENCE FOR ALL STICKY ELEMENTS) */
 .navPill {
   background: var(--nav-surface);
