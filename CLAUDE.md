@@ -92,6 +92,8 @@ Functions are hosted on GitHub as `function.json` at repository root. Reference 
 
 **Important:** There is no server-side function creation. When a function is executed via the API (e.g., `Functions.Executions.create`), the server fetches `function.json` from the GitHub repository. Any execution that incurs usage causes the function to be indexed and discoverable via the list endpoint. This means anyone can create a function, publish it to GitHub, execute it via the API, and it becomes an indexed function.
 
+**Note:** If `/functions` returns an empty list (`{"data":[]}`), this means no functions have been executed yet or the index was cleared. Functions only appear in the list after being executed at least once.
+
 The `/functions/create` page in web-new is a **JSON builder/editor tool** that helps users construct `function.json` files to save to their own repositories—it does not create functions on the server.
 
 **Content Policy:** The service is 18+ only. Report functionality for inappropriate functions is planned for the future.
