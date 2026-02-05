@@ -72,7 +72,6 @@ export interface FunctionFields {
   input_maps?: unknown;
   input_schema?: unknown;
   tasks?: unknown;
-  output?: unknown;
   output_length?: unknown;
   input_split?: unknown;
   input_merge?: unknown;
@@ -87,7 +86,6 @@ export function buildFunction(fields?: FunctionFields): Record<string, unknown> 
   const inputMaps = fields?.input_maps ?? readJsonFile("function/input_maps.json");
   const inputSchema = fields?.input_schema ?? readJsonFile("function/input_schema.json");
   const tasks = fields?.tasks ?? readJsonFile("function/tasks.json");
-  const output = fields?.output ?? readJsonFile("function/output.json");
   const outputLength = fields?.output_length ?? readJsonFile("function/output_length.json");
   const inputSplit = fields?.input_split ?? readJsonFile("function/input_split.json");
   const inputMerge = fields?.input_merge ?? readJsonFile("function/input_merge.json");
@@ -97,7 +95,6 @@ export function buildFunction(fields?: FunctionFields): Record<string, unknown> 
   if (inputMaps !== null) func.input_maps = inputMaps;
   if (inputSchema !== null) func.input_schema = inputSchema;
   if (tasks !== null) func.tasks = tasks;
-  if (output !== null) func.output = output;
   if (outputLength !== null) func.output_length = outputLength;
   if (inputSplit !== null) func.input_split = inputSplit;
   if (inputMerge !== null) func.input_merge = inputMerge;
@@ -147,9 +144,16 @@ export function buildProfile(options: ProfileOptions = {}): Functions.RemoteProf
     }
   }
 
+  // Generate equal weights for all tasks (each task gets 1/n weight)
+  const numTasks = profileTasks.length;
+  const weights = numTasks > 0
+    ? profileTasks.map(() => 1 / numTasks)
+    : [];
+
   return {
     description: `Default profile for ${name ?? ""}`,
     tasks: profileTasks,
+    profile: weights,
   };
 }
 

@@ -144,7 +144,6 @@ interface FunctionFields {
     input_maps?: unknown;
     input_schema?: unknown;
     tasks?: unknown;
-    output?: unknown;
     output_length?: unknown;
     input_split?: unknown;
     input_merge?: unknown;
@@ -9263,6 +9262,11 @@ declare const ExampleInputSchema: z.ZodObject<{
                 };
             } | /*elided*/ any | /*elided*/ any;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -13817,6 +13821,11 @@ declare const ExampleInputSchema: z.ZodObject<{
                 };
             } | /*elided*/ any | /*elided*/ any;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -14066,6 +14075,11 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>;
         }, z.core.$strip>], "type">>]>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">, z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"scalar.function">;
         owner: z.ZodString;
@@ -18620,6 +18634,11 @@ declare const ExampleInputSchema: z.ZodObject<{
                 };
             } | /*elided*/ any | /*elided*/ any;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -23174,6 +23193,11 @@ declare const ExampleInputSchema: z.ZodObject<{
                 };
             } | /*elided*/ any | /*elided*/ any;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -23423,6 +23447,11 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>;
         }, z.core.$strip>], "type">>]>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>, z.ZodNull]>>;
     outputLength: z.ZodNullable<z.ZodNumber>;
 }, z.core.$strip>;

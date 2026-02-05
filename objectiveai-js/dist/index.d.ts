@@ -13630,6 +13630,7 @@ declare const RemoteFunctionTaskProfileSchema: z.ZodObject<{
 type RemoteFunctionTaskProfile = z.infer<typeof RemoteFunctionTaskProfileSchema>;
 interface InlineFunctionTaskProfile {
     tasks: TaskProfile[];
+    profile: number[];
 }
 declare const InlineFunctionTaskProfileSchema: z.ZodType<InlineFunctionTaskProfile>;
 declare const VectorCompletionTaskProfileSchema: z.ZodObject<{
@@ -16584,6 +16585,7 @@ declare const InlineProfileSchema: z.ZodObject<{
         }, z.core.$strip>]>;
         profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>]>>;
+    profile: z.ZodArray<z.ZodNumber>;
 }, z.core.$strip>;
 type InlineProfile = z.infer<typeof InlineProfileSchema>;
 declare const RemoteProfileSchema: z.ZodObject<{
@@ -17325,6 +17327,7 @@ declare const RemoteProfileSchema: z.ZodObject<{
         }, z.core.$strip>]>;
         profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>]>>;
+    profile: z.ZodArray<z.ZodNumber>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>;
@@ -18068,6 +18071,7 @@ declare const ProfileSchema$1: z.ZodUnion<readonly [z.ZodObject<{
         }, z.core.$strip>]>;
         profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>]>>;
+    profile: z.ZodArray<z.ZodNumber>;
 }, z.core.$strip>, z.ZodObject<{
     tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
         owner: z.ZodString;
@@ -18807,6 +18811,7 @@ declare const ProfileSchema$1: z.ZodUnion<readonly [z.ZodObject<{
         }, z.core.$strip>]>;
         profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>]>>;
+    profile: z.ZodArray<z.ZodNumber>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>]>;
@@ -23521,6 +23526,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
 }, z.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionInlineProfileBase = z.infer<typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema>;
@@ -25032,6 +25038,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingS
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
     stream: z.ZodLiteral<true>;
 }, z.core.$strip>;
@@ -26544,6 +26551,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreami
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
     stream: z.ZodNullable<z.ZodOptional<z.ZodLiteral<false>>>;
 }, z.core.$strip>;
@@ -28056,6 +28064,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema: z.
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
     stream: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
 }, z.core.$strip>;
@@ -28852,6 +28861,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -28864,6 +28878,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -29267,12 +29286,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -29296,6 +29315,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -29308,6 +29332,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -29711,12 +29740,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -30522,6 +30551,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -30534,6 +30568,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -30937,12 +30976,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -30966,6 +31005,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -30978,6 +31022,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -31381,12 +31430,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -32193,6 +32242,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -32205,6 +32259,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -32608,12 +32667,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -32637,6 +32696,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -32649,6 +32713,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -33052,12 +33121,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -33864,6 +33933,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -33876,6 +33950,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -34279,12 +34358,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -34308,6 +34387,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -34320,6 +34404,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -34723,12 +34812,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -35535,6 +35624,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -35547,6 +35641,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -35950,12 +36049,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -35979,6 +36078,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -35991,6 +36095,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -36394,12 +36503,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -37150,6 +37259,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
 }, z.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionInlineProfileBase = z.infer<typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema>;
@@ -37945,6 +38055,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -37957,6 +38072,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -38360,12 +38480,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -38389,6 +38509,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -38401,6 +38526,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -38804,12 +38934,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -39560,6 +39690,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
     stream: z.ZodLiteral<true>;
 }, z.core.$strip>;
@@ -40356,6 +40487,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -40368,6 +40504,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -40771,12 +40912,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -40800,6 +40941,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -40812,6 +40958,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -41215,12 +41366,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -41971,6 +42122,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
     stream: z.ZodNullable<z.ZodOptional<z.ZodLiteral<false>>>;
 }, z.core.$strip>;
@@ -42767,6 +42919,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -42779,6 +42936,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -43182,12 +43344,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -43211,6 +43373,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -43223,6 +43390,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -43626,12 +43798,12 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -44382,6 +44554,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
     stream: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
 }, z.core.$strip>;
@@ -44410,6 +44583,11 @@ declare const InlineScalarFunctionSchema: z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -44422,6 +44600,11 @@ declare const InlineScalarFunctionSchema: z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -44825,12 +45008,12 @@ declare const InlineScalarFunctionSchema: z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
 }, z.core.$strip>;
 type InlineScalarFunction = z.infer<typeof InlineScalarFunctionSchema>;
 declare const InlineVectorFunctionSchema: z.ZodObject<{
@@ -44856,6 +45039,11 @@ declare const InlineVectorFunctionSchema: z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -44868,6 +45056,11 @@ declare const InlineVectorFunctionSchema: z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -45271,12 +45464,12 @@ declare const InlineVectorFunctionSchema: z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -45312,6 +45505,11 @@ declare const InlineFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -45324,6 +45522,11 @@ declare const InlineFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -45727,12 +45930,12 @@ declare const InlineFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -45756,6 +45959,11 @@ declare const InlineFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -45768,6 +45976,11 @@ declare const InlineFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -46171,12 +46384,12 @@ declare const InlineFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -46212,6 +46425,11 @@ declare const RemoteScalarFunctionSchema: z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -46224,6 +46442,11 @@ declare const RemoteScalarFunctionSchema: z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -46627,12 +46850,12 @@ declare const RemoteScalarFunctionSchema: z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -46690,6 +46913,11 @@ declare const RemoteVectorFunctionSchema: z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -46702,6 +46930,11 @@ declare const RemoteVectorFunctionSchema: z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -47105,12 +47338,12 @@ declare const RemoteVectorFunctionSchema: z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -47183,6 +47416,11 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -47195,6 +47433,11 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -47598,12 +47841,12 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -47659,6 +47902,11 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -47671,6 +47919,11 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -48074,12 +48327,12 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -48152,6 +48405,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -48164,6 +48422,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -48567,12 +48830,12 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -48596,6 +48859,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -48608,6 +48876,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -49011,12 +49284,12 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -49050,6 +49323,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -49062,6 +49340,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -49465,12 +49748,12 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -49526,6 +49809,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -49538,6 +49826,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -49941,12 +50234,12 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -52320,6 +52613,11 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -52332,6 +52630,11 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -52735,12 +53038,12 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -52799,6 +53102,11 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         owner: z.ZodString;
@@ -52811,6 +53119,11 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>]>>>;
         map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
         input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.completion">;
         skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -53214,12 +53527,12 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
         }, z.core.$strict>]>]>;
+        output: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>;
     }, z.core.$strip>], "type">>;
-    output: z.ZodUnion<readonly [z.ZodObject<{
-        $jmespath: z.ZodString;
-    }, z.core.$strict>, z.ZodObject<{
-        $starlark: z.ZodString;
-    }, z.core.$strict>]>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -53326,6 +53639,11 @@ declare const RetrievePairSchema: z.ZodObject<{
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -53338,6 +53656,11 @@ declare const RetrievePairSchema: z.ZodObject<{
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -53741,12 +54064,12 @@ declare const RetrievePairSchema: z.ZodObject<{
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         description: z.ZodString;
         changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -53805,6 +54128,11 @@ declare const RetrievePairSchema: z.ZodObject<{
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -53817,6 +54145,11 @@ declare const RetrievePairSchema: z.ZodObject<{
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -54220,12 +54553,12 @@ declare const RetrievePairSchema: z.ZodObject<{
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         description: z.ZodString;
         changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
@@ -55019,6 +55352,7 @@ declare const RetrievePairSchema: z.ZodObject<{
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
         description: z.ZodString;
         changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>;
@@ -56052,6 +56386,7 @@ declare const FunctionProfileComputationChunkSchema: z.ZodObject<{
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>>;
     fitting_stats: z.ZodOptional<z.ZodObject<{
         loss: z.ZodNumber;
@@ -57116,6 +57451,7 @@ declare const FunctionProfileComputationSchema: z.ZodObject<{
             }, z.core.$strip>]>;
             profile: z.ZodArray<z.ZodNumber>;
         }, z.core.$strip>]>>;
+        profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>;
     fitting_stats: z.ZodObject<{
         loss: z.ZodNumber;
@@ -61073,6 +61409,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -61085,6 +61426,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -61488,12 +61834,12 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -61517,6 +61863,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -61529,6 +61880,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -61932,12 +62288,12 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -62751,6 +63107,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -62763,6 +63124,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -63166,12 +63532,12 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -63195,6 +63561,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -63207,6 +63578,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -63610,12 +63986,12 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -64430,6 +64806,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -64442,6 +64823,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -64845,12 +65231,12 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -64874,6 +65260,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -64886,6 +65277,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -65289,12 +65685,12 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -66109,6 +66505,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -66121,6 +66522,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -66524,12 +66930,12 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
     }, z.core.$strip>, z.ZodObject<{
         type: z.ZodLiteral<"vector.function">;
         input_maps: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
@@ -66553,6 +66959,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.function">;
             owner: z.ZodString;
@@ -66565,6 +66976,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
             }, z.core.$strict>]>>>;
             map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
             input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>, z.ZodObject<{
             type: z.ZodLiteral<"vector.completion">;
             skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -66968,12 +67384,12 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>;
         }, z.core.$strip>], "type">>;
-        output: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>]>;
         input_split: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -68473,6 +68889,7 @@ declare const RetrieveSchema$1: z.ZodObject<{
         }, z.core.$strip>]>;
         profile: z.ZodArray<z.ZodNumber>;
     }, z.core.$strip>]>>;
+    profile: z.ZodArray<z.ZodNumber>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>;
@@ -68499,6 +68916,12 @@ declare const TaskExpressionSkipSchema: z.ZodUnion<readonly [z.ZodObject<{
 type TaskExpressionSkip = z.infer<typeof TaskExpressionSkipSchema>;
 declare const TaskExpressionMapSchema: z.ZodUInt32;
 type TaskExpressionMap = z.infer<typeof TaskExpressionMapSchema>;
+declare const TaskOutputExpressionSchema: z.ZodUnion<readonly [z.ZodObject<{
+    $jmespath: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    $starlark: z.ZodString;
+}, z.core.$strict>]>;
+type TaskOutputExpression = z.infer<typeof TaskOutputExpressionSchema>;
 declare const ScalarFunctionTaskExpressionSchema: z.ZodObject<{
     type: z.ZodLiteral<"scalar.function">;
     owner: z.ZodString;
@@ -68511,6 +68934,11 @@ declare const ScalarFunctionTaskExpressionSchema: z.ZodObject<{
     }, z.core.$strict>]>>>;
     map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>;
 type ScalarFunctionTaskExpression = z.infer<typeof ScalarFunctionTaskExpressionSchema>;
 declare const VectorFunctionTaskExpressionSchema: z.ZodObject<{
@@ -68525,6 +68953,11 @@ declare const VectorFunctionTaskExpressionSchema: z.ZodObject<{
     }, z.core.$strict>]>>>;
     map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>;
 type VectorFunctionTaskExpression = z.infer<typeof VectorFunctionTaskExpressionSchema>;
 declare const VectorCompletionTaskExpressionSchema: z.ZodObject<{
@@ -68930,6 +69363,11 @@ declare const VectorCompletionTaskExpressionSchema: z.ZodObject<{
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>]>]>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>;
 type VectorCompletion = z.infer<typeof VectorCompletionTaskExpressionSchema>;
 declare const TaskExpressionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -68944,6 +69382,11 @@ declare const TaskExpressionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     }, z.core.$strict>]>>>;
     map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     owner: z.ZodString;
@@ -68956,6 +69399,11 @@ declare const TaskExpressionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     }, z.core.$strict>]>>>;
     map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.completion">;
     skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -69359,6 +69807,11 @@ declare const TaskExpressionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>]>]>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>], "type">;
 type TaskExpression = z.infer<typeof TaskExpressionSchema>;
 declare const TaskExpressionsSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -69373,6 +69826,11 @@ declare const TaskExpressionsSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodOb
     }, z.core.$strict>]>>>;
     map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     owner: z.ZodString;
@@ -69385,6 +69843,11 @@ declare const TaskExpressionsSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodOb
     }, z.core.$strict>]>>>;
     map: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     input: z.ZodType<InputValueExpression, unknown, z.core.$ZodTypeInternals<InputValueExpression, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.completion">;
     skip: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodObject<{
@@ -69788,6 +70251,11 @@ declare const TaskExpressionsSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodOb
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
     }, z.core.$strict>]>]>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>], "type">>;
 type TaskExpressions = z.infer<typeof TaskExpressionsSchema>;
 declare const ScalarFunctionTaskSchema: z.ZodObject<{
@@ -69796,6 +70264,11 @@ declare const ScalarFunctionTaskSchema: z.ZodObject<{
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>;
 type ScalarFunctionTask = z.infer<typeof ScalarFunctionTaskSchema>;
 declare const VectorFunctionTaskSchema: z.ZodObject<{
@@ -69804,6 +70277,11 @@ declare const VectorFunctionTaskSchema: z.ZodObject<{
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>;
 type VectorFunctionTask = z.infer<typeof VectorFunctionTaskSchema>;
 declare const VectorCompletionTaskSchema: z.ZodObject<{
@@ -70007,6 +70485,11 @@ declare const VectorCompletionTaskSchema: z.ZodObject<{
             file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>;
     }, z.core.$strip>], "type">>]>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>;
 type VectorCompletionTask = z.infer<typeof VectorCompletionTaskSchema>;
 declare const TaskSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -70015,12 +70498,22 @@ declare const TaskSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     owner: z.ZodString;
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.completion">;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -70222,6 +70715,11 @@ declare const TaskSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
             file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>;
     }, z.core.$strip>], "type">>]>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>], "type">;
 type Task = z.infer<typeof TaskSchema>;
 declare const CompiledTaskSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -70230,12 +70728,22 @@ declare const CompiledTaskSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     owner: z.ZodString;
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.completion">;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -70437,18 +70945,33 @@ declare const CompiledTaskSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[
             file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>;
     }, z.core.$strip>], "type">>]>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>], "type">, z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
     type: z.ZodLiteral<"scalar.function">;
     owner: z.ZodString;
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     owner: z.ZodString;
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.completion">;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -70650,6 +71173,11 @@ declare const CompiledTaskSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[
             file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>;
     }, z.core.$strip>], "type">>]>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>], "type">>, z.ZodNull]>;
 type CompiledTask = z.infer<typeof CompiledTaskSchema>;
 declare const CompiledTasksSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -70658,12 +71186,22 @@ declare const CompiledTasksSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodDiscrimi
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     owner: z.ZodString;
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.completion">;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -70865,18 +71403,33 @@ declare const CompiledTasksSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodDiscrimi
             file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>;
     }, z.core.$strip>], "type">>]>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>], "type">, z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
     type: z.ZodLiteral<"scalar.function">;
     owner: z.ZodString;
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     owner: z.ZodString;
     repository: z.ZodString;
     commit: z.ZodString;
     input: z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.completion">;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
@@ -71078,13 +71631,17 @@ declare const CompiledTasksSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodDiscrimi
             file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>;
     }, z.core.$strip>], "type">>]>>;
+    output: z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>;
 }, z.core.$strip>], "type">>, z.ZodNull]>>;
 type CompiledTasks = z.infer<typeof CompiledTasksSchema>;
 
 declare function validateFunctionInput(function_: Function, input: InputValue): boolean | null;
 declare function compileFunctionInputMaps(function_: Function, input: InputValue): InputValue[][] | null;
 declare function compileFunctionTasks(function_: Function, input: InputValue): CompiledTasks;
-declare function compileFunctionOutput(function_: Function, input: InputValue, task_outputs: TaskOutputs): CompiledFunctionOutput;
 declare function compileFunctionOutputLength(function_: Function, input: InputValue): number | null;
 declare function compileFunctionInputSplit(function_: Function, input: InputValue): InputValue[] | null;
 declare function compileFunctionInputMerge(function_: Function, inputs: InputValue[]): InputValue | null;
@@ -71134,6 +71691,8 @@ type index$5_TaskExpressionSkip = TaskExpressionSkip;
 declare const index$5_TaskExpressionSkipSchema: typeof TaskExpressionSkipSchema;
 type index$5_TaskExpressions = TaskExpressions;
 declare const index$5_TaskExpressionsSchema: typeof TaskExpressionsSchema;
+type index$5_TaskOutputExpression = TaskOutputExpression;
+declare const index$5_TaskOutputExpressionSchema: typeof TaskOutputExpressionSchema;
 type index$5_TaskProfile = TaskProfile;
 declare const index$5_TaskProfileSchema: typeof TaskProfileSchema;
 type index$5_TaskProfiles = TaskProfiles;
@@ -71152,7 +71711,6 @@ declare const index$5_VectorFunctionTaskSchema: typeof VectorFunctionTaskSchema;
 declare const index$5_compileFunctionInputMaps: typeof compileFunctionInputMaps;
 declare const index$5_compileFunctionInputMerge: typeof compileFunctionInputMerge;
 declare const index$5_compileFunctionInputSplit: typeof compileFunctionInputSplit;
-declare const index$5_compileFunctionOutput: typeof compileFunctionOutput;
 declare const index$5_compileFunctionOutputLength: typeof compileFunctionOutputLength;
 declare const index$5_compileFunctionTasks: typeof compileFunctionTasks;
 declare const index$5_listPairs: typeof listPairs;
@@ -71160,7 +71718,7 @@ declare const index$5_retrievePair: typeof retrievePair;
 declare const index$5_retrievePairUsage: typeof retrievePairUsage;
 declare const index$5_validateFunctionInput: typeof validateFunctionInput;
 declare namespace index$5 {
-  export { type index$5_CompiledTask as CompiledTask, index$5_CompiledTaskSchema as CompiledTaskSchema, type index$5_CompiledTasks as CompiledTasks, index$5_CompiledTasksSchema as CompiledTasksSchema, index$f as Executions, index$c as Expression, type index$5_Function as Function, index$5_FunctionSchema as FunctionSchema, type HistoricalUsage$1 as HistoricalUsage, HistoricalUsageSchema$1 as HistoricalUsageSchema, type index$5_InlineFunction as InlineFunction, index$5_InlineFunctionSchema as InlineFunctionSchema, type index$5_InlineFunctionTaskProfile as InlineFunctionTaskProfile, index$5_InlineFunctionTaskProfileSchema as InlineFunctionTaskProfileSchema, type index$5_InlineProfile as InlineProfile, index$5_InlineProfileSchema as InlineProfileSchema, type index$5_InlineScalarFunction as InlineScalarFunction, index$5_InlineScalarFunctionSchema as InlineScalarFunctionSchema, type index$5_InlineVectorFunction as InlineVectorFunction, index$5_InlineVectorFunctionSchema as InlineVectorFunctionSchema, type List$1 as List, type ListItem$1 as ListItem, ListItemSchema$1 as ListItemSchema, type index$5_ListPairItem as ListPairItem, index$5_ListPairItemSchema as ListPairItemSchema, type index$5_ListPairs as ListPairs, index$5_ListPairsSchema as ListPairsSchema, ListSchema$1 as ListSchema, type Profile$1 as Profile, ProfileSchema$1 as ProfileSchema, index$6 as Profiles, type index$5_RemoteFunction as RemoteFunction, index$5_RemoteFunctionSchema as RemoteFunctionSchema, type index$5_RemoteFunctionTaskProfile as RemoteFunctionTaskProfile, index$5_RemoteFunctionTaskProfileSchema as RemoteFunctionTaskProfileSchema, type index$5_RemoteProfile as RemoteProfile, index$5_RemoteProfileSchema as RemoteProfileSchema, type index$5_RemoteScalarFunction as RemoteScalarFunction, index$5_RemoteScalarFunctionSchema as RemoteScalarFunctionSchema, type index$5_RemoteVectorFunction as RemoteVectorFunction, index$5_RemoteVectorFunctionSchema as RemoteVectorFunctionSchema, type Retrieve$2 as Retrieve, type index$5_RetrievePair as RetrievePair, index$5_RetrievePairSchema as RetrievePairSchema, RetrieveSchema$2 as RetrieveSchema, type index$5_ScalarFunctionTask as ScalarFunctionTask, type index$5_ScalarFunctionTaskExpression as ScalarFunctionTaskExpression, index$5_ScalarFunctionTaskExpressionSchema as ScalarFunctionTaskExpressionSchema, index$5_ScalarFunctionTaskSchema as ScalarFunctionTaskSchema, type index$5_Task as Task, type index$5_TaskExpression as TaskExpression, type index$5_TaskExpressionMap as TaskExpressionMap, index$5_TaskExpressionMapSchema as TaskExpressionMapSchema, index$5_TaskExpressionSchema as TaskExpressionSchema, type index$5_TaskExpressionSkip as TaskExpressionSkip, index$5_TaskExpressionSkipSchema as TaskExpressionSkipSchema, type index$5_TaskExpressions as TaskExpressions, index$5_TaskExpressionsSchema as TaskExpressionsSchema, type index$5_TaskProfile as TaskProfile, index$5_TaskProfileSchema as TaskProfileSchema, type index$5_TaskProfiles as TaskProfiles, index$5_TaskProfilesSchema as TaskProfilesSchema, index$5_TaskSchema as TaskSchema, type index$5_VectorCompletion as VectorCompletion, type index$5_VectorCompletionTask as VectorCompletionTask, index$5_VectorCompletionTaskExpressionSchema as VectorCompletionTaskExpressionSchema, type index$5_VectorCompletionTaskProfile as VectorCompletionTaskProfile, index$5_VectorCompletionTaskProfileSchema as VectorCompletionTaskProfileSchema, index$5_VectorCompletionTaskSchema as VectorCompletionTaskSchema, type index$5_VectorFunctionTask as VectorFunctionTask, type index$5_VectorFunctionTaskExpression as VectorFunctionTaskExpression, index$5_VectorFunctionTaskExpressionSchema as VectorFunctionTaskExpressionSchema, index$5_VectorFunctionTaskSchema as VectorFunctionTaskSchema, index$5_compileFunctionInputMaps as compileFunctionInputMaps, index$5_compileFunctionInputMerge as compileFunctionInputMerge, index$5_compileFunctionInputSplit as compileFunctionInputSplit, index$5_compileFunctionOutput as compileFunctionOutput, index$5_compileFunctionOutputLength as compileFunctionOutputLength, index$5_compileFunctionTasks as compileFunctionTasks, list$1 as list, index$5_listPairs as listPairs, retrieve$3 as retrieve, index$5_retrievePair as retrievePair, index$5_retrievePairUsage as retrievePairUsage, retrieveUsage$1 as retrieveUsage, index$5_validateFunctionInput as validateFunctionInput };
+  export { type index$5_CompiledTask as CompiledTask, index$5_CompiledTaskSchema as CompiledTaskSchema, type index$5_CompiledTasks as CompiledTasks, index$5_CompiledTasksSchema as CompiledTasksSchema, index$f as Executions, index$c as Expression, type index$5_Function as Function, index$5_FunctionSchema as FunctionSchema, type HistoricalUsage$1 as HistoricalUsage, HistoricalUsageSchema$1 as HistoricalUsageSchema, type index$5_InlineFunction as InlineFunction, index$5_InlineFunctionSchema as InlineFunctionSchema, type index$5_InlineFunctionTaskProfile as InlineFunctionTaskProfile, index$5_InlineFunctionTaskProfileSchema as InlineFunctionTaskProfileSchema, type index$5_InlineProfile as InlineProfile, index$5_InlineProfileSchema as InlineProfileSchema, type index$5_InlineScalarFunction as InlineScalarFunction, index$5_InlineScalarFunctionSchema as InlineScalarFunctionSchema, type index$5_InlineVectorFunction as InlineVectorFunction, index$5_InlineVectorFunctionSchema as InlineVectorFunctionSchema, type List$1 as List, type ListItem$1 as ListItem, ListItemSchema$1 as ListItemSchema, type index$5_ListPairItem as ListPairItem, index$5_ListPairItemSchema as ListPairItemSchema, type index$5_ListPairs as ListPairs, index$5_ListPairsSchema as ListPairsSchema, ListSchema$1 as ListSchema, type Profile$1 as Profile, ProfileSchema$1 as ProfileSchema, index$6 as Profiles, type index$5_RemoteFunction as RemoteFunction, index$5_RemoteFunctionSchema as RemoteFunctionSchema, type index$5_RemoteFunctionTaskProfile as RemoteFunctionTaskProfile, index$5_RemoteFunctionTaskProfileSchema as RemoteFunctionTaskProfileSchema, type index$5_RemoteProfile as RemoteProfile, index$5_RemoteProfileSchema as RemoteProfileSchema, type index$5_RemoteScalarFunction as RemoteScalarFunction, index$5_RemoteScalarFunctionSchema as RemoteScalarFunctionSchema, type index$5_RemoteVectorFunction as RemoteVectorFunction, index$5_RemoteVectorFunctionSchema as RemoteVectorFunctionSchema, type Retrieve$2 as Retrieve, type index$5_RetrievePair as RetrievePair, index$5_RetrievePairSchema as RetrievePairSchema, RetrieveSchema$2 as RetrieveSchema, type index$5_ScalarFunctionTask as ScalarFunctionTask, type index$5_ScalarFunctionTaskExpression as ScalarFunctionTaskExpression, index$5_ScalarFunctionTaskExpressionSchema as ScalarFunctionTaskExpressionSchema, index$5_ScalarFunctionTaskSchema as ScalarFunctionTaskSchema, type index$5_Task as Task, type index$5_TaskExpression as TaskExpression, type index$5_TaskExpressionMap as TaskExpressionMap, index$5_TaskExpressionMapSchema as TaskExpressionMapSchema, index$5_TaskExpressionSchema as TaskExpressionSchema, type index$5_TaskExpressionSkip as TaskExpressionSkip, index$5_TaskExpressionSkipSchema as TaskExpressionSkipSchema, type index$5_TaskExpressions as TaskExpressions, index$5_TaskExpressionsSchema as TaskExpressionsSchema, type index$5_TaskOutputExpression as TaskOutputExpression, index$5_TaskOutputExpressionSchema as TaskOutputExpressionSchema, type index$5_TaskProfile as TaskProfile, index$5_TaskProfileSchema as TaskProfileSchema, type index$5_TaskProfiles as TaskProfiles, index$5_TaskProfilesSchema as TaskProfilesSchema, index$5_TaskSchema as TaskSchema, type index$5_VectorCompletion as VectorCompletion, type index$5_VectorCompletionTask as VectorCompletionTask, index$5_VectorCompletionTaskExpressionSchema as VectorCompletionTaskExpressionSchema, type index$5_VectorCompletionTaskProfile as VectorCompletionTaskProfile, index$5_VectorCompletionTaskProfileSchema as VectorCompletionTaskProfileSchema, index$5_VectorCompletionTaskSchema as VectorCompletionTaskSchema, type index$5_VectorFunctionTask as VectorFunctionTask, type index$5_VectorFunctionTaskExpression as VectorFunctionTaskExpression, index$5_VectorFunctionTaskExpressionSchema as VectorFunctionTaskExpressionSchema, index$5_VectorFunctionTaskSchema as VectorFunctionTaskSchema, index$5_compileFunctionInputMaps as compileFunctionInputMaps, index$5_compileFunctionInputMerge as compileFunctionInputMerge, index$5_compileFunctionInputSplit as compileFunctionInputSplit, index$5_compileFunctionOutputLength as compileFunctionOutputLength, index$5_compileFunctionTasks as compileFunctionTasks, list$1 as list, index$5_listPairs as listPairs, retrieve$3 as retrieve, index$5_retrievePair as retrievePair, index$5_retrievePairUsage as retrievePairUsage, retrieveUsage$1 as retrieveUsage, index$5_validateFunctionInput as validateFunctionInput };
 }
 
 declare const VectorCompletionCreateParamsBaseSchema: z.ZodObject<{

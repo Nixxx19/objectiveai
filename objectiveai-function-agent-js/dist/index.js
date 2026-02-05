@@ -84,9 +84,6 @@ var input_schema_json_default = "null";
 // assets/function/input_split.json.txt
 var input_split_json_default = "null";
 
-// assets/function/output.json.txt
-var output_json_default = "null";
-
 // assets/function/output_length.json.txt
 var output_length_json_default = "null";
 
@@ -159,6 +156,9 @@ var ESSAY_TASKS_md_default = "";
 // assets/sub_functions/.gitignore.txt
 var gitignore_default3 = "*\n!.gitignore\n";
 
+// assets/cloned_functions/.gitignore.txt
+var gitignore_default4 = "*\n!.gitignore\n";
+
 // assets/inputs.json.txt
 var inputs_json_default = "[]\n";
 
@@ -169,7 +169,6 @@ var assets = {
   "function/input_merge.json": input_merge_json_default,
   "function/input_schema.json": input_schema_json_default,
   "function/input_split.json": input_split_json_default,
-  "function/output.json": output_json_default,
   "function/output_length.json": output_length_json_default,
   "function/tasks.json": tasks_json_default,
   "function/type.json": type_json_default,
@@ -192,6 +191,7 @@ var assets = {
   "plans/.gitkeep": gitkeep_default,
   "logs/.gitignore": gitignore_default2,
   "sub_functions/.gitignore": gitignore_default3,
+  "cloned_functions/.gitignore": gitignore_default4,
   "inputs.json": inputs_json_default,
   "ESSAY.md": ESSAY_md_default,
   "ESSAY_TASKS.md": ESSAY_TASKS_md_default
@@ -1380,7 +1380,6 @@ function getInventFunctionTools(planIndex) {
     { kind: "write-edit", value: "function/input_schema.json" },
     { kind: "write-edit", value: "function/input_maps.json" },
     { kind: "write-edit", value: "function/tasks.json" },
-    { kind: "write-edit", value: "function/output.json" },
     { kind: "write-edit", value: "function/output_length.json" },
     { kind: "write-edit", value: "function/input_split.json" },
     { kind: "write-edit", value: "function/input_merge.json" },
@@ -1415,7 +1414,6 @@ async function inventFunctionTasksLoop(log, sessionId) {
         "function/description.json",
         "function/input_schema.json",
         "function/input_maps.json",
-        "function/output.json",
         "function/output_length.json",
         "function/input_split.json",
         "function/input_merge.json",
@@ -1519,7 +1517,7 @@ Expressions receive a single object with these fields:
 
 ### Inspecting Sub-Functions
 If the function references sub-functions (tasks with type \`scalar.function\` or \`vector.function\`):
-- Run \`ts-node cloneSubFunctions.ts\` to clone them to \`sub_functions/<owner>/<repository>/<commit>/\`
+- Run \`ts-node cloneSubFunctions.ts\` to clone them to \`cloned_functions/<owner>/<repository>/<commit>/\`
 - Run \`ts-node cloneSubFunctions.ts --latest\` to clone the latest version instead
 - Read their \`function.json\` and source files to understand how they work
 - This can be used to fetch specific functions from GitHub
@@ -1664,7 +1662,6 @@ function getInventTools(planIndex) {
     { kind: "write-edit", value: "function/input_schema.json" },
     { kind: "write-edit", value: "function/input_maps.json" },
     { kind: "write-edit", value: "function/tasks.json" },
-    { kind: "write-edit", value: "function/output.json" },
     { kind: "write-edit", value: "function/output_length.json" },
     { kind: "write-edit", value: "function/input_split.json" },
     { kind: "write-edit", value: "function/input_merge.json" },
@@ -1699,7 +1696,6 @@ async function inventVectorTasksLoop(log, sessionId) {
         "function/description.json",
         "function/input_schema.json",
         "function/input_maps.json",
-        "function/output.json",
         "function/output_length.json",
         "function/input_split.json",
         "function/input_merge.json",
@@ -1914,7 +1910,6 @@ function getIssueHandlingTools(planIndex) {
     { kind: "write-edit", value: "function/input_schema.json" },
     { kind: "write-edit", value: "function/input_maps.json" },
     { kind: "write-edit", value: "function/tasks.json" },
-    { kind: "write-edit", value: "function/output.json" },
     { kind: "write-edit", value: "function/output_length.json" },
     { kind: "write-edit", value: "function/input_split.json" },
     { kind: "write-edit", value: "function/input_merge.json" },
@@ -1949,7 +1944,6 @@ async function handleIssuesLoop(log, sessionId) {
         "function/description.json",
         "function/input_schema.json",
         "function/input_maps.json",
-        "function/output.json",
         "function/output_length.json",
         "function/input_split.json",
         "function/input_merge.json",
@@ -2009,7 +2003,7 @@ Address each valid issue:
 
 ### Inspecting Sub-Functions
 If the function references sub-functions (tasks with type \`scalar.function\` or \`vector.function\`):
-- Run \`ts-node cloneSubFunctions.ts\` to clone them to \`sub_functions/<owner>/<repository>/<commit>/\`
+- Run \`ts-node cloneSubFunctions.ts\` to clone them to \`cloned_functions/<owner>/<repository>/<commit>/\`
 - Run \`ts-node cloneSubFunctions.ts --latest\` to clone the latest version instead
 - Read their \`function.json\` and source files to understand how they work
 
@@ -2213,7 +2207,6 @@ function buildFunction(fields) {
   const inputMaps = fields?.input_maps ?? readJsonFile("function/input_maps.json");
   const inputSchema = fields?.input_schema ?? readJsonFile("function/input_schema.json");
   const tasks = fields?.tasks ?? readJsonFile("function/tasks.json");
-  const output = fields?.output ?? readJsonFile("function/output.json");
   const outputLength = fields?.output_length ?? readJsonFile("function/output_length.json");
   const inputSplit = fields?.input_split ?? readJsonFile("function/input_split.json");
   const inputMerge = fields?.input_merge ?? readJsonFile("function/input_merge.json");
@@ -2222,7 +2215,6 @@ function buildFunction(fields) {
   if (inputMaps !== null) func.input_maps = inputMaps;
   if (inputSchema !== null) func.input_schema = inputSchema;
   if (tasks !== null) func.tasks = tasks;
-  if (output !== null) func.output = output;
   if (outputLength !== null) func.output_length = outputLength;
   if (inputSplit !== null) func.input_split = inputSplit;
   if (inputMerge !== null) func.input_merge = inputMerge;
@@ -2253,9 +2245,12 @@ function buildProfile(options = {}) {
       }
     }
   }
+  const numTasks = profileTasks.length;
+  const weights = numTasks > 0 ? profileTasks.map(() => 1 / numTasks) : [];
   return {
     description: `Default profile for ${name ?? ""}`,
-    tasks: profileTasks
+    tasks: profileTasks,
+    profile: weights
   };
 }
 function writeProfileJson(options = {}, path = "profile.json") {
