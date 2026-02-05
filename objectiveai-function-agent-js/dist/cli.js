@@ -1166,7 +1166,7 @@ async function handleOpenIssues(log, sessionId) {
 async function prepare(options = {}) {
   const log = options.log ?? createFileLogger().log;
   log("=== Initializing workspace ===");
-  await init({ spec: options.spec, apiBase: options.apiBase });
+  await init(options);
   let sessionId = options.sessionId;
   log("=== Step 1: Learning about ObjectiveAI ===");
   sessionId = await learnSubmodule(log, sessionId);
