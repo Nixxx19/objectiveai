@@ -7,7 +7,7 @@ import { PINNED_COLOR_ANIMATION_MS } from "../../../lib/constants";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import { useObjectiveAI } from "../../../hooks/useObjectiveAI";
 import { SchemaFormBuilder } from "../../../components/SchemaForm";
-import type { InputSchema, InputValue } from "../../../components/SchemaForm/types";
+import type { InputSchema, InputValue, ValidationError } from "../../../components/SchemaForm/types";
 import SplitItemDisplay from "../../../components/SplitItemDisplay";
 import { simplifySplitItems, toDisplayItem, getDisplayMode } from "../../../lib/split-item-utils";
 import { compileFunctionInputSplit } from "../../../lib/wasm-validation";
@@ -47,6 +47,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   const [isSaved, setIsSaved] = useState(false);
   const [showPinnedColor, setShowPinnedColor] = useState(false);
   const [splitItems, setSplitItems] = useState<InputValue[] | null>(null);
+  const [_formErrors, setFormErrors] = useState<ValidationError[]>([]); // Reserved for future validation display
   const [results, setResults] = useState<{
     output?: number | number[];
     inputSnapshot?: Record<string, unknown>; // Store input for display
@@ -274,9 +275,9 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
       const client = await getClient();
 
       // Build execution options with streaming and optional reasoning
-      // Type bridge: local InputValue and SDK's have minor structural differences
       const executionBody = {
-        input: formData as Record<string, unknown>,
+        // Type assertion needed: local InputValue type is compatible with SDK's InputValue but TS can't verify
+        input: formData as unknown as Parameters<typeof Functions.Executions.create>[3]["input"],
         stream: true as const,
         from_cache: DEV_EXECUTION_OPTIONS.from_cache,
         from_rng: DEV_EXECUTION_OPTIONS.from_rng,

@@ -96,7 +96,6 @@ export default function FunctionsPage() {
 
         setFunctions(functionItems);
       } catch (err) {
-        console.error("Failed to fetch functions:", err);
         setError(err instanceof Error ? err.message : "Failed to load functions");
       } finally {
         setIsLoading(false);
@@ -106,14 +105,12 @@ export default function FunctionsPage() {
     fetchFunctions();
   }, []);
 
-  // Load pinned and recent from localStorage
+  // Load pinned functions from localStorage
   useEffect(() => {
     const savedPinned = localStorage.getItem('pinned-functions');
-    const savedRecent = localStorage.getItem('recent-functions');
     if (savedPinned) {
       setPinnedFunctions(JSON.parse(savedPinned));
     }
-    if (savedRecent) setRecentFunctions(JSON.parse(savedRecent));
   }, []);
 
   // Dynamic sticky offset calculation based on nav height

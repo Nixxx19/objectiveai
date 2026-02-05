@@ -6,8 +6,8 @@ import { useState, useEffect } from "react";
  * Breakpoints matching globals.css
  * @see objectiveai-web-new/app/globals.css
  */
-const MOBILE_BREAKPOINT = 640;
-const TABLET_BREAKPOINT = 1024;
+export const MOBILE_BREAKPOINT = 640;
+export const TABLET_BREAKPOINT = 1024;
 
 interface ResponsiveState {
   /** Viewport is mobile width (<= 640px) */
@@ -18,12 +18,31 @@ interface ResponsiveState {
   isDesktop: boolean;
   /** Current window width in pixels */
   windowWidth: number;
+  /** Whether the component has mounted (for SSR-safe rendering) */
+  hasMounted: boolean;
 }
+
+/**
+ * SSR-safe default state - uses desktop values to avoid layout shift
+ * for the majority of users. Mobile users will see a brief flash but
+ * this is preferable to hydration errors.
+ */
+const SSR_DEFAULT_STATE: ResponsiveState = {
+  isMobile: false,
+  isTablet: false,
+  isDesktop: true,
+  windowWidth: 1200,
+  hasMounted: false,
+};
 
 /**
  * Custom hook for detecting responsive breakpoints.
  * Consolidates mobile and tablet detection that was previously
  * duplicated across browse pages.
+ *
+ * **SSR-Safe:** Always starts with desktop defaults on both server and
+ * client to prevent hydration mismatches. After mount, updates to actual
+ * viewport size.
  *
  * Breakpoints match globals.css:
  * - Mobile: <= 640px
@@ -31,22 +50,17 @@ interface ResponsiveState {
  * - Desktop: > 1024px
  *
  * @example
- * const { isMobile, isTablet, isDesktop } = useResponsive();
+ * const { isMobile, isTablet, isDesktop, hasMounted } = useResponsive();
  * // Use for responsive layouts
  * const columns = isDesktop ? 3 : isTablet ? 2 : 1;
+ * // Optional: hide content until mounted for SSR-sensitive UI
+ * if (!hasMounted) return <Skeleton />;
  */
 export function useResponsive(): ResponsiveState {
-  const [state, setState] = useState<ResponsiveState>({
-    isMobile: false,
-    isTablet: false,
-    isDesktop: true,
-    windowWidth: typeof window !== "undefined" ? window.innerWidth : 1200,
-  });
+  // Always initialize with the same values on server and client
+  const [state, setState] = useState<ResponsiveState>(SSR_DEFAULT_STATE);
 
   useEffect(() => {
-    // Check if window is available (SSR safety)
-    if (typeof window === "undefined") return;
-
     const updateState = () => {
       const width = window.innerWidth;
       setState({
@@ -54,10 +68,11 @@ export function useResponsive(): ResponsiveState {
         isTablet: width <= TABLET_BREAKPOINT,
         isDesktop: width > TABLET_BREAKPOINT,
         windowWidth: width,
+        hasMounted: true,
       });
     };
 
-    // Initial check
+    // Initial check after mount
     updateState();
 
     // Listen for resize events

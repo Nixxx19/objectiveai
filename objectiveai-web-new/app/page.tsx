@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import HeroText from "@/components/HeroText";
 import { deriveCategory, deriveDisplayName } from "../lib/objectiveai";
+import { useResponsive } from "../hooks/useResponsive";
 
 // =============================================================================
 // FEATURED FUNCTIONS CONFIGURATION
@@ -23,19 +24,9 @@ interface FeaturedFunction {
 }
 
 export default function Home() {
-  const [isMobile, setIsMobile] = useState(false);
+  const { isMobile } = useResponsive();
   const [functions, setFunctions] = useState<FeaturedFunction[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const checkViewport = () => {
-      const width = window.innerWidth;
-      setIsMobile(width <= 640);
-    };
-    checkViewport();
-    window.addEventListener('resize', checkViewport);
-    return () => window.removeEventListener('resize', checkViewport);
-  }, []);
 
   // Fetch functions from API
   useEffect(() => {
@@ -87,8 +78,8 @@ export default function Home() {
         );
 
         setFunctions(functionItems);
-      } catch (err) {
-        console.error("Failed to fetch featured functions:", err);
+      } catch {
+        // Silent failure - page still renders, just without featured functions
       } finally {
         setIsLoading(false);
       }

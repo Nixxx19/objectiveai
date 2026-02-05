@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import ArrayInput from "../../components/ArrayInput";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useResponsive } from "../../hooks/useResponsive";
 
 // Content item types matching ArrayInput component
 type TextItem = string;
@@ -48,7 +48,7 @@ export default function VectorCompletionsPage() {
   const [ensembleId, setEnsembleId] = useState("");
   const [profileWeights, setProfileWeights] = useState("1");
   const [isRunning, setIsRunning] = useState(false);
-  const isMobile = useIsMobile();
+  const { isMobile } = useResponsive();
   const [results, setResults] = useState<VectorResult | null>(null);
   const [runError, setRunError] = useState<string | null>(null);
   const [modelNames, setModelNames] = useState<Record<string, string>>({});
@@ -140,7 +140,6 @@ export default function VectorCompletionsPage() {
         _responses: validResponses,
       });
     } catch (err) {
-      console.error("Vector completion failed:", err);
       setRunError(err instanceof Error ? err.message : "Execution failed");
     } finally {
       setIsRunning(false);

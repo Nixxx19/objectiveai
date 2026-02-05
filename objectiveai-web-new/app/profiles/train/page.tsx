@@ -64,8 +64,8 @@ export default function ProfileTrainPage() {
         if (uniqueFunctions.length > 0) {
           setSelectedFunctionIndex(0);
         }
-      } catch (err) {
-        console.error("Failed to fetch functions:", err);
+      } catch {
+        // Silent failure - show empty function list
       } finally {
         setIsLoadingFunctions(false);
       }
@@ -144,7 +144,7 @@ export default function ProfileTrainPage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: isMobile ? "0 16px" : "0 32px" }}>
+      <div className="container">
         {/* Breadcrumb */}
         <nav style={{
           display: "flex",

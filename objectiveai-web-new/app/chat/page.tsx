@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useIsMobile } from "../../hooks/useIsMobile";
+import { useResponsive } from "../../hooks/useResponsive";
 
 interface Message {
   role: "user" | "assistant" | "system";
@@ -36,7 +36,7 @@ export default function ChatPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [usage, setUsage] = useState<ChatCompletion["usage"] | null>(null);
-  const isMobile = useIsMobile();
+  const { isMobile } = useResponsive();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -129,8 +129,8 @@ export default function ChatPage() {
                 if (chunk.usage) {
                   finalUsage = chunk.usage;
                 }
-              } catch (parseErr) {
-                console.error("Failed to parse chunk:", parseErr);
+              } catch {
+                // Skip malformed chunks - stream continues
               }
             }
           }
@@ -149,7 +149,6 @@ export default function ChatPage() {
         }
       }
     } catch (err) {
-      console.error("Chat completion failed:", err);
       setError(err instanceof Error ? err.message : "Request failed");
       // Remove the empty assistant message on error
       setMessages(newMessages);

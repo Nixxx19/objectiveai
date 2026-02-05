@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ObjectiveAI, Vector } from "objectiveai";
+import { normalizeError, getErrorStatusCode } from "@/lib/error-handling";
 
 // Server-side client with API key from environment
 function getServerClient(): ObjectiveAI {
@@ -88,8 +89,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    const status = message.includes("401") ? 401 : 500;
-    return NextResponse.json({ error: message }, { status });
+    const message = normalizeError(error);
+    const statusCode = getErrorStatusCode(error);
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }

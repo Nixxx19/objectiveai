@@ -178,7 +178,7 @@ export default function CreateEnsembleLlmPage() {
 
   return (
     <div className="page">
-      <div className="container" style={{ padding: isMobile ? "0 16px" : "0 32px" }}>
+      <div className="container">
         {/* Breadcrumb */}
         <div style={{ marginBottom: "16px" }}>
           <Link
@@ -231,6 +231,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Model Field (Required) */}
             <div style={{ marginBottom: "20px", position: "relative" }}>
               <label
+                htmlFor="model-input"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -242,6 +243,7 @@ export default function CreateEnsembleLlmPage() {
                 Model <span style={{ color: "var(--accent)" }}>*</span>
               </label>
               <input
+                id="model-input"
                 type="text"
                 value={model}
                 onChange={(e) => setModel(e.target.value)}
@@ -250,6 +252,7 @@ export default function CreateEnsembleLlmPage() {
                 placeholder="e.g., openai/gpt-4o"
                 className="input"
                 style={{ fontFamily: "monospace" }}
+                aria-describedby="model-hint"
               />
               {showSuggestions && filteredSuggestions.length > 0 && (
                 <div
@@ -297,7 +300,7 @@ export default function CreateEnsembleLlmPage() {
                   ))}
                 </div>
               )}
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="model-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 The model identifier (e.g., provider/model-name)
               </p>
             </div>
@@ -305,6 +308,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Temperature */}
             <div style={{ marginBottom: "20px" }}>
               <label
+                htmlFor="temperature-input"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -316,6 +320,7 @@ export default function CreateEnsembleLlmPage() {
                 Temperature
               </label>
               <input
+                id="temperature-input"
                 type="number"
                 value={temperature}
                 onChange={(e) => setTemperature(e.target.value)}
@@ -324,8 +329,9 @@ export default function CreateEnsembleLlmPage() {
                 max={2}
                 step={0.1}
                 className="input"
+                aria-describedby="temperature-hint"
               />
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="temperature-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 Controls randomness (0 = deterministic, 2 = most random)
               </p>
             </div>
@@ -333,6 +339,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Top P */}
             <div style={{ marginBottom: "20px" }}>
               <label
+                htmlFor="top-p-input"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -344,6 +351,7 @@ export default function CreateEnsembleLlmPage() {
                 Top P
               </label>
               <input
+                id="top-p-input"
                 type="number"
                 value={topP}
                 onChange={(e) => setTopP(e.target.value)}
@@ -352,8 +360,9 @@ export default function CreateEnsembleLlmPage() {
                 max={1}
                 step={0.05}
                 className="input"
+                aria-describedby="top-p-hint"
               />
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="top-p-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 Nucleus sampling threshold
               </p>
             </div>
@@ -361,6 +370,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Top Logprobs */}
             <div style={{ marginBottom: "20px" }}>
               <label
+                htmlFor="top-logprobs-input"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -372,6 +382,7 @@ export default function CreateEnsembleLlmPage() {
                 Top Logprobs
               </label>
               <input
+                id="top-logprobs-input"
                 type="number"
                 value={topLogprobs}
                 onChange={(e) => setTopLogprobs(e.target.value)}
@@ -380,8 +391,9 @@ export default function CreateEnsembleLlmPage() {
                 max={20}
                 step={1}
                 className="input"
+                aria-describedby="top-logprobs-hint"
               />
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="top-logprobs-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 Enables probabilistic voting (required for vector completions)
               </p>
             </div>
@@ -389,6 +401,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Frequency Penalty */}
             <div style={{ marginBottom: "20px" }}>
               <label
+                htmlFor="frequency-penalty-input"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -400,6 +413,7 @@ export default function CreateEnsembleLlmPage() {
                 Frequency Penalty
               </label>
               <input
+                id="frequency-penalty-input"
                 type="number"
                 value={frequencyPenalty}
                 onChange={(e) => setFrequencyPenalty(e.target.value)}
@@ -408,8 +422,9 @@ export default function CreateEnsembleLlmPage() {
                 max={2}
                 step={0.1}
                 className="input"
+                aria-describedby="frequency-penalty-hint"
               />
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="frequency-penalty-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 Penalizes repeated tokens based on frequency
               </p>
             </div>
@@ -417,6 +432,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Presence Penalty */}
             <div style={{ marginBottom: "20px" }}>
               <label
+                htmlFor="presence-penalty-input"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -428,6 +444,7 @@ export default function CreateEnsembleLlmPage() {
                 Presence Penalty
               </label>
               <input
+                id="presence-penalty-input"
                 type="number"
                 value={presencePenalty}
                 onChange={(e) => setPresencePenalty(e.target.value)}
@@ -436,8 +453,9 @@ export default function CreateEnsembleLlmPage() {
                 max={2}
                 step={0.1}
                 className="input"
+                aria-describedby="presence-penalty-hint"
               />
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="presence-penalty-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 Penalizes tokens based on presence in text so far
               </p>
             </div>
@@ -445,6 +463,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Output Mode */}
             <div style={{ marginBottom: "20px" }}>
               <label
+                htmlFor="output-mode-select"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -456,9 +475,11 @@ export default function CreateEnsembleLlmPage() {
                 Output Mode
               </label>
               <select
+                id="output-mode-select"
                 value={outputMode}
                 onChange={(e) => setOutputMode(e.target.value as OutputMode | "")}
                 className="select"
+                aria-describedby="output-mode-hint"
               >
                 <option value="">Default</option>
                 {OUTPUT_MODES.map((mode) => (
@@ -467,7 +488,7 @@ export default function CreateEnsembleLlmPage() {
                   </option>
                 ))}
               </select>
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="output-mode-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 How the LLM should format its output
               </p>
             </div>
@@ -475,6 +496,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Reasoning Effort */}
             <div style={{ marginBottom: "20px" }}>
               <label
+                htmlFor="reasoning-effort-select"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -486,9 +508,11 @@ export default function CreateEnsembleLlmPage() {
                 Reasoning Effort
               </label>
               <select
+                id="reasoning-effort-select"
                 value={reasoningEffort}
                 onChange={(e) => setReasoningEffort(e.target.value as ReasoningEffort | "")}
                 className="select"
+                aria-describedby="reasoning-effort-hint"
               >
                 <option value="">None</option>
                 {REASONING_EFFORTS.map((effort) => (
@@ -497,7 +521,7 @@ export default function CreateEnsembleLlmPage() {
                   </option>
                 ))}
               </select>
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="reasoning-effort-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 Amount of reasoning to apply (for supported models)
               </p>
             </div>
@@ -505,6 +529,7 @@ export default function CreateEnsembleLlmPage() {
             {/* Provider Order */}
             <div style={{ marginBottom: "0" }}>
               <label
+                htmlFor="provider-order-input"
                 style={{
                   display: "block",
                   fontSize: "13px",
@@ -516,13 +541,15 @@ export default function CreateEnsembleLlmPage() {
                 Provider Order
               </label>
               <input
+                id="provider-order-input"
                 type="text"
                 value={providerOrder}
                 onChange={(e) => setProviderOrder(e.target.value)}
                 placeholder="e.g., openai, azure, together"
                 className="input"
+                aria-describedby="provider-order-hint"
               />
-              <p style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
+              <p id="provider-order-hint" style={{ fontSize: "12px", color: "var(--text-muted)", marginTop: "6px" }}>
                 Comma-separated list of provider preferences
               </p>
             </div>

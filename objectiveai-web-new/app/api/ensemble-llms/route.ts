@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { ObjectiveAI, EnsembleLlm } from "objectiveai";
+import { normalizeError, getErrorStatusCode } from "@/lib/error-handling";
 
 function getServerClient(): ObjectiveAI {
   return new ObjectiveAI({
@@ -13,7 +14,8 @@ export async function GET() {
     const result = await EnsembleLlm.list(client);
     return NextResponse.json(result);
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    const message = normalizeError(error);
+    const statusCode = getErrorStatusCode(error);
+    return NextResponse.json({ error: message }, { status: statusCode });
   }
 }
