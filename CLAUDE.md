@@ -462,6 +462,8 @@ OAuth providers (Google, GitHub, X, Reddit) via NextAuth. Auth is fully function
 
 **Anonymous execution:** Backend provides ~5¢ free credit for anonymous users. To show remaining credits, call `Auth.Credits.retrieve(client)` with the SDK.
 
+**CORS:** API has `Access-Control-Allow-Origin: *` - client-side SDK calls work from any origin.
+
 **No user tiers:** There are no free/pro/enterprise tiers. All users have the same access level.
 
 ### Disabled Features
@@ -469,21 +471,24 @@ OAuth providers (Google, GitHub, X, Reddit) via NextAuth. Auth is fully function
 - **Purchase Credits** button disabled until Stripe integration is migrated from `objectiveai-web`
 - **Profile training** endpoint returns 501 (backend pending)—keep UI with "coming soon" messaging
 
-### Web-New Current State (~80% Complete)
+### Web-New Current State (~95% Complete)
 
 **Production-Ready Pages:**
 - `/` - Landing with featured functions
 - `/functions`, `/profiles`, `/ensembles`, `/ensemble-llms` - Browse pages with search/filter/sort
+- `/functions/[slug]` - Function detail with execution UI, profile selector, reasoning
+- `/ensembles/[id]` - Ensemble detail with LLM list and usage stats
+- `/ensemble-llms/[id]` - Ensemble LLM detail with config display
+- `/account/keys` - API keys management (create, view, disable)
+- `/account/credits` - Credit balance display via SDK
 - `/people` - Team page with founder bios
 - `/information` - FAQ (24 Q&As), API docs, SDK links
 - `/legal` - Terms + Privacy (expandable cards)
 - `/sdk-first`, `/vibe-native` - Onboarding guides
+- `/chat`, `/vector` - Direct completions pages
 
-**Partial/Incomplete:**
-- `/account/keys` - API keys management
-- `/account/credits` - Credit balance (view-only, purchase pending Stripe migration)
-- `/functions/[slug]`, `/ensembles/[id]`, `/ensemble-llms/[id]` - Detail pages
-- Stripe payment integration (migrate from `objectiveai-web`)
+**Pending:**
+- Stripe credit purchase (Stripe env var configured, needs UI migration from `objectiveai-web`)
 
 ### Key Web-New Files
 
@@ -703,8 +708,7 @@ Module loads gracefully - shows "Enter model to see ID" when WASM unavailable.
 ### Remaining Gaps
 
 - Profile training backend integration (endpoint returns 501—keep UI with "coming soon")
-- Stripe payment integration (migrate from `objectiveai-web/src/components/account/credits/Credits.tsx`)
-- Credits display showing remaining balance via `Auth.Credits.retrieve`
+- Stripe credit purchase UI (migrate from `objectiveai-web/src/components/account/credits/Credits.tsx`)
 
 ### Stripe Integration Notes
 
