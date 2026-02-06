@@ -18817,13 +18817,19 @@ declare const ProfileSchema$1: z.ZodUnion<readonly [z.ZodObject<{
 }, z.core.$strip>]>;
 type Profile$1 = z.infer<typeof ProfileSchema$1>;
 
+declare const ObjectInputSchemaSchema: z.ZodType<ObjectInputSchema>;
+type ObjectInputSchemaToZodSchema = z.ZodObject<Record<string, z.ZodOptional<z.ZodType<InputValue>> | z.ZodType<InputValue>>>;
 interface ObjectInputSchema {
     type: "object";
     description?: string | null;
     properties: Record<string, InputSchema>;
     required?: string[] | null;
 }
-declare const ObjectInputSchemaSchema: z.ZodType<Object>;
+declare namespace ObjectInputSchema {
+    function toZodSchema(self: ObjectInputSchema): ObjectInputSchemaToZodSchema;
+}
+declare const ArrayInputSchemaSchema: z.ZodType<ArrayInputSchema>;
+type ArrayInputSchemaToZodSchema = z.ZodArray<z.ZodType<InputValue>>;
 interface ArrayInputSchema {
     type: "array";
     description?: string | null;
@@ -18831,57 +18837,97 @@ interface ArrayInputSchema {
     maxItems?: number | null;
     items: InputSchema;
 }
-declare const ArrayInputSchemaSchema: z.ZodType<ArrayInputSchema>;
+declare namespace ArrayInputSchema {
+    function toZodSchema(self: ArrayInputSchema): ArrayInputSchemaToZodSchema;
+}
 declare const StringInputSchemaSchema: z.ZodObject<{
     type: z.ZodLiteral<"string">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
 }, z.core.$strip>;
+type StringInputSchemaToZodSchema = z.ZodString | z.ZodEnum<{
+    [x: string]: string;
+}>;
 type StringInputSchema = z.infer<typeof StringInputSchemaSchema>;
+declare namespace StringInputSchema {
+    function toZodSchema(self: StringInputSchema): StringInputSchemaToZodSchema;
+}
 declare const NumberInputSchemaSchema: z.ZodObject<{
     type: z.ZodLiteral<"number">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     minimum: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
     maximum: z.ZodNullable<z.ZodOptional<z.ZodNumber>>;
 }, z.core.$strip>;
+type NumberInputSchemaToZodSchema = z.ZodNumber;
 type NumberInputSchema = z.infer<typeof NumberInputSchemaSchema>;
+declare namespace NumberInputSchema {
+    function toZodSchema(self: NumberInputSchema): NumberInputSchemaToZodSchema;
+}
 declare const IntegerInputSchemaSchema: z.ZodObject<{
     type: z.ZodLiteral<"integer">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     minimum: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     maximum: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
 }, z.core.$strip>;
+type IntegerInputSchemaToZodSchema = z.ZodInt;
 type IntegerInputSchema = z.infer<typeof IntegerInputSchemaSchema>;
+declare namespace IntegerInputSchema {
+    function toZodSchema(self: IntegerInputSchema): IntegerInputSchemaToZodSchema;
+}
 declare const BooleanInputSchemaSchema: z.ZodObject<{
     type: z.ZodLiteral<"boolean">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>;
+type BooleanInputSchemaToZodSchema = z.ZodBoolean;
 type BooleanInputSchema = z.infer<typeof BooleanInputSchemaSchema>;
+declare namespace BooleanInputSchema {
+    function toZodSchema(self: BooleanInputSchema): BooleanInputSchemaToZodSchema;
+}
 declare const ImageInputSchemaSchema: z.ZodObject<{
     type: z.ZodLiteral<"image">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>;
+type ImageInputSchemaToZodSchema = typeof ImageRichContentPartSchema;
 type ImageInputSchema = z.infer<typeof ImageInputSchemaSchema>;
+declare namespace ImageInputSchema {
+    function toZodSchema(self: ImageInputSchema): ImageInputSchemaToZodSchema;
+}
 declare const AudioInputSchemaSchema: z.ZodObject<{
     type: z.ZodLiteral<"audio">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>;
+type AudioInputSchemaToZodSchema = typeof AudioRichContentPartSchema;
 type AudioInputSchema = z.infer<typeof AudioInputSchemaSchema>;
+declare namespace AudioInputSchema {
+    function toZodSchema(self: AudioInputSchema): AudioInputSchemaToZodSchema;
+}
 declare const VideoInputSchemaSchema: z.ZodObject<{
     type: z.ZodLiteral<"video">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>;
+type VideoInputSchemaToZodSchema = typeof VideoRichContentPartSchema;
 type VideoInputSchema = z.infer<typeof VideoInputSchemaSchema>;
+declare namespace VideoInputSchema {
+    function toZodSchema(self: VideoInputSchema): VideoInputSchemaToZodSchema;
+}
 declare const FileInputSchemaSchema: z.ZodObject<{
     type: z.ZodLiteral<"file">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>;
+type FileInputSchemaToZodSchema = typeof FileRichContentPartSchema;
 type FileInputSchema = z.infer<typeof FileInputSchemaSchema>;
+declare namespace FileInputSchema {
+    function toZodSchema(self: FileInputSchema): FileInputSchemaToZodSchema;
+}
+declare const AnyOfInputSchemaSchema: z.ZodType<AnyOfInputSchema>;
+type AnyOfInputSchemaToZodSchema = z.ZodUnion<z.ZodType<InputValue>[]>;
 interface AnyOfInputSchema {
     anyOf: InputSchema[];
 }
-declare const AnyOfInputSchemaSchema: z.ZodType<AnyOfInputSchema>;
-declare const InputSchemaSchema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+declare namespace AnyOfInputSchema {
+    function toZodSchema(self: AnyOfInputSchema): AnyOfInputSchemaToZodSchema;
+}
+declare const InputSchemaSchema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
     type: z.ZodLiteral<"string">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -18911,9 +18957,13 @@ declare const InputSchemaSchema: z.ZodUnion<readonly [z.ZodType<Object, unknown,
     type: z.ZodLiteral<"file">;
     description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
 }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
+type InputSchemaToZodSchema = ObjectInputSchemaToZodSchema | ArrayInputSchemaToZodSchema | StringInputSchemaToZodSchema | NumberInputSchemaToZodSchema | IntegerInputSchemaToZodSchema | BooleanInputSchemaToZodSchema | ImageInputSchemaToZodSchema | AudioInputSchemaToZodSchema | VideoInputSchemaToZodSchema | FileInputSchemaToZodSchema | AnyOfInputSchemaToZodSchema;
 type InputSchema = z.infer<typeof InputSchemaSchema>;
+declare namespace InputSchema {
+    function toZodSchema(self: InputSchema): InputSchemaToZodSchema;
+}
 type InputValue = ImageRichContentPart | AudioRichContentPart | VideoRichContentPart | FileRichContentPart | {
-    [key: string]: InputValue;
+    [key: string]: InputValue | undefined;
 } | InputValue[] | string | number | boolean;
 declare const InputValueSchema: z.ZodType<InputValue>;
 type InputValueExpression = ImageRichContentPart | AudioRichContentPart | VideoRichContentPart | FileRichContentPart | {
@@ -46858,7 +46908,7 @@ declare const RemoteScalarFunctionSchema: z.ZodObject<{
     }, z.core.$strip>], "type">>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+    input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
         type: z.ZodLiteral<"string">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -47346,7 +47396,7 @@ declare const RemoteVectorFunctionSchema: z.ZodObject<{
     }, z.core.$strip>], "type">>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+    input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
         type: z.ZodLiteral<"string">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -47849,7 +47899,7 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     }, z.core.$strip>], "type">>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+    input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
         type: z.ZodLiteral<"string">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -48335,7 +48385,7 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
     }, z.core.$strip>], "type">>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+    input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
         type: z.ZodLiteral<"string">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -49756,7 +49806,7 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
     }, z.core.$strip>], "type">>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+    input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
         type: z.ZodLiteral<"string">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -50242,7 +50292,7 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
     }, z.core.$strip>], "type">>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+    input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
         type: z.ZodLiteral<"string">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -52516,55 +52566,67 @@ declare const TaskOutputsSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
 }, z.core.$strip>, z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>, z.ZodNull]>>;
 type TaskOutputs = z.infer<typeof TaskOutputsSchema>;
 
-type index$c_AnyOfInputSchema = AnyOfInputSchema;
+declare const index$c_AnyOfInputSchema: typeof AnyOfInputSchema;
 declare const index$c_AnyOfInputSchemaSchema: typeof AnyOfInputSchemaSchema;
-type index$c_ArrayInputSchema = ArrayInputSchema;
+type index$c_AnyOfInputSchemaToZodSchema = AnyOfInputSchemaToZodSchema;
+declare const index$c_ArrayInputSchema: typeof ArrayInputSchema;
 declare const index$c_ArrayInputSchemaSchema: typeof ArrayInputSchemaSchema;
-type index$c_AudioInputSchema = AudioInputSchema;
+type index$c_ArrayInputSchemaToZodSchema = ArrayInputSchemaToZodSchema;
+declare const index$c_AudioInputSchema: typeof AudioInputSchema;
 declare const index$c_AudioInputSchemaSchema: typeof AudioInputSchemaSchema;
-type index$c_BooleanInputSchema = BooleanInputSchema;
+type index$c_AudioInputSchemaToZodSchema = AudioInputSchemaToZodSchema;
+declare const index$c_BooleanInputSchema: typeof BooleanInputSchema;
 declare const index$c_BooleanInputSchemaSchema: typeof BooleanInputSchemaSchema;
+type index$c_BooleanInputSchemaToZodSchema = BooleanInputSchemaToZodSchema;
 type index$c_CompiledFunctionOutput = CompiledFunctionOutput;
 declare const index$c_CompiledFunctionOutputSchema: typeof CompiledFunctionOutputSchema;
 type index$c_Expression = Expression;
 declare const index$c_ExpressionSchema: typeof ExpressionSchema;
-type index$c_FileInputSchema = FileInputSchema;
+declare const index$c_FileInputSchema: typeof FileInputSchema;
 declare const index$c_FileInputSchemaSchema: typeof FileInputSchemaSchema;
+type index$c_FileInputSchemaToZodSchema = FileInputSchemaToZodSchema;
 type index$c_FunctionOutput = FunctionOutput;
 declare const index$c_FunctionOutputSchema: typeof FunctionOutputSchema;
-type index$c_ImageInputSchema = ImageInputSchema;
+declare const index$c_ImageInputSchema: typeof ImageInputSchema;
 declare const index$c_ImageInputSchemaSchema: typeof ImageInputSchemaSchema;
+type index$c_ImageInputSchemaToZodSchema = ImageInputSchemaToZodSchema;
 type index$c_InputMapsExpression = InputMapsExpression;
 declare const index$c_InputMapsExpressionSchema: typeof InputMapsExpressionSchema;
-type index$c_InputSchema = InputSchema;
+declare const index$c_InputSchema: typeof InputSchema;
 declare const index$c_InputSchemaSchema: typeof InputSchemaSchema;
+type index$c_InputSchemaToZodSchema = InputSchemaToZodSchema;
 type index$c_InputValue = InputValue;
 type index$c_InputValueExpression = InputValueExpression;
 declare const index$c_InputValueExpressionSchema: typeof InputValueExpressionSchema;
 declare const index$c_InputValueSchema: typeof InputValueSchema;
-type index$c_IntegerInputSchema = IntegerInputSchema;
+declare const index$c_IntegerInputSchema: typeof IntegerInputSchema;
 declare const index$c_IntegerInputSchemaSchema: typeof IntegerInputSchemaSchema;
+type index$c_IntegerInputSchemaToZodSchema = IntegerInputSchemaToZodSchema;
 type index$c_JMESPathExpression = JMESPathExpression;
 declare const index$c_JMESPathExpressionSchema: typeof JMESPathExpressionSchema;
-type index$c_NumberInputSchema = NumberInputSchema;
+declare const index$c_NumberInputSchema: typeof NumberInputSchema;
 declare const index$c_NumberInputSchemaSchema: typeof NumberInputSchemaSchema;
-type index$c_ObjectInputSchema = ObjectInputSchema;
+type index$c_NumberInputSchemaToZodSchema = NumberInputSchemaToZodSchema;
+declare const index$c_ObjectInputSchema: typeof ObjectInputSchema;
 declare const index$c_ObjectInputSchemaSchema: typeof ObjectInputSchemaSchema;
+type index$c_ObjectInputSchemaToZodSchema = ObjectInputSchemaToZodSchema;
 type index$c_StarlarkExpression = StarlarkExpression;
 declare const index$c_StarlarkExpressionSchema: typeof StarlarkExpressionSchema;
-type index$c_StringInputSchema = StringInputSchema;
+declare const index$c_StringInputSchema: typeof StringInputSchema;
 declare const index$c_StringInputSchemaSchema: typeof StringInputSchemaSchema;
+type index$c_StringInputSchemaToZodSchema = StringInputSchemaToZodSchema;
 type index$c_TaskOutput = TaskOutput;
 declare const index$c_TaskOutputSchema: typeof TaskOutputSchema;
 type index$c_TaskOutputs = TaskOutputs;
 declare const index$c_TaskOutputsSchema: typeof TaskOutputsSchema;
 type index$c_VectorCompletionOutput = VectorCompletionOutput;
 declare const index$c_VectorCompletionOutputSchema: typeof VectorCompletionOutputSchema;
-type index$c_VideoInputSchema = VideoInputSchema;
+declare const index$c_VideoInputSchema: typeof VideoInputSchema;
 declare const index$c_VideoInputSchemaSchema: typeof VideoInputSchemaSchema;
+type index$c_VideoInputSchemaToZodSchema = VideoInputSchemaToZodSchema;
 declare const index$c_compileVectorCompletionOutput: typeof compileVectorCompletionOutput;
 declare namespace index$c {
-  export { type index$c_AnyOfInputSchema as AnyOfInputSchema, index$c_AnyOfInputSchemaSchema as AnyOfInputSchemaSchema, type index$c_ArrayInputSchema as ArrayInputSchema, index$c_ArrayInputSchemaSchema as ArrayInputSchemaSchema, type index$c_AudioInputSchema as AudioInputSchema, index$c_AudioInputSchemaSchema as AudioInputSchemaSchema, type index$c_BooleanInputSchema as BooleanInputSchema, index$c_BooleanInputSchemaSchema as BooleanInputSchemaSchema, type index$c_CompiledFunctionOutput as CompiledFunctionOutput, index$c_CompiledFunctionOutputSchema as CompiledFunctionOutputSchema, type index$c_Expression as Expression, index$c_ExpressionSchema as ExpressionSchema, type index$c_FileInputSchema as FileInputSchema, index$c_FileInputSchemaSchema as FileInputSchemaSchema, type index$c_FunctionOutput as FunctionOutput, index$c_FunctionOutputSchema as FunctionOutputSchema, type index$c_ImageInputSchema as ImageInputSchema, index$c_ImageInputSchemaSchema as ImageInputSchemaSchema, type index$c_InputMapsExpression as InputMapsExpression, index$c_InputMapsExpressionSchema as InputMapsExpressionSchema, type index$c_InputSchema as InputSchema, index$c_InputSchemaSchema as InputSchemaSchema, type index$c_InputValue as InputValue, type index$c_InputValueExpression as InputValueExpression, index$c_InputValueExpressionSchema as InputValueExpressionSchema, index$c_InputValueSchema as InputValueSchema, type index$c_IntegerInputSchema as IntegerInputSchema, index$c_IntegerInputSchemaSchema as IntegerInputSchemaSchema, type index$c_JMESPathExpression as JMESPathExpression, index$c_JMESPathExpressionSchema as JMESPathExpressionSchema, type index$c_NumberInputSchema as NumberInputSchema, index$c_NumberInputSchemaSchema as NumberInputSchemaSchema, type index$c_ObjectInputSchema as ObjectInputSchema, index$c_ObjectInputSchemaSchema as ObjectInputSchemaSchema, type index$c_StarlarkExpression as StarlarkExpression, index$c_StarlarkExpressionSchema as StarlarkExpressionSchema, type index$c_StringInputSchema as StringInputSchema, index$c_StringInputSchemaSchema as StringInputSchemaSchema, type index$c_TaskOutput as TaskOutput, index$c_TaskOutputSchema as TaskOutputSchema, type index$c_TaskOutputs as TaskOutputs, index$c_TaskOutputsSchema as TaskOutputsSchema, type index$c_VectorCompletionOutput as VectorCompletionOutput, index$c_VectorCompletionOutputSchema as VectorCompletionOutputSchema, type index$c_VideoInputSchema as VideoInputSchema, index$c_VideoInputSchemaSchema as VideoInputSchemaSchema, index$c_compileVectorCompletionOutput as compileVectorCompletionOutput };
+  export { index$c_AnyOfInputSchema as AnyOfInputSchema, index$c_AnyOfInputSchemaSchema as AnyOfInputSchemaSchema, type index$c_AnyOfInputSchemaToZodSchema as AnyOfInputSchemaToZodSchema, index$c_ArrayInputSchema as ArrayInputSchema, index$c_ArrayInputSchemaSchema as ArrayInputSchemaSchema, type index$c_ArrayInputSchemaToZodSchema as ArrayInputSchemaToZodSchema, index$c_AudioInputSchema as AudioInputSchema, index$c_AudioInputSchemaSchema as AudioInputSchemaSchema, type index$c_AudioInputSchemaToZodSchema as AudioInputSchemaToZodSchema, index$c_BooleanInputSchema as BooleanInputSchema, index$c_BooleanInputSchemaSchema as BooleanInputSchemaSchema, type index$c_BooleanInputSchemaToZodSchema as BooleanInputSchemaToZodSchema, type index$c_CompiledFunctionOutput as CompiledFunctionOutput, index$c_CompiledFunctionOutputSchema as CompiledFunctionOutputSchema, type index$c_Expression as Expression, index$c_ExpressionSchema as ExpressionSchema, index$c_FileInputSchema as FileInputSchema, index$c_FileInputSchemaSchema as FileInputSchemaSchema, type index$c_FileInputSchemaToZodSchema as FileInputSchemaToZodSchema, type index$c_FunctionOutput as FunctionOutput, index$c_FunctionOutputSchema as FunctionOutputSchema, index$c_ImageInputSchema as ImageInputSchema, index$c_ImageInputSchemaSchema as ImageInputSchemaSchema, type index$c_ImageInputSchemaToZodSchema as ImageInputSchemaToZodSchema, type index$c_InputMapsExpression as InputMapsExpression, index$c_InputMapsExpressionSchema as InputMapsExpressionSchema, index$c_InputSchema as InputSchema, index$c_InputSchemaSchema as InputSchemaSchema, type index$c_InputSchemaToZodSchema as InputSchemaToZodSchema, type index$c_InputValue as InputValue, type index$c_InputValueExpression as InputValueExpression, index$c_InputValueExpressionSchema as InputValueExpressionSchema, index$c_InputValueSchema as InputValueSchema, index$c_IntegerInputSchema as IntegerInputSchema, index$c_IntegerInputSchemaSchema as IntegerInputSchemaSchema, type index$c_IntegerInputSchemaToZodSchema as IntegerInputSchemaToZodSchema, type index$c_JMESPathExpression as JMESPathExpression, index$c_JMESPathExpressionSchema as JMESPathExpressionSchema, index$c_NumberInputSchema as NumberInputSchema, index$c_NumberInputSchemaSchema as NumberInputSchemaSchema, type index$c_NumberInputSchemaToZodSchema as NumberInputSchemaToZodSchema, index$c_ObjectInputSchema as ObjectInputSchema, index$c_ObjectInputSchemaSchema as ObjectInputSchemaSchema, type index$c_ObjectInputSchemaToZodSchema as ObjectInputSchemaToZodSchema, type index$c_StarlarkExpression as StarlarkExpression, index$c_StarlarkExpressionSchema as StarlarkExpressionSchema, index$c_StringInputSchema as StringInputSchema, index$c_StringInputSchemaSchema as StringInputSchemaSchema, type index$c_StringInputSchemaToZodSchema as StringInputSchemaToZodSchema, type index$c_TaskOutput as TaskOutput, index$c_TaskOutputSchema as TaskOutputSchema, type index$c_TaskOutputs as TaskOutputs, index$c_TaskOutputsSchema as TaskOutputsSchema, type index$c_VectorCompletionOutput as VectorCompletionOutput, index$c_VectorCompletionOutputSchema as VectorCompletionOutputSchema, index$c_VideoInputSchema as VideoInputSchema, index$c_VideoInputSchemaSchema as VideoInputSchemaSchema, type index$c_VideoInputSchemaToZodSchema as VideoInputSchemaToZodSchema, index$c_compileVectorCompletionOutput as compileVectorCompletionOutput };
 }
 
 declare const ListItemSchema$1: z.ZodObject<{
@@ -53046,7 +53108,7 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
     }, z.core.$strip>], "type">>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+    input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
         type: z.ZodLiteral<"string">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -53535,7 +53597,7 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
     }, z.core.$strip>], "type">>;
     description: z.ZodString;
     changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-    input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+    input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
         type: z.ZodLiteral<"string">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -54072,7 +54134,7 @@ declare const RetrievePairSchema: z.ZodObject<{
         }, z.core.$strip>], "type">>;
         description: z.ZodString;
         changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-        input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+        input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
             type: z.ZodLiteral<"string">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
@@ -54561,7 +54623,7 @@ declare const RetrievePairSchema: z.ZodObject<{
         }, z.core.$strip>], "type">>;
         description: z.ZodString;
         changelog: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-        input_schema: z.ZodUnion<readonly [z.ZodType<Object, unknown, z.core.$ZodTypeInternals<Object, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
+        input_schema: z.ZodUnion<readonly [z.ZodType<ObjectInputSchema, unknown, z.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z.ZodType<ArrayInputSchema, unknown, z.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z.ZodObject<{
             type: z.ZodLiteral<"string">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             enum: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodString>>>;
