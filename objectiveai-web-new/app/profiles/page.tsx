@@ -94,11 +94,13 @@ export default function ProfilesPage() {
     <div className="page">
       <div className="containerWide">
         {/* Header */}
-        <div style={{ marginBottom: isMobile ? "24px" : "32px" }}>
-          <h1 className="heading2" style={{ marginBottom: "8px" }}>Profiles</h1>
-          <p style={{ color: "var(--text-muted)", fontSize: isMobile ? "15px" : "17px" }}>
-            Learned weights for functions, trained to optimize ensemble voting
-          </p>
+        <div className="pageHeader">
+          <div>
+            <h1 className="heading2" style={{ marginBottom: "8px" }}>Profiles</h1>
+            <p style={{ color: "var(--text-muted)", fontSize: isMobile ? "15px" : "17px" }}>
+              Learned weights for functions, trained to optimize ensemble voting
+            </p>
+          </div>
         </div>
 
         {/* Sticky Search Bar Row with Filter Button */}
