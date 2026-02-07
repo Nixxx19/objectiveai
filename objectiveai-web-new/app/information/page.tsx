@@ -119,60 +119,60 @@ export default function InformationPage() {
     {
       category: "Ensemble LLMs",
       endpoints: [
-        { method: "GET", path: "/ensemble_llms", desc: "List all ObjectiveAI Ensemble LLMs" },
-        { method: "GET", path: "/ensemble_llms/{id}", desc: "Retrieve an ObjectiveAI Ensemble LLM" },
-        { method: "GET", path: "/ensemble_llms/{id}/usage", desc: "Retrieve historical usage for an ObjectiveAI Ensemble LLM" }
+        { method: "GET", path: "/ensemble_llms", href: "/docs/api/get/ensemble_llms", desc: "List all ObjectiveAI Ensemble LLMs" },
+        { method: "GET", path: "/ensemble_llms/{id}", href: "/docs/api/get/ensemble_llms/id", desc: "Retrieve an ObjectiveAI Ensemble LLM" },
+        { method: "GET", path: "/ensemble_llms/{id}/usage", href: "/docs/api/get/ensemble_llms/id/usage", desc: "Retrieve historical usage for an ObjectiveAI Ensemble LLM" }
       ]
     },
     {
       category: "Ensembles",
       endpoints: [
-        { method: "GET", path: "/ensembles", desc: "List all ObjectiveAI Ensembles" },
-        { method: "GET", path: "/ensembles/{id}", desc: "Retrieve an ObjectiveAI Ensemble" },
-        { method: "GET", path: "/ensembles/{id}/usage", desc: "Retrieve historical usage for an ObjectiveAI Ensemble" }
+        { method: "GET", path: "/ensembles", href: "/docs/api/get/ensembles", desc: "List all ObjectiveAI Ensembles" },
+        { method: "GET", path: "/ensembles/{id}", href: "/docs/api/get/ensembles/id", desc: "Retrieve an ObjectiveAI Ensemble" },
+        { method: "GET", path: "/ensembles/{id}/usage", href: "/docs/api/get/ensembles/id/usage", desc: "Retrieve historical usage for an ObjectiveAI Ensemble" }
       ]
     },
     {
       category: "Functions",
       endpoints: [
-        { method: "GET", path: "/functions", desc: "List all remote ObjectiveAI Functions" },
-        { method: "GET", path: "/functions/{fowner}/{frepository}/{fcommit}/usage", desc: "Retrieve historical usage for a remote ObjectiveAI Function" },
-        { method: "POST", path: "/functions", desc: "Execute an inline ObjectiveAI Function with an inline Profile" },
-        { method: "POST", path: "/functions/{fowner}/{frepository}/{fcommit}", desc: "Execute a remote ObjectiveAI Function with an inline Profile" },
-        { method: "POST", path: "/functions/profiles/{powner}/{prepository}/{pcommit}", desc: "Execute an inline ObjectiveAI Function with a remote Profile" },
-        { method: "POST", path: "/functions/{fowner}/{frepository}/{fcommit}/profiles/{powner}/{prepository}/{pcommit}", desc: "Execute a remote ObjectiveAI Function with a remote Profile" }
+        { method: "GET", path: "/functions", href: "/docs/api/get/functions", desc: "List all remote ObjectiveAI Functions" },
+        { method: "GET", path: "/functions/{fowner}/{frepository}/{fcommit}/usage", href: "/docs/api/get/functions/fowner/frepository/fcommit/usage", desc: "Retrieve historical usage for a remote ObjectiveAI Function" },
+        { method: "POST", path: "/functions", href: "/docs/api/post/functions", desc: "Execute an inline ObjectiveAI Function with an inline Profile" },
+        { method: "POST", path: "/functions/{fowner}/{frepository}/{fcommit}", href: "/docs/api/post/functions/fowner/frepository/fcommit", desc: "Execute a remote ObjectiveAI Function with an inline Profile" },
+        { method: "POST", path: "/functions/profiles/{powner}/{prepository}/{pcommit}", href: "/docs/api/post/functions/profiles/powner/prepository/pcommit", desc: "Execute an inline ObjectiveAI Function with a remote Profile" },
+        { method: "POST", path: "/functions/{fowner}/{frepository}/{fcommit}/profiles/{powner}/{prepository}/{pcommit}", href: "/docs/api/post/functions/fowner/frepository/fcommit/profiles/powner/prepository/pcommit", desc: "Execute a remote ObjectiveAI Function with a remote Profile" }
       ]
     },
     {
       category: "Function Profiles",
       endpoints: [
-        { method: "POST", path: "/functions/{fowner}/{frepository}/{fcommit}/profiles/compute", desc: "Compute an ObjectiveAI Function Profile from your own Data" },
-        { method: "GET", path: "/functions/profiles", desc: "List all remote ObjectiveAI Function Profiles" },
-        { method: "GET", path: "/functions/profiles/{powner}/{prepository}/{pcommit}/usage", desc: "Retrieve historical usage for a remote ObjectiveAI Function Profile" }
+        { method: "POST", path: "/functions/{fowner}/{frepository}/{fcommit}/profiles/compute", href: "/docs/api/post/functions/fowner/frepository/fcommit/profiles/compute", desc: "Compute an ObjectiveAI Function Profile from your own Data" },
+        { method: "GET", path: "/functions/profiles", href: "/docs/api/get/functions/profiles", desc: "List all remote ObjectiveAI Function Profiles" },
+        { method: "GET", path: "/functions/profiles/{powner}/{prepository}/{pcommit}/usage", href: "/docs/api/get/functions/profiles/powner/prepository/pcommit/usage", desc: "Retrieve historical usage for a remote ObjectiveAI Function Profile" }
       ]
     },
     {
       category: "Vector",
       endpoints: [
-        { method: "POST", path: "/vector/completions", desc: "Create a new Vector Completion" }
+        { method: "POST", path: "/vector/completions", href: "/docs/api/post/vector/completions", desc: "Create a new Vector Completion" }
       ]
     },
     {
       category: "Chat",
       endpoints: [
-        { method: "POST", path: "/chat/completions", desc: "Create a new Chat Completion" }
+        { method: "POST", path: "/chat/completions", href: "/docs/api/post/chat/completions", desc: "Create a new Chat Completion" }
       ]
     },
     {
       category: "Auth",
       endpoints: [
-        { method: "GET", path: "/auth/credits", desc: "Retrieve your available credits" },
-        { method: "GET", path: "/auth/keys", desc: "List your API keys" },
-        { method: "POST", path: "/auth/keys", desc: "Create a new API key" },
-        { method: "DELETE", path: "/auth/keys", desc: "Disable an API key" },
-        { method: "GET", path: "/auth/keys/openrouter", desc: "Retrieve your BYOK OpenRouter API key" },
-        { method: "POST", path: "/auth/keys/openrouter", desc: "Set your BYOK OpenRouter API key" },
-        { method: "DELETE", path: "/auth/keys/openrouter", desc: "Remove your BYOK OpenRouter API key" }
+        { method: "GET", path: "/auth/credits", href: "/docs/api/get/auth/credits", desc: "Retrieve your available credits" },
+        { method: "GET", path: "/auth/keys", href: "/docs/api/get/auth/keys", desc: "List your API keys" },
+        { method: "POST", path: "/auth/keys", href: "/docs/api/post/auth/keys", desc: "Create a new API key" },
+        { method: "DELETE", path: "/auth/keys", href: "/docs/api/delete/auth/keys", desc: "Disable an API key" },
+        { method: "GET", path: "/auth/keys/openrouter", href: "/docs/api/get/auth/keys/openrouter", desc: "Retrieve your BYOK OpenRouter API key" },
+        { method: "POST", path: "/auth/keys/openrouter", href: "/docs/api/post/auth/keys/openrouter", desc: "Set your BYOK OpenRouter API key" },
+        { method: "DELETE", path: "/auth/keys/openrouter", href: "/docs/api/delete/auth/keys/openrouter", desc: "Remove your BYOK OpenRouter API key" }
       ]
     }
   ];
@@ -472,7 +472,8 @@ export default function InformationPage() {
                             {endpoint.method}
                           </span>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div
+                            <Link
+                              href={endpoint.href}
                               className="endpointPath"
                               style={{
                                 fontSize: isMobile ? '12px' : '14px',
@@ -483,10 +484,12 @@ export default function InformationPage() {
                                 lineHeight: 1.4,
                                 cursor: 'pointer',
                                 wordBreak: 'break-all',
+                                display: 'block',
+                                textDecoration: 'none',
                               }}
                             >
                               {endpoint.path}
-                            </div>
+                            </Link>
                             <div style={{
                               fontSize: isMobile ? '13px' : '14px',
                               color: 'var(--text-muted)',

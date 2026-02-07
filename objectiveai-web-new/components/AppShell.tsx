@@ -117,7 +117,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       label: "Information",
       subLinks: [
         { href: "/people", label: "Team" },
-        { href: "/information", label: "Docs" },
+        { href: "/docs", label: "API Docs" },
+        { href: "/information", label: "Info" },
         { href: "/legal", label: "Legal" },
       ],
     },
