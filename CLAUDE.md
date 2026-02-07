@@ -730,6 +730,17 @@ Module loads gracefully - shows "Enter model to see ID" when WASM unavailable.
 - Profile training backend integration (endpoint returns 501—keep UI with "coming soon")
 - Stripe credit purchase UI (migrate from `objectiveai-web/src/components/account/credits/Credits.tsx`)
 
+### Feature Parity Audit Process
+
+**CRITICAL:** When auditing web-new for completeness, never rely solely on what web-new *has*. Always diff against `objectiveai-web` to find what's *missing*. The `/docs/api/` pages (32 server-rendered endpoint docs with Zod schema introspection) were missed in the original audit because the `/information` page partially covered the same ground—listing endpoints without providing per-endpoint schema documentation.
+
+**Required process for future audits:**
+1. Crawl every route in `objectiveai-web/src/app/` and list all user-facing pages
+2. Crawl every route in `objectiveai-web-new/app/` and list all user-facing pages
+3. Diff the two lists—any route in old but not in new is a gap
+4. For shared routes, verify feature parity (e.g., a summary card listing endpoints ≠ individual endpoint docs pages)
+5. Check shared components in old site (`objectiveai-web/src/components/`) for functionality not yet ported
+
 ### Stripe Integration Notes
 
 Reference `objectiveai-web/src/components/account/credits/Credits.tsx` for the complete Stripe implementation:
