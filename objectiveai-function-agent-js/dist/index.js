@@ -2306,6 +2306,7 @@ var ExampleInputSchema = z.object({
   compiledTasks: Functions.CompiledTasksSchema,
   outputLength: z.number().int().nonnegative().nullable().describe("Expected output length for vector functions")
 });
+z.array(ExampleInputSchema).min(10);
 
 // src/test.ts
 function readJsonFile2(path) {

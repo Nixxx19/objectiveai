@@ -186,7 +186,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -486,7 +486,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -513,7 +513,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -788,7 +788,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -815,7 +815,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -1065,7 +1065,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -1092,7 +1092,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -1317,7 +1317,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -1344,7 +1344,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -1544,7 +1544,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -1571,7 +1571,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -1746,7 +1746,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -1773,7 +1773,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -1923,7 +1923,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -1950,7 +1950,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -2075,7 +2075,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -2102,7 +2102,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -2202,7 +2202,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -2229,7 +2229,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -2304,7 +2304,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -2331,7 +2331,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -2381,7 +2381,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[];
+        } | /*elided*/ any | /*elided*/ any)[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -2408,7 +2408,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -2433,7 +2433,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any;
+        } | /*elided*/ any | /*elided*/ any) | undefined;
     } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown, z.core.$ZodTypeInternals<string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -2460,7 +2460,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -2760,7 +2760,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -2787,7 +2787,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -3062,7 +3062,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -3089,7 +3089,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -3339,7 +3339,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -3366,7 +3366,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -3591,7 +3591,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -3618,7 +3618,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -3818,7 +3818,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -3845,7 +3845,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -4020,7 +4020,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -4047,7 +4047,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -4197,7 +4197,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -4224,7 +4224,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -4349,7 +4349,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -4376,7 +4376,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -4476,7 +4476,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -4503,7 +4503,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -4578,7 +4578,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[])[];
+        } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -4605,7 +4605,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -4655,7 +4655,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any)[];
+        } | /*elided*/ any | /*elided*/ any)[]) | undefined;
     } | (string | number | boolean | {
         type: "image_url";
         image_url: {
@@ -4682,7 +4682,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             file_url?: string | null | undefined;
         };
     } | {
-        [key: string]: string | number | boolean | {
+        [key: string]: (string | number | boolean | {
             type: "image_url";
             image_url: {
                 url: string;
@@ -4707,7 +4707,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 filename?: string | null | undefined;
                 file_url?: string | null | undefined;
             };
-        } | /*elided*/ any | /*elided*/ any;
+        } | /*elided*/ any | /*elided*/ any) | undefined;
     } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
     compiledTasks: z.ZodArray<z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"scalar.function">;
@@ -4740,7 +4740,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -5040,7 +5040,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -5067,7 +5067,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -5342,7 +5342,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -5369,7 +5369,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -5619,7 +5619,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -5646,7 +5646,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -5871,7 +5871,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -5898,7 +5898,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -6098,7 +6098,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -6125,7 +6125,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -6300,7 +6300,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -6327,7 +6327,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -6477,7 +6477,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -6504,7 +6504,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -6629,7 +6629,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -6656,7 +6656,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -6756,7 +6756,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -6783,7 +6783,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -6858,7 +6858,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -6885,7 +6885,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -6935,7 +6935,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[];
+            } | /*elided*/ any | /*elided*/ any)[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -6962,7 +6962,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -6987,7 +6987,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any;
+            } | /*elided*/ any | /*elided*/ any) | undefined;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown, z.core.$ZodTypeInternals<string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -7014,7 +7014,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -7314,7 +7314,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -7341,7 +7341,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -7616,7 +7616,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -7643,7 +7643,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -7893,7 +7893,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -7920,7 +7920,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -8145,7 +8145,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -8172,7 +8172,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -8372,7 +8372,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -8399,7 +8399,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -8574,7 +8574,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -8601,7 +8601,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -8751,7 +8751,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -8778,7 +8778,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -8903,7 +8903,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -8930,7 +8930,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -9030,7 +9030,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -9057,7 +9057,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -9132,7 +9132,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -9159,7 +9159,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -9209,7 +9209,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[];
+            } | /*elided*/ any | /*elided*/ any)[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -9236,7 +9236,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -9261,7 +9261,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any;
+            } | /*elided*/ any | /*elided*/ any) | undefined;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
         output: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
@@ -9299,7 +9299,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -9599,7 +9599,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -9626,7 +9626,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -9901,7 +9901,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -9928,7 +9928,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -10178,7 +10178,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -10205,7 +10205,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -10430,7 +10430,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -10457,7 +10457,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -10657,7 +10657,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -10684,7 +10684,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -10859,7 +10859,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -10886,7 +10886,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -11036,7 +11036,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -11063,7 +11063,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -11188,7 +11188,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -11215,7 +11215,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -11315,7 +11315,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -11342,7 +11342,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -11417,7 +11417,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -11444,7 +11444,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -11494,7 +11494,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[];
+            } | /*elided*/ any | /*elided*/ any)[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -11521,7 +11521,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -11546,7 +11546,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any;
+            } | /*elided*/ any | /*elided*/ any) | undefined;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown, z.core.$ZodTypeInternals<string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -11573,7 +11573,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -11873,7 +11873,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -11900,7 +11900,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -12175,7 +12175,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -12202,7 +12202,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -12452,7 +12452,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -12479,7 +12479,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -12704,7 +12704,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -12731,7 +12731,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -12931,7 +12931,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -12958,7 +12958,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -13133,7 +13133,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -13160,7 +13160,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -13310,7 +13310,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -13337,7 +13337,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -13462,7 +13462,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -13489,7 +13489,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -13589,7 +13589,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -13616,7 +13616,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -13691,7 +13691,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -13718,7 +13718,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -13768,7 +13768,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[];
+            } | /*elided*/ any | /*elided*/ any)[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -13795,7 +13795,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -13820,7 +13820,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any;
+            } | /*elided*/ any | /*elided*/ any) | undefined;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
         output: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
@@ -14112,7 +14112,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -14412,7 +14412,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -14439,7 +14439,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -14714,7 +14714,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -14741,7 +14741,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -14991,7 +14991,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -15018,7 +15018,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -15243,7 +15243,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -15270,7 +15270,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -15470,7 +15470,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -15497,7 +15497,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -15672,7 +15672,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -15699,7 +15699,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -15849,7 +15849,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -15876,7 +15876,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -16001,7 +16001,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -16028,7 +16028,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -16128,7 +16128,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -16155,7 +16155,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -16230,7 +16230,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -16257,7 +16257,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -16307,7 +16307,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[];
+            } | /*elided*/ any | /*elided*/ any)[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -16334,7 +16334,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -16359,7 +16359,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any;
+            } | /*elided*/ any | /*elided*/ any) | undefined;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown, z.core.$ZodTypeInternals<string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -16386,7 +16386,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -16686,7 +16686,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -16713,7 +16713,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -16988,7 +16988,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -17015,7 +17015,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -17265,7 +17265,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -17292,7 +17292,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -17517,7 +17517,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -17544,7 +17544,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -17744,7 +17744,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -17771,7 +17771,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -17946,7 +17946,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -17973,7 +17973,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -18123,7 +18123,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -18150,7 +18150,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -18275,7 +18275,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -18302,7 +18302,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -18402,7 +18402,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -18429,7 +18429,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -18504,7 +18504,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -18531,7 +18531,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -18581,7 +18581,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[];
+            } | /*elided*/ any | /*elided*/ any)[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -18608,7 +18608,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -18633,7 +18633,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any;
+            } | /*elided*/ any | /*elided*/ any) | undefined;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
         output: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
@@ -18671,7 +18671,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -18971,7 +18971,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -18998,7 +18998,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -19273,7 +19273,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -19300,7 +19300,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -19550,7 +19550,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -19577,7 +19577,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -19802,7 +19802,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -19829,7 +19829,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -20029,7 +20029,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -20056,7 +20056,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -20231,7 +20231,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -20258,7 +20258,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -20408,7 +20408,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -20435,7 +20435,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -20560,7 +20560,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -20587,7 +20587,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -20687,7 +20687,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -20714,7 +20714,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -20789,7 +20789,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -20816,7 +20816,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -20866,7 +20866,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[];
+            } | /*elided*/ any | /*elided*/ any)[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -20893,7 +20893,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -20918,7 +20918,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any;
+            } | /*elided*/ any | /*elided*/ any) | undefined;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown, z.core.$ZodTypeInternals<string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -20945,7 +20945,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -21245,7 +21245,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -21272,7 +21272,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -21547,7 +21547,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -21574,7 +21574,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -21824,7 +21824,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -21851,7 +21851,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -22076,7 +22076,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -22103,7 +22103,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -22303,7 +22303,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -22330,7 +22330,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -22505,7 +22505,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -22532,7 +22532,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -22682,7 +22682,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -22709,7 +22709,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -22834,7 +22834,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -22861,7 +22861,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -22961,7 +22961,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -22988,7 +22988,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -23063,7 +23063,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[])[];
+            } | /*elided*/ any | /*elided*/ any)[])[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -23090,7 +23090,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -23140,7 +23140,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any)[];
+            } | /*elided*/ any | /*elided*/ any)[]) | undefined;
         } | (string | number | boolean | {
             type: "image_url";
             image_url: {
@@ -23167,7 +23167,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 file_url?: string | null | undefined;
             };
         } | {
-            [key: string]: string | number | boolean | {
+            [key: string]: (string | number | boolean | {
                 type: "image_url";
                 image_url: {
                     url: string;
@@ -23192,7 +23192,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                     filename?: string | null | undefined;
                     file_url?: string | null | undefined;
                 };
-            } | /*elided*/ any | /*elided*/ any;
+            } | /*elided*/ any | /*elided*/ any) | undefined;
         } | /*elided*/ any)[])[])[])[])[])[])[])[])[])[])[], unknown>>;
         output: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;

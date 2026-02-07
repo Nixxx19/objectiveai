@@ -2312,6 +2312,7 @@ var ExampleInputSchema = z__default.default.object({
   compiledTasks: objectiveai.Functions.CompiledTasksSchema,
   outputLength: z__default.default.number().int().nonnegative().nullable().describe("Expected output length for vector functions")
 });
+z__default.default.array(ExampleInputSchema).min(10);
 
 // src/test.ts
 function readJsonFile2(path) {
