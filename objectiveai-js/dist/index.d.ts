@@ -52512,6 +52512,8 @@ declare namespace index$d {
   export { type index$d_ChatCompletion as ChatCompletion, index$d_ChatCompletionSchema as ChatCompletionSchema, type ResponseObject$2 as ResponseObject, ResponseObjectSchema$2 as ResponseObjectSchema, type VectorCompletion$1 as VectorCompletion, index$d_VectorCompletionSchema as VectorCompletionSchema };
 }
 
+declare const InputMapsAsParameterSchema: z.ZodArray<z.ZodType<InputValue, unknown, z.core.$ZodTypeInternals<InputValue, unknown>>>;
+type InputMapsAsParameter = z.infer<typeof InputMapsAsParameterSchema>;
 declare const VectorCompletionOutputSchema: z.ZodObject<{
     votes: z.ZodArray<z.ZodObject<{
         model: z.ZodString;
@@ -52527,14 +52529,26 @@ declare const VectorCompletionOutputSchema: z.ZodObject<{
     weights: z.ZodArray<z.ZodNumber>;
 }, z.core.$strip>;
 type VectorCompletionOutput = z.infer<typeof VectorCompletionOutputSchema>;
+declare const MapVectorCompletionOutputSchema: z.ZodArray<z.ZodObject<{
+    votes: z.ZodArray<z.ZodObject<{
+        model: z.ZodString;
+        ensemble_index: z.ZodUInt32;
+        flat_ensemble_index: z.ZodUInt32;
+        vote: z.ZodArray<z.ZodNumber>;
+        weight: z.ZodNumber;
+        retry: z.ZodOptional<z.ZodBoolean>;
+        from_cache: z.ZodOptional<z.ZodBoolean>;
+        from_rng: z.ZodOptional<z.ZodBoolean>;
+    }, z.core.$strip>>;
+    scores: z.ZodArray<z.ZodNumber>;
+    weights: z.ZodArray<z.ZodNumber>;
+}, z.core.$strip>>;
+type MapVectorCompletionOutput = z.infer<typeof MapVectorCompletionOutputSchema>;
 declare function compileVectorCompletionOutput(completion: VectorCompletion$1 | VectorCompletionChunk): VectorCompletionOutput;
 declare const FunctionOutputSchema: z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>;
 type FunctionOutput = z.infer<typeof FunctionOutputSchema>;
-declare const CompiledFunctionOutputSchema: z.ZodObject<{
-    output: z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>;
-    valid: z.ZodBoolean;
-}, z.core.$strip>;
-type CompiledFunctionOutput = z.infer<typeof CompiledFunctionOutputSchema>;
+declare const MapFunctionOutputSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>>;
+type MapFunctionOutput = z.infer<typeof MapFunctionOutputSchema>;
 declare const TaskOutputSchema: z.ZodUnion<readonly [z.ZodObject<{
     votes: z.ZodArray<z.ZodObject<{
         model: z.ZodString;
@@ -52548,7 +52562,20 @@ declare const TaskOutputSchema: z.ZodUnion<readonly [z.ZodObject<{
     }, z.core.$strip>>;
     scores: z.ZodArray<z.ZodNumber>;
     weights: z.ZodArray<z.ZodNumber>;
-}, z.core.$strip>, z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>, z.ZodNull]>;
+}, z.core.$strip>, z.ZodArray<z.ZodObject<{
+    votes: z.ZodArray<z.ZodObject<{
+        model: z.ZodString;
+        ensemble_index: z.ZodUInt32;
+        flat_ensemble_index: z.ZodUInt32;
+        vote: z.ZodArray<z.ZodNumber>;
+        weight: z.ZodNumber;
+        retry: z.ZodOptional<z.ZodBoolean>;
+        from_cache: z.ZodOptional<z.ZodBoolean>;
+        from_rng: z.ZodOptional<z.ZodBoolean>;
+    }, z.core.$strip>>;
+    scores: z.ZodArray<z.ZodNumber>;
+    weights: z.ZodArray<z.ZodNumber>;
+}, z.core.$strip>>, z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>, z.ZodArray<z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>>, z.ZodNull]>;
 type TaskOutput = z.infer<typeof TaskOutputSchema>;
 declare const TaskOutputsSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
     votes: z.ZodArray<z.ZodObject<{
@@ -52563,7 +52590,20 @@ declare const TaskOutputsSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
     }, z.core.$strip>>;
     scores: z.ZodArray<z.ZodNumber>;
     weights: z.ZodArray<z.ZodNumber>;
-}, z.core.$strip>, z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>, z.ZodNull]>>;
+}, z.core.$strip>, z.ZodArray<z.ZodObject<{
+    votes: z.ZodArray<z.ZodObject<{
+        model: z.ZodString;
+        ensemble_index: z.ZodUInt32;
+        flat_ensemble_index: z.ZodUInt32;
+        vote: z.ZodArray<z.ZodNumber>;
+        weight: z.ZodNumber;
+        retry: z.ZodOptional<z.ZodBoolean>;
+        from_cache: z.ZodOptional<z.ZodBoolean>;
+        from_rng: z.ZodOptional<z.ZodBoolean>;
+    }, z.core.$strip>>;
+    scores: z.ZodArray<z.ZodNumber>;
+    weights: z.ZodArray<z.ZodNumber>;
+}, z.core.$strip>>, z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>, z.ZodArray<z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>>, z.ZodNull]>>;
 type TaskOutputs = z.infer<typeof TaskOutputsSchema>;
 
 type index$c_AnyOfInputSchema = AnyOfInputSchema;
@@ -52582,8 +52622,6 @@ type index$c_BooleanInputSchema = BooleanInputSchema;
 declare const index$c_BooleanInputSchemaExt: typeof BooleanInputSchemaExt;
 declare const index$c_BooleanInputSchemaSchema: typeof BooleanInputSchemaSchema;
 type index$c_BooleanInputSchemaToZodSchema = BooleanInputSchemaToZodSchema;
-type index$c_CompiledFunctionOutput = CompiledFunctionOutput;
-declare const index$c_CompiledFunctionOutputSchema: typeof CompiledFunctionOutputSchema;
 type index$c_Expression = Expression;
 declare const index$c_ExpressionSchema: typeof ExpressionSchema;
 type index$c_FileInputSchema = FileInputSchema;
@@ -52596,6 +52634,8 @@ type index$c_ImageInputSchema = ImageInputSchema;
 declare const index$c_ImageInputSchemaExt: typeof ImageInputSchemaExt;
 declare const index$c_ImageInputSchemaSchema: typeof ImageInputSchemaSchema;
 type index$c_ImageInputSchemaToZodSchema = ImageInputSchemaToZodSchema;
+type index$c_InputMapsAsParameter = InputMapsAsParameter;
+declare const index$c_InputMapsAsParameterSchema: typeof InputMapsAsParameterSchema;
 type index$c_InputMapsExpression = InputMapsExpression;
 declare const index$c_InputMapsExpressionSchema: typeof InputMapsExpressionSchema;
 type index$c_InputSchema = InputSchema;
@@ -52612,6 +52652,10 @@ declare const index$c_IntegerInputSchemaSchema: typeof IntegerInputSchemaSchema;
 type index$c_IntegerInputSchemaToZodSchema = IntegerInputSchemaToZodSchema;
 type index$c_JMESPathExpression = JMESPathExpression;
 declare const index$c_JMESPathExpressionSchema: typeof JMESPathExpressionSchema;
+type index$c_MapFunctionOutput = MapFunctionOutput;
+declare const index$c_MapFunctionOutputSchema: typeof MapFunctionOutputSchema;
+type index$c_MapVectorCompletionOutput = MapVectorCompletionOutput;
+declare const index$c_MapVectorCompletionOutputSchema: typeof MapVectorCompletionOutputSchema;
 type index$c_NumberInputSchema = NumberInputSchema;
 declare const index$c_NumberInputSchemaExt: typeof NumberInputSchemaExt;
 declare const index$c_NumberInputSchemaSchema: typeof NumberInputSchemaSchema;
@@ -52638,7 +52682,7 @@ declare const index$c_VideoInputSchemaSchema: typeof VideoInputSchemaSchema;
 type index$c_VideoInputSchemaToZodSchema = VideoInputSchemaToZodSchema;
 declare const index$c_compileVectorCompletionOutput: typeof compileVectorCompletionOutput;
 declare namespace index$c {
-  export { type index$c_AnyOfInputSchema as AnyOfInputSchema, index$c_AnyOfInputSchemaExt as AnyOfInputSchemaExt, index$c_AnyOfInputSchemaSchema as AnyOfInputSchemaSchema, type index$c_AnyOfInputSchemaToZodSchema as AnyOfInputSchemaToZodSchema, type index$c_ArrayInputSchema as ArrayInputSchema, index$c_ArrayInputSchemaExt as ArrayInputSchemaExt, index$c_ArrayInputSchemaSchema as ArrayInputSchemaSchema, type index$c_ArrayInputSchemaToZodSchema as ArrayInputSchemaToZodSchema, type index$c_AudioInputSchema as AudioInputSchema, index$c_AudioInputSchemaExt as AudioInputSchemaExt, index$c_AudioInputSchemaSchema as AudioInputSchemaSchema, type index$c_AudioInputSchemaToZodSchema as AudioInputSchemaToZodSchema, type index$c_BooleanInputSchema as BooleanInputSchema, index$c_BooleanInputSchemaExt as BooleanInputSchemaExt, index$c_BooleanInputSchemaSchema as BooleanInputSchemaSchema, type index$c_BooleanInputSchemaToZodSchema as BooleanInputSchemaToZodSchema, type index$c_CompiledFunctionOutput as CompiledFunctionOutput, index$c_CompiledFunctionOutputSchema as CompiledFunctionOutputSchema, type index$c_Expression as Expression, index$c_ExpressionSchema as ExpressionSchema, type index$c_FileInputSchema as FileInputSchema, index$c_FileInputSchemaExt as FileInputSchemaExt, index$c_FileInputSchemaSchema as FileInputSchemaSchema, type index$c_FileInputSchemaToZodSchema as FileInputSchemaToZodSchema, type index$c_FunctionOutput as FunctionOutput, index$c_FunctionOutputSchema as FunctionOutputSchema, type index$c_ImageInputSchema as ImageInputSchema, index$c_ImageInputSchemaExt as ImageInputSchemaExt, index$c_ImageInputSchemaSchema as ImageInputSchemaSchema, type index$c_ImageInputSchemaToZodSchema as ImageInputSchemaToZodSchema, type index$c_InputMapsExpression as InputMapsExpression, index$c_InputMapsExpressionSchema as InputMapsExpressionSchema, type index$c_InputSchema as InputSchema, index$c_InputSchemaExt as InputSchemaExt, index$c_InputSchemaSchema as InputSchemaSchema, type index$c_InputSchemaToZodSchema as InputSchemaToZodSchema, type index$c_InputValue as InputValue, type index$c_InputValueExpression as InputValueExpression, index$c_InputValueExpressionSchema as InputValueExpressionSchema, index$c_InputValueSchema as InputValueSchema, type index$c_IntegerInputSchema as IntegerInputSchema, index$c_IntegerInputSchemaExt as IntegerInputSchemaExt, index$c_IntegerInputSchemaSchema as IntegerInputSchemaSchema, type index$c_IntegerInputSchemaToZodSchema as IntegerInputSchemaToZodSchema, type index$c_JMESPathExpression as JMESPathExpression, index$c_JMESPathExpressionSchema as JMESPathExpressionSchema, type index$c_NumberInputSchema as NumberInputSchema, index$c_NumberInputSchemaExt as NumberInputSchemaExt, index$c_NumberInputSchemaSchema as NumberInputSchemaSchema, type index$c_NumberInputSchemaToZodSchema as NumberInputSchemaToZodSchema, type index$c_ObjectInputSchema as ObjectInputSchema, index$c_ObjectInputSchemaExt as ObjectInputSchemaExt, index$c_ObjectInputSchemaSchema as ObjectInputSchemaSchema, type index$c_ObjectInputSchemaToZodSchema as ObjectInputSchemaToZodSchema, type index$c_StarlarkExpression as StarlarkExpression, index$c_StarlarkExpressionSchema as StarlarkExpressionSchema, type index$c_StringInputSchema as StringInputSchema, index$c_StringInputSchemaExt as StringInputSchemaExt, index$c_StringInputSchemaSchema as StringInputSchemaSchema, type index$c_StringInputSchemaToZodSchema as StringInputSchemaToZodSchema, type index$c_TaskOutput as TaskOutput, index$c_TaskOutputSchema as TaskOutputSchema, type index$c_TaskOutputs as TaskOutputs, index$c_TaskOutputsSchema as TaskOutputsSchema, type index$c_VectorCompletionOutput as VectorCompletionOutput, index$c_VectorCompletionOutputSchema as VectorCompletionOutputSchema, type index$c_VideoInputSchema as VideoInputSchema, index$c_VideoInputSchemaExt as VideoInputSchemaExt, index$c_VideoInputSchemaSchema as VideoInputSchemaSchema, type index$c_VideoInputSchemaToZodSchema as VideoInputSchemaToZodSchema, index$c_compileVectorCompletionOutput as compileVectorCompletionOutput };
+  export { type index$c_AnyOfInputSchema as AnyOfInputSchema, index$c_AnyOfInputSchemaExt as AnyOfInputSchemaExt, index$c_AnyOfInputSchemaSchema as AnyOfInputSchemaSchema, type index$c_AnyOfInputSchemaToZodSchema as AnyOfInputSchemaToZodSchema, type index$c_ArrayInputSchema as ArrayInputSchema, index$c_ArrayInputSchemaExt as ArrayInputSchemaExt, index$c_ArrayInputSchemaSchema as ArrayInputSchemaSchema, type index$c_ArrayInputSchemaToZodSchema as ArrayInputSchemaToZodSchema, type index$c_AudioInputSchema as AudioInputSchema, index$c_AudioInputSchemaExt as AudioInputSchemaExt, index$c_AudioInputSchemaSchema as AudioInputSchemaSchema, type index$c_AudioInputSchemaToZodSchema as AudioInputSchemaToZodSchema, type index$c_BooleanInputSchema as BooleanInputSchema, index$c_BooleanInputSchemaExt as BooleanInputSchemaExt, index$c_BooleanInputSchemaSchema as BooleanInputSchemaSchema, type index$c_BooleanInputSchemaToZodSchema as BooleanInputSchemaToZodSchema, type index$c_Expression as Expression, index$c_ExpressionSchema as ExpressionSchema, type index$c_FileInputSchema as FileInputSchema, index$c_FileInputSchemaExt as FileInputSchemaExt, index$c_FileInputSchemaSchema as FileInputSchemaSchema, type index$c_FileInputSchemaToZodSchema as FileInputSchemaToZodSchema, type index$c_FunctionOutput as FunctionOutput, index$c_FunctionOutputSchema as FunctionOutputSchema, type index$c_ImageInputSchema as ImageInputSchema, index$c_ImageInputSchemaExt as ImageInputSchemaExt, index$c_ImageInputSchemaSchema as ImageInputSchemaSchema, type index$c_ImageInputSchemaToZodSchema as ImageInputSchemaToZodSchema, type index$c_InputMapsAsParameter as InputMapsAsParameter, index$c_InputMapsAsParameterSchema as InputMapsAsParameterSchema, type index$c_InputMapsExpression as InputMapsExpression, index$c_InputMapsExpressionSchema as InputMapsExpressionSchema, type index$c_InputSchema as InputSchema, index$c_InputSchemaExt as InputSchemaExt, index$c_InputSchemaSchema as InputSchemaSchema, type index$c_InputSchemaToZodSchema as InputSchemaToZodSchema, type index$c_InputValue as InputValue, type index$c_InputValueExpression as InputValueExpression, index$c_InputValueExpressionSchema as InputValueExpressionSchema, index$c_InputValueSchema as InputValueSchema, type index$c_IntegerInputSchema as IntegerInputSchema, index$c_IntegerInputSchemaExt as IntegerInputSchemaExt, index$c_IntegerInputSchemaSchema as IntegerInputSchemaSchema, type index$c_IntegerInputSchemaToZodSchema as IntegerInputSchemaToZodSchema, type index$c_JMESPathExpression as JMESPathExpression, index$c_JMESPathExpressionSchema as JMESPathExpressionSchema, type index$c_MapFunctionOutput as MapFunctionOutput, index$c_MapFunctionOutputSchema as MapFunctionOutputSchema, type index$c_MapVectorCompletionOutput as MapVectorCompletionOutput, index$c_MapVectorCompletionOutputSchema as MapVectorCompletionOutputSchema, type index$c_NumberInputSchema as NumberInputSchema, index$c_NumberInputSchemaExt as NumberInputSchemaExt, index$c_NumberInputSchemaSchema as NumberInputSchemaSchema, type index$c_NumberInputSchemaToZodSchema as NumberInputSchemaToZodSchema, type index$c_ObjectInputSchema as ObjectInputSchema, index$c_ObjectInputSchemaExt as ObjectInputSchemaExt, index$c_ObjectInputSchemaSchema as ObjectInputSchemaSchema, type index$c_ObjectInputSchemaToZodSchema as ObjectInputSchemaToZodSchema, type index$c_StarlarkExpression as StarlarkExpression, index$c_StarlarkExpressionSchema as StarlarkExpressionSchema, type index$c_StringInputSchema as StringInputSchema, index$c_StringInputSchemaExt as StringInputSchemaExt, index$c_StringInputSchemaSchema as StringInputSchemaSchema, type index$c_StringInputSchemaToZodSchema as StringInputSchemaToZodSchema, type index$c_TaskOutput as TaskOutput, index$c_TaskOutputSchema as TaskOutputSchema, type index$c_TaskOutputs as TaskOutputs, index$c_TaskOutputsSchema as TaskOutputsSchema, type index$c_VectorCompletionOutput as VectorCompletionOutput, index$c_VectorCompletionOutputSchema as VectorCompletionOutputSchema, type index$c_VideoInputSchema as VideoInputSchema, index$c_VideoInputSchemaExt as VideoInputSchemaExt, index$c_VideoInputSchemaSchema as VideoInputSchemaSchema, type index$c_VideoInputSchemaToZodSchema as VideoInputSchemaToZodSchema, index$c_compileVectorCompletionOutput as compileVectorCompletionOutput };
 }
 
 declare const ListItemSchema$1: z.ZodObject<{

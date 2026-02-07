@@ -544,7 +544,7 @@ export const InputValueExpressionSchema: z.ZodType<InputValueExpression> = z
     z.number(),
     z.boolean(),
     ExpressionSchema.describe(
-      "An expression which evaluates to an input value.",
+      "An expression which evaluates to an input value. Receives: `input`, `map` (if mapped).",
     ),
   ])
   .describe(InputValueSchema.description!)
@@ -555,12 +555,12 @@ export const InputValueExpressionSchema: z.ZodType<InputValueExpression> = z
 export const InputMapsExpressionSchema = z
   .union([
     ExpressionSchema.describe(
-      "An expression which evaluates to a 2D array of Inputs.",
+      "An expression which evaluates to a 2D array of Inputs. Receives: `input`.",
     ),
     z
       .array(
         ExpressionSchema.describe(
-          "An expression which evaluates to a 1D array of Inputs.",
+          "An expression which evaluates to a 1D array of Inputs. Receives: `input`.",
         ),
       )
       .describe(
@@ -568,6 +568,6 @@ export const InputMapsExpressionSchema = z
       ),
   ])
   .describe(
-    "An expression or list of expressions which evaluate to a 2D array of Inputs. Each sub-array will be fed into Tasks which specify an index of this input map.",
+    "An expression or list of expressions which evaluate to a 2D array of Inputs. Each sub-array will be fed into Tasks which specify an index of this input map. Receives: `input`.",
   );
 export type InputMapsExpression = z.infer<typeof InputMapsExpressionSchema>;
