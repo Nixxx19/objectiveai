@@ -18,7 +18,7 @@ export type VectorCompletionOutput = z.infer<
 >;
 
 export function compileVectorCompletionOutput(
-  completion: VectorCompletion | VectorCompletionChunk
+  completion: VectorCompletion | VectorCompletionChunk,
 ): VectorCompletionOutput {
   return {
     votes: completion.votes,
@@ -38,15 +38,15 @@ export const FunctionOutputSchema = z
   .describe("The output of a function execution.");
 export type FunctionOutput = z.infer<typeof FunctionOutputSchema>;
 
-export const CompiledFunctionOutputSchema = z
-  .object({
-    output: FunctionOutputSchema,
-    valid: z.boolean().describe("Whether the function output is valid."),
-  })
-  .describe("The output of a function execution, including its validity.");
-export type CompiledFunctionOutput = z.infer<
-  typeof CompiledFunctionOutputSchema
->;
+// export const CompiledFunctionOutputSchema = z
+//   .object({
+//     output: FunctionOutputSchema,
+//     valid: z.boolean().describe("Whether the function output is valid."),
+//   })
+//   .describe("The output of a function execution, including its validity.");
+// export type CompiledFunctionOutput = z.infer<
+//   typeof CompiledFunctionOutputSchema
+// >;
 
 export const TaskOutputSchema = z
   .union([
