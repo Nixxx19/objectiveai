@@ -3,7 +3,6 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  writeFileSync,
   rmSync,
   statSync,
 } from "fs";
@@ -45,28 +44,16 @@ function runAgentInSubdir(
 
   mkdirSync(subdir, { recursive: true });
 
-  const runnerScript = `
-import { Claude } from "@objectiveai/function-agent";
-
-async function main(): Promise<void> {
-  await Claude.invent({ name: ${JSON.stringify(name)}, spec: ${JSON.stringify(spec)}, depth: ${childDepth} });
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
-`;
-
-  const runnerPath = join(subdir, "_runner.ts");
-  writeFileSync(runnerPath, runnerScript);
-
   return new Promise<SpawnResult>((resolve) => {
-    const child = spawn("npx", ["ts-node", "_runner.ts"], {
-      cwd: subdir,
-      stdio: ["inherit", "pipe", "pipe"],
-      shell: true,
-    });
+    const child = spawn(
+      "objectiveai-function-agent",
+      ["invent", spec, "--name", name, "--depth", String(childDepth)],
+      {
+        cwd: subdir,
+        stdio: ["inherit", "pipe", "pipe"],
+        shell: true,
+      },
+    );
 
     childProcesses.push(child);
 
@@ -161,16 +148,42 @@ export async function spawnFunctionAgents(
   const childProcesses: ChildProcess[] = [];
   const killAll = () => {
     for (const child of childProcesses) {
-      if (!child.killed && child.pid) {
-        try {
-          process.kill(child.pid);
-        } catch {}
-      }
+      if (child.killed) continue;
+      try {
+        // On Windows with shell: true, kill the process tree
+        if (process.platform === "win32" && child.pid) {
+          execSync(`taskkill /PID ${child.pid} /T /F`, { stdio: "ignore" });
+        } else {
+          child.kill("SIGKILL");
+        }
+      } catch {}
     }
   };
 
+  // Kill children on every possible parent exit path
   const onExit = () => killAll();
+  const onSignal = (signal: string) => {
+    killAll();
+    process.exit(1);
+  };
+  const onError = () => {
+    killAll();
+    process.exit(1);
+  };
+
   process.on("exit", onExit);
+  process.on("SIGINT", onSignal);
+  process.on("SIGTERM", onSignal);
+  process.on("uncaughtException", onError);
+  process.on("unhandledRejection", onError);
+
+  const removeListeners = () => {
+    process.removeListener("exit", onExit);
+    process.removeListener("SIGINT", onSignal);
+    process.removeListener("SIGTERM", onSignal);
+    process.removeListener("uncaughtException", onError);
+    process.removeListener("unhandledRejection", onError);
+  };
 
   try {
     const results = await Promise.all(
@@ -187,6 +200,7 @@ export async function spawnFunctionAgents(
       error: `Spawn failed: ${(e as Error).message}`,
     };
   } finally {
-    process.removeListener("exit", onExit);
+    killAll();
+    removeListeners();
   }
 }

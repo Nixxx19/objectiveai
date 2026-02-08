@@ -2918,26 +2918,16 @@ function getCurrentDepth() {
 function runAgentInSubdir(name, spec, childDepth, childProcesses) {
   const subdir = path.join("agent_functions", name);
   fs.mkdirSync(subdir, { recursive: true });
-  const runnerScript = `
-import { Claude } from "@objectiveai/function-agent";
-
-async function main(): Promise<void> {
-  await Claude.invent({ name: ${JSON.stringify(name)}, spec: ${JSON.stringify(spec)}, depth: ${childDepth} });
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
-`;
-  const runnerPath = path.join(subdir, "_runner.ts");
-  fs.writeFileSync(runnerPath, runnerScript);
   return new Promise((resolve) => {
-    const child = child_process.spawn("npx", ["ts-node", "_runner.ts"], {
-      cwd: subdir,
-      stdio: ["inherit", "pipe", "pipe"],
-      shell: true
-    });
+    const child = child_process.spawn(
+      "objectiveai-function-agent",
+      ["invent", spec, "--name", name, "--depth", String(childDepth)],
+      {
+        cwd: subdir,
+        stdio: ["inherit", "pipe", "pipe"],
+        shell: true
+      }
+    );
     childProcesses.push(child);
     child.stdout?.on("data", () => {
     });
@@ -3015,16 +3005,38 @@ async function spawnFunctionAgents(params) {
   const childProcesses = [];
   const killAll = () => {
     for (const child of childProcesses) {
-      if (!child.killed && child.pid) {
-        try {
-          process.kill(child.pid);
-        } catch {
+      if (child.killed) continue;
+      try {
+        if (process.platform === "win32" && child.pid) {
+          child_process.execSync(`taskkill /PID ${child.pid} /T /F`, { stdio: "ignore" });
+        } else {
+          child.kill("SIGKILL");
         }
+      } catch {
       }
     }
   };
   const onExit = () => killAll();
+  const onSignal = (signal) => {
+    killAll();
+    process.exit(1);
+  };
+  const onError = () => {
+    killAll();
+    process.exit(1);
+  };
   process.on("exit", onExit);
+  process.on("SIGINT", onSignal);
+  process.on("SIGTERM", onSignal);
+  process.on("uncaughtException", onError);
+  process.on("unhandledRejection", onError);
+  const removeListeners = () => {
+    process.removeListener("exit", onExit);
+    process.removeListener("SIGINT", onSignal);
+    process.removeListener("SIGTERM", onSignal);
+    process.removeListener("uncaughtException", onError);
+    process.removeListener("unhandledRejection", onError);
+  };
   try {
     const results = await Promise.all(
       params.map(
@@ -3040,7 +3052,8 @@ async function spawnFunctionAgents(params) {
       error: `Spawn failed: ${e.message}`
     };
   } finally {
-    process.removeListener("exit", onExit);
+    killAll();
+    removeListeners();
   }
 }
 var SpawnFunctionAgentsParamsSchema = z19.z.array(
