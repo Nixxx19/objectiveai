@@ -361,6 +361,7 @@ async function inventLoop(
   sessionId?: string,
   apiBase?: string,
   apiKey?: string,
+  instructions?: string,
 ): Promise<string | undefined> {
   const nextPlanIndex = getNextPlanIndex();
   const maxAttempts = 5;
@@ -394,6 +395,10 @@ Please try again. Remember to:
 1. Use RunNetworkTests to test
 2. Use Submit to validate, commit, and push
 `;
+    }
+
+    if (instructions) {
+      prompt += `\n## Extra Instructions\n\n${instructions}\n`;
     }
 
     sessionId = await consumeStream(
@@ -440,7 +445,7 @@ export async function inventFunctionTasksMcp(
   const log = options.log ?? createFileLogger().log;
 
   log("=== Invent Loop: Creating new function (function tasks) ===");
-  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey, options.instructions);
 
   log("=== ObjectiveAI Function invention complete ===");
 }
@@ -452,7 +457,7 @@ export async function inventVectorTasksMcp(
   const log = options.log ?? createFileLogger().log;
 
   log("=== Invent Loop: Creating new function (vector tasks) ===");
-  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey, options.instructions);
 
   log("=== ObjectiveAI Function invention complete ===");
 }

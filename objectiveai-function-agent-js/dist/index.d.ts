@@ -11,6 +11,7 @@ interface AgentOptions {
     sessionId?: string;
     log?: LogFn;
     depth?: number;
+    instructions?: string;
 }
 
 declare function specMcp(log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;

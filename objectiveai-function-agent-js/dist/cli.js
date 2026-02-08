@@ -3306,7 +3306,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 `;
 }
-async function inventLoop(log, useFunctionTasks, sessionId, apiBase, apiKey) {
+async function inventLoop(log, useFunctionTasks, sessionId, apiBase, apiKey, instructions) {
   const nextPlanIndex = getNextPlanIndex();
   const maxAttempts = 5;
   let attempt = 0;
@@ -3330,6 +3330,13 @@ ${lastFailureReasons.map((r) => `- ${r}`).join("\n")}
 Please try again. Remember to:
 1. Use RunNetworkTests to test
 2. Use Submit to validate, commit, and push
+`;
+    }
+    if (instructions) {
+      prompt += `
+## Extra Instructions
+
+${instructions}
 `;
     }
     sessionId = await consumeStream(
@@ -3366,13 +3373,13 @@ Please try again. Remember to:
 async function inventFunctionTasksMcp(options = {}) {
   const log = options.log ?? createFileLogger().log;
   log("=== Invent Loop: Creating new function (function tasks) ===");
-  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey, options.instructions);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function inventVectorTasksMcp(options = {}) {
   const log = options.log ?? createFileLogger().log;
   log("=== Invent Loop: Creating new function (vector tasks) ===");
-  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey, options.instructions);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function inventMcp(options = {}) {
@@ -3405,6 +3412,7 @@ function parseArgs() {
   let depth;
   let apiBase;
   let apiKey;
+  let instructions;
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
     if (arg.startsWith("--depth=")) {
@@ -3423,29 +3431,34 @@ function parseArgs() {
       apiKey = arg.slice(10);
     } else if (arg === "--api-key") {
       apiKey = args[++i];
+    } else if (arg.startsWith("--instructions=")) {
+      instructions = arg.slice(15);
+    } else if (arg === "--instructions") {
+      instructions = args[++i];
     } else if (!command) {
       command = arg;
     } else if (!spec) {
       spec = arg;
     }
   }
-  return { command, spec, name, depth, apiBase, apiKey };
+  return { command, spec, name, depth, apiBase, apiKey, instructions };
 }
 async function main() {
-  const { command, spec, name, depth, apiBase, apiKey } = parseArgs();
+  const { command, spec, name, depth, apiBase, apiKey, instructions } = parseArgs();
   switch (command) {
     case "invent":
-      await claude_exports.invent({ spec, name, depth, apiBase, apiKey });
+      await claude_exports.invent({ spec, name, depth, apiBase, apiKey, instructions });
       break;
     default:
       console.log("Usage: objectiveai-function-agent invent [spec] [options]");
       console.log("");
       console.log("Options:");
-      console.log("  [spec]           Optional spec string for SPEC.md");
-      console.log("  --name NAME      Function name for name.txt");
-      console.log("  --depth N        Depth level (0=vector, >0=function tasks)");
-      console.log("  --api-base URL   API base URL");
-      console.log("  --api-key KEY    ObjectiveAI API key");
+      console.log("  [spec]              Optional spec string for SPEC.md");
+      console.log("  --name NAME         Function name for name.txt");
+      console.log("  --depth N           Depth level (0=vector, >0=function tasks)");
+      console.log("  --api-base URL      API base URL");
+      console.log("  --api-key KEY       ObjectiveAI API key");
+      console.log("  --instructions TEXT  Extra instructions for the invent agent");
       process.exit(1);
   }
 }

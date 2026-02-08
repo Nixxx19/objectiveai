@@ -3474,7 +3474,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 `;
 }
-async function inventLoop(log, useFunctionTasks, sessionId, apiBase, apiKey) {
+async function inventLoop(log, useFunctionTasks, sessionId, apiBase, apiKey, instructions) {
   const nextPlanIndex = getNextPlanIndex();
   const maxAttempts = 5;
   let attempt = 0;
@@ -3498,6 +3498,13 @@ ${lastFailureReasons.map((r) => `- ${r}`).join("\n")}
 Please try again. Remember to:
 1. Use RunNetworkTests to test
 2. Use Submit to validate, commit, and push
+`;
+    }
+    if (instructions) {
+      prompt += `
+## Extra Instructions
+
+${instructions}
 `;
     }
     sessionId = await consumeStream(
@@ -3534,13 +3541,13 @@ Please try again. Remember to:
 async function inventFunctionTasksMcp(options = {}) {
   const log = options.log ?? createFileLogger().log;
   log("=== Invent Loop: Creating new function (function tasks) ===");
-  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey, options.instructions);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function inventVectorTasksMcp(options = {}) {
   const log = options.log ?? createFileLogger().log;
   log("=== Invent Loop: Creating new function (vector tasks) ===");
-  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey, options.instructions);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function inventMcp(options = {}) {
