@@ -273,8 +273,6 @@ Expressions receive a single object with these fields:
 - **Multimodal content**: For fields that accept images, audio, video, or files, use bogus/placeholder string values (e.g. \`"https://example.com/image.jpg"\`). This is fine for testing - exercise the various modalities
 
 ### Build and Test
-- Use RunNetworkTests to execute the function for each example input
-- If tests fail, use ReadDefaultNetworkTest and ReadSwissSystemNetworkTest to read individual results
 - Fix issues and repeat until all tests pass
 
 ## Phase 2: Verify SPEC.md Compliance
@@ -333,8 +331,6 @@ Expressions receive a single object with these fields:
 - **Multimodal content**: For fields that accept images, audio, video, or files, use bogus/placeholder string values (e.g. \`"https://example.com/image.jpg"\`). This is fine for testing - exercise the various modalities
 
 ### Build and Test
-- Use RunNetworkTests to execute the function for each example input
-- If tests fail, use ReadDefaultNetworkTest and ReadSwissSystemNetworkTest to read individual results
 - Fix issues and repeat until all tests pass
 
 ## Phase 2: Verify SPEC.md Compliance
