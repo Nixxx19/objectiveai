@@ -20,11 +20,12 @@ export async function specMcp(
   sessionId?: string,
   spec?: string,
 ): Promise<string | undefined> {
+  if (specIsNonEmpty()) return sessionId;
+
   if (spec) {
     writeSpec(spec);
     return sessionId;
   }
-  if (specIsNonEmpty()) return sessionId;
 
   const tools = [
     ReadSpec,

@@ -1166,11 +1166,11 @@ function specIsNonEmpty() {
   return existsSync("SPEC.md") && readFileSync("SPEC.md", "utf-8").trim().length > 0;
 }
 async function specMcp(log, sessionId, spec) {
+  if (specIsNonEmpty()) return sessionId;
   if (spec) {
     writeSpec(spec);
     return sessionId;
   }
-  if (specIsNonEmpty()) return sessionId;
   const tools = [
     ReadSpec,
     WriteSpec,
@@ -1251,11 +1251,11 @@ function nameIsNonEmpty() {
   return existsSync("name.txt") && readFileSync("name.txt", "utf-8").trim().length > 0;
 }
 async function nameMcp(log, sessionId, name) {
+  if (nameIsNonEmpty()) return sessionId;
   if (name) {
     writeName(name);
     return sessionId;
   }
-  if (nameIsNonEmpty()) return sessionId;
   const tools = [
     ReadSpec,
     ReadName,

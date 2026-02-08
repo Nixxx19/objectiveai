@@ -22,11 +22,12 @@ export async function nameMcp(
   sessionId?: string,
   name?: string,
 ): Promise<string | undefined> {
+  if (nameIsNonEmpty()) return sessionId;
+
   if (name) {
     writeName(name);
     return sessionId;
   }
-  if (nameIsNonEmpty()) return sessionId;
 
   const tools = [
     ReadSpec,
