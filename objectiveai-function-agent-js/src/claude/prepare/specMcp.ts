@@ -1,6 +1,7 @@
 import { createSdkMcpServer, query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
+import { consumeStream } from "../../logging";
 import { writeSpec } from "../../tools/markdown";
 import { ReadSpec, WriteSpec } from "../../tools/claude/spec";
 import {
@@ -43,38 +44,9 @@ export async function specMcp(
     "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
     "Be creative and describe a function with plain language.";
 
-  const stream = query({
-    prompt,
-    options: {
-      tools: [],
-      mcpServers: { spec: mcpServer },
-      allowedTools: ["mcp__spec__*"],
-      disallowedTools: ["AskUserQuestion"],
-      permissionMode: "dontAsk",
-      resume: sessionId,
-    },
-  });
-
-  for await (const message of stream) {
-    if (message.type === "system" && message.subtype === "init") {
-      sessionId = message.session_id;
-    }
-    log(message);
-  }
-
-  let retry = 1;
-  while (!specIsNonEmpty()) {
-    if (retry > 3) {
-      throw new Error("SPEC.md is empty after spec phase");
-    }
-    const stream = query({
-      prompt:
-        "SPEC.md is empty after your spec phase." +
-        " Create SPEC.md specifying the ObjectiveAI Function to be built." +
-        " Think deeply about what function to invent:\n" +
-        "- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n" +
-        "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
-        "Be creative and describe a function with plain language.",
+  sessionId = await consumeStream(
+    query({
+      prompt,
       options: {
         tools: [],
         mcpServers: { spec: mcpServer },
@@ -83,14 +55,37 @@ export async function specMcp(
         permissionMode: "dontAsk",
         resume: sessionId,
       },
-    });
+    }),
+    log,
+    sessionId,
+  );
 
-    for await (const message of stream) {
-      if (message.type === "system" && message.subtype === "init") {
-        sessionId = message.session_id;
-      }
-      log(message);
+  let retry = 1;
+  while (!specIsNonEmpty()) {
+    if (retry > 3) {
+      throw new Error("SPEC.md is empty after spec phase");
     }
+    sessionId = await consumeStream(
+      query({
+        prompt:
+          "SPEC.md is empty after your spec phase." +
+          " Create SPEC.md specifying the ObjectiveAI Function to be built." +
+          " Think deeply about what function to invent:\n" +
+          "- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n" +
+          "- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\n" +
+          "Be creative and describe a function with plain language.",
+        options: {
+          tools: [],
+          mcpServers: { spec: mcpServer },
+          allowedTools: ["mcp__spec__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId,
+        },
+      }),
+      log,
+      sessionId,
+    );
     retry += 1;
   }
 

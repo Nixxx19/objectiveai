@@ -1,6 +1,7 @@
 import { createSdkMcpServer, query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
+import { consumeStream } from "../../logging";
 import { ReadEssayTasks, WriteEssayTasks } from "../../tools/claude/essayTasks";
 import { ReadSpec } from "../../tools/claude/spec";
 import { ReadName } from "../../tools/claude/name";
@@ -40,35 +41,9 @@ export async function essayTasksMcp(
     "Read SPEC.md, name.txt, ESSAY.md, and example functions to understand the context, then create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md." +
     " Each task is a plain language description of a task which will go into the function's `tasks` array.";
 
-  const stream = query({
-    prompt,
-    options: {
-      tools: [],
-      mcpServers: { essayTasks: mcpServer },
-      allowedTools: ["mcp__essayTasks__*"],
-      disallowedTools: ["AskUserQuestion"],
-      permissionMode: "dontAsk",
-      resume: sessionId,
-    },
-  });
-
-  for await (const message of stream) {
-    if (message.type === "system" && message.subtype === "init") {
-      sessionId = message.session_id;
-    }
-    log(message);
-  }
-
-  let retry = 1;
-  while (!essayTasksIsNonEmpty()) {
-    if (retry > 3) {
-      throw new Error("ESSAY_TASKS.md is empty after essayTasks phase");
-    }
-    const stream = query({
-      prompt:
-        "ESSAY_TASKS.md is empty after your essayTasks phase." +
-        " Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md." +
-        " Each task is a plain language description of a task which will go into the function's `tasks` array.",
+  sessionId = await consumeStream(
+    query({
+      prompt,
       options: {
         tools: [],
         mcpServers: { essayTasks: mcpServer },
@@ -77,14 +52,34 @@ export async function essayTasksMcp(
         permissionMode: "dontAsk",
         resume: sessionId,
       },
-    });
+    }),
+    log,
+    sessionId,
+  );
 
-    for await (const message of stream) {
-      if (message.type === "system" && message.subtype === "init") {
-        sessionId = message.session_id;
-      }
-      log(message);
+  let retry = 1;
+  while (!essayTasksIsNonEmpty()) {
+    if (retry > 3) {
+      throw new Error("ESSAY_TASKS.md is empty after essayTasks phase");
     }
+    sessionId = await consumeStream(
+      query({
+        prompt:
+          "ESSAY_TASKS.md is empty after your essayTasks phase." +
+          " Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md." +
+          " Each task is a plain language description of a task which will go into the function's `tasks` array.",
+        options: {
+          tools: [],
+          mcpServers: { essayTasks: mcpServer },
+          allowedTools: ["mcp__essayTasks__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId,
+        },
+      }),
+      log,
+      sessionId,
+    );
     retry += 1;
   }
 

@@ -1,7 +1,7 @@
 import { createSdkMcpServer, query } from "@anthropic-ai/claude-agent-sdk";
 import { AgentOptions, LogFn } from "../../agentOptions";
 import { submit } from "../../tools/submit";
-import { createFileLogger } from "../../logging";
+import { createFileLogger, consumeStream } from "../../logging";
 import { getNextPlanIndex } from "../planIndex";
 
 // Tools - read-only context
@@ -395,25 +395,21 @@ Please try again. Remember to:
 `;
     }
 
-    const stream = query({
-      prompt,
-      options: {
-        tools: [],
-        mcpServers: { invent: mcpServer },
-        allowedTools: ["mcp__invent__*"],
-        disallowedTools: ["AskUserQuestion"],
-        permissionMode: "dontAsk",
-        resume: sessionId,
-      },
-    });
-
-    // Run the assistant
-    for await (const message of stream) {
-      if (message.type === "system" && message.subtype === "init") {
-        sessionId = message.session_id;
-      }
-      log(message);
-    }
+    sessionId = await consumeStream(
+      query({
+        prompt,
+        options: {
+          tools: [],
+          mcpServers: { invent: mcpServer },
+          allowedTools: ["mcp__invent__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId,
+        },
+      }),
+      log,
+      sessionId,
+    );
 
     // Validate and submit
     log("Running submit...");

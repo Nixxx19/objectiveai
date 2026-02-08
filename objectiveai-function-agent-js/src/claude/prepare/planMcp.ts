@@ -1,5 +1,6 @@
 import { createSdkMcpServer, query } from "@anthropic-ai/claude-agent-sdk";
 import { LogFn } from "../../agentOptions";
+import { consumeStream } from "../../logging";
 import { makeReadPlan, makeWritePlan } from "../../tools/claude/plan";
 import { ReadSpec } from "../../tools/claude/spec";
 import { ReadName } from "../../tools/claude/name";
@@ -41,24 +42,21 @@ export async function planMcp(
     `\n- What expressions need to be written` +
     `\n- What test inputs will cover edge cases and diverse scenarios`;
 
-  const stream = query({
-    prompt,
-    options: {
-      tools: [],
-      mcpServers: { plan: mcpServer },
-      allowedTools: ["mcp__plan__*"],
-      disallowedTools: ["AskUserQuestion"],
-      permissionMode: "dontAsk",
-      resume: sessionId,
-    },
-  });
-
-  for await (const message of stream) {
-    if (message.type === "system" && message.subtype === "init") {
-      sessionId = message.session_id;
-    }
-    log(message);
-  }
+  sessionId = await consumeStream(
+    query({
+      prompt,
+      options: {
+        tools: [],
+        mcpServers: { plan: mcpServer },
+        allowedTools: ["mcp__plan__*"],
+        disallowedTools: ["AskUserQuestion"],
+        permissionMode: "dontAsk",
+        resume: sessionId,
+      },
+    }),
+    log,
+    sessionId,
+  );
 
   return sessionId;
 }

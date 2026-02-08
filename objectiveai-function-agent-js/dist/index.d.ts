@@ -1,5 +1,6 @@
 import z, { z as z$1 } from 'zod';
 import { Functions } from 'objectiveai';
+import { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 
 type LogFn = (...args: unknown[]) => void;
 interface AgentOptions {
@@ -58690,6 +58691,15 @@ declare function createFileLogger(): {
     logPath: string;
 };
 /**
+ * Extract important info from an SDK message and pre-serialize to string.
+ * Returns null for messages that should be skipped.
+ */
+declare function formatMessage(msg: SDKMessage): string | null;
+/**
+ * Consume an SDK message stream, extract session_id, and log formatted messages.
+ */
+declare function consumeStream(stream: AsyncIterable<SDKMessage>, log: LogFn, sessionId?: string): Promise<string | undefined>;
+/**
  * Get the path to the most recent log file.
  */
 declare function getLatestLogPath(): string | null;
@@ -58701,4 +58711,4 @@ declare const SpawnFunctionAgentsParamsSchema: z$1.ZodArray<z$1.ZodObject<{
 }, z$1.core.$strip>>;
 type SpawnFunctionAgentsParams = z$1.infer<typeof SpawnFunctionAgentsParamsSchema>;
 
-export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, createFileLogger, getLatestLogPath, init };
+export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, consumeStream, createFileLogger, formatMessage, getLatestLogPath, init };

@@ -52,18 +52,57 @@ function createFileLogger() {
   const logPath = `${logsDir}/${logIndex}.txt`;
   fs.writeFileSync(logPath, "");
   const log = (...args) => {
-    const message = args.map((arg) => {
-      if (typeof arg === "string") return arg;
-      try {
-        return JSON.stringify(arg, null, 2);
-      } catch {
-        return String(arg);
-      }
-    }).join(" ");
+    const message = args.map((arg) => typeof arg === "string" ? arg : String(arg)).join(" ");
     fs.appendFileSync(logPath, message + "\n");
-    console.log(...args);
+    console.log(message);
   };
   return { log, logPath };
+}
+function formatMessage(msg) {
+  switch (msg.type) {
+    case "system": {
+      if (msg.subtype === "init") {
+        return `[init] session=${msg.session_id} model=${msg.model}`;
+      }
+      if (msg.subtype === "compact_boundary") {
+        return `[compact]`;
+      }
+      return null;
+    }
+    case "assistant": {
+      const parts = [];
+      for (const block of msg.message.content) {
+        if (block.type === "text") {
+          const text = block.text.trim();
+          if (text) parts.push(text);
+        } else if (block.type === "tool_use") {
+          parts.push(`[tool_use] ${block.name}`);
+        }
+      }
+      const { usage } = msg.message;
+      parts.push(`[usage] in=${usage.input_tokens} out=${usage.output_tokens}`);
+      return parts.length > 0 ? parts.join("\n") : null;
+    }
+    case "result": {
+      const durationSec = (msg.duration_ms / 1e3).toFixed(1);
+      if (msg.subtype === "success") {
+        return `[result] success turns=${msg.num_turns} cost=$${msg.total_cost_usd.toFixed(4)} duration=${durationSec}s`;
+      }
+      return `[result] error=${msg.subtype} turns=${msg.num_turns} cost=$${msg.total_cost_usd.toFixed(4)} duration=${durationSec}s errors=${JSON.stringify(msg.errors)}`;
+    }
+    default:
+      return null;
+  }
+}
+async function consumeStream(stream, log, sessionId) {
+  for await (const message of stream) {
+    if (message.type === "system" && message.subtype === "init") {
+      sessionId = message.session_id;
+    }
+    const formatted = formatMessage(message);
+    if (formatted) log(formatted);
+  }
+  return sessionId;
 }
 function getLatestLogPath() {
   const logsDir = "logs";
@@ -1278,30 +1317,9 @@ async function specMcp(log, sessionId, spec) {
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "spec", tools });
   const prompt = "Read example functions to understand what ObjectiveAI Functions look like, then create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.";
-  const stream = claudeAgentSdk.query({
-    prompt,
-    options: {
-      tools: [],
-      mcpServers: { spec: mcpServer },
-      allowedTools: ["mcp__spec__*"],
-      disallowedTools: ["AskUserQuestion"],
-      permissionMode: "dontAsk",
-      resume: sessionId
-    }
-  });
-  for await (const message of stream) {
-    if (message.type === "system" && message.subtype === "init") {
-      sessionId = message.session_id;
-    }
-    log(message);
-  }
-  let retry = 1;
-  while (!specIsNonEmpty()) {
-    if (retry > 3) {
-      throw new Error("SPEC.md is empty after spec phase");
-    }
-    const stream2 = claudeAgentSdk.query({
-      prompt: "SPEC.md is empty after your spec phase. Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.",
+  sessionId = await consumeStream(
+    claudeAgentSdk.query({
+      prompt,
       options: {
         tools: [],
         mcpServers: { spec: mcpServer },
@@ -1310,13 +1328,30 @@ async function specMcp(log, sessionId, spec) {
         permissionMode: "dontAsk",
         resume: sessionId
       }
-    });
-    for await (const message of stream2) {
-      if (message.type === "system" && message.subtype === "init") {
-        sessionId = message.session_id;
-      }
-      log(message);
+    }),
+    log,
+    sessionId
+  );
+  let retry = 1;
+  while (!specIsNonEmpty()) {
+    if (retry > 3) {
+      throw new Error("SPEC.md is empty after spec phase");
     }
+    sessionId = await consumeStream(
+      claudeAgentSdk.query({
+        prompt: "SPEC.md is empty after your spec phase. Create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.",
+        options: {
+          tools: [],
+          mcpServers: { spec: mcpServer },
+          allowedTools: ["mcp__spec__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId
+        }
+      }),
+      log,
+      sessionId
+    );
     retry += 1;
   }
   return sessionId;
@@ -1390,30 +1425,9 @@ async function nameMcp(log, sessionId, name) {
     ReadFunctionSchema
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "name", tools });
-  const stream = claudeAgentSdk.query({
-    prompt: 'Read SPEC.md and example functions to understand the context, then create name.txt with the function name.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
-    options: {
-      tools: [],
-      mcpServers: { name: mcpServer },
-      allowedTools: ["mcp__name__*"],
-      disallowedTools: ["AskUserQuestion"],
-      permissionMode: "dontAsk",
-      resume: sessionId
-    }
-  });
-  for await (const message of stream) {
-    if (message.type === "system" && message.subtype === "init") {
-      sessionId = message.session_id;
-    }
-    log(message);
-  }
-  let retry = 1;
-  while (!nameIsNonEmpty()) {
-    if (retry > 10) {
-      throw new Error("name.txt is empty after name phase");
-    }
-    const stream2 = claudeAgentSdk.query({
-      prompt: 'name.txt is empty after your name phase. Create name.txt with the function name.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
+  sessionId = await consumeStream(
+    claudeAgentSdk.query({
+      prompt: 'Read SPEC.md and example functions to understand the context, then create name.txt with the function name.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
       options: {
         tools: [],
         mcpServers: { name: mcpServer },
@@ -1422,13 +1436,30 @@ async function nameMcp(log, sessionId, name) {
         permissionMode: "dontAsk",
         resume: sessionId
       }
-    });
-    for await (const message of stream2) {
-      if (message.type === "system" && message.subtype === "init") {
-        sessionId = message.session_id;
-      }
-      log(message);
+    }),
+    log,
+    sessionId
+  );
+  let retry = 1;
+  while (!nameIsNonEmpty()) {
+    if (retry > 10) {
+      throw new Error("name.txt is empty after name phase");
     }
+    sessionId = await consumeStream(
+      claudeAgentSdk.query({
+        prompt: 'name.txt is empty after your name phase. Create name.txt with the function name.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
+        options: {
+          tools: [],
+          mcpServers: { name: mcpServer },
+          allowedTools: ["mcp__name__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId
+        }
+      }),
+      log,
+      sessionId
+    );
     retry += 1;
   }
   return sessionId;
@@ -1463,30 +1494,9 @@ async function essayMcp(log, sessionId) {
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essay", tools });
   const prompt = "Read SPEC.md, name.txt, and example functions to understand the context, then create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
-  const stream = claudeAgentSdk.query({
-    prompt,
-    options: {
-      tools: [],
-      mcpServers: { essay: mcpServer },
-      allowedTools: ["mcp__essay__*"],
-      disallowedTools: ["AskUserQuestion"],
-      permissionMode: "dontAsk",
-      resume: sessionId
-    }
-  });
-  for await (const message of stream) {
-    if (message.type === "system" && message.subtype === "init") {
-      sessionId = message.session_id;
-    }
-    log(message);
-  }
-  let retry = 1;
-  while (!essayIsNonEmpty()) {
-    if (retry > 3) {
-      throw new Error("ESSAY.md is empty after essay phase");
-    }
-    const stream2 = claudeAgentSdk.query({
-      prompt: "ESSAY.md is empty after your essay phase. Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.",
+  sessionId = await consumeStream(
+    claudeAgentSdk.query({
+      prompt,
       options: {
         tools: [],
         mcpServers: { essay: mcpServer },
@@ -1495,13 +1505,30 @@ async function essayMcp(log, sessionId) {
         permissionMode: "dontAsk",
         resume: sessionId
       }
-    });
-    for await (const message of stream2) {
-      if (message.type === "system" && message.subtype === "init") {
-        sessionId = message.session_id;
-      }
-      log(message);
+    }),
+    log,
+    sessionId
+  );
+  let retry = 1;
+  while (!essayIsNonEmpty()) {
+    if (retry > 3) {
+      throw new Error("ESSAY.md is empty after essay phase");
     }
+    sessionId = await consumeStream(
+      claudeAgentSdk.query({
+        prompt: "ESSAY.md is empty after your essay phase. Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.",
+        options: {
+          tools: [],
+          mcpServers: { essay: mcpServer },
+          allowedTools: ["mcp__essay__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId
+        }
+      }),
+      log,
+      sessionId
+    );
     retry += 1;
   }
   return sessionId;
@@ -1537,30 +1564,9 @@ async function essayTasksMcp(log, sessionId) {
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essayTasks", tools });
   const prompt = "Read SPEC.md, name.txt, ESSAY.md, and example functions to understand the context, then create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.";
-  const stream = claudeAgentSdk.query({
-    prompt,
-    options: {
-      tools: [],
-      mcpServers: { essayTasks: mcpServer },
-      allowedTools: ["mcp__essayTasks__*"],
-      disallowedTools: ["AskUserQuestion"],
-      permissionMode: "dontAsk",
-      resume: sessionId
-    }
-  });
-  for await (const message of stream) {
-    if (message.type === "system" && message.subtype === "init") {
-      sessionId = message.session_id;
-    }
-    log(message);
-  }
-  let retry = 1;
-  while (!essayTasksIsNonEmpty()) {
-    if (retry > 3) {
-      throw new Error("ESSAY_TASKS.md is empty after essayTasks phase");
-    }
-    const stream2 = claudeAgentSdk.query({
-      prompt: "ESSAY_TASKS.md is empty after your essayTasks phase. Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.",
+  sessionId = await consumeStream(
+    claudeAgentSdk.query({
+      prompt,
       options: {
         tools: [],
         mcpServers: { essayTasks: mcpServer },
@@ -1569,13 +1575,30 @@ async function essayTasksMcp(log, sessionId) {
         permissionMode: "dontAsk",
         resume: sessionId
       }
-    });
-    for await (const message of stream2) {
-      if (message.type === "system" && message.subtype === "init") {
-        sessionId = message.session_id;
-      }
-      log(message);
+    }),
+    log,
+    sessionId
+  );
+  let retry = 1;
+  while (!essayTasksIsNonEmpty()) {
+    if (retry > 3) {
+      throw new Error("ESSAY_TASKS.md is empty after essayTasks phase");
     }
+    sessionId = await consumeStream(
+      claudeAgentSdk.query({
+        prompt: "ESSAY_TASKS.md is empty after your essayTasks phase. Create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.",
+        options: {
+          tools: [],
+          mcpServers: { essayTasks: mcpServer },
+          allowedTools: ["mcp__essayTasks__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId
+        }
+      }),
+      log,
+      sessionId
+    );
     retry += 1;
   }
   return sessionId;
@@ -1640,23 +1663,21 @@ async function planMcp(log, sessionId) {
 - What the function definition will look like
 - What expressions need to be written
 - What test inputs will cover edge cases and diverse scenarios`;
-  const stream = claudeAgentSdk.query({
-    prompt,
-    options: {
-      tools: [],
-      mcpServers: { plan: mcpServer },
-      allowedTools: ["mcp__plan__*"],
-      disallowedTools: ["AskUserQuestion"],
-      permissionMode: "dontAsk",
-      resume: sessionId
-    }
-  });
-  for await (const message of stream) {
-    if (message.type === "system" && message.subtype === "init") {
-      sessionId = message.session_id;
-    }
-    log(message);
-  }
+  sessionId = await consumeStream(
+    claudeAgentSdk.query({
+      prompt,
+      options: {
+        tools: [],
+        mcpServers: { plan: mcpServer },
+        allowedTools: ["mcp__plan__*"],
+        disallowedTools: ["AskUserQuestion"],
+        permissionMode: "dontAsk",
+        resume: sessionId
+      }
+    }),
+    log,
+    sessionId
+  );
   return sessionId;
 }
 
@@ -3329,8 +3350,6 @@ Expressions receive a single object with these fields:
 - **Multimodal content**: For fields that accept images, audio, video, or files, use bogus/placeholder string values (e.g. \`"https://example.com/image.jpg"\`). This is fine for testing - exercise the various modalities
 
 ### Build and Test
-- Use RunNetworkTests to execute the function for each example input
-- If tests fail, use ReadDefaultNetworkTest and ReadSwissSystemNetworkTest to read individual results
 - Fix issues and repeat until all tests pass
 
 ## Phase 2: Verify SPEC.md Compliance
@@ -3388,8 +3407,6 @@ Expressions receive a single object with these fields:
 - **Multimodal content**: For fields that accept images, audio, video, or files, use bogus/placeholder string values (e.g. \`"https://example.com/image.jpg"\`). This is fine for testing - exercise the various modalities
 
 ### Build and Test
-- Use RunNetworkTests to execute the function for each example input
-- If tests fail, use ReadDefaultNetworkTest and ReadSwissSystemNetworkTest to read individual results
 - Fix issues and repeat until all tests pass
 
 ## Phase 2: Verify SPEC.md Compliance
@@ -3439,23 +3456,21 @@ Please try again. Remember to:
 2. Use Submit to validate, commit, and push
 `;
     }
-    const stream = claudeAgentSdk.query({
-      prompt,
-      options: {
-        tools: [],
-        mcpServers: { invent: mcpServer },
-        allowedTools: ["mcp__invent__*"],
-        disallowedTools: ["AskUserQuestion"],
-        permissionMode: "dontAsk",
-        resume: sessionId
-      }
-    });
-    for await (const message of stream) {
-      if (message.type === "system" && message.subtype === "init") {
-        sessionId = message.session_id;
-      }
-      log(message);
-    }
+    sessionId = await consumeStream(
+      claudeAgentSdk.query({
+        prompt,
+        options: {
+          tools: [],
+          mcpServers: { invent: mcpServer },
+          allowedTools: ["mcp__invent__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId
+        }
+      }),
+      log,
+      sessionId
+    );
     log("Running submit...");
     lastFailureReasons = [];
     const submitResult = await submit("submit", apiBase);
@@ -3524,6 +3539,8 @@ exports.ExampleInputSchema = ExampleInputSchema;
 exports.ExampleInputsSchema = ExampleInputsSchema;
 exports.SpawnFunctionAgentsParamsSchema = SpawnFunctionAgentsParamsSchema;
 exports.Tools = tools_exports;
+exports.consumeStream = consumeStream;
 exports.createFileLogger = createFileLogger;
+exports.formatMessage = formatMessage;
 exports.getLatestLogPath = getLatestLogPath;
 exports.init = init;
