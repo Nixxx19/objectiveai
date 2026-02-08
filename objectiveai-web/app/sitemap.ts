@@ -60,10 +60,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/docs/api/delete/auth/keys/openrouter",
   ];
 
+  const getPriority = (route: string): number => {
+    if (route === "") return 1;
+    if (route.startsWith("/docs/api/")) return 0.3;
+    if (route.startsWith("/account/") || route.startsWith("/legal/")) return 0.3;
+    if (["/legal", "/faq", "/people", "/information"].includes(route)) return 0.5;
+    return 0.8;
+  };
+
   return staticRoutes.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date(),
     changeFrequency: route === "" ? "weekly" : "monthly",
-    priority: route === "" ? 1 : 0.8,
+    priority: getPriority(route),
   }));
 }

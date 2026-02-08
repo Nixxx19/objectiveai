@@ -211,6 +211,7 @@ export default function FunctionsPage() {
             className="iconBtn"
             onClick={() => setFiltersOpen(!filtersOpen)}
             aria-label={filtersOpen ? "Close filters" : "Open filters"}
+            aria-expanded={filtersOpen}
             style={{ flexShrink: 0 }}
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -452,20 +453,24 @@ export default function FunctionsPage() {
               }}
               onClick={() => setFiltersOpen(false)}
             />
-            <div style={{
-              position: 'fixed',
-              bottom: 0,
-              left: 0,
-              right: 0,
-              background: 'var(--card-bg)',
-              zIndex: 201,
-              padding: '24px',
-              borderTopLeftRadius: '20px',
-              borderTopRightRadius: '20px',
-              boxShadow: '0 -4px 20px var(--shadow)',
-              maxHeight: '70vh',
-              overflowY: 'auto',
-            }}>
+            <div
+              role="dialog"
+              aria-modal="true"
+              aria-label="Filters"
+              style={{
+                position: 'fixed',
+                bottom: 0,
+                left: 0,
+                right: 0,
+                background: 'var(--card-bg)',
+                zIndex: 201,
+                padding: '24px',
+                borderTopLeftRadius: '20px',
+                borderTopRightRadius: '20px',
+                boxShadow: '0 -4px 20px var(--shadow)',
+                maxHeight: '70vh',
+                overflowY: 'auto',
+              }}>
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -475,6 +480,7 @@ export default function FunctionsPage() {
                 <h3 style={{ fontSize: '18px', fontWeight: 600 }}>Filters</h3>
                 <button
                   onClick={() => setFiltersOpen(false)}
+                  aria-label="Close filters"
                   style={{
                     background: 'none',
                     border: 'none',

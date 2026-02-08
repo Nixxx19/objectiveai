@@ -263,6 +263,9 @@ export default function InformationPage() {
         {/* FAQ Card - Collapsible */}
         <div
           className="card"
+          role="button"
+          tabIndex={0}
+          aria-expanded={faqOpen}
           style={{
             marginBottom: '24px',
             padding: 0,
@@ -270,6 +273,7 @@ export default function InformationPage() {
             cursor: 'pointer',
           }}
           onClick={() => setFaqOpen(!faqOpen)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setFaqOpen(!faqOpen); } }}
         >
           <div
             style={{
@@ -363,6 +367,7 @@ export default function InformationPage() {
                                 e.stopPropagation();
                                 toggleItem(key);
                               }}
+                              aria-expanded={isOpen}
                               style={{
                                 width: '100%',
                                 padding: isMobile ? '12px 14px' : '14px 16px',
@@ -422,6 +427,9 @@ export default function InformationPage() {
         {/* SDKs Card - Collapsible */}
         <div
           className="card"
+          role="button"
+          tabIndex={0}
+          aria-expanded={sdksOpen}
           style={{
             marginBottom: '24px',
             padding: 0,
@@ -429,6 +437,7 @@ export default function InformationPage() {
             cursor: 'pointer',
           }}
           onClick={() => setSdksOpen(!sdksOpen)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSdksOpen(!sdksOpen); } }}
         >
           <div
             style={{
@@ -536,6 +545,9 @@ export default function InformationPage() {
         {/* API Documentation Card - Collapsible */}
         <div
           className="card"
+          role="button"
+          tabIndex={0}
+          aria-expanded={docsOpen}
           style={{
             marginBottom: '24px',
             padding: 0,
@@ -543,6 +555,7 @@ export default function InformationPage() {
             cursor: 'pointer',
           }}
           onClick={() => setDocsOpen(!docsOpen)}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setDocsOpen(!docsOpen); } }}
         >
           <div
             style={{
