@@ -3245,6 +3245,49 @@ function makeSubmit(apiBase, apiKey) {
     async ({ message }) => resultFromResult(await submit(message, apiBase, apiKey))
   );
 }
+function getGitHubOwner2() {
+  try {
+    return child_process.execSync("gh api user --jq .login", {
+      encoding: "utf-8",
+      stdio: "pipe"
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+function repoExists2(owner, name) {
+  try {
+    child_process.execSync(`gh repo view ${owner}/${name}`, { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+var OVERWRITE_FILES = [
+  "SPEC.md",
+  "ESSAY.md",
+  "ESSAY_TASKS.md",
+  "README.md"
+];
+function clearForOverwrite(dir) {
+  for (const file of OVERWRITE_FILES) {
+    const path$1 = path.join(dir, file);
+    if (fs.existsSync(path$1)) {
+      fs.rmSync(path$1);
+    }
+  }
+  const functionPath = path.join(dir, "function.json");
+  if (fs.existsSync(functionPath)) {
+    try {
+      const fn = JSON.parse(fs.readFileSync(functionPath, "utf-8"));
+      if (typeof fn === "object" && fn !== null) {
+        delete fn.description;
+        fs.writeFileSync(functionPath, JSON.stringify(fn, null, 2));
+      }
+    } catch {
+    }
+  }
+}
 function getCurrentDepth() {
   if (!fs.existsSync("parameters.json")) {
     return 0;
@@ -3322,17 +3365,18 @@ async function spawnFunctionAgents(params, apiBase, apiKey) {
     const dir = path.join("agent_functions", param.name);
     if (param.overwrite && fs.existsSync(dir)) {
       try {
-        fs.rmSync(dir, { recursive: true, force: true });
+        clearForOverwrite(dir);
       } catch (err) {
         return {
           ok: false,
           value: void 0,
-          error: `Failed to delete ${dir}: ${err}. If this error persists, make a new function with a different name instead.`
+          error: `Failed to clear ${dir} for overwrite: ${err}.`
         };
       }
     }
   }
   for (const param of params) {
+    if (param.overwrite) continue;
     const dir = path.join("agent_functions", param.name);
     if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
       return {
@@ -3340,6 +3384,21 @@ async function spawnFunctionAgents(params, apiBase, apiKey) {
         value: void 0,
         error: `agent_functions/${param.name} already exists. Set "overwrite": true to replace it, or use a different name.`
       };
+    }
+  }
+  const nonOverwriteParams = params.filter((p) => !p.overwrite);
+  if (nonOverwriteParams.length > 0) {
+    const owner = getGitHubOwner2();
+    if (owner) {
+      for (const param of nonOverwriteParams) {
+        if (repoExists2(owner, param.name)) {
+          return {
+            ok: false,
+            value: void 0,
+            error: `Repository ${owner}/${param.name} already exists on GitHub. Choose a different name.`
+          };
+        }
+      }
     }
   }
   const currentDepth = getCurrentDepth();
