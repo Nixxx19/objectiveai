@@ -27,7 +27,7 @@ const FOUNDERS: TeamMember[] = [
     id: "ceo",
     name: "Ronald Riggles",
     title: "CEO & Co-Founder",
-    bio: "AI ranking and scoring. Ronald has created a system that uses Ensembles of LLMs, who vote, to ensure confidence in objective, AI measurements. ObjectiveAI has evolved into a preferences engine. Objectively quantify subjective preferences to simulate how you actually think. No fine-tuning\u2014just learned weights over fixed models. Give it your feedback data and it computes a profile that reveals priorities you didn\u2019t know you had. He is building the infrastructure to scale this system into the most efficient, and autonomous, iteration of itself.",
+    bio: "AI ranking and scoring. Ronald has created a system that uses Ensembles of LLMs, who vote, to ensure confidence in objective, AI measurements. ObjectiveAI has evolved into a preferences engine. Objectively quantify subjective preferences to simulate how you actually think. No fine-tuning\u2014just learned weights over fixed models AND function tasks. Give it your feedback data and it computes a profile that reveals priorities you didn\u2019t know you had. He is building the infrastructure to scale this system into the most efficient, and autonomous, iteration of itself.",
     focusAreas: ["Software Engineer", "Objectivity", "Efficiency"],
     contactEmail: "", // Removed for now
     photoUrl: "/photos/ronald.jpg",
