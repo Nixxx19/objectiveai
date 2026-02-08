@@ -14,10 +14,12 @@ objectiveai/
 ├── objectiveai-api/                # API server (self-hostable, or import as library)
 ├── objectiveai-rs-wasm-js/         # WASM bindings for browser/Node.js
 ├── objectiveai-js/                 # TypeScript SDK (npm: objectiveai)
-├── objectiveai-web/                # Next.js web interface (legacy, being replaced)
-├── objectiveai-web-new/            # Next.js web interface (active development)
+├── objectiveai-web/                # Next.js web interface (legacy — being replaced by objectiveai-web-new)
+├── objectiveai-web-new/            # Next.js web interface (production-ready, pending launch)
 └── coding-agent-scratch/           # Scratch folder for testing SDK calls
 ```
+
+**Note:** At launch, `objectiveai-web-new/` will be renamed to `objectiveai-web/` and the old site deleted.
 
 ## Core Concepts
 
@@ -488,27 +490,30 @@ OAuth providers (Google, GitHub, X, Reddit) via NextAuth. Auth is fully function
 
 ### Disabled Features
 
-- **Purchase Credits** button disabled until Stripe integration is migrated from `objectiveai-web`
 - **Profile training** endpoint returns 501 (backend pending)—keep UI with "coming soon" messaging
 
-### Web-New Current State (~95% Complete)
+### Web-New Current State (Feature-Complete)
+
+All user-facing features from `objectiveai-web` have been ported or redesigned. The site is functionally ready for production.
 
 **Production-Ready Pages:**
-- `/` - Landing with featured functions
+- `/` - Landing with hero, featured functions, onboarding CTAs
 - `/functions`, `/profiles`, `/ensembles`, `/ensemble-llms` - Browse pages with search/filter/sort
 - `/functions/[slug]` - Function detail with execution UI, profile selector, reasoning
+- `/functions/create` - JSON builder for `function.json` files
 - `/ensembles/[id]` - Ensemble detail with LLM list and usage stats
+- `/ensembles/create` - Ensemble builder with WASM validation
 - `/ensemble-llms/[id]` - Ensemble LLM detail with config display
+- `/ensemble-llms/create` - Ensemble LLM builder with WASM validation
 - `/account/keys` - API keys management (create, view, disable)
-- `/account/credits` - Credit balance display via SDK
+- `/account/credits` - Credit balance + Stripe purchase + billing address
 - `/people` - Team page with founder bios
-- `/information` - FAQ (24 Q&As), API docs, SDK links
+- `/information`, `/faq` - FAQ (24 Q&As), API docs, SDK links
 - `/legal` - Terms + Privacy (expandable cards)
 - `/sdk-first`, `/vibe-native` - Onboarding guides
 - `/chat`, `/vector` - Direct completions pages
-
-**Pending:**
-- Stripe credit purchase (Stripe env var configured, needs UI migration from `objectiveai-web`)
+- `/docs/api/**` - 32 API endpoint docs with Zod schema introspection
+- `/profiles/train` - Profile training UI (backend returns 501 — coming soon)
 
 ### Key Web-New Files
 
@@ -518,6 +523,10 @@ OAuth providers (Google, GitHub, X, Reddit) via NextAuth. Auth is fully function
 | `components/AppShell.tsx` | Navigation, theme toggle, mobile menu |
 | `lib/objectiveai.ts` | SDK wrapper with dev defaults (`from_cache: true`, `from_rng: true`) |
 | `lib/provider.ts` | Token session management with OAuth refresh logic |
+| `lib/stripe.ts` | Stripe utilities (retry, theme, formatting) |
+| `lib/stripe-types.ts` | TypeScript types for Stripe API responses |
+| `components/stripe/` | PurchaseCreditsForm, BillingAddressForm, CreditsBreakdown |
+| `components/docs/EndpointDocs.tsx` | API endpoint docs with Zod schema introspection |
 | `contexts/AuthContext.tsx` | Auth provider with NextAuth integration |
 | `app/api/auth/[...nextauth]/route.ts` | NextAuth route (Google, GitHub, X, Reddit) |
 | `planning/` | Wireframes, moodboards, design guidelines |
@@ -676,7 +685,7 @@ For vector functions, enables tournament-style ranking:
 | Browse Profiles/Ensembles/LLMs | Complete | List views with search |
 | Detail Pages | Complete | Function, Ensemble, Ensemble LLM details |
 | API Key Management | Complete | Create, view, disable |
-| Credit Balance | View-only | Purchase disabled |
+| Credit Balance + Purchase | Complete | Stripe integration fully ported |
 | Media Input Component | Ready | `ArrayInput.tsx` supports images, audio, video, files |
 
 ### Recently Implemented ✅ (Feb 2026)
@@ -693,6 +702,8 @@ For vector functions, enables tournament-style ranking:
 | Function JSON Builder | Complete | `/functions/create` - JSON editor for creating `function.json` files (not server-side creation) |
 | Profile Training UI | Complete | `/profiles/train` (backend returns 501 - coming soon) |
 | WASM Validation | Complete | `lib/wasm-validation.ts` for real-time ID computation |
+| Stripe Credit Purchase | Complete | Full purchase flow, billing address, breakdown display |
+| API Docs (32 pages) | Complete | `/docs/api/**` with Zod schema introspection via `EndpointDocs` |
 
 ### Code Quality Improvements (Feb 2026)
 
@@ -728,7 +739,8 @@ Module loads gracefully - shows "Enter model to see ID" when WASM unavailable.
 ### Remaining Gaps
 
 - Profile training backend integration (endpoint returns 501—keep UI with "coming soon")
-- Stripe credit purchase UI (migrate from `objectiveai-web/src/components/account/credits/Credits.tsx`)
+- Rename `objectiveai-web-new/` → `objectiveai-web/` and delete old site
+- Open pull request via `gh pr create`
 
 ### Feature Parity Audit Process
 
@@ -741,14 +753,87 @@ Module loads gracefully - shows "Enter model to see ID" when WASM unavailable.
 4. For shared routes, verify feature parity (e.g., a summary card listing endpoints ≠ individual endpoint docs pages)
 5. Check shared components in old site (`objectiveai-web/src/components/`) for functionality not yet ported
 
-### Stripe Integration Notes
+### Stripe Integration (Complete)
 
-Reference `objectiveai-web/src/components/account/credits/Credits.tsx` for the complete Stripe implementation:
-- Uses `@stripe/stripe-js` and `@stripe/react-stripe-js`
+Stripe has been fully migrated from `objectiveai-web` to `objectiveai-web-new`:
+- `components/stripe/PurchaseCreditsForm.tsx` - Multi-step purchase flow
+- `components/stripe/BillingAddressForm.tsx` - Stripe AddressElement integration
+- `components/stripe/CreditsBreakdown.tsx` - Payment breakdown display
+- `lib/stripe.ts` - Utilities (retry logic, theme, formatting)
+- `lib/stripe-types.ts` - TypeScript types for Stripe API responses
+- `hooks/useStripeTheme.ts` - SSR-safe theme syncing for Stripe elements
 - Customer session management via `/stripe/customer` endpoint
 - Payment intent creation via `/stripe/payment_intent` endpoint
-- **Important:** 10-second delay after user sets billing address before payment can be computed (429 rate limit with retry)
-- Use `fetch` client-side for Stripe endpoints—these are NOT in the SDK
+- 10-second retry logic for 429 rate limit (tax propagation delay)
+- Uses `fetch` client-side for Stripe endpoints—these are NOT in the SDK
+
+---
+
+## Production Launch Plan
+
+### Pre-Launch Checklist
+
+**1. ~~Verify Stripe and API key flows match old website behavior~~ DONE**
+- Stripe: full parity confirmed (12 behaviors verified)
+- API keys: gaps fixed (added cost display, sort, key masking, copy feedback)
+
+**2. ~~Fix `next.config.ts`~~ DONE**
+- Added `transpilePackages`, `images.remotePatterns`, security headers
+
+**3. ~~Add production infrastructure files~~ DONE**
+- `public/robots.txt`, `app/sitemap.ts`, OG/Twitter meta in `layout.tsx`
+- `app/not-found.tsx` (branded 404), `app/error.tsx` (error boundary)
+- Security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy)
+
+**4. ~~Create Dockerfile and cloudbuild.yaml~~ DONE**
+- Multi-stage build (node:20 builder, node:20-slim runner)
+- All old build args + 3 new (Sonarly project key, Sonarly ingest point, ObjectiveAI API key)
+- Cloud Build deploys to Cloud Run `objective-ai-web-main` in `us-central1`
+
+**5. Rename and clean up:**
+- Delete `objectiveai-web/` (old website)
+- Rename `objectiveai-web-new/` to `objectiveai-web/`
+- Update all references in root `package.json`, `.gitmodules`, etc.
+- Update this CLAUDE.md (remove "web-new" references, update paths)
+- Dockerfile paths change: `objectiveai-web-new/` → `objectiveai-web/`
+
+**6. Open pull request** via `gh pr create`
+
+### Deployment Reference (from old website)
+
+**Dockerfile pattern** (`objectiveai-web/Dockerfile`):
+```
+Builder (node:20):
+  - Copy root package.json + objectiveai-js/ + objectiveai-web/package.json
+  - npm install --include=dev
+  - Copy objectiveai-web/ source
+  - npm run build --workspace=objectiveai-web
+  - Replace symlinked SDK with copied dist
+
+Runner (node:20-slim):
+  - Copy .next, public, node_modules, package.json, next.config.ts
+  - CMD ["npx", "next", "start"]
+```
+
+**Build args** (passed via Cloud Build substitution variables):
+- `AUTH_GOOGLE_CLIENT_ID`, `AUTH_GOOGLE_CLIENT_SECRET`
+- `AUTH_GITHUB_CLIENT_ID`, `AUTH_GITHUB_CLIENT_SECRET`
+- `AUTH_TWITTER_CLIENT_ID`, `AUTH_TWITTER_CLIENT_SECRET`
+- `AUTH_REDDIT_CLIENT_ID`, `AUTH_REDDIT_CLIENT_SECRET`
+- `NEXTAUTH_URL`, `NEXTAUTH_SECRET`
+- `NEXT_PUBLIC_API_URL`, `NODE_ENV`
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+- `IP_RSA_PUBLIC_KEY`, `USER_IP_HEADER`
+- (New) `NEXT_PUBLIC_SONARLY_PROJECT_KEY`, `NEXT_PUBLIC_SONARLY_INGEST_POINT`
+- (New) `OBJECTIVEAI_API_KEY`
+
+**Cloud Build pipeline** (`cloudbuild.yaml`):
+1. Fetch git submodules
+2. Build Docker image with all build args
+3. Tag as `us-docker.pkg.dev/$PROJECT_ID/objectiveai/objectiveai-web:latest`
+4. Push to GCP Artifact Registry
+5. Deploy to Cloud Run (`objective-ai-web-main`, `us-central1`, unauthenticated)
+6. Timeout: 2100s, Cloud Logging only
 
 ---
 

@@ -16,8 +16,31 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ObjectiveAI",
-  description: "Score, rank, and simulate with AI functions",
+  title: {
+    default: "ObjectiveAI",
+    template: "%s | ObjectiveAI",
+  },
+  description:
+    "Score everything. Rank everything. Simulate anyone. A REST API platform for scoring, ranking, and simulating preferences using ensembles of LLMs.",
+  metadataBase: new URL("https://objective-ai.io"),
+  openGraph: {
+    type: "website",
+    siteName: "ObjectiveAI",
+    title: "ObjectiveAI",
+    description:
+      "Score everything. Rank everything. Simulate anyone. A REST API platform for scoring, ranking, and simulating preferences using ensembles of LLMs.",
+    url: "https://objective-ai.io",
+  },
+  twitter: {
+    card: "summary",
+    title: "ObjectiveAI",
+    description:
+      "Score everything. Rank everything. Simulate anyone. A REST API platform using ensembles of LLMs.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({

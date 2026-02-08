@@ -31,8 +31,10 @@ export default function ApiKeysPage() {
   const [newKeyDescription, setNewKeyDescription] = useState("");
   const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [copiedListKey, setCopiedListKey] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isDisabling, setIsDisabling] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<'created' | 'cost'>('created');
 
   // Fetch keys using SDK
   const fetchKeys = useCallback(async () => {
@@ -121,6 +123,31 @@ export default function ApiKeysPage() {
       setTimeout(() => setCopied(false), COPY_FEEDBACK_DURATION_MS);
     }
   };
+
+  const handleCopyListKey = (apiKey: string) => {
+    navigator.clipboard.writeText(apiKey);
+    setCopiedListKey(apiKey);
+    setTimeout(() => setCopiedListKey(null), COPY_FEEDBACK_DURATION_MS);
+  };
+
+  const maskKey = (key: string) => {
+    if (key.length <= 12) return key;
+    return `${key.slice(0, 6)}...${key.slice(-6)}`;
+  };
+
+  const formatCost = (cost: number) => {
+    return `$${cost.toFixed(2)}`;
+  };
+
+  const sortedKeys = [...keys].sort((a, b) => {
+    // Active keys first, then disabled
+    const aDisabled = !!a.disabled;
+    const bDisabled = !!b.disabled;
+    if (aDisabled !== bDisabled) return aDisabled ? 1 : -1;
+    // Sort within group
+    if (sortBy === 'cost') return b.cost - a.cost;
+    return new Date(b.created).getTime() - new Date(a.created).getTime();
+  });
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString('en-US', {
@@ -220,30 +247,56 @@ export default function ApiKeysPage() {
           </p>
         </div>
 
-        {/* Create Key Button */}
-        <button
-          onClick={() => setShowCreateModal(true)}
-          className="pillBtn"
-          style={{
-            padding: '12px 24px',
-            fontSize: '14px',
-            fontWeight: 600,
-            background: 'var(--accent)',
-            color: 'var(--color-light)',
-            border: 'none',
-            cursor: 'pointer',
-            marginBottom: '24px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-          }}
-        >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="12" y1="5" x2="12" y2="19" />
-            <line x1="5" y1="12" x2="19" y2="12" />
-          </svg>
-          Create new key
-        </button>
+        {/* Actions Bar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px',
+          marginBottom: '24px',
+          flexWrap: 'wrap',
+        }}>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="pillBtn"
+            style={{
+              padding: '12px 24px',
+              fontSize: '14px',
+              fontWeight: 600,
+              background: 'var(--accent)',
+              color: 'var(--color-light)',
+              border: 'none',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Create new key
+          </button>
+          {keys.length > 1 && (
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as 'created' | 'cost')}
+              style={{
+                padding: '10px 16px',
+                fontSize: '13px',
+                background: 'var(--nav-surface)',
+                border: '1px solid var(--border)',
+                borderRadius: '8px',
+                color: 'var(--text)',
+                cursor: 'pointer',
+                outline: 'none',
+              }}
+            >
+              <option value="created">Sort: Newest</option>
+              <option value="cost">Sort: Most Spent</option>
+            </select>
+          )}
+        </div>
 
         {/* Keys List */}
         {keysLoading ? (
@@ -347,7 +400,7 @@ export default function ApiKeysPage() {
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {keys.map((key) => (
+            {sortedKeys.map((key) => (
               <div
                 key={key.api_key}
                 className="card"
@@ -377,26 +430,31 @@ export default function ApiKeysPage() {
                     alignItems: 'center',
                     gap: '8px',
                   }}>
-                    {key.api_key}
+                    {maskKey(key.api_key)}
                     <button
-                      onClick={() => {
-                        navigator.clipboard.writeText(key.api_key);
-                      }}
+                      onClick={() => handleCopyListKey(key.api_key)}
                       style={{
                         background: 'none',
                         border: 'none',
                         padding: '4px',
                         cursor: 'pointer',
-                        color: 'var(--text-muted)',
+                        color: copiedListKey === key.api_key ? 'var(--accent)' : 'var(--text-muted)',
                         display: 'flex',
                         alignItems: 'center',
+                        transition: 'color 0.2s',
                       }}
                       title="Copy to clipboard"
                     >
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
-                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
-                      </svg>
+                      {copiedListKey === key.api_key ? (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      ) : (
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                      )}
                     </button>
                   </div>
                   {key.description && (
@@ -416,6 +474,7 @@ export default function ApiKeysPage() {
                 }}>
                   <div>created {formatDate(key.created)}</div>
                   <div>expires {key.expires ? formatDate(key.expires) : 'never'}</div>
+                  <div>spent {formatCost(key.cost)}</div>
                 </div>
                 {key.disabled ? (
                   <span style={{
