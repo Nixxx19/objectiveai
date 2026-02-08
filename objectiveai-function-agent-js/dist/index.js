@@ -2482,36 +2482,67 @@ function clearDir(dir) {
   }
 }
 async function runNetworkTests(apiBase, apiKey) {
-  const client = new ObjectiveAI({ ...apiBase && { apiBase }, ...apiKey && { apiKey } });
+  const client = new ObjectiveAI({
+    ...apiBase && { apiBase },
+    ...apiKey && { apiKey }
+  });
   const fnRaw = readFunction();
   if (!fnRaw.ok) {
-    return { ok: false, value: void 0, error: `Unable to read function.json: ${fnRaw.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to read function.json: ${fnRaw.error}`
+    };
   }
   const funcResult = validateFunction(fnRaw.value);
   if (!funcResult.ok) {
-    return { ok: false, value: void 0, error: `Function validation failed: ${funcResult.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Function validation failed: ${funcResult.error}`
+    };
   }
   const func = funcResult.value;
   const buildResult = buildProfile();
   if (!buildResult.ok) {
-    return { ok: false, value: void 0, error: `Failed to build profile: ${buildResult.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Failed to build profile: ${buildResult.error}`
+    };
   }
   const profileRaw = readProfile();
   if (!profileRaw.ok) {
-    return { ok: false, value: void 0, error: `Unable to read profile.json: ${profileRaw.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to read profile.json: ${profileRaw.error}`
+    };
   }
   const profileResult = validateProfile(profileRaw.value);
   if (!profileResult.ok) {
-    return { ok: false, value: void 0, error: `Profile validation failed: ${profileResult.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Profile validation failed: ${profileResult.error}`
+    };
   }
   const profile = profileResult.value;
   const file = readExampleInputs();
   if (!file.ok) {
-    return { ok: false, value: void 0, error: `Unable to read inputs.json: ${file.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to read inputs.json: ${file.error}`
+    };
   }
   const inputsResult = validateExampleInputs(file.value, fnRaw.value);
   if (!inputsResult.ok) {
-    return { ok: false, value: void 0, error: `Inputs validation failed: ${inputsResult.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Inputs validation failed: ${inputsResult.error}`
+    };
   }
   const inputs = inputsResult.value;
   const defaultDir = join("network_tests", "default");
@@ -2534,14 +2565,26 @@ async function runNetworkTests(apiBase, apiKey) {
       const result = results[i];
       writeFileSync(join(defaultDir, `${i}.json`), JSON.stringify(result));
       if (result.error !== null) {
-        return { ok: false, value: void 0, error: `Default strategy: execution failed for input [${i}]: ${JSON.stringify(result.error)}` };
+        return {
+          ok: false,
+          value: void 0,
+          error: `Default strategy: execution failed for input [${i}]: ${JSON.stringify(result.error)}`
+        };
       }
       if (result.tasks_errors) {
-        return { ok: false, value: void 0, error: `Default strategy: task errors for input [${i}]` };
+        return {
+          ok: false,
+          value: void 0,
+          error: `Default strategy: task errors for input [${i}]`
+        };
       }
     }
   } catch (e) {
-    return { ok: false, value: void 0, error: `Default strategy: ${e.message}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Default strategy: ${e.message}`
+    };
   }
   if (func.type === "vector.function") {
     try {
@@ -2551,22 +2594,37 @@ async function runNetworkTests(apiBase, apiKey) {
           function: func,
           profile,
           from_rng: true,
-          strategy: { type: "swiss_system" }
+          strategy: { type: "swiss_system", pool: 2 }
         })
       );
       const results = await Promise.all(promises);
       for (let i = 0; i < inputs.length; i++) {
         const result = results[i];
-        writeFileSync(join(swissSystemDir, `${i}.json`), JSON.stringify(result));
+        writeFileSync(
+          join(swissSystemDir, `${i}.json`),
+          JSON.stringify(result)
+        );
         if (result.error !== null) {
-          return { ok: false, value: void 0, error: `SwissSystem strategy: execution failed for input [${i}]: ${JSON.stringify(result.error)}` };
+          return {
+            ok: false,
+            value: void 0,
+            error: `SwissSystem strategy: execution failed for input [${i}]: ${JSON.stringify(result.error)}`
+          };
         }
         if (result.tasks_errors) {
-          return { ok: false, value: void 0, error: `SwissSystem strategy: task errors for input [${i}]` };
+          return {
+            ok: false,
+            value: void 0,
+            error: `SwissSystem strategy: task errors for input [${i}]`
+          };
         }
       }
     } catch (e) {
-      return { ok: false, value: void 0, error: `SwissSystem strategy: ${e.message}` };
+      return {
+        ok: false,
+        value: void 0,
+        error: `SwissSystem strategy: ${e.message}`
+      };
     }
   }
   return { ok: true, value: void 0, error: void 0 };
@@ -2574,23 +2632,47 @@ async function runNetworkTests(apiBase, apiKey) {
 function readDefaultNetworkTest(index) {
   const filePath = join("network_tests", "default", `${index}.json`);
   if (!existsSync(filePath)) {
-    return { ok: false, value: void 0, error: `File not found: ${filePath}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `File not found: ${filePath}`
+    };
   }
   try {
-    return { ok: true, value: JSON.parse(readFileSync(filePath, "utf-8")), error: void 0 };
+    return {
+      ok: true,
+      value: JSON.parse(readFileSync(filePath, "utf-8")),
+      error: void 0
+    };
   } catch (e) {
-    return { ok: false, value: void 0, error: `Failed to parse ${filePath}: ${e.message}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Failed to parse ${filePath}: ${e.message}`
+    };
   }
 }
 function readSwissSystemNetworkTest(index) {
   const filePath = join("network_tests", "swisssystem", `${index}.json`);
   if (!existsSync(filePath)) {
-    return { ok: false, value: void 0, error: `File not found: ${filePath}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `File not found: ${filePath}`
+    };
   }
   try {
-    return { ok: true, value: JSON.parse(readFileSync(filePath, "utf-8")), error: void 0 };
+    return {
+      ok: true,
+      value: JSON.parse(readFileSync(filePath, "utf-8")),
+      error: void 0
+    };
   } catch (e) {
-    return { ok: false, value: void 0, error: `Failed to parse ${filePath}: ${e.message}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Failed to parse ${filePath}: ${e.message}`
+    };
   }
 }
 
