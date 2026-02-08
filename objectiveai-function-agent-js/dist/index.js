@@ -1,9 +1,9 @@
 import { existsSync, readFileSync, writeFileSync, readdirSync, statSync, mkdirSync, appendFileSync, unlinkSync, rmSync } from 'fs';
+import { execSync, spawn } from 'child_process';
 import { join, dirname } from 'path';
 import { Functions, ObjectiveAI } from 'objectiveai';
 import { tool, createSdkMcpServer, query } from '@anthropic-ai/claude-agent-sdk';
 import z19, { z } from 'zod';
-import { execSync, spawn } from 'child_process';
 
 var __defProp = Object.defineProperty;
 var __export = (target, all) => {
@@ -173,6 +173,9 @@ function writeGitignore() {
   );
 }
 async function init(options = {}) {
+  if (!existsSync(".git")) {
+    execSync("git init", { stdio: "pipe" });
+  }
   writeGitignore();
   await fetchExamples(options.apiBase, options.apiKey);
   if (!existsSync("parameters.json")) {

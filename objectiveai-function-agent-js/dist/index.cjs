@@ -1,11 +1,11 @@
 'use strict';
 
 var fs = require('fs');
+var child_process = require('child_process');
 var path = require('path');
 var objectiveai = require('objectiveai');
 var claudeAgentSdk = require('@anthropic-ai/claude-agent-sdk');
 var z19 = require('zod');
-var child_process = require('child_process');
 
 function _interopDefault (e) { return e && e.__esModule ? e : { default: e }; }
 
@@ -179,6 +179,9 @@ function writeGitignore() {
   );
 }
 async function init(options = {}) {
+  if (!fs.existsSync(".git")) {
+    child_process.execSync("git init", { stdio: "pipe" });
+  }
   writeGitignore();
   await fetchExamples(options.apiBase, options.apiKey);
   if (!fs.existsSync("parameters.json")) {

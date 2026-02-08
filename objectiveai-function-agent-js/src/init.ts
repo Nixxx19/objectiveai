@@ -1,4 +1,5 @@
 import { existsSync, mkdirSync, writeFileSync } from "fs";
+import { execSync } from "child_process";
 import { dirname, join } from "path";
 import { ObjectiveAI, Functions } from "objectiveai";
 import { AgentOptions } from "./agentOptions";
@@ -89,6 +90,11 @@ function writeGitignore(): void {
 }
 
 export async function init(options: AgentOptions = {}): Promise<void> {
+  // Initialize git repo if needed
+  if (!existsSync(".git")) {
+    execSync("git init", { stdio: "pipe" });
+  }
+
   // Write .gitignore
   writeGitignore();
 
