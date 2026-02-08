@@ -3553,7 +3553,9 @@ Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example function
 
 ### Task Structure
 
-This function must use **function tasks** (type: \`scalar.function\` or \`vector.function\`). You must create **at least 2 sub-functions** by spawning child agents:
+This function must use **function tasks** (type: \`scalar.function\` or \`vector.function\`). You must create **at least 2 sub-functions** by spawning child agents.
+
+**Before spawning**, define the parent function's input schema using EditInputSchema. The sub-function specs you write must describe input schemas that are derivable from this parent input schema, so define it first.
 
 1. Analyze ESSAY_TASKS.md and create a spec for each sub-function describing:
    - What it evaluates (purpose, not implementation details)
