@@ -1,23 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { GitHubIcon, DiscordIcon, XIcon, LinkedInIcon, YouTubeIcon } from "./SocialIcons";
 import { useIsMobile } from "../hooks/useIsMobile";
-import { EMAIL_SENT_FEEDBACK_DURATION_MS } from "../lib/constants";
 
 export default function Footer() {
-  const [emailSent, setEmailSent] = useState(false);
   const isMobile = useIsMobile();
-
-  const handleSubmit = () => {
-    setEmailSent(true);
-    setTimeout(() => setEmailSent(false), EMAIL_SENT_FEEDBACK_DURATION_MS);
-  };
 
   const socialIcons = [
     { name: "GitHub", href: "https://github.com/ObjectiveAI/objectiveai", icon: <GitHubIcon /> },
-    { name: "Discord", href: "https://discord.gg/YD5anq5sNR", icon: <DiscordIcon /> },
+    { name: "Discord", href: "https://discord.gg/gbNFHensby", icon: <DiscordIcon /> },
     { name: "X", href: "https://x.com/objectv_ai", icon: <XIcon /> },
     { name: "LinkedIn", href: "https://www.linkedin.com/company/objective-ai", icon: <LinkedInIcon /> },
     { name: "YouTube", href: "https://www.youtube.com/@Objective-AI", icon: <YouTubeIcon /> },
@@ -160,28 +152,17 @@ export default function Footer() {
             }}>
               Support & Inquiries
             </label>
-            <div className="humanTextField" style={{
-              maxWidth: '100%',
-            }}>
-              <input
-                type="email"
-                placeholder="you@email.com"
-                style={{
-                  width: '100%',
-                }}
-              />
-              <button onClick={handleSubmit} aria-label="Send">
-                <svg
-                  className={`arrowIcon ${emailSent ? 'sent' : ''}`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M5 12h14M12 5l7 7-7 7" />
-                </svg>
-              </button>
-            </div>
+            <a
+              href="mailto:admin@objective-ai.io"
+              style={{
+                fontSize: '14px',
+                color: 'var(--accent)',
+                textDecoration: 'none',
+                fontWeight: 500,
+              }}
+            >
+              admin@objective-ai.io
+            </a>
           </div>
 
           {/* ROW 3: Identity */}
@@ -210,7 +191,7 @@ export default function Footer() {
               letterSpacing: '0.01em',
               opacity: 0.6,
             }}>
-              Objective Artificial Intelligence, 2025
+              Objective Artificial Intelligence, 2025–2026
             </div>
           </div>
         </div>

@@ -300,7 +300,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               {/* Discord Button - adapts to theme (hidden on mobile) */}
               {!isMobile && (
                 <a
-                  href="https://discord.gg/YD5anq5sNR"
+                  href="https://discord.gg/gbNFHensby"
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -494,7 +494,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </div>
               {/* Discord Button for Mobile */}
               <a
-                href="https://discord.gg/YD5anq5sNR"
+                href="https://discord.gg/gbNFHensby"
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => setMobileMenuOpen(false)}
