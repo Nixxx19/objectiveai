@@ -400,177 +400,6 @@ __export(function_exports, {
   validateTasks: () => validateTasks,
   validateType: () => validateType
 });
-function readFunctionSchema() {
-  return Functions.RemoteFunctionSchema;
-}
-function checkFunction() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check function: ${fn.error}`
-    };
-  }
-  const result = validateFunction(fn.value);
-  if (!result.ok) {
-    return { ok: false, value: void 0, error: result.error };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function validateFunction(fn) {
-  const parsed = Functions.RemoteFunctionSchema.safeParse(fn);
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
-function readFunction() {
-  if (!existsSync("function.json")) {
-    return { ok: true, value: {}, error: void 0 };
-  }
-  let fn;
-  try {
-    fn = JSON.parse(readFileSync("function.json", "utf-8"));
-  } catch (e) {
-    return { ok: true, value: {}, error: void 0 };
-  }
-  if (typeof fn !== "object" || fn === null) {
-    return { ok: true, value: {}, error: void 0 };
-  }
-  return { ok: true, value: fn, error: void 0 };
-}
-function editFunction(fields) {
-  let fn = {};
-  if (existsSync("function.json")) {
-    try {
-      const parsed = JSON.parse(readFileSync("function.json", "utf-8"));
-      if (typeof parsed === "object" && parsed !== null) {
-        fn = parsed;
-      }
-    } catch {
-    }
-  }
-  for (const key in fields) {
-    const value = fields[key];
-    if (value === null) {
-      delete fn[key];
-    } else if (value !== void 0) {
-      fn[key] = value;
-    }
-  }
-  const fieldOrder = [
-    "type",
-    "description",
-    "changelog",
-    "input_schema",
-    "input_maps",
-    "tasks",
-    "output_length",
-    "input_split",
-    "input_merge"
-  ];
-  const ordered = {};
-  for (const key of fieldOrder) {
-    if (key in fn) {
-      ordered[key] = fn[key];
-    }
-  }
-  for (const key in fn) {
-    if (!(key in ordered)) {
-      ordered[key] = fn[key];
-    }
-  }
-  writeFileSync("function.json", JSON.stringify(ordered, null, 2));
-  return { ok: true, value: void 0, error: void 0 };
-}
-
-// src/tools/function/description.ts
-var DescriptionSchema = z19.string().nonempty();
-function readDescription() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: fn.error };
-  }
-  return { ok: true, value: fn.value.description, error: void 0 };
-}
-function readDescriptionSchema() {
-  return DescriptionSchema;
-}
-function checkDescription() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: `Unable to check description: ${fn.error}` };
-  }
-  const result = validateDescription(fn.value);
-  if (!result.ok) {
-    return { ok: false, value: void 0, error: `Description is invalid: ${result.error}` };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function editDescription(value) {
-  const result = validateDescription({ description: value });
-  if (!result.ok) {
-    return { ok: false, value: void 0, error: `Invalid description: ${result.error}` };
-  }
-  return editFunction({ description: result.value });
-}
-function validateDescription(fn) {
-  const parsed = DescriptionSchema.safeParse(fn.description);
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
-function readInputMaps() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: fn.error };
-  }
-  return { ok: true, value: fn.value.input_maps, error: void 0 };
-}
-function readInputMapsSchema() {
-  return Functions.Expression.InputMapsExpressionSchema;
-}
-function checkInputMaps() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_maps: ${fn.error}`
-    };
-  }
-  const result = validateInputMaps(fn.value);
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `input_maps is invalid: ${result.error}`
-    };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function editInputMaps(value) {
-  const result = validateInputMaps({ input_maps: value });
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Invalid input_maps: ${result.error}`
-    };
-  }
-  return editFunction({ input_maps: result.value });
-}
-function validateInputMaps(fn) {
-  const parsed = Functions.Expression.InputMapsExpressionSchema.safeParse(
-    fn.input_maps
-  );
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
 var FunctionTypeSchema = z19.enum([
   ...new Set(
     Functions.RemoteFunctionSchema.options.map((opt) => opt.shape.type.value)
@@ -586,16 +415,15 @@ function readType() {
 function readTypeSchema() {
   return FunctionTypeSchema;
 }
-function checkType() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check type: ${fn.error}`
-    };
+function checkType(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check type: ${read.error}` };
+    }
+    fn = read.value;
   }
-  const result = validateType(fn.value);
+  const result = validateType(fn);
   if (!result.ok) {
     return {
       ok: false,
@@ -623,100 +451,6 @@ function validateType(fn) {
   }
   return { ok: true, value: parsed.data, error: void 0 };
 }
-
-// src/tools/function/inputMerge.ts
-var InputMergeSchema = Functions.RemoteVectorFunctionSchema.shape.input_merge;
-function readInputMerge() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: fn.error };
-  }
-  return { ok: true, value: fn.value.input_merge, error: void 0 };
-}
-function readInputMergeSchema() {
-  return InputMergeSchema;
-}
-function checkInputMerge() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_merge: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_merge: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    if (fn.value.input_merge !== void 0) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `input_merge must not be present for type "${typeResult.value}"`
-      };
-    }
-    return { ok: true, value: void 0, error: void 0 };
-  }
-  const result = validateInputMerge(fn.value);
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `input_merge is invalid: ${result.error}`
-    };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function delInputMerge() {
-  return editFunction({ input_merge: null });
-}
-function editInputMerge(value) {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit input_merge: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit input_merge: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    return {
-      ok: false,
-      value: void 0,
-      error: `input_merge is not applicable for type "${typeResult.value}"`
-    };
-  }
-  const result = validateInputMerge({ input_merge: value });
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Invalid input_merge: ${result.error}`
-    };
-  }
-  return editFunction({ input_merge: result.value });
-}
-function validateInputMerge(fn) {
-  const parsed = InputMergeSchema.safeParse(fn.input_merge);
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
 function readInputSchema() {
   const fn = readFunction();
   if (!fn.ok) {
@@ -727,16 +461,15 @@ function readInputSchema() {
 function readInputSchemaSchema() {
   return Functions.Expression.InputSchemaSchema;
 }
-function checkInputSchema() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_schema: ${fn.error}`
-    };
+function checkInputSchema(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check input_schema: ${read.error}` };
+    }
+    fn = read.value;
   }
-  const result = validateInputSchema(fn.value);
+  const result = validateInputSchema(fn);
   if (!result.ok) {
     return {
       ok: false,
@@ -766,185 +499,49 @@ function validateInputSchema(fn) {
   }
   return { ok: true, value: parsed.data, error: void 0 };
 }
-var InputSplitSchema = Functions.RemoteVectorFunctionSchema.shape.input_split;
-function readInputSplit() {
+function readInputMaps() {
   const fn = readFunction();
   if (!fn.ok) {
     return { ok: false, value: void 0, error: fn.error };
   }
-  return { ok: true, value: fn.value.input_split, error: void 0 };
+  return { ok: true, value: fn.value.input_maps, error: void 0 };
 }
-function readInputSplitSchema() {
-  return InputSplitSchema;
+function readInputMapsSchema() {
+  return Functions.Expression.InputMapsExpressionSchema;
 }
-function checkInputSplit() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_split: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_split: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    if (fn.value.input_split !== void 0) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `input_split must not be present for type "${typeResult.value}"`
-      };
+function checkInputMaps(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check input_maps: ${read.error}` };
     }
-    return { ok: true, value: void 0, error: void 0 };
+    fn = read.value;
   }
-  const result = validateInputSplit(fn.value);
+  const result = validateInputMaps(fn);
   if (!result.ok) {
     return {
       ok: false,
       value: void 0,
-      error: `input_split is invalid: ${result.error}`
+      error: `input_maps is invalid: ${result.error}`
     };
   }
   return { ok: true, value: void 0, error: void 0 };
 }
-function delInputSplit() {
-  return editFunction({ input_split: null });
-}
-function editInputSplit(value) {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit input_split: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit input_split: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    return {
-      ok: false,
-      value: void 0,
-      error: `input_split is not applicable for type "${typeResult.value}"`
-    };
-  }
-  const result = validateInputSplit({ input_split: value });
+function editInputMaps(value) {
+  const result = validateInputMaps({ input_maps: value });
   if (!result.ok) {
     return {
       ok: false,
       value: void 0,
-      error: `Invalid input_split: ${result.error}`
+      error: `Invalid input_maps: ${result.error}`
     };
   }
-  return editFunction({ input_split: result.value });
+  return editFunction({ input_maps: result.value });
 }
-function validateInputSplit(fn) {
-  const parsed = InputSplitSchema.safeParse(fn.input_split);
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
-var OutputLengthSchema = Functions.RemoteVectorFunctionSchema.shape.output_length;
-function readOutputLength() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: fn.error };
-  }
-  return { ok: true, value: fn.value.output_length, error: void 0 };
-}
-function readOutputLengthSchema() {
-  return OutputLengthSchema;
-}
-function checkOutputLength() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check output_length: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check output_length: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    if (fn.value.output_length !== void 0) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `output_length must not be present for type "${typeResult.value}"`
-      };
-    }
-    return { ok: true, value: void 0, error: void 0 };
-  }
-  const result = validateOutputLength(fn.value);
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `output_length is invalid: ${result.error}`
-    };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function delOutputLength() {
-  return editFunction({ output_length: null });
-}
-function editOutputLength(value) {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit output_length: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit output_length: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    return {
-      ok: false,
-      value: void 0,
-      error: `output_length is not applicable for type "${typeResult.value}"`
-    };
-  }
-  const result = validateOutputLength({ output_length: value });
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Invalid output_length: ${result.error}`
-    };
-  }
-  return editFunction({ output_length: result.value });
-}
-function validateOutputLength(fn) {
-  const parsed = OutputLengthSchema.safeParse(fn.output_length);
+function validateInputMaps(fn) {
+  const parsed = Functions.Expression.InputMapsExpressionSchema.safeParse(
+    fn.input_maps
+  );
   if (!parsed.success) {
     return { ok: false, value: void 0, error: parsed.error.message };
   }
@@ -973,16 +570,15 @@ function readToolsSchema() {
 function readResponsesSchema() {
   return ResponsesSchema;
 }
-function checkTasks() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check tasks: ${fn.error}`
-    };
+function checkTasks(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check tasks: ${read.error}` };
+    }
+    fn = read.value;
   }
-  const result = validateTasks(fn.value);
+  const result = validateTasks(fn);
   if (!result.ok) {
     return {
       ok: false,
@@ -1088,6 +684,426 @@ function delTask(index) {
 }
 function validateTasks(fn) {
   const parsed = TasksSchema.safeParse(fn.tasks);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+var OutputLengthSchema = Functions.RemoteVectorFunctionSchema.shape.output_length;
+function readOutputLength() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return { ok: false, value: void 0, error: fn.error };
+  }
+  return { ok: true, value: fn.value.output_length, error: void 0 };
+}
+function readOutputLengthSchema() {
+  return OutputLengthSchema;
+}
+function checkOutputLength(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check output_length: ${read.error}` };
+    }
+    fn = read.value;
+  }
+  const typeResult = validateType(fn);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to check output_length: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    if (fn.output_length !== void 0) {
+      return {
+        ok: false,
+        value: void 0,
+        error: `output_length must not be present for type "${typeResult.value}"`
+      };
+    }
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  const result = validateOutputLength(fn);
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `output_length is invalid: ${result.error}`
+    };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function delOutputLength() {
+  return editFunction({ output_length: null });
+}
+function editOutputLength(value) {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit output_length: ${fn.error}`
+    };
+  }
+  const typeResult = validateType(fn.value);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit output_length: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    return {
+      ok: false,
+      value: void 0,
+      error: `output_length is not applicable for type "${typeResult.value}"`
+    };
+  }
+  const result = validateOutputLength({ output_length: value });
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Invalid output_length: ${result.error}`
+    };
+  }
+  return editFunction({ output_length: result.value });
+}
+function validateOutputLength(fn) {
+  const parsed = OutputLengthSchema.safeParse(fn.output_length);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+var InputSplitSchema = Functions.RemoteVectorFunctionSchema.shape.input_split;
+function readInputSplit() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return { ok: false, value: void 0, error: fn.error };
+  }
+  return { ok: true, value: fn.value.input_split, error: void 0 };
+}
+function readInputSplitSchema() {
+  return InputSplitSchema;
+}
+function checkInputSplit(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check input_split: ${read.error}` };
+    }
+    fn = read.value;
+  }
+  const typeResult = validateType(fn);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to check input_split: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    if (fn.input_split !== void 0) {
+      return {
+        ok: false,
+        value: void 0,
+        error: `input_split must not be present for type "${typeResult.value}"`
+      };
+    }
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  const result = validateInputSplit(fn);
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `input_split is invalid: ${result.error}`
+    };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function delInputSplit() {
+  return editFunction({ input_split: null });
+}
+function editInputSplit(value) {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit input_split: ${fn.error}`
+    };
+  }
+  const typeResult = validateType(fn.value);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit input_split: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    return {
+      ok: false,
+      value: void 0,
+      error: `input_split is not applicable for type "${typeResult.value}"`
+    };
+  }
+  const result = validateInputSplit({ input_split: value });
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Invalid input_split: ${result.error}`
+    };
+  }
+  return editFunction({ input_split: result.value });
+}
+function validateInputSplit(fn) {
+  const parsed = InputSplitSchema.safeParse(fn.input_split);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+var InputMergeSchema = Functions.RemoteVectorFunctionSchema.shape.input_merge;
+function readInputMerge() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return { ok: false, value: void 0, error: fn.error };
+  }
+  return { ok: true, value: fn.value.input_merge, error: void 0 };
+}
+function readInputMergeSchema() {
+  return InputMergeSchema;
+}
+function checkInputMerge(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check input_merge: ${read.error}` };
+    }
+    fn = read.value;
+  }
+  const typeResult = validateType(fn);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to check input_merge: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    if (fn.input_merge !== void 0) {
+      return {
+        ok: false,
+        value: void 0,
+        error: `input_merge must not be present for type "${typeResult.value}"`
+      };
+    }
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  const result = validateInputMerge(fn);
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `input_merge is invalid: ${result.error}`
+    };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function delInputMerge() {
+  return editFunction({ input_merge: null });
+}
+function editInputMerge(value) {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit input_merge: ${fn.error}`
+    };
+  }
+  const typeResult = validateType(fn.value);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit input_merge: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    return {
+      ok: false,
+      value: void 0,
+      error: `input_merge is not applicable for type "${typeResult.value}"`
+    };
+  }
+  const result = validateInputMerge({ input_merge: value });
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Invalid input_merge: ${result.error}`
+    };
+  }
+  return editFunction({ input_merge: result.value });
+}
+function validateInputMerge(fn) {
+  const parsed = InputMergeSchema.safeParse(fn.input_merge);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+
+// src/tools/function/function.ts
+function readFunctionSchema() {
+  return Functions.RemoteFunctionSchema;
+}
+function checkFunction() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to check function: ${fn.error}`
+    };
+  }
+  const result = validateFunction(fn.value);
+  if (!result.ok) {
+    return { ok: false, value: void 0, error: result.error };
+  }
+  const checks = [
+    checkType,
+    checkDescription,
+    checkInputSchema,
+    checkInputMaps,
+    checkTasks,
+    checkOutputLength,
+    checkInputSplit,
+    checkInputMerge
+  ];
+  const errors = [];
+  for (const check of checks) {
+    const r = check(fn.value);
+    if (!r.ok) {
+      errors.push(r.error);
+    }
+  }
+  if (errors.length > 0) {
+    return { ok: false, value: void 0, error: errors.join("\n") };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function validateFunction(fn) {
+  const parsed = Functions.RemoteFunctionSchema.safeParse(fn);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+function readFunction() {
+  if (!existsSync("function.json")) {
+    return { ok: true, value: {}, error: void 0 };
+  }
+  let fn;
+  try {
+    fn = JSON.parse(readFileSync("function.json", "utf-8"));
+  } catch (e) {
+    return { ok: true, value: {}, error: void 0 };
+  }
+  if (typeof fn !== "object" || fn === null) {
+    return { ok: true, value: {}, error: void 0 };
+  }
+  return { ok: true, value: fn, error: void 0 };
+}
+function editFunction(fields) {
+  let fn = {};
+  if (existsSync("function.json")) {
+    try {
+      const parsed = JSON.parse(readFileSync("function.json", "utf-8"));
+      if (typeof parsed === "object" && parsed !== null) {
+        fn = parsed;
+      }
+    } catch {
+    }
+  }
+  for (const key in fields) {
+    const value = fields[key];
+    if (value === null) {
+      delete fn[key];
+    } else if (value !== void 0) {
+      fn[key] = value;
+    }
+  }
+  const fieldOrder = [
+    "type",
+    "description",
+    "changelog",
+    "input_schema",
+    "input_maps",
+    "tasks",
+    "output_length",
+    "input_split",
+    "input_merge"
+  ];
+  const ordered = {};
+  for (const key of fieldOrder) {
+    if (key in fn) {
+      ordered[key] = fn[key];
+    }
+  }
+  for (const key in fn) {
+    if (!(key in ordered)) {
+      ordered[key] = fn[key];
+    }
+  }
+  writeFileSync("function.json", JSON.stringify(ordered, null, 2));
+  return { ok: true, value: void 0, error: void 0 };
+}
+
+// src/tools/function/description.ts
+var DescriptionSchema = z19.string().nonempty();
+function readDescription() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return { ok: false, value: void 0, error: fn.error };
+  }
+  return { ok: true, value: fn.value.description, error: void 0 };
+}
+function readDescriptionSchema() {
+  return DescriptionSchema;
+}
+function checkDescription(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check description: ${read.error}` };
+    }
+    fn = read.value;
+  }
+  const result = validateDescription(fn);
+  if (!result.ok) {
+    return { ok: false, value: void 0, error: `Description is invalid: ${result.error}` };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function editDescription(value) {
+  const result = validateDescription({ description: value });
+  if (!result.ok) {
+    return { ok: false, value: void 0, error: `Invalid description: ${result.error}` };
+  }
+  return editFunction({ description: result.value });
+}
+function validateDescription(fn) {
+  const parsed = DescriptionSchema.safeParse(fn.description);
   if (!parsed.success) {
     return { ok: false, value: void 0, error: parsed.error.message };
   }

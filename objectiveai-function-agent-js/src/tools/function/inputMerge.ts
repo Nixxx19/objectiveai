@@ -19,17 +19,16 @@ export function readInputMergeSchema(): typeof InputMergeSchema {
   return InputMergeSchema;
 }
 
-export function checkInputMerge(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Unable to check input_merge: ${fn.error}`,
-    };
+export function checkInputMerge(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check input_merge: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const typeResult = validateType(fn.value);
+  const typeResult = validateType(fn);
   if (!typeResult.ok) {
     return {
       ok: false,
@@ -39,7 +38,7 @@ export function checkInputMerge(): Result<undefined> {
   }
 
   if (typeResult.value !== "vector.function") {
-    if (fn.value.input_merge !== undefined) {
+    if (fn.input_merge !== undefined) {
       return {
         ok: false,
         value: undefined,
@@ -49,7 +48,7 @@ export function checkInputMerge(): Result<undefined> {
     return { ok: true, value: undefined, error: undefined };
   }
 
-  const result = validateInputMerge(fn.value);
+  const result = validateInputMerge(fn);
   if (!result.ok) {
     return {
       ok: false,

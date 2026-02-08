@@ -19,17 +19,16 @@ export function readInputSplitSchema(): typeof InputSplitSchema {
   return InputSplitSchema;
 }
 
-export function checkInputSplit(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Unable to check input_split: ${fn.error}`,
-    };
+export function checkInputSplit(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check input_split: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const typeResult = validateType(fn.value);
+  const typeResult = validateType(fn);
   if (!typeResult.ok) {
     return {
       ok: false,
@@ -39,7 +38,7 @@ export function checkInputSplit(): Result<undefined> {
   }
 
   if (typeResult.value !== "vector.function") {
-    if (fn.value.input_split !== undefined) {
+    if (fn.input_split !== undefined) {
       return {
         ok: false,
         value: undefined,
@@ -49,7 +48,7 @@ export function checkInputSplit(): Result<undefined> {
     return { ok: true, value: undefined, error: undefined };
   }
 
-  const result = validateInputSplit(fn.value);
+  const result = validateInputSplit(fn);
   if (!result.ok) {
     return {
       ok: false,

@@ -104,13 +104,13 @@ declare const DescriptionSchema: z.ZodString;
 type Description = z.infer<typeof DescriptionSchema>;
 declare function readDescription(): Result<unknown>;
 declare function readDescriptionSchema(): typeof DescriptionSchema;
-declare function checkDescription(): Result<undefined>;
+declare function checkDescription(fn?: DeserializedFunction): Result<undefined>;
 declare function editDescription(value: unknown): Result<undefined>;
 declare function validateDescription(fn: DeserializedFunction): Result<Description>;
 
 declare function readInputMaps(): Result<unknown>;
 declare function readInputMapsSchema(): typeof Functions.Expression.InputMapsExpressionSchema;
-declare function checkInputMaps(): Result<undefined>;
+declare function checkInputMaps(fn?: DeserializedFunction): Result<undefined>;
 declare function editInputMaps(value: unknown): Result<undefined>;
 declare function validateInputMaps(fn: DeserializedFunction): Result<Functions.Expression.InputMapsExpression>;
 
@@ -122,14 +122,14 @@ declare const InputMergeSchema: z.ZodUnion<readonly [z.ZodObject<{
 type InputMerge = z.infer<typeof InputMergeSchema>;
 declare function readInputMerge(): Result<unknown>;
 declare function readInputMergeSchema(): typeof InputMergeSchema;
-declare function checkInputMerge(): Result<undefined>;
+declare function checkInputMerge(fn?: DeserializedFunction): Result<undefined>;
 declare function delInputMerge(): Result<undefined>;
 declare function editInputMerge(value: unknown): Result<undefined>;
 declare function validateInputMerge(fn: DeserializedFunction): Result<InputMerge>;
 
 declare function readInputSchema(): Result<unknown>;
 declare function readInputSchemaSchema(): typeof Functions.Expression.InputSchemaSchema;
-declare function checkInputSchema(): Result<undefined>;
+declare function checkInputSchema(fn?: DeserializedFunction): Result<undefined>;
 declare function editInputSchema(value: unknown): Result<undefined>;
 declare function validateInputSchema(fn: DeserializedFunction): Result<Functions.Expression.InputSchema>;
 
@@ -141,7 +141,7 @@ declare const InputSplitSchema: z.ZodUnion<readonly [z.ZodObject<{
 type InputSplit = z.infer<typeof InputSplitSchema>;
 declare function readInputSplit(): Result<unknown>;
 declare function readInputSplitSchema(): typeof InputSplitSchema;
-declare function checkInputSplit(): Result<undefined>;
+declare function checkInputSplit(fn?: DeserializedFunction): Result<undefined>;
 declare function delInputSplit(): Result<undefined>;
 declare function editInputSplit(value: unknown): Result<undefined>;
 declare function validateInputSplit(fn: DeserializedFunction): Result<InputSplit>;
@@ -154,7 +154,7 @@ declare const OutputLengthSchema: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<r
 type OutputLength = z.infer<typeof OutputLengthSchema>;
 declare function readOutputLength(): Result<unknown>;
 declare function readOutputLengthSchema(): typeof OutputLengthSchema;
-declare function checkOutputLength(): Result<undefined>;
+declare function checkOutputLength(fn?: DeserializedFunction): Result<undefined>;
 declare function delOutputLength(): Result<undefined>;
 declare function editOutputLength(value: unknown): Result<undefined>;
 declare function validateOutputLength(fn: DeserializedFunction): Result<OutputLength>;
@@ -13075,7 +13075,7 @@ declare const ResponsesSchema: z.ZodUnion<readonly [z.ZodArray<z.ZodUnion<readon
 declare function readMessagesSchema(): typeof MessagesSchema;
 declare function readToolsSchema(): typeof ToolsSchema;
 declare function readResponsesSchema(): typeof ResponsesSchema;
-declare function checkTasks(): Result<undefined>;
+declare function checkTasks(fn?: DeserializedFunction): Result<undefined>;
 declare function editTasks(value: unknown): Result<undefined>;
 declare function appendTask(value: unknown): Result<undefined>;
 declare function editTask(index: number, value: unknown): Result<undefined>;
@@ -13088,7 +13088,7 @@ declare const FunctionTypeSchema: z.ZodEnum<{
 type FunctionType = z.infer<typeof FunctionTypeSchema>;
 declare function readType(): Result<unknown>;
 declare function readTypeSchema(): typeof FunctionTypeSchema;
-declare function checkType(): Result<undefined>;
+declare function checkType(fn?: DeserializedFunction): Result<undefined>;
 declare function editType(value: unknown): Result<undefined>;
 declare function validateType(fn: DeserializedFunction): Result<FunctionType>;
 

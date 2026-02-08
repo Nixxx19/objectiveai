@@ -20,17 +20,16 @@ export function readOutputLengthSchema(): typeof OutputLengthSchema {
   return OutputLengthSchema;
 }
 
-export function checkOutputLength(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Unable to check output_length: ${fn.error}`,
-    };
+export function checkOutputLength(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check output_length: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const typeResult = validateType(fn.value);
+  const typeResult = validateType(fn);
   if (!typeResult.ok) {
     return {
       ok: false,
@@ -40,7 +39,7 @@ export function checkOutputLength(): Result<undefined> {
   }
 
   if (typeResult.value !== "vector.function") {
-    if (fn.value.output_length !== undefined) {
+    if (fn.output_length !== undefined) {
       return {
         ok: false,
         value: undefined,
@@ -50,7 +49,7 @@ export function checkOutputLength(): Result<undefined> {
     return { ok: true, value: undefined, error: undefined };
   }
 
-  const result = validateOutputLength(fn.value);
+  const result = validateOutputLength(fn);
   if (!result.ok) {
     return {
       ok: false,

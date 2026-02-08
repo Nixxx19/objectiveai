@@ -17,13 +17,16 @@ export function readDescriptionSchema(): typeof DescriptionSchema {
   return DescriptionSchema;
 }
 
-export function checkDescription(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: undefined, error: `Unable to check description: ${fn.error}` };
+export function checkDescription(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check description: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const result = validateDescription(fn.value);
+  const result = validateDescription(fn);
   if (!result.ok) {
     return { ok: false, value: undefined, error: `Description is invalid: ${result.error}` };
   }

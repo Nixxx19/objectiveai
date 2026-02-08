@@ -34,17 +34,16 @@ export function readResponsesSchema(): typeof ResponsesSchema {
   return ResponsesSchema;
 }
 
-export function checkTasks(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Unable to check tasks: ${fn.error}`,
-    };
+export function checkTasks(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check tasks: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const result = validateTasks(fn.value);
+  const result = validateTasks(fn);
   if (!result.ok) {
     return {
       ok: false,
