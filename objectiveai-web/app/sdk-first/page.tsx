@@ -23,14 +23,18 @@ const client = new ObjectiveAI({
   apiKey: process.env.OBJECTIVEAI_API_KEY,
 });
 
-const result = await Functions.Executions.create(
-  client,
-  { owner: "objective-ai", repository: "is-spam" },
-  null,
-  { input: { text: "Hello world" } }
-);
+// Browse available functions
+const functions = await Functions.list(client);
+console.log(functions.data);
 
-console.log(result.output);`;
+// Execute a function with a profile
+// const result = await Functions.Executions.create(
+//   client,
+//   { owner: "fn-owner", repository: "fn-repo" },
+//   { owner: "profile-owner", repository: "profile-repo" },
+//   { input: { text: "Hello world" }, from_cache: true, from_rng: true }
+// );
+// console.log(result.output);`;
 
   return (
     <div className="page">
@@ -105,7 +109,7 @@ console.log(result.output);`;
               npm
             </a>
             <a
-              href="https://github.com/anthropics/objectiveai-js"
+              href="https://github.com/ObjectiveAI/objectiveai"
               target="_blank"
               rel="noopener noreferrer"
               className="pillBtn"

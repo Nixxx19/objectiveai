@@ -265,7 +265,7 @@ function FunctionTaskEditor({ task, onChange }: { task: FunctionTask; onChange: 
               type="text"
               value={task.repository}
               onChange={(e) => onChange({ ...task, repository: e.target.value })}
-              placeholder="is-spam"
+              placeholder="my-function"
             />
           </div>
         </div>

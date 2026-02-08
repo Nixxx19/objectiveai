@@ -183,7 +183,7 @@ export default function InformationPage() {
       links: [
         { label: "Getting Started", url: "/sdk-first", available: true },
         { label: "npm", url: "https://www.npmjs.com/package/objectiveai", available: true },
-        { label: "GitHub", url: "https://github.com/ObjectiveAI/objectiveai-js", available: true }
+        { label: "GitHub", url: "https://github.com/ObjectiveAI/objectiveai", available: true }
       ]
     },
     {
@@ -209,8 +209,8 @@ export default function InformationPage() {
     {
       lang: "Rust",
       links: [
-        { label: "crates.io", url: "#", available: false },
-        { label: "GitHub", url: "#", available: false }
+        { label: "crates.io", url: "https://crates.io/crates/objectiveai", available: true },
+        { label: "GitHub", url: "https://github.com/ObjectiveAI/objectiveai", available: true }
       ]
     },
     {

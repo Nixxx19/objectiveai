@@ -42,20 +42,28 @@ async function main() {
   }
 
   // Test 3: Execute a function (using cache and RNG for free execution)
+  // Note: Both function and profile are required. Use listPairs() to find valid pairs.
   try {
-    console.log("\n3. Executing function (from cache/RNG)...");
-    const result = await Functions.Executions.create(
-      client,
-      { owner: "WiggidyW", repository: "keyword-relevance-score" },
-      null, // no profile
-      {
-        input: { text: "hello world", keyword: "greeting" },
-        from_cache: true,
-        from_rng: true,
-      }
-    );
-    console.log(`   Output: ${result.output}`);
-    console.log(`   Cost: $${result.usage.cost}`);
+    console.log("\n3. Listing function-profile pairs...");
+    const pairs = await Functions.listPairs(client);
+    if (pairs.data.length > 0) {
+      const pair = pairs.data[0];
+      console.log(`   Executing ${pair.function.owner}/${pair.function.repository}...`);
+      const result = await Functions.Executions.create(
+        client,
+        pair.function,
+        pair.profile,
+        {
+          input: { text: "hello world" },
+          from_cache: true,
+          from_rng: true,
+        }
+      );
+      console.log(`   Output: ${result.output}`);
+      console.log(`   Cost: $${result.usage.cost}`);
+    } else {
+      console.log("   No function-profile pairs found");
+    }
   } catch (error) {
     console.log(`   Error: ${error}`);
   }

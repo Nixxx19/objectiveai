@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import { useIsMobile } from "../../hooks/useIsMobile";
-import { EMAIL_SENT_FEEDBACK_DURATION_MS } from "../../lib/constants";
 
 // Types for team member data
 interface SocialLinks {
@@ -28,7 +26,7 @@ const FOUNDERS: TeamMember[] = [
     id: "ceo",
     name: "Ronald Riggles",
     title: "CEO & Co-Founder",
-    bio: "Building the infrastructure for objective AI evaluation. Previously worked on distributed systems and machine learning pipelines. Passionate about making AI more transparent and accountable through ensemble methods.",
+    bio: "Building the infrastructure for objective AI evaluation. Passionate about making AI more transparent and accountable through ensemble methods.",
     focusAreas: ["Software Engineer", "Programmer", "AI Architect"],
     contactEmail: "", // Removed for now
     photoUrl: "/photos/ronald.jpg",
@@ -42,7 +40,7 @@ const FOUNDERS: TeamMember[] = [
     id: "coo",
     name: "Maya Gore",
     title: "COO & Co-Founder",
-    bio: "Designing experiences that make complex AI systems feel intuitive. Background in product design and creative technology. Believes great tools should be invisible, letting users focus on what matters.",
+    bio: "Designing experiences that make complex AI systems feel intuitive. Believes great tools should be invisible, letting users focus on what matters.",
     focusAreas: ["User Interface", "Creative Direction", "Vibe Coder"],
     contactEmail: "", // Removed for now
     photoUrl: "/photos/maya.jpg",
@@ -281,12 +279,6 @@ function SocialIconLink({ href, label, icon }: { href: string; label: string; ic
 
 export default function PeoplePage() {
   const isMobile = useIsMobile();
-  const [emailSent, setEmailSent] = useState(false);
-
-  const handleJoinSubmit = () => {
-    setEmailSent(true);
-    setTimeout(() => setEmailSent(false), EMAIL_SENT_FEEDBACK_DURATION_MS);
-  };
 
   return (
     <div className="page">
@@ -346,46 +338,27 @@ export default function PeoplePage() {
               margin: '0 auto 28px',
               lineHeight: 1.6,
             }}>
-              We&apos;re always looking for talented people who share our vision. 
+              We&apos;re always looking for talented people who share our vision.
               Get in touch to explore opportunities.
             </p>
-            
-            {/* Email Input */}
-            <div style={{ maxWidth: '400px', margin: '0 auto' }}>
-              <div className="humanTextField">
-                <input
-                  type="email"
-                  placeholder="you@email.com"
-                  style={{ width: '100%' }}
-                />
-                <button onClick={handleJoinSubmit} aria-label="Send">
-                  <svg 
-                    className={`arrowIcon ${emailSent ? 'sent' : ''}`}
-                    viewBox="0 0 24 24" 
-                    fill="none" 
-                    stroke="currentColor" 
-                    strokeWidth="2"
-                  >
-                    <path d="M5 12h14M12 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-            
-            <p style={{
-              fontSize: '12px',
-              color: 'var(--text-muted)',
-              marginTop: '16px',
-              opacity: 0.6,
-            }}>
-              Or reach out directly at{' '}
-              <a 
-                href="mailto:admin@objective-ai.io"
-                style={{ color: 'var(--accent)', textDecoration: 'none' }}
-              >
-                admin@objective-ai.io
-              </a>
-            </p>
+
+            <a
+              href="mailto:admin@objective-ai.io"
+              className="pillBtn"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '14px 28px',
+                fontSize: '15px',
+                fontWeight: 600,
+                background: 'var(--accent)',
+                color: 'var(--color-light)',
+                textDecoration: 'none',
+              }}
+            >
+              admin@objective-ai.io
+            </a>
           </div>
         </section>
       </div>
