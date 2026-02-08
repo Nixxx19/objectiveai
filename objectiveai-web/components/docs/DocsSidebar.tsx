@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useState } from "react";
+import { useIsMobile } from "@/hooks/useIsMobile";
 
 export function DocsSidebar(): ReactElement {
-  const [open, setOpen] = useState(true);
-  useEffect(() => {
-    if (window.innerWidth < 640) setOpen(false);
-  }, []);
+  const isMobile = useIsMobile();
+  const [manualOpen, setManualOpen] = useState<boolean | null>(null);
+  const open = manualOpen ?? !isMobile;
 
   return (
     <div className="docsSidebarWrapper">
@@ -21,7 +21,7 @@ export function DocsSidebar(): ReactElement {
       <div className="docsSidebarToggle" style={{ display: undefined }}>
         <button
           className="docsSidebarToggleBtn"
-          onClick={() => setOpen((prev) => !prev)}
+          onClick={() => setManualOpen(!open)}
           aria-label={open ? "Collapse sidebar" : "Expand sidebar"}
         >
           <svg

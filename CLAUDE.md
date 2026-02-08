@@ -794,7 +794,13 @@ Stripe integration in `objectiveai-web/`:
 - Old site deleted, `objectiveai-web-new/` renamed to `objectiveai-web/`
 - All references updated (root `package.json`, Dockerfile, cloudbuild.yaml, CLAUDE.md)
 
-**6. Open pull request** via `gh pr create`
+**6. ~~Pre-launch accuracy audit~~ DONE**
+- 3-pass audit of all user-facing content, SDK calls, URLs, and claims
+- Fixed: fabricated function names (`objective-ai/is-spam`, `is-toxic`, `sentiment`), crashing SDK example (null profile), wrong GitHub URLs (`anthropics/objectiveai-js`), fake email forms (2), wrong Discord invite, Rust SDK marked "Coming Soon" (published on crates.io), unverified founder bios, wrong curl endpoint, copyright year
+- Files changed: `sdk-first/page.tsx`, `vibe-native/page.tsx`, `people/page.tsx`, `information/page.tsx`, `functions/create/page.tsx`, `Footer.tsx`, `AppShell.tsx`
+- Note for Ronald: API docs show `/vector/completions/{id}` and `/vector/completions/cache` as GET (matching SDK `get_unary`), but `objectiveai-api/src/main.rs` registers them as POST. Docs match the SDK — verify if this is intentional.
+
+**7. Open pull request** via `gh pr create`
 
 ### Deployment Reference (from old website)
 

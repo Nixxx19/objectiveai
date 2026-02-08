@@ -21,11 +21,10 @@ export default function UserMenu({ isMobile = false, forceClose = false, onOpen 
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when parent forces it (e.g. mobile nav opened)
-  useEffect(() => {
-    if (forceClose && isOpen) {
-      setIsOpen(false);
-    }
-  }, [forceClose, isOpen]);
+  // React 19: derive state from props during render instead of useEffect
+  if (forceClose && isOpen) {
+    setIsOpen(false);
+  }
 
   // Close menu when clicking outside
   useEffect(() => {

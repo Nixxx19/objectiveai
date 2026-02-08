@@ -1,5 +1,5 @@
 /**
- * ObjectiveAI helpers for web-new.
+ * ObjectiveAI helpers.
  * For SDK clients, use lib/client.ts (createPublicClient / createClient)
  * or hooks/useObjectiveAI.ts (getClient / getPublicClient).
  */
