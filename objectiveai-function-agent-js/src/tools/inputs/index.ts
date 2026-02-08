@@ -10,7 +10,7 @@ import {
 } from "../../exampleInput";
 import { validateInputSchema } from "../function/inputSchema";
 import { DeserializedFunction, readFunction, validateFunction } from "../function/function";
-import { readProfile, validateProfile } from "../profile";
+import { buildProfile, readProfile, validateProfile } from "../profile";
 import { readParameters, validateParameters } from "../parameters";
 
 export function validateExampleInput(
@@ -259,7 +259,11 @@ export function checkExampleInputs(): Result<undefined> {
   }
   const func = funcResult.value;
 
-  // Read and validate profile.json
+  // Build and validate profile.json
+  const buildResult = buildProfile();
+  if (!buildResult.ok) {
+    return { ok: false, value: undefined, error: `Failed to build profile: ${buildResult.error}` };
+  }
   const profileRaw = readProfile();
   if (!profileRaw.ok) {
     return { ok: false, value: undefined, error: profileRaw.error };

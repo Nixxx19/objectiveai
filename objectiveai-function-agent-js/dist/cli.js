@@ -74,8 +74,6 @@ function formatMessage(msg) {
           parts.push(`[tool_use] ${block.name}`);
         }
       }
-      const { usage } = msg.message;
-      parts.push(`[usage] in=${usage.input_tokens} out=${usage.output_tokens}`);
       return parts.length > 0 ? parts.join("\n") : null;
     }
     case "result": {
@@ -239,6 +237,9 @@ function writeSpec(content) {
 // src/tools/claude/util.ts
 function textResult(text) {
   return { content: [{ type: "text", text }] };
+}
+function errorResult(error) {
+  return { content: [{ type: "text", text: error }], isError: true };
 }
 function resultFromResult(result) {
   if (!result.ok) {
@@ -1596,14 +1597,43 @@ async function prepare(options = {}) {
   sessionId = await planMcp(log, sessionId);
   return sessionId;
 }
-var ExampleInputSchema = z19.object({
-  value: Functions.Expression.InputValueSchema,
-  compiledTasks: Functions.CompiledTasksSchema,
-  outputLength: z19.number().int().nonnegative().nullable().describe("Expected output length for vector functions")
-});
-var ExampleInputsSchema = z19.array(ExampleInputSchema).min(10).max(100).describe(
-  "An array of example inputs for the function. Must contain between 10 and 100 items."
-);
+var defaultVectorCompletionTaskProfile = {
+  ensemble: {
+    llms: [
+      {
+        count: 1,
+        model: "openai/gpt-4.1-nano",
+        output_mode: "json_schema"
+      },
+      {
+        count: 1,
+        model: "google/gemini-2.5-flash-lite",
+        output_mode: "json_schema"
+      },
+      {
+        count: 1,
+        model: "deepseek/deepseek-v3.2",
+        output_mode: "instruction",
+        top_logprobs: 20
+      },
+      {
+        count: 1,
+        model: "openai/gpt-4o-mini",
+        output_mode: "json_schema",
+        top_logprobs: 20
+      },
+      {
+        count: 1,
+        model: "x-ai/grok-4.1-fast",
+        output_mode: "json_schema",
+        reasoning: {
+          enabled: false
+        }
+      }
+    ]
+  },
+  profile: [1, 1, 1, 1, 1]
+};
 function readProfile() {
   if (!existsSync("profile.json")) {
     return { ok: false, value: void 0, error: "profile.json is missing" };
@@ -1629,6 +1659,53 @@ function validateProfile(value) {
   }
   return { ok: true, value: parsed.data, error: void 0 };
 }
+function buildProfile() {
+  const raw = readTasks();
+  if (!raw.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to build profile: ${raw.error}`
+    };
+  }
+  const tasksResult = validateTasks({ tasks: raw.value });
+  if (!tasksResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to build profile: tasks are invalid: ${tasksResult.error}`
+    };
+  }
+  const profileTasks = [];
+  for (const task of tasksResult.value) {
+    if (task.type === "vector.completion") {
+      profileTasks.push(defaultVectorCompletionTaskProfile);
+    } else if (task.type === "scalar.function" || task.type === "vector.function") {
+      profileTasks.push({
+        owner: task.owner,
+        repository: task.repository,
+        commit: task.commit
+      });
+    }
+  }
+  const numTasks = profileTasks.length;
+  const weights = numTasks > 0 ? profileTasks.map(() => 1 / numTasks) : [];
+  const profile = {
+    description: "Default profile",
+    tasks: profileTasks,
+    profile: weights
+  };
+  writeFileSync("profile.json", JSON.stringify(profile, null, 2));
+  return { ok: true, value: void 0, error: void 0 };
+}
+var ExampleInputSchema = z19.object({
+  value: Functions.Expression.InputValueSchema,
+  compiledTasks: Functions.CompiledTasksSchema,
+  outputLength: z19.number().int().nonnegative().nullable().describe("Expected output length for vector functions")
+});
+var ExampleInputsSchema = z19.array(ExampleInputSchema).min(10).max(100).describe(
+  "An array of example inputs for the function. Must contain between 10 and 100 items."
+);
 var ParametersSchema = z19.object({
   depth: z19.number().int().nonnegative()
 });
@@ -1858,6 +1935,10 @@ function checkExampleInputs() {
     return { ok: false, value: void 0, error: `Function schema validation failed: ${funcResult.error}` };
   }
   const func = funcResult.value;
+  const buildResult = buildProfile();
+  if (!buildResult.ok) {
+    return { ok: false, value: void 0, error: `Failed to build profile: ${buildResult.error}` };
+  }
   const profileRaw = readProfile();
   if (!profileRaw.ok) {
     return { ok: false, value: void 0, error: profileRaw.error };
@@ -2129,6 +2210,10 @@ async function runNetworkTests(apiBase) {
     return { ok: false, value: void 0, error: `Function validation failed: ${funcResult.error}` };
   }
   const func = funcResult.value;
+  const buildResult = buildProfile();
+  if (!buildResult.ok) {
+    return { ok: false, value: void 0, error: `Failed to build profile: ${buildResult.error}` };
+  }
   const profileRaw = readProfile();
   if (!profileRaw.ok) {
     return { ok: false, value: void 0, error: `Unable to read profile.json: ${profileRaw.error}` };
@@ -2263,6 +2348,16 @@ function ensureGitHubRepo(name, description) {
   }
 }
 async function submit(message, apiBase) {
+  const profileBuild = buildProfile();
+  if (!profileBuild.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Profile build failed: ${profileBuild.error}
+
+Fix the function definition first.`
+    };
+  }
   const fnCheck = checkFunction();
   if (!fnCheck.ok) {
     return {
@@ -2620,6 +2715,21 @@ var CheckTasks = tool(
   {},
   async () => resultFromResult(checkTasks())
 );
+function buildExampleInput(value) {
+  const fnRaw = readFunction();
+  if (!fnRaw.ok) return { ok: false, error: fnRaw.error };
+  const funcResult = validateFunction(fnRaw.value);
+  if (!funcResult.ok) return { ok: false, error: funcResult.error };
+  const func = funcResult.value;
+  let compiledTasks;
+  try {
+    compiledTasks = Functions.compileFunctionTasks(func, value);
+  } catch (e) {
+    return { ok: false, error: `Failed to compile tasks: ${e.message}` };
+  }
+  const outputLength = func.type === "vector.function" ? Functions.compileFunctionOutputLength(func, value) : null;
+  return { ok: true, value: { value, compiledTasks, outputLength } };
+}
 var ReadExampleInputs = tool(
   "ReadExampleInputs",
   "Read the Function's example inputs",
@@ -2640,18 +2750,26 @@ var ReadExampleInputsSchema = tool(
 );
 var AppendExampleInput = tool(
   "AppendExampleInput",
-  "Append an example input to the Function's example inputs array",
+  "Append an example input to the Function's example inputs array. Provide just the input value \u2014 compiledTasks and outputLength are computed automatically.",
   { value: z19.record(z19.string(), z19.unknown()) },
-  async ({ value }) => resultFromResult(appendExampleInput(value))
+  async ({ value }) => {
+    const built = buildExampleInput(value);
+    if (!built.ok) return errorResult(built.error);
+    return resultFromResult(appendExampleInput(built.value));
+  }
 );
 var EditExampleInput = tool(
   "EditExampleInput",
-  "Replace an example input at a specific index in the Function's example inputs array",
+  "Replace an example input at a specific index in the Function's example inputs array. Provide just the input value \u2014 compiledTasks and outputLength are computed automatically.",
   {
     index: z19.number().int().nonnegative(),
     value: z19.record(z19.string(), z19.unknown())
   },
-  async ({ index, value }) => resultFromResult(editExampleInput(index, value))
+  async ({ index, value }) => {
+    const built = buildExampleInput(value);
+    if (!built.ok) return errorResult(built.error);
+    return resultFromResult(editExampleInput(index, built.value));
+  }
 );
 var DelExampleInput = tool(
   "DelExampleInput",

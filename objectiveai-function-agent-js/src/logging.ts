@@ -78,8 +78,6 @@ export function formatMessage(msg: SDKMessage): string | null {
           parts.push(`[tool_use] ${block.name}`);
         }
       }
-      const { usage } = msg.message;
-      parts.push(`[usage] in=${usage.input_tokens} out=${usage.output_tokens}`);
       return parts.length > 0 ? parts.join("\n") : null;
     }
 

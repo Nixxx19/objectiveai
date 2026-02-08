@@ -2,6 +2,7 @@ import { execSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { Result } from "./result";
 import { checkFunction } from "./function/function";
+import { buildProfile } from "./profile";
 import { checkExampleInputs } from "./inputs";
 import { runNetworkTests } from "./test";
 import { checkDescription, readDescription } from "./function/description";
@@ -48,6 +49,16 @@ function ensureGitHubRepo(name: string, description: string): void {
 }
 
 export async function submit(message: string, apiBase?: string): Promise<Result<string>> {
+  // 0. Build profile from current function definition
+  const profileBuild = buildProfile();
+  if (!profileBuild.ok) {
+    return {
+      ok: false,
+      value: undefined,
+      error: `Profile build failed: ${profileBuild.error}\n\nFix the function definition first.`,
+    };
+  }
+
   // 1. Check function
   const fnCheck = checkFunction();
   if (!fnCheck.ok) {

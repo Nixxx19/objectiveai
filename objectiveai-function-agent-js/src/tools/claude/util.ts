@@ -5,6 +5,10 @@ export function textResult(text: string): CallToolResult {
   return { content: [{ type: "text" as const, text }] };
 }
 
+export function errorResult(error: string): CallToolResult {
+  return { content: [{ type: "text" as const, text: error }], isError: true };
+}
+
 export function resultFromResult<T>(result: Result<T>): CallToolResult {
   if (!result.ok) {
     return {

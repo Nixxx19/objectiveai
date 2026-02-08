@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, unlinkSync, writeFile
 import { join } from "path";
 import { Result } from "./result";
 import { readFunction, validateFunction } from "./function/function";
-import { readProfile, validateProfile } from "./profile";
+import { buildProfile, readProfile, validateProfile } from "./profile";
 import { readExampleInputs, validateExampleInputs } from "./inputs";
 
 function clearDir(dir: string): void {
@@ -27,7 +27,11 @@ export async function runNetworkTests(apiBase?: string): Promise<Result<undefine
   }
   const func = funcResult.value;
 
-  // Read and validate profile
+  // Build and validate profile
+  const buildResult = buildProfile();
+  if (!buildResult.ok) {
+    return { ok: false, value: undefined, error: `Failed to build profile: ${buildResult.error}` };
+  }
   const profileRaw = readProfile();
   if (!profileRaw.ok) {
     return { ok: false, value: undefined, error: `Unable to read profile.json: ${profileRaw.error}` };
