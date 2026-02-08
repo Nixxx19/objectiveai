@@ -170,7 +170,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -196,7 +196,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -221,7 +221,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -246,7 +246,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -271,7 +271,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -296,7 +296,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -321,7 +321,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -346,7 +346,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -371,7 +371,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -396,7 +396,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -421,7 +421,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -446,7 +446,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -471,7 +471,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -545,7 +545,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -571,7 +571,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -596,7 +596,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -621,7 +621,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -646,7 +646,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -671,7 +671,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -696,7 +696,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -721,7 +721,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -746,7 +746,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -771,7 +771,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -796,7 +796,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -821,7 +821,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -891,7 +891,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -917,7 +917,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -942,7 +942,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -967,7 +967,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -992,7 +992,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1017,7 +1017,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1042,7 +1042,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1067,7 +1067,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1092,7 +1092,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1117,7 +1117,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1142,7 +1142,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1208,7 +1208,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -1234,7 +1234,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1259,7 +1259,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1284,7 +1284,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1309,7 +1309,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1334,7 +1334,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1359,7 +1359,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1384,7 +1384,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1409,7 +1409,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1434,7 +1434,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1496,7 +1496,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -1522,7 +1522,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1547,7 +1547,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1572,7 +1572,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1597,7 +1597,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1622,7 +1622,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1647,7 +1647,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1672,7 +1672,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1697,7 +1697,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1755,7 +1755,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -1781,7 +1781,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1806,7 +1806,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1831,7 +1831,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1856,7 +1856,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1881,7 +1881,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1906,7 +1906,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1931,7 +1931,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -1985,7 +1985,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -2011,7 +2011,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2036,7 +2036,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2061,7 +2061,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2086,7 +2086,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2111,7 +2111,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2136,7 +2136,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2186,7 +2186,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -2212,7 +2212,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2237,7 +2237,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2262,7 +2262,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2287,7 +2287,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2312,7 +2312,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2358,7 +2358,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -2384,7 +2384,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2409,7 +2409,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2434,7 +2434,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2459,7 +2459,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2501,7 +2501,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -2527,7 +2527,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2552,7 +2552,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2577,7 +2577,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2615,7 +2615,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -2641,7 +2641,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2666,7 +2666,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2700,7 +2700,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -2726,7 +2726,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2804,7 +2804,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -2830,7 +2830,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2855,7 +2855,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2880,7 +2880,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2905,7 +2905,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2930,7 +2930,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2955,7 +2955,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -2980,7 +2980,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3005,7 +3005,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3030,7 +3030,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3055,7 +3055,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3080,7 +3080,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3105,7 +3105,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3179,7 +3179,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -3205,7 +3205,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3230,7 +3230,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3255,7 +3255,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3280,7 +3280,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3305,7 +3305,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3330,7 +3330,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3355,7 +3355,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3380,7 +3380,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3405,7 +3405,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3430,7 +3430,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3455,7 +3455,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3525,7 +3525,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -3551,7 +3551,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3576,7 +3576,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3601,7 +3601,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3626,7 +3626,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3651,7 +3651,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3676,7 +3676,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3701,7 +3701,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3726,7 +3726,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3751,7 +3751,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3776,7 +3776,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3842,7 +3842,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -3868,7 +3868,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3893,7 +3893,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3918,7 +3918,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3943,7 +3943,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3968,7 +3968,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -3993,7 +3993,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4018,7 +4018,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4043,7 +4043,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4068,7 +4068,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4130,7 +4130,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -4156,7 +4156,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4181,7 +4181,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4206,7 +4206,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4231,7 +4231,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4256,7 +4256,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4281,7 +4281,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4306,7 +4306,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4331,7 +4331,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4389,7 +4389,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -4415,7 +4415,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4440,7 +4440,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4465,7 +4465,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4490,7 +4490,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4515,7 +4515,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4540,7 +4540,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4565,7 +4565,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4619,7 +4619,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -4645,7 +4645,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4670,7 +4670,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4695,7 +4695,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4720,7 +4720,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4745,7 +4745,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4770,7 +4770,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4820,7 +4820,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -4846,7 +4846,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4871,7 +4871,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4896,7 +4896,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4921,7 +4921,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4946,7 +4946,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -4992,7 +4992,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -5018,7 +5018,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5043,7 +5043,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5068,7 +5068,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5093,7 +5093,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5135,7 +5135,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -5161,7 +5161,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5186,7 +5186,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5211,7 +5211,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5249,7 +5249,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -5275,7 +5275,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5300,7 +5300,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5334,7 +5334,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -5360,7 +5360,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5455,7 +5455,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -5481,7 +5481,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5506,7 +5506,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5531,7 +5531,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5556,7 +5556,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5581,7 +5581,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5606,7 +5606,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5631,7 +5631,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5656,7 +5656,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5681,7 +5681,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5706,7 +5706,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5731,7 +5731,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5756,7 +5756,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5830,7 +5830,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -5856,7 +5856,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5881,7 +5881,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5906,7 +5906,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5931,7 +5931,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5956,7 +5956,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -5981,7 +5981,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6006,7 +6006,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6031,7 +6031,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6056,7 +6056,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6081,7 +6081,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6106,7 +6106,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6176,7 +6176,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -6202,7 +6202,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6227,7 +6227,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6252,7 +6252,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6277,7 +6277,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6302,7 +6302,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6327,7 +6327,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6352,7 +6352,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6377,7 +6377,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6402,7 +6402,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6427,7 +6427,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6493,7 +6493,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -6519,7 +6519,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6544,7 +6544,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6569,7 +6569,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6594,7 +6594,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6619,7 +6619,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6644,7 +6644,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6669,7 +6669,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6694,7 +6694,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6719,7 +6719,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6781,7 +6781,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -6807,7 +6807,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6832,7 +6832,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6857,7 +6857,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6882,7 +6882,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6907,7 +6907,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6932,7 +6932,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6957,7 +6957,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -6982,7 +6982,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7040,7 +7040,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -7066,7 +7066,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7091,7 +7091,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7116,7 +7116,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7141,7 +7141,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7166,7 +7166,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7191,7 +7191,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7216,7 +7216,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7270,7 +7270,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -7296,7 +7296,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7321,7 +7321,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7346,7 +7346,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7371,7 +7371,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7396,7 +7396,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7421,7 +7421,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7471,7 +7471,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -7497,7 +7497,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7522,7 +7522,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7547,7 +7547,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7572,7 +7572,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7597,7 +7597,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7643,7 +7643,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -7669,7 +7669,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7694,7 +7694,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7719,7 +7719,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7744,7 +7744,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7786,7 +7786,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -7812,7 +7812,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7837,7 +7837,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7862,7 +7862,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7900,7 +7900,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -7926,7 +7926,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7951,7 +7951,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -7985,7 +7985,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -8011,7 +8011,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8089,7 +8089,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -8115,7 +8115,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8140,7 +8140,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8165,7 +8165,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8190,7 +8190,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8215,7 +8215,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8240,7 +8240,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8265,7 +8265,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8290,7 +8290,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8315,7 +8315,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8340,7 +8340,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8365,7 +8365,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8390,7 +8390,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8464,7 +8464,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -8490,7 +8490,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8515,7 +8515,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8540,7 +8540,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8565,7 +8565,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8590,7 +8590,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8615,7 +8615,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8640,7 +8640,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8665,7 +8665,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8690,7 +8690,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8715,7 +8715,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8740,7 +8740,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8810,7 +8810,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -8836,7 +8836,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8861,7 +8861,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8886,7 +8886,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8911,7 +8911,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8936,7 +8936,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8961,7 +8961,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -8986,7 +8986,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9011,7 +9011,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9036,7 +9036,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9061,7 +9061,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9127,7 +9127,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -9153,7 +9153,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9178,7 +9178,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9203,7 +9203,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9228,7 +9228,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9253,7 +9253,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9278,7 +9278,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9303,7 +9303,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9328,7 +9328,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9353,7 +9353,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9415,7 +9415,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -9441,7 +9441,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9466,7 +9466,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9491,7 +9491,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9516,7 +9516,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9541,7 +9541,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9566,7 +9566,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9591,7 +9591,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9616,7 +9616,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9674,7 +9674,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -9700,7 +9700,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9725,7 +9725,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9750,7 +9750,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9775,7 +9775,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9800,7 +9800,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9825,7 +9825,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9850,7 +9850,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9904,7 +9904,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -9930,7 +9930,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9955,7 +9955,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -9980,7 +9980,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10005,7 +10005,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10030,7 +10030,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10055,7 +10055,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10105,7 +10105,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -10131,7 +10131,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10156,7 +10156,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10181,7 +10181,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10206,7 +10206,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10231,7 +10231,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10277,7 +10277,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -10303,7 +10303,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10328,7 +10328,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10353,7 +10353,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10378,7 +10378,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10420,7 +10420,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -10446,7 +10446,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10471,7 +10471,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10496,7 +10496,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10534,7 +10534,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -10560,7 +10560,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10585,7 +10585,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -10619,7 +10619,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -10645,7 +10645,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -11983,7 +11983,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -12009,7 +12009,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12034,7 +12034,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12059,7 +12059,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12084,7 +12084,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12109,7 +12109,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12134,7 +12134,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12159,7 +12159,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12184,7 +12184,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12209,7 +12209,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12234,7 +12234,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12259,7 +12259,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12284,7 +12284,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12310,7 +12310,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -12336,7 +12336,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12361,7 +12361,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12386,7 +12386,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12411,7 +12411,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12436,7 +12436,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12461,7 +12461,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12486,7 +12486,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12511,7 +12511,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12536,7 +12536,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12561,7 +12561,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12586,7 +12586,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12612,7 +12612,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -12638,7 +12638,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12663,7 +12663,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12688,7 +12688,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12713,7 +12713,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12738,7 +12738,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12763,7 +12763,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12788,7 +12788,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12813,7 +12813,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12838,7 +12838,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12863,7 +12863,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12889,7 +12889,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -12915,7 +12915,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12940,7 +12940,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12965,7 +12965,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -12990,7 +12990,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13015,7 +13015,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13040,7 +13040,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13065,7 +13065,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13090,7 +13090,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13115,7 +13115,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13141,7 +13141,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -13167,7 +13167,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13192,7 +13192,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13217,7 +13217,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13242,7 +13242,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13267,7 +13267,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13292,7 +13292,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13317,7 +13317,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13342,7 +13342,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13368,7 +13368,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -13394,7 +13394,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13419,7 +13419,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13444,7 +13444,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13469,7 +13469,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13494,7 +13494,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13519,7 +13519,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13544,7 +13544,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13570,7 +13570,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -13596,7 +13596,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13621,7 +13621,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13646,7 +13646,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13671,7 +13671,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13696,7 +13696,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13721,7 +13721,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13747,7 +13747,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -13773,7 +13773,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13798,7 +13798,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13823,7 +13823,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13848,7 +13848,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13873,7 +13873,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13899,7 +13899,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -13925,7 +13925,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13950,7 +13950,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -13975,7 +13975,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14000,7 +14000,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14026,7 +14026,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -14052,7 +14052,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14077,7 +14077,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14102,7 +14102,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14128,7 +14128,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -14154,7 +14154,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14179,7 +14179,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14205,7 +14205,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -14231,7 +14231,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14257,7 +14257,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -14283,7 +14283,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14308,7 +14308,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14333,7 +14333,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14358,7 +14358,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14383,7 +14383,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14408,7 +14408,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14433,7 +14433,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14458,7 +14458,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14483,7 +14483,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14508,7 +14508,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14533,7 +14533,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14558,7 +14558,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14584,7 +14584,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -14610,7 +14610,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14635,7 +14635,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14660,7 +14660,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14685,7 +14685,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14710,7 +14710,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14735,7 +14735,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14760,7 +14760,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14785,7 +14785,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14810,7 +14810,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14835,7 +14835,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14860,7 +14860,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14886,7 +14886,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -14912,7 +14912,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14937,7 +14937,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14962,7 +14962,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -14987,7 +14987,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15012,7 +15012,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15037,7 +15037,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15062,7 +15062,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15087,7 +15087,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15112,7 +15112,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15137,7 +15137,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15163,7 +15163,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -15189,7 +15189,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15214,7 +15214,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15239,7 +15239,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15264,7 +15264,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15289,7 +15289,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15314,7 +15314,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15339,7 +15339,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15364,7 +15364,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15389,7 +15389,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15415,7 +15415,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -15441,7 +15441,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15466,7 +15466,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15491,7 +15491,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15516,7 +15516,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15541,7 +15541,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15566,7 +15566,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15591,7 +15591,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15616,7 +15616,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15642,7 +15642,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -15668,7 +15668,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15693,7 +15693,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15718,7 +15718,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15743,7 +15743,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15768,7 +15768,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15793,7 +15793,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15818,7 +15818,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15844,7 +15844,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -15870,7 +15870,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15895,7 +15895,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15920,7 +15920,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15945,7 +15945,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15970,7 +15970,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -15995,7 +15995,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16021,7 +16021,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -16047,7 +16047,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16072,7 +16072,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16097,7 +16097,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16122,7 +16122,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16147,7 +16147,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16173,7 +16173,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -16199,7 +16199,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16224,7 +16224,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16249,7 +16249,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16274,7 +16274,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16300,7 +16300,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -16326,7 +16326,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16351,7 +16351,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16376,7 +16376,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16402,7 +16402,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -16428,7 +16428,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16453,7 +16453,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16479,7 +16479,7 @@ declare const ExampleInputSchema: z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -16505,7 +16505,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16537,7 +16537,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16563,7 +16563,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16588,7 +16588,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16613,7 +16613,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16638,7 +16638,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16663,7 +16663,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16688,7 +16688,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16713,7 +16713,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16738,7 +16738,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16763,7 +16763,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16788,7 +16788,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16813,7 +16813,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16838,7 +16838,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16864,7 +16864,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -16890,7 +16890,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16915,7 +16915,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16940,7 +16940,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16965,7 +16965,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -16990,7 +16990,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17015,7 +17015,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17040,7 +17040,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17065,7 +17065,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17090,7 +17090,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17115,7 +17115,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17140,7 +17140,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17166,7 +17166,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -17192,7 +17192,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17217,7 +17217,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17242,7 +17242,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17267,7 +17267,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17292,7 +17292,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17317,7 +17317,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17342,7 +17342,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17367,7 +17367,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17392,7 +17392,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17417,7 +17417,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17443,7 +17443,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -17469,7 +17469,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17494,7 +17494,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17519,7 +17519,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17544,7 +17544,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17569,7 +17569,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17594,7 +17594,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17619,7 +17619,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17644,7 +17644,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17669,7 +17669,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17695,7 +17695,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -17721,7 +17721,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17746,7 +17746,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17771,7 +17771,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17796,7 +17796,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17821,7 +17821,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17846,7 +17846,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17871,7 +17871,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17896,7 +17896,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17922,7 +17922,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -17948,7 +17948,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17973,7 +17973,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -17998,7 +17998,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18023,7 +18023,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18048,7 +18048,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18073,7 +18073,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18098,7 +18098,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18124,7 +18124,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -18150,7 +18150,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18175,7 +18175,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18200,7 +18200,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18225,7 +18225,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18250,7 +18250,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18275,7 +18275,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18301,7 +18301,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -18327,7 +18327,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18352,7 +18352,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18377,7 +18377,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18402,7 +18402,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18427,7 +18427,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18453,7 +18453,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -18479,7 +18479,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18504,7 +18504,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18529,7 +18529,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18554,7 +18554,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18580,7 +18580,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -18606,7 +18606,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18631,7 +18631,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18656,7 +18656,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18682,7 +18682,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -18708,7 +18708,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18733,7 +18733,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18759,7 +18759,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -18785,7 +18785,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18811,7 +18811,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -18837,7 +18837,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18862,7 +18862,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18887,7 +18887,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18912,7 +18912,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18937,7 +18937,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18962,7 +18962,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -18987,7 +18987,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19012,7 +19012,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19037,7 +19037,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19062,7 +19062,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19087,7 +19087,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19112,7 +19112,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19138,7 +19138,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -19164,7 +19164,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19189,7 +19189,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19214,7 +19214,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19239,7 +19239,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19264,7 +19264,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19289,7 +19289,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19314,7 +19314,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19339,7 +19339,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19364,7 +19364,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19389,7 +19389,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19414,7 +19414,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19440,7 +19440,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -19466,7 +19466,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19491,7 +19491,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19516,7 +19516,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19541,7 +19541,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19566,7 +19566,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19591,7 +19591,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19616,7 +19616,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19641,7 +19641,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19666,7 +19666,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19691,7 +19691,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19717,7 +19717,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -19743,7 +19743,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19768,7 +19768,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19793,7 +19793,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19818,7 +19818,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19843,7 +19843,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19868,7 +19868,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19893,7 +19893,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19918,7 +19918,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19943,7 +19943,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -19969,7 +19969,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -19995,7 +19995,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20020,7 +20020,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20045,7 +20045,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20070,7 +20070,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20095,7 +20095,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20120,7 +20120,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20145,7 +20145,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20170,7 +20170,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20196,7 +20196,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -20222,7 +20222,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20247,7 +20247,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20272,7 +20272,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20297,7 +20297,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20322,7 +20322,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20347,7 +20347,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20372,7 +20372,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20398,7 +20398,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -20424,7 +20424,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20449,7 +20449,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20474,7 +20474,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20499,7 +20499,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20524,7 +20524,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20549,7 +20549,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20575,7 +20575,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -20601,7 +20601,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20626,7 +20626,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20651,7 +20651,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20676,7 +20676,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20701,7 +20701,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20727,7 +20727,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -20753,7 +20753,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20778,7 +20778,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20803,7 +20803,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20828,7 +20828,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20854,7 +20854,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -20880,7 +20880,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20905,7 +20905,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20930,7 +20930,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -20956,7 +20956,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -20982,7 +20982,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21007,7 +21007,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21033,7 +21033,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -21059,7 +21059,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21096,7 +21096,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -21122,7 +21122,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21147,7 +21147,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21172,7 +21172,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21197,7 +21197,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21222,7 +21222,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21247,7 +21247,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21272,7 +21272,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21297,7 +21297,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21322,7 +21322,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21347,7 +21347,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21372,7 +21372,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21397,7 +21397,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21423,7 +21423,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -21449,7 +21449,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21474,7 +21474,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21499,7 +21499,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21524,7 +21524,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21549,7 +21549,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21574,7 +21574,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21599,7 +21599,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21624,7 +21624,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21649,7 +21649,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21674,7 +21674,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21699,7 +21699,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21725,7 +21725,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -21751,7 +21751,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21776,7 +21776,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21801,7 +21801,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21826,7 +21826,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21851,7 +21851,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21876,7 +21876,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21901,7 +21901,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21926,7 +21926,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21951,7 +21951,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -21976,7 +21976,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22002,7 +22002,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -22028,7 +22028,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22053,7 +22053,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22078,7 +22078,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22103,7 +22103,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22128,7 +22128,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22153,7 +22153,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22178,7 +22178,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22203,7 +22203,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22228,7 +22228,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22254,7 +22254,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -22280,7 +22280,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22305,7 +22305,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22330,7 +22330,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22355,7 +22355,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22380,7 +22380,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22405,7 +22405,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22430,7 +22430,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22455,7 +22455,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22481,7 +22481,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -22507,7 +22507,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22532,7 +22532,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22557,7 +22557,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22582,7 +22582,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22607,7 +22607,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22632,7 +22632,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22657,7 +22657,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22683,7 +22683,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -22709,7 +22709,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22734,7 +22734,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22759,7 +22759,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22784,7 +22784,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22809,7 +22809,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22834,7 +22834,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22860,7 +22860,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -22886,7 +22886,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22911,7 +22911,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22936,7 +22936,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22961,7 +22961,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -22986,7 +22986,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23012,7 +23012,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -23038,7 +23038,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23063,7 +23063,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23088,7 +23088,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23113,7 +23113,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23139,7 +23139,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -23165,7 +23165,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23190,7 +23190,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23215,7 +23215,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23241,7 +23241,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -23267,7 +23267,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23292,7 +23292,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23318,7 +23318,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -23344,7 +23344,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23370,7 +23370,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -23396,7 +23396,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23421,7 +23421,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23446,7 +23446,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23471,7 +23471,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23496,7 +23496,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23521,7 +23521,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23546,7 +23546,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23571,7 +23571,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23596,7 +23596,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23621,7 +23621,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23646,7 +23646,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23671,7 +23671,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23697,7 +23697,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -23723,7 +23723,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23748,7 +23748,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23773,7 +23773,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23798,7 +23798,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23823,7 +23823,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23848,7 +23848,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23873,7 +23873,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23898,7 +23898,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23923,7 +23923,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23948,7 +23948,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23973,7 +23973,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -23999,7 +23999,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -24025,7 +24025,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24050,7 +24050,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24075,7 +24075,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24100,7 +24100,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24125,7 +24125,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24150,7 +24150,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24175,7 +24175,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24200,7 +24200,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24225,7 +24225,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24250,7 +24250,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24276,7 +24276,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -24302,7 +24302,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24327,7 +24327,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24352,7 +24352,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24377,7 +24377,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24402,7 +24402,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24427,7 +24427,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24452,7 +24452,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24477,7 +24477,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24502,7 +24502,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24528,7 +24528,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -24554,7 +24554,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24579,7 +24579,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24604,7 +24604,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24629,7 +24629,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24654,7 +24654,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24679,7 +24679,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24704,7 +24704,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24729,7 +24729,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24755,7 +24755,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -24781,7 +24781,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24806,7 +24806,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24831,7 +24831,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24856,7 +24856,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24881,7 +24881,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24906,7 +24906,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24931,7 +24931,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -24957,7 +24957,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -24983,7 +24983,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25008,7 +25008,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25033,7 +25033,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25058,7 +25058,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25083,7 +25083,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25108,7 +25108,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25134,7 +25134,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -25160,7 +25160,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25185,7 +25185,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25210,7 +25210,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25235,7 +25235,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25260,7 +25260,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25286,7 +25286,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -25312,7 +25312,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25337,7 +25337,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25362,7 +25362,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25387,7 +25387,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25413,7 +25413,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -25439,7 +25439,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25464,7 +25464,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25489,7 +25489,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25515,7 +25515,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -25541,7 +25541,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25566,7 +25566,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25592,7 +25592,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -25618,7 +25618,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25909,7 +25909,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -25935,7 +25935,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25960,7 +25960,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -25985,7 +25985,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26010,7 +26010,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26035,7 +26035,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26060,7 +26060,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26085,7 +26085,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26110,7 +26110,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26135,7 +26135,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26160,7 +26160,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26185,7 +26185,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26210,7 +26210,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26236,7 +26236,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -26262,7 +26262,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26287,7 +26287,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26312,7 +26312,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26337,7 +26337,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26362,7 +26362,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26387,7 +26387,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26412,7 +26412,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26437,7 +26437,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26462,7 +26462,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26487,7 +26487,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26512,7 +26512,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26538,7 +26538,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -26564,7 +26564,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26589,7 +26589,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26614,7 +26614,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26639,7 +26639,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26664,7 +26664,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26689,7 +26689,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26714,7 +26714,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26739,7 +26739,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26764,7 +26764,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26789,7 +26789,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26815,7 +26815,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -26841,7 +26841,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26866,7 +26866,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26891,7 +26891,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26916,7 +26916,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26941,7 +26941,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26966,7 +26966,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -26991,7 +26991,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27016,7 +27016,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27041,7 +27041,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27067,7 +27067,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -27093,7 +27093,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27118,7 +27118,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27143,7 +27143,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27168,7 +27168,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27193,7 +27193,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27218,7 +27218,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27243,7 +27243,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27268,7 +27268,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27294,7 +27294,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -27320,7 +27320,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27345,7 +27345,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27370,7 +27370,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27395,7 +27395,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27420,7 +27420,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27445,7 +27445,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27470,7 +27470,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27496,7 +27496,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -27522,7 +27522,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27547,7 +27547,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27572,7 +27572,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27597,7 +27597,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27622,7 +27622,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27647,7 +27647,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27673,7 +27673,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -27699,7 +27699,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27724,7 +27724,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27749,7 +27749,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27774,7 +27774,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27799,7 +27799,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27825,7 +27825,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -27851,7 +27851,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27876,7 +27876,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27901,7 +27901,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27926,7 +27926,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -27952,7 +27952,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -27978,7 +27978,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28003,7 +28003,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28028,7 +28028,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28054,7 +28054,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -28080,7 +28080,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28105,7 +28105,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28131,7 +28131,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -28157,7 +28157,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28183,7 +28183,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -28209,7 +28209,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28234,7 +28234,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28259,7 +28259,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28284,7 +28284,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28309,7 +28309,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28334,7 +28334,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28359,7 +28359,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28384,7 +28384,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28409,7 +28409,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28434,7 +28434,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28459,7 +28459,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28484,7 +28484,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28510,7 +28510,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -28536,7 +28536,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28561,7 +28561,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28586,7 +28586,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28611,7 +28611,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28636,7 +28636,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28661,7 +28661,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28686,7 +28686,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28711,7 +28711,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28736,7 +28736,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28761,7 +28761,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28786,7 +28786,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28812,7 +28812,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -28838,7 +28838,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28863,7 +28863,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28888,7 +28888,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28913,7 +28913,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28938,7 +28938,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28963,7 +28963,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -28988,7 +28988,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29013,7 +29013,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29038,7 +29038,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29063,7 +29063,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29089,7 +29089,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -29115,7 +29115,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29140,7 +29140,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29165,7 +29165,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29190,7 +29190,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29215,7 +29215,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29240,7 +29240,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29265,7 +29265,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29290,7 +29290,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29315,7 +29315,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29341,7 +29341,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -29367,7 +29367,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29392,7 +29392,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29417,7 +29417,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29442,7 +29442,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29467,7 +29467,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29492,7 +29492,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29517,7 +29517,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29542,7 +29542,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29568,7 +29568,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -29594,7 +29594,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29619,7 +29619,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29644,7 +29644,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29669,7 +29669,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29694,7 +29694,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29719,7 +29719,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29744,7 +29744,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29770,7 +29770,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -29796,7 +29796,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29821,7 +29821,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29846,7 +29846,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29871,7 +29871,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29896,7 +29896,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29921,7 +29921,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29947,7 +29947,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -29973,7 +29973,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -29998,7 +29998,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30023,7 +30023,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30048,7 +30048,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30073,7 +30073,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30099,7 +30099,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -30125,7 +30125,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30150,7 +30150,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30175,7 +30175,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30200,7 +30200,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30226,7 +30226,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -30252,7 +30252,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30277,7 +30277,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30302,7 +30302,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30328,7 +30328,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -30354,7 +30354,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30379,7 +30379,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30405,7 +30405,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -30431,7 +30431,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30468,7 +30468,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -30494,7 +30494,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30519,7 +30519,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30544,7 +30544,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30569,7 +30569,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30594,7 +30594,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30619,7 +30619,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30644,7 +30644,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30669,7 +30669,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30694,7 +30694,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30719,7 +30719,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30744,7 +30744,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30769,7 +30769,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30795,7 +30795,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -30821,7 +30821,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30846,7 +30846,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30871,7 +30871,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30896,7 +30896,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30921,7 +30921,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30946,7 +30946,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30971,7 +30971,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -30996,7 +30996,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31021,7 +31021,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31046,7 +31046,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31071,7 +31071,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31097,7 +31097,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -31123,7 +31123,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31148,7 +31148,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31173,7 +31173,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31198,7 +31198,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31223,7 +31223,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31248,7 +31248,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31273,7 +31273,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31298,7 +31298,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31323,7 +31323,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31348,7 +31348,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31374,7 +31374,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -31400,7 +31400,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31425,7 +31425,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31450,7 +31450,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31475,7 +31475,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31500,7 +31500,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31525,7 +31525,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31550,7 +31550,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31575,7 +31575,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31600,7 +31600,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31626,7 +31626,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -31652,7 +31652,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31677,7 +31677,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31702,7 +31702,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31727,7 +31727,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31752,7 +31752,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31777,7 +31777,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31802,7 +31802,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31827,7 +31827,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31853,7 +31853,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -31879,7 +31879,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31904,7 +31904,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31929,7 +31929,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31954,7 +31954,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -31979,7 +31979,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32004,7 +32004,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32029,7 +32029,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32055,7 +32055,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -32081,7 +32081,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32106,7 +32106,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32131,7 +32131,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32156,7 +32156,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32181,7 +32181,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32206,7 +32206,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32232,7 +32232,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -32258,7 +32258,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32283,7 +32283,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32308,7 +32308,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32333,7 +32333,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32358,7 +32358,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32384,7 +32384,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -32410,7 +32410,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32435,7 +32435,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32460,7 +32460,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32485,7 +32485,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32511,7 +32511,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -32537,7 +32537,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32562,7 +32562,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32587,7 +32587,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32613,7 +32613,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -32639,7 +32639,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32664,7 +32664,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32690,7 +32690,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -32716,7 +32716,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32742,7 +32742,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -32768,7 +32768,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32793,7 +32793,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32818,7 +32818,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32843,7 +32843,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32868,7 +32868,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32893,7 +32893,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32918,7 +32918,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32943,7 +32943,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32968,7 +32968,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -32993,7 +32993,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33018,7 +33018,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33043,7 +33043,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33069,7 +33069,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -33095,7 +33095,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33120,7 +33120,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33145,7 +33145,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33170,7 +33170,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33195,7 +33195,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33220,7 +33220,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33245,7 +33245,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33270,7 +33270,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33295,7 +33295,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33320,7 +33320,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33345,7 +33345,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33371,7 +33371,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -33397,7 +33397,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33422,7 +33422,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33447,7 +33447,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33472,7 +33472,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33497,7 +33497,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33522,7 +33522,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33547,7 +33547,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33572,7 +33572,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33597,7 +33597,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33622,7 +33622,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33648,7 +33648,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -33674,7 +33674,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33699,7 +33699,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33724,7 +33724,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33749,7 +33749,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33774,7 +33774,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33799,7 +33799,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33824,7 +33824,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33849,7 +33849,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33874,7 +33874,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33900,7 +33900,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -33926,7 +33926,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33951,7 +33951,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -33976,7 +33976,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34001,7 +34001,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34026,7 +34026,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34051,7 +34051,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34076,7 +34076,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34101,7 +34101,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34127,7 +34127,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -34153,7 +34153,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34178,7 +34178,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34203,7 +34203,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34228,7 +34228,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34253,7 +34253,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34278,7 +34278,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34303,7 +34303,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34329,7 +34329,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -34355,7 +34355,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34380,7 +34380,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34405,7 +34405,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34430,7 +34430,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34455,7 +34455,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34480,7 +34480,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34506,7 +34506,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -34532,7 +34532,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34557,7 +34557,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34582,7 +34582,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34607,7 +34607,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34632,7 +34632,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34658,7 +34658,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -34684,7 +34684,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34709,7 +34709,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34734,7 +34734,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34759,7 +34759,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34785,7 +34785,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -34811,7 +34811,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34836,7 +34836,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34861,7 +34861,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34887,7 +34887,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -34913,7 +34913,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34938,7 +34938,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -34964,7 +34964,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -34990,7 +34990,7 @@ declare const ExampleInputSchema: z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -35281,7 +35281,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -35307,7 +35307,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35332,7 +35332,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35357,7 +35357,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35382,7 +35382,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35407,7 +35407,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35432,7 +35432,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35457,7 +35457,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35482,7 +35482,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35507,7 +35507,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35532,7 +35532,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35557,7 +35557,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35582,7 +35582,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35608,7 +35608,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -35634,7 +35634,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35659,7 +35659,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35684,7 +35684,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35709,7 +35709,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35734,7 +35734,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35759,7 +35759,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35784,7 +35784,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35809,7 +35809,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35834,7 +35834,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35859,7 +35859,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35884,7 +35884,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35910,7 +35910,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -35936,7 +35936,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35961,7 +35961,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -35986,7 +35986,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36011,7 +36011,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36036,7 +36036,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36061,7 +36061,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36086,7 +36086,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36111,7 +36111,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36136,7 +36136,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36161,7 +36161,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36187,7 +36187,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -36213,7 +36213,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36238,7 +36238,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36263,7 +36263,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36288,7 +36288,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36313,7 +36313,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36338,7 +36338,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36363,7 +36363,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36388,7 +36388,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36413,7 +36413,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36439,7 +36439,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -36465,7 +36465,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36490,7 +36490,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36515,7 +36515,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36540,7 +36540,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36565,7 +36565,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36590,7 +36590,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36615,7 +36615,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36640,7 +36640,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36666,7 +36666,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -36692,7 +36692,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36717,7 +36717,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36742,7 +36742,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36767,7 +36767,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36792,7 +36792,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36817,7 +36817,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36842,7 +36842,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36868,7 +36868,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -36894,7 +36894,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36919,7 +36919,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36944,7 +36944,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36969,7 +36969,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -36994,7 +36994,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37019,7 +37019,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37045,7 +37045,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -37071,7 +37071,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37096,7 +37096,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37121,7 +37121,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37146,7 +37146,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37171,7 +37171,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37197,7 +37197,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -37223,7 +37223,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37248,7 +37248,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37273,7 +37273,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37298,7 +37298,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37324,7 +37324,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -37350,7 +37350,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37375,7 +37375,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37400,7 +37400,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37426,7 +37426,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -37452,7 +37452,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37477,7 +37477,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37503,7 +37503,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -37529,7 +37529,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37555,7 +37555,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -37581,7 +37581,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37606,7 +37606,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37631,7 +37631,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37656,7 +37656,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37681,7 +37681,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37706,7 +37706,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37731,7 +37731,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37756,7 +37756,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37781,7 +37781,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37806,7 +37806,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37831,7 +37831,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37856,7 +37856,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37882,7 +37882,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -37908,7 +37908,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37933,7 +37933,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37958,7 +37958,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -37983,7 +37983,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38008,7 +38008,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38033,7 +38033,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38058,7 +38058,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38083,7 +38083,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38108,7 +38108,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38133,7 +38133,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38158,7 +38158,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38184,7 +38184,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -38210,7 +38210,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38235,7 +38235,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38260,7 +38260,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38285,7 +38285,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38310,7 +38310,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38335,7 +38335,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38360,7 +38360,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38385,7 +38385,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38410,7 +38410,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38435,7 +38435,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38461,7 +38461,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -38487,7 +38487,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38512,7 +38512,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38537,7 +38537,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38562,7 +38562,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38587,7 +38587,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38612,7 +38612,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38637,7 +38637,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38662,7 +38662,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38687,7 +38687,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38713,7 +38713,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -38739,7 +38739,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38764,7 +38764,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38789,7 +38789,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38814,7 +38814,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38839,7 +38839,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38864,7 +38864,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38889,7 +38889,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38914,7 +38914,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38940,7 +38940,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -38966,7 +38966,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -38991,7 +38991,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39016,7 +39016,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39041,7 +39041,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39066,7 +39066,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39091,7 +39091,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39116,7 +39116,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39142,7 +39142,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -39168,7 +39168,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39193,7 +39193,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39218,7 +39218,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39243,7 +39243,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39268,7 +39268,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39293,7 +39293,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39319,7 +39319,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -39345,7 +39345,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39370,7 +39370,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39395,7 +39395,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39420,7 +39420,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39445,7 +39445,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39471,7 +39471,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -39497,7 +39497,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39522,7 +39522,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39547,7 +39547,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39572,7 +39572,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39598,7 +39598,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -39624,7 +39624,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39649,7 +39649,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39674,7 +39674,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39700,7 +39700,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -39726,7 +39726,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39751,7 +39751,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39777,7 +39777,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
         type: "image_url";
         image_url: {
             url: string;
-            detail?: "low" | "high" | "auto" | null | undefined;
+            detail?: "auto" | "low" | "high" | null | undefined;
         };
     } | {
         type: "input_audio";
@@ -39803,7 +39803,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39835,7 +39835,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -39861,7 +39861,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -39886,7 +39886,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -39911,7 +39911,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -39936,7 +39936,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -39961,7 +39961,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -39986,7 +39986,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40011,7 +40011,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40036,7 +40036,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40061,7 +40061,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40086,7 +40086,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40111,7 +40111,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40136,7 +40136,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40162,7 +40162,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -40188,7 +40188,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40213,7 +40213,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40238,7 +40238,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40263,7 +40263,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40288,7 +40288,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40313,7 +40313,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40338,7 +40338,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40363,7 +40363,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40388,7 +40388,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40413,7 +40413,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40438,7 +40438,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40464,7 +40464,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -40490,7 +40490,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40515,7 +40515,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40540,7 +40540,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40565,7 +40565,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40590,7 +40590,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40615,7 +40615,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40640,7 +40640,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40665,7 +40665,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40690,7 +40690,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40715,7 +40715,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40741,7 +40741,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -40767,7 +40767,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40792,7 +40792,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40817,7 +40817,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40842,7 +40842,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40867,7 +40867,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40892,7 +40892,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40917,7 +40917,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40942,7 +40942,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40967,7 +40967,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -40993,7 +40993,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -41019,7 +41019,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41044,7 +41044,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41069,7 +41069,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41094,7 +41094,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41119,7 +41119,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41144,7 +41144,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41169,7 +41169,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41194,7 +41194,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41220,7 +41220,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -41246,7 +41246,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41271,7 +41271,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41296,7 +41296,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41321,7 +41321,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41346,7 +41346,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41371,7 +41371,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41396,7 +41396,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41422,7 +41422,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -41448,7 +41448,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41473,7 +41473,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41498,7 +41498,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41523,7 +41523,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41548,7 +41548,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41573,7 +41573,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41599,7 +41599,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -41625,7 +41625,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41650,7 +41650,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41675,7 +41675,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41700,7 +41700,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41725,7 +41725,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41751,7 +41751,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -41777,7 +41777,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41802,7 +41802,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41827,7 +41827,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41852,7 +41852,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41878,7 +41878,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -41904,7 +41904,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41929,7 +41929,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41954,7 +41954,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -41980,7 +41980,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -42006,7 +42006,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42031,7 +42031,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42057,7 +42057,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -42083,7 +42083,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42109,7 +42109,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -42135,7 +42135,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42160,7 +42160,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42185,7 +42185,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42210,7 +42210,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42235,7 +42235,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42260,7 +42260,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42285,7 +42285,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42310,7 +42310,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42335,7 +42335,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42360,7 +42360,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42385,7 +42385,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42410,7 +42410,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42436,7 +42436,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -42462,7 +42462,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42487,7 +42487,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42512,7 +42512,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42537,7 +42537,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42562,7 +42562,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42587,7 +42587,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42612,7 +42612,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42637,7 +42637,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42662,7 +42662,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42687,7 +42687,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42712,7 +42712,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42738,7 +42738,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -42764,7 +42764,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42789,7 +42789,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42814,7 +42814,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42839,7 +42839,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42864,7 +42864,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42889,7 +42889,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42914,7 +42914,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42939,7 +42939,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42964,7 +42964,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -42989,7 +42989,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43015,7 +43015,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -43041,7 +43041,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43066,7 +43066,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43091,7 +43091,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43116,7 +43116,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43141,7 +43141,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43166,7 +43166,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43191,7 +43191,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43216,7 +43216,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43241,7 +43241,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43267,7 +43267,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -43293,7 +43293,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43318,7 +43318,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43343,7 +43343,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43368,7 +43368,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43393,7 +43393,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43418,7 +43418,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43443,7 +43443,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43468,7 +43468,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43494,7 +43494,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -43520,7 +43520,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43545,7 +43545,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43570,7 +43570,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43595,7 +43595,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43620,7 +43620,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43645,7 +43645,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43670,7 +43670,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43696,7 +43696,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -43722,7 +43722,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43747,7 +43747,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43772,7 +43772,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43797,7 +43797,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43822,7 +43822,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43847,7 +43847,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43873,7 +43873,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -43899,7 +43899,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43924,7 +43924,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43949,7 +43949,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43974,7 +43974,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -43999,7 +43999,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44025,7 +44025,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -44051,7 +44051,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44076,7 +44076,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44101,7 +44101,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44126,7 +44126,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44152,7 +44152,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -44178,7 +44178,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44203,7 +44203,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44228,7 +44228,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44254,7 +44254,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -44280,7 +44280,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44305,7 +44305,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44331,7 +44331,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -44357,7 +44357,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44394,7 +44394,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -44420,7 +44420,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44445,7 +44445,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44470,7 +44470,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44495,7 +44495,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44520,7 +44520,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44545,7 +44545,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44570,7 +44570,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44595,7 +44595,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44620,7 +44620,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44645,7 +44645,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44670,7 +44670,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44695,7 +44695,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44721,7 +44721,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -44747,7 +44747,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44772,7 +44772,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44797,7 +44797,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44822,7 +44822,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44847,7 +44847,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44872,7 +44872,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44897,7 +44897,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44922,7 +44922,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44947,7 +44947,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44972,7 +44972,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -44997,7 +44997,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45023,7 +45023,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -45049,7 +45049,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45074,7 +45074,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45099,7 +45099,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45124,7 +45124,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45149,7 +45149,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45174,7 +45174,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45199,7 +45199,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45224,7 +45224,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45249,7 +45249,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45274,7 +45274,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45300,7 +45300,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -45326,7 +45326,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45351,7 +45351,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45376,7 +45376,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45401,7 +45401,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45426,7 +45426,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45451,7 +45451,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45476,7 +45476,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45501,7 +45501,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45526,7 +45526,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45552,7 +45552,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -45578,7 +45578,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45603,7 +45603,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45628,7 +45628,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45653,7 +45653,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45678,7 +45678,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45703,7 +45703,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45728,7 +45728,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45753,7 +45753,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45779,7 +45779,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -45805,7 +45805,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45830,7 +45830,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45855,7 +45855,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45880,7 +45880,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45905,7 +45905,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45930,7 +45930,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45955,7 +45955,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -45981,7 +45981,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -46007,7 +46007,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46032,7 +46032,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46057,7 +46057,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46082,7 +46082,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46107,7 +46107,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46132,7 +46132,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46158,7 +46158,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -46184,7 +46184,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46209,7 +46209,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46234,7 +46234,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46259,7 +46259,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46284,7 +46284,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46310,7 +46310,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -46336,7 +46336,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46361,7 +46361,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46386,7 +46386,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46411,7 +46411,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46437,7 +46437,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -46463,7 +46463,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46488,7 +46488,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46513,7 +46513,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46539,7 +46539,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -46565,7 +46565,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46590,7 +46590,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46616,7 +46616,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -46642,7 +46642,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46668,7 +46668,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -46694,7 +46694,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46719,7 +46719,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46744,7 +46744,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46769,7 +46769,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46794,7 +46794,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46819,7 +46819,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46844,7 +46844,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46869,7 +46869,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46894,7 +46894,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46919,7 +46919,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46944,7 +46944,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46969,7 +46969,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -46995,7 +46995,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -47021,7 +47021,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47046,7 +47046,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47071,7 +47071,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47096,7 +47096,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47121,7 +47121,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47146,7 +47146,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47171,7 +47171,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47196,7 +47196,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47221,7 +47221,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47246,7 +47246,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47271,7 +47271,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47297,7 +47297,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -47323,7 +47323,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47348,7 +47348,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47373,7 +47373,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47398,7 +47398,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47423,7 +47423,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47448,7 +47448,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47473,7 +47473,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47498,7 +47498,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47523,7 +47523,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47548,7 +47548,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47574,7 +47574,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -47600,7 +47600,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47625,7 +47625,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47650,7 +47650,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47675,7 +47675,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47700,7 +47700,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47725,7 +47725,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47750,7 +47750,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47775,7 +47775,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47800,7 +47800,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47826,7 +47826,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -47852,7 +47852,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47877,7 +47877,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47902,7 +47902,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47927,7 +47927,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47952,7 +47952,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -47977,7 +47977,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48002,7 +48002,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48027,7 +48027,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48053,7 +48053,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -48079,7 +48079,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48104,7 +48104,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48129,7 +48129,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48154,7 +48154,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48179,7 +48179,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48204,7 +48204,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48229,7 +48229,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48255,7 +48255,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -48281,7 +48281,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48306,7 +48306,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48331,7 +48331,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48356,7 +48356,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48381,7 +48381,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48406,7 +48406,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48432,7 +48432,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -48458,7 +48458,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48483,7 +48483,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48508,7 +48508,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48533,7 +48533,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48558,7 +48558,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48584,7 +48584,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -48610,7 +48610,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48635,7 +48635,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48660,7 +48660,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48685,7 +48685,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48711,7 +48711,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -48737,7 +48737,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48762,7 +48762,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48787,7 +48787,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48813,7 +48813,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -48839,7 +48839,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48864,7 +48864,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -48890,7 +48890,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -48916,7 +48916,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49207,7 +49207,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -49233,7 +49233,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49258,7 +49258,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49283,7 +49283,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49308,7 +49308,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49333,7 +49333,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49358,7 +49358,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49383,7 +49383,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49408,7 +49408,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49433,7 +49433,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49458,7 +49458,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49483,7 +49483,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49508,7 +49508,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49534,7 +49534,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -49560,7 +49560,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49585,7 +49585,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49610,7 +49610,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49635,7 +49635,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49660,7 +49660,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49685,7 +49685,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49710,7 +49710,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49735,7 +49735,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49760,7 +49760,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49785,7 +49785,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49810,7 +49810,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49836,7 +49836,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -49862,7 +49862,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49887,7 +49887,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49912,7 +49912,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49937,7 +49937,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49962,7 +49962,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -49987,7 +49987,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50012,7 +50012,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50037,7 +50037,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50062,7 +50062,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50087,7 +50087,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50113,7 +50113,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -50139,7 +50139,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50164,7 +50164,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50189,7 +50189,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50214,7 +50214,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50239,7 +50239,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50264,7 +50264,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50289,7 +50289,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50314,7 +50314,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50339,7 +50339,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50365,7 +50365,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -50391,7 +50391,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50416,7 +50416,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50441,7 +50441,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50466,7 +50466,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50491,7 +50491,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50516,7 +50516,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50541,7 +50541,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50566,7 +50566,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50592,7 +50592,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -50618,7 +50618,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50643,7 +50643,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50668,7 +50668,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50693,7 +50693,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50718,7 +50718,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50743,7 +50743,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50768,7 +50768,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50794,7 +50794,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -50820,7 +50820,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50845,7 +50845,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50870,7 +50870,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50895,7 +50895,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50920,7 +50920,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50945,7 +50945,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -50971,7 +50971,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -50997,7 +50997,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51022,7 +51022,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51047,7 +51047,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51072,7 +51072,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51097,7 +51097,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51123,7 +51123,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -51149,7 +51149,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51174,7 +51174,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51199,7 +51199,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51224,7 +51224,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51250,7 +51250,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -51276,7 +51276,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51301,7 +51301,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51326,7 +51326,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51352,7 +51352,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -51378,7 +51378,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51403,7 +51403,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51429,7 +51429,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -51455,7 +51455,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51481,7 +51481,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -51507,7 +51507,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51532,7 +51532,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51557,7 +51557,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51582,7 +51582,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51607,7 +51607,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51632,7 +51632,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51657,7 +51657,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51682,7 +51682,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51707,7 +51707,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51732,7 +51732,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51757,7 +51757,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51782,7 +51782,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51808,7 +51808,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -51834,7 +51834,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51859,7 +51859,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51884,7 +51884,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51909,7 +51909,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51934,7 +51934,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51959,7 +51959,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -51984,7 +51984,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52009,7 +52009,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52034,7 +52034,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52059,7 +52059,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52084,7 +52084,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52110,7 +52110,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -52136,7 +52136,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52161,7 +52161,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52186,7 +52186,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52211,7 +52211,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52236,7 +52236,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52261,7 +52261,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52286,7 +52286,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52311,7 +52311,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52336,7 +52336,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52361,7 +52361,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52387,7 +52387,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -52413,7 +52413,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52438,7 +52438,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52463,7 +52463,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52488,7 +52488,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52513,7 +52513,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52538,7 +52538,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52563,7 +52563,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52588,7 +52588,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52613,7 +52613,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52639,7 +52639,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -52665,7 +52665,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52690,7 +52690,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52715,7 +52715,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52740,7 +52740,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52765,7 +52765,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52790,7 +52790,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52815,7 +52815,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52840,7 +52840,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52866,7 +52866,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -52892,7 +52892,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52917,7 +52917,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52942,7 +52942,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52967,7 +52967,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -52992,7 +52992,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53017,7 +53017,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53042,7 +53042,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53068,7 +53068,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -53094,7 +53094,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53119,7 +53119,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53144,7 +53144,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53169,7 +53169,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53194,7 +53194,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53219,7 +53219,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53245,7 +53245,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -53271,7 +53271,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53296,7 +53296,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53321,7 +53321,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53346,7 +53346,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53371,7 +53371,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53397,7 +53397,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -53423,7 +53423,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53448,7 +53448,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53473,7 +53473,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53498,7 +53498,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53524,7 +53524,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -53550,7 +53550,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53575,7 +53575,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53600,7 +53600,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53626,7 +53626,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -53652,7 +53652,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53677,7 +53677,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53703,7 +53703,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -53729,7 +53729,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53766,7 +53766,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -53792,7 +53792,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53817,7 +53817,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53842,7 +53842,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53867,7 +53867,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53892,7 +53892,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53917,7 +53917,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53942,7 +53942,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53967,7 +53967,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -53992,7 +53992,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54017,7 +54017,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54042,7 +54042,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54067,7 +54067,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54093,7 +54093,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -54119,7 +54119,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54144,7 +54144,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54169,7 +54169,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54194,7 +54194,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54219,7 +54219,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54244,7 +54244,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54269,7 +54269,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54294,7 +54294,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54319,7 +54319,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54344,7 +54344,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54369,7 +54369,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54395,7 +54395,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -54421,7 +54421,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54446,7 +54446,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54471,7 +54471,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54496,7 +54496,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54521,7 +54521,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54546,7 +54546,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54571,7 +54571,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54596,7 +54596,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54621,7 +54621,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54646,7 +54646,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54672,7 +54672,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -54698,7 +54698,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54723,7 +54723,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54748,7 +54748,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54773,7 +54773,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54798,7 +54798,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54823,7 +54823,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54848,7 +54848,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54873,7 +54873,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54898,7 +54898,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54924,7 +54924,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -54950,7 +54950,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -54975,7 +54975,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55000,7 +55000,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55025,7 +55025,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55050,7 +55050,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55075,7 +55075,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55100,7 +55100,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55125,7 +55125,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55151,7 +55151,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -55177,7 +55177,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55202,7 +55202,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55227,7 +55227,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55252,7 +55252,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55277,7 +55277,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55302,7 +55302,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55327,7 +55327,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55353,7 +55353,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -55379,7 +55379,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55404,7 +55404,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55429,7 +55429,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55454,7 +55454,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55479,7 +55479,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55504,7 +55504,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55530,7 +55530,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -55556,7 +55556,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55581,7 +55581,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55606,7 +55606,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55631,7 +55631,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55656,7 +55656,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55682,7 +55682,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -55708,7 +55708,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55733,7 +55733,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55758,7 +55758,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55783,7 +55783,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55809,7 +55809,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -55835,7 +55835,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55860,7 +55860,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55885,7 +55885,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55911,7 +55911,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -55937,7 +55937,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55962,7 +55962,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -55988,7 +55988,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -56014,7 +56014,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56040,7 +56040,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -56066,7 +56066,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56091,7 +56091,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56116,7 +56116,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56141,7 +56141,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56166,7 +56166,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56191,7 +56191,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56216,7 +56216,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56241,7 +56241,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56266,7 +56266,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56291,7 +56291,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56316,7 +56316,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56341,7 +56341,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56367,7 +56367,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -56393,7 +56393,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56418,7 +56418,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56443,7 +56443,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56468,7 +56468,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56493,7 +56493,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56518,7 +56518,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56543,7 +56543,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56568,7 +56568,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56593,7 +56593,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56618,7 +56618,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56643,7 +56643,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56669,7 +56669,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -56695,7 +56695,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56720,7 +56720,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56745,7 +56745,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56770,7 +56770,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56795,7 +56795,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56820,7 +56820,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56845,7 +56845,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56870,7 +56870,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56895,7 +56895,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56920,7 +56920,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56946,7 +56946,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -56972,7 +56972,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -56997,7 +56997,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57022,7 +57022,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57047,7 +57047,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57072,7 +57072,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57097,7 +57097,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57122,7 +57122,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57147,7 +57147,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57172,7 +57172,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57198,7 +57198,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -57224,7 +57224,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57249,7 +57249,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57274,7 +57274,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57299,7 +57299,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57324,7 +57324,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57349,7 +57349,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57374,7 +57374,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57399,7 +57399,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57425,7 +57425,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -57451,7 +57451,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57476,7 +57476,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57501,7 +57501,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57526,7 +57526,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57551,7 +57551,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57576,7 +57576,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57601,7 +57601,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57627,7 +57627,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -57653,7 +57653,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57678,7 +57678,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57703,7 +57703,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57728,7 +57728,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57753,7 +57753,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57778,7 +57778,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57804,7 +57804,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -57830,7 +57830,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57855,7 +57855,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57880,7 +57880,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57905,7 +57905,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57930,7 +57930,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -57956,7 +57956,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -57982,7 +57982,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58007,7 +58007,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58032,7 +58032,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58057,7 +58057,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58083,7 +58083,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -58109,7 +58109,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58134,7 +58134,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58159,7 +58159,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58185,7 +58185,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -58211,7 +58211,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58236,7 +58236,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";
@@ -58262,7 +58262,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             type: "image_url";
             image_url: {
                 url: string;
-                detail?: "low" | "high" | "auto" | null | undefined;
+                detail?: "auto" | "low" | "high" | null | undefined;
             };
         } | {
             type: "input_audio";
@@ -58288,7 +58288,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
                 type: "image_url";
                 image_url: {
                     url: string;
-                    detail?: "low" | "high" | "auto" | null | undefined;
+                    detail?: "auto" | "low" | "high" | null | undefined;
                 };
             } | {
                 type: "input_audio";

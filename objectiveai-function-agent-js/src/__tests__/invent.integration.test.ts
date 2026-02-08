@@ -40,7 +40,7 @@ vi.mock("objectiveai", async (importOriginal) => {
     }),
     Functions: {
       ...mod.Functions,
-      listPairs: vi.fn().mockResolvedValue({ data: [] }),
+      list: vi.fn().mockResolvedValue({ data: [] }),
       retrieve: vi.fn().mockResolvedValue({}),
       Executions: {
         ...mod.Functions.Executions,

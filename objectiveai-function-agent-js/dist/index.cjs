@@ -88,29 +88,11 @@ function getFunctionPath(ref) {
     "function.json"
   );
 }
-function getProfilePath(ref) {
-  return path.join(
-    "examples",
-    "profiles",
-    ref.owner,
-    ref.repository,
-    ref.commit,
-    "profile.json"
-  );
-}
 function functionExists(ref) {
   return fs.existsSync(getFunctionPath(ref));
 }
-function profileExists(ref) {
-  return fs.existsSync(getProfilePath(ref));
-}
 function writeFunction(ref, data) {
   const path$1 = getFunctionPath(ref);
-  fs.mkdirSync(path.dirname(path$1), { recursive: true });
-  fs.writeFileSync(path$1, JSON.stringify(data, null, 2));
-}
-function writeProfile(ref, data) {
-  const path$1 = getProfilePath(ref);
   fs.mkdirSync(path.dirname(path$1), { recursive: true });
   fs.writeFileSync(path$1, JSON.stringify(data, null, 2));
 }
@@ -136,60 +118,16 @@ async function fetchFunctionRecursively(objectiveai$1, ref) {
     }
   }
 }
-function isRemoteProfileTask(task) {
-  return "owner" in task && "repository" in task && "commit" in task && !("tasks" in task) && !("ensemble" in task);
-}
-function isInlineProfileTask(task) {
-  return "tasks" in task && !("ensemble" in task);
-}
-async function fetchProfileRecursively(objectiveai$1, ref) {
-  if (profileExists(ref)) {
-    return;
-  }
-  const profile = await objectiveai.Functions.Profiles.retrieve(
-    objectiveai$1,
-    ref.owner,
-    ref.repository,
-    ref.commit
-  );
-  writeProfile(ref, profile);
-  async function processTaskProfiles(tasks) {
-    for (const task of tasks) {
-      if (isRemoteProfileTask(task)) {
-        const subRef = {
-          owner: task.owner,
-          repository: task.repository,
-          commit: task.commit
-        };
-        await fetchProfileRecursively(objectiveai$1, subRef);
-      } else if (isInlineProfileTask(task)) {
-        await processTaskProfiles(task.tasks);
-      }
-    }
-  }
-  await processTaskProfiles(profile.tasks);
-}
 async function fetchExamples(apiBase) {
   if (fs.existsSync(path.join("examples", "examples.json"))) {
     return;
   }
   const objectiveai$1 = new objectiveai.ObjectiveAI(apiBase ? { apiBase } : void 0);
-  const { data: pairs } = await objectiveai.Functions.listPairs(objectiveai$1);
-  const shuffled = pairs.sort(() => Math.random() - 0.5);
+  const { data: functions } = await objectiveai.Functions.list(objectiveai$1);
+  const shuffled = functions.sort(() => Math.random() - 0.5);
   const selected = shuffled.slice(0, Math.min(10, shuffled.length));
-  for (const pair of selected) {
-    const funcRef = {
-      owner: pair.function.owner,
-      repository: pair.function.repository,
-      commit: pair.function.commit
-    };
-    const profileRef = {
-      owner: pair.profile.owner,
-      repository: pair.profile.repository,
-      commit: pair.profile.commit
-    };
-    await fetchFunctionRecursively(objectiveai$1, funcRef);
-    await fetchProfileRecursively(objectiveai$1, profileRef);
+  for (const func of selected) {
+    await fetchFunctionRecursively(objectiveai$1, func);
   }
   fs.mkdirSync("examples", { recursive: true });
   fs.writeFileSync(
