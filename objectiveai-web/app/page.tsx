@@ -103,15 +103,26 @@ export default function Home() {
         paddingTop: isMobile ? '32px' : '48px',
       }}>
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: isMobile ? '0 16px' : '0 32px', maxWidth: '800px' }}>
+          <p style={{
+            fontSize: isMobile ? '11px' : '13px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.12em',
+            color: 'var(--accent)',
+            marginBottom: '12px',
+          }}>
+            AI Scoring Primitives for Developers
+          </p>
           <div style={{ marginBottom: '12px', width: '100%' }}>
             <HeroText />
           </div>
           <p style={{
-            fontSize: isMobile ? '15px' : '17px',
+            fontSize: isMobile ? '13px' : '15px',
             color: 'var(--text-muted)',
             marginBottom: '24px',
+            maxWidth: '500px',
           }}>
-            AI Scoring Primitives for Developers
+            Ensembles of LLMs, voting, to provide confidence in objective AI measurements.
           </p>
           <div style={{
             display: 'flex',
