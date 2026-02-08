@@ -414,6 +414,20 @@ export function checkExampleInputs(): Result<undefined> {
       if (!deepEqual(mergedOutput, value)) {
         return { ok: false, value: undefined, error: `Example input [${i}] merged input does not match original input.\n\nOriginal: ${JSON.stringify(value)}\n\nMerged: ${JSON.stringify(mergedOutput)}` };
       }
+
+      // Validate random subsets: merge random combinations and check output_length matches subset size
+      const subsets = randomSubsets(inputSplit.length, 5);
+      for (const subset of subsets) {
+        const subSplits = subset.map(idx => inputSplit[idx]);
+        const merged = Functions.compileFunctionInputMerge(func, subSplits);
+        if (merged === null) {
+          return { ok: false, value: undefined, error: `Example input [${i}] input_merge returned null for subset [${subset.join(", ")}]` };
+        }
+        const mergedLen = Functions.compileFunctionOutputLength(func, merged);
+        if (mergedLen !== subset.length) {
+          return { ok: false, value: undefined, error: `Example input [${i}] merged subset [${subset.join(", ")}] output_length is ${mergedLen}, expected ${subset.length}` };
+        }
+      }
     }
   }
 
@@ -526,6 +540,21 @@ function checkSchemaCoverage(
     }
   }
   return { ok: true, value: undefined, error: undefined };
+}
+
+function randomSubsets(length: number, count: number): number[][] {
+  if (length < 2) return [];
+  const result: number[][] = [];
+  for (let c = 0; c < count; c++) {
+    const size = 2 + Math.floor(Math.random() * (length - 2));
+    const indices = Array.from({ length }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    result.push(indices.slice(0, size).sort((a, b) => a - b));
+  }
+  return result;
 }
 
 function deepEqual(a: unknown, b: unknown): boolean {

@@ -2093,6 +2093,18 @@ Original: ${JSON.stringify(value)}
 
 Merged: ${JSON.stringify(mergedOutput)}` };
       }
+      const subsets = randomSubsets(inputSplit.length, 5);
+      for (const subset of subsets) {
+        const subSplits = subset.map((idx) => inputSplit[idx]);
+        const merged = Functions.compileFunctionInputMerge(func, subSplits);
+        if (merged === null) {
+          return { ok: false, value: void 0, error: `Example input [${i}] input_merge returned null for subset [${subset.join(", ")}]` };
+        }
+        const mergedLen = Functions.compileFunctionOutputLength(func, merged);
+        if (mergedLen !== subset.length) {
+          return { ok: false, value: void 0, error: `Example input [${i}] merged subset [${subset.join(", ")}] output_length is ${mergedLen}, expected ${subset.length}` };
+        }
+      }
     }
   }
   const allValues = inputs.map((input) => input.value);
@@ -2188,6 +2200,20 @@ function checkSchemaCoverage(schema, values, path) {
     }
   }
   return { ok: true, value: void 0, error: void 0 };
+}
+function randomSubsets(length, count) {
+  if (length < 2) return [];
+  const result = [];
+  for (let c = 0; c < count; c++) {
+    const size = 2 + Math.floor(Math.random() * (length - 2));
+    const indices = Array.from({ length }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    result.push(indices.slice(0, size).sort((a, b) => a - b));
+  }
+  return result;
 }
 function deepEqual(a, b) {
   if (a === b) return true;
