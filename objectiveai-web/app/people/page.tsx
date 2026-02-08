@@ -40,8 +40,8 @@ const FOUNDERS: TeamMember[] = [
     id: "coo",
     name: "Maya Gore",
     title: "COO & Co-Founder",
-    bio: "Designing experiences that make complex AI systems feel intuitive. Believes great tools should be invisible, letting users focus on what matters.",
-    focusAreas: ["User Interface", "Creative Direction", "Vibe Coder"],
+    bio: "Maya Gore is an undergraduate senior in graphic design who views artificial intelligence not as a threat, but as something to shape with intent and nurture through practice. Her work with ObjectiveAI began with a logo. From that first .svg, through meetings, iteration, and collaboration, she became fully integrated as a Co-Founder. Most recently, she worked alongside Claude Code to implement the UI MVP. Now, she\u2019s focused on refining and perfecting the visual experience of ObjectiveAI.",
+    focusAreas: ["User Interface", "Branding", "Clarity"],
     contactEmail: "", // Removed for now
     photoUrl: "/photos/maya.jpg",
     socials: {
