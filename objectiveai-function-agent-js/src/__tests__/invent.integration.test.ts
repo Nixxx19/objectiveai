@@ -71,6 +71,9 @@ vi.mock("child_process", async (importOriginal) => {
       if (cmd === "git remote get-url origin")
         return "https://github.com/test-owner/test-repo.git";
       if (cmd === "git push") return "";
+      if (cmd === "gh api user --jq .login") return "test-owner";
+      if (cmd.startsWith("gh repo view "))
+        throw new Error("not found");
       if (cmd.startsWith("gh ")) return "";
       if (cmd === "git rev-parse HEAD") return "abc123def456";
       throw new Error(`Unexpected execSync command: ${cmd}`);

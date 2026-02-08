@@ -1321,8 +1321,35 @@ function readName() {
   }
   return { ok: true, value: readFileSync("name.txt", "utf-8"), error: void 0 };
 }
+function getGitHubOwner() {
+  try {
+    return execSync("gh api user --jq .login", {
+      encoding: "utf-8",
+      stdio: "pipe"
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+function repoExists(owner, name) {
+  try {
+    execSync(`gh repo view ${owner}/${name}`, { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
 function writeName(content) {
-  writeFileSync("name.txt", content);
+  const name = content.trim();
+  const owner = getGitHubOwner();
+  if (owner && repoExists(owner, name)) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Repository ${owner}/${name} already exists on GitHub. Choose a different name.`
+    };
+  }
+  writeFileSync("name.txt", name);
   return { ok: true, value: void 0, error: void 0 };
 }
 var ReadName = tool(
