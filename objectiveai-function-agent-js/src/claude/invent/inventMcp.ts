@@ -42,7 +42,7 @@ import {
 import {
   ReadInputSchema,
   ReadInputSchemaSchema,
-  EditInputSchema,
+  makeEditInputSchema,
   CheckInputSchema,
 } from "../../tools/claude/inputSchema";
 import {
@@ -143,7 +143,7 @@ function getCommonTools(planIndex: number, apiBase?: string, apiKey?: string) {
     CheckDescription,
     ReadInputSchema,
     ReadInputSchemaSchema,
-    EditInputSchema,
+    makeEditInputSchema(),
     CheckInputSchema,
     ReadInputMaps,
     ReadInputMapsSchema,

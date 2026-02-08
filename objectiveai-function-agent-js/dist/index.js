@@ -1880,6 +1880,7 @@ var inputs_exports = {};
 __export(inputs_exports, {
   appendExampleInput: () => appendExampleInput,
   checkExampleInputs: () => checkExampleInputs,
+  collectModalities: () => collectModalities,
   delExampleInput: () => delExampleInput,
   editExampleInput: () => editExampleInput,
   readExampleInputs: () => readExampleInputs,
@@ -2975,12 +2976,55 @@ var ReadInputSchemaSchema = tool(
   {},
   async () => textResult(formatZodSchema(readInputSchemaSchema()))
 );
-var EditInputSchema = tool(
-  "EditInputSchema",
-  "Edit the Function's `input_schema` field",
-  { value: z19.record(z19.string(), z19.unknown()) },
-  async ({ value }) => resultFromResult(editInputSchema(value))
-);
+function makeEditInputSchema() {
+  let modalityRemovalRejected = false;
+  return tool(
+    "EditInputSchema",
+    "Edit the Function's `input_schema` field. If the new schema removes multimodal types present in the current schema, you must pass `dangerouslyRemoveModalities: true` \u2014 but only after re-reading SPEC.md to confirm this does not contradict it.",
+    {
+      value: z19.record(z19.string(), z19.unknown()),
+      dangerouslyRemoveModalities: z19.boolean().optional()
+    },
+    async ({ value, dangerouslyRemoveModalities }) => {
+      if (dangerouslyRemoveModalities) {
+        if (!modalityRemovalRejected) {
+          return resultFromResult({
+            ok: false,
+            value: void 0,
+            error: "dangerouslyRemoveModalities can only be used after a previous EditInputSchema call was rejected for removing modalities."
+          });
+        }
+        modalityRemovalRejected = false;
+        return resultFromResult(editInputSchema(value));
+      }
+      const current = readInputSchema();
+      if (current.ok && current.value) {
+        const currentParsed = validateInputSchema({ input_schema: current.value });
+        const newParsed = validateInputSchema({ input_schema: value });
+        if (currentParsed.ok && newParsed.ok) {
+          const oldModalities = collectModalities(currentParsed.value);
+          const newModalities = collectModalities(newParsed.value);
+          const removed = [];
+          for (const m of oldModalities) {
+            if (!newModalities.has(m)) {
+              removed.push(m);
+            }
+          }
+          if (removed.length > 0) {
+            modalityRemovalRejected = true;
+            return resultFromResult({
+              ok: false,
+              value: void 0,
+              error: `This edit would remove multimodal types: ${removed.join(", ")}. Re-read SPEC.md and confirm this does not contradict it. If SPEC.md allows removing these modalities, call EditInputSchema again with dangerouslyRemoveModalities: true.`
+            });
+          }
+        }
+      }
+      modalityRemovalRejected = false;
+      return resultFromResult(editInputSchema(value));
+    }
+  );
+}
 var CheckInputSchema = tool(
   "CheckInputSchema",
   "Validate the Function's `input_schema` field",
@@ -3601,7 +3645,7 @@ function getCommonTools(planIndex, apiBase, apiKey) {
     CheckDescription,
     ReadInputSchema,
     ReadInputSchemaSchema,
-    EditInputSchema,
+    makeEditInputSchema(),
     CheckInputSchema,
     ReadInputMaps,
     ReadInputMapsSchema,

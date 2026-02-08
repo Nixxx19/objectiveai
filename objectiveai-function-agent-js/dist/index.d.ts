@@ -59756,9 +59756,13 @@ declare function appendExampleInput(value: unknown): Result<undefined>;
 declare function editExampleInput(index: number, value: unknown): Result<undefined>;
 declare function delExampleInput(index: number): Result<undefined>;
 declare function checkExampleInputs(): Result<undefined>;
+type Modality = "image" | "audio" | "video" | "file";
+declare function collectModalities(schema: Functions.Expression.InputSchema): Set<Modality>;
 
+type index$4_Modality = Modality;
 declare const index$4_appendExampleInput: typeof appendExampleInput;
 declare const index$4_checkExampleInputs: typeof checkExampleInputs;
+declare const index$4_collectModalities: typeof collectModalities;
 declare const index$4_delExampleInput: typeof delExampleInput;
 declare const index$4_editExampleInput: typeof editExampleInput;
 declare const index$4_readExampleInputs: typeof readExampleInputs;
@@ -59766,7 +59770,7 @@ declare const index$4_readExampleInputsSchema: typeof readExampleInputsSchema;
 declare const index$4_validateExampleInput: typeof validateExampleInput;
 declare const index$4_validateExampleInputs: typeof validateExampleInputs;
 declare namespace index$4 {
-  export { index$4_appendExampleInput as appendExampleInput, index$4_checkExampleInputs as checkExampleInputs, index$4_delExampleInput as delExampleInput, index$4_editExampleInput as editExampleInput, index$4_readExampleInputs as readExampleInputs, index$4_readExampleInputsSchema as readExampleInputsSchema, index$4_validateExampleInput as validateExampleInput, index$4_validateExampleInputs as validateExampleInputs };
+  export { type index$4_Modality as Modality, index$4_appendExampleInput as appendExampleInput, index$4_checkExampleInputs as checkExampleInputs, index$4_collectModalities as collectModalities, index$4_delExampleInput as delExampleInput, index$4_editExampleInput as editExampleInput, index$4_readExampleInputs as readExampleInputs, index$4_readExampleInputsSchema as readExampleInputsSchema, index$4_validateExampleInput as validateExampleInput, index$4_validateExampleInputs as validateExampleInputs };
 }
 
 declare function readEssay(): Result<string>;

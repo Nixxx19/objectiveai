@@ -579,7 +579,7 @@ function deepEqual(a: unknown, b: unknown): boolean {
   return aKeys.every((key) => key in bObj && deepEqual(aObj[key], bObj[key]));
 }
 
-type Modality = "image" | "audio" | "video" | "file";
+export type Modality = "image" | "audio" | "video" | "file";
 
 const MODALITY_PART_TYPES: Record<Modality, string[]> = {
   image: ["image_url"],
@@ -590,7 +590,7 @@ const MODALITY_PART_TYPES: Record<Modality, string[]> = {
 
 const ALL_MODALITIES: Modality[] = ["image", "audio", "video", "file"];
 
-function collectModalities(schema: Functions.Expression.InputSchema): Set<Modality> {
+export function collectModalities(schema: Functions.Expression.InputSchema): Set<Modality> {
   const result = new Set<Modality>();
   collectModalitiesRecursive(schema, result);
   return result;
