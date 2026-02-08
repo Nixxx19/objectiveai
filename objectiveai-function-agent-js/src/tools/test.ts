@@ -54,8 +54,8 @@ export async function runNetworkTests(apiBase?: string, apiKey?: string): Promis
   const inputs = inputsResult.value;
 
   // Clear and prepare output directories
-  const defaultDir = join("networkTests", "default");
-  const swissSystemDir = join("networkTests", "swisssystem");
+  const defaultDir = join("network_tests", "default");
+  const swissSystemDir = join("network_tests", "swisssystem");
   clearDir(defaultDir);
   clearDir(swissSystemDir);
   mkdirSync(defaultDir, { recursive: true });
@@ -118,7 +118,7 @@ export async function runNetworkTests(apiBase?: string, apiKey?: string): Promis
 }
 
 export function readDefaultNetworkTest(index: number): Result<unknown> {
-  const filePath = join("networkTests", "default", `${index}.json`);
+  const filePath = join("network_tests", "default", `${index}.json`);
   if (!existsSync(filePath)) {
     return { ok: false, value: undefined, error: `File not found: ${filePath}` };
   }
@@ -130,7 +130,7 @@ export function readDefaultNetworkTest(index: number): Result<unknown> {
 }
 
 export function readSwissSystemNetworkTest(index: number): Result<unknown> {
-  const filePath = join("networkTests", "swisssystem", `${index}.json`);
+  const filePath = join("network_tests", "swisssystem", `${index}.json`);
   if (!existsSync(filePath)) {
     return { ok: false, value: undefined, error: `File not found: ${filePath}` };
   }

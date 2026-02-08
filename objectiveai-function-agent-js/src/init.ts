@@ -85,7 +85,7 @@ async function fetchExamples(apiBase?: string, apiKey?: string): Promise<void> {
 function writeGitignore(): void {
   writeFileSync(
     ".gitignore",
-    ["examples/", "agent_functions/", "networkTests/", ""].join("\n"),
+    ["examples/", "agent_functions/", "network_tests/", "logs/", ""].join("\n"),
   );
 }
 

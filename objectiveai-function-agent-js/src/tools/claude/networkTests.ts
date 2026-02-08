@@ -10,7 +10,7 @@ import z from "zod";
 export function makeRunNetworkTests(apiBase?: string, apiKey?: string) {
   return tool(
     "RunNetworkTests",
-    "Execute the function once for each example input and write results to networkTests/",
+    "Execute the function once for each example input and write results to network_tests/",
     {},
     async () => resultFromResult(await runNetworkTests(apiBase, apiKey)),
   );
