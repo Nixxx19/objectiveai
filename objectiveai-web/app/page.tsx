@@ -117,9 +117,10 @@ export default function Home() {
             <HeroText />
           </div>
           <p style={{
-            fontSize: isMobile ? '15px' : '18px',
+            fontSize: isMobile ? '14px' : '17px',
             color: 'var(--text-muted)',
             marginBottom: '24px',
+            maxWidth: '395px',
             textWrap: 'balance',
           }}>
             Ensembles of LLMs, voting, to provide confidence in objective AI measurements.
