@@ -1640,7 +1640,7 @@ function getPlanPath(index) {
 }
 
 // src/claude/prepare/planMcp.ts
-async function planMcp(log, sessionId) {
+async function planMcp(log, sessionId, instructions) {
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
   const tools = [
@@ -1655,12 +1655,19 @@ async function planMcp(log, sessionId) {
     ReadFunctionSchema
   ];
   const mcpServer = createSdkMcpServer({ name: "plan", tools });
-  const prompt = `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context. Then write your implementation plan to \`${planPath}\` (plan index ${nextPlanIndex}). Include:
+  let prompt = `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context. Then write your implementation plan to \`${planPath}\` (plan index ${nextPlanIndex}). Include:
 - The input schema structure and field descriptions
 - Whether any input maps are needed for mapped task execution
 - What the function definition will look like
 - What expressions need to be written
 - What test inputs will cover edge cases and diverse scenarios`;
+  if (instructions) {
+    prompt += `
+
+## Extra Instructions
+
+${instructions}`;
+  }
   sessionId = await consumeStream(
     query({
       prompt,
@@ -1692,7 +1699,7 @@ async function prepare(options = {}) {
   log("=== Step 4: ESSAY_TASKS.md ===");
   sessionId = await essayTasksMcp(log, sessionId);
   log("=== Step 5: Plan ===");
-  sessionId = await planMcp(log, sessionId);
+  sessionId = await planMcp(log, sessionId, options.instructions);
   return sessionId;
 }
 
@@ -3474,7 +3481,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 `;
 }
-async function inventLoop(log, useFunctionTasks, sessionId, apiBase, apiKey, instructions) {
+async function inventLoop(log, useFunctionTasks, sessionId, apiBase, apiKey) {
   const nextPlanIndex = getNextPlanIndex();
   const maxAttempts = 5;
   let attempt = 0;
@@ -3498,13 +3505,6 @@ ${lastFailureReasons.map((r) => `- ${r}`).join("\n")}
 Please try again. Remember to:
 1. Use RunNetworkTests to test
 2. Use Submit to validate, commit, and push
-`;
-    }
-    if (instructions) {
-      prompt += `
-## Extra Instructions
-
-${instructions}
 `;
     }
     sessionId = await consumeStream(
@@ -3541,13 +3541,13 @@ ${instructions}
 async function inventFunctionTasksMcp(options = {}) {
   const log = options.log ?? createFileLogger().log;
   log("=== Invent Loop: Creating new function (function tasks) ===");
-  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey, options.instructions);
+  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function inventVectorTasksMcp(options = {}) {
   const log = options.log ?? createFileLogger().log;
   log("=== Invent Loop: Creating new function (vector tasks) ===");
-  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey, options.instructions);
+  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function inventMcp(options = {}) {

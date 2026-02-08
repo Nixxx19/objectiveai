@@ -16,6 +16,7 @@ import { getNextPlanIndex, getPlanPath } from "../planIndex";
 export async function planMcp(
   log: LogFn,
   sessionId?: string,
+  instructions?: string,
 ): Promise<string | undefined> {
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
@@ -33,7 +34,7 @@ export async function planMcp(
   ];
   const mcpServer = createSdkMcpServer({ name: "plan", tools });
 
-  const prompt =
+  let prompt =
     `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context.` +
     ` Then write your implementation plan to \`${planPath}\` (plan index ${nextPlanIndex}). Include:` +
     `\n- The input schema structure and field descriptions` +
@@ -41,6 +42,10 @@ export async function planMcp(
     `\n- What the function definition will look like` +
     `\n- What expressions need to be written` +
     `\n- What test inputs will cover edge cases and diverse scenarios`;
+
+  if (instructions) {
+    prompt += `\n\n## Extra Instructions\n\n${instructions}`;
+  }
 
   sessionId = await consumeStream(
     query({

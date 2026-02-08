@@ -22,7 +22,7 @@ declare function essayMcp(log: LogFn, sessionId?: string): Promise<string | unde
 
 declare function essayTasksMcp(log: LogFn, sessionId?: string): Promise<string | undefined>;
 
-declare function planMcp(log: LogFn, sessionId?: string): Promise<string | undefined>;
+declare function planMcp(log: LogFn, sessionId?: string, instructions?: string): Promise<string | undefined>;
 
 declare function prepare(options?: AgentOptions): Promise<string | undefined>;
 
