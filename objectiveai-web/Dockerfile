@@ -85,5 +85,4 @@ COPY --from=builder /root/objectiveai-web/.next/standalone ./
 COPY --from=builder /root/objectiveai-web/.next/static ./objectiveai-web/.next/static
 COPY --from=builder /root/objectiveai-web/public ./objectiveai-web/public
 WORKDIR /root/objectiveai-web
-ENV PORT=8080
 CMD ["node", "server.js"]
