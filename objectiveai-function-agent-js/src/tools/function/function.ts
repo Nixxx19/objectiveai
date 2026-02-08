@@ -1,7 +1,8 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { Functions } from "objectiveai";
+import z from "zod";
 import { Result } from "../result";
-import { checkType } from "./type";
+import { checkType, validateType } from "./type";
 import { checkDescription } from "./description";
 import { checkInputSchema } from "./inputSchema";
 import { checkInputMaps } from "./inputMaps";
@@ -21,8 +22,21 @@ export interface DeserializedFunction {
   input_merge?: unknown;
 }
 
-export function readFunctionSchema(): typeof Functions.RemoteFunctionSchema {
-  return Functions.RemoteFunctionSchema;
+export function readFunctionSchema(): z.ZodType {
+  const fn = readFunction();
+  if (!fn.ok) return Functions.RemoteFunctionSchema;
+
+  const type = validateType(fn.value);
+  if (!type.ok) return Functions.RemoteFunctionSchema;
+
+  switch (type.value) {
+    case "scalar.function":
+      return Functions.RemoteScalarFunctionSchema;
+    case "vector.function":
+      return Functions.RemoteVectorFunctionSchema;
+    default:
+      return Functions.RemoteFunctionSchema;
+  }
 }
 
 export function checkFunction(): Result<undefined> {

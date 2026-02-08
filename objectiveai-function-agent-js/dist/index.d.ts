@@ -94,7 +94,7 @@ interface DeserializedFunction {
     input_split?: unknown;
     input_merge?: unknown;
 }
-declare function readFunctionSchema(): typeof Functions.RemoteFunctionSchema;
+declare function readFunctionSchema(): z.ZodType;
 declare function checkFunction(): Result<undefined>;
 declare function validateFunction(fn: DeserializedFunction): Result<Functions.RemoteFunction>;
 declare function readFunction(): Result<DeserializedFunction>;

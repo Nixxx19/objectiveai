@@ -971,7 +971,18 @@ function validateInputMerge(fn) {
 
 // src/tools/function/function.ts
 function readFunctionSchema() {
-  return objectiveai.Functions.RemoteFunctionSchema;
+  const fn = readFunction();
+  if (!fn.ok) return objectiveai.Functions.RemoteFunctionSchema;
+  const type = validateType(fn.value);
+  if (!type.ok) return objectiveai.Functions.RemoteFunctionSchema;
+  switch (type.value) {
+    case "scalar.function":
+      return objectiveai.Functions.RemoteScalarFunctionSchema;
+    case "vector.function":
+      return objectiveai.Functions.RemoteVectorFunctionSchema;
+    default:
+      return objectiveai.Functions.RemoteFunctionSchema;
+  }
 }
 function checkFunction() {
   const fn = readFunction();
