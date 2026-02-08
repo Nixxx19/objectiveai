@@ -5,6 +5,7 @@ import {
   readFileSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "fs";
 
 import { join } from "path";
@@ -46,8 +47,12 @@ function runAgentInSubdir(
 
   mkdirSync(subdir, { recursive: true });
 
+  // Write spec to SPEC.md before spawning so it doesn't need to be a CLI arg.
+  // Long spec strings with special characters get mangled by shell escaping on Windows.
+  writeFileSync(join(subdir, "SPEC.md"), spec, "utf-8");
+
   return new Promise<SpawnResult>((resolve) => {
-    const args = ["invent", spec, "--name", name, "--depth", String(childDepth)];
+    const args = ["invent", "--name", name, "--depth", String(childDepth)];
     if (apiBase) args.push("--api-base", apiBase);
     if (apiKey) args.push("--api-key", apiKey);
 

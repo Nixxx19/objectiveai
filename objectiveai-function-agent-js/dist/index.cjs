@@ -3018,8 +3018,9 @@ function getCurrentDepth() {
 function runAgentInSubdir(name, spec, childDepth, childProcesses, apiBase, apiKey) {
   const subdir = path.join("agent_functions", name);
   fs.mkdirSync(subdir, { recursive: true });
+  fs.writeFileSync(path.join(subdir, "SPEC.md"), spec, "utf-8");
   return new Promise((resolve) => {
-    const args = ["invent", spec, "--name", name, "--depth", String(childDepth)];
+    const args = ["invent", "--name", name, "--depth", String(childDepth)];
     if (apiBase) args.push("--api-base", apiBase);
     if (apiKey) args.push("--api-key", apiKey);
     const child = child_process.spawn(
