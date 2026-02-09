@@ -1,6 +1,15 @@
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { Functions } from "objectiveai";
+import z from "zod";
 import { Result } from "../result";
+import { checkType, validateType } from "./type";
+import { checkDescription } from "./description";
+import { checkInputSchema } from "./inputSchema";
+import { checkInputMaps } from "./inputMaps";
+import { checkTasks } from "./tasks";
+import { checkOutputLength } from "./outputLength";
+import { checkInputSplit } from "./inputSplit";
+import { checkInputMerge } from "./inputMerge";
 
 export interface DeserializedFunction {
   type?: unknown;
@@ -13,8 +22,21 @@ export interface DeserializedFunction {
   input_merge?: unknown;
 }
 
-export function readFunctionSchema(): typeof Functions.RemoteFunctionSchema {
-  return Functions.RemoteFunctionSchema;
+export function readFunctionSchema(): z.ZodType {
+  const fn = readFunction();
+  if (!fn.ok) return Functions.RemoteFunctionSchema;
+
+  const type = validateType(fn.value);
+  if (!type.ok) return Functions.RemoteFunctionSchema;
+
+  switch (type.value) {
+    case "scalar.function":
+      return Functions.RemoteScalarFunctionSchema;
+    case "vector.function":
+      return Functions.RemoteVectorFunctionSchema;
+    default:
+      return Functions.RemoteFunctionSchema;
+  }
 }
 
 export function checkFunction(): Result<undefined> {
@@ -30,6 +52,27 @@ export function checkFunction(): Result<undefined> {
   const result = validateFunction(fn.value);
   if (!result.ok) {
     return { ok: false, value: undefined, error: result.error };
+  }
+
+  const checks = [
+    checkType,
+    checkDescription,
+    checkInputSchema,
+    checkInputMaps,
+    checkTasks,
+    checkOutputLength,
+    checkInputSplit,
+    checkInputMerge,
+  ];
+  const errors: string[] = [];
+  for (const check of checks) {
+    const r = check(fn.value);
+    if (!r.ok) {
+      errors.push(r.error!);
+    }
+  }
+  if (errors.length > 0) {
+    return { ok: false, value: undefined, error: errors.join("\n") };
   }
 
   return { ok: true, value: undefined, error: undefined };

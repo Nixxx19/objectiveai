@@ -1,4 +1,4 @@
-import { Functions } from "objectiveai";
+import { Functions, Chat, Vector } from "objectiveai";
 import z from "zod";
 import { existsSync, readFileSync, writeFileSync } from "fs";
 import { Result } from "../result";
@@ -61,6 +61,12 @@ export function validateExampleInput(
       error:
         "outputLength must be null because function does not have output_length",
     };
+  }
+
+  // Validate compiled task content format
+  const tasksResult = validateTasks(exampleInput.compiledTasks);
+  if (!tasksResult.ok) {
+    return { ok: false, value: undefined, error: tasksResult.error };
   }
 
   return { ok: true, value: exampleInput, error: undefined };
@@ -414,6 +420,20 @@ export function checkExampleInputs(): Result<undefined> {
       if (!deepEqual(mergedOutput, value)) {
         return { ok: false, value: undefined, error: `Example input [${i}] merged input does not match original input.\n\nOriginal: ${JSON.stringify(value)}\n\nMerged: ${JSON.stringify(mergedOutput)}` };
       }
+
+      // Validate random subsets: merge random combinations and check output_length matches subset size
+      const subsets = randomSubsets(inputSplit.length, 5);
+      for (const subset of subsets) {
+        const subSplits = subset.map(idx => inputSplit[idx]);
+        const merged = Functions.compileFunctionInputMerge(func, subSplits);
+        if (merged === null) {
+          return { ok: false, value: undefined, error: `Example input [${i}] input_merge returned null for subset [${subset.join(", ")}]` };
+        }
+        const mergedLen = Functions.compileFunctionOutputLength(func, merged);
+        if (mergedLen !== subset.length) {
+          return { ok: false, value: undefined, error: `Example input [${i}] merged subset [${subset.join(", ")}] output_length is ${mergedLen}, expected ${subset.length}` };
+        }
+      }
     }
   }
 
@@ -422,6 +442,68 @@ export function checkExampleInputs(): Result<undefined> {
   const coverageResult = checkSchemaCoverage(func.input_schema, allValues, "input_schema");
   if (!coverageResult.ok) {
     return coverageResult;
+  }
+
+  // Multimodal coverage validation
+  const modalities = collectModalities(func.input_schema);
+  if (modalities.size > 0) {
+    const allCompiledTasks = inputs.flatMap(input => input.compiledTasks);
+    const found = new Set<Modality>();
+    for (const ct of allCompiledTasks) {
+      collectModalitiesFromCompiledTask(ct, found);
+    }
+    for (const modality of modalities) {
+      if (!found.has(modality)) {
+        return { ok: false, value: undefined, error: `Input schema declares "${modality}" modality but no compiled task across all example inputs contains a rich content part of that type. Add at least one example input that uses "${modality}" content.` };
+      }
+    }
+  }
+
+  return { ok: true, value: undefined, error: undefined };
+}
+
+function validateTasks(compiledTasks: Functions.CompiledTasks): Result<undefined> {
+  for (let i = 0; i < compiledTasks.length; i++) {
+    const result = validateCompiledTaskContent(compiledTasks[i], i);
+    if (!result.ok) return result;
+  }
+  return { ok: true, value: undefined, error: undefined };
+}
+
+function validateCompiledTaskContent(ct: Functions.CompiledTask, index: number): Result<undefined> {
+  if (ct === null) return { ok: true, value: undefined, error: undefined };
+  if (Array.isArray(ct)) {
+    for (const sub of ct) {
+      const result = validateCompiledTaskContent(sub, index);
+      if (!result.ok) return result;
+    }
+    return { ok: true, value: undefined, error: undefined };
+  }
+  if (ct.type !== "vector.completion") {
+    return { ok: true, value: undefined, error: undefined };
+  }
+
+  // Message content must be an array of content parts, not a plain string
+  for (let j = 0; j < ct.messages.length; j++) {
+    const msg = ct.messages[j];
+    if ("content" in msg && msg.content != null && typeof msg.content === "string") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `compiledTasks[${index}] messages[${j}] content must be an array of content parts, not a string`,
+      };
+    }
+  }
+
+  // Each response must be an array of content parts, not a plain string
+  for (let j = 0; j < ct.responses.length; j++) {
+    if (typeof ct.responses[j] === "string") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `compiledTasks[${index}] responses[${j}] must be an array of content parts, not a string`,
+      };
+    }
   }
 
   return { ok: true, value: undefined, error: undefined };
@@ -491,7 +573,7 @@ function checkSchemaCoverage(
     }
 
     // At least 1 value has length > threshold, if possible
-    const threshold = effectiveMin > 1 ? effectiveMin : 1;
+    const threshold = Math.max(3, effectiveMin);
     if (maxItems === null || maxItems > threshold) {
       const hasGreater = values.some(v => Array.isArray(v) && v.length > threshold);
       if (!hasGreater) {
@@ -511,6 +593,21 @@ function checkSchemaCoverage(
     }
   }
   return { ok: true, value: undefined, error: undefined };
+}
+
+function randomSubsets(length: number, count: number): number[][] {
+  if (length < 2) return [];
+  const result: number[][] = [];
+  for (let c = 0; c < count; c++) {
+    const size = 2 + Math.floor(Math.random() * (length - 2));
+    const indices = Array.from({ length }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    result.push(indices.slice(0, size).sort((a, b) => a - b));
+  }
+  return result;
 }
 
 function deepEqual(a: unknown, b: unknown): boolean {
@@ -533,6 +630,102 @@ function deepEqual(a: unknown, b: unknown): boolean {
   const bKeys = Object.keys(bObj);
   if (aKeys.length !== bKeys.length) return false;
   return aKeys.every((key) => key in bObj && deepEqual(aObj[key], bObj[key]));
+}
+
+export type Modality = "image" | "audio" | "video" | "file";
+
+const MODALITY_PART_TYPES: Record<Modality, string[]> = {
+  image: ["image_url"],
+  audio: ["input_audio"],
+  video: ["video_url", "input_video"],
+  file: ["file"],
+};
+
+const ALL_MODALITIES: Modality[] = ["image", "audio", "video", "file"];
+
+export function collectModalities(schema: Functions.Expression.InputSchema): Set<Modality> {
+  const result = new Set<Modality>();
+  collectModalitiesRecursive(schema, result);
+  return result;
+}
+
+function collectModalitiesRecursive(schema: Functions.Expression.InputSchema, result: Set<Modality>): void {
+  if ("anyOf" in schema) {
+    for (const option of schema.anyOf) {
+      collectModalitiesRecursive(option, result);
+    }
+  } else if (schema.type === "object") {
+    for (const propSchema of Object.values(schema.properties)) {
+      collectModalitiesRecursive(propSchema, result);
+    }
+  } else if (schema.type === "array") {
+    collectModalitiesRecursive(schema.items, result);
+  } else if (ALL_MODALITIES.includes(schema.type as Modality)) {
+    result.add(schema.type as Modality);
+  }
+}
+
+function collectModalitiesFromCompiledTask(ct: Functions.CompiledTask, found: Set<Modality>): void {
+  if (ct === null) return;
+  if (Array.isArray(ct)) {
+    for (const sub of ct) {
+      collectModalitiesFromCompiledTask(sub, found);
+    }
+    return;
+  }
+  if (ct.type === "vector.completion") {
+    collectModalitiesFromMessages(ct.messages, found);
+    collectModalitiesFromResponses(ct.responses, found);
+  } else {
+    collectModalitiesFromInputValue(ct.input, found);
+  }
+}
+
+function collectModalitiesFromMessages(messages: Chat.Completions.Request.Message[], found: Set<Modality>): void {
+  for (const msg of messages) {
+    if ("content" in msg && msg.content != null) {
+      collectModalitiesFromRichContent(msg.content, found);
+    }
+  }
+}
+
+function collectModalitiesFromResponses(responses: Vector.Completions.Request.VectorResponse[], found: Set<Modality>): void {
+  for (const resp of responses) {
+    collectModalitiesFromRichContent(resp, found);
+  }
+}
+
+function collectModalitiesFromRichContent(content: Chat.Completions.Request.RichContent, found: Set<Modality>): void {
+  if (typeof content === "string") return;
+  for (const part of content) {
+    checkPartType(part.type, found);
+  }
+}
+
+function checkPartType(partType: string, found: Set<Modality>): void {
+  for (const modality of ALL_MODALITIES) {
+    if (MODALITY_PART_TYPES[modality].includes(partType)) {
+      found.add(modality);
+    }
+  }
+}
+
+function collectModalitiesFromInputValue(value: Functions.Expression.InputValue, found: Set<Modality>): void {
+  if (typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectModalitiesFromInputValue(item, found);
+    }
+    return;
+  }
+  if ("type" in value && typeof value.type === "string") {
+    checkPartType(value.type, found);
+  }
+  for (const v of Object.values(value)) {
+    if (v !== undefined) {
+      collectModalitiesFromInputValue(v as Functions.Expression.InputValue, found);
+    }
+  }
 }
 
 function compiledTasksEqual(

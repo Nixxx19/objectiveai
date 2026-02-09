@@ -5,6 +5,7 @@ import {
   readFileSync,
   rmSync,
   statSync,
+  writeFileSync,
 } from "fs";
 
 import { join } from "path";
@@ -24,6 +25,54 @@ interface AgentError {
 }
 
 type SpawnResult = AgentResult | AgentError;
+
+function getGitHubOwner(): string | null {
+  try {
+    return execSync("gh api user --jq .login", {
+      encoding: "utf-8",
+      stdio: "pipe",
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+
+function repoExists(owner: string, name: string): boolean {
+  try {
+    execSync(`gh repo view ${owner}/${name}`, { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const OVERWRITE_FILES = [
+  "SPEC.md",
+  "ESSAY.md",
+  "ESSAY_TASKS.md",
+  "README.md",
+];
+
+function clearForOverwrite(dir: string): void {
+  for (const file of OVERWRITE_FILES) {
+    const path = join(dir, file);
+    if (existsSync(path)) {
+      rmSync(path);
+    }
+  }
+
+  // Clear description from function.json
+  const functionPath = join(dir, "function.json");
+  if (existsSync(functionPath)) {
+    try {
+      const fn = JSON.parse(readFileSync(functionPath, "utf-8"));
+      if (typeof fn === "object" && fn !== null) {
+        delete fn.description;
+        writeFileSync(functionPath, JSON.stringify(fn, null, 2));
+      }
+    } catch {}
+  }
+}
 
 function getCurrentDepth(): number {
   if (!existsSync("parameters.json")) {
@@ -46,8 +95,12 @@ function runAgentInSubdir(
 
   mkdirSync(subdir, { recursive: true });
 
+  // Write spec to SPEC.md before spawning so it doesn't need to be a CLI arg.
+  // Long spec strings with special characters get mangled by shell escaping on Windows.
+  writeFileSync(join(subdir, "SPEC.md"), spec, "utf-8");
+
   return new Promise<SpawnResult>((resolve) => {
-    const args = ["invent", spec, "--name", name, "--depth", String(childDepth)];
+    const args = ["invent", "--name", name, "--depth", String(childDepth)];
     if (apiBase) args.push("--api-base", apiBase);
     if (apiKey) args.push("--api-key", apiKey);
 
@@ -58,6 +111,7 @@ function runAgentInSubdir(
         cwd: subdir,
         stdio: ["inherit", "pipe", "pipe"],
         shell: true,
+        env: { ...process.env, OBJECTIVEAI_PARENT_PID: String(process.pid) },
       },
     );
 
@@ -127,19 +181,20 @@ export async function spawnFunctionAgents(
     const dir = join("agent_functions", param.name);
     if (param.overwrite && existsSync(dir)) {
       try {
-        rmSync(dir, { recursive: true, force: true });
+        clearForOverwrite(dir);
       } catch (err) {
         return {
           ok: false,
           value: undefined,
-          error: `Failed to delete ${dir}: ${err}. If this error persists, make a new function with a different name instead.`,
+          error: `Failed to clear ${dir} for overwrite: ${err}.`,
         };
       }
     }
   }
 
-  // Check for existing directories
+  // Check for existing directories (non-overwrite only)
   for (const param of params) {
+    if (param.overwrite) continue;
     const dir = join("agent_functions", param.name);
     if (existsSync(dir) && statSync(dir).isDirectory()) {
       return {
@@ -147,6 +202,23 @@ export async function spawnFunctionAgents(
         value: undefined,
         error: `agent_functions/${param.name} already exists. Set "overwrite": true to replace it, or use a different name.`,
       };
+    }
+  }
+
+  // Check that no repos already exist on GitHub (non-overwrite only)
+  const nonOverwriteParams = params.filter((p) => !p.overwrite);
+  if (nonOverwriteParams.length > 0) {
+    const owner = getGitHubOwner();
+    if (owner) {
+      for (const param of nonOverwriteParams) {
+        if (repoExists(owner, param.name)) {
+          return {
+            ok: false,
+            value: undefined,
+            error: `Repository ${owner}/${param.name} already exists on GitHub. Choose a different name.`,
+          };
+        }
+      }
     }
   }
 

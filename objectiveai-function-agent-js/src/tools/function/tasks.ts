@@ -18,17 +18,32 @@ export function readTasksSchema(): typeof TasksSchema {
   return TasksSchema;
 }
 
-export function checkTasks(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Unable to check tasks: ${fn.error}`,
-    };
+const MessagesSchema = Functions.VectorCompletionTaskExpressionSchema.shape.messages;
+const ToolsSchema = Functions.VectorCompletionTaskExpressionSchema.shape.tools;
+const ResponsesSchema = Functions.VectorCompletionTaskExpressionSchema.shape.responses;
+
+export function readMessagesSchema(): typeof MessagesSchema {
+  return MessagesSchema;
+}
+
+export function readToolsSchema(): typeof ToolsSchema {
+  return ToolsSchema;
+}
+
+export function readResponsesSchema(): typeof ResponsesSchema {
+  return ResponsesSchema;
+}
+
+export function checkTasks(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check tasks: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const result = validateTasks(fn.value);
+  const result = validateTasks(fn);
   if (!result.ok) {
     return {
       ok: false,

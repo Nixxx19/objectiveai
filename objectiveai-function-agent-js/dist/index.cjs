@@ -175,7 +175,7 @@ async function fetchExamples(apiBase, apiKey) {
 function writeGitignore() {
   fs.writeFileSync(
     ".gitignore",
-    ["examples/", "agent_functions/", "networkTests/", ""].join("\n")
+    ["examples/", "agent_functions/", "network_tests/", "logs/", ""].join("\n")
   );
 }
 async function init(options = {}) {
@@ -387,10 +387,13 @@ __export(function_exports, {
   readInputSchemaSchema: () => readInputSchemaSchema,
   readInputSplit: () => readInputSplit,
   readInputSplitSchema: () => readInputSplitSchema,
+  readMessagesSchema: () => readMessagesSchema,
   readOutputLength: () => readOutputLength,
   readOutputLengthSchema: () => readOutputLengthSchema,
+  readResponsesSchema: () => readResponsesSchema,
   readTasks: () => readTasks,
   readTasksSchema: () => readTasksSchema,
+  readToolsSchema: () => readToolsSchema,
   readType: () => readType,
   readTypeSchema: () => readTypeSchema,
   validateDescription: () => validateDescription,
@@ -403,177 +406,6 @@ __export(function_exports, {
   validateTasks: () => validateTasks,
   validateType: () => validateType
 });
-function readFunctionSchema() {
-  return objectiveai.Functions.RemoteFunctionSchema;
-}
-function checkFunction() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check function: ${fn.error}`
-    };
-  }
-  const result = validateFunction(fn.value);
-  if (!result.ok) {
-    return { ok: false, value: void 0, error: result.error };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function validateFunction(fn) {
-  const parsed = objectiveai.Functions.RemoteFunctionSchema.safeParse(fn);
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
-function readFunction() {
-  if (!fs.existsSync("function.json")) {
-    return { ok: true, value: {}, error: void 0 };
-  }
-  let fn;
-  try {
-    fn = JSON.parse(fs.readFileSync("function.json", "utf-8"));
-  } catch (e) {
-    return { ok: true, value: {}, error: void 0 };
-  }
-  if (typeof fn !== "object" || fn === null) {
-    return { ok: true, value: {}, error: void 0 };
-  }
-  return { ok: true, value: fn, error: void 0 };
-}
-function editFunction(fields) {
-  let fn = {};
-  if (fs.existsSync("function.json")) {
-    try {
-      const parsed = JSON.parse(fs.readFileSync("function.json", "utf-8"));
-      if (typeof parsed === "object" && parsed !== null) {
-        fn = parsed;
-      }
-    } catch {
-    }
-  }
-  for (const key in fields) {
-    const value = fields[key];
-    if (value === null) {
-      delete fn[key];
-    } else if (value !== void 0) {
-      fn[key] = value;
-    }
-  }
-  const fieldOrder = [
-    "type",
-    "description",
-    "changelog",
-    "input_schema",
-    "input_maps",
-    "tasks",
-    "output_length",
-    "input_split",
-    "input_merge"
-  ];
-  const ordered = {};
-  for (const key of fieldOrder) {
-    if (key in fn) {
-      ordered[key] = fn[key];
-    }
-  }
-  for (const key in fn) {
-    if (!(key in ordered)) {
-      ordered[key] = fn[key];
-    }
-  }
-  fs.writeFileSync("function.json", JSON.stringify(ordered, null, 2));
-  return { ok: true, value: void 0, error: void 0 };
-}
-
-// src/tools/function/description.ts
-var DescriptionSchema = z19__default.default.string().nonempty();
-function readDescription() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: fn.error };
-  }
-  return { ok: true, value: fn.value.description, error: void 0 };
-}
-function readDescriptionSchema() {
-  return DescriptionSchema;
-}
-function checkDescription() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: `Unable to check description: ${fn.error}` };
-  }
-  const result = validateDescription(fn.value);
-  if (!result.ok) {
-    return { ok: false, value: void 0, error: `Description is invalid: ${result.error}` };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function editDescription(value) {
-  const result = validateDescription({ description: value });
-  if (!result.ok) {
-    return { ok: false, value: void 0, error: `Invalid description: ${result.error}` };
-  }
-  return editFunction({ description: result.value });
-}
-function validateDescription(fn) {
-  const parsed = DescriptionSchema.safeParse(fn.description);
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
-function readInputMaps() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: fn.error };
-  }
-  return { ok: true, value: fn.value.input_maps, error: void 0 };
-}
-function readInputMapsSchema() {
-  return objectiveai.Functions.Expression.InputMapsExpressionSchema;
-}
-function checkInputMaps() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_maps: ${fn.error}`
-    };
-  }
-  const result = validateInputMaps(fn.value);
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `input_maps is invalid: ${result.error}`
-    };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function editInputMaps(value) {
-  const result = validateInputMaps({ input_maps: value });
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Invalid input_maps: ${result.error}`
-    };
-  }
-  return editFunction({ input_maps: result.value });
-}
-function validateInputMaps(fn) {
-  const parsed = objectiveai.Functions.Expression.InputMapsExpressionSchema.safeParse(
-    fn.input_maps
-  );
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
 var FunctionTypeSchema = z19__default.default.enum([
   ...new Set(
     objectiveai.Functions.RemoteFunctionSchema.options.map((opt) => opt.shape.type.value)
@@ -589,16 +421,15 @@ function readType() {
 function readTypeSchema() {
   return FunctionTypeSchema;
 }
-function checkType() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check type: ${fn.error}`
-    };
+function checkType(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check type: ${read.error}` };
+    }
+    fn = read.value;
   }
-  const result = validateType(fn.value);
+  const result = validateType(fn);
   if (!result.ok) {
     return {
       ok: false,
@@ -626,100 +457,6 @@ function validateType(fn) {
   }
   return { ok: true, value: parsed.data, error: void 0 };
 }
-
-// src/tools/function/inputMerge.ts
-var InputMergeSchema = objectiveai.Functions.RemoteVectorFunctionSchema.shape.input_merge;
-function readInputMerge() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: fn.error };
-  }
-  return { ok: true, value: fn.value.input_merge, error: void 0 };
-}
-function readInputMergeSchema() {
-  return InputMergeSchema;
-}
-function checkInputMerge() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_merge: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_merge: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    if (fn.value.input_merge !== void 0) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `input_merge must not be present for type "${typeResult.value}"`
-      };
-    }
-    return { ok: true, value: void 0, error: void 0 };
-  }
-  const result = validateInputMerge(fn.value);
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `input_merge is invalid: ${result.error}`
-    };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function delInputMerge() {
-  return editFunction({ input_merge: null });
-}
-function editInputMerge(value) {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit input_merge: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit input_merge: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    return {
-      ok: false,
-      value: void 0,
-      error: `input_merge is not applicable for type "${typeResult.value}"`
-    };
-  }
-  const result = validateInputMerge({ input_merge: value });
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Invalid input_merge: ${result.error}`
-    };
-  }
-  return editFunction({ input_merge: result.value });
-}
-function validateInputMerge(fn) {
-  const parsed = InputMergeSchema.safeParse(fn.input_merge);
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
 function readInputSchema() {
   const fn = readFunction();
   if (!fn.ok) {
@@ -730,16 +467,15 @@ function readInputSchema() {
 function readInputSchemaSchema() {
   return objectiveai.Functions.Expression.InputSchemaSchema;
 }
-function checkInputSchema() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_schema: ${fn.error}`
-    };
+function checkInputSchema(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check input_schema: ${read.error}` };
+    }
+    fn = read.value;
   }
-  const result = validateInputSchema(fn.value);
+  const result = validateInputSchema(fn);
   if (!result.ok) {
     return {
       ok: false,
@@ -769,185 +505,52 @@ function validateInputSchema(fn) {
   }
   return { ok: true, value: parsed.data, error: void 0 };
 }
-var InputSplitSchema = objectiveai.Functions.RemoteVectorFunctionSchema.shape.input_split;
-function readInputSplit() {
+function readInputMaps() {
   const fn = readFunction();
   if (!fn.ok) {
     return { ok: false, value: void 0, error: fn.error };
   }
-  return { ok: true, value: fn.value.input_split, error: void 0 };
+  return { ok: true, value: fn.value.input_maps, error: void 0 };
 }
-function readInputSplitSchema() {
-  return InputSplitSchema;
+function readInputMapsSchema() {
+  return objectiveai.Functions.Expression.InputMapsExpressionSchema;
 }
-function checkInputSplit() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_split: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check input_split: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    if (fn.value.input_split !== void 0) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `input_split must not be present for type "${typeResult.value}"`
-      };
+function checkInputMaps(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check input_maps: ${read.error}` };
     }
+    fn = read.value;
+  }
+  if (fn.input_maps === void 0) {
     return { ok: true, value: void 0, error: void 0 };
   }
-  const result = validateInputSplit(fn.value);
+  const result = validateInputMaps(fn);
   if (!result.ok) {
     return {
       ok: false,
       value: void 0,
-      error: `input_split is invalid: ${result.error}`
+      error: `input_maps is invalid: ${result.error}`
     };
   }
   return { ok: true, value: void 0, error: void 0 };
 }
-function delInputSplit() {
-  return editFunction({ input_split: null });
-}
-function editInputSplit(value) {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit input_split: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit input_split: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    return {
-      ok: false,
-      value: void 0,
-      error: `input_split is not applicable for type "${typeResult.value}"`
-    };
-  }
-  const result = validateInputSplit({ input_split: value });
+function editInputMaps(value) {
+  const result = validateInputMaps({ input_maps: value });
   if (!result.ok) {
     return {
       ok: false,
       value: void 0,
-      error: `Invalid input_split: ${result.error}`
+      error: `Invalid input_maps: ${result.error}`
     };
   }
-  return editFunction({ input_split: result.value });
+  return editFunction({ input_maps: result.value });
 }
-function validateInputSplit(fn) {
-  const parsed = InputSplitSchema.safeParse(fn.input_split);
-  if (!parsed.success) {
-    return { ok: false, value: void 0, error: parsed.error.message };
-  }
-  return { ok: true, value: parsed.data, error: void 0 };
-}
-var OutputLengthSchema = objectiveai.Functions.RemoteVectorFunctionSchema.shape.output_length;
-function readOutputLength() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return { ok: false, value: void 0, error: fn.error };
-  }
-  return { ok: true, value: fn.value.output_length, error: void 0 };
-}
-function readOutputLengthSchema() {
-  return OutputLengthSchema;
-}
-function checkOutputLength() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check output_length: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check output_length: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    if (fn.value.output_length !== void 0) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `output_length must not be present for type "${typeResult.value}"`
-      };
-    }
-    return { ok: true, value: void 0, error: void 0 };
-  }
-  const result = validateOutputLength(fn.value);
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `output_length is invalid: ${result.error}`
-    };
-  }
-  return { ok: true, value: void 0, error: void 0 };
-}
-function delOutputLength() {
-  return editFunction({ output_length: null });
-}
-function editOutputLength(value) {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit output_length: ${fn.error}`
-    };
-  }
-  const typeResult = validateType(fn.value);
-  if (!typeResult.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to edit output_length: type is invalid: ${typeResult.error}`
-    };
-  }
-  if (typeResult.value !== "vector.function") {
-    return {
-      ok: false,
-      value: void 0,
-      error: `output_length is not applicable for type "${typeResult.value}"`
-    };
-  }
-  const result = validateOutputLength({ output_length: value });
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Invalid output_length: ${result.error}`
-    };
-  }
-  return editFunction({ output_length: result.value });
-}
-function validateOutputLength(fn) {
-  const parsed = OutputLengthSchema.safeParse(fn.output_length);
+function validateInputMaps(fn) {
+  const parsed = objectiveai.Functions.Expression.InputMapsExpressionSchema.safeParse(
+    fn.input_maps
+  );
   if (!parsed.success) {
     return { ok: false, value: void 0, error: parsed.error.message };
   }
@@ -964,16 +567,27 @@ function readTasks() {
 function readTasksSchema() {
   return TasksSchema;
 }
-function checkTasks() {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Unable to check tasks: ${fn.error}`
-    };
+var MessagesSchema = objectiveai.Functions.VectorCompletionTaskExpressionSchema.shape.messages;
+var ToolsSchema = objectiveai.Functions.VectorCompletionTaskExpressionSchema.shape.tools;
+var ResponsesSchema = objectiveai.Functions.VectorCompletionTaskExpressionSchema.shape.responses;
+function readMessagesSchema() {
+  return MessagesSchema;
+}
+function readToolsSchema() {
+  return ToolsSchema;
+}
+function readResponsesSchema() {
+  return ResponsesSchema;
+}
+function checkTasks(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check tasks: ${read.error}` };
+    }
+    fn = read.value;
   }
-  const result = validateTasks(fn.value);
+  const result = validateTasks(fn);
   if (!result.ok) {
     return {
       ok: false,
@@ -1084,171 +698,596 @@ function validateTasks(fn) {
   }
   return { ok: true, value: parsed.data, error: void 0 };
 }
+var OutputLengthSchema = objectiveai.Functions.RemoteVectorFunctionSchema.shape.output_length;
+function readOutputLength() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return { ok: false, value: void 0, error: fn.error };
+  }
+  return { ok: true, value: fn.value.output_length, error: void 0 };
+}
+function readOutputLengthSchema() {
+  return OutputLengthSchema;
+}
+function checkOutputLength(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check output_length: ${read.error}` };
+    }
+    fn = read.value;
+  }
+  const typeResult = validateType(fn);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to check output_length: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    if (fn.output_length !== void 0) {
+      return {
+        ok: false,
+        value: void 0,
+        error: `output_length must not be present for type "${typeResult.value}"`
+      };
+    }
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  const result = validateOutputLength(fn);
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `output_length is invalid: ${result.error}`
+    };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function delOutputLength() {
+  return editFunction({ output_length: null });
+}
+function editOutputLength(value) {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit output_length: ${fn.error}`
+    };
+  }
+  const typeResult = validateType(fn.value);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit output_length: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    return {
+      ok: false,
+      value: void 0,
+      error: `output_length is not applicable for type "${typeResult.value}"`
+    };
+  }
+  const result = validateOutputLength({ output_length: value });
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Invalid output_length: ${result.error}`
+    };
+  }
+  return editFunction({ output_length: result.value });
+}
+function validateOutputLength(fn) {
+  const parsed = OutputLengthSchema.safeParse(fn.output_length);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+var InputSplitSchema = objectiveai.Functions.RemoteVectorFunctionSchema.shape.input_split;
+function readInputSplit() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return { ok: false, value: void 0, error: fn.error };
+  }
+  return { ok: true, value: fn.value.input_split, error: void 0 };
+}
+function readInputSplitSchema() {
+  return InputSplitSchema;
+}
+function checkInputSplit(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check input_split: ${read.error}` };
+    }
+    fn = read.value;
+  }
+  const typeResult = validateType(fn);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to check input_split: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    if (fn.input_split !== void 0) {
+      return {
+        ok: false,
+        value: void 0,
+        error: `input_split must not be present for type "${typeResult.value}"`
+      };
+    }
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  const result = validateInputSplit(fn);
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `input_split is invalid: ${result.error}`
+    };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function delInputSplit() {
+  return editFunction({ input_split: null });
+}
+function editInputSplit(value) {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit input_split: ${fn.error}`
+    };
+  }
+  const typeResult = validateType(fn.value);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit input_split: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    return {
+      ok: false,
+      value: void 0,
+      error: `input_split is not applicable for type "${typeResult.value}"`
+    };
+  }
+  const result = validateInputSplit({ input_split: value });
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Invalid input_split: ${result.error}`
+    };
+  }
+  return editFunction({ input_split: result.value });
+}
+function validateInputSplit(fn) {
+  const parsed = InputSplitSchema.safeParse(fn.input_split);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+var InputMergeSchema = objectiveai.Functions.RemoteVectorFunctionSchema.shape.input_merge;
+function readInputMerge() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return { ok: false, value: void 0, error: fn.error };
+  }
+  return { ok: true, value: fn.value.input_merge, error: void 0 };
+}
+function readInputMergeSchema() {
+  return InputMergeSchema;
+}
+function checkInputMerge(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check input_merge: ${read.error}` };
+    }
+    fn = read.value;
+  }
+  const typeResult = validateType(fn);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to check input_merge: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    if (fn.input_merge !== void 0) {
+      return {
+        ok: false,
+        value: void 0,
+        error: `input_merge must not be present for type "${typeResult.value}"`
+      };
+    }
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  const result = validateInputMerge(fn);
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `input_merge is invalid: ${result.error}`
+    };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function delInputMerge() {
+  return editFunction({ input_merge: null });
+}
+function editInputMerge(value) {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit input_merge: ${fn.error}`
+    };
+  }
+  const typeResult = validateType(fn.value);
+  if (!typeResult.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to edit input_merge: type is invalid: ${typeResult.error}`
+    };
+  }
+  if (typeResult.value !== "vector.function") {
+    return {
+      ok: false,
+      value: void 0,
+      error: `input_merge is not applicable for type "${typeResult.value}"`
+    };
+  }
+  const result = validateInputMerge({ input_merge: value });
+  if (!result.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Invalid input_merge: ${result.error}`
+    };
+  }
+  return editFunction({ input_merge: result.value });
+}
+function validateInputMerge(fn) {
+  const parsed = InputMergeSchema.safeParse(fn.input_merge);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+
+// src/tools/function/function.ts
+function readFunctionSchema() {
+  const fn = readFunction();
+  if (!fn.ok) return objectiveai.Functions.RemoteFunctionSchema;
+  const type = validateType(fn.value);
+  if (!type.ok) return objectiveai.Functions.RemoteFunctionSchema;
+  switch (type.value) {
+    case "scalar.function":
+      return objectiveai.Functions.RemoteScalarFunctionSchema;
+    case "vector.function":
+      return objectiveai.Functions.RemoteVectorFunctionSchema;
+    default:
+      return objectiveai.Functions.RemoteFunctionSchema;
+  }
+}
+function checkFunction() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to check function: ${fn.error}`
+    };
+  }
+  const result = validateFunction(fn.value);
+  if (!result.ok) {
+    return { ok: false, value: void 0, error: result.error };
+  }
+  const checks = [
+    checkType,
+    checkDescription,
+    checkInputSchema,
+    checkInputMaps,
+    checkTasks,
+    checkOutputLength,
+    checkInputSplit,
+    checkInputMerge
+  ];
+  const errors = [];
+  for (const check of checks) {
+    const r = check(fn.value);
+    if (!r.ok) {
+      errors.push(r.error);
+    }
+  }
+  if (errors.length > 0) {
+    return { ok: false, value: void 0, error: errors.join("\n") };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function validateFunction(fn) {
+  const parsed = objectiveai.Functions.RemoteFunctionSchema.safeParse(fn);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
+function readFunction() {
+  if (!fs.existsSync("function.json")) {
+    return { ok: true, value: {}, error: void 0 };
+  }
+  let fn;
+  try {
+    fn = JSON.parse(fs.readFileSync("function.json", "utf-8"));
+  } catch (e) {
+    return { ok: true, value: {}, error: void 0 };
+  }
+  if (typeof fn !== "object" || fn === null) {
+    return { ok: true, value: {}, error: void 0 };
+  }
+  return { ok: true, value: fn, error: void 0 };
+}
+function editFunction(fields) {
+  let fn = {};
+  if (fs.existsSync("function.json")) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync("function.json", "utf-8"));
+      if (typeof parsed === "object" && parsed !== null) {
+        fn = parsed;
+      }
+    } catch {
+    }
+  }
+  for (const key in fields) {
+    const value = fields[key];
+    if (value === null) {
+      delete fn[key];
+    } else if (value !== void 0) {
+      fn[key] = value;
+    }
+  }
+  const fieldOrder = [
+    "type",
+    "description",
+    "changelog",
+    "input_schema",
+    "input_maps",
+    "tasks",
+    "output_length",
+    "input_split",
+    "input_merge"
+  ];
+  const ordered = {};
+  for (const key of fieldOrder) {
+    if (key in fn) {
+      ordered[key] = fn[key];
+    }
+  }
+  for (const key in fn) {
+    if (!(key in ordered)) {
+      ordered[key] = fn[key];
+    }
+  }
+  fs.writeFileSync("function.json", JSON.stringify(ordered, null, 2));
+  return { ok: true, value: void 0, error: void 0 };
+}
+
+// src/tools/function/description.ts
+var DescriptionSchema = z19__default.default.string().nonempty();
+function readDescription() {
+  const fn = readFunction();
+  if (!fn.ok) {
+    return { ok: false, value: void 0, error: fn.error };
+  }
+  return { ok: true, value: fn.value.description, error: void 0 };
+}
+function readDescriptionSchema() {
+  return DescriptionSchema;
+}
+function checkDescription(fn) {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: void 0, error: `Unable to check description: ${read.error}` };
+    }
+    fn = read.value;
+  }
+  const result = validateDescription(fn);
+  if (!result.ok) {
+    return { ok: false, value: void 0, error: `Description is invalid: ${result.error}` };
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function editDescription(value) {
+  const result = validateDescription({ description: value });
+  if (!result.ok) {
+    return { ok: false, value: void 0, error: `Invalid description: ${result.error}` };
+  }
+  return editFunction({ description: result.value });
+}
+function validateDescription(fn) {
+  const parsed = DescriptionSchema.safeParse(fn.description);
+  if (!parsed.success) {
+    return { ok: false, value: void 0, error: parsed.error.message };
+  }
+  return { ok: true, value: parsed.data, error: void 0 };
+}
 
 // src/tools/schema.ts
-function formatZodSchema(schema) {
-  return formatNode(schema, 0);
+function formatZodSchema(schema, opts) {
+  const root = convert(
+    schema,
+    opts?.resolveLazy ? 1 : 0,
+    /* skipDirectRef */
+    true
+  );
+  return JSON.stringify(root, null, 2);
 }
-function formatNode(schema, indent) {
-  const pad = "  ".repeat(indent);
+function registerLazyRef(schema, toolName) {
+  const title = safeMeta(schema)?.title;
+  if (title) {
+    lazyRefs[title] = toolName;
+  }
+}
+var lazyRefs = {};
+function registerPropertyRefs(parentSchema, refs) {
+  const existing = propertyRefsBySchema.get(parentSchema);
+  propertyRefsBySchema.set(
+    parentSchema,
+    existing ? { ...existing, ...refs } : refs
+  );
+}
+var propertyRefsBySchema = /* @__PURE__ */ new WeakMap();
+function registerSchemaRef(schema, toolName) {
+  schemaRefs.set(schema, toolName);
+}
+var schemaRefs = /* @__PURE__ */ new WeakMap();
+function convert(schema, lazyDepth = 0, skipDirectRef = false) {
+  if (!skipDirectRef) {
+    const directRef = schemaRefs.get(schema);
+    if (directRef) return { $ref: directRef };
+  }
   const def = schema._def ?? schema.def;
   const type = def?.type ?? "unknown";
   switch (type) {
-    case "object": {
-      const desc = schema.description;
-      const shape = def.shape;
-      const keys = Object.keys(shape);
-      if (keys.length === 0) {
-        const descStr = desc ? ` - ${desc}` : "";
-        return `object${descStr}`;
-      }
-      const lines = [];
-      if (desc) lines.push(`${pad}${desc}`);
-      for (const key of keys) {
-        const propSchema = shape[key];
-        const propDesc = propSchema.description;
-        const unwrapped = unwrap(propSchema);
-        const innerDesc = unwrapped.inner.description;
-        const displayDesc = propDesc ?? innerDesc;
-        const opt = unwrapped.optional ? "?" : "";
-        const nul = unwrapped.nullable ? " | null" : "";
-        const typeStr = formatNode(unwrapped.inner, indent + 1);
-        const descStr = displayDesc ? ` - ${displayDesc}` : "";
-        lines.push(`${pad}  ${key}${opt}: ${typeStr}${nul}${descStr}`);
-      }
-      return `object
-${lines.join("\n")}`;
-    }
-    case "array": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      const elementStr = formatNode(def.element, indent);
-      return `${elementStr}[]${descStr}`;
-    }
-    case "string": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      return `string${descStr}`;
-    }
-    case "number": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      const bag = schema._zod?.bag;
-      if (bag?.format === "int32" || bag?.format === "uint32" || bag?.format === "int64" || bag?.format === "uint64") {
-        return `integer${descStr}`;
-      }
-      return `number${descStr}`;
-    }
-    case "int": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      return `integer${descStr}`;
-    }
-    case "boolean": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      return `boolean${descStr}`;
-    }
-    case "enum": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      const entries = def.entries;
-      const values = Object.values(entries).map((v) => JSON.stringify(v));
-      return `${values.join(" | ")}${descStr}`;
-    }
-    case "literal": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      const values = def.values.map((v) => JSON.stringify(v));
-      return `${values.join(" | ")}${descStr}`;
-    }
-    case "union": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      const options = def.options;
-      if (options.every(isInline)) {
-        return options.map((o) => formatNode(o, indent)).join(" | ") + descStr;
-      }
-      const lines = [];
-      if (desc) lines.push(`${pad}${desc}`);
-      for (const option of options) {
-        const unwrapped = unwrap(option);
-        const nul = unwrapped.nullable ? " | null" : "";
-        lines.push(`${pad}  | ${formatNode(unwrapped.inner, indent + 1)}${nul}`);
-      }
-      return `union
-${lines.join("\n")}`;
-    }
-    case "intersection": {
-      const left = formatNode(def.left, indent);
-      const right = formatNode(def.right, indent);
-      return `${left} & ${right}`;
-    }
-    case "record": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      const valueStr = formatNode(def.valueType, indent);
-      return `Record<string, ${valueStr}>${descStr}`;
-    }
-    case "tuple": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      const items = def.items.map((item) => formatNode(item, indent));
-      return `[${items.join(", ")}]${descStr}`;
-    }
-    case "lazy": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      const meta = schema.meta?.();
-      const title = meta?.title;
-      if (title) return `${title}${descStr}`;
-      return `(recursive)${descStr}`;
-    }
+    // --- wrappers ---
     case "optional":
-      return formatNode(def.innerType, indent);
-    case "nullable": {
-      return `${formatNode(def.innerType, indent)} | null`;
-    }
     case "default":
     case "prefault":
-      return formatNode(def.innerType, indent);
-    case "pipe": {
-      return formatNode(def.out, indent);
-    }
     case "readonly": {
-      return formatNode(def.innerType, indent);
+      const wrapperRef = lazyToolRef(schema);
+      if (wrapperRef) return wrapperRef;
+      return convert(def.innerType, lazyDepth);
     }
-    case "null": {
-      return "null";
+    case "nullable":
+      return withDesc({ anyOf: [convert(def.innerType, lazyDepth), { type: "null" }] }, schema);
+    case "pipe":
+      return convert(def.out, lazyDepth);
+    // --- primitives ---
+    case "string":
+      return withDesc({ type: "string" }, schema);
+    case "number": {
+      const bag = schema._zod?.bag;
+      if (bag?.format === "int32" || bag?.format === "uint32" || bag?.format === "int64" || bag?.format === "uint64") {
+        return withDesc({ type: "integer" }, schema);
+      }
+      return withDesc({ type: "number" }, schema);
     }
-    case "undefined": {
-      return "undefined";
+    case "int":
+      return withDesc({ type: "integer" }, schema);
+    case "boolean":
+      return withDesc({ type: "boolean" }, schema);
+    case "null":
+      return { type: "null" };
+    case "undefined":
+      return {};
+    case "any":
+    case "unknown":
+      return withDesc({}, schema);
+    case "date":
+      return withDesc({ type: "string", format: "date-time" }, schema);
+    // --- enums & literals ---
+    case "enum":
+      return withDesc({ enum: Object.values(def.entries) }, schema);
+    case "literal": {
+      const values = def.values;
+      if (values.length === 1) return withDesc({ const: values[0] }, schema);
+      return withDesc({ enum: values }, schema);
     }
-    case "any": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      return `any${descStr}`;
+    // --- composites ---
+    case "object": {
+      const shape = def.shape;
+      const propRefs = propertyRefsBySchema.get(schema);
+      const properties = {};
+      const required = [];
+      for (const [key, prop] of Object.entries(shape)) {
+        const u = unwrap(prop);
+        if (propRefs?.[key]) {
+          properties[key] = { $ref: propRefs[key] };
+        } else {
+          let converted = convert(u.inner);
+          if (u.nullable) converted = { anyOf: [converted, { type: "null" }] };
+          properties[key] = converted;
+        }
+        if (!u.optional) required.push(key);
+      }
+      const result = { type: "object", properties };
+      if (required.length > 0) result.required = required;
+      return withDesc(result, schema);
     }
-    case "unknown": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      return `unknown${descStr}`;
+    case "array":
+      return withDesc({ type: "array", items: convert(def.element) }, schema);
+    case "tuple": {
+      const items = def.items.map((i) => convert(i));
+      return withDesc({ type: "array", prefixItems: items }, schema);
     }
-    case "date": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      return `Date${descStr}`;
+    case "record":
+      return withDesc({ type: "object", additionalProperties: convert(def.valueType) }, schema);
+    // --- set operations ---
+    case "union": {
+      const options = def.options.map((o) => convert(o));
+      return withDesc({ anyOf: options }, schema);
     }
-    case "custom": {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      return `custom${descStr}`;
+    case "intersection":
+      return withDesc({ allOf: [convert(def.left), convert(def.right)] }, schema);
+    // --- recursive ---
+    // Never call def.getter() — some z.lazy getters create new instances per
+    // call which blows the stack even with cycle detection. Emit a $ref to
+    // the corresponding MCP tool name instead.
+    // If lazyDepth > 0, resolve the getter once (for top-level lazy schemas
+    // that need to show their inner structure).
+    case "lazy": {
+      if (lazyDepth > 0) {
+        const inner = def.getter();
+        return withDesc(convert(inner), schema);
+      }
+      return lazyToolRef(schema) ?? withDesc({}, schema);
     }
-    default: {
-      const desc = schema.description;
-      const descStr = desc ? ` - ${desc}` : "";
-      return `${type}${descStr}`;
-    }
+    // --- fallback ---
+    default:
+      return withDesc({}, schema);
+  }
+}
+function lazyToolRef(schema) {
+  const meta = safeMeta(schema);
+  const title = meta?.title;
+  const toolName = title ? lazyRefs[title] : void 0;
+  return toolName ? { $ref: toolName } : void 0;
+}
+function withDesc(obj, schema) {
+  const d = safeDesc(schema);
+  if (d) obj.description = d;
+  return obj;
+}
+function safeDesc(schema) {
+  try {
+    return schema.description;
+  } catch {
+    return void 0;
+  }
+}
+function safeMeta(schema) {
+  try {
+    return schema.meta?.();
+  } catch {
+    return void 0;
   }
 }
 function unwrap(schema) {
@@ -1257,29 +1296,19 @@ function unwrap(schema) {
   let current = schema;
   while (true) {
     const def = current._def ?? current.def;
-    const type = def?.type ?? "";
-    if (type === "optional") {
+    const t = def?.type ?? "";
+    if (t === "optional") {
       optional = true;
       current = def.innerType;
-    } else if (type === "nullable") {
+    } else if (t === "nullable") {
       nullable = true;
       current = def.innerType;
-    } else if (type === "default" || type === "prefault") {
+    } else if (t === "default" || t === "prefault") {
       optional = true;
       current = def.innerType;
-    } else {
-      break;
-    }
+    } else break;
   }
   return { inner: current, optional, nullable };
-}
-function isInline(schema) {
-  const def = schema._def ?? schema.def;
-  def?.type ?? "";
-  const unwrapped = unwrap(schema);
-  const innerDef = unwrapped.inner._def ?? unwrapped.inner.def;
-  const innerType = innerDef?.type ?? "";
-  return ["string", "number", "int", "boolean", "literal", "null", "undefined", "any", "unknown", "date", "nan"].includes(innerType);
 }
 
 // src/tools/claude/function.ts
@@ -1646,7 +1675,7 @@ function getPlanPath(index) {
 }
 
 // src/claude/prepare/planMcp.ts
-async function planMcp(log, sessionId) {
+async function planMcp(log, sessionId, instructions) {
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
   const tools = [
@@ -1661,12 +1690,19 @@ async function planMcp(log, sessionId) {
     ReadFunctionSchema
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "plan", tools });
-  const prompt = `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context. Then write your implementation plan to \`${planPath}\` (plan index ${nextPlanIndex}). Include:
+  let prompt = `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context. Then write your implementation plan to \`${planPath}\` (plan index ${nextPlanIndex}). Include:
 - The input schema structure and field descriptions
 - Whether any input maps are needed for mapped task execution
 - What the function definition will look like
 - What expressions need to be written
 - What test inputs will cover edge cases and diverse scenarios`;
+  if (instructions) {
+    prompt += `
+
+## Extra Instructions
+
+${instructions}`;
+  }
   sessionId = await consumeStream(
     claudeAgentSdk.query({
       prompt,
@@ -1698,7 +1734,7 @@ async function prepare(options = {}) {
   log("=== Step 4: ESSAY_TASKS.md ===");
   sessionId = await essayTasksMcp(log, sessionId);
   log("=== Step 5: Plan ===");
-  sessionId = await planMcp(log, sessionId);
+  sessionId = await planMcp(log, sessionId, options.instructions);
   return sessionId;
 }
 
@@ -1837,6 +1873,7 @@ var inputs_exports = {};
 __export(inputs_exports, {
   appendExampleInput: () => appendExampleInput,
   checkExampleInputs: () => checkExampleInputs,
+  collectModalities: () => collectModalities,
   delExampleInput: () => delExampleInput,
   editExampleInput: () => editExampleInput,
   readExampleInputs: () => readExampleInputs,
@@ -1936,6 +1973,10 @@ function validateExampleInput(value, fn) {
       value: void 0,
       error: "outputLength must be null because function does not have output_length"
     };
+  }
+  const tasksResult = validateTasks2(exampleInput.compiledTasks);
+  if (!tasksResult.ok) {
+    return { ok: false, value: void 0, error: tasksResult.error };
   }
   return { ok: true, value: exampleInput, error: void 0 };
 }
@@ -2240,12 +2281,77 @@ Original: ${JSON.stringify(value)}
 
 Merged: ${JSON.stringify(mergedOutput)}` };
       }
+      const subsets = randomSubsets(inputSplit.length, 5);
+      for (const subset of subsets) {
+        const subSplits = subset.map((idx) => inputSplit[idx]);
+        const merged = objectiveai.Functions.compileFunctionInputMerge(func, subSplits);
+        if (merged === null) {
+          return { ok: false, value: void 0, error: `Example input [${i}] input_merge returned null for subset [${subset.join(", ")}]` };
+        }
+        const mergedLen = objectiveai.Functions.compileFunctionOutputLength(func, merged);
+        if (mergedLen !== subset.length) {
+          return { ok: false, value: void 0, error: `Example input [${i}] merged subset [${subset.join(", ")}] output_length is ${mergedLen}, expected ${subset.length}` };
+        }
+      }
     }
   }
   const allValues = inputs.map((input) => input.value);
   const coverageResult = checkSchemaCoverage(func.input_schema, allValues, "input_schema");
   if (!coverageResult.ok) {
     return coverageResult;
+  }
+  const modalities = collectModalities(func.input_schema);
+  if (modalities.size > 0) {
+    const allCompiledTasks = inputs.flatMap((input) => input.compiledTasks);
+    const found = /* @__PURE__ */ new Set();
+    for (const ct of allCompiledTasks) {
+      collectModalitiesFromCompiledTask(ct, found);
+    }
+    for (const modality of modalities) {
+      if (!found.has(modality)) {
+        return { ok: false, value: void 0, error: `Input schema declares "${modality}" modality but no compiled task across all example inputs contains a rich content part of that type. Add at least one example input that uses "${modality}" content.` };
+      }
+    }
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function validateTasks2(compiledTasks) {
+  for (let i = 0; i < compiledTasks.length; i++) {
+    const result = validateCompiledTaskContent(compiledTasks[i], i);
+    if (!result.ok) return result;
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function validateCompiledTaskContent(ct, index) {
+  if (ct === null) return { ok: true, value: void 0, error: void 0 };
+  if (Array.isArray(ct)) {
+    for (const sub of ct) {
+      const result = validateCompiledTaskContent(sub, index);
+      if (!result.ok) return result;
+    }
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  if (ct.type !== "vector.completion") {
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  for (let j = 0; j < ct.messages.length; j++) {
+    const msg = ct.messages[j];
+    if ("content" in msg && msg.content != null && typeof msg.content === "string") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `compiledTasks[${index}] messages[${j}] content must be an array of content parts, not a string`
+      };
+    }
+  }
+  for (let j = 0; j < ct.responses.length; j++) {
+    if (typeof ct.responses[j] === "string") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `compiledTasks[${index}] responses[${j}] must be an array of content parts, not a string`
+      };
+    }
   }
   return { ok: true, value: void 0, error: void 0 };
 }
@@ -2303,7 +2409,7 @@ function checkSchemaCoverage(schema, values, path) {
         return { ok: false, value: void 0, error: `${path}: no example input has an array of length 1` };
       }
     }
-    const threshold = effectiveMin > 1 ? effectiveMin : 1;
+    const threshold = Math.max(3, effectiveMin);
     if (maxItems === null || maxItems > threshold) {
       const hasGreater = values.some((v) => Array.isArray(v) && v.length > threshold);
       if (!hasGreater) {
@@ -2323,6 +2429,20 @@ function checkSchemaCoverage(schema, values, path) {
   }
   return { ok: true, value: void 0, error: void 0 };
 }
+function randomSubsets(length, count) {
+  if (length < 2) return [];
+  const result = [];
+  for (let c = 0; c < count; c++) {
+    const size = 2 + Math.floor(Math.random() * (length - 2));
+    const indices = Array.from({ length }, (_, i) => i);
+    for (let i = indices.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [indices[i], indices[j]] = [indices[j], indices[i]];
+    }
+    result.push(indices.slice(0, size).sort((a, b) => a - b));
+  }
+  return result;
+}
 function deepEqual(a, b) {
   if (a === b) return true;
   if (a === null || b === null) return a === b;
@@ -2341,6 +2461,90 @@ function deepEqual(a, b) {
   if (aKeys.length !== bKeys.length) return false;
   return aKeys.every((key) => key in bObj && deepEqual(aObj[key], bObj[key]));
 }
+var MODALITY_PART_TYPES = {
+  image: ["image_url"],
+  audio: ["input_audio"],
+  video: ["video_url", "input_video"],
+  file: ["file"]
+};
+var ALL_MODALITIES = ["image", "audio", "video", "file"];
+function collectModalities(schema) {
+  const result = /* @__PURE__ */ new Set();
+  collectModalitiesRecursive(schema, result);
+  return result;
+}
+function collectModalitiesRecursive(schema, result) {
+  if ("anyOf" in schema) {
+    for (const option of schema.anyOf) {
+      collectModalitiesRecursive(option, result);
+    }
+  } else if (schema.type === "object") {
+    for (const propSchema of Object.values(schema.properties)) {
+      collectModalitiesRecursive(propSchema, result);
+    }
+  } else if (schema.type === "array") {
+    collectModalitiesRecursive(schema.items, result);
+  } else if (ALL_MODALITIES.includes(schema.type)) {
+    result.add(schema.type);
+  }
+}
+function collectModalitiesFromCompiledTask(ct, found) {
+  if (ct === null) return;
+  if (Array.isArray(ct)) {
+    for (const sub of ct) {
+      collectModalitiesFromCompiledTask(sub, found);
+    }
+    return;
+  }
+  if (ct.type === "vector.completion") {
+    collectModalitiesFromMessages(ct.messages, found);
+    collectModalitiesFromResponses(ct.responses, found);
+  } else {
+    collectModalitiesFromInputValue(ct.input, found);
+  }
+}
+function collectModalitiesFromMessages(messages, found) {
+  for (const msg of messages) {
+    if ("content" in msg && msg.content != null) {
+      collectModalitiesFromRichContent(msg.content, found);
+    }
+  }
+}
+function collectModalitiesFromResponses(responses, found) {
+  for (const resp of responses) {
+    collectModalitiesFromRichContent(resp, found);
+  }
+}
+function collectModalitiesFromRichContent(content, found) {
+  if (typeof content === "string") return;
+  for (const part of content) {
+    checkPartType(part.type, found);
+  }
+}
+function checkPartType(partType, found) {
+  for (const modality of ALL_MODALITIES) {
+    if (MODALITY_PART_TYPES[modality].includes(partType)) {
+      found.add(modality);
+    }
+  }
+}
+function collectModalitiesFromInputValue(value, found) {
+  if (typeof value !== "object") return;
+  if (Array.isArray(value)) {
+    for (const item of value) {
+      collectModalitiesFromInputValue(item, found);
+    }
+    return;
+  }
+  if ("type" in value && typeof value.type === "string") {
+    checkPartType(value.type, found);
+  }
+  for (const v of Object.values(value)) {
+    if (v !== void 0) {
+      collectModalitiesFromInputValue(v, found);
+    }
+  }
+}
 function compiledTasksEqual(a, b) {
   if (a === null) {
     return b === null;
@@ -2354,7 +2558,7 @@ function compiledTasksEqual(a, b) {
     return b !== null && !Array.isArray(b) && b.type === "vector.function" && b.owner === a.owner && b.repository === a.repository && b.commit === a.commit && JSON.stringify(a.input) === JSON.stringify(b.input);
   } else if (a.type === "vector.completion") {
     return b !== null && !Array.isArray(b) && b.type === "vector.completion" && JSON.stringify(a.messages) === JSON.stringify(b.messages) && JSON.stringify(a.responses) === JSON.stringify(b.responses) && a.tools === void 0 ? b.tools === void 0 : b.tools !== void 0 && a.tools.length === b.tools.length && a.tools.every(
-      (tool23, index) => JSON.stringify(tool23) === JSON.stringify(
+      (tool28, index) => JSON.stringify(tool28) === JSON.stringify(
         b.tools[index]
       )
     );
@@ -2369,40 +2573,71 @@ function clearDir(dir) {
   }
 }
 async function runNetworkTests(apiBase, apiKey) {
-  const client = new objectiveai.ObjectiveAI({ ...apiBase && { apiBase }, ...apiKey && { apiKey } });
+  const client = new objectiveai.ObjectiveAI({
+    ...apiBase && { apiBase },
+    ...apiKey && { apiKey }
+  });
   const fnRaw = readFunction();
   if (!fnRaw.ok) {
-    return { ok: false, value: void 0, error: `Unable to read function.json: ${fnRaw.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to read function.json: ${fnRaw.error}`
+    };
   }
   const funcResult = validateFunction(fnRaw.value);
   if (!funcResult.ok) {
-    return { ok: false, value: void 0, error: `Function validation failed: ${funcResult.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Function validation failed: ${funcResult.error}`
+    };
   }
   const func = funcResult.value;
   const buildResult = buildProfile();
   if (!buildResult.ok) {
-    return { ok: false, value: void 0, error: `Failed to build profile: ${buildResult.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Failed to build profile: ${buildResult.error}`
+    };
   }
   const profileRaw = readProfile();
   if (!profileRaw.ok) {
-    return { ok: false, value: void 0, error: `Unable to read profile.json: ${profileRaw.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to read profile.json: ${profileRaw.error}`
+    };
   }
   const profileResult = validateProfile(profileRaw.value);
   if (!profileResult.ok) {
-    return { ok: false, value: void 0, error: `Profile validation failed: ${profileResult.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Profile validation failed: ${profileResult.error}`
+    };
   }
   const profile = profileResult.value;
   const file = readExampleInputs();
   if (!file.ok) {
-    return { ok: false, value: void 0, error: `Unable to read inputs.json: ${file.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Unable to read inputs.json: ${file.error}`
+    };
   }
   const inputsResult = validateExampleInputs(file.value, fnRaw.value);
   if (!inputsResult.ok) {
-    return { ok: false, value: void 0, error: `Inputs validation failed: ${inputsResult.error}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Inputs validation failed: ${inputsResult.error}`
+    };
   }
   const inputs = inputsResult.value;
-  const defaultDir = path.join("networkTests", "default");
-  const swissSystemDir = path.join("networkTests", "swisssystem");
+  const defaultDir = path.join("network_tests", "default");
+  const swissSystemDir = path.join("network_tests", "swisssystem");
   clearDir(defaultDir);
   clearDir(swissSystemDir);
   fs.mkdirSync(defaultDir, { recursive: true });
@@ -2421,14 +2656,26 @@ async function runNetworkTests(apiBase, apiKey) {
       const result = results[i];
       fs.writeFileSync(path.join(defaultDir, `${i}.json`), JSON.stringify(result));
       if (result.error !== null) {
-        return { ok: false, value: void 0, error: `Default strategy: execution failed for input [${i}]: ${JSON.stringify(result.error)}` };
+        return {
+          ok: false,
+          value: void 0,
+          error: `Default strategy: execution failed for input [${i}]: ${JSON.stringify(result.error)}`
+        };
       }
       if (result.tasks_errors) {
-        return { ok: false, value: void 0, error: `Default strategy: task errors for input [${i}]` };
+        return {
+          ok: false,
+          value: void 0,
+          error: `Default strategy: task errors for input [${i}]`
+        };
       }
     }
   } catch (e) {
-    return { ok: false, value: void 0, error: `Default strategy: ${e.message}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Default strategy: ${e.message}`
+    };
   }
   if (func.type === "vector.function") {
     try {
@@ -2438,46 +2685,85 @@ async function runNetworkTests(apiBase, apiKey) {
           function: func,
           profile,
           from_rng: true,
-          strategy: { type: "swiss_system" }
+          strategy: { type: "swiss_system", pool: 2 }
         })
       );
       const results = await Promise.all(promises);
       for (let i = 0; i < inputs.length; i++) {
         const result = results[i];
-        fs.writeFileSync(path.join(swissSystemDir, `${i}.json`), JSON.stringify(result));
+        fs.writeFileSync(
+          path.join(swissSystemDir, `${i}.json`),
+          JSON.stringify(result)
+        );
         if (result.error !== null) {
-          return { ok: false, value: void 0, error: `SwissSystem strategy: execution failed for input [${i}]: ${JSON.stringify(result.error)}` };
+          return {
+            ok: false,
+            value: void 0,
+            error: `SwissSystem strategy: execution failed for input [${i}]: ${JSON.stringify(result.error)}`
+          };
         }
         if (result.tasks_errors) {
-          return { ok: false, value: void 0, error: `SwissSystem strategy: task errors for input [${i}]` };
+          return {
+            ok: false,
+            value: void 0,
+            error: `SwissSystem strategy: task errors for input [${i}]`
+          };
         }
       }
     } catch (e) {
-      return { ok: false, value: void 0, error: `SwissSystem strategy: ${e.message}` };
+      return {
+        ok: false,
+        value: void 0,
+        error: `SwissSystem strategy: ${e.message}`
+      };
     }
   }
   return { ok: true, value: void 0, error: void 0 };
 }
 function readDefaultNetworkTest(index) {
-  const filePath = path.join("networkTests", "default", `${index}.json`);
+  const filePath = path.join("network_tests", "default", `${index}.json`);
   if (!fs.existsSync(filePath)) {
-    return { ok: false, value: void 0, error: `File not found: ${filePath}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `File not found: ${filePath}`
+    };
   }
   try {
-    return { ok: true, value: JSON.parse(fs.readFileSync(filePath, "utf-8")), error: void 0 };
+    return {
+      ok: true,
+      value: JSON.parse(fs.readFileSync(filePath, "utf-8")),
+      error: void 0
+    };
   } catch (e) {
-    return { ok: false, value: void 0, error: `Failed to parse ${filePath}: ${e.message}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Failed to parse ${filePath}: ${e.message}`
+    };
   }
 }
 function readSwissSystemNetworkTest(index) {
-  const filePath = path.join("networkTests", "swisssystem", `${index}.json`);
+  const filePath = path.join("network_tests", "swisssystem", `${index}.json`);
   if (!fs.existsSync(filePath)) {
-    return { ok: false, value: void 0, error: `File not found: ${filePath}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `File not found: ${filePath}`
+    };
   }
   try {
-    return { ok: true, value: JSON.parse(fs.readFileSync(filePath, "utf-8")), error: void 0 };
+    return {
+      ok: true,
+      value: JSON.parse(fs.readFileSync(filePath, "utf-8")),
+      error: void 0
+    };
   } catch (e) {
-    return { ok: false, value: void 0, error: `Failed to parse ${filePath}: ${e.message}` };
+    return {
+      ok: false,
+      value: void 0,
+      error: `Failed to parse ${filePath}: ${e.message}`
+    };
   }
 }
 
@@ -2609,6 +2895,63 @@ Use the EditDescription tool to fix it.`
   }).trim();
   return { ok: true, value: commit, error: void 0 };
 }
+var registered = false;
+function registerSchemaRefs() {
+  if (registered) return;
+  registered = true;
+  registerLazyRef(objectiveai.JsonValueSchema, "ReadJsonValueSchema");
+  registerLazyRef(objectiveai.JsonValueExpressionSchema, "ReadJsonValueExpressionSchema");
+  registerLazyRef(objectiveai.Functions.Expression.InputValueSchema, "ReadInputValueSchema");
+  registerLazyRef(objectiveai.Functions.Expression.InputValueExpressionSchema, "ReadInputValueExpressionSchema");
+  registerLazyRef(readInputSchemaSchema(), "ReadInputSchemaSchema");
+  const scalarPropertyRefs = {
+    type: "ReadTypeSchema",
+    description: "ReadDescriptionSchema",
+    input_schema: "ReadInputSchemaSchema",
+    input_maps: "ReadInputMapsSchema",
+    tasks: "ReadTasksSchema"
+  };
+  const vectorPropertyRefs = {
+    ...scalarPropertyRefs,
+    output_length: "ReadOutputLengthSchema",
+    input_split: "ReadInputSplitSchema",
+    input_merge: "ReadInputMergeSchema"
+  };
+  registerPropertyRefs(objectiveai.Functions.RemoteScalarFunctionSchema, scalarPropertyRefs);
+  registerPropertyRefs(objectiveai.Functions.RemoteVectorFunctionSchema, vectorPropertyRefs);
+  registerPropertyRefs(objectiveai.Functions.VectorCompletionTaskExpressionSchema, {
+    messages: "ReadMessagesExpressionSchema",
+    tools: "ReadToolsExpressionSchema",
+    responses: "ReadResponsesExpressionSchema"
+  });
+  const functionTaskInputRef = { input: "ReadInputValueExpressionSchema" };
+  registerPropertyRefs(objectiveai.Functions.ScalarFunctionTaskExpressionSchema, functionTaskInputRef);
+  registerPropertyRefs(objectiveai.Functions.VectorFunctionTaskExpressionSchema, functionTaskInputRef);
+  const Request3 = objectiveai.Chat.Completions.Request;
+  registerSchemaRef(Request3.DeveloperMessageExpressionSchema, "ReadDeveloperMessageExpressionSchema");
+  registerSchemaRef(Request3.SystemMessageExpressionSchema, "ReadSystemMessageExpressionSchema");
+  registerSchemaRef(Request3.UserMessageExpressionSchema, "ReadUserMessageExpressionSchema");
+  registerSchemaRef(Request3.ToolMessageExpressionSchema, "ReadToolMessageExpressionSchema");
+  registerSchemaRef(Request3.AssistantMessageExpressionSchema, "ReadAssistantMessageExpressionSchema");
+  registerSchemaRef(Request3.SimpleContentExpressionSchema, "ReadSimpleContentExpressionSchema");
+  registerSchemaRef(Request3.RichContentExpressionSchema, "ReadRichContentExpressionSchema");
+  registerSchemaRef(objectiveai.Functions.ScalarFunctionTaskExpressionSchema, "ReadScalarFunctionTaskSchema");
+  registerSchemaRef(objectiveai.Functions.VectorFunctionTaskExpressionSchema, "ReadVectorFunctionTaskSchema");
+  registerSchemaRef(objectiveai.Functions.VectorCompletionTaskExpressionSchema, "ReadVectorCompletionTaskSchema");
+  registerSchemaRef(Request3.DeveloperMessageSchema, "ReadDeveloperMessageSchema");
+  registerSchemaRef(Request3.SystemMessageSchema, "ReadSystemMessageSchema");
+  registerSchemaRef(Request3.UserMessageSchema, "ReadUserMessageSchema");
+  registerSchemaRef(Request3.ToolMessageSchema, "ReadToolMessageSchema");
+  registerSchemaRef(Request3.AssistantMessageSchema, "ReadAssistantMessageSchema");
+  registerSchemaRef(Request3.SimpleContentSchema, "ReadSimpleContentSchema");
+  registerSchemaRef(Request3.RichContentSchema, "ReadRichContentSchema");
+  registerSchemaRef(objectiveai.Functions.ScalarFunctionTaskSchema, "ReadCompiledScalarFunctionTaskSchema");
+  registerSchemaRef(objectiveai.Functions.VectorFunctionTaskSchema, "ReadCompiledVectorFunctionTaskSchema");
+  registerSchemaRef(objectiveai.Functions.VectorCompletionTaskSchema, "ReadCompiledVectorCompletionTaskSchema");
+  const compiledFunctionTaskInputRef = { input: "ReadInputValueSchema" };
+  registerPropertyRefs(objectiveai.Functions.ScalarFunctionTaskSchema, compiledFunctionTaskInputRef);
+  registerPropertyRefs(objectiveai.Functions.VectorFunctionTaskSchema, compiledFunctionTaskInputRef);
+}
 
 // src/tools/expressionParams/index.ts
 var expressionParams_exports = {};
@@ -2657,7 +3000,7 @@ var ReadInputParamSchema = claudeAgentSdk.tool(
 );
 var ReadMapParamSchema = claudeAgentSdk.tool(
   "ReadMapParamSchema",
-  "Read the schema for `map` available in mapped task expression context. A 1D array element from the 2D input maps.",
+  "Read the schema for `map` available in mapped task expression context. For a task with `map: i`, the task is compiled once per element in `input_maps[i]`. Each compiled instance receives the current element as `map`.",
   {},
   async () => textResult(formatZodSchema(readMapParamSchema()))
 );
@@ -2727,12 +3070,55 @@ var ReadInputSchemaSchema = claudeAgentSdk.tool(
   {},
   async () => textResult(formatZodSchema(readInputSchemaSchema()))
 );
-var EditInputSchema = claudeAgentSdk.tool(
-  "EditInputSchema",
-  "Edit the Function's `input_schema` field",
-  { value: z19__default.default.record(z19__default.default.string(), z19__default.default.unknown()) },
-  async ({ value }) => resultFromResult(editInputSchema(value))
-);
+function makeEditInputSchema() {
+  let modalityRemovalRejected = false;
+  return claudeAgentSdk.tool(
+    "EditInputSchema",
+    "Edit the Function's `input_schema` field. If the new schema removes multimodal types present in the current schema, you must pass `dangerouslyRemoveModalities: true` \u2014 but only after re-reading SPEC.md to confirm this does not contradict it.",
+    {
+      value: z19__default.default.record(z19__default.default.string(), z19__default.default.unknown()),
+      dangerouslyRemoveModalities: z19__default.default.boolean().optional()
+    },
+    async ({ value, dangerouslyRemoveModalities }) => {
+      if (dangerouslyRemoveModalities) {
+        if (!modalityRemovalRejected) {
+          return resultFromResult({
+            ok: false,
+            value: void 0,
+            error: "dangerouslyRemoveModalities can only be used after a previous EditInputSchema call was rejected for removing modalities."
+          });
+        }
+        modalityRemovalRejected = false;
+        return resultFromResult(editInputSchema(value));
+      }
+      const current = readInputSchema();
+      if (current.ok && current.value) {
+        const currentParsed = validateInputSchema({ input_schema: current.value });
+        const newParsed = validateInputSchema({ input_schema: value });
+        if (currentParsed.ok && newParsed.ok) {
+          const oldModalities = collectModalities(currentParsed.value);
+          const newModalities = collectModalities(newParsed.value);
+          const removed = [];
+          for (const m of oldModalities) {
+            if (!newModalities.has(m)) {
+              removed.push(m);
+            }
+          }
+          if (removed.length > 0) {
+            modalityRemovalRejected = true;
+            return resultFromResult({
+              ok: false,
+              value: void 0,
+              error: `This edit would remove multimodal types: ${removed.join(", ")}. Re-read SPEC.md and confirm this does not contradict it. If SPEC.md allows removing these modalities, call EditInputSchema again with dangerouslyRemoveModalities: true.`
+            });
+          }
+        }
+      }
+      modalityRemovalRejected = false;
+      return resultFromResult(editInputSchema(value));
+    }
+  );
+}
 var CheckInputSchema = claudeAgentSdk.tool(
   "CheckInputSchema",
   "Validate the Function's `input_schema` field",
@@ -2801,7 +3187,7 @@ var ReadInputSplit = claudeAgentSdk.tool(
 );
 var ReadInputSplitSchema = claudeAgentSdk.tool(
   "ReadInputSplitSchema",
-  "Read the schema for Function `input_split` field",
+  "Read the schema for Function `input_split` field. Splits the input into sub-inputs (one per output element). Array length must equal output_length. Each sub-input, when executed alone, must produce output_length=1. Used by strategies like swiss_system for parallel pool execution.",
   {},
   async () => textResult(formatZodSchema(readInputSplitSchema()))
 );
@@ -2831,7 +3217,7 @@ var ReadInputMerge = claudeAgentSdk.tool(
 );
 var ReadInputMergeSchema = claudeAgentSdk.tool(
   "ReadInputMergeSchema",
-  "Read the schema for Function `input_merge` field",
+  "Read the schema for Function `input_merge` field. Recombines a variable-size, arbitrarily-ordered subset of sub-inputs (from input_split) back into a single input. Receives `input` as an array of sub-inputs. Used by strategies like swiss_system for parallel pool execution.",
   {},
   async () => textResult(formatZodSchema(readInputMergeSchema()))
 );
@@ -2891,6 +3277,24 @@ var CheckTasks = claudeAgentSdk.tool(
   "Validate the Function's `tasks` field",
   {},
   async () => resultFromResult(checkTasks())
+);
+var ReadMessagesExpressionSchema = claudeAgentSdk.tool(
+  "ReadMessagesExpressionSchema",
+  "Read the schema for the `messages` field of a vector.completion task",
+  {},
+  async () => textResult(formatZodSchema(readMessagesSchema()))
+);
+var ReadToolsExpressionSchema = claudeAgentSdk.tool(
+  "ReadToolsExpressionSchema",
+  "Read the schema for the `tools` field of a vector.completion task",
+  {},
+  async () => textResult(formatZodSchema(readToolsSchema()))
+);
+var ReadResponsesExpressionSchema = claudeAgentSdk.tool(
+  "ReadResponsesExpressionSchema",
+  "Read the schema for the `responses` field of a vector.completion task",
+  {},
+  async () => textResult(formatZodSchema(readResponsesSchema()))
 );
 function buildExampleInput(value) {
   const fnRaw = readFunction();
@@ -2963,7 +3367,7 @@ var CheckExampleInputs = claudeAgentSdk.tool(
 function makeRunNetworkTests(apiBase, apiKey) {
   return claudeAgentSdk.tool(
     "RunNetworkTests",
-    "Execute the function once for each example input and write results to networkTests/",
+    "Execute the function once for each example input and write results to network_tests/",
     {},
     async () => resultFromResult(await runNetworkTests(apiBase, apiKey))
   );
@@ -2979,6 +3383,152 @@ var ReadSwissSystemNetworkTest = claudeAgentSdk.tool(
   "Read a swiss_system strategy network test result by index",
   { index: z19__default.default.number().int().nonnegative() },
   async ({ index }) => resultFromResult(readSwissSystemNetworkTest(index))
+);
+var ReadJsonValueSchema = claudeAgentSdk.tool(
+  "ReadJsonValueSchema",
+  "Read the schema for the JsonValue type (recursive)",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.JsonValueSchema, { resolveLazy: true }))
+);
+var ReadJsonValueExpressionSchema = claudeAgentSdk.tool(
+  "ReadJsonValueExpressionSchema",
+  "Read the schema for the JsonValueExpression type (recursive, supports expressions)",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.JsonValueExpressionSchema, { resolveLazy: true }))
+);
+var ReadInputValueSchema = claudeAgentSdk.tool(
+  "ReadInputValueSchema",
+  "Read the schema for the InputValue type (recursive, supports media)",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.Functions.Expression.InputValueSchema, { resolveLazy: true }))
+);
+var ReadInputValueExpressionSchema = claudeAgentSdk.tool(
+  "ReadInputValueExpressionSchema",
+  "Read the schema for the InputValueExpression type (recursive, supports media and expressions)",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.Functions.Expression.InputValueExpressionSchema, { resolveLazy: true }))
+);
+var Request = objectiveai.Chat.Completions.Request;
+var ReadDeveloperMessageSchema = claudeAgentSdk.tool(
+  "ReadDeveloperMessageSchema",
+  "Read the schema for a compiled developer message (role: developer)",
+  {},
+  async () => textResult(formatZodSchema(Request.DeveloperMessageSchema))
+);
+var ReadSystemMessageSchema = claudeAgentSdk.tool(
+  "ReadSystemMessageSchema",
+  "Read the schema for a compiled system message (role: system)",
+  {},
+  async () => textResult(formatZodSchema(Request.SystemMessageSchema))
+);
+var ReadUserMessageSchema = claudeAgentSdk.tool(
+  "ReadUserMessageSchema",
+  "Read the schema for a compiled user message (role: user)",
+  {},
+  async () => textResult(formatZodSchema(Request.UserMessageSchema))
+);
+var ReadToolMessageSchema = claudeAgentSdk.tool(
+  "ReadToolMessageSchema",
+  "Read the schema for a compiled tool message (role: tool)",
+  {},
+  async () => textResult(formatZodSchema(Request.ToolMessageSchema))
+);
+var ReadAssistantMessageSchema = claudeAgentSdk.tool(
+  "ReadAssistantMessageSchema",
+  "Read the schema for a compiled assistant message (role: assistant)",
+  {},
+  async () => textResult(formatZodSchema(Request.AssistantMessageSchema))
+);
+var ReadDeveloperMessageExpressionSchema = claudeAgentSdk.tool(
+  "ReadDeveloperMessageExpressionSchema",
+  "Read the schema for a developer message expression (role: developer, supports $starlark/$jmespath)",
+  {},
+  async () => textResult(formatZodSchema(Request.DeveloperMessageExpressionSchema))
+);
+var ReadSystemMessageExpressionSchema = claudeAgentSdk.tool(
+  "ReadSystemMessageExpressionSchema",
+  "Read the schema for a system message expression (role: system, supports $starlark/$jmespath)",
+  {},
+  async () => textResult(formatZodSchema(Request.SystemMessageExpressionSchema))
+);
+var ReadUserMessageExpressionSchema = claudeAgentSdk.tool(
+  "ReadUserMessageExpressionSchema",
+  "Read the schema for a user message expression (role: user, supports $starlark/$jmespath)",
+  {},
+  async () => textResult(formatZodSchema(Request.UserMessageExpressionSchema))
+);
+var ReadToolMessageExpressionSchema = claudeAgentSdk.tool(
+  "ReadToolMessageExpressionSchema",
+  "Read the schema for a tool message expression (role: tool, supports $starlark/$jmespath)",
+  {},
+  async () => textResult(formatZodSchema(Request.ToolMessageExpressionSchema))
+);
+var ReadAssistantMessageExpressionSchema = claudeAgentSdk.tool(
+  "ReadAssistantMessageExpressionSchema",
+  "Read the schema for an assistant message expression (role: assistant, supports $starlark/$jmespath)",
+  {},
+  async () => textResult(formatZodSchema(Request.AssistantMessageExpressionSchema))
+);
+var Request2 = objectiveai.Chat.Completions.Request;
+var ReadSimpleContentSchema = claudeAgentSdk.tool(
+  "ReadSimpleContentSchema",
+  "Read the schema for compiled SimpleContent (text-only content used by developer/system messages)",
+  {},
+  async () => textResult(formatZodSchema(Request2.SimpleContentSchema))
+);
+var ReadRichContentSchema = claudeAgentSdk.tool(
+  "ReadRichContentSchema",
+  "Read the schema for compiled RichContent (text, images, audio, video, files \u2014 used by user/tool/assistant messages)",
+  {},
+  async () => textResult(formatZodSchema(Request2.RichContentSchema))
+);
+var ReadSimpleContentExpressionSchema = claudeAgentSdk.tool(
+  "ReadSimpleContentExpressionSchema",
+  "Read the schema for SimpleContent expression (text-only content, supports $starlark/$jmespath)",
+  {},
+  async () => textResult(formatZodSchema(Request2.SimpleContentExpressionSchema))
+);
+var ReadRichContentExpressionSchema = claudeAgentSdk.tool(
+  "ReadRichContentExpressionSchema",
+  "Read the schema for RichContent expression (text, images, audio, video, files \u2014 supports $starlark/$jmespath)",
+  {},
+  async () => textResult(formatZodSchema(Request2.RichContentExpressionSchema))
+);
+var ReadScalarFunctionTaskSchema = claudeAgentSdk.tool(
+  "ReadScalarFunctionTaskSchema",
+  "Read the schema for a scalar.function task",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.Functions.ScalarFunctionTaskExpressionSchema))
+);
+var ReadVectorFunctionTaskSchema = claudeAgentSdk.tool(
+  "ReadVectorFunctionTaskSchema",
+  "Read the schema for a vector.function task",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.Functions.VectorFunctionTaskExpressionSchema))
+);
+var ReadVectorCompletionTaskSchema = claudeAgentSdk.tool(
+  "ReadVectorCompletionTaskSchema",
+  "Read the schema for a vector.completion task",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.Functions.VectorCompletionTaskExpressionSchema))
+);
+var ReadCompiledScalarFunctionTaskSchema = claudeAgentSdk.tool(
+  "ReadCompiledScalarFunctionTaskSchema",
+  "Read the schema for a compiled scalar.function task (used in compiledTasks within ExampleInputs)",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.Functions.ScalarFunctionTaskSchema))
+);
+var ReadCompiledVectorFunctionTaskSchema = claudeAgentSdk.tool(
+  "ReadCompiledVectorFunctionTaskSchema",
+  "Read the schema for a compiled vector.function task (used in compiledTasks within ExampleInputs)",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.Functions.VectorFunctionTaskSchema))
+);
+var ReadCompiledVectorCompletionTaskSchema = claudeAgentSdk.tool(
+  "ReadCompiledVectorCompletionTaskSchema",
+  "Read the schema for a compiled vector.completion task (used in compiledTasks within ExampleInputs)",
+  {},
+  async () => textResult(formatZodSchema(objectiveai.Functions.VectorCompletionTaskSchema))
 );
 var ReadReadme = claudeAgentSdk.tool(
   "ReadReadme",
@@ -3000,6 +3550,49 @@ function makeSubmit(apiBase, apiKey) {
     async ({ message }) => resultFromResult(await submit(message, apiBase, apiKey))
   );
 }
+function getGitHubOwner2() {
+  try {
+    return child_process.execSync("gh api user --jq .login", {
+      encoding: "utf-8",
+      stdio: "pipe"
+    }).trim();
+  } catch {
+    return null;
+  }
+}
+function repoExists2(owner, name) {
+  try {
+    child_process.execSync(`gh repo view ${owner}/${name}`, { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
+}
+var OVERWRITE_FILES = [
+  "SPEC.md",
+  "ESSAY.md",
+  "ESSAY_TASKS.md",
+  "README.md"
+];
+function clearForOverwrite(dir) {
+  for (const file of OVERWRITE_FILES) {
+    const path$1 = path.join(dir, file);
+    if (fs.existsSync(path$1)) {
+      fs.rmSync(path$1);
+    }
+  }
+  const functionPath = path.join(dir, "function.json");
+  if (fs.existsSync(functionPath)) {
+    try {
+      const fn = JSON.parse(fs.readFileSync(functionPath, "utf-8"));
+      if (typeof fn === "object" && fn !== null) {
+        delete fn.description;
+        fs.writeFileSync(functionPath, JSON.stringify(fn, null, 2));
+      }
+    } catch {
+    }
+  }
+}
 function getCurrentDepth() {
   if (!fs.existsSync("parameters.json")) {
     return 0;
@@ -3011,8 +3604,9 @@ function getCurrentDepth() {
 function runAgentInSubdir(name, spec, childDepth, childProcesses, apiBase, apiKey) {
   const subdir = path.join("agent_functions", name);
   fs.mkdirSync(subdir, { recursive: true });
+  fs.writeFileSync(path.join(subdir, "SPEC.md"), spec, "utf-8");
   return new Promise((resolve) => {
-    const args = ["invent", spec, "--name", name, "--depth", String(childDepth)];
+    const args = ["invent", "--name", name, "--depth", String(childDepth)];
     if (apiBase) args.push("--api-base", apiBase);
     if (apiKey) args.push("--api-key", apiKey);
     const child = child_process.spawn(
@@ -3021,7 +3615,8 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, apiBase, apiKe
       {
         cwd: subdir,
         stdio: ["inherit", "pipe", "pipe"],
-        shell: true
+        shell: true,
+        env: { ...process.env, OBJECTIVEAI_PARENT_PID: String(process.pid) }
       }
     );
     childProcesses.push(child);
@@ -3076,17 +3671,18 @@ async function spawnFunctionAgents(params, apiBase, apiKey) {
     const dir = path.join("agent_functions", param.name);
     if (param.overwrite && fs.existsSync(dir)) {
       try {
-        fs.rmSync(dir, { recursive: true, force: true });
+        clearForOverwrite(dir);
       } catch (err) {
         return {
           ok: false,
           value: void 0,
-          error: `Failed to delete ${dir}: ${err}. If this error persists, make a new function with a different name instead.`
+          error: `Failed to clear ${dir} for overwrite: ${err}.`
         };
       }
     }
   }
   for (const param of params) {
+    if (param.overwrite) continue;
     const dir = path.join("agent_functions", param.name);
     if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
       return {
@@ -3094,6 +3690,21 @@ async function spawnFunctionAgents(params, apiBase, apiKey) {
         value: void 0,
         error: `agent_functions/${param.name} already exists. Set "overwrite": true to replace it, or use a different name.`
       };
+    }
+  }
+  const nonOverwriteParams = params.filter((p) => !p.overwrite);
+  if (nonOverwriteParams.length > 0) {
+    const owner = getGitHubOwner2();
+    if (owner) {
+      for (const param of nonOverwriteParams) {
+        if (repoExists2(owner, param.name)) {
+          return {
+            ok: false,
+            value: void 0,
+            error: `Repository ${owner}/${param.name} already exists on GitHub. Choose a different name.`
+          };
+        }
+      }
     }
   }
   const currentDepth = getCurrentDepth();
@@ -3159,14 +3770,39 @@ var SpawnFunctionAgentsParamsSchema = z19.z.array(
     overwrite: z19.z.boolean().optional()
   })
 );
-
-// src/tools/claude/spawnFunctionAgents.ts
 function makeSpawnFunctionAgents(apiBase, apiKey) {
+  let hasSpawned = false;
+  let respawnRejected = false;
   return claudeAgentSdk.tool(
     "SpawnFunctionAgents",
     "Spawn child function agents in parallel",
-    { params: SpawnFunctionAgentsParamsSchema },
-    async ({ params }) => resultFromResult(await spawnFunctionAgents(params, apiBase, apiKey))
+    {
+      params: SpawnFunctionAgentsParamsSchema,
+      dangerouslyRespawn: z19__default.default.boolean().optional()
+    },
+    async ({ params, dangerouslyRespawn }) => {
+      if (hasSpawned) {
+        if (dangerouslyRespawn) {
+          if (!respawnRejected) {
+            return resultFromResult({
+              ok: false,
+              value: void 0,
+              error: "dangerouslyRespawn can only be used after a previous SpawnFunctionAgents call was rejected for respawning."
+            });
+          }
+          respawnRejected = false;
+          return resultFromResult(await spawnFunctionAgents(params, apiBase, apiKey));
+        }
+        respawnRejected = true;
+        return resultFromResult({
+          ok: false,
+          value: void 0,
+          error: "SpawnFunctionAgents has already been called. Before respawning, you must: (1) use ListAgentFunctions and read each agent function's function.json, (2) try every possible fix (editing tasks, input schemas, expressions, example inputs) to make the existing agent outputs work, (3) only respawn as an absolute last resort after exhausting all alternatives. If you have truly tried everything, call SpawnFunctionAgents again with `dangerouslyRespawn: true`."
+        });
+      }
+      hasSpawned = true;
+      return resultFromResult(await spawnFunctionAgents(params, apiBase, apiKey));
+    }
   );
 }
 function listAgentFunctions() {
@@ -3235,7 +3871,12 @@ function readAgentFunction(name) {
     repository = match?.[2] ?? "";
   } catch {
   }
-  return { ok: true, value: { name, owner, repository, commit, path: subPath }, error: void 0 };
+  let functionJson = null;
+  try {
+    functionJson = JSON.parse(fs.readFileSync(path.join(subPath, "function.json"), "utf-8"));
+  } catch {
+  }
+  return { ok: true, value: { name, owner, repository, commit, path: subPath, functionJson }, error: void 0 };
 }
 var ListAgentFunctions = claudeAgentSdk.tool(
   "ListAgentFunctions",
@@ -3252,6 +3893,7 @@ var ReadAgentFunction = claudeAgentSdk.tool(
 
 // src/claude/invent/inventMcp.ts
 function getCommonTools(planIndex, apiBase, apiKey) {
+  registerSchemaRefs();
   return [
     // Core Context
     ReadSpec,
@@ -3275,7 +3917,7 @@ function getCommonTools(planIndex, apiBase, apiKey) {
     CheckDescription,
     ReadInputSchema,
     ReadInputSchemaSchema,
-    EditInputSchema,
+    makeEditInputSchema(),
     CheckInputSchema,
     ReadInputMaps,
     ReadInputMapsSchema,
@@ -3302,10 +3944,44 @@ function getCommonTools(planIndex, apiBase, apiKey) {
     EditTask,
     DelTask,
     CheckTasks,
+    ReadMessagesExpressionSchema,
+    ReadToolsExpressionSchema,
+    ReadResponsesExpressionSchema,
     // Expression params
     ReadInputParamSchema,
     ReadMapParamSchema,
     ReadOutputParamSchema,
+    // Recursive type schemas (referenced by $ref in other schemas)
+    ReadJsonValueSchema,
+    ReadJsonValueExpressionSchema,
+    ReadInputValueSchema,
+    ReadInputValueExpressionSchema,
+    // Message role schemas (expression variants, referenced by $ref in ReadMessagesExpressionSchema)
+    ReadDeveloperMessageExpressionSchema,
+    ReadSystemMessageExpressionSchema,
+    ReadUserMessageExpressionSchema,
+    ReadToolMessageExpressionSchema,
+    ReadAssistantMessageExpressionSchema,
+    // Message role schemas (compiled variants, referenced by $ref in ReadCompiledVectorCompletionTaskSchema)
+    ReadDeveloperMessageSchema,
+    ReadSystemMessageSchema,
+    ReadUserMessageSchema,
+    ReadToolMessageSchema,
+    ReadAssistantMessageSchema,
+    // Content schemas (expression variants, referenced by $ref in expression message schemas)
+    ReadSimpleContentExpressionSchema,
+    ReadRichContentExpressionSchema,
+    // Content schemas (compiled variants, referenced by $ref in compiled message schemas)
+    ReadSimpleContentSchema,
+    ReadRichContentSchema,
+    // Task type schemas (referenced by $ref in ReadTasksSchema)
+    ReadScalarFunctionTaskSchema,
+    ReadVectorFunctionTaskSchema,
+    ReadVectorCompletionTaskSchema,
+    // Compiled task type schemas (referenced by $ref in ReadExampleInputsSchema)
+    ReadCompiledScalarFunctionTaskSchema,
+    ReadCompiledVectorFunctionTaskSchema,
+    ReadCompiledVectorCompletionTaskSchema,
     // Example inputs
     ReadExampleInputs,
     ReadExampleInputsSchema,
@@ -3330,13 +4006,15 @@ function getFunctionTasksTools(apiBase, apiKey) {
 function buildFunctionTasksPrompt() {
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
 
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context.
+Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
 
 ## Phase 1: Implementation
 
 ### Task Structure
 
-This function must use **function tasks** (type: \`scalar.function\` or \`vector.function\`). You must create **at least 2 sub-functions** by spawning child agents:
+This function must use **function tasks** (type: \`scalar.function\` or \`vector.function\`). You must create **at least 2 sub-functions** by spawning child agents.
+
+**Before spawning**, define the parent function's input schema using EditInputSchema, and input_maps using EditInputMaps if any tasks will use mapped iteration. The sub-function specs you write must describe input schemas that are derivable from this parent input schema, so define these first.
 
 1. Analyze ESSAY_TASKS.md and create a spec for each sub-function describing:
    - What it evaluates (purpose, not implementation details)
@@ -3354,7 +4032,7 @@ This function must use **function tasks** (type: \`scalar.function\` or \`vector
    ]
    \`\`\`
 
-3. Parse the result to get \`{name, owner, repository, commit}\` for each
+3. Parse the result to get \`{name, owner, repository, commit}\` for each. Use ReadAgentFunction to read each spawned sub-function's \`function.json\`.
 
 4. Create function tasks using AppendTask referencing those sub-functions:
    \`\`\`json
@@ -3426,7 +4104,7 @@ Once all tests pass and SPEC.md compliance is verified:
 function buildVectorTasksPrompt() {
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
 
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context.
+Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
 
 ## Phase 1: Implementation
 
@@ -3443,6 +4121,16 @@ This function must use **vector completion tasks** (type: \`vector.completion\`)
 - Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions
 - Starlark example: \`{"$starlark": "input['items'][0]"}\`
 - JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)
+- **Never use \`str()\` on multimodal content** (images, audio, video). Pass rich content directly via expressions so the model receives the actual media, not a stringified representation.
+
+### Message and Response Content Format
+- **Messages**: Always use array-of-parts format for message \`content\`, never plain strings.
+  - Correct: \`{"role": "user", "content": [{"type": "text", "text": "What is the quality of this?"}]}\`
+  - Wrong: \`{"role": "user", "content": "What is the quality of this?"}\`
+- **Responses**: Always use array-of-parts format for each response, never plain strings.
+  - Correct: \`[[{"type": "text", "text": "good"}], [{"type": "text", "text": "bad"}]]\`
+  - Wrong: \`["good", "bad"]\`
+- This ensures compiled tasks can carry multimodal content (images, audio, etc.) alongside text.
 
 ### Expression Context
 Expressions receive a single object with these fields:
@@ -3582,6 +4270,9 @@ __export(tools_exports, {
   formatZodSchema: () => formatZodSchema,
   readDefaultNetworkTest: () => readDefaultNetworkTest,
   readSwissSystemNetworkTest: () => readSwissSystemNetworkTest,
+  registerLazyRef: () => registerLazyRef,
+  registerPropertyRefs: () => registerPropertyRefs,
+  registerSchemaRef: () => registerSchemaRef,
   runNetworkTests: () => runNetworkTests
 });
 

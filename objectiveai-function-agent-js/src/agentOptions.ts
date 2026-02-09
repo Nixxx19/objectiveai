@@ -8,4 +8,5 @@ export interface AgentOptions {
   sessionId?: string;
   log?: LogFn;
   depth?: number;
+  instructions?: string;
 }

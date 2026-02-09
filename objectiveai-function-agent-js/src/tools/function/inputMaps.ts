@@ -14,17 +14,20 @@ export function readInputMapsSchema(): typeof Functions.Expression.InputMapsExpr
   return Functions.Expression.InputMapsExpressionSchema;
 }
 
-export function checkInputMaps(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Unable to check input_maps: ${fn.error}`,
-    };
+export function checkInputMaps(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check input_maps: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const result = validateInputMaps(fn.value);
+  if (fn.input_maps === undefined) {
+    return { ok: true, value: undefined, error: undefined };
+  }
+
+  const result = validateInputMaps(fn);
   if (!result.ok) {
     return {
       ok: false,

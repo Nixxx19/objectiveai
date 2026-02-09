@@ -14,17 +14,16 @@ export function readInputSchemaSchema(): typeof Functions.Expression.InputSchema
   return Functions.Expression.InputSchemaSchema;
 }
 
-export function checkInputSchema(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Unable to check input_schema: ${fn.error}`,
-    };
+export function checkInputSchema(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check input_schema: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const result = validateInputSchema(fn.value);
+  const result = validateInputSchema(fn);
   if (!result.ok) {
     return {
       ok: false,

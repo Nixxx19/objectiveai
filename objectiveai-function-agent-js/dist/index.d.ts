@@ -1,4 +1,5 @@
 import z, { z as z$1 } from 'zod';
+import * as objectiveai from 'objectiveai';
 import { Functions } from 'objectiveai';
 import { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 
@@ -11,6 +12,7 @@ interface AgentOptions {
     sessionId?: string;
     log?: LogFn;
     depth?: number;
+    instructions?: string;
 }
 
 declare function specMcp(log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;
@@ -21,7 +23,7 @@ declare function essayMcp(log: LogFn, sessionId?: string): Promise<string | unde
 
 declare function essayTasksMcp(log: LogFn, sessionId?: string): Promise<string | undefined>;
 
-declare function planMcp(log: LogFn, sessionId?: string): Promise<string | undefined>;
+declare function planMcp(log: LogFn, sessionId?: string, instructions?: string): Promise<string | undefined>;
 
 declare function prepare(options?: AgentOptions): Promise<string | undefined>;
 
@@ -64,7 +66,8 @@ declare function readInputParamSchema(): Result<z.ZodType>;
 
 /**
  * Read the schema for `map` in expression context.
- * Map is a 1D array from the 2D input maps, selected by the task's map index.
+ * For a task with `map: i`, the task is compiled once per element in `input_maps[i]`.
+ * Each compiled instance receives the current element as `map`.
  */
 declare function readMapParamSchema(): z.ZodType;
 
@@ -92,7 +95,7 @@ interface DeserializedFunction {
     input_split?: unknown;
     input_merge?: unknown;
 }
-declare function readFunctionSchema(): typeof Functions.RemoteFunctionSchema;
+declare function readFunctionSchema(): z.ZodType;
 declare function checkFunction(): Result<undefined>;
 declare function validateFunction(fn: DeserializedFunction): Result<Functions.RemoteFunction>;
 declare function readFunction(): Result<DeserializedFunction>;
@@ -102,13 +105,13 @@ declare const DescriptionSchema: z.ZodString;
 type Description = z.infer<typeof DescriptionSchema>;
 declare function readDescription(): Result<unknown>;
 declare function readDescriptionSchema(): typeof DescriptionSchema;
-declare function checkDescription(): Result<undefined>;
+declare function checkDescription(fn?: DeserializedFunction): Result<undefined>;
 declare function editDescription(value: unknown): Result<undefined>;
 declare function validateDescription(fn: DeserializedFunction): Result<Description>;
 
 declare function readInputMaps(): Result<unknown>;
 declare function readInputMapsSchema(): typeof Functions.Expression.InputMapsExpressionSchema;
-declare function checkInputMaps(): Result<undefined>;
+declare function checkInputMaps(fn?: DeserializedFunction): Result<undefined>;
 declare function editInputMaps(value: unknown): Result<undefined>;
 declare function validateInputMaps(fn: DeserializedFunction): Result<Functions.Expression.InputMapsExpression>;
 
@@ -120,14 +123,14 @@ declare const InputMergeSchema: z.ZodUnion<readonly [z.ZodObject<{
 type InputMerge = z.infer<typeof InputMergeSchema>;
 declare function readInputMerge(): Result<unknown>;
 declare function readInputMergeSchema(): typeof InputMergeSchema;
-declare function checkInputMerge(): Result<undefined>;
+declare function checkInputMerge(fn?: DeserializedFunction): Result<undefined>;
 declare function delInputMerge(): Result<undefined>;
 declare function editInputMerge(value: unknown): Result<undefined>;
 declare function validateInputMerge(fn: DeserializedFunction): Result<InputMerge>;
 
 declare function readInputSchema(): Result<unknown>;
 declare function readInputSchemaSchema(): typeof Functions.Expression.InputSchemaSchema;
-declare function checkInputSchema(): Result<undefined>;
+declare function checkInputSchema(fn?: DeserializedFunction): Result<undefined>;
 declare function editInputSchema(value: unknown): Result<undefined>;
 declare function validateInputSchema(fn: DeserializedFunction): Result<Functions.Expression.InputSchema>;
 
@@ -139,7 +142,7 @@ declare const InputSplitSchema: z.ZodUnion<readonly [z.ZodObject<{
 type InputSplit = z.infer<typeof InputSplitSchema>;
 declare function readInputSplit(): Result<unknown>;
 declare function readInputSplitSchema(): typeof InputSplitSchema;
-declare function checkInputSplit(): Result<undefined>;
+declare function checkInputSplit(fn?: DeserializedFunction): Result<undefined>;
 declare function delInputSplit(): Result<undefined>;
 declare function editInputSplit(value: unknown): Result<undefined>;
 declare function validateInputSplit(fn: DeserializedFunction): Result<InputSplit>;
@@ -152,7 +155,7 @@ declare const OutputLengthSchema: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<r
 type OutputLength = z.infer<typeof OutputLengthSchema>;
 declare function readOutputLength(): Result<unknown>;
 declare function readOutputLengthSchema(): typeof OutputLengthSchema;
-declare function checkOutputLength(): Result<undefined>;
+declare function checkOutputLength(fn?: DeserializedFunction): Result<undefined>;
 declare function delOutputLength(): Result<undefined>;
 declare function editOutputLength(value: unknown): Result<undefined>;
 declare function validateOutputLength(fn: DeserializedFunction): Result<OutputLength>;
@@ -11063,775 +11066,7 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
             }, z.core.$strict>]>]>>>;
-            parameters: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodRecord<z.ZodString, z.ZodType<string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | /*elided*/ any | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null, unknown, z.core.$ZodTypeInternals<string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | (string | number | boolean | {
-                $jmespath: string;
-            } | {
-                $starlark: string;
-            } | /*elided*/ any | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null)[] | {
-                [key: string]: string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | (string | number | boolean | {
-                    $jmespath: string;
-                } | {
-                    $starlark: string;
-                } | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-            } | null, unknown>>>, z.ZodUnion<readonly [z.ZodObject<{
+            parameters: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodRecord<z.ZodString, z.ZodType<objectiveai.JsonValueExpression, unknown, z.core.$ZodTypeInternals<objectiveai.JsonValueExpression, unknown>>>, z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
@@ -11907,7 +11142,405 @@ declare const TasksSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
 type Tasks = z.infer<typeof TasksSchema>;
 declare function readTasks(): Result<unknown>;
 declare function readTasksSchema(): typeof TasksSchema;
-declare function checkTasks(): Result<undefined>;
+declare const MessagesSchema: z.ZodUnion<readonly [z.ZodArray<z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.ZodObject<{
+    role: z.ZodLiteral<"developer">;
+    content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        type: z.ZodLiteral<"text">;
+        text: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>;
+    name: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>>;
+}, z.core.$strip>, z.ZodObject<{
+    role: z.ZodLiteral<"system">;
+    content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        type: z.ZodLiteral<"text">;
+        text: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>;
+    name: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>>;
+}, z.core.$strip>, z.ZodObject<{
+    role: z.ZodLiteral<"user">;
+    content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.ZodObject<{
+        type: z.ZodLiteral<"text">;
+        text: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"image_url">;
+        image_url: z.ZodUnion<readonly [z.ZodObject<{
+            url: z.ZodString;
+            detail: z.ZodNullable<z.ZodOptional<z.ZodEnum<{
+                auto: "auto";
+                low: "low";
+                high: "high";
+            }>>>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"input_audio">;
+        input_audio: z.ZodUnion<readonly [z.ZodObject<{
+            data: z.ZodString;
+            format: z.ZodEnum<{
+                wav: "wav";
+                mp3: "mp3";
+            }>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodEnum<{
+            video_url: "video_url";
+            input_video: "input_video";
+        }>;
+        video_url: z.ZodUnion<readonly [z.ZodObject<{
+            url: z.ZodString;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"file">;
+        file: z.ZodUnion<readonly [z.ZodObject<{
+            file_data: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            file_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            filename: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>], "type">, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>;
+    name: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>>;
+}, z.core.$strip>, z.ZodObject<{
+    role: z.ZodLiteral<"tool">;
+    content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.ZodObject<{
+        type: z.ZodLiteral<"text">;
+        text: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"image_url">;
+        image_url: z.ZodUnion<readonly [z.ZodObject<{
+            url: z.ZodString;
+            detail: z.ZodNullable<z.ZodOptional<z.ZodEnum<{
+                auto: "auto";
+                low: "low";
+                high: "high";
+            }>>>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"input_audio">;
+        input_audio: z.ZodUnion<readonly [z.ZodObject<{
+            data: z.ZodString;
+            format: z.ZodEnum<{
+                wav: "wav";
+                mp3: "mp3";
+            }>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodEnum<{
+            video_url: "video_url";
+            input_video: "input_video";
+        }>;
+        video_url: z.ZodUnion<readonly [z.ZodObject<{
+            url: z.ZodString;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"file">;
+        file: z.ZodUnion<readonly [z.ZodObject<{
+            file_data: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            file_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            filename: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>], "type">, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>;
+    tool_call_id: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>;
+}, z.core.$strip>, z.ZodObject<{
+    role: z.ZodLiteral<"assistant">;
+    content: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.ZodObject<{
+        type: z.ZodLiteral<"text">;
+        text: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"image_url">;
+        image_url: z.ZodUnion<readonly [z.ZodObject<{
+            url: z.ZodString;
+            detail: z.ZodNullable<z.ZodOptional<z.ZodEnum<{
+                auto: "auto";
+                low: "low";
+                high: "high";
+            }>>>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"input_audio">;
+        input_audio: z.ZodUnion<readonly [z.ZodObject<{
+            data: z.ZodString;
+            format: z.ZodEnum<{
+                wav: "wav";
+                mp3: "mp3";
+            }>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodEnum<{
+            video_url: "video_url";
+            input_video: "input_video";
+        }>;
+        video_url: z.ZodUnion<readonly [z.ZodObject<{
+            url: z.ZodString;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"file">;
+        file: z.ZodUnion<readonly [z.ZodObject<{
+            file_data: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            file_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            filename: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+            file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+        }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+    }, z.core.$strip>], "type">, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>>;
+    name: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>>;
+    refusal: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>>;
+    tool_calls: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        type: z.ZodLiteral<"function">;
+        id: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+        function: z.ZodObject<{
+            name: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>]>;
+            arguments: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>]>]>;
+        }, z.core.$strip>;
+    }, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>>;
+    reasoning: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+        $jmespath: z.ZodString;
+    }, z.core.$strict>, z.ZodObject<{
+        $starlark: z.ZodString;
+    }, z.core.$strict>]>]>>>;
+}, z.core.$strip>], "role">, z.ZodUnion<readonly [z.ZodObject<{
+    $jmespath: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    $starlark: z.ZodString;
+}, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+    $jmespath: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    $starlark: z.ZodString;
+}, z.core.$strict>]>]>;
+declare const ToolsSchema: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+    type: z.ZodLiteral<"function">;
+    function: z.ZodObject<{
+        name: z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>;
+        description: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodString, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>>>;
+        parameters: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodRecord<z.ZodString, z.ZodType<objectiveai.JsonValueExpression, unknown, z.core.$ZodTypeInternals<objectiveai.JsonValueExpression, unknown>>>, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>>>;
+        strict: z.ZodNullable<z.ZodOptional<z.ZodUnion<readonly [z.ZodBoolean, z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>]>]>>>;
+    }, z.core.$strip>;
+}, z.core.$strip>, z.ZodUnion<readonly [z.ZodObject<{
+    $jmespath: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    $starlark: z.ZodString;
+}, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+    $jmespath: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    $starlark: z.ZodString;
+}, z.core.$strict>]>]>>>;
+declare const ResponsesSchema: z.ZodUnion<readonly [z.ZodArray<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
+    type: z.ZodLiteral<"text">;
+    text: z.ZodString;
+}, z.core.$strip>, z.ZodObject<{
+    type: z.ZodLiteral<"image_url">;
+    image_url: z.ZodObject<{
+        url: z.ZodString;
+        detail: z.ZodNullable<z.ZodOptional<z.ZodEnum<{
+            auto: "auto";
+            low: "low";
+            high: "high";
+        }>>>;
+    }, z.core.$strip>;
+}, z.core.$strip>, z.ZodObject<{
+    type: z.ZodLiteral<"input_audio">;
+    input_audio: z.ZodObject<{
+        data: z.ZodString;
+        format: z.ZodEnum<{
+            wav: "wav";
+            mp3: "mp3";
+        }>;
+    }, z.core.$strip>;
+}, z.core.$strip>, z.ZodObject<{
+    type: z.ZodEnum<{
+        video_url: "video_url";
+        input_video: "input_video";
+    }>;
+    video_url: z.ZodObject<{
+        url: z.ZodString;
+    }, z.core.$strip>;
+}, z.core.$strip>, z.ZodObject<{
+    type: z.ZodLiteral<"file">;
+    file: z.ZodObject<{
+        file_data: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+        file_id: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+        filename: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+        file_url: z.ZodNullable<z.ZodOptional<z.ZodString>>;
+    }, z.core.$strip>;
+}, z.core.$strip>], "type">>]>, z.ZodUnion<readonly [z.ZodObject<{
+    $jmespath: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    $starlark: z.ZodString;
+}, z.core.$strict>]>]>>, z.ZodUnion<readonly [z.ZodObject<{
+    $jmespath: z.ZodString;
+}, z.core.$strict>, z.ZodObject<{
+    $starlark: z.ZodString;
+}, z.core.$strict>]>]>;
+declare function readMessagesSchema(): typeof MessagesSchema;
+declare function readToolsSchema(): typeof ToolsSchema;
+declare function readResponsesSchema(): typeof ResponsesSchema;
+declare function checkTasks(fn?: DeserializedFunction): Result<undefined>;
 declare function editTasks(value: unknown): Result<undefined>;
 declare function appendTask(value: unknown): Result<undefined>;
 declare function editTask(index: number, value: unknown): Result<undefined>;
@@ -11920,7 +11553,7 @@ declare const FunctionTypeSchema: z.ZodEnum<{
 type FunctionType = z.infer<typeof FunctionTypeSchema>;
 declare function readType(): Result<unknown>;
 declare function readTypeSchema(): typeof FunctionTypeSchema;
-declare function checkType(): Result<undefined>;
+declare function checkType(fn?: DeserializedFunction): Result<undefined>;
 declare function editType(value: unknown): Result<undefined>;
 declare function validateType(fn: DeserializedFunction): Result<FunctionType>;
 
@@ -11961,10 +11594,13 @@ declare const index$5_readInputSchema: typeof readInputSchema;
 declare const index$5_readInputSchemaSchema: typeof readInputSchemaSchema;
 declare const index$5_readInputSplit: typeof readInputSplit;
 declare const index$5_readInputSplitSchema: typeof readInputSplitSchema;
+declare const index$5_readMessagesSchema: typeof readMessagesSchema;
 declare const index$5_readOutputLength: typeof readOutputLength;
 declare const index$5_readOutputLengthSchema: typeof readOutputLengthSchema;
+declare const index$5_readResponsesSchema: typeof readResponsesSchema;
 declare const index$5_readTasks: typeof readTasks;
 declare const index$5_readTasksSchema: typeof readTasksSchema;
+declare const index$5_readToolsSchema: typeof readToolsSchema;
 declare const index$5_readType: typeof readType;
 declare const index$5_readTypeSchema: typeof readTypeSchema;
 declare const index$5_validateDescription: typeof validateDescription;
@@ -11977,7 +11613,7 @@ declare const index$5_validateOutputLength: typeof validateOutputLength;
 declare const index$5_validateTasks: typeof validateTasks;
 declare const index$5_validateType: typeof validateType;
 declare namespace index$5 {
-  export { type index$5_DeserializedFunction as DeserializedFunction, index$5_appendTask as appendTask, index$5_checkDescription as checkDescription, index$5_checkFunction as checkFunction, index$5_checkInputMaps as checkInputMaps, index$5_checkInputMerge as checkInputMerge, index$5_checkInputSchema as checkInputSchema, index$5_checkInputSplit as checkInputSplit, index$5_checkOutputLength as checkOutputLength, index$5_checkTasks as checkTasks, index$5_checkType as checkType, index$5_delInputMerge as delInputMerge, index$5_delInputSplit as delInputSplit, index$5_delOutputLength as delOutputLength, index$5_delTask as delTask, index$5_editDescription as editDescription, index$5_editFunction as editFunction, index$5_editInputMaps as editInputMaps, index$5_editInputMerge as editInputMerge, index$5_editInputSchema as editInputSchema, index$5_editInputSplit as editInputSplit, index$5_editOutputLength as editOutputLength, index$5_editTask as editTask, index$5_editTasks as editTasks, index$5_editType as editType, index$5_readDescription as readDescription, index$5_readDescriptionSchema as readDescriptionSchema, index$5_readFunction as readFunction, index$5_readFunctionSchema as readFunctionSchema, index$5_readInputMaps as readInputMaps, index$5_readInputMapsSchema as readInputMapsSchema, index$5_readInputMerge as readInputMerge, index$5_readInputMergeSchema as readInputMergeSchema, index$5_readInputSchema as readInputSchema, index$5_readInputSchemaSchema as readInputSchemaSchema, index$5_readInputSplit as readInputSplit, index$5_readInputSplitSchema as readInputSplitSchema, index$5_readOutputLength as readOutputLength, index$5_readOutputLengthSchema as readOutputLengthSchema, index$5_readTasks as readTasks, index$5_readTasksSchema as readTasksSchema, index$5_readType as readType, index$5_readTypeSchema as readTypeSchema, index$5_validateDescription as validateDescription, index$5_validateFunction as validateFunction, index$5_validateInputMaps as validateInputMaps, index$5_validateInputMerge as validateInputMerge, index$5_validateInputSchema as validateInputSchema, index$5_validateInputSplit as validateInputSplit, index$5_validateOutputLength as validateOutputLength, index$5_validateTasks as validateTasks, index$5_validateType as validateType };
+  export { type index$5_DeserializedFunction as DeserializedFunction, index$5_appendTask as appendTask, index$5_checkDescription as checkDescription, index$5_checkFunction as checkFunction, index$5_checkInputMaps as checkInputMaps, index$5_checkInputMerge as checkInputMerge, index$5_checkInputSchema as checkInputSchema, index$5_checkInputSplit as checkInputSplit, index$5_checkOutputLength as checkOutputLength, index$5_checkTasks as checkTasks, index$5_checkType as checkType, index$5_delInputMerge as delInputMerge, index$5_delInputSplit as delInputSplit, index$5_delOutputLength as delOutputLength, index$5_delTask as delTask, index$5_editDescription as editDescription, index$5_editFunction as editFunction, index$5_editInputMaps as editInputMaps, index$5_editInputMerge as editInputMerge, index$5_editInputSchema as editInputSchema, index$5_editInputSplit as editInputSplit, index$5_editOutputLength as editOutputLength, index$5_editTask as editTask, index$5_editTasks as editTasks, index$5_editType as editType, index$5_readDescription as readDescription, index$5_readDescriptionSchema as readDescriptionSchema, index$5_readFunction as readFunction, index$5_readFunctionSchema as readFunctionSchema, index$5_readInputMaps as readInputMaps, index$5_readInputMapsSchema as readInputMapsSchema, index$5_readInputMerge as readInputMerge, index$5_readInputMergeSchema as readInputMergeSchema, index$5_readInputSchema as readInputSchema, index$5_readInputSchemaSchema as readInputSchemaSchema, index$5_readInputSplit as readInputSplit, index$5_readInputSplitSchema as readInputSplitSchema, index$5_readMessagesSchema as readMessagesSchema, index$5_readOutputLength as readOutputLength, index$5_readOutputLengthSchema as readOutputLengthSchema, index$5_readResponsesSchema as readResponsesSchema, index$5_readTasks as readTasks, index$5_readTasksSchema as readTasksSchema, index$5_readToolsSchema as readToolsSchema, index$5_readType as readType, index$5_readTypeSchema as readTypeSchema, index$5_validateDescription as validateDescription, index$5_validateFunction as validateFunction, index$5_validateInputMaps as validateInputMaps, index$5_validateInputMerge as validateInputMerge, index$5_validateInputSchema as validateInputSchema, index$5_validateInputSplit as validateInputSplit, index$5_validateOutputLength as validateOutputLength, index$5_validateTasks as validateTasks, index$5_validateType as validateType };
 }
 
 declare const ExampleInputSchema: z.ZodObject<{
@@ -25806,55 +25442,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             function: z.ZodObject<{
                 name: z.ZodString;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-                parameters: z.ZodNullable<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | {
-                    [key: string]: string | number | boolean | /*elided*/ any | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null, unknown, z.core.$ZodTypeInternals<string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | {
-                    [key: string]: string | number | boolean | /*elided*/ any | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null, unknown>>>>>;
+                parameters: z.ZodNullable<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<objectiveai.JsonValue, unknown, z.core.$ZodTypeInternals<objectiveai.JsonValue, unknown>>>>>;
                 strict: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
             }, z.core.$strip>;
         }, z.core.$strip>]>>>;
@@ -35178,55 +34766,7 @@ declare const ExampleInputSchema: z.ZodObject<{
             function: z.ZodObject<{
                 name: z.ZodString;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-                parameters: z.ZodNullable<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | {
-                    [key: string]: string | number | boolean | /*elided*/ any | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null, unknown, z.core.$ZodTypeInternals<string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | {
-                    [key: string]: string | number | boolean | /*elided*/ any | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null, unknown>>>>>;
+                parameters: z.ZodNullable<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<objectiveai.JsonValue, unknown, z.core.$ZodTypeInternals<objectiveai.JsonValue, unknown>>>>>;
                 strict: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
             }, z.core.$strip>;
         }, z.core.$strip>]>>>;
@@ -49104,55 +48644,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             function: z.ZodObject<{
                 name: z.ZodString;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-                parameters: z.ZodNullable<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | {
-                    [key: string]: string | number | boolean | /*elided*/ any | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null, unknown, z.core.$ZodTypeInternals<string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | {
-                    [key: string]: string | number | boolean | /*elided*/ any | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null, unknown>>>>>;
+                parameters: z.ZodNullable<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<objectiveai.JsonValue, unknown, z.core.$ZodTypeInternals<objectiveai.JsonValue, unknown>>>>>;
                 strict: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
             }, z.core.$strip>;
         }, z.core.$strip>]>>>;
@@ -58476,55 +57968,7 @@ declare const ExampleInputsSchema: z.ZodArray<z.ZodObject<{
             function: z.ZodObject<{
                 name: z.ZodString;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
-                parameters: z.ZodNullable<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | {
-                    [key: string]: string | number | boolean | /*elided*/ any | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null, unknown, z.core.$ZodTypeInternals<string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | {
-                    [key: string]: string | number | boolean | /*elided*/ any | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null)[] | {
-                    [key: string]: string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | (string | number | boolean | /*elided*/ any | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null)[] | /*elided*/ any | null;
-                } | null, unknown>>>>>;
+                parameters: z.ZodNullable<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodType<objectiveai.JsonValue, unknown, z.core.$ZodTypeInternals<objectiveai.JsonValue, unknown>>>>>;
                 strict: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
             }, z.core.$strip>;
         }, z.core.$strip>]>>>;
@@ -58585,9 +58029,13 @@ declare function appendExampleInput(value: unknown): Result<undefined>;
 declare function editExampleInput(index: number, value: unknown): Result<undefined>;
 declare function delExampleInput(index: number): Result<undefined>;
 declare function checkExampleInputs(): Result<undefined>;
+type Modality = "image" | "audio" | "video" | "file";
+declare function collectModalities(schema: Functions.Expression.InputSchema): Set<Modality>;
 
+type index$4_Modality = Modality;
 declare const index$4_appendExampleInput: typeof appendExampleInput;
 declare const index$4_checkExampleInputs: typeof checkExampleInputs;
+declare const index$4_collectModalities: typeof collectModalities;
 declare const index$4_delExampleInput: typeof delExampleInput;
 declare const index$4_editExampleInput: typeof editExampleInput;
 declare const index$4_readExampleInputs: typeof readExampleInputs;
@@ -58595,7 +58043,7 @@ declare const index$4_readExampleInputsSchema: typeof readExampleInputsSchema;
 declare const index$4_validateExampleInput: typeof validateExampleInput;
 declare const index$4_validateExampleInputs: typeof validateExampleInputs;
 declare namespace index$4 {
-  export { index$4_appendExampleInput as appendExampleInput, index$4_checkExampleInputs as checkExampleInputs, index$4_delExampleInput as delExampleInput, index$4_editExampleInput as editExampleInput, index$4_readExampleInputs as readExampleInputs, index$4_readExampleInputsSchema as readExampleInputsSchema, index$4_validateExampleInput as validateExampleInput, index$4_validateExampleInputs as validateExampleInputs };
+  export { type index$4_Modality as Modality, index$4_appendExampleInput as appendExampleInput, index$4_checkExampleInputs as checkExampleInputs, index$4_collectModalities as collectModalities, index$4_delExampleInput as delExampleInput, index$4_editExampleInput as editExampleInput, index$4_readExampleInputs as readExampleInputs, index$4_readExampleInputsSchema as readExampleInputsSchema, index$4_validateExampleInput as validateExampleInput, index$4_validateExampleInputs as validateExampleInputs };
 }
 
 declare function readEssay(): Result<string>;
@@ -58663,7 +58111,42 @@ declare namespace index$1 {
   export { index$1_buildProfile as buildProfile, index$1_checkProfile as checkProfile, index$1_defaultVectorCompletionTaskProfile as defaultVectorCompletionTaskProfile, index$1_readProfile as readProfile, index$1_readProfileSchema as readProfileSchema, index$1_validateProfile as validateProfile };
 }
 
-declare function formatZodSchema(schema: z.ZodType): string;
+/**
+ * Converts a Zod schema to a JSON Schema string.
+ *
+ * Cannot use z.toJSONSchema() because some schemas (e.g. JsonValueSchema)
+ * use z.lazy() with getters that create new instances on each call, causing
+ * infinite recursion in Zod's built-in converter.
+ *
+ * Lazy schemas are emitted as $ref to the corresponding MCP tool name.
+ * Use {@link registerLazyRef} to register lazy schema → tool name mappings.
+ */
+declare function formatZodSchema(schema: z.ZodType, opts?: {
+    resolveLazy?: boolean;
+}): string;
+/**
+ * Registers a lazy schema reference. When formatZodSchema encounters a lazy
+ * schema (or wrapper around one) whose meta title matches the given schema's
+ * meta title, it emits a $ref to the given tool name.
+ *
+ * The meta title is extracted from the schema's own `.meta()` call, so no
+ * hard-coded type names are needed — the mapping is derived from the schema.
+ */
+declare function registerLazyRef(schema: z.ZodType, toolName: string): void;
+/**
+ * Registers property-level refs on a parent object schema. When
+ * formatZodSchema encounters this parent, properties with registered
+ * refs emit $ref instead of inlining the property's schema.
+ *
+ * This allows parent schemas (like a Function schema) to show compact
+ * $ref entries for properties that have their own dedicated tools.
+ */
+declare function registerPropertyRefs(parentSchema: z.ZodType, refs: Record<string, string>): void;
+/**
+ * Registers a direct schema-to-tool ref. When formatZodSchema encounters
+ * this exact schema instance as a child, it emits $ref to the tool name.
+ */
+declare function registerSchemaRef(schema: z.ZodType, toolName: string): void;
 
 declare function runNetworkTests(apiBase?: string, apiKey?: string): Promise<Result<undefined>>;
 declare function readDefaultNetworkTest(index: number): Result<unknown>;
@@ -58673,9 +58156,12 @@ type index_Result<T> = Result<T>;
 declare const index_formatZodSchema: typeof formatZodSchema;
 declare const index_readDefaultNetworkTest: typeof readDefaultNetworkTest;
 declare const index_readSwissSystemNetworkTest: typeof readSwissSystemNetworkTest;
+declare const index_registerLazyRef: typeof registerLazyRef;
+declare const index_registerPropertyRefs: typeof registerPropertyRefs;
+declare const index_registerSchemaRef: typeof registerSchemaRef;
 declare const index_runNetworkTests: typeof runNetworkTests;
 declare namespace index {
-  export { index$6 as ExpressionParams, index$5 as Function, index$4 as Inputs, index$3 as Markdown, index$2 as Parameters, index$1 as Profile, type index_Result as Result, index_formatZodSchema as formatZodSchema, index_readDefaultNetworkTest as readDefaultNetworkTest, index_readSwissSystemNetworkTest as readSwissSystemNetworkTest, index_runNetworkTests as runNetworkTests };
+  export { index$6 as ExpressionParams, index$5 as Function, index$4 as Inputs, index$3 as Markdown, index$2 as Parameters, index$1 as Profile, type index_Result as Result, index_formatZodSchema as formatZodSchema, index_readDefaultNetworkTest as readDefaultNetworkTest, index_readSwissSystemNetworkTest as readSwissSystemNetworkTest, index_registerLazyRef as registerLazyRef, index_registerPropertyRefs as registerPropertyRefs, index_registerSchemaRef as registerSchemaRef, index_runNetworkTests as runNetworkTests };
 }
 
 interface Parameters {

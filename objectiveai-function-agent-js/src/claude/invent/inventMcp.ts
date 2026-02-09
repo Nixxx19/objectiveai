@@ -3,6 +3,7 @@ import { AgentOptions, LogFn } from "../../agentOptions";
 import { submit } from "../../tools/submit";
 import { createFileLogger, consumeStream } from "../../logging";
 import { getNextPlanIndex } from "../planIndex";
+import { registerSchemaRefs } from "../../tools/schemaRefs";
 
 // Tools - read-only context
 import { ReadSpec } from "../../tools/claude/spec";
@@ -42,7 +43,7 @@ import {
 import {
   ReadInputSchema,
   ReadInputSchemaSchema,
-  EditInputSchema,
+  makeEditInputSchema,
   CheckInputSchema,
 } from "../../tools/claude/inputSchema";
 import {
@@ -79,6 +80,9 @@ import {
   EditTask,
   DelTask,
   CheckTasks,
+  ReadMessagesExpressionSchema,
+  ReadToolsExpressionSchema,
+  ReadResponsesExpressionSchema,
 } from "../../tools/claude/tasks";
 
 // Tools - example inputs
@@ -101,6 +105,48 @@ import {
   ReadSwissSystemNetworkTest,
 } from "../../tools/claude/networkTests";
 
+// Tools - recursive type schemas
+import {
+  ReadJsonValueSchema,
+  ReadJsonValueExpressionSchema,
+} from "../../tools/claude/jsonValue";
+import {
+  ReadInputValueSchema,
+  ReadInputValueExpressionSchema,
+} from "../../tools/claude/inputValue";
+
+// Tools - message role schemas
+import {
+  ReadDeveloperMessageSchema,
+  ReadSystemMessageSchema,
+  ReadUserMessageSchema,
+  ReadToolMessageSchema,
+  ReadAssistantMessageSchema,
+  ReadDeveloperMessageExpressionSchema,
+  ReadSystemMessageExpressionSchema,
+  ReadUserMessageExpressionSchema,
+  ReadToolMessageExpressionSchema,
+  ReadAssistantMessageExpressionSchema,
+} from "../../tools/claude/messages";
+
+// Tools - content schemas
+import {
+  ReadSimpleContentSchema,
+  ReadRichContentSchema,
+  ReadSimpleContentExpressionSchema,
+  ReadRichContentExpressionSchema,
+} from "../../tools/claude/content";
+
+// Tools - task type schemas
+import {
+  ReadScalarFunctionTaskSchema,
+  ReadVectorFunctionTaskSchema,
+  ReadVectorCompletionTaskSchema,
+  ReadCompiledScalarFunctionTaskSchema,
+  ReadCompiledVectorFunctionTaskSchema,
+  ReadCompiledVectorCompletionTaskSchema,
+} from "../../tools/claude/taskTypes";
+
 // Tools - readme
 import { ReadReadme, WriteReadme } from "../../tools/claude/readme";
 
@@ -116,6 +162,7 @@ import {
 
 // Common tools shared by both variants
 function getCommonTools(planIndex: number, apiBase?: string, apiKey?: string) {
+  registerSchemaRefs();
   return [
     // Core Context
     ReadSpec,
@@ -140,7 +187,7 @@ function getCommonTools(planIndex: number, apiBase?: string, apiKey?: string) {
     CheckDescription,
     ReadInputSchema,
     ReadInputSchemaSchema,
-    EditInputSchema,
+    makeEditInputSchema(),
     CheckInputSchema,
     ReadInputMaps,
     ReadInputMapsSchema,
@@ -167,11 +214,52 @@ function getCommonTools(planIndex: number, apiBase?: string, apiKey?: string) {
     EditTask,
     DelTask,
     CheckTasks,
+    ReadMessagesExpressionSchema,
+    ReadToolsExpressionSchema,
+    ReadResponsesExpressionSchema,
 
     // Expression params
     ReadInputParamSchema,
     ReadMapParamSchema,
     ReadOutputParamSchema,
+
+    // Recursive type schemas (referenced by $ref in other schemas)
+    ReadJsonValueSchema,
+    ReadJsonValueExpressionSchema,
+    ReadInputValueSchema,
+    ReadInputValueExpressionSchema,
+
+    // Message role schemas (expression variants, referenced by $ref in ReadMessagesExpressionSchema)
+    ReadDeveloperMessageExpressionSchema,
+    ReadSystemMessageExpressionSchema,
+    ReadUserMessageExpressionSchema,
+    ReadToolMessageExpressionSchema,
+    ReadAssistantMessageExpressionSchema,
+
+    // Message role schemas (compiled variants, referenced by $ref in ReadCompiledVectorCompletionTaskSchema)
+    ReadDeveloperMessageSchema,
+    ReadSystemMessageSchema,
+    ReadUserMessageSchema,
+    ReadToolMessageSchema,
+    ReadAssistantMessageSchema,
+
+    // Content schemas (expression variants, referenced by $ref in expression message schemas)
+    ReadSimpleContentExpressionSchema,
+    ReadRichContentExpressionSchema,
+
+    // Content schemas (compiled variants, referenced by $ref in compiled message schemas)
+    ReadSimpleContentSchema,
+    ReadRichContentSchema,
+
+    // Task type schemas (referenced by $ref in ReadTasksSchema)
+    ReadScalarFunctionTaskSchema,
+    ReadVectorFunctionTaskSchema,
+    ReadVectorCompletionTaskSchema,
+
+    // Compiled task type schemas (referenced by $ref in ReadExampleInputsSchema)
+    ReadCompiledScalarFunctionTaskSchema,
+    ReadCompiledVectorFunctionTaskSchema,
+    ReadCompiledVectorCompletionTaskSchema,
 
     // Example inputs
     ReadExampleInputs,
@@ -203,13 +291,15 @@ function getFunctionTasksTools(apiBase?: string, apiKey?: string) {
 function buildFunctionTasksPrompt(): string {
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
 
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context.
+Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
 
 ## Phase 1: Implementation
 
 ### Task Structure
 
-This function must use **function tasks** (type: \`scalar.function\` or \`vector.function\`). You must create **at least 2 sub-functions** by spawning child agents:
+This function must use **function tasks** (type: \`scalar.function\` or \`vector.function\`). You must create **at least 2 sub-functions** by spawning child agents.
+
+**Before spawning**, define the parent function's input schema using EditInputSchema, and input_maps using EditInputMaps if any tasks will use mapped iteration. The sub-function specs you write must describe input schemas that are derivable from this parent input schema, so define these first.
 
 1. Analyze ESSAY_TASKS.md and create a spec for each sub-function describing:
    - What it evaluates (purpose, not implementation details)
@@ -227,7 +317,7 @@ This function must use **function tasks** (type: \`scalar.function\` or \`vector
    ]
    \`\`\`
 
-3. Parse the result to get \`{name, owner, repository, commit}\` for each
+3. Parse the result to get \`{name, owner, repository, commit}\` for each. Use ReadAgentFunction to read each spawned sub-function's \`function.json\`.
 
 4. Create function tasks using AppendTask referencing those sub-functions:
    \`\`\`json
@@ -300,7 +390,7 @@ Once all tests pass and SPEC.md compliance is verified:
 function buildVectorTasksPrompt(): string {
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
 
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context.
+Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
 
 ## Phase 1: Implementation
 
@@ -317,6 +407,16 @@ This function must use **vector completion tasks** (type: \`vector.completion\`)
 - Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions
 - Starlark example: \`{"$starlark": "input['items'][0]"}\`
 - JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)
+- **Never use \`str()\` on multimodal content** (images, audio, video). Pass rich content directly via expressions so the model receives the actual media, not a stringified representation.
+
+### Message and Response Content Format
+- **Messages**: Always use array-of-parts format for message \`content\`, never plain strings.
+  - Correct: \`{"role": "user", "content": [{"type": "text", "text": "What is the quality of this?"}]}\`
+  - Wrong: \`{"role": "user", "content": "What is the quality of this?"}\`
+- **Responses**: Always use array-of-parts format for each response, never plain strings.
+  - Correct: \`[[{"type": "text", "text": "good"}], [{"type": "text", "text": "bad"}]]\`
+  - Wrong: \`["good", "bad"]\`
+- This ensures compiled tasks can carry multimodal content (images, audio, etc.) alongside text.
 
 ### Expression Context
 Expressions receive a single object with these fields:

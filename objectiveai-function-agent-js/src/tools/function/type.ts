@@ -22,17 +22,16 @@ export function readTypeSchema(): typeof FunctionTypeSchema {
   return FunctionTypeSchema;
 }
 
-export function checkType(): Result<undefined> {
-  const fn = readFunction();
-  if (!fn.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Unable to check type: ${fn.error}`,
-    };
+export function checkType(fn?: DeserializedFunction): Result<undefined> {
+  if (!fn) {
+    const read = readFunction();
+    if (!read.ok) {
+      return { ok: false, value: undefined, error: `Unable to check type: ${read.error}` };
+    }
+    fn = read.value;
   }
 
-  const result = validateType(fn.value);
+  const result = validateType(fn);
   if (!result.ok) {
     return {
       ok: false,
