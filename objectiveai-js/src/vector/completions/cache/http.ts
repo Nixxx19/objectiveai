@@ -7,8 +7,8 @@ export function retrieve(
   request: CacheVoteRequest,
   options?: RequestOptions,
 ): Promise<CacheVote> {
-  // Using GET with body for complex request object
-  return client.get_unary<CacheVote>(
+  // Using POST to match backend implementation
+  return client.post_unary<CacheVote>(
     "/vector/completions/cache",
     request,
     options,
