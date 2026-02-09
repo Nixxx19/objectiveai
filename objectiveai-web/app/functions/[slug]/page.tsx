@@ -8,7 +8,6 @@ import { PINNED_COLOR_ANIMATION_MS } from "../../../lib/constants";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import { useObjectiveAI } from "../../../hooks/useObjectiveAI";
 import { InputBuilder } from "../../../components/InputBuilder";
-import SchemaFormBuilder from "../../../components/SchemaForm/SchemaFormBuilder";
 import type { InputSchema, InputValue } from "../../../components/SchemaForm/types";
 import SplitItemDisplay from "../../../components/SplitItemDisplay";
 import { simplifySplitItems, toDisplayItem, getDisplayMode } from "../../../lib/split-item-utils";
@@ -111,42 +110,39 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
         setIsLoadingDetails(true);
         setLoadError(null);
 
+        // First get the function-profile pairs via SDK
         const publicClient = createPublicClient();
+        const pairs = await Functions.listPairs(publicClient);
 
-        // Try to find profiles for this function via listPairs
-        let profiles: { owner: string; repository: string; commit: string }[] = [];
-        let functionCommit: string | undefined;
+        // Find ALL pairs for this function (may have multiple profiles)
+        const matchingPairs = pairs.data.filter(
+          (p: { function: { owner: string; repository: string } }) =>
+            p.function.owner === owner && p.function.repository === repository
+        );
 
-        try {
-          const pairs = await Functions.listPairs(publicClient);
-          const matchingPairs = pairs.data.filter(
-            (p: { function: { owner: string; repository: string } }) =>
-              p.function.owner === owner && p.function.repository === repository
-          );
-
-          if (matchingPairs.length > 0) {
-            profiles = matchingPairs.map((p: { profile: { owner: string; repository: string; commit: string } }) => p.profile);
-            functionCommit = matchingPairs[0].function.commit;
-          }
-        } catch {
-          // listPairs failed — continue, we'll try retrieve directly
+        if (matchingPairs.length === 0) {
+          throw new Error(`Function ${owner}/${repository} not found`);
         }
 
-        // Fetch full function details via SDK (with or without commit)
-        const details = await Functions.retrieve(publicClient, owner, repository, functionCommit ?? null);
-
-        const commit = (details as { commit?: string }).commit || functionCommit || "";
-        const category = details.type === "vector.function" ? "Ranking" : "Scoring";
-
+        // Store all available profiles
+        const profiles = matchingPairs.map((p: { profile: { owner: string; repository: string; commit: string } }) => p.profile);
         setAvailableProfiles(profiles);
         setSelectedProfileIndex(0);
 
+        // Use the first pair for function details
+        const pair = matchingPairs[0];
+
+        // Fetch full function details via SDK
+        const details = await Functions.retrieve(publicClient, pair.function.owner, pair.function.repository, pair.function.commit);
+
+        const category = details.type === "vector.function" ? "Ranking" : "Scoring";
+
         setFunctionDetails({
-          owner,
-          repository,
-          commit,
-          name: deriveDisplayName(repository),
-          description: details.description || `${deriveDisplayName(repository)} function`,
+          owner: pair.function.owner,
+          repository: pair.function.repository,
+          commit: pair.function.commit,
+          name: deriveDisplayName(pair.function.repository),
+          description: details.description || `${deriveDisplayName(pair.function.repository)} function`,
           category,
           type: details.type as "scalar.function" | "vector.function",
           inputSchema: (details as { input_schema?: Record<string, unknown> }).input_schema || null,
@@ -439,27 +435,14 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
 
   // Build input fields — schema-driven when available, freeform otherwise
   const renderInputFields = () => {
-    // When schema is available, use SchemaFormBuilder for proper type handling
-    // (strings → textarea, numbers → number input, etc.)
-    if (functionDetails?.inputSchema) {
-      return (
-        <SchemaFormBuilder
-          schema={functionDetails.inputSchema as unknown as InputSchema}
-          value={formData}
-          onChange={setFormData}
-          disabled={isRunning}
-        />
-      );
-    }
-
-    // No schema: freeform rich content input
     return (
       <InputBuilder
+        schema={functionDetails?.inputSchema ? (functionDetails.inputSchema as unknown as InputSchema) : null}
         value={formData}
         onChange={setFormData}
         disabled={isRunning}
-        label="Input"
-        description="Build your input data"
+        label={!functionDetails?.inputSchema ? "Input" : undefined}
+        description={!functionDetails?.inputSchema ? "Build your input data" : undefined}
       />
     );
   };

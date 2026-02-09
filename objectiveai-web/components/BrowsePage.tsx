@@ -50,9 +50,11 @@ function useBrowsePageContext() {
 
 interface BrowsePageProps {
   children: ReactNode;
+  /** Optional: Override the default max-width (1400px) */
+  maxWidth?: string;
 }
 
-function BrowsePageRoot({ children }: BrowsePageProps) {
+function BrowsePageRoot({ children, maxWidth = "1400px" }: BrowsePageProps) {
   const isMobile = useIsMobile();
   const [isTablet, setIsTablet] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -110,7 +112,16 @@ function BrowsePageRoot({ children }: BrowsePageProps) {
   return (
     <BrowsePageContext.Provider value={contextValue}>
       <div className="page">
-        <div className="containerWide">
+        <div
+          style={{
+            width: "100%",
+            maxWidth,
+            marginLeft: "auto",
+            marginRight: "auto",
+            padding: isMobile ? "0 16px" : "0 32px",
+            boxSizing: "border-box",
+          }}
+        >
           {children}
         </div>
       </div>
@@ -363,15 +374,21 @@ function Content({ children }: ContentProps) {
 
 interface GridProps {
   children: ReactNode;
+  /** Number of columns on desktop when filters closed (default: 3) */
+  columns?: number;
+  /** Number of columns on desktop when filters open (default: 2) */
+  columnsWithFilters?: number;
   /** Grid layout or list layout */
   layout?: "grid" | "list";
 }
 
 function Grid({
   children,
+  columns = 3,
+  columnsWithFilters = 2,
   layout = "grid",
 }: GridProps) {
-  const { isMobile } = useBrowsePageContext();
+  const { isMobile, isTablet, filtersOpen } = useBrowsePageContext();
 
   if (layout === "list") {
     return (
@@ -387,7 +404,11 @@ function Grid({
         display: "grid",
         gridTemplateColumns: isMobile
           ? "1fr"
-          : "repeat(auto-fill, minmax(340px, 1fr))",
+          : isTablet
+          ? "repeat(2, 1fr)"
+          : filtersOpen
+          ? `repeat(${columnsWithFilters}, 1fr)`
+          : `repeat(${columns}, 1fr)`,
         gap: isMobile ? "12px" : "16px",
       }}
     >

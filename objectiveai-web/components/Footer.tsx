@@ -21,7 +21,7 @@ export default function Footer() {
     <footer className="footer" style={{ padding: isMobile ? '24px 0 6px' : '32px 0 6px' }}>
       {/* Footer Module Container */}
       <div style={{
-        maxWidth: 'clamp(1100px, 80%, 1600px)',
+        maxWidth: '1100px',
         margin: '0 auto',
         padding: isMobile ? '0 16px' : '0 32px',
       }}>

@@ -166,8 +166,8 @@ export default function InformationPage() {
       category: "Vector",
       endpoints: [
         { method: "POST", path: "/vector/completions", href: "/docs/api/post/vector/completions", desc: "Create a new Vector Completion" },
-        { method: "POST", path: "/vector/completions/{id}", href: "/docs/api/post/vector/completions/id", desc: "Retrieve votes from a historical Vector Completion" },
-        { method: "POST", path: "/vector/completions/cache", href: "/docs/api/post/vector/completions/cache", desc: "Request a cached vote from the global ObjectiveAI vote cache" }
+        { method: "GET", path: "/vector/completions/{id}", href: "/docs/api/get/vector/completions/id", desc: "Retrieve votes from a historical Vector Completion" },
+        { method: "GET", path: "/vector/completions/cache", href: "/docs/api/get/vector/completions/cache", desc: "Request a cached vote from the global ObjectiveAI vote cache" }
       ]
     },
     {

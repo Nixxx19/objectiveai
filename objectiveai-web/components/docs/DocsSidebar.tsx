@@ -216,15 +216,15 @@ function SidebarTable(): ReactElement {
         description="Create a new Vector Completion"
       />
       <SidebarApiItem
-        method="POST"
+        method="GET"
         path="/vector/completions/{id}"
-        href="/docs/api/post/vector/completions/id"
+        href="/docs/api/get/vector/completions/id"
         description="Retrieve votes from a historical Vector Completion"
       />
       <SidebarApiItem
-        method="POST"
+        method="GET"
         path="/vector/completions/cache"
-        href="/docs/api/post/vector/completions/cache"
+        href="/docs/api/get/vector/completions/cache"
         description="Request a cached vote from the global ObjectiveAI vote cache"
       />
 

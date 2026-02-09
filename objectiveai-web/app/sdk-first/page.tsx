@@ -25,6 +25,7 @@ const client = new ObjectiveAI({
 
 // Browse available functions
 const functions = await Functions.list(client);
+console.log(functions.data);
 
 // Execute a function with a profile
 // const result = await Functions.Executions.create(
