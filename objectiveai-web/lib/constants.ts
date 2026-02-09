@@ -44,3 +44,6 @@ export const STRIPE_MAX_CREDITS_CENTS = 1_000_000;     // $10,000 maximum
  */
 export const BREAKPOINT_MOBILE = 640;
 export const BREAKPOINT_TABLET = 1024;
+export const BREAKPOINT_DESKTOP_LG = 1440;
+export const BREAKPOINT_DESKTOP_XL = 1920;
+export const BREAKPOINT_ULTRAWIDE = 2560;

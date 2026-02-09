@@ -141,7 +141,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         }}
       >
         <div style={{
-          maxWidth: '1100px',
+          maxWidth: 'clamp(1100px, 80%, 1600px)',
           margin: '0 auto',
           padding: isMobile ? '0 16px' : '0 32px',
           width: '100%',
