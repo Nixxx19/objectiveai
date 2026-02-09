@@ -78,4 +78,22 @@ Please verify:
 
 ---
 
-**Action Required:** Please review and provide guidance on which implementation should be corrected.
+## ✅ RESOLVED (February 9, 2026)
+
+**Resolution:** Documentation bug corrected. The backend and SDK both correctly use POST methods. The issue was in the web app documentation showing GET instead of POST.
+
+### Changes Made
+
+1. **SDK was already correct** - Uses `client.post_unary()` for both endpoints (commit e8a60e9)
+2. **Documentation fixed:**
+   - Updated `DocsSidebar.tsx` to show POST methods (lines 219, 226)
+   - Updated `app/information/page.tsx` to show POST methods (lines 169, 170)
+   - Moved doc pages from `/docs/api/get/` to `/docs/api/post/` directories
+3. **Verification:** Full build succeeded with no TypeScript errors
+4. **Confirmation:** All 34 documented API endpoints now match backend implementation
+
+### Root Cause
+
+The issue description in this file was based on outdated code. The SDK was fixed to use POST in commit e8a60e9, but the documentation still showed GET, causing confusion.
+
+**Status:** CLOSED - All documentation now correctly reflects POST methods matching backend implementation.
