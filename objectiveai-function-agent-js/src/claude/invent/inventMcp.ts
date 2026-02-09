@@ -291,7 +291,7 @@ function getFunctionTasksTools(apiBase?: string, apiKey?: string) {
 function buildFunctionTasksPrompt(): string {
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
 
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context.
+Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
 
 ## Phase 1: Implementation
 
@@ -317,7 +317,7 @@ This function must use **function tasks** (type: \`scalar.function\` or \`vector
    ]
    \`\`\`
 
-3. Parse the result to get \`{name, owner, repository, commit}\` for each
+3. Parse the result to get \`{name, owner, repository, commit}\` for each. Use ReadAgentFunction to read each spawned sub-function's \`function.json\`.
 
 4. Create function tasks using AppendTask referencing those sub-functions:
    \`\`\`json
@@ -390,7 +390,7 @@ Once all tests pass and SPEC.md compliance is verified:
 function buildVectorTasksPrompt(): string {
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
 
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context.
+Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
 
 ## Phase 1: Implementation
 
