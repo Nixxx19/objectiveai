@@ -73,20 +73,27 @@ const SAMPLE_INPUT = {
     "Core AI/ML talent pool, proximity to YC network and partners, existing investor relationships in the Bay Area.",
   founders: [
     {
-      founder_name: "Ronald Gore",
-      founder_title: "CEO & CTO",
+      founder_name: "Ronald Riggles",
+      founder_title: "CEO & Co-Founder",
       founder_bio:
-        "Solo technical founder. Built the entire platform: Rust SDK, API server, WASM bindings, TypeScript SDK, and Next.js web interface. Previously senior engineer at a large tech company working on distributed systems. Deep expertise in LLM orchestration, probabilistic systems, and API design.",
-      founder_equity_pct: 100,
+        "CEO & Co-Founder. Built the entire platform: Rust SDK, API server, WASM bindings, TypeScript SDK, and backend infrastructure. Deep expertise in LLM orchestration, probabilistic systems, and API design.",
+      founder_equity_pct: 50,
+    },
+    {
+      founder_name: "Maya Gore",
+      founder_title: "COO & Co-Founder",
+      founder_bio:
+        "COO & Co-Founder. Handles UI/UX, branding, and frontend implementation. Worked alongside Claude Code to build the web interface. Focused on visual experience and product clarity.",
+      founder_equity_pct: 50,
     },
   ],
   who_writes_code:
-    "Ronald writes all production code — the Rust core SDK, API server, WASM bindings, TypeScript SDK, and web interface. AI coding tools (Claude Code) are used extensively for the web frontend. No non-founder technical work.",
+    "Ronald writes all backend code — the Rust core SDK, API server, WASM bindings, TypeScript SDK. Maya works with Claude Code on the web frontend. No non-founder technical work.",
   looking_for_cofounder: false,
   how_far_along:
     "Fully launched. Production API at api.objective-ai.io serving real traffic. Complete TypeScript SDK published on npm. Web interface live with function browsing, execution UI, API key management, credit purchasing via Stripe, and 32-page API docs. Multiple scoring functions deployed and indexed.",
   how_long_working:
-    "Ronald has been working on this for approximately 8 months, full-time for the last 5 months.",
+    "Ronald has been working on this for approximately 8 months, full-time for the last 5 months. Maya joined as Co-Founder and has been working on design and frontend for several months.",
   tech_stack:
     "Rust (core SDK, API server, WASM bindings), TypeScript (JS SDK, Next.js web app), Google Cloud Run for deployment, Stripe for payments. LLMs accessed via OpenRouter. Content-addressed IDs using XXHash3-128. Client-side validation via WASM in browser.",
   people_using_product: true,
@@ -99,11 +106,11 @@ const SAMPLE_INPUT = {
     "Usage-based API pricing. Each function execution incurs a cost based on upstream LLM usage plus ObjectiveAI margin. Current pricing covers compute costs with healthy margins. Revenue scales linearly with usage. TAM: every application that needs a score, rank, or preference — content moderation, recommendation, hiring, grading, pricing. Conservative estimate: $50M ARR achievable with 1% of the LLM evaluation market.",
   company_category: "B2B / API / AI Infrastructure",
   legal_entity: "Objective Artificial Intelligence, Inc. - Delaware C Corp",
-  equity_breakdown: "Ronald Gore (CEO & CTO): 100%",
+  equity_breakdown: "Ronald Riggles (CEO & Co-Founder): 50%, Maya Gore (COO & Co-Founder): 50%",
   investment_taken: false,
   currently_fundraising: false,
   why_yc:
-    "YC's network would help with enterprise sales motion and hiring the first engineers. The batch structure provides accountability and deadlines that are valuable for a solo founder. Several YC companies in the AI infrastructure space could be early design partners.",
+    "YC's network would help with enterprise sales motion and hiring the first engineers. The batch structure provides accountability and deadlines. Several YC companies in the AI infrastructure space could be early design partners.",
 };
 
 async function api(method: string, path: string, body?: unknown) {
