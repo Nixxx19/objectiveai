@@ -1804,6 +1804,10 @@ function validateExampleInput(value, fn) {
       error: "outputLength must be null because function does not have output_length"
     };
   }
+  const tasksResult = validateTasks2(exampleInput.compiledTasks);
+  if (!tasksResult.ok) {
+    return { ok: false, value: void 0, error: tasksResult.error };
+  }
   return { ok: true, value: exampleInput, error: void 0 };
 }
 function validateExampleInputs(value, fn) {
@@ -2137,6 +2141,46 @@ Merged: ${JSON.stringify(mergedOutput)}` };
       if (!found.has(modality)) {
         return { ok: false, value: void 0, error: `Input schema declares "${modality}" modality but no compiled task across all example inputs contains a rich content part of that type. Add at least one example input that uses "${modality}" content.` };
       }
+    }
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function validateTasks2(compiledTasks) {
+  for (let i = 0; i < compiledTasks.length; i++) {
+    const result = validateCompiledTaskContent(compiledTasks[i], i);
+    if (!result.ok) return result;
+  }
+  return { ok: true, value: void 0, error: void 0 };
+}
+function validateCompiledTaskContent(ct, index) {
+  if (ct === null) return { ok: true, value: void 0, error: void 0 };
+  if (Array.isArray(ct)) {
+    for (const sub of ct) {
+      const result = validateCompiledTaskContent(sub, index);
+      if (!result.ok) return result;
+    }
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  if (ct.type !== "vector.completion") {
+    return { ok: true, value: void 0, error: void 0 };
+  }
+  for (let j = 0; j < ct.messages.length; j++) {
+    const msg = ct.messages[j];
+    if ("content" in msg && msg.content != null && typeof msg.content === "string") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `compiledTasks[${index}] messages[${j}] content must be an array of content parts, not a string`
+      };
+    }
+  }
+  for (let j = 0; j < ct.responses.length; j++) {
+    if (typeof ct.responses[j] === "string") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `compiledTasks[${index}] responses[${j}] must be an array of content parts, not a string`
+      };
     }
   }
   return { ok: true, value: void 0, error: void 0 };

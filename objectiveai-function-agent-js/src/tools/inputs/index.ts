@@ -63,6 +63,12 @@ export function validateExampleInput(
     };
   }
 
+  // Validate compiled task content format
+  const tasksResult = validateTasks(exampleInput.compiledTasks);
+  if (!tasksResult.ok) {
+    return { ok: false, value: undefined, error: tasksResult.error };
+  }
+
   return { ok: true, value: exampleInput, error: undefined };
 }
 
@@ -450,6 +456,53 @@ export function checkExampleInputs(): Result<undefined> {
       if (!found.has(modality)) {
         return { ok: false, value: undefined, error: `Input schema declares "${modality}" modality but no compiled task across all example inputs contains a rich content part of that type. Add at least one example input that uses "${modality}" content.` };
       }
+    }
+  }
+
+  return { ok: true, value: undefined, error: undefined };
+}
+
+function validateTasks(compiledTasks: Functions.CompiledTasks): Result<undefined> {
+  for (let i = 0; i < compiledTasks.length; i++) {
+    const result = validateCompiledTaskContent(compiledTasks[i], i);
+    if (!result.ok) return result;
+  }
+  return { ok: true, value: undefined, error: undefined };
+}
+
+function validateCompiledTaskContent(ct: Functions.CompiledTask, index: number): Result<undefined> {
+  if (ct === null) return { ok: true, value: undefined, error: undefined };
+  if (Array.isArray(ct)) {
+    for (const sub of ct) {
+      const result = validateCompiledTaskContent(sub, index);
+      if (!result.ok) return result;
+    }
+    return { ok: true, value: undefined, error: undefined };
+  }
+  if (ct.type !== "vector.completion") {
+    return { ok: true, value: undefined, error: undefined };
+  }
+
+  // Message content must be an array of content parts, not a plain string
+  for (let j = 0; j < ct.messages.length; j++) {
+    const msg = ct.messages[j];
+    if ("content" in msg && msg.content != null && typeof msg.content === "string") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `compiledTasks[${index}] messages[${j}] content must be an array of content parts, not a string`,
+      };
+    }
+  }
+
+  // Each response must be an array of content parts, not a plain string
+  for (let j = 0; j < ct.responses.length; j++) {
+    if (typeof ct.responses[j] === "string") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `compiledTasks[${index}] responses[${j}] must be an array of content parts, not a string`,
+      };
     }
   }
 

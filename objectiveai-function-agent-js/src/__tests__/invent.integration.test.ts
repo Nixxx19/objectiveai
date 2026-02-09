@@ -148,8 +148,8 @@ async function inventScript(): Promise<void> {
   assertOk(
     appendTask({
       type: "vector.completion",
-      messages: [{ role: "user", content: "Rate quality" }],
-      responses: ["good", "bad"],
+      messages: [{ role: "user", content: [{ type: "text", text: "Rate quality" }] }],
+      responses: [[{ type: "text", text: "good" }], [{ type: "text", text: "bad" }]],
       output: { $starlark: "output['scores'][0]" },
     }),
     "appendTask",
