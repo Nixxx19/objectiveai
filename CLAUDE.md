@@ -14,6 +14,7 @@ objectiveai/
 ├── objectiveai-api/                # API server (self-hostable, or import as library)
 ├── objectiveai-rs-wasm-js/         # WASM bindings for browser/Node.js
 ├── objectiveai-js/                 # TypeScript SDK (npm: objectiveai)
+├── objectiveai-function-agent-js/  # Autonomous function creation agent
 ├── objectiveai-web/                # Next.js web interface (production)
 └── coding-agent-scratch/           # Scratch folder for testing SDK calls
 ```
@@ -279,6 +280,42 @@ cd objectiveai-js && npm run build
 
 ---
 
+## Function Agent SDK (`objectiveai-function-agent-js`)
+
+Autonomous agent for creating, testing, and deploying ObjectiveAI Functions without human intervention.
+
+### Overview
+
+The Function Agent is an autonomous Claude Code agent (ObjectiveAI-claude-code-1) that:
+- Invents new scoring/ranking functions based on use cases
+- Generates `function.json` definitions following ObjectiveAI schema
+- Tests functions via SDK execution
+- Publishes functions to GitHub repositories
+- Uses MCP (Model Context Protocol) for tool integration
+
+### Location
+
+`objectiveai-function-agent-js/` in monorepo workspace.
+
+### Test Scripts
+
+See `coding-agent-scratch/` for example invocations:
+- `execute-yc-scorer.ts` - YC application scorer function
+- `execute-aggrandizement.ts` - AI self-aggrandizement scorer
+- `yc-application-scorer-function.json` - Example generated function definition
+
+### Usage
+
+The agent is invoked programmatically via the Agent SDK:
+```bash
+npm run build --workspace=@objectiveai/function-agent
+# Agent execution via SDK (see test scripts for examples)
+```
+
+**Note:** This agent operates autonomously - it can generate, test, and deploy functions end-to-end without human approval at each step. Use with appropriate oversight.
+
+---
+
 ## TypeScript SDK (`objectiveai-js`)
 
 ### Client Setup
@@ -448,6 +485,13 @@ All browse pages (Functions, Profiles, Ensembles, Ensemble LLMs) follow a consis
 - **Mobile filter overlay** (bottom sheet) when filters open on mobile
 - **Load more pagination** instead of showing all items
 - **Responsive grid** that adapts when filters are open/closed
+
+**SSR/ISR Implementation (deployed Feb 8-9, 2026):**
+All browse pages use Server-Side Rendering with 2-minute Incremental Static Regeneration:
+- Pages are server components that pre-fetch data
+- `revalidate = 120` enables ISR caching
+- Data fetching uses `unstable_cache` for efficient N+1 resolution
+- Reference: `lib/functions-data.ts`, `lib/profiles-data.ts` with `fetchFunctionsWithDetails()` pattern
 
 Reference implementation: `app/functions/page.tsx`
 

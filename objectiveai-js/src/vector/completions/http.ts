@@ -51,9 +51,9 @@ export function retrieve(
   id: string,
   options?: RequestOptions,
 ): Promise<Retrieve> {
-  return client.get_unary<Retrieve>(
+  return client.post_unary<Retrieve>(
     `/vector/completions/${id}`,
-    undefined,
+    {},
     options,
   );
 }

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FunctionItem } from "../lib/functions-data";
-import { NAV_HEIGHT_CALCULATION_DELAY_MS, STICKY_BAR_HEIGHT, STICKY_SEARCH_OVERLAP } from "../lib/constants";
+import { NAV_HEIGHT_CALCULATION_DELAY_MS, STICKY_BAR_HEIGHT, STICKY_SEARCH_OVERLAP, PINNED_COLOR_ANIMATION_MS } from "../lib/constants";
 import { useResponsive } from "../hooks/useResponsive";
 import { EmptyState } from "./ui";
 
@@ -21,19 +21,18 @@ export default function FunctionsBrowse({ functions }: FunctionsBrowseProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [sortBy, setSortBy] = useState("name");
   const [filtersOpen, setFiltersOpen] = useState(false);
-  const [pinnedFunctions, setPinnedFunctions] = useState<string[]>([]);
+  const [pinnedFunctions, setPinnedFunctions] = useState<string[]>(() => {
+    // Initialize from localStorage if available (client-side only)
+    if (typeof window !== 'undefined') {
+      const savedPinned = localStorage.getItem('pinned-functions');
+      return savedPinned ? JSON.parse(savedPinned) : [];
+    }
+    return [];
+  });
+  const [showPinnedColor, setShowPinnedColor] = useState<string | null>(null);
   const [navOffset, setNavOffset] = useState(96);
   const { isMobile, isTablet } = useResponsive();
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const searchRef = useRef<HTMLDivElement>(null);
-
-  // Load pinned functions from localStorage
-  useEffect(() => {
-    const savedPinned = localStorage.getItem('pinned-functions');
-    if (savedPinned) {
-      setPinnedFunctions(JSON.parse(savedPinned));
-    }
-  }, []);
 
   // Dynamic sticky offset calculation based on nav height
   useEffect(() => {
@@ -52,10 +51,40 @@ export default function FunctionsBrowse({ functions }: FunctionsBrowseProps) {
     };
   }, [isMobile]);
 
-  // Reset visible count when filters change
-  useEffect(() => {
-    setVisibleCount(INITIAL_VISIBLE_COUNT);
-  }, [searchQuery, selectedCategory, sortBy]);
+  // Create a stable filter key to track when filters change
+  const filterKey = `${searchQuery}-${selectedCategory}-${sortBy}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+
+  // Reset pagination when filters change (using layout effect to avoid visible flash)
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    if (visibleCount !== INITIAL_VISIBLE_COUNT) {
+      // This setState during render is intentional for state synchronization
+      setVisibleCount(INITIAL_VISIBLE_COUNT);
+    }
+  }
+
+  // Toggle pin state for a function
+  const togglePin = (slug: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const savedLibrary = localStorage.getItem("pinned-functions");
+    const library = savedLibrary ? JSON.parse(savedLibrary) : [];
+
+    if (pinnedFunctions.includes(slug)) {
+      const updated = library.filter((s: string) => s !== slug);
+      localStorage.setItem("pinned-functions", JSON.stringify(updated));
+      setPinnedFunctions(updated);
+    } else {
+      library.push(slug);
+      localStorage.setItem("pinned-functions", JSON.stringify(library));
+      setPinnedFunctions(library);
+      setShowPinnedColor(slug);
+      setTimeout(() => setShowPinnedColor(null), PINNED_COLOR_ANIMATION_MS);
+    }
+  };
 
   // Filter and sort functions
   const filteredFunctions = functions
@@ -262,6 +291,28 @@ export default function FunctionsBrowse({ functions }: FunctionsBrowseProps) {
                     position: 'relative',
                     padding: '16px',
                   }}>
+                    {/* Pin button */}
+                    <button
+                      onClick={(e) => togglePin(fn.slug, e)}
+                      aria-label={pinnedFunctions.includes(fn.slug) ? "Unpin function" : "Pin function"}
+                      style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        background: 'none',
+                        border: 'none',
+                        padding: '4px',
+                        cursor: 'pointer',
+                        fontSize: '14px',
+                        color: showPinnedColor === fn.slug ? 'var(--accent)' : 'var(--text-muted)',
+                        opacity: pinnedFunctions.includes(fn.slug) ? 1 : 0.5,
+                        transition: showPinnedColor === fn.slug ? 'color 0.15s ease-in, opacity 0.15s ease-in' : 'color 0.5s ease-out, opacity 0.2s ease-out',
+                        zIndex: 1,
+                      }}
+                      title={pinnedFunctions.includes(fn.slug) ? "Unpin" : "Pin"}
+                    >
+                      {pinnedFunctions.includes(fn.slug) ? '📌' : '📍'}
+                    </button>
                     <span className="tag" style={{ alignSelf: 'flex-start', marginBottom: '8px', fontSize: '11px', padding: '4px 10px' }}>
                       {fn.category}
                     </span>

@@ -26,8 +26,21 @@ export default function ProfilesBrowse({ initialProfiles }: ProfilesBrowseProps)
   const [selectedOwner, setSelectedOwner] = useState("All");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [navOffset, setNavOffset] = useState(96);
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Create a stable filter key to track when filters change
+  const filterKey = `${searchQuery}-${selectedOwner}-${sortBy}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+
+  // Reset pagination when filters change
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    if (visibleCount !== INITIAL_VISIBLE_COUNT) {
+      // This setState during render is intentional for state synchronization
+      setVisibleCount(INITIAL_VISIBLE_COUNT);
+    }
+  }
 
   // Dynamic sticky offset calculation based on nav height
   useEffect(() => {
@@ -45,11 +58,6 @@ export default function ProfilesBrowse({ initialProfiles }: ProfilesBrowseProps)
       clearTimeout(timer);
     };
   }, [isMobile]);
-
-  // Reset visible count when filters change
-  useEffect(() => {
-    setVisibleCount(INITIAL_VISIBLE_COUNT);
-  }, [searchQuery, selectedOwner, sortBy]);
 
   // Get unique owners for filtering
   const owners = ["All", ...Array.from(new Set(profiles.map(p => p.owner))).sort()];

@@ -23,8 +23,21 @@ export function EnsemblesBrowse({ ensembles }: EnsemblesBrowseProps) {
   const [sortBy, setSortBy] = useState("id");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [navOffset, setNavOffset] = useState(96);
-  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const searchRef = useRef<HTMLDivElement>(null);
+
+  // Create a stable filter key to track when filters change
+  const filterKey = `${searchQuery}-${sortBy}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+
+  // Reset pagination when filters change
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    if (visibleCount !== INITIAL_VISIBLE_COUNT) {
+      // This setState during render is intentional for state synchronization
+      setVisibleCount(INITIAL_VISIBLE_COUNT);
+    }
+  }
 
   useEffect(() => {
     const updateOffset = () => {
@@ -41,10 +54,6 @@ export function EnsemblesBrowse({ ensembles }: EnsemblesBrowseProps) {
       clearTimeout(timer);
     };
   }, [isMobile]);
-
-  useEffect(() => {
-    setVisibleCount(INITIAL_VISIBLE_COUNT);
-  }, [searchQuery, sortBy]);
 
   const filteredEnsembles = ensembles
     .filter((e) => e.id.toLowerCase().includes(searchQuery.toLowerCase()))
