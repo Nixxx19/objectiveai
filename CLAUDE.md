@@ -740,7 +740,7 @@ For vector functions, enables tournament-style ranking:
 | Detail Pages | Complete | Function, Ensemble, Ensemble LLM details |
 | API Key Management | Complete | Create, view, disable |
 | Credit Balance + Purchase | Complete | Stripe integration fully ported |
-| Media Input Component | Ready | `ArrayInput.tsx` supports images, audio, video, files |
+| Rich Media Inputs | Complete | Functions with typed schemas (image/audio/video/file) render proper upload fields via SchemaFormBuilder |
 
 ### Recently Implemented ✅ (Feb 2026)
 
@@ -750,7 +750,7 @@ For vector functions, enables tournament-style ranking:
 | Reasoning Model Selector | Complete | Toggle + model dropdown (GPT-4o Mini, GPT-4o, Claude 3 Haiku/Sonnet) |
 | Direct Chat Completions | Complete | `/chat` page with SDK streaming |
 | Direct Vector Completions | Complete | `/vector` page with score viz, SDK calls |
-| File Uploads | Complete | Removed `textOnly` restriction from ArrayInput |
+| Rich Media Function Inputs | Complete (Feb 9) | SchemaFormBuilder for typed schemas, ImageField/AudioField/VideoField/FileField render proper upload UIs |
 | Ensemble LLM Creation | Complete | `/ensemble-llms/create` with WASM validation |
 | Ensemble Creation | Complete | `/ensembles/create` with WASM validation |
 | Function JSON Builder | Complete | `/functions/create` - JSON editor for creating `function.json` files (not server-side creation) |
