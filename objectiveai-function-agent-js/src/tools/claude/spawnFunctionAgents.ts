@@ -1,13 +1,11 @@
 import { tool } from "@anthropic-ai/claude-agent-sdk";
+import { ToolState } from "./toolState";
 import { resultFromResult } from "./util";
 import { spawnFunctionAgents } from "../spawnFunctionAgents";
 import { SpawnFunctionAgentsParamsSchema } from "../../spawnFunctionAgentsParams";
 import z from "zod";
 
-export function makeSpawnFunctionAgents(apiBase?: string, apiKey?: string) {
-  let hasSpawned = false;
-  let respawnRejected = false;
-
+export function makeSpawnFunctionAgents(state: ToolState) {
   return tool(
     "SpawnFunctionAgents",
     "Spawn child function agents in parallel",
@@ -16,9 +14,9 @@ export function makeSpawnFunctionAgents(apiBase?: string, apiKey?: string) {
       dangerouslyRespawn: z.boolean().optional(),
     },
     async ({ params, dangerouslyRespawn }) => {
-      if (hasSpawned) {
+      if (state.spawnFunctionAgentsHasSpawned) {
         if (dangerouslyRespawn) {
-          if (!respawnRejected) {
+          if (!state.spawnFunctionAgentsRespawnRejected) {
             return resultFromResult({
               ok: false,
               value: undefined,
@@ -26,11 +24,11 @@ export function makeSpawnFunctionAgents(apiBase?: string, apiKey?: string) {
                 "dangerouslyRespawn can only be used after a previous SpawnFunctionAgents call was rejected for respawning.",
             });
           }
-          respawnRejected = false;
-          return resultFromResult(await spawnFunctionAgents(params, apiBase, apiKey));
+          state.spawnFunctionAgentsRespawnRejected = false;
+          return resultFromResult(await spawnFunctionAgents(params, state.submitApiBase, state.submitApiKey));
         }
 
-        respawnRejected = true;
+        state.spawnFunctionAgentsRespawnRejected = true;
         return resultFromResult({
           ok: false,
           value: undefined,
@@ -43,8 +41,8 @@ export function makeSpawnFunctionAgents(apiBase?: string, apiKey?: string) {
         });
       }
 
-      hasSpawned = true;
-      return resultFromResult(await spawnFunctionAgents(params, apiBase, apiKey));
+      state.spawnFunctionAgentsHasSpawned = true;
+      return resultFromResult(await spawnFunctionAgents(params, state.submitApiBase, state.submitApiKey));
     },
   );
 }

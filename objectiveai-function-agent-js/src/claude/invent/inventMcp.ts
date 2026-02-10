@@ -4,99 +4,100 @@ import { submit } from "../../tools/submit";
 import { createFileLogger, consumeStream } from "../../logging";
 import { getNextPlanIndex } from "../planIndex";
 import { registerSchemaRefs } from "../../tools/schemaRefs";
+import { ToolState } from "../../tools/claude/toolState";
 
 // Tools - read-only context
-import { ReadSpec } from "../../tools/claude/spec";
-import { ReadName } from "../../tools/claude/name";
-import { ReadEssay } from "../../tools/claude/essay";
-import { ReadEssayTasks } from "../../tools/claude/essayTasks";
+import { makeReadSpec } from "../../tools/claude/spec";
+import { makeReadName } from "../../tools/claude/name";
+import { makeReadEssay } from "../../tools/claude/essay";
+import { makeReadEssayTasks } from "../../tools/claude/essayTasks";
 import {
-  ListExampleFunctions,
-  ReadExampleFunction,
+  makeListExampleFunctions,
+  makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
 
 // Tools - expression params
 import {
-  ReadInputParamSchema,
-  ReadMapParamSchema,
-  ReadOutputParamSchema,
+  makeReadInputParamSchema,
+  makeReadMapParamSchema,
+  makeReadOutputParamSchema,
 } from "../../tools/claude/expressionParams";
 
 // Tools - function field CRUD
 import {
-  ReadFunction,
-  ReadFunctionSchema,
-  CheckFunction,
+  makeReadFunction,
+  makeReadFunctionSchema,
+  makeCheckFunction,
 } from "../../tools/claude/function";
 import {
-  ReadType,
-  ReadTypeSchema,
-  EditType,
-  CheckType,
+  makeReadType,
+  makeReadTypeSchema,
+  makeEditType,
+  makeCheckType,
 } from "../../tools/claude/type";
 import {
-  ReadDescription,
-  ReadDescriptionSchema,
-  EditDescription,
-  CheckDescription,
+  makeReadDescription,
+  makeReadDescriptionSchema,
+  makeEditDescription,
+  makeCheckDescription,
 } from "../../tools/claude/description";
 import {
-  ReadInputSchema,
-  ReadInputSchemaSchema,
+  makeReadInputSchema,
+  makeReadInputSchemaSchema,
   makeEditInputSchema,
-  CheckInputSchema,
+  makeCheckInputSchema,
 } from "../../tools/claude/inputSchema";
 import {
-  ReadInputMaps,
-  ReadInputMapsSchema,
-  AppendInputMap,
-  DelInputMap,
-  DelInputMaps,
-  CheckInputMaps,
+  makeReadInputMaps,
+  makeReadInputMapsSchema,
+  makeAppendInputMap,
+  makeDelInputMap,
+  makeDelInputMaps,
+  makeCheckInputMaps,
 } from "../../tools/claude/inputMaps";
 import {
-  ReadOutputLength,
-  ReadOutputLengthSchema,
-  EditOutputLength,
-  CheckOutputLength,
-  DelOutputLength,
+  makeReadOutputLength,
+  makeReadOutputLengthSchema,
+  makeEditOutputLength,
+  makeCheckOutputLength,
+  makeDelOutputLength,
 } from "../../tools/claude/outputLength";
 import {
-  ReadInputSplit,
-  ReadInputSplitSchema,
-  EditInputSplit,
-  CheckInputSplit,
-  DelInputSplit,
+  makeReadInputSplit,
+  makeReadInputSplitSchema,
+  makeEditInputSplit,
+  makeCheckInputSplit,
+  makeDelInputSplit,
 } from "../../tools/claude/inputSplit";
 import {
-  ReadInputMerge,
-  ReadInputMergeSchema,
-  EditInputMerge,
-  CheckInputMerge,
-  DelInputMerge,
+  makeReadInputMerge,
+  makeReadInputMergeSchema,
+  makeEditInputMerge,
+  makeCheckInputMerge,
+  makeDelInputMerge,
 } from "../../tools/claude/inputMerge";
 import {
-  ReadTasks,
-  ReadTasksSchema,
-  AppendTask,
-  EditTask,
-  DelTask,
-  DelTasks,
-  CheckTasks,
-  ReadMessagesExpressionSchema,
-  ReadToolsExpressionSchema,
-  ReadResponsesExpressionSchema,
+  makeReadTasks,
+  makeReadTasksSchema,
+  makeAppendTask,
+  makeEditTask,
+  makeDelTask,
+  makeDelTasks,
+  makeCheckTasks,
+  makeReadMessagesExpressionSchema,
+  makeReadToolsExpressionSchema,
+  makeReadResponsesExpressionSchema,
 } from "../../tools/claude/tasks";
 
 // Tools - example inputs
 import {
-  ReadExampleInputs,
-  ReadExampleInputsSchema,
-  AppendExampleInput,
-  EditExampleInput,
-  DelExampleInput,
-  DelExampleInputs,
-  CheckExampleInputs,
+  makeReadExampleInputs,
+  makeReadExampleInputsSchema,
+  makeAppendExampleInput,
+  makeEditExampleInput,
+  makeDelExampleInput,
+  makeDelExampleInputs,
+  makeCheckExampleInputs,
 } from "../../tools/claude/inputs";
 
 // Tools - plan
@@ -105,54 +106,54 @@ import { makeReadPlan } from "../../tools/claude/plan";
 // Tools - network tests
 import {
   makeRunNetworkTests,
-  ReadDefaultNetworkTest,
-  ReadSwissSystemNetworkTest,
+  makeReadDefaultNetworkTest,
+  makeReadSwissSystemNetworkTest,
 } from "../../tools/claude/networkTests";
 
 // Tools - recursive type schemas
 import {
-  ReadJsonValueSchema,
-  ReadJsonValueExpressionSchema,
+  makeReadJsonValueSchema,
+  makeReadJsonValueExpressionSchema,
 } from "../../tools/claude/jsonValue";
 import {
-  ReadInputValueSchema,
-  ReadInputValueExpressionSchema,
+  makeReadInputValueSchema,
+  makeReadInputValueExpressionSchema,
 } from "../../tools/claude/inputValue";
 
 // Tools - message role schemas
 import {
-  ReadDeveloperMessageSchema,
-  ReadSystemMessageSchema,
-  ReadUserMessageSchema,
-  ReadToolMessageSchema,
-  ReadAssistantMessageSchema,
-  ReadDeveloperMessageExpressionSchema,
-  ReadSystemMessageExpressionSchema,
-  ReadUserMessageExpressionSchema,
-  ReadToolMessageExpressionSchema,
-  ReadAssistantMessageExpressionSchema,
+  makeReadDeveloperMessageSchema,
+  makeReadSystemMessageSchema,
+  makeReadUserMessageSchema,
+  makeReadToolMessageSchema,
+  makeReadAssistantMessageSchema,
+  makeReadDeveloperMessageExpressionSchema,
+  makeReadSystemMessageExpressionSchema,
+  makeReadUserMessageExpressionSchema,
+  makeReadToolMessageExpressionSchema,
+  makeReadAssistantMessageExpressionSchema,
 } from "../../tools/claude/messages";
 
 // Tools - content schemas
 import {
-  ReadSimpleContentSchema,
-  ReadRichContentSchema,
-  ReadSimpleContentExpressionSchema,
-  ReadRichContentExpressionSchema,
+  makeReadSimpleContentSchema,
+  makeReadRichContentSchema,
+  makeReadSimpleContentExpressionSchema,
+  makeReadRichContentExpressionSchema,
 } from "../../tools/claude/content";
 
 // Tools - task type schemas
 import {
-  ReadScalarFunctionTaskSchema,
-  ReadVectorFunctionTaskSchema,
-  ReadVectorCompletionTaskSchema,
-  ReadCompiledScalarFunctionTaskSchema,
-  ReadCompiledVectorFunctionTaskSchema,
-  ReadCompiledVectorCompletionTaskSchema,
+  makeReadScalarFunctionTaskSchema,
+  makeReadVectorFunctionTaskSchema,
+  makeReadVectorCompletionTaskSchema,
+  makeReadCompiledScalarFunctionTaskSchema,
+  makeReadCompiledVectorFunctionTaskSchema,
+  makeReadCompiledVectorCompletionTaskSchema,
 } from "../../tools/claude/taskTypes";
 
 // Tools - readme
-import { ReadReadme, WriteReadme } from "../../tools/claude/readme";
+import { makeReadReadme, makeWriteReadme } from "../../tools/claude/readme";
 
 // Tools - submit
 import { makeSubmit } from "../../tools/claude/submit";
@@ -160,140 +161,140 @@ import { makeSubmit } from "../../tools/claude/submit";
 // Tools - agent functions (for function tasks variant)
 import { makeSpawnFunctionAgents } from "../../tools/claude/spawnFunctionAgents";
 import {
-  ListAgentFunctions,
-  ReadAgentFunction,
+  makeListAgentFunctions,
+  makeReadAgentFunction,
 } from "../../tools/claude/agentFunctions";
 
 // Common tools shared by both variants
-function getCommonTools(planIndex: number, apiBase?: string, apiKey?: string) {
+function getCommonTools(state: ToolState) {
   registerSchemaRefs();
   return [
     // Core Context
-    ReadSpec,
-    ReadName,
-    ReadEssay,
-    ReadEssayTasks,
-    makeReadPlan(planIndex),
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema,
+    makeReadSpec(state),
+    makeReadName(state),
+    makeReadEssay(state),
+    makeReadEssayTasks(state),
+    makeReadPlan(state),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
+    makeReadFunctionSchema(state),
 
     // Function
-    ReadFunction,
-    CheckFunction,
-    ReadType,
-    ReadTypeSchema,
-    EditType,
-    CheckType,
-    ReadDescription,
-    ReadDescriptionSchema,
-    EditDescription,
-    CheckDescription,
-    ReadInputSchema,
-    ReadInputSchemaSchema,
-    makeEditInputSchema(),
-    CheckInputSchema,
-    ReadInputMaps,
-    ReadInputMapsSchema,
-    AppendInputMap,
-    DelInputMap,
-    DelInputMaps,
-    CheckInputMaps,
-    ReadOutputLength,
-    ReadOutputLengthSchema,
-    EditOutputLength,
-    DelOutputLength,
-    CheckOutputLength,
-    ReadInputSplit,
-    ReadInputSplitSchema,
-    EditInputSplit,
-    DelInputSplit,
-    CheckInputSplit,
-    ReadInputMerge,
-    ReadInputMergeSchema,
-    EditInputMerge,
-    DelInputMerge,
-    CheckInputMerge,
-    ReadTasks,
-    ReadTasksSchema,
-    AppendTask,
-    EditTask,
-    DelTask,
-    DelTasks,
-    CheckTasks,
-    ReadMessagesExpressionSchema,
-    ReadToolsExpressionSchema,
-    ReadResponsesExpressionSchema,
+    makeReadFunction(state),
+    makeCheckFunction(state),
+    makeReadType(state),
+    makeReadTypeSchema(state),
+    makeEditType(state),
+    makeCheckType(state),
+    makeReadDescription(state),
+    makeReadDescriptionSchema(state),
+    makeEditDescription(state),
+    makeCheckDescription(state),
+    makeReadInputSchema(state),
+    makeReadInputSchemaSchema(state),
+    makeEditInputSchema(state),
+    makeCheckInputSchema(state),
+    makeReadInputMaps(state),
+    makeReadInputMapsSchema(state),
+    makeAppendInputMap(state),
+    makeDelInputMap(state),
+    makeDelInputMaps(state),
+    makeCheckInputMaps(state),
+    makeReadOutputLength(state),
+    makeReadOutputLengthSchema(state),
+    makeEditOutputLength(state),
+    makeDelOutputLength(state),
+    makeCheckOutputLength(state),
+    makeReadInputSplit(state),
+    makeReadInputSplitSchema(state),
+    makeEditInputSplit(state),
+    makeDelInputSplit(state),
+    makeCheckInputSplit(state),
+    makeReadInputMerge(state),
+    makeReadInputMergeSchema(state),
+    makeEditInputMerge(state),
+    makeDelInputMerge(state),
+    makeCheckInputMerge(state),
+    makeReadTasks(state),
+    makeReadTasksSchema(state),
+    makeAppendTask(state),
+    makeEditTask(state),
+    makeDelTask(state),
+    makeDelTasks(state),
+    makeCheckTasks(state),
+    makeReadMessagesExpressionSchema(state),
+    makeReadToolsExpressionSchema(state),
+    makeReadResponsesExpressionSchema(state),
 
     // Expression params
-    ReadInputParamSchema,
-    ReadMapParamSchema,
-    ReadOutputParamSchema,
+    makeReadInputParamSchema(state),
+    makeReadMapParamSchema(state),
+    makeReadOutputParamSchema(state),
 
     // Recursive type schemas (referenced by $ref in other schemas)
-    ReadJsonValueSchema,
-    ReadJsonValueExpressionSchema,
-    ReadInputValueSchema,
-    ReadInputValueExpressionSchema,
+    makeReadJsonValueSchema(state),
+    makeReadJsonValueExpressionSchema(state),
+    makeReadInputValueSchema(state),
+    makeReadInputValueExpressionSchema(state),
 
     // Message role schemas (expression variants, referenced by $ref in ReadMessagesExpressionSchema)
-    ReadDeveloperMessageExpressionSchema,
-    ReadSystemMessageExpressionSchema,
-    ReadUserMessageExpressionSchema,
-    ReadToolMessageExpressionSchema,
-    ReadAssistantMessageExpressionSchema,
+    makeReadDeveloperMessageExpressionSchema(state),
+    makeReadSystemMessageExpressionSchema(state),
+    makeReadUserMessageExpressionSchema(state),
+    makeReadToolMessageExpressionSchema(state),
+    makeReadAssistantMessageExpressionSchema(state),
 
     // Message role schemas (compiled variants, referenced by $ref in ReadCompiledVectorCompletionTaskSchema)
-    ReadDeveloperMessageSchema,
-    ReadSystemMessageSchema,
-    ReadUserMessageSchema,
-    ReadToolMessageSchema,
-    ReadAssistantMessageSchema,
+    makeReadDeveloperMessageSchema(state),
+    makeReadSystemMessageSchema(state),
+    makeReadUserMessageSchema(state),
+    makeReadToolMessageSchema(state),
+    makeReadAssistantMessageSchema(state),
 
     // Content schemas (expression variants, referenced by $ref in expression message schemas)
-    ReadSimpleContentExpressionSchema,
-    ReadRichContentExpressionSchema,
+    makeReadSimpleContentExpressionSchema(state),
+    makeReadRichContentExpressionSchema(state),
 
     // Content schemas (compiled variants, referenced by $ref in compiled message schemas)
-    ReadSimpleContentSchema,
-    ReadRichContentSchema,
+    makeReadSimpleContentSchema(state),
+    makeReadRichContentSchema(state),
 
     // Task type schemas (referenced by $ref in ReadTasksSchema)
-    ReadScalarFunctionTaskSchema,
-    ReadVectorFunctionTaskSchema,
-    ReadVectorCompletionTaskSchema,
+    makeReadScalarFunctionTaskSchema(state),
+    makeReadVectorFunctionTaskSchema(state),
+    makeReadVectorCompletionTaskSchema(state),
 
     // Compiled task type schemas (referenced by $ref in ReadExampleInputsSchema)
-    ReadCompiledScalarFunctionTaskSchema,
-    ReadCompiledVectorFunctionTaskSchema,
-    ReadCompiledVectorCompletionTaskSchema,
+    makeReadCompiledScalarFunctionTaskSchema(state),
+    makeReadCompiledVectorFunctionTaskSchema(state),
+    makeReadCompiledVectorCompletionTaskSchema(state),
 
     // Example inputs
-    ReadExampleInputs,
-    ReadExampleInputsSchema,
-    AppendExampleInput,
-    EditExampleInput,
-    DelExampleInput,
-    DelExampleInputs,
-    CheckExampleInputs,
+    makeReadExampleInputs(state),
+    makeReadExampleInputsSchema(state),
+    makeAppendExampleInput(state),
+    makeEditExampleInput(state),
+    makeDelExampleInput(state),
+    makeDelExampleInputs(state),
+    makeCheckExampleInputs(state),
 
     // README
-    ReadReadme,
-    WriteReadme,
+    makeReadReadme(state),
+    makeWriteReadme(state),
 
     // Network tests
-    makeRunNetworkTests(apiBase, apiKey),
-    ReadDefaultNetworkTest,
-    ReadSwissSystemNetworkTest,
+    makeRunNetworkTests(state),
+    makeReadDefaultNetworkTest(state),
+    makeReadSwissSystemNetworkTest(state),
 
     // Submit
-    makeSubmit(apiBase, apiKey),
+    makeSubmit(state),
   ];
 }
 
 // Additional tools for function tasks variant (sub-function spawning)
-function getFunctionTasksTools(apiBase?: string, apiKey?: string) {
-  return [makeSpawnFunctionAgents(apiBase, apiKey), ListAgentFunctions, ReadAgentFunction];
+function getFunctionTasksTools(state: ToolState) {
+  return [makeSpawnFunctionAgents(state), makeListAgentFunctions(state), makeReadAgentFunction(state)];
 }
 
 function buildFunctionTasksPrompt(): string {
@@ -464,13 +465,15 @@ Once all tests pass and SPEC.md compliance is verified:
 }
 
 async function inventLoop(
+  state: ToolState,
   log: LogFn,
   useFunctionTasks: boolean,
   sessionId?: string,
-  apiBase?: string,
-  apiKey?: string,
 ): Promise<string | undefined> {
   const nextPlanIndex = getNextPlanIndex();
+  state.readPlanIndex = nextPlanIndex;
+  state.writePlanIndex = nextPlanIndex;
+
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -482,8 +485,8 @@ async function inventLoop(
 
     // Build tools list
     const tools = [
-      ...getCommonTools(nextPlanIndex, apiBase, apiKey),
-      ...(useFunctionTasks ? getFunctionTasksTools(apiBase, apiKey) : []),
+      ...getCommonTools(state),
+      ...(useFunctionTasks ? getFunctionTasksTools(state) : []),
     ];
     const mcpServer = createSdkMcpServer({ name: "invent", tools });
 
@@ -523,7 +526,7 @@ Please try again. Remember to:
     // Validate and submit
     log("Running submit...");
     lastFailureReasons = [];
-    const submitResult = await submit("submit", apiBase, apiKey);
+    const submitResult = await submit("submit", state.submitApiBase, state.submitApiKey);
     if (submitResult.ok) {
       success = true;
       log(`Success: Submitted commit ${submitResult.value}`);
@@ -546,9 +549,10 @@ export async function inventFunctionTasksMcp(
   options: AgentOptions = {},
 ): Promise<void> {
   const log = options.log ?? createFileLogger().log;
+  const state = options.toolState!;
 
   log("=== Invent Loop: Creating new function (function tasks) ===");
-  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(state, log, true, options.sessionId);
 
   log("=== ObjectiveAI Function invention complete ===");
 }
@@ -558,9 +562,10 @@ export async function inventVectorTasksMcp(
   options: AgentOptions = {},
 ): Promise<void> {
   const log = options.log ?? createFileLogger().log;
+  const state = options.toolState!;
 
   log("=== Invent Loop: Creating new function (vector tasks) ===");
-  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(state, log, false, options.sessionId);
 
   log("=== ObjectiveAI Function invention complete ===");
 }

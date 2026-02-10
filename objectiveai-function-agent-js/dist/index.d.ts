@@ -3,6 +3,18 @@ import * as objectiveai from 'objectiveai';
 import { Functions } from 'objectiveai';
 import { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 
+interface ToolState {
+    spawnFunctionAgentsHasSpawned: boolean;
+    spawnFunctionAgentsRespawnRejected: boolean;
+    editInputSchemaModalityRemovalRejected: boolean;
+    runNetworkTestsApiBase: string | undefined;
+    runNetworkTestsApiKey: string | undefined;
+    readPlanIndex: number;
+    writePlanIndex: number;
+    submitApiBase: string | undefined;
+    submitApiKey: string | undefined;
+}
+
 type LogFn = (...args: unknown[]) => void;
 interface AgentOptions {
     name?: string;
@@ -13,17 +25,18 @@ interface AgentOptions {
     log?: LogFn;
     depth?: number;
     instructions?: string;
+    toolState?: ToolState;
 }
 
-declare function specMcp(log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;
+declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;
 
-declare function nameMcp(log: LogFn, sessionId?: string, name?: string): Promise<string | undefined>;
+declare function nameMcp(state: ToolState, log: LogFn, sessionId?: string, name?: string): Promise<string | undefined>;
 
-declare function essayMcp(log: LogFn, sessionId?: string): Promise<string | undefined>;
+declare function essayMcp(state: ToolState, log: LogFn, sessionId?: string): Promise<string | undefined>;
 
-declare function essayTasksMcp(log: LogFn, sessionId?: string): Promise<string | undefined>;
+declare function essayTasksMcp(state: ToolState, log: LogFn, sessionId?: string): Promise<string | undefined>;
 
-declare function planMcp(log: LogFn, sessionId?: string, instructions?: string): Promise<string | undefined>;
+declare function planMcp(state: ToolState, log: LogFn, sessionId?: string, instructions?: string): Promise<string | undefined>;
 
 declare function prepare(options?: AgentOptions): Promise<string | undefined>;
 

@@ -293,18 +293,22 @@ function resultFromResult(result) {
   }
   return textResult(JSON.stringify(result.value, null, 2));
 }
-var ReadSpec = claudeAgentSdk.tool(
-  "ReadSpec",
-  "Read SPEC.md",
-  {},
-  async () => resultFromResult(readSpec())
-);
-var WriteSpec = claudeAgentSdk.tool(
-  "WriteSpec",
-  "Write SPEC.md",
-  { content: z19__default.default.string() },
-  async ({ content }) => resultFromResult(writeSpec(content))
-);
+function makeReadSpec(state) {
+  return claudeAgentSdk.tool(
+    "ReadSpec",
+    "Read SPEC.md",
+    {},
+    async () => resultFromResult(readSpec())
+  );
+}
+function makeWriteSpec(state) {
+  return claudeAgentSdk.tool(
+    "WriteSpec",
+    "Write SPEC.md",
+    { content: z19__default.default.string() },
+    async ({ content }) => resultFromResult(writeSpec(content))
+  );
+}
 function listExampleFunctions() {
   const path$1 = path.join("examples", "examples.json");
   if (!fs.existsSync(path$1)) {
@@ -331,22 +335,26 @@ function readExampleFunction(owner, repository, commit) {
     return { ok: false, value: void 0, error: `Failed to parse ${path$1}: ${e.message}` };
   }
 }
-var ListExampleFunctions = claudeAgentSdk.tool(
-  "ListExampleFunctions",
-  "List root example functions",
-  {},
-  async () => resultFromResult(listExampleFunctions())
-);
-var ReadExampleFunction = claudeAgentSdk.tool(
-  "ReadExampleFunction",
-  "Read an example function by owner, repository, and commit",
-  {
-    owner: z19__default.default.string(),
-    repository: z19__default.default.string(),
-    commit: z19__default.default.string()
-  },
-  async ({ owner, repository, commit }) => resultFromResult(readExampleFunction(owner, repository, commit))
-);
+function makeListExampleFunctions(state) {
+  return claudeAgentSdk.tool(
+    "ListExampleFunctions",
+    "List root example functions",
+    {},
+    async () => resultFromResult(listExampleFunctions())
+  );
+}
+function makeReadExampleFunction(state) {
+  return claudeAgentSdk.tool(
+    "ReadExampleFunction",
+    "Read an example function by owner, repository, and commit",
+    {
+      owner: z19__default.default.string(),
+      repository: z19__default.default.string(),
+      commit: z19__default.default.string()
+    },
+    async ({ owner, repository, commit }) => resultFromResult(readExampleFunction(owner, repository, commit))
+  );
+}
 
 // src/tools/function/index.ts
 var function_exports = {};
@@ -1386,40 +1394,46 @@ function unwrap(schema) {
 }
 
 // src/tools/claude/function.ts
-var ReadFunction = claudeAgentSdk.tool(
-  "ReadFunction",
-  "Read the full Function",
-  {},
-  async () => resultFromResult(readFunction())
-);
-var ReadFunctionSchema = claudeAgentSdk.tool(
-  "ReadFunctionSchema",
-  "Read the schema for Function",
-  {},
-  async () => textResult(formatZodSchema(readFunctionSchema()))
-);
-var CheckFunction = claudeAgentSdk.tool(
-  "CheckFunction",
-  "Validate the full Function",
-  {},
-  async () => resultFromResult(checkFunction())
-);
+function makeReadFunction(state) {
+  return claudeAgentSdk.tool(
+    "ReadFunction",
+    "Read the full Function",
+    {},
+    async () => resultFromResult(readFunction())
+  );
+}
+function makeReadFunctionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadFunctionSchema",
+    "Read the schema for Function",
+    {},
+    async () => textResult(formatZodSchema(readFunctionSchema()))
+  );
+}
+function makeCheckFunction(state) {
+  return claudeAgentSdk.tool(
+    "CheckFunction",
+    "Validate the full Function",
+    {},
+    async () => resultFromResult(checkFunction())
+  );
+}
 
 // src/claude/prepare/specMcp.ts
 function specIsNonEmpty() {
   return fs.existsSync("SPEC.md") && fs.readFileSync("SPEC.md", "utf-8").trim().length > 0;
 }
-async function specMcp(log, sessionId, spec) {
+async function specMcp(state, log, sessionId, spec) {
   if (specIsNonEmpty()) return sessionId;
   if (spec) {
     writeSpec(spec);
     return sessionId;
   }
   const tools = [
-    WriteSpec,
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema
+    makeWriteSpec(),
+    makeListExampleFunctions(),
+    makeReadExampleFunction(),
+    makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "spec", tools });
   const prompt = "Read example functions to understand what ObjectiveAI Functions look like, then create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.";
@@ -1499,36 +1513,40 @@ function writeName(content) {
   fs.writeFileSync("name.txt", name);
   return { ok: true, value: void 0, error: void 0 };
 }
-var ReadName = claudeAgentSdk.tool(
-  "ReadName",
-  "Read name.txt",
-  {},
-  async () => resultFromResult(readName())
-);
-var WriteName = claudeAgentSdk.tool(
-  "WriteName",
-  "Write name.txt",
-  { content: z19__default.default.string() },
-  async ({ content }) => resultFromResult(writeName(content))
-);
+function makeReadName(state) {
+  return claudeAgentSdk.tool(
+    "ReadName",
+    "Read name.txt",
+    {},
+    async () => resultFromResult(readName())
+  );
+}
+function makeWriteName(state) {
+  return claudeAgentSdk.tool(
+    "WriteName",
+    "Write name.txt",
+    { content: z19__default.default.string() },
+    async ({ content }) => resultFromResult(writeName(content))
+  );
+}
 
 // src/claude/prepare/nameMcp.ts
 function nameIsNonEmpty() {
   return fs.existsSync("name.txt") && fs.readFileSync("name.txt", "utf-8").trim().length > 0;
 }
-async function nameMcp(log, sessionId, name) {
+async function nameMcp(state, log, sessionId, name) {
   if (nameIsNonEmpty()) return sessionId;
   if (name) {
     writeName(name);
     return sessionId;
   }
   const tools = [
-    ReadSpec,
-    ReadName,
-    WriteName,
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema
+    makeReadSpec(),
+    makeReadName(),
+    makeWriteName(),
+    makeListExampleFunctions(),
+    makeReadExampleFunction(),
+    makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "name", tools });
   sessionId = await consumeStream(
@@ -1570,32 +1588,36 @@ async function nameMcp(log, sessionId, name) {
   }
   return sessionId;
 }
-var ReadEssay = claudeAgentSdk.tool(
-  "ReadEssay",
-  "Read ESSAY.md",
-  {},
-  async () => resultFromResult(readEssay())
-);
-var WriteEssay = claudeAgentSdk.tool(
-  "WriteEssay",
-  "Write ESSAY.md",
-  { content: z19__default.default.string() },
-  async ({ content }) => resultFromResult(writeEssay(content))
-);
+function makeReadEssay(state) {
+  return claudeAgentSdk.tool(
+    "ReadEssay",
+    "Read ESSAY.md",
+    {},
+    async () => resultFromResult(readEssay())
+  );
+}
+function makeWriteEssay(state) {
+  return claudeAgentSdk.tool(
+    "WriteEssay",
+    "Write ESSAY.md",
+    { content: z19__default.default.string() },
+    async ({ content }) => resultFromResult(writeEssay(content))
+  );
+}
 
 // src/claude/prepare/essayMcp.ts
 function essayIsNonEmpty() {
   return fs.existsSync("ESSAY.md") && fs.readFileSync("ESSAY.md", "utf-8").trim().length > 0;
 }
-async function essayMcp(log, sessionId) {
+async function essayMcp(state, log, sessionId) {
   if (essayIsNonEmpty()) return sessionId;
   const tools = [
-    ReadSpec,
-    ReadName,
-    WriteEssay,
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema
+    makeReadSpec(),
+    makeReadName(),
+    makeWriteEssay(),
+    makeListExampleFunctions(),
+    makeReadExampleFunction(),
+    makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essay", tools });
   const prompt = "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
@@ -1638,33 +1660,37 @@ async function essayMcp(log, sessionId) {
   }
   return sessionId;
 }
-var ReadEssayTasks = claudeAgentSdk.tool(
-  "ReadEssayTasks",
-  "Read ESSAY_TASKS.md",
-  {},
-  async () => resultFromResult(readEssayTasks())
-);
-var WriteEssayTasks = claudeAgentSdk.tool(
-  "WriteEssayTasks",
-  "Write ESSAY_TASKS.md",
-  { content: z19__default.default.string() },
-  async ({ content }) => resultFromResult(writeEssayTasks(content))
-);
+function makeReadEssayTasks(state) {
+  return claudeAgentSdk.tool(
+    "ReadEssayTasks",
+    "Read ESSAY_TASKS.md",
+    {},
+    async () => resultFromResult(readEssayTasks())
+  );
+}
+function makeWriteEssayTasks(state) {
+  return claudeAgentSdk.tool(
+    "WriteEssayTasks",
+    "Write ESSAY_TASKS.md",
+    { content: z19__default.default.string() },
+    async ({ content }) => resultFromResult(writeEssayTasks(content))
+  );
+}
 
 // src/claude/prepare/essayTasksMcp.ts
 function essayTasksIsNonEmpty() {
   return fs.existsSync("ESSAY_TASKS.md") && fs.readFileSync("ESSAY_TASKS.md", "utf-8").trim().length > 0;
 }
-async function essayTasksMcp(log, sessionId) {
+async function essayTasksMcp(state, log, sessionId) {
   if (essayTasksIsNonEmpty()) return sessionId;
   const tools = [
-    ReadSpec,
-    ReadName,
-    ReadEssay,
-    WriteEssayTasks,
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema
+    makeReadSpec(),
+    makeReadName(),
+    makeReadEssay(),
+    makeWriteEssayTasks(),
+    makeListExampleFunctions(),
+    makeReadExampleFunction(),
+    makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essayTasks", tools });
   const prompt = "Read SPEC.md, name.txt, ESSAY.md, and example functions to understand the context, then create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's `tasks` array.";
@@ -1707,28 +1733,22 @@ async function essayTasksMcp(log, sessionId) {
   }
   return sessionId;
 }
-function makeReadPlan(index) {
+function makeReadPlan(state) {
   return claudeAgentSdk.tool(
     "ReadPlan",
     "Read the plan",
     {},
-    async () => resultFromResult(readPlan(index))
+    async () => resultFromResult(readPlan(state.readPlanIndex))
   );
 }
-function makeWritePlan(index) {
+function makeWritePlan(state) {
   return claudeAgentSdk.tool(
     "WritePlan",
     "Write the plan",
     { content: z19__default.default.string() },
-    async ({ content }) => resultFromResult(writePlan(index, content))
+    async ({ content }) => resultFromResult(writePlan(state.writePlanIndex, content))
   );
 }
-claudeAgentSdk.tool(
-  "GetLatestPlanIndex",
-  "Get the highest existing plan index",
-  {},
-  async () => resultFromResult(getLatestPlanIndex())
-);
 function getNextPlanIndex() {
   const plansDir = "plans";
   let nextPlanIndex = 1;
@@ -1746,18 +1766,20 @@ function getPlanPath(index) {
 }
 
 // src/claude/prepare/planMcp.ts
-async function planMcp(log, sessionId, instructions) {
+async function planMcp(state, log, sessionId, instructions) {
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
+  state.readPlanIndex = nextPlanIndex;
+  state.writePlanIndex = nextPlanIndex;
   const tools = [
-    ReadSpec,
-    ReadName,
-    ReadEssay,
-    ReadEssayTasks,
-    makeWritePlan(nextPlanIndex),
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema
+    makeReadSpec(),
+    makeReadName(),
+    makeReadEssay(),
+    makeReadEssayTasks(),
+    makeWritePlan(state),
+    makeListExampleFunctions(),
+    makeReadExampleFunction(),
+    makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "plan", tools });
   let prompt = `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context. Then write your implementation plan to \`${planPath}\` (plan index ${nextPlanIndex}). Include:
@@ -1794,17 +1816,18 @@ ${instructions}`;
 // src/claude/prepare/index.ts
 async function prepare(options = {}) {
   const log = options.log ?? createFileLogger().log;
+  const state = options.toolState;
   let sessionId = options.sessionId;
   log("=== Step 1: SPEC.md ===");
-  sessionId = await specMcp(log, sessionId, options.spec);
+  sessionId = await specMcp(state, log, sessionId, options.spec);
   log("=== Step 2: name.txt ===");
-  sessionId = await nameMcp(log, sessionId, options.name);
+  sessionId = await nameMcp(state, log, sessionId, options.name);
   log("=== Step 3: ESSAY.md ===");
-  sessionId = await essayMcp(log, sessionId);
+  sessionId = await essayMcp(state, log, sessionId);
   log("=== Step 4: ESSAY_TASKS.md ===");
-  sessionId = await essayTasksMcp(log, sessionId);
+  sessionId = await essayTasksMcp(state, log, sessionId);
   log("=== Step 5: Plan ===");
-  sessionId = await planMcp(log, sessionId, options.instructions);
+  sessionId = await planMcp(state, log, sessionId, options.instructions);
   return sessionId;
 }
 
@@ -3061,92 +3084,117 @@ function readOutputParamSchema() {
 }
 
 // src/tools/claude/expressionParams.ts
-var ReadInputParamSchema = claudeAgentSdk.tool(
-  "ReadInputParamSchema",
-  "Read the schema for `input` available in expression context.",
-  {},
-  async () => {
-    const result = readInputParamSchema();
-    if (!result.ok) {
-      return resultFromResult(result);
+function makeReadInputParamSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputParamSchema",
+    "Read the schema for `input` available in expression context.",
+    {},
+    async () => {
+      const result = readInputParamSchema();
+      if (!result.ok) {
+        return resultFromResult(result);
+      }
+      return textResult(formatZodSchema(result.value));
     }
-    return textResult(formatZodSchema(result.value));
-  }
-);
-var ReadMapParamSchema = claudeAgentSdk.tool(
-  "ReadMapParamSchema",
-  "Read the schema for `map` available in mapped task expression context. For a task with `map: i`, the task is compiled once per element in `input_maps[i]`. Each compiled instance receives the current element as `map`.",
-  {},
-  async () => textResult(formatZodSchema(readMapParamSchema()))
-);
-var ReadOutputParamSchema = claudeAgentSdk.tool(
-  "ReadOutputParamSchema",
-  "Read the schema for `output` available in task output expression context.",
-  {},
-  async () => textResult(formatZodSchema(readOutputParamSchema()))
-);
-var ReadType = claudeAgentSdk.tool(
-  "ReadType",
-  "Read the Function's `type` field",
-  {},
-  async () => resultFromResult(readType())
-);
-var ReadTypeSchema = claudeAgentSdk.tool(
-  "ReadTypeSchema",
-  "Read the schema for Function `type` field",
-  {},
-  async () => textResult(formatZodSchema(readTypeSchema()))
-);
-var EditType = claudeAgentSdk.tool(
-  "EditType",
-  "Edit the Function's `type` field",
-  { value: z19__default.default.string() },
-  async ({ value }) => resultFromResult(editType(value))
-);
-var CheckType = claudeAgentSdk.tool(
-  "CheckType",
-  "Validate the Function's `type` field",
-  {},
-  async () => resultFromResult(checkType())
-);
-var ReadDescription = claudeAgentSdk.tool(
-  "ReadDescription",
-  "Read the Function's `description` field",
-  {},
-  async () => resultFromResult(readDescription())
-);
-var ReadDescriptionSchema = claudeAgentSdk.tool(
-  "ReadDescriptionSchema",
-  "Read the schema for Function `description` field",
-  {},
-  async () => textResult(formatZodSchema(readDescriptionSchema()))
-);
-var EditDescription = claudeAgentSdk.tool(
-  "EditDescription",
-  "Edit the Function's `description` field",
-  { value: z19__default.default.string() },
-  async ({ value }) => resultFromResult(editDescription(value))
-);
-var CheckDescription = claudeAgentSdk.tool(
-  "CheckDescription",
-  "Validate the Function's `description` field",
-  {},
-  async () => resultFromResult(checkDescription())
-);
-var ReadInputSchema = claudeAgentSdk.tool(
-  "ReadInputSchema",
-  "Read the Function's `input_schema` field",
-  {},
-  async () => resultFromResult(readInputSchema())
-);
-var ReadInputSchemaSchema = claudeAgentSdk.tool(
-  "ReadInputSchemaSchema",
-  "Read the schema for Function `input_schema` field",
-  {},
-  async () => textResult(formatZodSchema(readInputSchemaSchema()))
-);
-function makeEditInputSchema() {
-  let modalityRemovalRejected = false;
+  );
+}
+function makeReadMapParamSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadMapParamSchema",
+    "Read the schema for `map` available in mapped task expression context. For a task with `map: i`, the task is compiled once per element in `input_maps[i]`. Each compiled instance receives the current element as `map`.",
+    {},
+    async () => textResult(formatZodSchema(readMapParamSchema()))
+  );
+}
+function makeReadOutputParamSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadOutputParamSchema",
+    "Read the schema for `output` available in task output expression context.",
+    {},
+    async () => textResult(formatZodSchema(readOutputParamSchema()))
+  );
+}
+function makeReadType(state) {
+  return claudeAgentSdk.tool(
+    "ReadType",
+    "Read the Function's `type` field",
+    {},
+    async () => resultFromResult(readType())
+  );
+}
+function makeReadTypeSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadTypeSchema",
+    "Read the schema for Function `type` field",
+    {},
+    async () => textResult(formatZodSchema(readTypeSchema()))
+  );
+}
+function makeEditType(state) {
+  return claudeAgentSdk.tool(
+    "EditType",
+    "Edit the Function's `type` field",
+    { value: z19__default.default.string() },
+    async ({ value }) => resultFromResult(editType(value))
+  );
+}
+function makeCheckType(state) {
+  return claudeAgentSdk.tool(
+    "CheckType",
+    "Validate the Function's `type` field",
+    {},
+    async () => resultFromResult(checkType())
+  );
+}
+function makeReadDescription(state) {
+  return claudeAgentSdk.tool(
+    "ReadDescription",
+    "Read the Function's `description` field",
+    {},
+    async () => resultFromResult(readDescription())
+  );
+}
+function makeReadDescriptionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadDescriptionSchema",
+    "Read the schema for Function `description` field",
+    {},
+    async () => textResult(formatZodSchema(readDescriptionSchema()))
+  );
+}
+function makeEditDescription(state) {
+  return claudeAgentSdk.tool(
+    "EditDescription",
+    "Edit the Function's `description` field",
+    { value: z19__default.default.string() },
+    async ({ value }) => resultFromResult(editDescription(value))
+  );
+}
+function makeCheckDescription(state) {
+  return claudeAgentSdk.tool(
+    "CheckDescription",
+    "Validate the Function's `description` field",
+    {},
+    async () => resultFromResult(checkDescription())
+  );
+}
+function makeReadInputSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputSchema",
+    "Read the Function's `input_schema` field",
+    {},
+    async () => resultFromResult(readInputSchema())
+  );
+}
+function makeReadInputSchemaSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputSchemaSchema",
+    "Read the schema for Function `input_schema` field",
+    {},
+    async () => textResult(formatZodSchema(readInputSchemaSchema()))
+  );
+}
+function makeEditInputSchema(state) {
   return claudeAgentSdk.tool(
     "EditInputSchema",
     "Edit the Function's `input_schema` field. If the new schema removes multimodal types present in the current schema, you must pass `dangerouslyRemoveModalities: true` \u2014 but only after re-reading SPEC.md to confirm this does not contradict it.",
@@ -3156,14 +3204,14 @@ function makeEditInputSchema() {
     },
     async ({ value, dangerouslyRemoveModalities }) => {
       if (dangerouslyRemoveModalities) {
-        if (!modalityRemovalRejected) {
+        if (!state.editInputSchemaModalityRemovalRejected) {
           return resultFromResult({
             ok: false,
             value: void 0,
             error: "dangerouslyRemoveModalities can only be used after a previous EditInputSchema call was rejected for removing modalities."
           });
         }
-        modalityRemovalRejected = false;
+        state.editInputSchemaModalityRemovalRejected = false;
         return resultFromResult(editInputSchema(value));
       }
       const current = readInputSchema();
@@ -3180,7 +3228,7 @@ function makeEditInputSchema() {
             }
           }
           if (removed.length > 0) {
-            modalityRemovalRejected = true;
+            state.editInputSchemaModalityRemovalRejected = true;
             return resultFromResult({
               ok: false,
               value: void 0,
@@ -3189,212 +3237,270 @@ function makeEditInputSchema() {
           }
         }
       }
-      modalityRemovalRejected = false;
+      state.editInputSchemaModalityRemovalRejected = false;
       return resultFromResult(editInputSchema(value));
     }
   );
 }
-var CheckInputSchema = claudeAgentSdk.tool(
-  "CheckInputSchema",
-  "Validate the Function's `input_schema` field",
-  {},
-  async () => resultFromResult(checkInputSchema())
-);
-var ReadInputMaps = claudeAgentSdk.tool(
-  "ReadInputMaps",
-  "Read the Function's `input_maps` field",
-  {},
-  async () => resultFromResult(readInputMaps())
-);
-var ReadInputMapsSchema = claudeAgentSdk.tool(
-  "ReadInputMapsSchema",
-  "Read the schema for Function `input_maps` field",
-  {},
-  async () => textResult(formatZodSchema(readInputMapsSchema()))
-);
-claudeAgentSdk.tool(
-  "EditInputMaps",
-  "Edit the Function's `input_maps` field",
-  { value: z19__default.default.unknown().nullable() },
-  async ({ value }) => resultFromResult(editInputMaps(value))
-);
-var AppendInputMap = claudeAgentSdk.tool(
-  "AppendInputMap",
-  "Append an input map to the Function's `input_maps` array",
-  { value: z19__default.default.unknown() },
-  async ({ value }) => resultFromResult(appendInputMap(value))
-);
-var DelInputMap = claudeAgentSdk.tool(
-  "DelInputMap",
-  "Delete an input map at a specific index from the Function's `input_maps` array",
-  { index: z19__default.default.int().nonnegative() },
-  async ({ index }) => resultFromResult(delInputMap(index))
-);
-var DelInputMaps = claudeAgentSdk.tool(
-  "DelInputMaps",
-  "Delete the Function's `input_maps` field",
-  {},
-  async () => resultFromResult(delInputMaps())
-);
-var CheckInputMaps = claudeAgentSdk.tool(
-  "CheckInputMaps",
-  "Validate the Function's `input_maps` field",
-  {},
-  async () => resultFromResult(checkInputMaps())
-);
-var ReadOutputLength = claudeAgentSdk.tool(
-  "ReadOutputLength",
-  "Read the Function's `output_length` field",
-  {},
-  async () => resultFromResult(readOutputLength())
-);
-var ReadOutputLengthSchema = claudeAgentSdk.tool(
-  "ReadOutputLengthSchema",
-  "Read the schema for Function `output_length` field",
-  {},
-  async () => textResult(formatZodSchema(readOutputLengthSchema()))
-);
-var EditOutputLength = claudeAgentSdk.tool(
-  "EditOutputLength",
-  "Edit the Function's `output_length` field",
-  { value: z19__default.default.unknown().nullable() },
-  async ({ value }) => resultFromResult(editOutputLength(value))
-);
-var DelOutputLength = claudeAgentSdk.tool(
-  "DelOutputLength",
-  "Delete the Function's `output_length` field",
-  {},
-  async () => resultFromResult(delOutputLength())
-);
-var CheckOutputLength = claudeAgentSdk.tool(
-  "CheckOutputLength",
-  "Validate the Function's `output_length` field",
-  {},
-  async () => resultFromResult(checkOutputLength())
-);
-var ReadInputSplit = claudeAgentSdk.tool(
-  "ReadInputSplit",
-  "Read the Function's `input_split` field",
-  {},
-  async () => resultFromResult(readInputSplit())
-);
-var ReadInputSplitSchema = claudeAgentSdk.tool(
-  "ReadInputSplitSchema",
-  "Read the schema for Function `input_split` field. Splits the input into sub-inputs (one per output element). Array length must equal output_length. Each sub-input, when executed alone, must produce output_length=1. Used by strategies like swiss_system for parallel pool execution.",
-  {},
-  async () => textResult(formatZodSchema(readInputSplitSchema()))
-);
-var EditInputSplit = claudeAgentSdk.tool(
-  "EditInputSplit",
-  "Edit the Function's `input_split` field",
-  { value: z19__default.default.unknown().nullable() },
-  async ({ value }) => resultFromResult(editInputSplit(value))
-);
-var DelInputSplit = claudeAgentSdk.tool(
-  "DelInputSplit",
-  "Delete the Function's `input_split` field",
-  {},
-  async () => resultFromResult(delInputSplit())
-);
-var CheckInputSplit = claudeAgentSdk.tool(
-  "CheckInputSplit",
-  "Validate the Function's `input_split` field",
-  {},
-  async () => resultFromResult(checkInputSplit())
-);
-var ReadInputMerge = claudeAgentSdk.tool(
-  "ReadInputMerge",
-  "Read the Function's `input_merge` field",
-  {},
-  async () => resultFromResult(readInputMerge())
-);
-var ReadInputMergeSchema = claudeAgentSdk.tool(
-  "ReadInputMergeSchema",
-  "Read the schema for Function `input_merge` field. Recombines a variable-size, arbitrarily-ordered subset of sub-inputs (from input_split) back into a single input. Receives `input` as an array of sub-inputs. Used by strategies like swiss_system for parallel pool execution.",
-  {},
-  async () => textResult(formatZodSchema(readInputMergeSchema()))
-);
-var EditInputMerge = claudeAgentSdk.tool(
-  "EditInputMerge",
-  "Edit the Function's `input_merge` field",
-  { value: z19__default.default.unknown().nullable() },
-  async ({ value }) => resultFromResult(editInputMerge(value))
-);
-var DelInputMerge = claudeAgentSdk.tool(
-  "DelInputMerge",
-  "Delete the Function's `input_merge` field",
-  {},
-  async () => resultFromResult(delInputMerge())
-);
-var CheckInputMerge = claudeAgentSdk.tool(
-  "CheckInputMerge",
-  "Validate the Function's `input_merge` field",
-  {},
-  async () => resultFromResult(checkInputMerge())
-);
-var ReadTasks = claudeAgentSdk.tool(
-  "ReadTasks",
-  "Read the Function's `tasks` field",
-  {},
-  async () => resultFromResult(readTasks())
-);
-var ReadTasksSchema = claudeAgentSdk.tool(
-  "ReadTasksSchema",
-  "Read the schema for Function `tasks` field",
-  {},
-  async () => textResult(formatZodSchema(readTasksSchema()))
-);
-var AppendTask = claudeAgentSdk.tool(
-  "AppendTask",
-  "Append a task to the Function's `tasks` array",
-  { value: z19__default.default.record(z19__default.default.string(), z19__default.default.unknown()) },
-  async ({ value }) => resultFromResult(appendTask(value))
-);
-var EditTask = claudeAgentSdk.tool(
-  "EditTask",
-  "Replace a task at a specific index in the Function's `tasks` array",
-  {
-    index: z19__default.default.number().int().nonnegative(),
-    value: z19__default.default.record(z19__default.default.string(), z19__default.default.unknown())
-  },
-  async ({ index, value }) => resultFromResult(editTask(index, value))
-);
-var DelTask = claudeAgentSdk.tool(
-  "DelTask",
-  "Delete a task at a specific index from the Function's `tasks` array",
-  { index: z19__default.default.int().nonnegative() },
-  async ({ index }) => resultFromResult(delTask(index))
-);
-var DelTasks = claudeAgentSdk.tool(
-  "DelTasks",
-  "Delete all tasks from the Function's `tasks` array",
-  {},
-  async () => resultFromResult(delTasks())
-);
-var CheckTasks = claudeAgentSdk.tool(
-  "CheckTasks",
-  "Validate the Function's `tasks` field",
-  {},
-  async () => resultFromResult(checkTasks())
-);
-var ReadMessagesExpressionSchema = claudeAgentSdk.tool(
-  "ReadMessagesExpressionSchema",
-  "Read the schema for the `messages` field of a vector.completion task",
-  {},
-  async () => textResult(formatZodSchema(readMessagesSchema()))
-);
-var ReadToolsExpressionSchema = claudeAgentSdk.tool(
-  "ReadToolsExpressionSchema",
-  "Read the schema for the `tools` field of a vector.completion task",
-  {},
-  async () => textResult(formatZodSchema(readToolsSchema()))
-);
-var ReadResponsesExpressionSchema = claudeAgentSdk.tool(
-  "ReadResponsesExpressionSchema",
-  "Read the schema for the `responses` field of a vector.completion task",
-  {},
-  async () => textResult(formatZodSchema(readResponsesSchema()))
-);
+function makeCheckInputSchema(state) {
+  return claudeAgentSdk.tool(
+    "CheckInputSchema",
+    "Validate the Function's `input_schema` field",
+    {},
+    async () => resultFromResult(checkInputSchema())
+  );
+}
+function makeReadInputMaps(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputMaps",
+    "Read the Function's `input_maps` field",
+    {},
+    async () => resultFromResult(readInputMaps())
+  );
+}
+function makeReadInputMapsSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputMapsSchema",
+    "Read the schema for Function `input_maps` field",
+    {},
+    async () => textResult(formatZodSchema(readInputMapsSchema()))
+  );
+}
+function makeAppendInputMap(state) {
+  return claudeAgentSdk.tool(
+    "AppendInputMap",
+    "Append an input map to the Function's `input_maps` array",
+    { value: z19__default.default.unknown() },
+    async ({ value }) => resultFromResult(appendInputMap(value))
+  );
+}
+function makeDelInputMap(state) {
+  return claudeAgentSdk.tool(
+    "DelInputMap",
+    "Delete an input map at a specific index from the Function's `input_maps` array",
+    { index: z19__default.default.int().nonnegative() },
+    async ({ index }) => resultFromResult(delInputMap(index))
+  );
+}
+function makeDelInputMaps(state) {
+  return claudeAgentSdk.tool(
+    "DelInputMaps",
+    "Delete the Function's `input_maps` field",
+    {},
+    async () => resultFromResult(delInputMaps())
+  );
+}
+function makeCheckInputMaps(state) {
+  return claudeAgentSdk.tool(
+    "CheckInputMaps",
+    "Validate the Function's `input_maps` field",
+    {},
+    async () => resultFromResult(checkInputMaps())
+  );
+}
+function makeReadOutputLength(state) {
+  return claudeAgentSdk.tool(
+    "ReadOutputLength",
+    "Read the Function's `output_length` field",
+    {},
+    async () => resultFromResult(readOutputLength())
+  );
+}
+function makeReadOutputLengthSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadOutputLengthSchema",
+    "Read the schema for Function `output_length` field",
+    {},
+    async () => textResult(formatZodSchema(readOutputLengthSchema()))
+  );
+}
+function makeEditOutputLength(state) {
+  return claudeAgentSdk.tool(
+    "EditOutputLength",
+    "Edit the Function's `output_length` field",
+    { value: z19__default.default.unknown().nullable() },
+    async ({ value }) => resultFromResult(editOutputLength(value))
+  );
+}
+function makeDelOutputLength(state) {
+  return claudeAgentSdk.tool(
+    "DelOutputLength",
+    "Delete the Function's `output_length` field",
+    {},
+    async () => resultFromResult(delOutputLength())
+  );
+}
+function makeCheckOutputLength(state) {
+  return claudeAgentSdk.tool(
+    "CheckOutputLength",
+    "Validate the Function's `output_length` field",
+    {},
+    async () => resultFromResult(checkOutputLength())
+  );
+}
+function makeReadInputSplit(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputSplit",
+    "Read the Function's `input_split` field",
+    {},
+    async () => resultFromResult(readInputSplit())
+  );
+}
+function makeReadInputSplitSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputSplitSchema",
+    "Read the schema for Function `input_split` field. Splits the input into sub-inputs (one per output element). Array length must equal output_length. Each sub-input, when executed alone, must produce output_length=1. Used by strategies like swiss_system for parallel pool execution.",
+    {},
+    async () => textResult(formatZodSchema(readInputSplitSchema()))
+  );
+}
+function makeEditInputSplit(state) {
+  return claudeAgentSdk.tool(
+    "EditInputSplit",
+    "Edit the Function's `input_split` field",
+    { value: z19__default.default.unknown().nullable() },
+    async ({ value }) => resultFromResult(editInputSplit(value))
+  );
+}
+function makeDelInputSplit(state) {
+  return claudeAgentSdk.tool(
+    "DelInputSplit",
+    "Delete the Function's `input_split` field",
+    {},
+    async () => resultFromResult(delInputSplit())
+  );
+}
+function makeCheckInputSplit(state) {
+  return claudeAgentSdk.tool(
+    "CheckInputSplit",
+    "Validate the Function's `input_split` field",
+    {},
+    async () => resultFromResult(checkInputSplit())
+  );
+}
+function makeReadInputMerge(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputMerge",
+    "Read the Function's `input_merge` field",
+    {},
+    async () => resultFromResult(readInputMerge())
+  );
+}
+function makeReadInputMergeSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputMergeSchema",
+    "Read the schema for Function `input_merge` field. Recombines a variable-size, arbitrarily-ordered subset of sub-inputs (from input_split) back into a single input. Receives `input` as an array of sub-inputs. Used by strategies like swiss_system for parallel pool execution.",
+    {},
+    async () => textResult(formatZodSchema(readInputMergeSchema()))
+  );
+}
+function makeEditInputMerge(state) {
+  return claudeAgentSdk.tool(
+    "EditInputMerge",
+    "Edit the Function's `input_merge` field",
+    { value: z19__default.default.unknown().nullable() },
+    async ({ value }) => resultFromResult(editInputMerge(value))
+  );
+}
+function makeDelInputMerge(state) {
+  return claudeAgentSdk.tool(
+    "DelInputMerge",
+    "Delete the Function's `input_merge` field",
+    {},
+    async () => resultFromResult(delInputMerge())
+  );
+}
+function makeCheckInputMerge(state) {
+  return claudeAgentSdk.tool(
+    "CheckInputMerge",
+    "Validate the Function's `input_merge` field",
+    {},
+    async () => resultFromResult(checkInputMerge())
+  );
+}
+function makeReadTasks(state) {
+  return claudeAgentSdk.tool(
+    "ReadTasks",
+    "Read the Function's `tasks` field",
+    {},
+    async () => resultFromResult(readTasks())
+  );
+}
+function makeReadTasksSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadTasksSchema",
+    "Read the schema for Function `tasks` field",
+    {},
+    async () => textResult(formatZodSchema(readTasksSchema()))
+  );
+}
+function makeAppendTask(state) {
+  return claudeAgentSdk.tool(
+    "AppendTask",
+    "Append a task to the Function's `tasks` array",
+    { value: z19__default.default.record(z19__default.default.string(), z19__default.default.unknown()) },
+    async ({ value }) => resultFromResult(appendTask(value))
+  );
+}
+function makeEditTask(state) {
+  return claudeAgentSdk.tool(
+    "EditTask",
+    "Replace a task at a specific index in the Function's `tasks` array",
+    {
+      index: z19__default.default.number().int().nonnegative(),
+      value: z19__default.default.record(z19__default.default.string(), z19__default.default.unknown())
+    },
+    async ({ index, value }) => resultFromResult(editTask(index, value))
+  );
+}
+function makeDelTask(state) {
+  return claudeAgentSdk.tool(
+    "DelTask",
+    "Delete a task at a specific index from the Function's `tasks` array",
+    { index: z19__default.default.int().nonnegative() },
+    async ({ index }) => resultFromResult(delTask(index))
+  );
+}
+function makeDelTasks(state) {
+  return claudeAgentSdk.tool(
+    "DelTasks",
+    "Delete all tasks from the Function's `tasks` array",
+    {},
+    async () => resultFromResult(delTasks())
+  );
+}
+function makeCheckTasks(state) {
+  return claudeAgentSdk.tool(
+    "CheckTasks",
+    "Validate the Function's `tasks` field",
+    {},
+    async () => resultFromResult(checkTasks())
+  );
+}
+function makeReadMessagesExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadMessagesExpressionSchema",
+    "Read the schema for the `messages` field of a vector.completion task",
+    {},
+    async () => textResult(formatZodSchema(readMessagesSchema()))
+  );
+}
+function makeReadToolsExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadToolsExpressionSchema",
+    "Read the schema for the `tools` field of a vector.completion task",
+    {},
+    async () => textResult(formatZodSchema(readToolsSchema()))
+  );
+}
+function makeReadResponsesExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadResponsesExpressionSchema",
+    "Read the schema for the `responses` field of a vector.completion task",
+    {},
+    async () => textResult(formatZodSchema(readResponsesSchema()))
+  );
+}
 function buildExampleInput(value) {
   const fnRaw = readFunction();
   if (!fnRaw.ok) return { ok: false, error: fnRaw.error };
@@ -3413,249 +3519,319 @@ function buildExampleInput(value) {
   const outputLength = func.type === "vector.function" ? objectiveai.Functions.compileFunctionOutputLength(func, value) : null;
   return { ok: true, value: { value, compiledTasks, outputLength } };
 }
-var ReadExampleInputs = claudeAgentSdk.tool(
-  "ReadExampleInputs",
-  "Read the Function's example inputs",
-  {},
-  async () => resultFromResult(readExampleInputs())
-);
-var ReadExampleInputsSchema = claudeAgentSdk.tool(
-  "ReadExampleInputsSchema",
-  "Read the schema for Function example inputs",
-  {},
-  async () => {
-    const result = readExampleInputsSchema();
-    if (!result.ok) {
-      return resultFromResult(result);
+function makeReadExampleInputs(state) {
+  return claudeAgentSdk.tool(
+    "ReadExampleInputs",
+    "Read the Function's example inputs",
+    {},
+    async () => resultFromResult(readExampleInputs())
+  );
+}
+function makeReadExampleInputsSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadExampleInputsSchema",
+    "Read the schema for Function example inputs",
+    {},
+    async () => {
+      const result = readExampleInputsSchema();
+      if (!result.ok) {
+        return resultFromResult(result);
+      }
+      return textResult(formatZodSchema(result.value));
     }
-    return textResult(formatZodSchema(result.value));
-  }
-);
-var AppendExampleInput = claudeAgentSdk.tool(
-  "AppendExampleInput",
-  "Append an example input to the Function's example inputs array. Provide just the input value \u2014 compiledTasks and outputLength are computed automatically.",
-  { value: objectiveai.Functions.Expression.InputValueSchema },
-  async ({ value }) => {
-    const built = buildExampleInput(value);
-    if (!built.ok) return errorResult(built.error);
-    return resultFromResult(appendExampleInput(built.value));
-  }
-);
-var EditExampleInput = claudeAgentSdk.tool(
-  "EditExampleInput",
-  "Replace an example input at a specific index in the Function's example inputs array. Provide just the input value \u2014 compiledTasks and outputLength are computed automatically.",
-  {
-    index: z19__default.default.number().int().nonnegative(),
-    value: objectiveai.Functions.Expression.InputValueSchema
-  },
-  async ({ index, value }) => {
-    const built = buildExampleInput(value);
-    if (!built.ok) return errorResult(built.error);
-    return resultFromResult(editExampleInput(index, built.value));
-  }
-);
-var DelExampleInput = claudeAgentSdk.tool(
-  "DelExampleInput",
-  "Delete an example input at a specific index from the Function's example inputs array",
-  { index: z19__default.default.number().int().nonnegative() },
-  async ({ index }) => resultFromResult(delExampleInput(index))
-);
-var DelExampleInputs = claudeAgentSdk.tool(
-  "DelExampleInputs",
-  "Delete all example inputs from the Function's example inputs array",
-  {},
-  async () => resultFromResult(delExampleInputs())
-);
-var CheckExampleInputs = claudeAgentSdk.tool(
-  "CheckExampleInputs",
-  "Validate the Function's example inputs",
-  {},
-  async () => resultFromResult(checkExampleInputs())
-);
-function makeRunNetworkTests(apiBase, apiKey) {
+  );
+}
+function makeAppendExampleInput(state) {
+  return claudeAgentSdk.tool(
+    "AppendExampleInput",
+    "Append an example input to the Function's example inputs array. Provide just the input value \u2014 compiledTasks and outputLength are computed automatically.",
+    { value: objectiveai.Functions.Expression.InputValueSchema },
+    async ({ value }) => {
+      const built = buildExampleInput(value);
+      if (!built.ok) return errorResult(built.error);
+      return resultFromResult(appendExampleInput(built.value));
+    }
+  );
+}
+function makeEditExampleInput(state) {
+  return claudeAgentSdk.tool(
+    "EditExampleInput",
+    "Replace an example input at a specific index in the Function's example inputs array. Provide just the input value \u2014 compiledTasks and outputLength are computed automatically.",
+    {
+      index: z19__default.default.number().int().nonnegative(),
+      value: objectiveai.Functions.Expression.InputValueSchema
+    },
+    async ({ index, value }) => {
+      const built = buildExampleInput(value);
+      if (!built.ok) return errorResult(built.error);
+      return resultFromResult(editExampleInput(index, built.value));
+    }
+  );
+}
+function makeDelExampleInput(state) {
+  return claudeAgentSdk.tool(
+    "DelExampleInput",
+    "Delete an example input at a specific index from the Function's example inputs array",
+    { index: z19__default.default.number().int().nonnegative() },
+    async ({ index }) => resultFromResult(delExampleInput(index))
+  );
+}
+function makeDelExampleInputs(state) {
+  return claudeAgentSdk.tool(
+    "DelExampleInputs",
+    "Delete all example inputs from the Function's example inputs array",
+    {},
+    async () => resultFromResult(delExampleInputs())
+  );
+}
+function makeCheckExampleInputs(state) {
+  return claudeAgentSdk.tool(
+    "CheckExampleInputs",
+    "Validate the Function's example inputs",
+    {},
+    async () => resultFromResult(checkExampleInputs())
+  );
+}
+function makeRunNetworkTests(state) {
   return claudeAgentSdk.tool(
     "RunNetworkTests",
     "Execute the function once for each example input and write results to network_tests/",
     {},
-    async () => resultFromResult(await runNetworkTests(apiBase, apiKey))
+    async () => resultFromResult(await runNetworkTests(state.runNetworkTestsApiBase, state.runNetworkTestsApiKey))
   );
 }
-var ReadDefaultNetworkTest = claudeAgentSdk.tool(
-  "ReadDefaultNetworkTest",
-  "Read a default strategy network test result by index",
-  { index: z19__default.default.number().int().nonnegative() },
-  async ({ index }) => resultFromResult(readDefaultNetworkTest(index))
-);
-var ReadSwissSystemNetworkTest = claudeAgentSdk.tool(
-  "ReadSwissSystemNetworkTest",
-  "Read a swiss_system strategy network test result by index",
-  { index: z19__default.default.number().int().nonnegative() },
-  async ({ index }) => resultFromResult(readSwissSystemNetworkTest(index))
-);
-var ReadJsonValueSchema = claudeAgentSdk.tool(
-  "ReadJsonValueSchema",
-  "Read the schema for the JsonValue type (recursive)",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.JsonValueSchema, { resolveLazy: true }))
-);
-var ReadJsonValueExpressionSchema = claudeAgentSdk.tool(
-  "ReadJsonValueExpressionSchema",
-  "Read the schema for the JsonValueExpression type (recursive, supports expressions)",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.JsonValueExpressionSchema, { resolveLazy: true }))
-);
-var ReadInputValueSchema = claudeAgentSdk.tool(
-  "ReadInputValueSchema",
-  "Read the schema for the InputValue type (recursive, supports media)",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.Functions.Expression.InputValueSchema, { resolveLazy: true }))
-);
-var ReadInputValueExpressionSchema = claudeAgentSdk.tool(
-  "ReadInputValueExpressionSchema",
-  "Read the schema for the InputValueExpression type (recursive, supports media and expressions)",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.Functions.Expression.InputValueExpressionSchema, { resolveLazy: true }))
-);
+function makeReadDefaultNetworkTest(state) {
+  return claudeAgentSdk.tool(
+    "ReadDefaultNetworkTest",
+    "Read a default strategy network test result by index",
+    { index: z19__default.default.number().int().nonnegative() },
+    async ({ index }) => resultFromResult(readDefaultNetworkTest(index))
+  );
+}
+function makeReadSwissSystemNetworkTest(state) {
+  return claudeAgentSdk.tool(
+    "ReadSwissSystemNetworkTest",
+    "Read a swiss_system strategy network test result by index",
+    { index: z19__default.default.number().int().nonnegative() },
+    async ({ index }) => resultFromResult(readSwissSystemNetworkTest(index))
+  );
+}
+function makeReadJsonValueSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadJsonValueSchema",
+    "Read the schema for the JsonValue type (recursive)",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.JsonValueSchema, { resolveLazy: true }))
+  );
+}
+function makeReadJsonValueExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadJsonValueExpressionSchema",
+    "Read the schema for the JsonValueExpression type (recursive, supports expressions)",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.JsonValueExpressionSchema, { resolveLazy: true }))
+  );
+}
+function makeReadInputValueSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputValueSchema",
+    "Read the schema for the InputValue type (recursive, supports media)",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.Functions.Expression.InputValueSchema, { resolveLazy: true }))
+  );
+}
+function makeReadInputValueExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadInputValueExpressionSchema",
+    "Read the schema for the InputValueExpression type (recursive, supports media and expressions)",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.Functions.Expression.InputValueExpressionSchema, { resolveLazy: true }))
+  );
+}
 var Request = objectiveai.Chat.Completions.Request;
-var ReadDeveloperMessageSchema = claudeAgentSdk.tool(
-  "ReadDeveloperMessageSchema",
-  "Read the schema for a compiled developer message (role: developer)",
-  {},
-  async () => textResult(formatZodSchema(Request.DeveloperMessageSchema))
-);
-var ReadSystemMessageSchema = claudeAgentSdk.tool(
-  "ReadSystemMessageSchema",
-  "Read the schema for a compiled system message (role: system)",
-  {},
-  async () => textResult(formatZodSchema(Request.SystemMessageSchema))
-);
-var ReadUserMessageSchema = claudeAgentSdk.tool(
-  "ReadUserMessageSchema",
-  "Read the schema for a compiled user message (role: user)",
-  {},
-  async () => textResult(formatZodSchema(Request.UserMessageSchema))
-);
-var ReadToolMessageSchema = claudeAgentSdk.tool(
-  "ReadToolMessageSchema",
-  "Read the schema for a compiled tool message (role: tool)",
-  {},
-  async () => textResult(formatZodSchema(Request.ToolMessageSchema))
-);
-var ReadAssistantMessageSchema = claudeAgentSdk.tool(
-  "ReadAssistantMessageSchema",
-  "Read the schema for a compiled assistant message (role: assistant)",
-  {},
-  async () => textResult(formatZodSchema(Request.AssistantMessageSchema))
-);
-var ReadDeveloperMessageExpressionSchema = claudeAgentSdk.tool(
-  "ReadDeveloperMessageExpressionSchema",
-  "Read the schema for a developer message expression (role: developer, supports $starlark/$jmespath)",
-  {},
-  async () => textResult(formatZodSchema(Request.DeveloperMessageExpressionSchema))
-);
-var ReadSystemMessageExpressionSchema = claudeAgentSdk.tool(
-  "ReadSystemMessageExpressionSchema",
-  "Read the schema for a system message expression (role: system, supports $starlark/$jmespath)",
-  {},
-  async () => textResult(formatZodSchema(Request.SystemMessageExpressionSchema))
-);
-var ReadUserMessageExpressionSchema = claudeAgentSdk.tool(
-  "ReadUserMessageExpressionSchema",
-  "Read the schema for a user message expression (role: user, supports $starlark/$jmespath)",
-  {},
-  async () => textResult(formatZodSchema(Request.UserMessageExpressionSchema))
-);
-var ReadToolMessageExpressionSchema = claudeAgentSdk.tool(
-  "ReadToolMessageExpressionSchema",
-  "Read the schema for a tool message expression (role: tool, supports $starlark/$jmespath)",
-  {},
-  async () => textResult(formatZodSchema(Request.ToolMessageExpressionSchema))
-);
-var ReadAssistantMessageExpressionSchema = claudeAgentSdk.tool(
-  "ReadAssistantMessageExpressionSchema",
-  "Read the schema for an assistant message expression (role: assistant, supports $starlark/$jmespath)",
-  {},
-  async () => textResult(formatZodSchema(Request.AssistantMessageExpressionSchema))
-);
+function makeReadDeveloperMessageSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadDeveloperMessageSchema",
+    "Read the schema for a compiled developer message (role: developer)",
+    {},
+    async () => textResult(formatZodSchema(Request.DeveloperMessageSchema))
+  );
+}
+function makeReadSystemMessageSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadSystemMessageSchema",
+    "Read the schema for a compiled system message (role: system)",
+    {},
+    async () => textResult(formatZodSchema(Request.SystemMessageSchema))
+  );
+}
+function makeReadUserMessageSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadUserMessageSchema",
+    "Read the schema for a compiled user message (role: user)",
+    {},
+    async () => textResult(formatZodSchema(Request.UserMessageSchema))
+  );
+}
+function makeReadToolMessageSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadToolMessageSchema",
+    "Read the schema for a compiled tool message (role: tool)",
+    {},
+    async () => textResult(formatZodSchema(Request.ToolMessageSchema))
+  );
+}
+function makeReadAssistantMessageSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadAssistantMessageSchema",
+    "Read the schema for a compiled assistant message (role: assistant)",
+    {},
+    async () => textResult(formatZodSchema(Request.AssistantMessageSchema))
+  );
+}
+function makeReadDeveloperMessageExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadDeveloperMessageExpressionSchema",
+    "Read the schema for a developer message expression (role: developer, supports $starlark/$jmespath)",
+    {},
+    async () => textResult(formatZodSchema(Request.DeveloperMessageExpressionSchema))
+  );
+}
+function makeReadSystemMessageExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadSystemMessageExpressionSchema",
+    "Read the schema for a system message expression (role: system, supports $starlark/$jmespath)",
+    {},
+    async () => textResult(formatZodSchema(Request.SystemMessageExpressionSchema))
+  );
+}
+function makeReadUserMessageExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadUserMessageExpressionSchema",
+    "Read the schema for a user message expression (role: user, supports $starlark/$jmespath)",
+    {},
+    async () => textResult(formatZodSchema(Request.UserMessageExpressionSchema))
+  );
+}
+function makeReadToolMessageExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadToolMessageExpressionSchema",
+    "Read the schema for a tool message expression (role: tool, supports $starlark/$jmespath)",
+    {},
+    async () => textResult(formatZodSchema(Request.ToolMessageExpressionSchema))
+  );
+}
+function makeReadAssistantMessageExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadAssistantMessageExpressionSchema",
+    "Read the schema for an assistant message expression (role: assistant, supports $starlark/$jmespath)",
+    {},
+    async () => textResult(formatZodSchema(Request.AssistantMessageExpressionSchema))
+  );
+}
 var Request2 = objectiveai.Chat.Completions.Request;
-var ReadSimpleContentSchema = claudeAgentSdk.tool(
-  "ReadSimpleContentSchema",
-  "Read the schema for compiled SimpleContent (text-only content used by developer/system messages)",
-  {},
-  async () => textResult(formatZodSchema(Request2.SimpleContentSchema))
-);
-var ReadRichContentSchema = claudeAgentSdk.tool(
-  "ReadRichContentSchema",
-  "Read the schema for compiled RichContent (text, images, audio, video, files \u2014 used by user/tool/assistant messages)",
-  {},
-  async () => textResult(formatZodSchema(Request2.RichContentSchema))
-);
-var ReadSimpleContentExpressionSchema = claudeAgentSdk.tool(
-  "ReadSimpleContentExpressionSchema",
-  "Read the schema for SimpleContent expression (text-only content, supports $starlark/$jmespath)",
-  {},
-  async () => textResult(formatZodSchema(Request2.SimpleContentExpressionSchema))
-);
-var ReadRichContentExpressionSchema = claudeAgentSdk.tool(
-  "ReadRichContentExpressionSchema",
-  "Read the schema for RichContent expression (text, images, audio, video, files \u2014 supports $starlark/$jmespath)",
-  {},
-  async () => textResult(formatZodSchema(Request2.RichContentExpressionSchema))
-);
-var ReadScalarFunctionTaskSchema = claudeAgentSdk.tool(
-  "ReadScalarFunctionTaskSchema",
-  "Read the schema for a scalar.function task",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.Functions.ScalarFunctionTaskExpressionSchema))
-);
-var ReadVectorFunctionTaskSchema = claudeAgentSdk.tool(
-  "ReadVectorFunctionTaskSchema",
-  "Read the schema for a vector.function task",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.Functions.VectorFunctionTaskExpressionSchema))
-);
-var ReadVectorCompletionTaskSchema = claudeAgentSdk.tool(
-  "ReadVectorCompletionTaskSchema",
-  "Read the schema for a vector.completion task",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.Functions.VectorCompletionTaskExpressionSchema))
-);
-var ReadCompiledScalarFunctionTaskSchema = claudeAgentSdk.tool(
-  "ReadCompiledScalarFunctionTaskSchema",
-  "Read the schema for a compiled scalar.function task (used in compiledTasks within ExampleInputs)",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.Functions.ScalarFunctionTaskSchema))
-);
-var ReadCompiledVectorFunctionTaskSchema = claudeAgentSdk.tool(
-  "ReadCompiledVectorFunctionTaskSchema",
-  "Read the schema for a compiled vector.function task (used in compiledTasks within ExampleInputs)",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.Functions.VectorFunctionTaskSchema))
-);
-var ReadCompiledVectorCompletionTaskSchema = claudeAgentSdk.tool(
-  "ReadCompiledVectorCompletionTaskSchema",
-  "Read the schema for a compiled vector.completion task (used in compiledTasks within ExampleInputs)",
-  {},
-  async () => textResult(formatZodSchema(objectiveai.Functions.VectorCompletionTaskSchema))
-);
-var ReadReadme = claudeAgentSdk.tool(
-  "ReadReadme",
-  "Read README.md",
-  {},
-  async () => resultFromResult(readReadme())
-);
-var WriteReadme = claudeAgentSdk.tool(
-  "WriteReadme",
-  "Write README.md",
-  { content: z19__default.default.string() },
-  async ({ content }) => resultFromResult(writeReadme(content))
-);
-function makeSubmit(apiBase, apiKey) {
+function makeReadSimpleContentSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadSimpleContentSchema",
+    "Read the schema for compiled SimpleContent (text-only content used by developer/system messages)",
+    {},
+    async () => textResult(formatZodSchema(Request2.SimpleContentSchema))
+  );
+}
+function makeReadRichContentSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadRichContentSchema",
+    "Read the schema for compiled RichContent (text, images, audio, video, files \u2014 used by user/tool/assistant messages)",
+    {},
+    async () => textResult(formatZodSchema(Request2.RichContentSchema))
+  );
+}
+function makeReadSimpleContentExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadSimpleContentExpressionSchema",
+    "Read the schema for SimpleContent expression (text-only content, supports $starlark/$jmespath)",
+    {},
+    async () => textResult(formatZodSchema(Request2.SimpleContentExpressionSchema))
+  );
+}
+function makeReadRichContentExpressionSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadRichContentExpressionSchema",
+    "Read the schema for RichContent expression (text, images, audio, video, files \u2014 supports $starlark/$jmespath)",
+    {},
+    async () => textResult(formatZodSchema(Request2.RichContentExpressionSchema))
+  );
+}
+function makeReadScalarFunctionTaskSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadScalarFunctionTaskSchema",
+    "Read the schema for a scalar.function task",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.Functions.ScalarFunctionTaskExpressionSchema))
+  );
+}
+function makeReadVectorFunctionTaskSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadVectorFunctionTaskSchema",
+    "Read the schema for a vector.function task",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.Functions.VectorFunctionTaskExpressionSchema))
+  );
+}
+function makeReadVectorCompletionTaskSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadVectorCompletionTaskSchema",
+    "Read the schema for a vector.completion task",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.Functions.VectorCompletionTaskExpressionSchema))
+  );
+}
+function makeReadCompiledScalarFunctionTaskSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadCompiledScalarFunctionTaskSchema",
+    "Read the schema for a compiled scalar.function task (used in compiledTasks within ExampleInputs)",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.Functions.ScalarFunctionTaskSchema))
+  );
+}
+function makeReadCompiledVectorFunctionTaskSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadCompiledVectorFunctionTaskSchema",
+    "Read the schema for a compiled vector.function task (used in compiledTasks within ExampleInputs)",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.Functions.VectorFunctionTaskSchema))
+  );
+}
+function makeReadCompiledVectorCompletionTaskSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadCompiledVectorCompletionTaskSchema",
+    "Read the schema for a compiled vector.completion task (used in compiledTasks within ExampleInputs)",
+    {},
+    async () => textResult(formatZodSchema(objectiveai.Functions.VectorCompletionTaskSchema))
+  );
+}
+function makeReadReadme(state) {
+  return claudeAgentSdk.tool(
+    "ReadReadme",
+    "Read README.md",
+    {},
+    async () => resultFromResult(readReadme())
+  );
+}
+function makeWriteReadme(state) {
+  return claudeAgentSdk.tool(
+    "WriteReadme",
+    "Write README.md",
+    { content: z19__default.default.string() },
+    async ({ content }) => resultFromResult(writeReadme(content))
+  );
+}
+function makeSubmit(state) {
   return claudeAgentSdk.tool(
     "Submit",
     "Check function, check example inputs, run network tests, commit and push to GitHub (if all successful)",
     { message: z19__default.default.string().describe("Commit message") },
-    async ({ message }) => resultFromResult(await submit(message, apiBase, apiKey))
+    async ({ message }) => resultFromResult(await submit(message, state.submitApiBase, state.submitApiKey))
   );
 }
 function getGitHubOwner2() {
@@ -3878,9 +4054,7 @@ var SpawnFunctionAgentsParamsSchema = z19.z.array(
     overwrite: z19.z.boolean().optional()
   })
 );
-function makeSpawnFunctionAgents(apiBase, apiKey) {
-  let hasSpawned = false;
-  let respawnRejected = false;
+function makeSpawnFunctionAgents(state) {
   return claudeAgentSdk.tool(
     "SpawnFunctionAgents",
     "Spawn child function agents in parallel",
@@ -3889,27 +4063,27 @@ function makeSpawnFunctionAgents(apiBase, apiKey) {
       dangerouslyRespawn: z19__default.default.boolean().optional()
     },
     async ({ params, dangerouslyRespawn }) => {
-      if (hasSpawned) {
+      if (state.spawnFunctionAgentsHasSpawned) {
         if (dangerouslyRespawn) {
-          if (!respawnRejected) {
+          if (!state.spawnFunctionAgentsRespawnRejected) {
             return resultFromResult({
               ok: false,
               value: void 0,
               error: "dangerouslyRespawn can only be used after a previous SpawnFunctionAgents call was rejected for respawning."
             });
           }
-          respawnRejected = false;
-          return resultFromResult(await spawnFunctionAgents(params, apiBase, apiKey));
+          state.spawnFunctionAgentsRespawnRejected = false;
+          return resultFromResult(await spawnFunctionAgents(params, state.submitApiBase, state.submitApiKey));
         }
-        respawnRejected = true;
+        state.spawnFunctionAgentsRespawnRejected = true;
         return resultFromResult({
           ok: false,
           value: void 0,
           error: "SpawnFunctionAgents has already been called. Before respawning, you must: (1) use ListAgentFunctions and read each agent function's function.json, (2) try every possible fix (editing tasks, input schemas, expressions, example inputs) to make the existing agent outputs work, (3) only respawn as an absolute last resort after exhausting all alternatives. If you have truly tried everything, call SpawnFunctionAgents again with `dangerouslyRespawn: true`."
         });
       }
-      hasSpawned = true;
-      return resultFromResult(await spawnFunctionAgents(params, apiBase, apiKey));
+      state.spawnFunctionAgentsHasSpawned = true;
+      return resultFromResult(await spawnFunctionAgents(params, state.submitApiBase, state.submitApiKey));
     }
   );
 }
@@ -3986,134 +4160,138 @@ function readAgentFunction(name) {
   }
   return { ok: true, value: { name, owner, repository, commit, path: subPath, functionJson }, error: void 0 };
 }
-var ListAgentFunctions = claudeAgentSdk.tool(
-  "ListAgentFunctions",
-  "List all agent functions with their owner, repository, and commit",
-  {},
-  async () => resultFromResult(listAgentFunctions())
-);
-var ReadAgentFunction = claudeAgentSdk.tool(
-  "ReadAgentFunction",
-  "Read an agent function by name",
-  { name: z19__default.default.string() },
-  async ({ name }) => resultFromResult(readAgentFunction(name))
-);
+function makeListAgentFunctions(state) {
+  return claudeAgentSdk.tool(
+    "ListAgentFunctions",
+    "List all agent functions with their owner, repository, and commit",
+    {},
+    async () => resultFromResult(listAgentFunctions())
+  );
+}
+function makeReadAgentFunction(state) {
+  return claudeAgentSdk.tool(
+    "ReadAgentFunction",
+    "Read an agent function by name",
+    { name: z19__default.default.string() },
+    async ({ name }) => resultFromResult(readAgentFunction(name))
+  );
+}
 
 // src/claude/invent/inventMcp.ts
-function getCommonTools(planIndex, apiBase, apiKey) {
+function getCommonTools(state) {
   registerSchemaRefs();
   return [
     // Core Context
-    ReadSpec,
-    ReadName,
-    ReadEssay,
-    ReadEssayTasks,
-    makeReadPlan(planIndex),
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema,
+    makeReadSpec(),
+    makeReadName(),
+    makeReadEssay(),
+    makeReadEssayTasks(),
+    makeReadPlan(state),
+    makeListExampleFunctions(),
+    makeReadExampleFunction(),
+    makeReadFunctionSchema(),
     // Function
-    ReadFunction,
-    CheckFunction,
-    ReadType,
-    ReadTypeSchema,
-    EditType,
-    CheckType,
-    ReadDescription,
-    ReadDescriptionSchema,
-    EditDescription,
-    CheckDescription,
-    ReadInputSchema,
-    ReadInputSchemaSchema,
-    makeEditInputSchema(),
-    CheckInputSchema,
-    ReadInputMaps,
-    ReadInputMapsSchema,
-    AppendInputMap,
-    DelInputMap,
-    DelInputMaps,
-    CheckInputMaps,
-    ReadOutputLength,
-    ReadOutputLengthSchema,
-    EditOutputLength,
-    DelOutputLength,
-    CheckOutputLength,
-    ReadInputSplit,
-    ReadInputSplitSchema,
-    EditInputSplit,
-    DelInputSplit,
-    CheckInputSplit,
-    ReadInputMerge,
-    ReadInputMergeSchema,
-    EditInputMerge,
-    DelInputMerge,
-    CheckInputMerge,
-    ReadTasks,
-    ReadTasksSchema,
-    AppendTask,
-    EditTask,
-    DelTask,
-    DelTasks,
-    CheckTasks,
-    ReadMessagesExpressionSchema,
-    ReadToolsExpressionSchema,
-    ReadResponsesExpressionSchema,
+    makeReadFunction(),
+    makeCheckFunction(),
+    makeReadType(),
+    makeReadTypeSchema(),
+    makeEditType(),
+    makeCheckType(),
+    makeReadDescription(),
+    makeReadDescriptionSchema(),
+    makeEditDescription(),
+    makeCheckDescription(),
+    makeReadInputSchema(),
+    makeReadInputSchemaSchema(),
+    makeEditInputSchema(state),
+    makeCheckInputSchema(),
+    makeReadInputMaps(),
+    makeReadInputMapsSchema(),
+    makeAppendInputMap(),
+    makeDelInputMap(),
+    makeDelInputMaps(),
+    makeCheckInputMaps(),
+    makeReadOutputLength(),
+    makeReadOutputLengthSchema(),
+    makeEditOutputLength(),
+    makeDelOutputLength(),
+    makeCheckOutputLength(),
+    makeReadInputSplit(),
+    makeReadInputSplitSchema(),
+    makeEditInputSplit(),
+    makeDelInputSplit(),
+    makeCheckInputSplit(),
+    makeReadInputMerge(),
+    makeReadInputMergeSchema(),
+    makeEditInputMerge(),
+    makeDelInputMerge(),
+    makeCheckInputMerge(),
+    makeReadTasks(),
+    makeReadTasksSchema(),
+    makeAppendTask(),
+    makeEditTask(),
+    makeDelTask(),
+    makeDelTasks(),
+    makeCheckTasks(),
+    makeReadMessagesExpressionSchema(),
+    makeReadToolsExpressionSchema(),
+    makeReadResponsesExpressionSchema(),
     // Expression params
-    ReadInputParamSchema,
-    ReadMapParamSchema,
-    ReadOutputParamSchema,
+    makeReadInputParamSchema(),
+    makeReadMapParamSchema(),
+    makeReadOutputParamSchema(),
     // Recursive type schemas (referenced by $ref in other schemas)
-    ReadJsonValueSchema,
-    ReadJsonValueExpressionSchema,
-    ReadInputValueSchema,
-    ReadInputValueExpressionSchema,
+    makeReadJsonValueSchema(),
+    makeReadJsonValueExpressionSchema(),
+    makeReadInputValueSchema(),
+    makeReadInputValueExpressionSchema(),
     // Message role schemas (expression variants, referenced by $ref in ReadMessagesExpressionSchema)
-    ReadDeveloperMessageExpressionSchema,
-    ReadSystemMessageExpressionSchema,
-    ReadUserMessageExpressionSchema,
-    ReadToolMessageExpressionSchema,
-    ReadAssistantMessageExpressionSchema,
+    makeReadDeveloperMessageExpressionSchema(),
+    makeReadSystemMessageExpressionSchema(),
+    makeReadUserMessageExpressionSchema(),
+    makeReadToolMessageExpressionSchema(),
+    makeReadAssistantMessageExpressionSchema(),
     // Message role schemas (compiled variants, referenced by $ref in ReadCompiledVectorCompletionTaskSchema)
-    ReadDeveloperMessageSchema,
-    ReadSystemMessageSchema,
-    ReadUserMessageSchema,
-    ReadToolMessageSchema,
-    ReadAssistantMessageSchema,
+    makeReadDeveloperMessageSchema(),
+    makeReadSystemMessageSchema(),
+    makeReadUserMessageSchema(),
+    makeReadToolMessageSchema(),
+    makeReadAssistantMessageSchema(),
     // Content schemas (expression variants, referenced by $ref in expression message schemas)
-    ReadSimpleContentExpressionSchema,
-    ReadRichContentExpressionSchema,
+    makeReadSimpleContentExpressionSchema(),
+    makeReadRichContentExpressionSchema(),
     // Content schemas (compiled variants, referenced by $ref in compiled message schemas)
-    ReadSimpleContentSchema,
-    ReadRichContentSchema,
+    makeReadSimpleContentSchema(),
+    makeReadRichContentSchema(),
     // Task type schemas (referenced by $ref in ReadTasksSchema)
-    ReadScalarFunctionTaskSchema,
-    ReadVectorFunctionTaskSchema,
-    ReadVectorCompletionTaskSchema,
+    makeReadScalarFunctionTaskSchema(),
+    makeReadVectorFunctionTaskSchema(),
+    makeReadVectorCompletionTaskSchema(),
     // Compiled task type schemas (referenced by $ref in ReadExampleInputsSchema)
-    ReadCompiledScalarFunctionTaskSchema,
-    ReadCompiledVectorFunctionTaskSchema,
-    ReadCompiledVectorCompletionTaskSchema,
+    makeReadCompiledScalarFunctionTaskSchema(),
+    makeReadCompiledVectorFunctionTaskSchema(),
+    makeReadCompiledVectorCompletionTaskSchema(),
     // Example inputs
-    ReadExampleInputs,
-    ReadExampleInputsSchema,
-    AppendExampleInput,
-    EditExampleInput,
-    DelExampleInput,
-    DelExampleInputs,
-    CheckExampleInputs,
+    makeReadExampleInputs(),
+    makeReadExampleInputsSchema(),
+    makeAppendExampleInput(),
+    makeEditExampleInput(),
+    makeDelExampleInput(),
+    makeDelExampleInputs(),
+    makeCheckExampleInputs(),
     // README
-    ReadReadme,
-    WriteReadme,
+    makeReadReadme(),
+    makeWriteReadme(),
     // Network tests
-    makeRunNetworkTests(apiBase, apiKey),
-    ReadDefaultNetworkTest,
-    ReadSwissSystemNetworkTest,
+    makeRunNetworkTests(state),
+    makeReadDefaultNetworkTest(),
+    makeReadSwissSystemNetworkTest(),
     // Submit
-    makeSubmit(apiBase, apiKey)
+    makeSubmit(state)
   ];
 }
-function getFunctionTasksTools(apiBase, apiKey) {
-  return [makeSpawnFunctionAgents(apiBase, apiKey), ListAgentFunctions, ReadAgentFunction];
+function getFunctionTasksTools(state) {
+  return [makeSpawnFunctionAgents(state), makeListAgentFunctions(), makeReadAgentFunction()];
 }
 function buildFunctionTasksPrompt() {
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
@@ -4280,8 +4458,10 @@ Once all tests pass and SPEC.md compliance is verified:
 - **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 `;
 }
-async function inventLoop(log, useFunctionTasks, sessionId, apiBase, apiKey) {
+async function inventLoop(state, log, useFunctionTasks, sessionId) {
   const nextPlanIndex = getNextPlanIndex();
+  state.readPlanIndex = nextPlanIndex;
+  state.writePlanIndex = nextPlanIndex;
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -4290,8 +4470,8 @@ async function inventLoop(log, useFunctionTasks, sessionId, apiBase, apiKey) {
     attempt++;
     log(`Invent loop attempt ${attempt}/${maxAttempts}`);
     const tools = [
-      ...getCommonTools(nextPlanIndex, apiBase, apiKey),
-      ...useFunctionTasks ? getFunctionTasksTools(apiBase, apiKey) : []
+      ...getCommonTools(state),
+      ...useFunctionTasks ? getFunctionTasksTools(state) : []
     ];
     const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "invent", tools });
     let prompt;
@@ -4323,7 +4503,7 @@ Please try again. Remember to:
     );
     log("Running submit...");
     lastFailureReasons = [];
-    const submitResult = await submit("submit", apiBase, apiKey);
+    const submitResult = await submit("submit", state.submitApiBase, state.submitApiKey);
     if (submitResult.ok) {
       success = true;
       log(`Success: Submitted commit ${submitResult.value}`);
@@ -4339,14 +4519,16 @@ Please try again. Remember to:
 }
 async function inventFunctionTasksMcp(options = {}) {
   const log = options.log ?? createFileLogger().log;
+  const state = options.toolState;
   log("=== Invent Loop: Creating new function (function tasks) ===");
-  await inventLoop(log, true, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(state, log, true, options.sessionId);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function inventVectorTasksMcp(options = {}) {
   const log = options.log ?? createFileLogger().log;
+  const state = options.toolState;
   log("=== Invent Loop: Creating new function (vector tasks) ===");
-  await inventLoop(log, false, options.sessionId, options.apiBase, options.apiKey);
+  await inventLoop(state, log, false, options.sessionId);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function inventMcp(options = {}) {
@@ -4358,10 +4540,31 @@ async function inventMcp(options = {}) {
   }
 }
 
+// src/tools/claude/toolState.ts
+function makeToolState(options) {
+  return {
+    spawnFunctionAgentsHasSpawned: false,
+    spawnFunctionAgentsRespawnRejected: false,
+    editInputSchemaModalityRemovalRejected: false,
+    runNetworkTestsApiBase: options.apiBase,
+    runNetworkTestsApiKey: options.apiKey,
+    readPlanIndex: options.readPlanIndex,
+    writePlanIndex: options.writePlanIndex,
+    submitApiBase: options.apiBase,
+    submitApiKey: options.apiKey
+  };
+}
+
 // src/claude/index.ts
 async function invent(options = {}) {
   const log = options.log ?? createFileLogger().log;
-  options = { ...options, log };
+  const toolState = options.toolState ?? makeToolState({
+    apiBase: options.apiBase,
+    apiKey: options.apiKey,
+    readPlanIndex: 0,
+    writePlanIndex: 0
+  });
+  options = { ...options, log, toolState };
   log("=== Initializing workspace ===");
   await init(options);
   log("=== Preparing ===");

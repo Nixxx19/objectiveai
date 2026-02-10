@@ -11,52 +11,67 @@ import {
 } from "../function";
 import z from "zod";
 import { formatZodSchema } from "../schema";
+import { ToolState } from "./toolState";
 
-export const ReadInputMaps = tool(
-  "ReadInputMaps",
-  "Read the Function's `input_maps` field",
-  {},
-  async () => resultFromResult(readInputMaps()),
-);
+export function makeReadInputMaps(state: ToolState) {
+  return tool(
+    "ReadInputMaps",
+    "Read the Function's `input_maps` field",
+    {},
+    async () => resultFromResult(readInputMaps()),
+  );
+}
 
-export const ReadInputMapsSchema = tool(
-  "ReadInputMapsSchema",
-  "Read the schema for Function `input_maps` field",
-  {},
-  async () => textResult(formatZodSchema(readInputMapsSchema())),
-);
+export function makeReadInputMapsSchema(state: ToolState) {
+  return tool(
+    "ReadInputMapsSchema",
+    "Read the schema for Function `input_maps` field",
+    {},
+    async () => textResult(formatZodSchema(readInputMapsSchema())),
+  );
+}
 
-export const EditInputMaps = tool(
-  "EditInputMaps",
-  "Edit the Function's `input_maps` field",
-  { value: z.unknown().nullable() },
-  async ({ value }) => resultFromResult(editInputMaps(value)),
-);
+export function makeEditInputMaps(state: ToolState) {
+  return tool(
+    "EditInputMaps",
+    "Edit the Function's `input_maps` field",
+    { value: z.unknown().nullable() },
+    async ({ value }) => resultFromResult(editInputMaps(value)),
+  );
+}
 
-export const AppendInputMap = tool(
-  "AppendInputMap",
-  "Append an input map to the Function's `input_maps` array",
-  { value: z.unknown() },
-  async ({ value }) => resultFromResult(appendInputMap(value)),
-);
+export function makeAppendInputMap(state: ToolState) {
+  return tool(
+    "AppendInputMap",
+    "Append an input map to the Function's `input_maps` array",
+    { value: z.unknown() },
+    async ({ value }) => resultFromResult(appendInputMap(value)),
+  );
+}
 
-export const DelInputMap = tool(
-  "DelInputMap",
-  "Delete an input map at a specific index from the Function's `input_maps` array",
-  { index: z.int().nonnegative() },
-  async ({ index }) => resultFromResult(delInputMap(index)),
-);
+export function makeDelInputMap(state: ToolState) {
+  return tool(
+    "DelInputMap",
+    "Delete an input map at a specific index from the Function's `input_maps` array",
+    { index: z.int().nonnegative() },
+    async ({ index }) => resultFromResult(delInputMap(index)),
+  );
+}
 
-export const DelInputMaps = tool(
-  "DelInputMaps",
-  "Delete the Function's `input_maps` field",
-  {},
-  async () => resultFromResult(delInputMaps()),
-);
+export function makeDelInputMaps(state: ToolState) {
+  return tool(
+    "DelInputMaps",
+    "Delete the Function's `input_maps` field",
+    {},
+    async () => resultFromResult(delInputMaps()),
+  );
+}
 
-export const CheckInputMaps = tool(
-  "CheckInputMaps",
-  "Validate the Function's `input_maps` field",
-  {},
-  async () => resultFromResult(checkInputMaps()),
-);
+export function makeCheckInputMaps(state: ToolState) {
+  return tool(
+    "CheckInputMaps",
+    "Validate the Function's `input_maps` field",
+    {},
+    async () => resultFromResult(checkInputMaps()),
+  );
+}

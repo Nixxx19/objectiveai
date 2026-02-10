@@ -3,13 +3,14 @@ import { existsSync, readFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { consumeStream } from "../../logging";
 import { writeName } from "../../tools/name";
-import { ReadName, WriteName } from "../../tools/claude/name";
-import { ReadSpec } from "../../tools/claude/spec";
+import { makeReadName, makeWriteName } from "../../tools/claude/name";
+import { makeReadSpec } from "../../tools/claude/spec";
 import {
-  ListExampleFunctions,
-  ReadExampleFunction,
+  makeListExampleFunctions,
+  makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
-import { ReadFunctionSchema } from "../../tools/claude/function";
+import { makeReadFunctionSchema } from "../../tools/claude/function";
+import { ToolState } from "../../tools/claude/toolState";
 
 function nameIsNonEmpty(): boolean {
   return (
@@ -19,6 +20,7 @@ function nameIsNonEmpty(): boolean {
 }
 
 export async function nameMcp(
+  state: ToolState,
   log: LogFn,
   sessionId?: string,
   name?: string,
@@ -31,12 +33,12 @@ export async function nameMcp(
   }
 
   const tools = [
-    ReadSpec,
-    ReadName,
-    WriteName,
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema,
+    makeReadSpec(state),
+    makeReadName(state),
+    makeWriteName(state),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
+    makeReadFunctionSchema(state),
   ];
   const mcpServer = createSdkMcpServer({ name: "name", tools });
 

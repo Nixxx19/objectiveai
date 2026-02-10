@@ -1,4 +1,5 @@
 import { tool } from "@anthropic-ai/claude-agent-sdk";
+import { ToolState } from "./toolState";
 import { resultFromResult, textResult } from "./util";
 import {
   checkInputSchema,
@@ -11,23 +12,25 @@ import { collectModalities } from "../inputs";
 import z from "zod";
 import { formatZodSchema } from "../schema";
 
-export const ReadInputSchema = tool(
-  "ReadInputSchema",
-  "Read the Function's `input_schema` field",
-  {},
-  async () => resultFromResult(readInputSchema()),
-);
+export function makeReadInputSchema(state: ToolState) {
+  return tool(
+    "ReadInputSchema",
+    "Read the Function's `input_schema` field",
+    {},
+    async () => resultFromResult(readInputSchema()),
+  );
+}
 
-export const ReadInputSchemaSchema = tool(
-  "ReadInputSchemaSchema",
-  "Read the schema for Function `input_schema` field",
-  {},
-  async () => textResult(formatZodSchema(readInputSchemaSchema())),
-);
+export function makeReadInputSchemaSchema(state: ToolState) {
+  return tool(
+    "ReadInputSchemaSchema",
+    "Read the schema for Function `input_schema` field",
+    {},
+    async () => textResult(formatZodSchema(readInputSchemaSchema())),
+  );
+}
 
-export function makeEditInputSchema() {
-  let modalityRemovalRejected = false;
-
+export function makeEditInputSchema(state: ToolState) {
   return tool(
     "EditInputSchema",
     "Edit the Function's `input_schema` field. If the new schema removes multimodal types present in the current schema, you must pass `dangerouslyRemoveModalities: true` — but only after re-reading SPEC.md to confirm this does not contradict it.",
@@ -37,14 +40,14 @@ export function makeEditInputSchema() {
     },
     async ({ value, dangerouslyRemoveModalities }) => {
       if (dangerouslyRemoveModalities) {
-        if (!modalityRemovalRejected) {
+        if (!state.editInputSchemaModalityRemovalRejected) {
           return resultFromResult({
             ok: false,
             value: undefined,
             error: "dangerouslyRemoveModalities can only be used after a previous EditInputSchema call was rejected for removing modalities.",
           });
         }
-        modalityRemovalRejected = false;
+        state.editInputSchemaModalityRemovalRejected = false;
         return resultFromResult(editInputSchema(value));
       }
 
@@ -63,7 +66,7 @@ export function makeEditInputSchema() {
             }
           }
           if (removed.length > 0) {
-            modalityRemovalRejected = true;
+            state.editInputSchemaModalityRemovalRejected = true;
             return resultFromResult({
               ok: false,
               value: undefined,
@@ -75,15 +78,17 @@ export function makeEditInputSchema() {
         }
       }
 
-      modalityRemovalRejected = false;
+      state.editInputSchemaModalityRemovalRejected = false;
       return resultFromResult(editInputSchema(value));
     },
   );
 }
 
-export const CheckInputSchema = tool(
-  "CheckInputSchema",
-  "Validate the Function's `input_schema` field",
-  {},
-  async () => resultFromResult(checkInputSchema()),
-);
+export function makeCheckInputSchema(state: ToolState) {
+  return tool(
+    "CheckInputSchema",
+    "Validate the Function's `input_schema` field",
+    {},
+    async () => resultFromResult(checkInputSchema()),
+  );
+}

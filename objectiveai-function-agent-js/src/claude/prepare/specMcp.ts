@@ -3,12 +3,13 @@ import { existsSync, readFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { consumeStream } from "../../logging";
 import { writeSpec } from "../../tools/markdown";
-import { ReadSpec, WriteSpec } from "../../tools/claude/spec";
+import { makeReadSpec, makeWriteSpec } from "../../tools/claude/spec";
 import {
-  ListExampleFunctions,
-  ReadExampleFunction,
+  makeListExampleFunctions,
+  makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
-import { ReadFunctionSchema } from "../../tools/claude/function";
+import { makeReadFunctionSchema } from "../../tools/claude/function";
+import { ToolState } from "../../tools/claude/toolState";
 
 function specIsNonEmpty(): boolean {
   return (
@@ -17,6 +18,7 @@ function specIsNonEmpty(): boolean {
 }
 
 export async function specMcp(
+  state: ToolState,
   log: LogFn,
   sessionId?: string,
   spec?: string,
@@ -29,10 +31,10 @@ export async function specMcp(
   }
 
   const tools = [
-    WriteSpec,
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema,
+    makeWriteSpec(state),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
+    makeReadFunctionSchema(state),
   ];
   const mcpServer = createSdkMcpServer({ name: "spec", tools });
 

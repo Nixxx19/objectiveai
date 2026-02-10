@@ -52,34 +52,62 @@ import { readExampleInputsSchema } from "../tools/inputs";
 import { registerSchemaRefs } from "../tools/schemaRefs";
 
 // Import claude tool wrappers for handler tests
-import { ReadJsonValueSchema, ReadJsonValueExpressionSchema } from "../tools/claude/jsonValue";
-import { ReadInputValueSchema, ReadInputValueExpressionSchema } from "../tools/claude/inputValue";
+import { makeReadJsonValueSchema, makeReadJsonValueExpressionSchema } from "../tools/claude/jsonValue";
+import { makeReadInputValueSchema, makeReadInputValueExpressionSchema } from "../tools/claude/inputValue";
 import {
-  ReadDeveloperMessageSchema,
-  ReadSystemMessageSchema,
-  ReadUserMessageSchema,
-  ReadToolMessageSchema,
-  ReadAssistantMessageSchema,
-  ReadDeveloperMessageExpressionSchema,
-  ReadSystemMessageExpressionSchema,
-  ReadUserMessageExpressionSchema,
-  ReadToolMessageExpressionSchema,
-  ReadAssistantMessageExpressionSchema,
+  makeReadDeveloperMessageSchema,
+  makeReadSystemMessageSchema,
+  makeReadUserMessageSchema,
+  makeReadToolMessageSchema,
+  makeReadAssistantMessageSchema,
+  makeReadDeveloperMessageExpressionSchema,
+  makeReadSystemMessageExpressionSchema,
+  makeReadUserMessageExpressionSchema,
+  makeReadToolMessageExpressionSchema,
+  makeReadAssistantMessageExpressionSchema,
 } from "../tools/claude/messages";
 import {
-  ReadSimpleContentSchema,
-  ReadRichContentSchema,
-  ReadSimpleContentExpressionSchema,
-  ReadRichContentExpressionSchema,
+  makeReadSimpleContentSchema,
+  makeReadRichContentSchema,
+  makeReadSimpleContentExpressionSchema,
+  makeReadRichContentExpressionSchema,
 } from "../tools/claude/content";
 import {
-  ReadScalarFunctionTaskSchema,
-  ReadVectorFunctionTaskSchema,
-  ReadVectorCompletionTaskSchema,
-  ReadCompiledScalarFunctionTaskSchema,
-  ReadCompiledVectorFunctionTaskSchema,
-  ReadCompiledVectorCompletionTaskSchema,
+  makeReadScalarFunctionTaskSchema,
+  makeReadVectorFunctionTaskSchema,
+  makeReadVectorCompletionTaskSchema,
+  makeReadCompiledScalarFunctionTaskSchema,
+  makeReadCompiledVectorFunctionTaskSchema,
+  makeReadCompiledVectorCompletionTaskSchema,
 } from "../tools/claude/taskTypes";
+import { makeToolState } from "../tools/claude/toolState";
+
+const testState = makeToolState({ readPlanIndex: 0, writePlanIndex: 0 });
+
+const ReadJsonValueSchema = makeReadJsonValueSchema(testState);
+const ReadJsonValueExpressionSchema = makeReadJsonValueExpressionSchema(testState);
+const ReadInputValueSchema = makeReadInputValueSchema(testState);
+const ReadInputValueExpressionSchema = makeReadInputValueExpressionSchema(testState);
+const ReadDeveloperMessageSchema = makeReadDeveloperMessageSchema(testState);
+const ReadSystemMessageSchema = makeReadSystemMessageSchema(testState);
+const ReadUserMessageSchema = makeReadUserMessageSchema(testState);
+const ReadToolMessageSchema = makeReadToolMessageSchema(testState);
+const ReadAssistantMessageSchema = makeReadAssistantMessageSchema(testState);
+const ReadDeveloperMessageExpressionSchema = makeReadDeveloperMessageExpressionSchema(testState);
+const ReadSystemMessageExpressionSchema = makeReadSystemMessageExpressionSchema(testState);
+const ReadUserMessageExpressionSchema = makeReadUserMessageExpressionSchema(testState);
+const ReadToolMessageExpressionSchema = makeReadToolMessageExpressionSchema(testState);
+const ReadAssistantMessageExpressionSchema = makeReadAssistantMessageExpressionSchema(testState);
+const ReadSimpleContentSchema = makeReadSimpleContentSchema(testState);
+const ReadRichContentSchema = makeReadRichContentSchema(testState);
+const ReadSimpleContentExpressionSchema = makeReadSimpleContentExpressionSchema(testState);
+const ReadRichContentExpressionSchema = makeReadRichContentExpressionSchema(testState);
+const ReadScalarFunctionTaskSchema = makeReadScalarFunctionTaskSchema(testState);
+const ReadVectorFunctionTaskSchema = makeReadVectorFunctionTaskSchema(testState);
+const ReadVectorCompletionTaskSchema = makeReadVectorCompletionTaskSchema(testState);
+const ReadCompiledScalarFunctionTaskSchema = makeReadCompiledScalarFunctionTaskSchema(testState);
+const ReadCompiledVectorFunctionTaskSchema = makeReadCompiledVectorFunctionTaskSchema(testState);
+const ReadCompiledVectorCompletionTaskSchema = makeReadCompiledVectorCompletionTaskSchema(testState);
 
 function assertNonEmptyString(value: unknown, name?: string): asserts value is string {
   expect(typeof value).toBe("string");

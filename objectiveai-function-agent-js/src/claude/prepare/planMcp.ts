@@ -2,18 +2,20 @@ import { createSdkMcpServer, query } from "@anthropic-ai/claude-agent-sdk";
 import { LogFn } from "../../agentOptions";
 import { consumeStream } from "../../logging";
 import { makeReadPlan, makeWritePlan } from "../../tools/claude/plan";
-import { ReadSpec } from "../../tools/claude/spec";
-import { ReadName } from "../../tools/claude/name";
-import { ReadEssay } from "../../tools/claude/essay";
-import { ReadEssayTasks } from "../../tools/claude/essayTasks";
+import { makeReadSpec } from "../../tools/claude/spec";
+import { makeReadName } from "../../tools/claude/name";
+import { makeReadEssay } from "../../tools/claude/essay";
+import { makeReadEssayTasks } from "../../tools/claude/essayTasks";
 import {
-  ListExampleFunctions,
-  ReadExampleFunction,
+  makeListExampleFunctions,
+  makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
-import { ReadFunctionSchema } from "../../tools/claude/function";
+import { makeReadFunctionSchema } from "../../tools/claude/function";
+import { ToolState } from "../../tools/claude/toolState";
 import { getNextPlanIndex, getPlanPath } from "../planIndex";
 
 export async function planMcp(
+  state: ToolState,
   log: LogFn,
   sessionId?: string,
   instructions?: string,
@@ -21,15 +23,17 @@ export async function planMcp(
   const nextPlanIndex = getNextPlanIndex();
   const planPath = getPlanPath(nextPlanIndex);
 
+  state.readPlanIndex = nextPlanIndex;
+  state.writePlanIndex = nextPlanIndex;
   const tools = [
-    ReadSpec,
-    ReadName,
-    ReadEssay,
-    ReadEssayTasks,
-    makeWritePlan(nextPlanIndex),
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema,
+    makeReadSpec(state),
+    makeReadName(state),
+    makeReadEssay(state),
+    makeReadEssayTasks(state),
+    makeWritePlan(state),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
+    makeReadFunctionSchema(state),
   ];
   const mcpServer = createSdkMcpServer({ name: "plan", tools });
 

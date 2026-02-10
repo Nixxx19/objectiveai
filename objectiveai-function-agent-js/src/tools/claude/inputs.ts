@@ -1,4 +1,5 @@
 import { tool } from "@anthropic-ai/claude-agent-sdk";
+import { ToolState } from "./toolState";
 import { Functions } from "objectiveai";
 import { resultFromResult, textResult, errorResult } from "./util";
 import {
@@ -40,68 +41,82 @@ function buildExampleInput(value: Functions.Expression.InputValue) {
   return { ok: true as const, value: { value, compiledTasks, outputLength } };
 }
 
-export const ReadExampleInputs = tool(
-  "ReadExampleInputs",
-  "Read the Function's example inputs",
-  {},
-  async () => resultFromResult(readExampleInputs()),
-);
+export function makeReadExampleInputs(state: ToolState) {
+  return tool(
+    "ReadExampleInputs",
+    "Read the Function's example inputs",
+    {},
+    async () => resultFromResult(readExampleInputs()),
+  );
+}
 
-export const ReadExampleInputsSchema = tool(
-  "ReadExampleInputsSchema",
-  "Read the schema for Function example inputs",
-  {},
-  async () => {
-    const result = readExampleInputsSchema();
-    if (!result.ok) {
-      return resultFromResult(result);
-    }
-    return textResult(formatZodSchema(result.value));
-  },
-);
+export function makeReadExampleInputsSchema(state: ToolState) {
+  return tool(
+    "ReadExampleInputsSchema",
+    "Read the schema for Function example inputs",
+    {},
+    async () => {
+      const result = readExampleInputsSchema();
+      if (!result.ok) {
+        return resultFromResult(result);
+      }
+      return textResult(formatZodSchema(result.value));
+    },
+  );
+}
 
-export const AppendExampleInput = tool(
-  "AppendExampleInput",
-  "Append an example input to the Function's example inputs array. Provide just the input value — compiledTasks and outputLength are computed automatically.",
-  { value: Functions.Expression.InputValueSchema },
-  async ({ value }) => {
-    const built = buildExampleInput(value);
-    if (!built.ok) return errorResult(built.error);
-    return resultFromResult(appendExampleInput(built.value));
-  },
-);
+export function makeAppendExampleInput(state: ToolState) {
+  return tool(
+    "AppendExampleInput",
+    "Append an example input to the Function's example inputs array. Provide just the input value — compiledTasks and outputLength are computed automatically.",
+    { value: Functions.Expression.InputValueSchema },
+    async ({ value }) => {
+      const built = buildExampleInput(value);
+      if (!built.ok) return errorResult(built.error);
+      return resultFromResult(appendExampleInput(built.value));
+    },
+  );
+}
 
-export const EditExampleInput = tool(
-  "EditExampleInput",
-  "Replace an example input at a specific index in the Function's example inputs array. Provide just the input value — compiledTasks and outputLength are computed automatically.",
-  {
-    index: z.number().int().nonnegative(),
-    value: Functions.Expression.InputValueSchema,
-  },
-  async ({ index, value }) => {
-    const built = buildExampleInput(value);
-    if (!built.ok) return errorResult(built.error);
-    return resultFromResult(editExampleInput(index, built.value));
-  },
-);
+export function makeEditExampleInput(state: ToolState) {
+  return tool(
+    "EditExampleInput",
+    "Replace an example input at a specific index in the Function's example inputs array. Provide just the input value — compiledTasks and outputLength are computed automatically.",
+    {
+      index: z.number().int().nonnegative(),
+      value: Functions.Expression.InputValueSchema,
+    },
+    async ({ index, value }) => {
+      const built = buildExampleInput(value);
+      if (!built.ok) return errorResult(built.error);
+      return resultFromResult(editExampleInput(index, built.value));
+    },
+  );
+}
 
-export const DelExampleInput = tool(
-  "DelExampleInput",
-  "Delete an example input at a specific index from the Function's example inputs array",
-  { index: z.number().int().nonnegative() },
-  async ({ index }) => resultFromResult(delExampleInput(index)),
-);
+export function makeDelExampleInput(state: ToolState) {
+  return tool(
+    "DelExampleInput",
+    "Delete an example input at a specific index from the Function's example inputs array",
+    { index: z.number().int().nonnegative() },
+    async ({ index }) => resultFromResult(delExampleInput(index)),
+  );
+}
 
-export const DelExampleInputs = tool(
-  "DelExampleInputs",
-  "Delete all example inputs from the Function's example inputs array",
-  {},
-  async () => resultFromResult(delExampleInputs()),
-);
+export function makeDelExampleInputs(state: ToolState) {
+  return tool(
+    "DelExampleInputs",
+    "Delete all example inputs from the Function's example inputs array",
+    {},
+    async () => resultFromResult(delExampleInputs()),
+  );
+}
 
-export const CheckExampleInputs = tool(
-  "CheckExampleInputs",
-  "Validate the Function's example inputs",
-  {},
-  async () => resultFromResult(checkExampleInputs()),
-);
+export function makeCheckExampleInputs(state: ToolState) {
+  return tool(
+    "CheckExampleInputs",
+    "Validate the Function's example inputs",
+    {},
+    async () => resultFromResult(checkExampleInputs()),
+  );
+}

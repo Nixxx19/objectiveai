@@ -2,15 +2,16 @@ import { createSdkMcpServer, query } from "@anthropic-ai/claude-agent-sdk";
 import { existsSync, readFileSync } from "fs";
 import { LogFn } from "../../agentOptions";
 import { consumeStream } from "../../logging";
-import { ReadEssayTasks, WriteEssayTasks } from "../../tools/claude/essayTasks";
-import { ReadSpec } from "../../tools/claude/spec";
-import { ReadName } from "../../tools/claude/name";
-import { ReadEssay } from "../../tools/claude/essay";
+import { makeReadEssayTasks, makeWriteEssayTasks } from "../../tools/claude/essayTasks";
+import { makeReadSpec } from "../../tools/claude/spec";
+import { makeReadName } from "../../tools/claude/name";
+import { makeReadEssay } from "../../tools/claude/essay";
 import {
-  ListExampleFunctions,
-  ReadExampleFunction,
+  makeListExampleFunctions,
+  makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
-import { ReadFunctionSchema } from "../../tools/claude/function";
+import { makeReadFunctionSchema } from "../../tools/claude/function";
+import { ToolState } from "../../tools/claude/toolState";
 
 function essayTasksIsNonEmpty(): boolean {
   return (
@@ -20,19 +21,20 @@ function essayTasksIsNonEmpty(): boolean {
 }
 
 export async function essayTasksMcp(
+  state: ToolState,
   log: LogFn,
   sessionId?: string,
 ): Promise<string | undefined> {
   if (essayTasksIsNonEmpty()) return sessionId;
 
   const tools = [
-    ReadSpec,
-    ReadName,
-    ReadEssay,
-    WriteEssayTasks,
-    ListExampleFunctions,
-    ReadExampleFunction,
-    ReadFunctionSchema,
+    makeReadSpec(state),
+    makeReadName(state),
+    makeReadEssay(state),
+    makeWriteEssayTasks(state),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
+    makeReadFunctionSchema(state),
   ];
   const mcpServer = createSdkMcpServer({ name: "essayTasks", tools });
 
