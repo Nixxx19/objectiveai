@@ -10,9 +10,11 @@ import { COPY_FEEDBACK_DURATION_MS, DROPDOWN_BLUR_DELAY_MS, WASM_VALIDATION_DEBO
 const MODEL_SUGGESTIONS = [
   "openai/gpt-4o",
   "openai/gpt-4o-mini",
-  "anthropic/claude-3-5-sonnet",
-  "anthropic/claude-3-haiku",
+  "anthropic/claude-sonnet-4.5",
+  "anthropic/claude-haiku-4.5",
+  "anthropic/claude-opus-4.6",
   "google/gemini-2.0-flash",
+  "google/gemini-2.0-pro",
 ];
 
 // Output mode options
