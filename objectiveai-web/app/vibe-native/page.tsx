@@ -48,7 +48,7 @@ curl -X POST https://api.objective-ai.io/functions/{owner}/{repo}/profiles/{prof
 
 - \`from_cache: true\` - Use cached votes (faster, cheaper)
 - \`from_rng: true\` - Simulate votes if not cached (free)
-- \`reasoning: { "model": "openai/gpt-4o-mini" }\` - Get AI explanation of results
+- \`reasoning: { "model": "anthropic/claude-haiku-4.5" }\` - Get AI explanation of results
 
 ## Your Role
 
@@ -96,7 +96,7 @@ export default function VibeNativePage() {
 
         {/* Try Functions CTA */}
         <div className="card" style={{
-          padding: isMobile ? '24px 20px' : '32px',
+          padding: isMobile ? '24px 16px' : '32px',
           marginBottom: '24px',
           textAlign: 'center',
         }}>
@@ -199,6 +199,7 @@ export default function VibeNativePage() {
               maxHeight: '400px',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
+              overflowWrap: 'break-word',
             }}>
               <code>{CLAUDE_HYPERPROMPT}</code>
             </pre>

@@ -319,7 +319,7 @@ export default function PeoplePage() {
           <div
             className="card"
             style={{
-              padding: isMobile ? '28px 20px' : '48px',
+              padding: isMobile ? '28px 16px' : '48px',
               textAlign: 'center',
               maxWidth: '700px',
               margin: '0 auto',

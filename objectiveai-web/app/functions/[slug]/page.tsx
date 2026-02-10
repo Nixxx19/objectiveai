@@ -8,6 +8,7 @@ import { PINNED_COLOR_ANIMATION_MS } from "../../../lib/constants";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import { useObjectiveAI } from "../../../hooks/useObjectiveAI";
 import { InputBuilder } from "../../../components/InputBuilder";
+import SchemaFormBuilder from "../../../components/SchemaForm/SchemaFormBuilder";
 import type { InputSchema, InputValue } from "../../../components/SchemaForm/types";
 import SplitItemDisplay from "../../../components/SplitItemDisplay";
 import { simplifySplitItems, toDisplayItem, getDisplayMode } from "../../../lib/split-item-utils";
@@ -98,9 +99,11 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
 
   const REASONING_MODEL_OPTIONS = [
     { value: "openai/gpt-4o-mini", label: "GPT-4o Mini (cheapest)" },
+    { value: "anthropic/claude-haiku-4.5", label: "Claude Haiku 4.5" },
     { value: "openai/gpt-4o", label: "GPT-4o" },
-    { value: "anthropic/claude-3-haiku", label: "Claude 3 Haiku" },
-    { value: "anthropic/claude-3-5-sonnet", label: "Claude 3.5 Sonnet" },
+    { value: "anthropic/claude-sonnet-4.5", label: "Claude Sonnet 4.5" },
+    { value: "google/gemini-2.0-flash", label: "Gemini 2.0 Flash" },
+    { value: "anthropic/claude-opus-4.6", label: "Claude Opus 4.6 (best)" },
   ];
 
   // Fetch function details
@@ -435,14 +438,26 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
 
   // Build input fields — schema-driven when available, freeform otherwise
   const renderInputFields = () => {
+    if (functionDetails?.inputSchema) {
+      // Use SchemaFormBuilder for functions with schemas - supports typed fields (image, audio, video, file)
+      return (
+        <SchemaFormBuilder
+          schema={functionDetails.inputSchema as unknown as InputSchema}
+          value={formData}
+          onChange={setFormData}
+          disabled={isRunning}
+        />
+      );
+    }
+
+    // Use InputBuilder for freeform input (no schema)
     return (
       <InputBuilder
-        schema={functionDetails?.inputSchema ? (functionDetails.inputSchema as unknown as InputSchema) : null}
         value={formData}
         onChange={setFormData}
         disabled={isRunning}
-        label={!functionDetails?.inputSchema ? "Input" : undefined}
-        description={!functionDetails?.inputSchema ? "Build your input data" : undefined}
+        label="Input"
+        description="Build your input data"
       />
     );
   };
@@ -891,7 +906,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
               style={{
                 width: "100%",
                 marginTop: isMobile ? "20px" : "32px",
-                padding: isMobile ? "12px 20px" : undefined,
+                padding: isMobile ? "12px 16px" : undefined,
                 opacity: isRunning ? 0.7 : 1,
               }}
             >
@@ -915,7 +930,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             {!results && !isRunning && !runError && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
                 color: "var(--text-muted)",
               }}>
                 <p style={{ marginBottom: "8px", fontSize: "24px" }}>—</p>
@@ -926,7 +941,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             {isRunning && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
                 color: "var(--text-muted)",
               }}>
                 <div style={{
@@ -945,7 +960,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             {runError && !isRunning && !results && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
               }}>
                 <p style={{ color: "var(--color-error)", marginBottom: "8px" }}>
                   {runError.includes("401") ? "Not authenticated" : "Execution failed"}
@@ -1014,7 +1029,8 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                             Model Breakdown
                           </p>
 
-                          <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "12px" : "16px" }}>
+                          <div className="model-breakdown-wrapper">
+                            <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "12px" : "16px" }}>
                             {(() => {
                               const displayedVotes = showAllModels ? votes : votes.slice(0, 5);
                               const completions = results.tasks?.[0]?.completions || [];
@@ -1068,11 +1084,14 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                                             {isExpanded ? "▼" : "▶"}
                                           </span>
                                         )}
-                                        <span style={{
-                                          fontFamily: isResolved ? "inherit" : "monospace",
-                                          fontSize: isResolved ? (isMobile ? "12px" : "13px") : (isMobile ? "11px" : "12px"),
-                                          color: isResolved ? "var(--text)" : "var(--text-muted)",
-                                        }}>
+                                        <span
+                                          className={isResolved ? "model-name" : "model-id"}
+                                          style={{
+                                            fontFamily: isResolved ? "inherit" : "monospace",
+                                            fontSize: isResolved ? (isMobile ? "12px" : "13px") : (isMobile ? "11px" : "12px"),
+                                            color: isResolved ? "var(--text)" : "var(--text-muted)",
+                                          }}
+                                        >
                                           {displayName}
                                         </span>
                                         <span style={{ margin: "0 6px", color: "var(--text-muted)" }}>→</span>
@@ -1142,6 +1161,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                                 }
                               </button>
                             )}
+                            </div>
                           </div>
 
                           {allSimulated && (

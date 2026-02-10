@@ -515,7 +515,7 @@ export default function FunctionCreatePage() {
 
         <div style={{ display: "grid", gridTemplateColumns: isMobile ? "1fr" : "1fr 400px", gap: "24px" }}>
           {/* Left: Editor */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <div className="form-section-stack">
             {/* Function Type */}
             <div className="card" style={{ padding: "24px" }}>
               <h2 style={{ fontSize: "16px", fontWeight: 600, marginBottom: "16px" }}>Function Type</h2>

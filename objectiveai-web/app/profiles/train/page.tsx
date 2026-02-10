@@ -338,7 +338,7 @@ export default function ProfileTrainPage() {
           }}
         >
           {/* Left - Configuration */}
-          <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "24px" }}>
+          <div className="form-section-stack">
             {/* Function Selector */}
             <div className="card" style={{ padding: isMobile ? "16px" : undefined }}>
               <h3

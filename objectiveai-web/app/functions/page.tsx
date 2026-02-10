@@ -342,16 +342,12 @@ export default function FunctionsPage() {
                     <h3 style={{ fontSize: '16px', fontWeight: 600, marginBottom: '6px' }}>
                       {fn.name}
                     </h3>
-                    <p style={{
+                    <p className="card-description" style={{
                       fontSize: '13px',
                       lineHeight: 1.5,
                       color: 'var(--text-muted)',
                       flex: 1,
                       marginBottom: '12px',
-                      display: '-webkit-box',
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
                     }}>
                       {fn.description}
                     </p>

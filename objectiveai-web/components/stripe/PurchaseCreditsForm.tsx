@@ -200,7 +200,7 @@ export function PurchaseCreditsForm({
       <div
         className="card"
         style={{
-          padding: isMobile ? "24px 20px" : "32px",
+          padding: isMobile ? "24px 16px" : "32px",
           textAlign: "center",
         }}
       >
@@ -223,7 +223,7 @@ export function PurchaseCreditsForm({
   }
 
   return (
-    <div className="card" style={{ padding: isMobile ? "24px 20px" : "32px" }}>
+    <div className="card" style={{ padding: isMobile ? "24px 16px" : "32px" }}>
       <h3
         style={{
           fontSize: "18px",
