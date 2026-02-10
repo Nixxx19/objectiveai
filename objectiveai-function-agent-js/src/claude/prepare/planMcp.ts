@@ -12,7 +12,7 @@ import {
 } from "../../tools/claude/exampleFunctions";
 import { makeReadFunctionSchema } from "../../tools/claude/function";
 import { ToolState } from "../../tools/claude/toolState";
-import { getNextPlanIndex, getPlanPath } from "../planIndex";
+import { getPlanPath } from "../planIndex";
 
 export async function planMcp(
   state: ToolState,
@@ -20,11 +20,8 @@ export async function planMcp(
   sessionId?: string,
   instructions?: string,
 ): Promise<string | undefined> {
-  const nextPlanIndex = getNextPlanIndex();
-  const planPath = getPlanPath(nextPlanIndex);
+  const planPath = getPlanPath(state.writePlanIndex);
 
-  state.readPlanIndex = nextPlanIndex;
-  state.writePlanIndex = nextPlanIndex;
   const tools = [
     makeReadSpec(state),
     makeReadName(state),
@@ -39,7 +36,7 @@ export async function planMcp(
 
   let prompt =
     `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context.` +
-    ` Then write your implementation plan to \`${planPath}\` (plan index ${nextPlanIndex}). Include:` +
+    ` Then write your implementation plan to \`${planPath}\` (plan index ${state.writePlanIndex}). Include:` +
     `\n- The input schema structure and field descriptions` +
     `\n- Whether any input maps are needed for mapped task execution` +
     `\n- What the function definition will look like` +

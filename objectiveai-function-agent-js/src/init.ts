@@ -89,7 +89,7 @@ function writeGitignore(): void {
   );
 }
 
-export async function init(options: AgentOptions = {}): Promise<void> {
+export async function init(options: AgentOptions): Promise<void> {
   // Initialize git repo if needed
   if (!existsSync(".git")) {
     execSync("git init", { stdio: "pipe" });
@@ -104,7 +104,7 @@ export async function init(options: AgentOptions = {}): Promise<void> {
   // Write parameters.json if missing
   if (!existsSync("parameters.json")) {
     const parameters: Parameters = {
-      depth: options.depth ?? 0,
+      depth: options.depth,
     };
     writeFileSync("parameters.json", JSON.stringify(parameters, null, 2));
   }

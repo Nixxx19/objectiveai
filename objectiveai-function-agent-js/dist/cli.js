@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
-import { existsSync, readFileSync, writeFileSync, readdirSync, mkdirSync, appendFileSync, statSync, unlinkSync, rmSync } from 'fs';
 import { execSync, spawn } from 'child_process';
+import { existsSync, readFileSync, writeFileSync, readdirSync, mkdirSync, appendFileSync, statSync, unlinkSync, rmSync } from 'fs';
 import { join, dirname } from 'path';
 import { Functions, Chat, ObjectiveAI, JsonValueSchema, JsonValueExpressionSchema } from 'objectiveai';
 import { createSdkMcpServer, query, tool } from '@anthropic-ai/claude-agent-sdk';
@@ -98,6 +98,44 @@ async function consumeStream(stream, log, sessionId) {
   }
   return sessionId;
 }
+
+// src/agentOptions.ts
+function readEnv(name) {
+  return typeof process !== "undefined" ? process.env?.[name]?.trim() || void 0 : void 0;
+}
+function getGitConfig(key) {
+  try {
+    return execSync(`git config ${key}`, { encoding: "utf-8", stdio: "pipe" }).trim() || void 0;
+  } catch {
+    return void 0;
+  }
+}
+function makeAgentOptions(options = {}) {
+  const apiBase = options.apiBase ?? readEnv("OBJECTIVEAI_API_BASE") ?? "https://api.objective-ai.io";
+  const apiKey = options.apiKey ?? readEnv("OBJECTIVEAI_API_KEY");
+  if (!apiKey) {
+    throw new Error("API key is required. Set OBJECTIVEAI_API_KEY or pass apiKey.");
+  }
+  const log = options.log ?? createFileLogger().log;
+  const depth = options.depth ?? 0;
+  const gitUserName = options.gitUserName ?? readEnv("GIT_AUTHOR_NAME") ?? readEnv("GIT_COMMITTER_NAME") ?? getGitConfig("user.name");
+  if (!gitUserName) {
+    throw new Error("Git user name is required. Set GIT_AUTHOR_NAME, configure git config user.name, or pass gitUserName.");
+  }
+  const gitUserEmail = options.gitUserEmail ?? readEnv("GIT_AUTHOR_EMAIL") ?? readEnv("GIT_COMMITTER_EMAIL") ?? getGitConfig("user.email");
+  if (!gitUserEmail) {
+    throw new Error("Git user email is required. Set GIT_AUTHOR_EMAIL, configure git config user.email, or pass gitUserEmail.");
+  }
+  return {
+    ...options,
+    apiBase,
+    apiKey,
+    log,
+    depth,
+    gitUserName,
+    gitUserEmail
+  };
+}
 function getFunctionPath(ref) {
   return join(
     "examples",
@@ -161,7 +199,7 @@ function writeGitignore() {
     ["examples/", "agent_functions/", "network_tests/", "logs/", ""].join("\n")
   );
 }
-async function init(options = {}) {
+async function init(options) {
   if (!existsSync(".git")) {
     execSync("git init", { stdio: "pipe" });
   }
@@ -169,7 +207,7 @@ async function init(options = {}) {
   await fetchExamples(options.apiBase, options.apiKey);
   if (!existsSync("parameters.json")) {
     const parameters = {
-      depth: options.depth ?? 0
+      depth: options.depth
     };
     writeFileSync("parameters.json", JSON.stringify(parameters, null, 2));
   }
@@ -1662,10 +1700,7 @@ function getPlanPath(index) {
 
 // src/claude/prepare/planMcp.ts
 async function planMcp(state, log, sessionId, instructions) {
-  const nextPlanIndex = getNextPlanIndex();
-  const planPath = getPlanPath(nextPlanIndex);
-  state.readPlanIndex = nextPlanIndex;
-  state.writePlanIndex = nextPlanIndex;
+  const planPath = getPlanPath(state.writePlanIndex);
   const tools = [
     makeReadSpec(),
     makeReadName(),
@@ -1677,7 +1712,7 @@ async function planMcp(state, log, sessionId, instructions) {
     makeReadFunctionSchema()
   ];
   const mcpServer = createSdkMcpServer({ name: "plan", tools });
-  let prompt = `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context. Then write your implementation plan to \`${planPath}\` (plan index ${nextPlanIndex}). Include:
+  let prompt = `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context. Then write your implementation plan to \`${planPath}\` (plan index ${state.writePlanIndex}). Include:
 - The input schema structure and field descriptions
 - Whether any input maps are needed for mapped task execution
 - What the function definition will look like
@@ -1709,8 +1744,8 @@ ${instructions}`;
 }
 
 // src/claude/prepare/index.ts
-async function prepare(state, options = {}) {
-  const log = options.log ?? createFileLogger().log;
+async function prepare(state, options) {
+  const log = options.log;
   let sessionId = options.sessionId;
   log("=== Step 1: SPEC.md ===");
   sessionId = await specMcp(state, log, sessionId, options.spec);
@@ -4131,7 +4166,11 @@ function getCommonTools(state) {
   ];
 }
 function getFunctionTasksTools(state) {
-  return [makeSpawnFunctionAgents(state), makeListAgentFunctions(), makeReadAgentFunction()];
+  return [
+    makeSpawnFunctionAgents(state),
+    makeListAgentFunctions(),
+    makeReadAgentFunction()
+  ];
 }
 function buildFunctionTasksPrompt() {
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
@@ -4299,9 +4338,6 @@ Once all tests pass and SPEC.md compliance is verified:
 `;
 }
 async function inventLoop(state, log, useFunctionTasks, sessionId) {
-  const nextPlanIndex = getNextPlanIndex();
-  state.readPlanIndex = nextPlanIndex;
-  state.writePlanIndex = nextPlanIndex;
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -4343,10 +4379,15 @@ Please try again. Remember to:
     );
     log("Running submit...");
     lastFailureReasons = [];
-    const submitResult = await submit("submit", state.submitApiBase, state.submitApiKey, {
-      userName: state.gitUserName,
-      userEmail: state.gitUserEmail
-    });
+    const submitResult = await submit(
+      "submit",
+      state.submitApiBase,
+      state.submitApiKey,
+      {
+        userName: state.gitUserName,
+        userEmail: state.gitUserEmail
+      }
+    );
     if (submitResult.ok) {
       success = true;
       log(`Success: Submitted commit ${submitResult.value}`);
@@ -4360,20 +4401,20 @@ Please try again. Remember to:
   }
   return sessionId;
 }
-async function inventFunctionTasksMcp(state, options = {}) {
-  const log = options.log ?? createFileLogger().log;
+async function inventFunctionTasksMcp(state, options) {
+  const log = options.log;
   log("=== Invent Loop: Creating new function (function tasks) ===");
   await inventLoop(state, log, true, options.sessionId);
   log("=== ObjectiveAI Function invention complete ===");
 }
-async function inventVectorTasksMcp(state, options = {}) {
-  const log = options.log ?? createFileLogger().log;
+async function inventVectorTasksMcp(state, options) {
+  const log = options.log;
   log("=== Invent Loop: Creating new function (vector tasks) ===");
   await inventLoop(state, log, false, options.sessionId);
   log("=== ObjectiveAI Function invention complete ===");
 }
-async function inventMcp(state, options = {}) {
-  const depth = options.depth ?? 0;
+async function inventMcp(state, options) {
+  const depth = options.depth;
   if (depth === 0) {
     await inventVectorTasksMcp(state, options);
   } else {
@@ -4399,22 +4440,22 @@ function makeToolState(options) {
 }
 
 // src/claude/index.ts
-async function invent(options = {}) {
-  const log = options.log ?? createFileLogger().log;
+async function invent(partialOptions = {}) {
+  const options = makeAgentOptions(partialOptions);
+  const nextPlanIndex = getNextPlanIndex();
   const toolState = makeToolState({
     apiBase: options.apiBase,
     apiKey: options.apiKey,
-    readPlanIndex: 0,
-    writePlanIndex: 0,
+    readPlanIndex: nextPlanIndex,
+    writePlanIndex: nextPlanIndex,
     gitUserName: options.gitUserName,
     gitUserEmail: options.gitUserEmail
   });
-  options = { ...options, log };
-  log("=== Initializing workspace ===");
+  options.log("=== Initializing workspace ===");
   await init(options);
-  log("=== Preparing ===");
+  options.log("=== Preparing ===");
   const sessionId = await prepare(toolState, options);
-  log("=== Inventing ===");
+  options.log("=== Inventing ===");
   await inventMcp(toolState, { ...options, sessionId });
 }
 

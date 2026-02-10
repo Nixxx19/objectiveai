@@ -2,7 +2,6 @@ import { createSdkMcpServer, query } from "@anthropic-ai/claude-agent-sdk";
 import { AgentOptions, LogFn } from "../../agentOptions";
 import { submit } from "../../tools/submit";
 import { createFileLogger, consumeStream } from "../../logging";
-import { getNextPlanIndex } from "../planIndex";
 import { registerSchemaRefs } from "../../tools/schemaRefs";
 import { ToolState } from "../../tools/claude/toolState";
 
@@ -294,7 +293,11 @@ function getCommonTools(state: ToolState) {
 
 // Additional tools for function tasks variant (sub-function spawning)
 function getFunctionTasksTools(state: ToolState) {
-  return [makeSpawnFunctionAgents(state), makeListAgentFunctions(state), makeReadAgentFunction(state)];
+  return [
+    makeSpawnFunctionAgents(state),
+    makeListAgentFunctions(state),
+    makeReadAgentFunction(state),
+  ];
 }
 
 function buildFunctionTasksPrompt(): string {
@@ -470,10 +473,6 @@ async function inventLoop(
   useFunctionTasks: boolean,
   sessionId?: string,
 ): Promise<string | undefined> {
-  const nextPlanIndex = getNextPlanIndex();
-  state.readPlanIndex = nextPlanIndex;
-  state.writePlanIndex = nextPlanIndex;
-
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -526,10 +525,15 @@ Please try again. Remember to:
     // Validate and submit
     log("Running submit...");
     lastFailureReasons = [];
-    const submitResult = await submit("submit", state.submitApiBase, state.submitApiKey, {
-      userName: state.gitUserName,
-      userEmail: state.gitUserEmail,
-    });
+    const submitResult = await submit(
+      "submit",
+      state.submitApiBase,
+      state.submitApiKey,
+      {
+        userName: state.gitUserName,
+        userEmail: state.gitUserEmail,
+      },
+    );
     if (submitResult.ok) {
       success = true;
       log(`Success: Submitted commit ${submitResult.value}`);
@@ -550,9 +554,9 @@ Please try again. Remember to:
 // Main entry point for inventing with function tasks (depth > 0)
 export async function inventFunctionTasksMcp(
   state: ToolState,
-  options: AgentOptions = {},
+  options: AgentOptions,
 ): Promise<void> {
-  const log = options.log ?? createFileLogger().log;
+  const log = options.log;
 
   log("=== Invent Loop: Creating new function (function tasks) ===");
   await inventLoop(state, log, true, options.sessionId);
@@ -563,9 +567,9 @@ export async function inventFunctionTasksMcp(
 // Main entry point for inventing with vector tasks (depth === 0)
 export async function inventVectorTasksMcp(
   state: ToolState,
-  options: AgentOptions = {},
+  options: AgentOptions,
 ): Promise<void> {
-  const log = options.log ?? createFileLogger().log;
+  const log = options.log;
 
   log("=== Invent Loop: Creating new function (vector tasks) ===");
   await inventLoop(state, log, false, options.sessionId);
@@ -574,8 +578,11 @@ export async function inventVectorTasksMcp(
 }
 
 // Unified entry point that selects variant based on depth
-export async function inventMcp(state: ToolState, options: AgentOptions = {}): Promise<void> {
-  const depth = options.depth ?? 0;
+export async function inventMcp(
+  state: ToolState,
+  options: AgentOptions,
+): Promise<void> {
+  const depth = options.depth;
   if (depth === 0) {
     await inventVectorTasksMcp(state, options);
   } else {

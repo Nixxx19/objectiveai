@@ -1,31 +1,31 @@
-import { AgentOptions } from "../agentOptions";
-import { createFileLogger } from "../logging";
+import { AgentOptions, makeAgentOptions } from "../agentOptions";
 import { init } from "../init";
 import { prepare } from "./prepare";
 import { inventMcp } from "./invent";
-import { makeToolState, ToolState } from "../tools/claude/toolState";
+import { makeToolState } from "../tools/claude/toolState";
+import { getNextPlanIndex } from "./planIndex";
 
 export * from "./prepare";
 export * from "./invent";
 
-export async function invent(options: AgentOptions = {}): Promise<void> {
-  const log = options.log ?? createFileLogger().log;
+export async function invent(partialOptions: Partial<AgentOptions> = {}): Promise<void> {
+  const options = makeAgentOptions(partialOptions);
+  const nextPlanIndex = getNextPlanIndex();
   const toolState = makeToolState({
     apiBase: options.apiBase,
     apiKey: options.apiKey,
-    readPlanIndex: 0,
-    writePlanIndex: 0,
+    readPlanIndex: nextPlanIndex,
+    writePlanIndex: nextPlanIndex,
     gitUserName: options.gitUserName,
     gitUserEmail: options.gitUserEmail,
   });
-  options = { ...options, log };
 
-  log("=== Initializing workspace ===");
+  options.log("=== Initializing workspace ===");
   await init(options);
 
-  log("=== Preparing ===");
+  options.log("=== Preparing ===");
   const sessionId = await prepare(toolState, options);
 
-  log("=== Inventing ===");
+  options.log("=== Inventing ===");
   await inventMcp(toolState, { ...options, sessionId });
 }

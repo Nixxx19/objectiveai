@@ -7,28 +7,29 @@ type LogFn = (...args: unknown[]) => void;
 interface AgentOptions {
     name?: string;
     spec?: string;
-    apiBase?: string;
-    apiKey?: string;
+    apiBase: string;
+    apiKey: string;
     sessionId?: string;
-    log?: LogFn;
-    depth?: number;
+    log: LogFn;
+    depth: number;
     instructions?: string;
-    gitUserName?: string;
-    gitUserEmail?: string;
+    gitUserName: string;
+    gitUserEmail: string;
 }
+declare function makeAgentOptions(options?: Partial<AgentOptions>): AgentOptions;
 
 interface ToolState {
     spawnFunctionAgentsHasSpawned: boolean;
     spawnFunctionAgentsRespawnRejected: boolean;
     editInputSchemaModalityRemovalRejected: boolean;
-    runNetworkTestsApiBase: string | undefined;
-    runNetworkTestsApiKey: string | undefined;
+    runNetworkTestsApiBase: string;
+    runNetworkTestsApiKey: string;
     readPlanIndex: number;
     writePlanIndex: number;
-    submitApiBase: string | undefined;
-    submitApiKey: string | undefined;
-    gitUserName: string | undefined;
-    gitUserEmail: string | undefined;
+    submitApiBase: string;
+    submitApiKey: string;
+    gitUserName: string;
+    gitUserEmail: string;
 }
 
 declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;
@@ -41,13 +42,13 @@ declare function essayTasksMcp(state: ToolState, log: LogFn, sessionId?: string)
 
 declare function planMcp(state: ToolState, log: LogFn, sessionId?: string, instructions?: string): Promise<string | undefined>;
 
-declare function prepare(state: ToolState, options?: AgentOptions): Promise<string | undefined>;
+declare function prepare(state: ToolState, options: AgentOptions): Promise<string | undefined>;
 
-declare function inventFunctionTasksMcp(state: ToolState, options?: AgentOptions): Promise<void>;
-declare function inventVectorTasksMcp(state: ToolState, options?: AgentOptions): Promise<void>;
-declare function inventMcp(state: ToolState, options?: AgentOptions): Promise<void>;
+declare function inventFunctionTasksMcp(state: ToolState, options: AgentOptions): Promise<void>;
+declare function inventVectorTasksMcp(state: ToolState, options: AgentOptions): Promise<void>;
+declare function inventMcp(state: ToolState, options: AgentOptions): Promise<void>;
 
-declare function invent(options?: AgentOptions): Promise<void>;
+declare function invent(partialOptions?: Partial<AgentOptions>): Promise<void>;
 
 declare const index$7_essayMcp: typeof essayMcp;
 declare const index$7_essayTasksMcp: typeof essayTasksMcp;
@@ -58193,7 +58194,7 @@ declare namespace index {
 interface Parameters {
     depth: number;
 }
-declare function init(options?: AgentOptions): Promise<void>;
+declare function init(options: AgentOptions): Promise<void>;
 
 /**
  * Creates a log function that writes to both a file and console.
@@ -58224,4 +58225,4 @@ declare const SpawnFunctionAgentsParamsSchema: z$1.ZodArray<z$1.ZodObject<{
 }, z$1.core.$strip>>;
 type SpawnFunctionAgentsParams = z$1.infer<typeof SpawnFunctionAgentsParamsSchema>;
 
-export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, consumeStream, createFileLogger, formatMessage, getLatestLogPath, init };
+export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, consumeStream, createFileLogger, formatMessage, getLatestLogPath, init, makeAgentOptions };

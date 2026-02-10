@@ -5,7 +5,6 @@ export * from "./essayTasksMcp";
 export * from "./planMcp";
 
 import { AgentOptions } from "../../agentOptions";
-import { createFileLogger } from "../../logging";
 import { ToolState } from "../../tools/claude/toolState";
 import { specMcp } from "./specMcp";
 import { nameMcp } from "./nameMcp";
@@ -16,9 +15,9 @@ import { planMcp } from "./planMcp";
 // Runs init and steps 1-5
 export async function prepare(
   state: ToolState,
-  options: AgentOptions = {},
+  options: AgentOptions,
 ): Promise<string | undefined> {
-  const log = options.log ?? createFileLogger().log;
+  const log = options.log;
 
   // Run preparation steps, passing sessionId between them
   let sessionId = options.sessionId;

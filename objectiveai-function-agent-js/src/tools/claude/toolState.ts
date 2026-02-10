@@ -2,23 +2,23 @@ export interface ToolState {
   spawnFunctionAgentsHasSpawned: boolean;
   spawnFunctionAgentsRespawnRejected: boolean;
   editInputSchemaModalityRemovalRejected: boolean;
-  runNetworkTestsApiBase: string | undefined;
-  runNetworkTestsApiKey: string | undefined;
+  runNetworkTestsApiBase: string;
+  runNetworkTestsApiKey: string;
   readPlanIndex: number;
   writePlanIndex: number;
-  submitApiBase: string | undefined;
-  submitApiKey: string | undefined;
-  gitUserName: string | undefined;
-  gitUserEmail: string | undefined;
+  submitApiBase: string;
+  submitApiKey: string;
+  gitUserName: string;
+  gitUserEmail: string;
 }
 
 export function makeToolState(options: {
-  apiBase?: string;
-  apiKey?: string;
+  apiBase: string;
+  apiKey: string;
   readPlanIndex: number;
   writePlanIndex: number;
-  gitUserName?: string;
-  gitUserEmail?: string;
+  gitUserName: string;
+  gitUserEmail: string;
 }): ToolState {
   return {
     spawnFunctionAgentsHasSpawned: false,
