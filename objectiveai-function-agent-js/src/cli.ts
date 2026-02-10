@@ -1,3 +1,4 @@
+import { Command } from "commander";
 import { Claude } from "./index";
 
 // If spawned by a parent agent, exit when the parent dies.
@@ -16,78 +17,34 @@ if (parentPid) {
   watchdog.unref();
 }
 
-function parseArgs(): {
-  command?: string;
-  spec?: string;
-  name?: string;
-  depth?: number;
-  apiBase?: string;
-  apiKey?: string;
-  instructions?: string;
-} {
-  const args = process.argv.slice(2);
-  let command: string | undefined;
-  let spec: string | undefined;
-  let name: string | undefined;
-  let depth: number | undefined;
-  let apiBase: string | undefined;
-  let apiKey: string | undefined;
-  let instructions: string | undefined;
+const program = new Command();
 
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg.startsWith("--depth=")) {
-      depth = parseInt(arg.slice(8), 10);
-    } else if (arg === "--depth") {
-      depth = parseInt(args[++i], 10);
-    } else if (arg.startsWith("--name=")) {
-      name = arg.slice(7);
-    } else if (arg === "--name") {
-      name = args[++i];
-    } else if (arg.startsWith("--api-base=")) {
-      apiBase = arg.slice(11);
-    } else if (arg === "--api-base") {
-      apiBase = args[++i];
-    } else if (arg.startsWith("--api-key=")) {
-      apiKey = arg.slice(10);
-    } else if (arg === "--api-key") {
-      apiKey = args[++i];
-    } else if (arg.startsWith("--instructions=")) {
-      instructions = arg.slice(15);
-    } else if (arg === "--instructions") {
-      instructions = args[++i];
-    } else if (!command) {
-      command = arg;
-    } else if (!spec) {
-      spec = arg;
-    }
-  }
+program
+  .name("objectiveai-function-agent")
+  .description("Autonomous agent for creating ObjectiveAI Functions");
 
-  return { command, spec, name, depth, apiBase, apiKey, instructions };
-}
+program
+  .command("invent")
+  .description("Invent a new ObjectiveAI Function")
+  .argument("[spec]", "Optional spec string for SPEC.md")
+  .option("--name <name>", "Function name for name.txt")
+  .option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt)
+  .option("--api-base <url>", "API base URL")
+  .option("--api-key <key>", "ObjectiveAI API key")
+  .option("--instructions <text>", "Extra instructions for the invent agent")
+  .option("--git-user-name <name>", "Git author/committer name")
+  .option("--git-user-email <email>", "Git author/committer email")
+  .action(async (spec, opts) => {
+    await Claude.invent({
+      spec,
+      name: opts.name,
+      depth: opts.depth,
+      apiBase: opts.apiBase,
+      apiKey: opts.apiKey,
+      instructions: opts.instructions,
+      gitUserName: opts.gitUserName,
+      gitUserEmail: opts.gitUserEmail,
+    });
+  });
 
-async function main(): Promise<void> {
-  const { command, spec, name, depth, apiBase, apiKey, instructions } = parseArgs();
-
-  switch (command) {
-    case "invent":
-      await Claude.invent({ spec, name, depth, apiBase, apiKey, instructions });
-      break;
-    default:
-      console.log("Usage: objectiveai-function-agent invent [spec] [options]");
-      console.log("");
-      console.log("Options:");
-      console.log("  [spec]              Optional spec string for SPEC.md");
-      console.log("  --name NAME         Function name for name.txt");
-      console.log("  --depth N           Depth level (0=vector, >0=function tasks)");
-      console.log("  --api-base URL      API base URL");
-      console.log("  --api-key KEY       ObjectiveAI API key");
-      console.log("  --instructions TEXT  Extra instructions for the invent agent");
-      process.exit(1);
-  }
-}
-
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+program.parse();

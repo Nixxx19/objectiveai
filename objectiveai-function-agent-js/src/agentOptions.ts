@@ -12,4 +12,6 @@ export interface AgentOptions {
   depth?: number;
   instructions?: string;
   toolState?: ToolState;
+  gitUserName?: string;
+  gitUserEmail?: string;
 }

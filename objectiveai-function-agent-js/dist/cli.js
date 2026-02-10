@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { Command } from 'commander';
 import { existsSync, readFileSync, writeFileSync, readdirSync, mkdirSync, appendFileSync, statSync, unlinkSync, rmSync } from 'fs';
 import { execSync, spawn } from 'child_process';
 import { join, dirname } from 'path';
@@ -2727,7 +2728,7 @@ function ensureGitHubRepo(name, description) {
     execSync("git push", { stdio: "inherit" });
   }
 }
-async function submit(message, apiBase, apiKey) {
+async function submit(message, apiBase, apiKey, git) {
   const profileBuild = buildProfile();
   if (!profileBuild.ok) {
     return {
@@ -2801,8 +2802,14 @@ Use the EditDescription tool to fix it.`
   try {
     execSync("git diff --cached --quiet", { stdio: "pipe" });
   } catch {
+    const commitEnv = {
+      ...process.env,
+      ...git?.userName && { GIT_AUTHOR_NAME: git.userName, GIT_COMMITTER_NAME: git.userName },
+      ...git?.userEmail && { GIT_AUTHOR_EMAIL: git.userEmail, GIT_COMMITTER_EMAIL: git.userEmail }
+    };
     execSync(`git commit -m "${message.replace(/"/g, '\\"')}"`, {
-      stdio: "inherit"
+      stdio: "inherit",
+      env: commitEnv
     });
   }
   try {
@@ -3650,7 +3657,10 @@ function makeSubmit(state) {
     "Submit",
     "Check function, check example inputs, run network tests, commit and push to GitHub (if all successful)",
     { message: z19.string().describe("Commit message") },
-    async ({ message }) => resultFromResult(await submit(message, state.submitApiBase, state.submitApiKey))
+    async ({ message }) => resultFromResult(await submit(message, state.submitApiBase, state.submitApiKey, {
+      userName: state.gitUserName,
+      userEmail: state.gitUserEmail
+    }))
   );
 }
 function getGitHubOwner2() {
@@ -3704,14 +3714,16 @@ function getCurrentDepth() {
   const params = JSON.parse(content);
   return params.depth ?? 0;
 }
-function runAgentInSubdir(name, spec, childDepth, childProcesses, apiBase, apiKey) {
+function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
   const subdir = join("agent_functions", name);
   mkdirSync(subdir, { recursive: true });
   writeFileSync(join(subdir, "SPEC.md"), spec, "utf-8");
   return new Promise((resolve) => {
     const args = ["invent", "--name", name, "--depth", String(childDepth)];
-    if (apiBase) args.push("--api-base", apiBase);
-    if (apiKey) args.push("--api-key", apiKey);
+    if (opts?.apiBase) args.push("--api-base", opts.apiBase);
+    if (opts?.apiKey) args.push("--api-key", opts.apiKey);
+    if (opts?.gitUserName) args.push("--git-user-name", opts.gitUserName);
+    if (opts?.gitUserEmail) args.push("--git-user-email", opts.gitUserEmail);
     const child = spawn(
       "objectiveai-function-agent",
       args,
@@ -3757,7 +3769,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, apiBase, apiKe
     });
   });
 }
-async function spawnFunctionAgents(params, apiBase, apiKey) {
+async function spawnFunctionAgents(params, opts) {
   if (params.length === 0) {
     return { ok: false, value: void 0, error: "params array is empty" };
   }
@@ -3850,7 +3862,7 @@ async function spawnFunctionAgents(params, apiBase, apiKey) {
   try {
     const results = await Promise.all(
       params.map(
-        (param) => runAgentInSubdir(param.name, param.spec, childDepth, childProcesses, apiBase, apiKey)
+        (param) => runAgentInSubdir(param.name, param.spec, childDepth, childProcesses, opts)
       )
     );
     return { ok: true, value: results, error: void 0 };
@@ -3892,7 +3904,12 @@ function makeSpawnFunctionAgents(state) {
             });
           }
           state.spawnFunctionAgentsRespawnRejected = false;
-          return resultFromResult(await spawnFunctionAgents(params, state.submitApiBase, state.submitApiKey));
+          return resultFromResult(await spawnFunctionAgents(params, {
+            apiBase: state.submitApiBase,
+            apiKey: state.submitApiKey,
+            gitUserName: state.gitUserName,
+            gitUserEmail: state.gitUserEmail
+          }));
         }
         state.spawnFunctionAgentsRespawnRejected = true;
         return resultFromResult({
@@ -3902,7 +3919,12 @@ function makeSpawnFunctionAgents(state) {
         });
       }
       state.spawnFunctionAgentsHasSpawned = true;
-      return resultFromResult(await spawnFunctionAgents(params, state.submitApiBase, state.submitApiKey));
+      return resultFromResult(await spawnFunctionAgents(params, {
+        apiBase: state.submitApiBase,
+        apiKey: state.submitApiKey,
+        gitUserName: state.gitUserName,
+        gitUserEmail: state.gitUserEmail
+      }));
     }
   );
 }
@@ -4322,7 +4344,10 @@ Please try again. Remember to:
     );
     log("Running submit...");
     lastFailureReasons = [];
-    const submitResult = await submit("submit", state.submitApiBase, state.submitApiKey);
+    const submitResult = await submit("submit", state.submitApiBase, state.submitApiKey, {
+      userName: state.gitUserName,
+      userEmail: state.gitUserEmail
+    });
     if (submitResult.ok) {
       success = true;
       log(`Success: Submitted commit ${submitResult.value}`);
@@ -4370,7 +4395,9 @@ function makeToolState(options) {
     readPlanIndex: options.readPlanIndex,
     writePlanIndex: options.writePlanIndex,
     submitApiBase: options.apiBase,
-    submitApiKey: options.apiKey
+    submitApiKey: options.apiKey,
+    gitUserName: options.gitUserName,
+    gitUserEmail: options.gitUserEmail
   };
 }
 
@@ -4381,7 +4408,9 @@ async function invent(options = {}) {
     apiBase: options.apiBase,
     apiKey: options.apiKey,
     readPlanIndex: 0,
-    writePlanIndex: 0
+    writePlanIndex: 0,
+    gitUserName: options.gitUserName,
+    gitUserEmail: options.gitUserEmail
   });
   options = { ...options, log, toolState };
   log("=== Initializing workspace ===");
@@ -4405,65 +4434,18 @@ if (parentPid) {
   }, 3e3);
   watchdog.unref();
 }
-function parseArgs() {
-  const args = process.argv.slice(2);
-  let command;
-  let spec;
-  let name;
-  let depth;
-  let apiBase;
-  let apiKey;
-  let instructions;
-  for (let i = 0; i < args.length; i++) {
-    const arg = args[i];
-    if (arg.startsWith("--depth=")) {
-      depth = parseInt(arg.slice(8), 10);
-    } else if (arg === "--depth") {
-      depth = parseInt(args[++i], 10);
-    } else if (arg.startsWith("--name=")) {
-      name = arg.slice(7);
-    } else if (arg === "--name") {
-      name = args[++i];
-    } else if (arg.startsWith("--api-base=")) {
-      apiBase = arg.slice(11);
-    } else if (arg === "--api-base") {
-      apiBase = args[++i];
-    } else if (arg.startsWith("--api-key=")) {
-      apiKey = arg.slice(10);
-    } else if (arg === "--api-key") {
-      apiKey = args[++i];
-    } else if (arg.startsWith("--instructions=")) {
-      instructions = arg.slice(15);
-    } else if (arg === "--instructions") {
-      instructions = args[++i];
-    } else if (!command) {
-      command = arg;
-    } else if (!spec) {
-      spec = arg;
-    }
-  }
-  return { command, spec, name, depth, apiBase, apiKey, instructions };
-}
-async function main() {
-  const { command, spec, name, depth, apiBase, apiKey, instructions } = parseArgs();
-  switch (command) {
-    case "invent":
-      await claude_exports.invent({ spec, name, depth, apiBase, apiKey, instructions });
-      break;
-    default:
-      console.log("Usage: objectiveai-function-agent invent [spec] [options]");
-      console.log("");
-      console.log("Options:");
-      console.log("  [spec]              Optional spec string for SPEC.md");
-      console.log("  --name NAME         Function name for name.txt");
-      console.log("  --depth N           Depth level (0=vector, >0=function tasks)");
-      console.log("  --api-base URL      API base URL");
-      console.log("  --api-key KEY       ObjectiveAI API key");
-      console.log("  --instructions TEXT  Extra instructions for the invent agent");
-      process.exit(1);
-  }
-}
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
+var program = new Command();
+program.name("objectiveai-function-agent").description("Autonomous agent for creating ObjectiveAI Functions");
+program.command("invent").description("Invent a new ObjectiveAI Function").argument("[spec]", "Optional spec string for SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--instructions <text>", "Extra instructions for the invent agent").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").action(async (spec, opts) => {
+  await claude_exports.invent({
+    spec,
+    name: opts.name,
+    depth: opts.depth,
+    apiBase: opts.apiBase,
+    apiKey: opts.apiKey,
+    instructions: opts.instructions,
+    gitUserName: opts.gitUserName,
+    gitUserEmail: opts.gitUserEmail
+  });
 });
+program.parse();

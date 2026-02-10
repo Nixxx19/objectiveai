@@ -25,7 +25,12 @@ export function makeSpawnFunctionAgents(state: ToolState) {
             });
           }
           state.spawnFunctionAgentsRespawnRejected = false;
-          return resultFromResult(await spawnFunctionAgents(params, state.submitApiBase, state.submitApiKey));
+          return resultFromResult(await spawnFunctionAgents(params, {
+            apiBase: state.submitApiBase,
+            apiKey: state.submitApiKey,
+            gitUserName: state.gitUserName,
+            gitUserEmail: state.gitUserEmail,
+          }));
         }
 
         state.spawnFunctionAgentsRespawnRejected = true;
@@ -42,7 +47,12 @@ export function makeSpawnFunctionAgents(state: ToolState) {
       }
 
       state.spawnFunctionAgentsHasSpawned = true;
-      return resultFromResult(await spawnFunctionAgents(params, state.submitApiBase, state.submitApiKey));
+      return resultFromResult(await spawnFunctionAgents(params, {
+            apiBase: state.submitApiBase,
+            apiKey: state.submitApiKey,
+            gitUserName: state.gitUserName,
+            gitUserEmail: state.gitUserEmail,
+          }));
     },
   );
 }

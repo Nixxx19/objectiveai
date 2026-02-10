@@ -83,13 +83,19 @@ function getCurrentDepth(): number {
   return params.depth ?? 0;
 }
 
+interface RunAgentOptions {
+  apiBase?: string;
+  apiKey?: string;
+  gitUserName?: string;
+  gitUserEmail?: string;
+}
+
 function runAgentInSubdir(
   name: string,
   spec: string,
   childDepth: number,
   childProcesses: ChildProcess[],
-  apiBase?: string,
-  apiKey?: string,
+  opts?: RunAgentOptions,
 ): Promise<SpawnResult> {
   const subdir = join("agent_functions", name);
 
@@ -101,8 +107,10 @@ function runAgentInSubdir(
 
   return new Promise<SpawnResult>((resolve) => {
     const args = ["invent", "--name", name, "--depth", String(childDepth)];
-    if (apiBase) args.push("--api-base", apiBase);
-    if (apiKey) args.push("--api-key", apiKey);
+    if (opts?.apiBase) args.push("--api-base", opts.apiBase);
+    if (opts?.apiKey) args.push("--api-key", opts.apiKey);
+    if (opts?.gitUserName) args.push("--git-user-name", opts.gitUserName);
+    if (opts?.gitUserEmail) args.push("--git-user-email", opts.gitUserEmail);
 
     const child = spawn(
       "objectiveai-function-agent",
@@ -158,8 +166,7 @@ function runAgentInSubdir(
 
 export async function spawnFunctionAgents(
   params: SpawnFunctionAgentsParams,
-  apiBase?: string,
-  apiKey?: string,
+  opts?: RunAgentOptions,
 ): Promise<Result<SpawnResult[]>> {
   if (params.length === 0) {
     return { ok: false, value: undefined, error: "params array is empty" };
@@ -268,7 +275,7 @@ export async function spawnFunctionAgents(
   try {
     const results = await Promise.all(
       params.map((param) =>
-        runAgentInSubdir(param.name, param.spec, childDepth, childProcesses, apiBase, apiKey),
+        runAgentInSubdir(param.name, param.spec, childDepth, childProcesses, opts),
       ),
     );
     return { ok: true, value: results, error: undefined };

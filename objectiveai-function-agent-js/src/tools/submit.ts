@@ -48,7 +48,12 @@ function ensureGitHubRepo(name: string, description: string): void {
   }
 }
 
-export async function submit(message: string, apiBase?: string, apiKey?: string): Promise<Result<string>> {
+export interface SubmitGitIdentity {
+  userName?: string;
+  userEmail?: string;
+}
+
+export async function submit(message: string, apiBase?: string, apiKey?: string, git?: SubmitGitIdentity): Promise<Result<string>> {
   // 0. Build profile from current function definition
   const profileBuild = buildProfile();
   if (!profileBuild.ok) {
@@ -132,8 +137,14 @@ export async function submit(message: string, apiBase?: string, apiKey?: string)
     execSync("git diff --cached --quiet", { stdio: "pipe" });
     // No changes — still push in case there are unpushed commits
   } catch {
+    const commitEnv = {
+      ...process.env,
+      ...(git?.userName && { GIT_AUTHOR_NAME: git.userName, GIT_COMMITTER_NAME: git.userName }),
+      ...(git?.userEmail && { GIT_AUTHOR_EMAIL: git.userEmail, GIT_COMMITTER_EMAIL: git.userEmail }),
+    };
     execSync(`git commit -m "${message.replace(/"/g, '\\"')}"`, {
       stdio: "inherit",
+      env: commitEnv,
     });
   }
 

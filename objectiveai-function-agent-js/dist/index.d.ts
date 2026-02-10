@@ -13,6 +13,8 @@ interface ToolState {
     writePlanIndex: number;
     submitApiBase: string | undefined;
     submitApiKey: string | undefined;
+    gitUserName: string | undefined;
+    gitUserEmail: string | undefined;
 }
 
 type LogFn = (...args: unknown[]) => void;
@@ -26,6 +28,8 @@ interface AgentOptions {
     depth?: number;
     instructions?: string;
     toolState?: ToolState;
+    gitUserName?: string;
+    gitUserEmail?: string;
 }
 
 declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;

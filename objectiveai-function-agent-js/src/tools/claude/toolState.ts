@@ -8,6 +8,8 @@ export interface ToolState {
   writePlanIndex: number;
   submitApiBase: string | undefined;
   submitApiKey: string | undefined;
+  gitUserName: string | undefined;
+  gitUserEmail: string | undefined;
 }
 
 export function makeToolState(options: {
@@ -15,6 +17,8 @@ export function makeToolState(options: {
   apiKey?: string;
   readPlanIndex: number;
   writePlanIndex: number;
+  gitUserName?: string;
+  gitUserEmail?: string;
 }): ToolState {
   return {
     spawnFunctionAgentsHasSpawned: false,
@@ -26,5 +30,7 @@ export function makeToolState(options: {
     writePlanIndex: options.writePlanIndex,
     submitApiBase: options.apiBase,
     submitApiKey: options.apiKey,
+    gitUserName: options.gitUserName,
+    gitUserEmail: options.gitUserEmail,
   };
 }

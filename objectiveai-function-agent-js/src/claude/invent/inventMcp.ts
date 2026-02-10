@@ -526,7 +526,10 @@ Please try again. Remember to:
     // Validate and submit
     log("Running submit...");
     lastFailureReasons = [];
-    const submitResult = await submit("submit", state.submitApiBase, state.submitApiKey);
+    const submitResult = await submit("submit", state.submitApiBase, state.submitApiKey, {
+      userName: state.gitUserName,
+      userEmail: state.gitUserEmail,
+    });
     if (submitResult.ok) {
       success = true;
       log(`Success: Submitted commit ${submitResult.value}`);

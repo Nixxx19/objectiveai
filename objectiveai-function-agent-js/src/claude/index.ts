@@ -15,6 +15,8 @@ export async function invent(options: AgentOptions = {}): Promise<void> {
     apiKey: options.apiKey,
     readPlanIndex: 0,
     writePlanIndex: 0,
+    gitUserName: options.gitUserName,
+    gitUserEmail: options.gitUserEmail,
   });
   options = { ...options, log, toolState };
 

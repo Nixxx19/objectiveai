@@ -9,6 +9,9 @@ export function makeSubmit(state: ToolState) {
     "Submit",
     "Check function, check example inputs, run network tests, commit and push to GitHub (if all successful)",
     { message: z.string().describe("Commit message") },
-    async ({ message }) => resultFromResult(await submit(message, state.submitApiBase, state.submitApiKey)),
+    async ({ message }) => resultFromResult(await submit(message, state.submitApiBase, state.submitApiKey, {
+      userName: state.gitUserName,
+      userEmail: state.gitUserEmail,
+    })),
   );
 }
