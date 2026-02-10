@@ -363,6 +363,7 @@ __export(function_exports, {
   checkTasks: () => checkTasks,
   checkType: () => checkType,
   delInputMap: () => delInputMap,
+  delInputMaps: () => delInputMaps,
   delInputMerge: () => delInputMerge,
   delInputSplit: () => delInputSplit,
   delOutputLength: () => delOutputLength,
@@ -537,6 +538,9 @@ function checkInputMaps(fn) {
     };
   }
   return { ok: true, value: void 0, error: void 0 };
+}
+function delInputMaps() {
+  return editFunction({ input_maps: void 0 });
 }
 function editInputMaps(value) {
   const result = validateInputMaps({ input_maps: value });
@@ -3217,6 +3221,12 @@ var DelInputMap = claudeAgentSdk.tool(
   { index: z19__default.default.int().nonnegative() },
   async ({ index }) => resultFromResult(delInputMap(index))
 );
+var DelInputMaps = claudeAgentSdk.tool(
+  "DelInputMaps",
+  "Delete the Function's `input_maps` field",
+  {},
+  async () => resultFromResult(delInputMaps())
+);
 var CheckInputMaps = claudeAgentSdk.tool(
   "CheckInputMaps",
   "Validate the Function's `input_maps` field",
@@ -4000,6 +4010,7 @@ function getCommonTools(planIndex, apiBase, apiKey) {
     ReadInputMapsSchema,
     AppendInputMap,
     DelInputMap,
+    DelInputMaps,
     CheckInputMaps,
     ReadOutputLength,
     ReadOutputLengthSchema,

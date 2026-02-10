@@ -4,6 +4,7 @@ import {
   appendInputMap,
   checkInputMaps,
   delInputMap,
+  delInputMaps,
   editInputMaps,
   readInputMaps,
   readInputMapsSchema,
@@ -44,6 +45,13 @@ export const DelInputMap = tool(
   "Delete an input map at a specific index from the Function's `input_maps` array",
   { index: z.int().nonnegative() },
   async ({ index }) => resultFromResult(delInputMap(index)),
+);
+
+export const DelInputMaps = tool(
+  "DelInputMaps",
+  "Delete the Function's `input_maps` field",
+  {},
+  async () => resultFromResult(delInputMaps()),
 );
 
 export const CheckInputMaps = tool(

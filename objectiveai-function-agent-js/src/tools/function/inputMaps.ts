@@ -39,6 +39,10 @@ export function checkInputMaps(fn?: DeserializedFunction): Result<undefined> {
   return { ok: true, value: undefined, error: undefined };
 }
 
+export function delInputMaps(): Result<undefined> {
+  return editFunction({ input_maps: undefined });
+}
+
 export function editInputMaps(value: unknown): Result<undefined> {
   const result = validateInputMaps({ input_maps: value });
   if (!result.ok) {

@@ -51,6 +51,7 @@ import {
   ReadInputMapsSchema,
   AppendInputMap,
   DelInputMap,
+  DelInputMaps,
   CheckInputMaps,
 } from "../../tools/claude/inputMaps";
 import {
@@ -194,6 +195,7 @@ function getCommonTools(planIndex: number, apiBase?: string, apiKey?: string) {
     ReadInputMapsSchema,
     AppendInputMap,
     DelInputMap,
+    DelInputMaps,
     CheckInputMaps,
     ReadOutputLength,
     ReadOutputLengthSchema,
