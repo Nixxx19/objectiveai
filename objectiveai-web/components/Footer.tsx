@@ -21,7 +21,7 @@ export default function Footer() {
     <footer className="footer" style={{ padding: isMobile ? '24px 0 6px' : '32px 0 6px' }}>
       {/* Footer Module Container */}
       <div style={{
-        maxWidth: '1100px',
+        maxWidth: '1400px',
         margin: '0 auto',
         padding: isMobile ? '0 16px' : '0 32px',
       }}>
@@ -34,12 +34,12 @@ export default function Footer() {
             justifyContent: 'space-between',
             alignItems: 'flex-start',
             marginBottom: isMobile ? '20px' : '28px',
-            gap: '48px',
+            gap: isMobile ? '32px' : '48px',
           }} className="footerMenuSocialRow">
             {/* Pages Menu (3 groups) - CENTERED */}
             <nav style={{
               display: 'flex',
-              gap: '72px',
+              gap: isMobile ? '32px' : '48px',
               justifyContent: 'center',
             }} className="footerPageMenu">
               {/* GROUP 1: FUNCTIONS */}

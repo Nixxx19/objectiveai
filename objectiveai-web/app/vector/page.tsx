@@ -526,7 +526,7 @@ export default function VectorCompletionsPage() {
               style={{
                 width: "100%",
                 marginTop: isMobile ? "20px" : "32px",
-                padding: isMobile ? "12px 20px" : undefined,
+                padding: isMobile ? "12px 16px" : undefined,
                 opacity: isRunning ? 0.7 : 1,
               }}
             >
@@ -550,7 +550,7 @@ export default function VectorCompletionsPage() {
             {!results && !isRunning && !runError && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
                 color: "var(--text-muted)",
               }}>
                 <p style={{ marginBottom: "8px", fontSize: "32px", opacity: 0.5 }}>📊</p>
@@ -561,7 +561,7 @@ export default function VectorCompletionsPage() {
             {isRunning && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
                 color: "var(--text-muted)",
               }}>
                 <div style={{
@@ -580,7 +580,7 @@ export default function VectorCompletionsPage() {
             {runError && !isRunning && !results && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
               }}>
                 <p style={{ color: "var(--color-error)", marginBottom: "8px" }}>
                   {runError.includes("401") ? "Not authenticated" : "Execution failed"}

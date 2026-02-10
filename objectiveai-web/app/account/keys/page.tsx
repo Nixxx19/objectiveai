@@ -189,7 +189,7 @@ export default function ApiKeysPage() {
           justifyContent: 'center',
           minHeight: '50vh',
           textAlign: 'center',
-          padding: isMobile ? '40px 20px' : '60px 32px',
+          padding: isMobile ? '40px 16px' : '60px 32px',
         }}>
           <svg
             width="48"
@@ -301,7 +301,7 @@ export default function ApiKeysPage() {
         {/* Keys List */}
         {keysLoading ? (
           <div className="card" style={{
-            padding: isMobile ? '40px 20px' : '60px 32px',
+            padding: isMobile ? '40px 16px' : '60px 32px',
             textAlign: 'center',
           }}>
             <div style={{
@@ -319,7 +319,7 @@ export default function ApiKeysPage() {
           </div>
         ) : keysError ? (
           <div className="card" style={{
-            padding: isMobile ? '40px 20px' : '60px 32px',
+            padding: isMobile ? '40px 16px' : '60px 32px',
             textAlign: 'center',
           }}>
             <svg
@@ -368,7 +368,7 @@ export default function ApiKeysPage() {
           </div>
         ) : keys.length === 0 ? (
           <div className="card" style={{
-            padding: isMobile ? '40px 20px' : '60px 32px',
+            padding: isMobile ? '40px 16px' : '60px 32px',
             textAlign: 'center',
           }}>
             <svg
@@ -414,7 +414,7 @@ export default function ApiKeysPage() {
                   opacity: key.disabled ? 0.5 : 1,
                 }}
               >
-                <div style={{ flex: 1, minWidth: '200px' }}>
+                <div style={{ flex: 1, minWidth: isMobile ? '0' : '200px' }}>
                   <div style={{
                     fontSize: '15px',
                     fontWeight: 600,
@@ -578,7 +578,7 @@ export default function ApiKeysPage() {
             background: 'var(--card-bg)',
             border: '1px solid var(--border)',
             borderRadius: '16px',
-            padding: isMobile ? '24px 20px' : '32px',
+            padding: isMobile ? '24px 16px' : '32px',
             width: isMobile ? 'calc(100% - 40px)' : '440px',
             maxWidth: '440px',
             zIndex: 1001,

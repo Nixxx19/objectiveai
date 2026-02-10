@@ -63,7 +63,7 @@ console.log(functions.data);
 
         {/* CTA Card */}
         <div className="card" style={{
-          padding: isMobile ? '24px 20px' : '32px',
+          padding: isMobile ? '24px 16px' : '32px',
           marginBottom: '24px',
           textAlign: 'center',
         }}>
@@ -258,6 +258,9 @@ function CodeBlock({
         fontSize: isMobile ? '12px' : '13px',
         lineHeight: 1.6,
         fontFamily: 'var(--font-mono)',
+        whiteSpace: 'pre-wrap',
+        wordBreak: 'break-word',
+        overflowWrap: 'break-word',
       }}>
         <code>{code}</code>
       </pre>

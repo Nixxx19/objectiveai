@@ -157,7 +157,7 @@ export default function ChatPage() {
             </span>
           </label>
           <div style={{ display: "flex", gap: "12px", alignItems: "center", flexWrap: "wrap" }}>
-            <div className="aiTextField" style={{ flex: 1, minWidth: isMobile ? "100%" : "300px" }}>
+            <div className="aiTextField" style={{ flex: 1, minWidth: isMobile ? "100%" : "240px" }}>
               <input
                 type="text"
                 value={model}

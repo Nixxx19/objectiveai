@@ -137,7 +137,7 @@ export default function CreditsPage() {
 
         {/* Balance Card */}
         <div className="card" style={{
-          padding: isMobile ? '24px 20px' : '32px',
+          padding: isMobile ? '24px 16px' : '32px',
           marginBottom: '24px',
           textAlign: 'center',
         }}>

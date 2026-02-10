@@ -1222,6 +1222,13 @@ body {
   min-width: 280px;
 }
 
+@media (max-width: 640px) {
+  .docsSidebarNav {
+    min-width: unset;
+    width: 100%;
+  }
+}
+
 .docsSidebarSection {
   padding: 4px 12px;
 }
@@ -1335,7 +1342,7 @@ body {
 }
 
 .docsSections {
-  max-width: 768px;
+  max-width: min(768px, 100vw - 32px);
   margin: 0 auto;
   display: flex;
   flex-direction: column;

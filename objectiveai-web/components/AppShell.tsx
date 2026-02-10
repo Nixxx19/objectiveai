@@ -253,7 +253,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                           border: '1px solid var(--border)',
                           borderRadius: '12px',
                           padding: '8px',
-                          minWidth: '140px',
+                          minWidth: isMobile ? '120px' : '140px',
                           boxShadow: '0 4px 20px var(--shadow)',
                         }}>
                           {link.subLinks.map(sub => (

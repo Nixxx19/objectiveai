@@ -906,7 +906,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
               style={{
                 width: "100%",
                 marginTop: isMobile ? "20px" : "32px",
-                padding: isMobile ? "12px 20px" : undefined,
+                padding: isMobile ? "12px 16px" : undefined,
                 opacity: isRunning ? 0.7 : 1,
               }}
             >
@@ -930,7 +930,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             {!results && !isRunning && !runError && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
                 color: "var(--text-muted)",
               }}>
                 <p style={{ marginBottom: "8px", fontSize: "24px" }}>—</p>
@@ -941,7 +941,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             {isRunning && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
                 color: "var(--text-muted)",
               }}>
                 <div style={{
@@ -960,7 +960,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             {runError && !isRunning && !results && (
               <div style={{
                 textAlign: "center",
-                padding: isMobile ? "40px 20px" : "60px 20px",
+                padding: isMobile ? "40px 16px" : "60px 20px",
               }}>
                 <p style={{ color: "var(--color-error)", marginBottom: "8px" }}>
                   {runError.includes("401") ? "Not authenticated" : "Execution failed"}

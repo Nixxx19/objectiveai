@@ -96,7 +96,7 @@ export default function VibeNativePage() {
 
         {/* Try Functions CTA */}
         <div className="card" style={{
-          padding: isMobile ? '24px 20px' : '32px',
+          padding: isMobile ? '24px 16px' : '32px',
           marginBottom: '24px',
           textAlign: 'center',
         }}>
@@ -199,6 +199,7 @@ export default function VibeNativePage() {
               maxHeight: '400px',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
+              overflowWrap: 'break-word',
             }}>
               <code>{CLAUDE_HYPERPROMPT}</code>
             </pre>

@@ -165,7 +165,7 @@ export default function UserMenu({ isMobile = false, forceClose = false, onOpen 
               position: "absolute",
               top: "calc(100% + 8px)",
               right: 0,
-              minWidth: "200px",
+              minWidth: isMobile ? "160px" : "200px",
               background: "var(--card-bg)",
               border: "1px solid var(--border)",
               borderRadius: "16px",
