@@ -4486,4 +4486,4 @@ program.command("invent").description("Invent a new ObjectiveAI Function").argum
     gitUserEmail: opts.gitUserEmail
   });
 });
-program.parse();
+program.parse(process.argv);

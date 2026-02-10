@@ -34,17 +34,17 @@ program
   .option("--instructions <text>", "Extra instructions for the invent agent")
   .option("--git-user-name <name>", "Git author/committer name")
   .option("--git-user-email <email>", "Git author/committer email")
-  .action(async (spec, opts) => {
+  .action(async (spec: string | undefined, opts: Record<string, string | number | undefined>) => {
     await Claude.invent({
       spec,
-      name: opts.name,
-      depth: opts.depth,
-      apiBase: opts.apiBase,
-      apiKey: opts.apiKey,
-      instructions: opts.instructions,
-      gitUserName: opts.gitUserName,
-      gitUserEmail: opts.gitUserEmail,
+      name: opts.name as string | undefined,
+      depth: opts.depth as number | undefined,
+      apiBase: opts.apiBase as string | undefined,
+      apiKey: opts.apiKey as string | undefined,
+      instructions: opts.instructions as string | undefined,
+      gitUserName: opts.gitUserName as string | undefined,
+      gitUserEmail: opts.gitUserEmail as string | undefined,
     });
   });
 
-program.parse();
+program.parse(process.argv);
