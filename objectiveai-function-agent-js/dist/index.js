@@ -621,7 +621,11 @@ function appendTask(value) {
       error: `Invalid tasks after append: ${result.error}`
     };
   }
-  return editFunction({ tasks: result.value });
+  const editResult = editFunction({ tasks: result.value });
+  if (!editResult.ok) {
+    return editResult;
+  }
+  return { ok: true, value: `new length: ${newTasks.length}`, error: void 0 };
 }
 function editTask(index, value) {
   const fn = readFunction();
@@ -683,7 +687,11 @@ function delTask(index) {
   }
   const newTasks = [...fn.value.tasks];
   newTasks.splice(index, 1);
-  return editFunction({ tasks: newTasks });
+  const editResult = editFunction({ tasks: newTasks });
+  if (!editResult.ok) {
+    return editResult;
+  }
+  return { ok: true, value: `new length: ${newTasks.length}`, error: void 0 };
 }
 function validateTasks(fn) {
   const parsed = TasksSchema.safeParse(fn.tasks);
@@ -1336,7 +1344,6 @@ async function specMcp(log, sessionId, spec) {
     return sessionId;
   }
   const tools = [
-    ReadSpec,
     WriteSpec,
     ListExampleFunctions,
     ReadExampleFunction,
@@ -1513,14 +1520,13 @@ async function essayMcp(log, sessionId) {
   const tools = [
     ReadSpec,
     ReadName,
-    ReadEssay,
     WriteEssay,
     ListExampleFunctions,
     ReadExampleFunction,
     ReadFunctionSchema
   ];
   const mcpServer = createSdkMcpServer({ name: "essay", tools });
-  const prompt = "Read SPEC.md, name.txt, and example functions to understand the context, then create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
+  const prompt = "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
   sessionId = await consumeStream(
     query({
       prompt,
@@ -1583,7 +1589,6 @@ async function essayTasksMcp(log, sessionId) {
     ReadSpec,
     ReadName,
     ReadEssay,
-    ReadEssayTasks,
     WriteEssayTasks,
     ListExampleFunctions,
     ReadExampleFunction,
@@ -1677,7 +1682,6 @@ async function planMcp(log, sessionId, instructions) {
     ReadName,
     ReadEssay,
     ReadEssayTasks,
-    makeReadPlan(nextPlanIndex),
     makeWritePlan(nextPlanIndex),
     ListExampleFunctions,
     ReadExampleFunction,
@@ -2067,7 +2071,7 @@ function appendExampleInput(value) {
     }
   }
   writeExampleInputsFile(newInputs);
-  return { ok: true, value: void 0, error: void 0 };
+  return { ok: true, value: `new length: ${newInputs.length}`, error: void 0 };
 }
 function editExampleInput(index, value) {
   const file = readExampleInputsFile();
@@ -2127,7 +2131,7 @@ function delExampleInput(index) {
   const newInputs = [...file.value];
   newInputs.splice(index, 1);
   writeExampleInputsFile(newInputs);
-  return { ok: true, value: void 0, error: void 0 };
+  return { ok: true, value: `new length: ${newInputs.length}`, error: void 0 };
 }
 function checkExampleInputs() {
   const fnRaw = readFunction();

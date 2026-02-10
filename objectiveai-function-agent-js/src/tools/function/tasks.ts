@@ -67,7 +67,7 @@ export function editTasks(value: unknown): Result<undefined> {
   return editFunction({ tasks: result.value });
 }
 
-export function appendTask(value: unknown): Result<undefined> {
+export function appendTask(value: unknown): Result<string> {
   const fn = readFunction();
   if (!fn.ok) {
     return {
@@ -88,7 +88,11 @@ export function appendTask(value: unknown): Result<undefined> {
       error: `Invalid tasks after append: ${result.error}`,
     };
   }
-  return editFunction({ tasks: result.value });
+  const editResult = editFunction({ tasks: result.value });
+  if (!editResult.ok) {
+    return editResult as Result<string>;
+  }
+  return { ok: true, value: `new length: ${newTasks.length}`, error: undefined };
 }
 
 export function editTask(index: number, value: unknown): Result<undefined> {
@@ -130,7 +134,7 @@ export function editTask(index: number, value: unknown): Result<undefined> {
   return editFunction({ tasks: result.value });
 }
 
-export function delTask(index: number): Result<undefined> {
+export function delTask(index: number): Result<string> {
   const fn = readFunction();
   if (!fn.ok) {
     return {
@@ -157,7 +161,11 @@ export function delTask(index: number): Result<undefined> {
 
   const newTasks = [...fn.value.tasks];
   newTasks.splice(index, 1);
-  return editFunction({ tasks: newTasks });
+  const editResult = editFunction({ tasks: newTasks });
+  if (!editResult.ok) {
+    return editResult as Result<string>;
+  }
+  return { ok: true, value: `new length: ${newTasks.length}`, error: undefined };
 }
 
 export function validateTasks(fn: DeserializedFunction): Result<Tasks> {

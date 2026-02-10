@@ -148,7 +148,7 @@ function writeExampleInputsFile(value: unknown[]): void {
   writeFileSync("inputs.json", JSON.stringify(value, null, 2));
 }
 
-export function appendExampleInput(value: unknown): Result<undefined> {
+export function appendExampleInput(value: unknown): Result<string> {
   const file = readExampleInputsFile();
   if (!file.ok) {
     return {
@@ -181,7 +181,7 @@ export function appendExampleInput(value: unknown): Result<undefined> {
   }
 
   writeExampleInputsFile(newInputs);
-  return { ok: true, value: undefined, error: undefined };
+  return { ok: true, value: `new length: ${newInputs.length}`, error: undefined };
 }
 
 export function editExampleInput(
@@ -230,7 +230,7 @@ export function editExampleInput(
   return { ok: true, value: undefined, error: undefined };
 }
 
-export function delExampleInput(index: number): Result<undefined> {
+export function delExampleInput(index: number): Result<string> {
   const file = readExampleInputsFile();
   if (!file.ok) {
     return {
@@ -250,7 +250,7 @@ export function delExampleInput(index: number): Result<undefined> {
   const newInputs = [...file.value];
   newInputs.splice(index, 1);
   writeExampleInputsFile(newInputs);
-  return { ok: true, value: undefined, error: undefined };
+  return { ok: true, value: `new length: ${newInputs.length}`, error: undefined };
 }
 
 export function checkExampleInputs(): Result<undefined> {
