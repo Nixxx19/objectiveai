@@ -403,22 +403,23 @@ export default function ApiKeysPage() {
             {sortedKeys.map((key) => (
               <div
                 key={key.api_key}
-                className="card"
+                className="card api-key-card"
                 style={{
                   padding: isMobile ? '16px' : '20px',
                   display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
                   justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: '16px',
-                  flexWrap: 'wrap',
+                  alignItems: isMobile ? 'stretch' : 'center',
+                  gap: isMobile ? '12px' : '16px',
                   opacity: key.disabled ? 0.5 : 1,
                 }}
               >
-                <div style={{ flex: 1, minWidth: isMobile ? '0' : '200px' }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{
                     fontSize: '15px',
                     fontWeight: 600,
                     marginBottom: '4px',
+                    wordBreak: 'break-word',
                   }}>
                     {key.name}
                   </div>
@@ -429,6 +430,7 @@ export default function ApiKeysPage() {
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px',
+                    wordBreak: 'break-all',
                   }}>
                     {maskKey(key.api_key)}
                     <button
@@ -471,6 +473,7 @@ export default function ApiKeysPage() {
                   fontSize: '12px',
                   color: 'var(--text-muted)',
                   textAlign: isMobile ? 'left' : 'right',
+                  minWidth: isMobile ? 'auto' : '150px',
                 }}>
                   <div>created {formatDate(key.created)}</div>
                   <div>expires {key.expires ? formatDate(key.expires) : 'never'}</div>

@@ -123,7 +123,7 @@ export default function ChatPage() {
   return (
     <div className="page">
 
-      <div className="container" style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 140px)" }}>
+      <div className="container chat-page-container">
         {/* Header */}
         <div style={{ marginBottom: isMobile ? "16px" : "24px" }}>
           <h1 className="heading2" style={{ marginBottom: "8px" }}>
@@ -182,6 +182,7 @@ export default function ChatPage() {
           className="card"
           style={{
             flex: 1,
+            minHeight: 0,
             display: "flex",
             flexDirection: "column",
             padding: 0,

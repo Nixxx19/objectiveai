@@ -1518,3 +1518,115 @@ body {
   color: var(--text-muted);
   line-height: 1.4;
 }
+
+/* ============================================
+   RESPONSIVE UTILITY CLASSES
+   ============================================ */
+
+/* Chat Page Container - Flexbox layout to replace calc(100vh) */
+.chat-page-container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - var(--content-top, 100px));
+  min-height: 400px; /* Prevent collapsing on very short viewports */
+}
+
+@media (max-width: 640px) {
+  .chat-page-container {
+    height: calc(100vh - var(--content-top, 80px));
+    min-height: 300px;
+  }
+}
+
+/* Model Breakdown Wrapper - Horizontal scroll on mobile */
+.model-breakdown-wrapper {
+  width: 100%;
+  overflow-x: visible; /* Desktop: no scroll */
+}
+
+@media (max-width: 640px) {
+  .model-breakdown-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    /* Add subtle indicator to show scrollability */
+    position: relative;
+  }
+
+  .model-breakdown-wrapper::after {
+    content: "→";
+    position: sticky;
+    right: 0;
+    float: right;
+    padding: 4px 8px;
+    background: var(--card-bg);
+    opacity: 0.6;
+    font-size: 12px;
+    pointer-events: none;
+  }
+}
+
+/* API Key Card - Responsive stacking */
+.api-key-card {
+  /* Ensure content doesn't overflow */
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+@media (max-width: 640px) {
+  .api-key-card {
+    /* Stack all sections vertically on mobile */
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+}
+
+/* Model ID - Content-addressed IDs (break anywhere) */
+.model-id {
+  font-family: var(--font-mono);
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+/* Model Name - Model names with slashes (break at natural boundaries) */
+.model-name {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+/* Card Description - Truncate with ellipsis in browse cards */
+.card-description {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  word-wrap: break-word;
+}
+
+/* Detail Description - Full wrapping on detail pages */
+.detail-description {
+  max-width: 100%;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* Form Section Stack - Consistent form spacing */
+.form-section-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+@media (max-width: 1024px) {
+  .form-section-stack {
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-section-stack {
+    gap: 16px;
+  }
+}

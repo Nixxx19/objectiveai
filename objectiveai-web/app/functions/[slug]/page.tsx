@@ -1029,7 +1029,8 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                             Model Breakdown
                           </p>
 
-                          <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "12px" : "16px" }}>
+                          <div className="model-breakdown-wrapper">
+                            <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "12px" : "16px" }}>
                             {(() => {
                               const displayedVotes = showAllModels ? votes : votes.slice(0, 5);
                               const completions = results.tasks?.[0]?.completions || [];
@@ -1083,11 +1084,14 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                                             {isExpanded ? "▼" : "▶"}
                                           </span>
                                         )}
-                                        <span style={{
-                                          fontFamily: isResolved ? "inherit" : "monospace",
-                                          fontSize: isResolved ? (isMobile ? "12px" : "13px") : (isMobile ? "11px" : "12px"),
-                                          color: isResolved ? "var(--text)" : "var(--text-muted)",
-                                        }}>
+                                        <span
+                                          className={isResolved ? "model-name" : "model-id"}
+                                          style={{
+                                            fontFamily: isResolved ? "inherit" : "monospace",
+                                            fontSize: isResolved ? (isMobile ? "12px" : "13px") : (isMobile ? "11px" : "12px"),
+                                            color: isResolved ? "var(--text)" : "var(--text-muted)",
+                                          }}
+                                        >
                                           {displayName}
                                         </span>
                                         <span style={{ margin: "0 6px", color: "var(--text-muted)" }}>→</span>
@@ -1157,6 +1161,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                                 }
                               </button>
                             )}
+                            </div>
                           </div>
 
                           {allSimulated && (
