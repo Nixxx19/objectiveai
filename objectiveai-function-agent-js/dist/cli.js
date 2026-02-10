@@ -523,6 +523,9 @@ function validateInputMaps(fn) {
   return { ok: true, value: parsed.data, error: void 0 };
 }
 var TasksSchema = Functions.TaskExpressionsSchema.min(1);
+function delTasks() {
+  return editFunction({ tasks: [] });
+}
 function readTasks() {
   const fn = readFunction();
   if (!fn.ok) {
@@ -1891,6 +1894,10 @@ function validateExampleInputs(value, fn) {
   }
   return { ok: true, value: exampleInputs, error: void 0 };
 }
+function delExampleInputs() {
+  writeFileSync("inputs.json", "[]");
+  return { ok: true, value: void 0, error: void 0 };
+}
 function readExampleInputs() {
   return readExampleInputsFile();
 }
@@ -3175,6 +3182,12 @@ var DelTask = tool(
   { index: z19.int().nonnegative() },
   async ({ index }) => resultFromResult(delTask(index))
 );
+var DelTasks = tool(
+  "DelTasks",
+  "Delete all tasks from the Function's `tasks` array",
+  {},
+  async () => resultFromResult(delTasks())
+);
 var CheckTasks = tool(
   "CheckTasks",
   "Validate the Function's `tasks` field",
@@ -3263,6 +3276,12 @@ var DelExampleInput = tool(
   "Delete an example input at a specific index from the Function's example inputs array",
   { index: z19.number().int().nonnegative() },
   async ({ index }) => resultFromResult(delExampleInput(index))
+);
+var DelExampleInputs = tool(
+  "DelExampleInputs",
+  "Delete all example inputs from the Function's example inputs array",
+  {},
+  async () => resultFromResult(delExampleInputs())
 );
 var CheckExampleInputs = tool(
   "CheckExampleInputs",
@@ -3851,6 +3870,7 @@ function getCommonTools(planIndex, apiBase, apiKey) {
     AppendTask,
     EditTask,
     DelTask,
+    DelTasks,
     CheckTasks,
     ReadMessagesExpressionSchema,
     ReadToolsExpressionSchema,
@@ -3896,6 +3916,7 @@ function getCommonTools(planIndex, apiBase, apiKey) {
     AppendExampleInput,
     EditExampleInput,
     DelExampleInput,
+    DelExampleInputs,
     CheckExampleInputs,
     // README
     ReadReadme,

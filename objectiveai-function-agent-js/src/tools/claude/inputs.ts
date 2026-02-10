@@ -5,6 +5,7 @@ import {
   appendExampleInput,
   checkExampleInputs,
   delExampleInput,
+  delExampleInputs,
   editExampleInput,
   readExampleInputs,
   readExampleInputsSchema,
@@ -89,6 +90,13 @@ export const DelExampleInput = tool(
   "Delete an example input at a specific index from the Function's example inputs array",
   { index: z.number().int().nonnegative() },
   async ({ index }) => resultFromResult(delExampleInput(index)),
+);
+
+export const DelExampleInputs = tool(
+  "DelExampleInputs",
+  "Delete all example inputs from the Function's example inputs array",
+  {},
+  async () => resultFromResult(delExampleInputs()),
 );
 
 export const CheckExampleInputs = tool(

@@ -96,6 +96,11 @@ export function validateExampleInputs(
   return { ok: true, value: exampleInputs, error: undefined };
 }
 
+export function delExampleInputs(): Result<undefined> {
+  writeFileSync("inputs.json", "[]");
+  return { ok: true, value: undefined, error: undefined };
+}
+
 export function readExampleInputs(): Result<unknown> {
   return readExampleInputsFile();
 }

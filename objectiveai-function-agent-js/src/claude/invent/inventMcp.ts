@@ -81,6 +81,7 @@ import {
   AppendTask,
   EditTask,
   DelTask,
+  DelTasks,
   CheckTasks,
   ReadMessagesExpressionSchema,
   ReadToolsExpressionSchema,
@@ -94,6 +95,7 @@ import {
   AppendExampleInput,
   EditExampleInput,
   DelExampleInput,
+  DelExampleInputs,
   CheckExampleInputs,
 } from "../../tools/claude/inputs";
 
@@ -217,6 +219,7 @@ function getCommonTools(planIndex: number, apiBase?: string, apiKey?: string) {
     AppendTask,
     EditTask,
     DelTask,
+    DelTasks,
     CheckTasks,
     ReadMessagesExpressionSchema,
     ReadToolsExpressionSchema,
@@ -271,6 +274,7 @@ function getCommonTools(planIndex: number, apiBase?: string, apiKey?: string) {
     AppendExampleInput,
     EditExampleInput,
     DelExampleInput,
+    DelExampleInputs,
     CheckExampleInputs,
 
     // README

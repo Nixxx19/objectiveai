@@ -368,6 +368,7 @@ __export(function_exports, {
   delInputSplit: () => delInputSplit,
   delOutputLength: () => delOutputLength,
   delTask: () => delTask,
+  delTasks: () => delTasks,
   editDescription: () => editDescription,
   editFunction: () => editFunction,
   editInputMaps: () => editInputMaps,
@@ -619,6 +620,9 @@ function validateInputMaps(fn) {
   return { ok: true, value: parsed.data, error: void 0 };
 }
 var TasksSchema = objectiveai.Functions.TaskExpressionsSchema.min(1);
+function delTasks() {
+  return editFunction({ tasks: [] });
+}
 function readTasks() {
   const fn = readFunction();
   if (!fn.ok) {
@@ -1941,6 +1945,7 @@ __export(inputs_exports, {
   checkExampleInputs: () => checkExampleInputs,
   collectModalities: () => collectModalities,
   delExampleInput: () => delExampleInput,
+  delExampleInputs: () => delExampleInputs,
   editExampleInput: () => editExampleInput,
   readExampleInputs: () => readExampleInputs,
   readExampleInputsSchema: () => readExampleInputsSchema,
@@ -2063,6 +2068,10 @@ function validateExampleInputs(value, fn) {
     }
   }
   return { ok: true, value: exampleInputs, error: void 0 };
+}
+function delExampleInputs() {
+  fs.writeFileSync("inputs.json", "[]");
+  return { ok: true, value: void 0, error: void 0 };
 }
 function readExampleInputs() {
   return readExampleInputsFile();
@@ -3356,6 +3365,12 @@ var DelTask = claudeAgentSdk.tool(
   { index: z19__default.default.int().nonnegative() },
   async ({ index }) => resultFromResult(delTask(index))
 );
+var DelTasks = claudeAgentSdk.tool(
+  "DelTasks",
+  "Delete all tasks from the Function's `tasks` array",
+  {},
+  async () => resultFromResult(delTasks())
+);
 var CheckTasks = claudeAgentSdk.tool(
   "CheckTasks",
   "Validate the Function's `tasks` field",
@@ -3444,6 +3459,12 @@ var DelExampleInput = claudeAgentSdk.tool(
   "Delete an example input at a specific index from the Function's example inputs array",
   { index: z19__default.default.number().int().nonnegative() },
   async ({ index }) => resultFromResult(delExampleInput(index))
+);
+var DelExampleInputs = claudeAgentSdk.tool(
+  "DelExampleInputs",
+  "Delete all example inputs from the Function's example inputs array",
+  {},
+  async () => resultFromResult(delExampleInputs())
 );
 var CheckExampleInputs = claudeAgentSdk.tool(
   "CheckExampleInputs",
@@ -4032,6 +4053,7 @@ function getCommonTools(planIndex, apiBase, apiKey) {
     AppendTask,
     EditTask,
     DelTask,
+    DelTasks,
     CheckTasks,
     ReadMessagesExpressionSchema,
     ReadToolsExpressionSchema,
@@ -4077,6 +4099,7 @@ function getCommonTools(planIndex, apiBase, apiKey) {
     AppendExampleInput,
     EditExampleInput,
     DelExampleInput,
+    DelExampleInputs,
     CheckExampleInputs,
     // README
     ReadReadme,

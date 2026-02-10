@@ -4,6 +4,7 @@ import {
   appendTask,
   checkTasks,
   delTask,
+  delTasks,
   editTask,
   readTasks,
   readTasksSchema,
@@ -50,6 +51,13 @@ export const DelTask = tool(
   "Delete a task at a specific index from the Function's `tasks` array",
   { index: z.int().nonnegative() },
   async ({ index }) => resultFromResult(delTask(index)),
+);
+
+export const DelTasks = tool(
+  "DelTasks",
+  "Delete all tasks from the Function's `tasks` array",
+  {},
+  async () => resultFromResult(delTasks()),
 );
 
 export const CheckTasks = tool(

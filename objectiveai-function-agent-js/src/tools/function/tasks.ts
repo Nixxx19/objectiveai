@@ -6,6 +6,10 @@ import z from "zod";
 const TasksSchema = Functions.TaskExpressionsSchema.min(1);
 type Tasks = z.infer<typeof TasksSchema>;
 
+export function delTasks(): Result<undefined> {
+  return editFunction({ tasks: [] });
+}
+
 export function readTasks(): Result<unknown> {
   const fn = readFunction();
   if (!fn.ok) {
