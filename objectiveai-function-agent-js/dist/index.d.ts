@@ -3,6 +3,20 @@ import * as objectiveai from 'objectiveai';
 import { Functions } from 'objectiveai';
 import { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 
+type LogFn = (...args: unknown[]) => void;
+interface AgentOptions {
+    name?: string;
+    spec?: string;
+    apiBase?: string;
+    apiKey?: string;
+    sessionId?: string;
+    log?: LogFn;
+    depth?: number;
+    instructions?: string;
+    gitUserName?: string;
+    gitUserEmail?: string;
+}
+
 interface ToolState {
     spawnFunctionAgentsHasSpawned: boolean;
     spawnFunctionAgentsRespawnRejected: boolean;
@@ -17,21 +31,6 @@ interface ToolState {
     gitUserEmail: string | undefined;
 }
 
-type LogFn = (...args: unknown[]) => void;
-interface AgentOptions {
-    name?: string;
-    spec?: string;
-    apiBase?: string;
-    apiKey?: string;
-    sessionId?: string;
-    log?: LogFn;
-    depth?: number;
-    instructions?: string;
-    toolState?: ToolState;
-    gitUserName?: string;
-    gitUserEmail?: string;
-}
-
 declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;
 
 declare function nameMcp(state: ToolState, log: LogFn, sessionId?: string, name?: string): Promise<string | undefined>;
@@ -42,11 +41,11 @@ declare function essayTasksMcp(state: ToolState, log: LogFn, sessionId?: string)
 
 declare function planMcp(state: ToolState, log: LogFn, sessionId?: string, instructions?: string): Promise<string | undefined>;
 
-declare function prepare(options?: AgentOptions): Promise<string | undefined>;
+declare function prepare(state: ToolState, options?: AgentOptions): Promise<string | undefined>;
 
-declare function inventFunctionTasksMcp(options?: AgentOptions): Promise<void>;
-declare function inventVectorTasksMcp(options?: AgentOptions): Promise<void>;
-declare function inventMcp(options?: AgentOptions): Promise<void>;
+declare function inventFunctionTasksMcp(state: ToolState, options?: AgentOptions): Promise<void>;
+declare function inventVectorTasksMcp(state: ToolState, options?: AgentOptions): Promise<void>;
+declare function inventMcp(state: ToolState, options?: AgentOptions): Promise<void>;
 
 declare function invent(options?: AgentOptions): Promise<void>;
 

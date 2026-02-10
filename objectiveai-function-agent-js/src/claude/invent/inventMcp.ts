@@ -549,10 +549,10 @@ Please try again. Remember to:
 
 // Main entry point for inventing with function tasks (depth > 0)
 export async function inventFunctionTasksMcp(
+  state: ToolState,
   options: AgentOptions = {},
 ): Promise<void> {
   const log = options.log ?? createFileLogger().log;
-  const state = options.toolState!;
 
   log("=== Invent Loop: Creating new function (function tasks) ===");
   await inventLoop(state, log, true, options.sessionId);
@@ -562,10 +562,10 @@ export async function inventFunctionTasksMcp(
 
 // Main entry point for inventing with vector tasks (depth === 0)
 export async function inventVectorTasksMcp(
+  state: ToolState,
   options: AgentOptions = {},
 ): Promise<void> {
   const log = options.log ?? createFileLogger().log;
-  const state = options.toolState!;
 
   log("=== Invent Loop: Creating new function (vector tasks) ===");
   await inventLoop(state, log, false, options.sessionId);
@@ -574,11 +574,11 @@ export async function inventVectorTasksMcp(
 }
 
 // Unified entry point that selects variant based on depth
-export async function inventMcp(options: AgentOptions = {}): Promise<void> {
+export async function inventMcp(state: ToolState, options: AgentOptions = {}): Promise<void> {
   const depth = options.depth ?? 0;
   if (depth === 0) {
-    await inventVectorTasksMcp(options);
+    await inventVectorTasksMcp(state, options);
   } else {
-    await inventFunctionTasksMcp(options);
+    await inventFunctionTasksMcp(state, options);
   }
 }

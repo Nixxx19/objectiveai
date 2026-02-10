@@ -1832,9 +1832,8 @@ ${instructions}`;
 }
 
 // src/claude/prepare/index.ts
-async function prepare(options = {}) {
+async function prepare(state, options = {}) {
   const log = options.log ?? createFileLogger().log;
-  const state = options.toolState;
   let sessionId = options.sessionId;
   log("=== Step 1: SPEC.md ===");
   sessionId = await specMcp(state, log, sessionId, options.spec);
@@ -4559,26 +4558,24 @@ Please try again. Remember to:
   }
   return sessionId;
 }
-async function inventFunctionTasksMcp(options = {}) {
+async function inventFunctionTasksMcp(state, options = {}) {
   const log = options.log ?? createFileLogger().log;
-  const state = options.toolState;
   log("=== Invent Loop: Creating new function (function tasks) ===");
   await inventLoop(state, log, true, options.sessionId);
   log("=== ObjectiveAI Function invention complete ===");
 }
-async function inventVectorTasksMcp(options = {}) {
+async function inventVectorTasksMcp(state, options = {}) {
   const log = options.log ?? createFileLogger().log;
-  const state = options.toolState;
   log("=== Invent Loop: Creating new function (vector tasks) ===");
   await inventLoop(state, log, false, options.sessionId);
   log("=== ObjectiveAI Function invention complete ===");
 }
-async function inventMcp(options = {}) {
+async function inventMcp(state, options = {}) {
   const depth = options.depth ?? 0;
   if (depth === 0) {
-    await inventVectorTasksMcp(options);
+    await inventVectorTasksMcp(state, options);
   } else {
-    await inventFunctionTasksMcp(options);
+    await inventFunctionTasksMcp(state, options);
   }
 }
 
@@ -4602,7 +4599,7 @@ function makeToolState(options) {
 // src/claude/index.ts
 async function invent(options = {}) {
   const log = options.log ?? createFileLogger().log;
-  const toolState = options.toolState ?? makeToolState({
+  const toolState = makeToolState({
     apiBase: options.apiBase,
     apiKey: options.apiKey,
     readPlanIndex: 0,
@@ -4610,13 +4607,13 @@ async function invent(options = {}) {
     gitUserName: options.gitUserName,
     gitUserEmail: options.gitUserEmail
   });
-  options = { ...options, log, toolState };
+  options = { ...options, log };
   log("=== Initializing workspace ===");
   await init(options);
   log("=== Preparing ===");
-  const sessionId = await prepare(options);
+  const sessionId = await prepare(toolState, options);
   log("=== Inventing ===");
-  await inventMcp({ ...options, sessionId });
+  await inventMcp(toolState, { ...options, sessionId });
 }
 
 // src/tools/index.ts

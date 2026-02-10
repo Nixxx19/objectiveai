@@ -15,10 +15,10 @@ import { planMcp } from "./planMcp";
 
 // Runs init and steps 1-5
 export async function prepare(
+  state: ToolState,
   options: AgentOptions = {},
 ): Promise<string | undefined> {
   const log = options.log ?? createFileLogger().log;
-  const state = options.toolState!;
 
   // Run preparation steps, passing sessionId between them
   let sessionId = options.sessionId;

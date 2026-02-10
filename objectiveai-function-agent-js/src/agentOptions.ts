@@ -1,5 +1,3 @@
-import { ToolState } from "./tools/claude/toolState";
-
 export type LogFn = (...args: unknown[]) => void;
 
 export interface AgentOptions {
@@ -11,7 +9,6 @@ export interface AgentOptions {
   log?: LogFn;
   depth?: number;
   instructions?: string;
-  toolState?: ToolState;
   gitUserName?: string;
   gitUserEmail?: string;
 }

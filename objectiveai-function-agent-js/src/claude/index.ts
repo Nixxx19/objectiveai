@@ -3,14 +3,14 @@ import { createFileLogger } from "../logging";
 import { init } from "../init";
 import { prepare } from "./prepare";
 import { inventMcp } from "./invent";
-import { makeToolState } from "../tools/claude/toolState";
+import { makeToolState, ToolState } from "../tools/claude/toolState";
 
 export * from "./prepare";
 export * from "./invent";
 
 export async function invent(options: AgentOptions = {}): Promise<void> {
   const log = options.log ?? createFileLogger().log;
-  const toolState = options.toolState ?? makeToolState({
+  const toolState = makeToolState({
     apiBase: options.apiBase,
     apiKey: options.apiKey,
     readPlanIndex: 0,
@@ -18,14 +18,14 @@ export async function invent(options: AgentOptions = {}): Promise<void> {
     gitUserName: options.gitUserName,
     gitUserEmail: options.gitUserEmail,
   });
-  options = { ...options, log, toolState };
+  options = { ...options, log };
 
   log("=== Initializing workspace ===");
   await init(options);
 
   log("=== Preparing ===");
-  const sessionId = await prepare(options);
+  const sessionId = await prepare(toolState, options);
 
   log("=== Inventing ===");
-  await inventMcp({ ...options, sessionId });
+  await inventMcp(toolState, { ...options, sessionId });
 }
