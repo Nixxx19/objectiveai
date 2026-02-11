@@ -78,7 +78,7 @@ export default function Footer() {
 
               {/* GROUP 3: FREEFORM */}
               <div style={{ textAlign: 'left' }}>
-                <Link href="/sdk-first" className="footerGroupTitle">
+                <Link href="/chat" className="footerGroupTitle">
                   Freeform
                 </Link>
                 <div style={{
@@ -86,8 +86,6 @@ export default function Footer() {
                   flexDirection: 'column',
                   gap: '3px',
                 }}>
-                  <Link href="/sdk-first" className="footerLink">SDK-First</Link>
-                  <Link href="/vibe-native" className="footerLink">Vibe-Native</Link>
                   <Link href="/chat" className="footerLink">Chat</Link>
                   <Link href="/vector" className="footerLink">Vector</Link>
                 </div>

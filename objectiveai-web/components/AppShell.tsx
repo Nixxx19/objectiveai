@@ -103,11 +103,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       ],
     },
     {
-      href: "/sdk-first",
+      href: "/chat",
       label: "Freeform",
       subLinks: [
-        { href: "/sdk-first", label: "SDK-First" },
-        { href: "/vibe-native", label: "Vibe-Native" },
         { href: "/chat", label: "Chat" },
         { href: "/vector", label: "Vector" },
       ],

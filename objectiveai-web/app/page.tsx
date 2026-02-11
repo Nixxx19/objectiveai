@@ -131,11 +131,11 @@ export default function Home() {
             justifyContent: 'center',
             flexWrap: 'wrap',
           }}>
-            <Link href="/vibe-native" className="pillBtn">
-              Vibe-Native
+            <Link href="/chat" className="pillBtn">
+              Try Chat
             </Link>
-            <Link href="/sdk-first" className="pillBtn">
-              SDK-First
+            <Link href="/vector" className="pillBtn">
+              Try Vector
             </Link>
           </div>
         </div>
