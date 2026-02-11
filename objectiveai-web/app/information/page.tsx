@@ -20,6 +20,14 @@ export default function InformationPage() {
       name: "SDK-First",
       description: "Get started with ObjectiveAI SDKs in minutes",
     },
+    {
+      name: "Chat Completions",
+      description: "Direct chat completions interface for interactive LLM conversations",
+    },
+    {
+      name: "Vector Completions",
+      description: "Direct vector completions interface for scoring and ranking with ensemble voting",
+    },
   ];
 
   const apiEndpoints = [
@@ -204,7 +212,6 @@ export default function InformationPage() {
             <div
               style={{
                 padding: isMobile ? '0 16px 16px' : '0 24px 24px',
-                borderTop: '1px solid var(--border)',
                 marginTop: '8px',
                 paddingTop: isMobile ? '16px' : '20px',
               }}
@@ -310,7 +317,6 @@ export default function InformationPage() {
             <div
               style={{
                 padding: isMobile ? '0 16px 16px' : '0 24px 24px',
-                borderTop: '1px solid var(--border)',
                 marginTop: '8px',
                 paddingTop: isMobile ? '16px' : '20px',
               }}
@@ -328,7 +334,6 @@ export default function InformationPage() {
                       fontWeight: 600,
                       marginBottom: '12px',
                       paddingBottom: '12px',
-                      borderBottom: '1px solid var(--border)',
                       color: 'var(--text)',
                     }}>
                       {sdk.lang}
@@ -428,7 +433,6 @@ export default function InformationPage() {
             <div
               style={{
                 padding: isMobile ? '0 16px 16px' : '0 24px 24px',
-                borderTop: '1px solid var(--border)',
                 marginTop: '8px',
                 paddingTop: isMobile ? '16px' : '20px',
               }}
