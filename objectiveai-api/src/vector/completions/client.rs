@@ -15,6 +15,48 @@ pub fn response_id(created: u64) -> String {
     format!("vctcpl-{}-{}", uuid.simple(), created)
 }
 
+fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
+    if xs.is_empty() {
+        return xs;
+    }
+    for x in &mut xs {
+        *x = Decimal::ONE - *x;
+    }
+    let sum: Decimal = xs.iter().map(|x| x.abs()).sum();
+    if sum == Decimal::ZERO {
+        let uniform = Decimal::ONE / Decimal::from(xs.len());
+        for x in &mut xs {
+            *x = uniform;
+        }
+    } else {
+        for x in &mut xs {
+            *x /= sum;
+        }
+    }
+    xs
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rust_decimal::dec;
+
+    #[test]
+    fn invert_and_l1_normalize_example() {
+        let v = vec![dec!(0.75), dec!(0.25), dec!(0.0)];
+        let out = invert_and_l1_normalize(v);
+        assert_eq!(out, vec![dec!(0.125), dec!(0.375), dec!(0.5)]);
+    }
+
+    #[test]
+    fn invert_and_l1_normalize_uniform_when_all_ones() {
+        let v = vec![dec!(1.0), dec!(1.0), dec!(1.0), dec!(1.0)];
+        // invert -> all zeros -> uniform
+        let out = invert_and_l1_normalize(v);
+        assert_eq!(out, vec![dec!(0.25), dec!(0.25), dec!(0.25), dec!(0.25)]);
+    }
+}
+
 /// Client for creating vector completions.
 ///
 /// Orchestrates multiple LLM chat completions to vote on response options,
@@ -506,6 +548,10 @@ where
                 for v in &mut vote {
                     *v /= sum;
                 }
+                // optionally invert the vote
+                if llm.inner.base.invert_vote.is_some_and(|b| b) {
+                    vote = invert_and_l1_normalize(vote);
+                }
                 // push the vote
                 static_votes.push(
                     objectiveai::vector::completions::response::Vote {
@@ -739,6 +785,7 @@ where
                         pfx_tree,
                         responses_key_pattern,
                         responses_key_pattern_stripped,
+                        invert_vote: llm.base.invert_vote.is_some_and(|b| b),
                     },
                 );
                 vector_pfx_indices.push(Arc::new(pfx_indices));
@@ -855,6 +902,7 @@ where
                             pfx_tree,
                             responses_key_pattern,
                             responses_key_pattern_stripped,
+                            invert_vote,
                         } = &vector_pfx_data[&completion.inner.model];
 
                         // try to get votes for each choice
@@ -866,6 +914,11 @@ where
                                 request_responses_len,
                                 &choice,
                             ) {
+                                let vote = if *invert_vote {
+                                    invert_and_l1_normalize(vote)
+                                } else {
+                                    vote
+                                };
                                 chunk.votes.push(objectiveai::vector::completions::response::Vote {
                                     model: completion.inner.model.clone(),
                                     ensemble_index: ensemble_index as u64,
