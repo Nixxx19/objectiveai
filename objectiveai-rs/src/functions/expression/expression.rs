@@ -251,7 +251,15 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::functions::expression::{ExpressionError, Input, Params, ParamsOwned};
+    use crate::chat::completions::request::{
+        AssistantToolCallExpression, AssistantToolCallFunctionExpression,
+        File, FunctionToolExpression, ImageUrl, InputAudio, MessageExpression,
+        RichContentExpression, RichContentPartExpression, SimpleContentExpression,
+        SimpleContentPartExpression, ToolExpression, ValueExpression, VideoUrl,
+    };
+    use crate::functions::expression::{
+        ExpressionError, FunctionOutput, Input, InputExpression, Params, ParamsOwned,
+    };
     use indexmap::IndexMap;
 
     fn empty_params() -> Params<'static, 'static, 'static> {
@@ -260,6 +268,15 @@ mod tests {
             output: None,
             map: None,
         })
+    }
+
+    fn starlark_one<T: serde::de::DeserializeOwned>(
+        code: &str,
+        params: &Params,
+    ) -> T {
+        Expression::Starlark(code.to_string())
+            .compile_one(params)
+            .unwrap()
     }
 
     fn params_with_object(
@@ -384,6 +401,199 @@ mod tests {
         match result {
             OneOrMany::Many(values) => assert_eq!(values, vec![1, 2, 3]),
             other => panic!("expected Many([1, 2, 3]), got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn expression_outputs_primitives_and_options() {
+        let params = empty_params();
+
+        let b: bool = starlark_one("True", &params);
+        assert!(b);
+
+        let n: u64 = starlark_one("123", &params);
+        assert_eq!(n, 123);
+
+        let some_s: Option<String> = starlark_one("\"hi\"", &params);
+        assert_eq!(some_s.as_deref(), Some("hi"));
+        // Optional values: use a literal `WithExpression::Value(None)` to
+        // represent null. A *starlark expression* that evaluates to None is
+        // treated as an empty array by `compile_one_or_many`, which makes
+        // `compile_one` return ExpectedOneValueFoundMany.
+        let none_s: Option<String> =
+            WithExpression::Value::<Option<String>>(None)
+                .compile_one(&params)
+                .unwrap();
+        assert_eq!(none_s, None);
+        let err = Expression::Starlark("None".to_string())
+            .compile_one::<Option<String>>(&params)
+            .unwrap_err();
+        assert!(matches!(err, ExpressionError::ExpectedOneValueFoundMany));
+
+        let some_b: Option<bool> = starlark_one("False", &params);
+        assert_eq!(some_b, Some(false));
+        let none_b: Option<bool> = WithExpression::Value::<Option<bool>>(None)
+            .compile_one(&params)
+            .unwrap();
+        assert_eq!(none_b, None);
+        let err = Expression::Starlark("None".to_string())
+            .compile_one::<Option<bool>>(&params)
+            .unwrap_err();
+        assert!(matches!(err, ExpressionError::ExpectedOneValueFoundMany));
+    }
+
+    #[test]
+    fn expression_outputs_input_and_vec_input() {
+        let params = empty_params();
+
+        let input: Input = starlark_one("\"hello\"", &params);
+        assert!(matches!(input, Input::String(s) if s == "hello"));
+
+        let inputs: Vec<Input> = starlark_one("[1, \"a\", True]", &params);
+        assert_eq!(inputs.len(), 3);
+        assert!(matches!(&inputs[0], Input::Integer(1)));
+        assert!(matches!(&inputs[1], Input::String(s) if s == "a"));
+        assert!(matches!(&inputs[2], Input::Boolean(true)));
+    }
+
+    #[test]
+    fn expression_outputs_input_expression_and_value_expression() {
+        let params = empty_params();
+
+        let ie: InputExpression = starlark_one("{\"k\": \"v\"}", &params);
+        match ie {
+            InputExpression::Object(obj) => {
+                assert!(obj.contains_key("k"));
+            }
+            other => panic!("expected InputExpression::Object, got {:?}", other),
+        }
+
+        let ve: ValueExpression = starlark_one("{\"x\": 1}", &params);
+        match ve {
+            ValueExpression::Object(map) => {
+                assert!(map.contains_key("x"));
+            }
+            other => panic!("expected ValueExpression::Object, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn expression_outputs_content_expression_types() {
+        let params = empty_params();
+
+        let sc: SimpleContentExpression = starlark_one("\"hello\"", &params);
+        assert!(matches!(sc, SimpleContentExpression::Text(t) if t == "hello"));
+
+        let rc: RichContentExpression = starlark_one("\"hello\"", &params);
+        assert!(matches!(rc, RichContentExpression::Text(t) if t == "hello"));
+
+        let scp: SimpleContentPartExpression =
+            starlark_one("{\"type\": \"text\", \"text\": \"hi\"}", &params);
+        match scp {
+            SimpleContentPartExpression::Text { .. } => {}
+        }
+
+        let rcp: RichContentPartExpression =
+            starlark_one("{\"type\": \"text\", \"text\": \"hi\"}", &params);
+        match rcp {
+            RichContentPartExpression::Text { .. } => {}
+            other => panic!("expected RichContentPartExpression::Text, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn expression_outputs_rich_media_structs() {
+        let params = empty_params();
+
+        let image: ImageUrl = starlark_one("{\"url\": \"https://example.com/img.png\"}", &params);
+        assert_eq!(image.url, "https://example.com/img.png");
+
+        let audio: InputAudio = starlark_one("{\"data\": \"BASE64\", \"format\": \"wav\"}", &params);
+        assert_eq!(audio.format, "wav");
+
+        let video: VideoUrl = starlark_one("{\"url\": \"https://example.com/v.mp4\"}", &params);
+        assert_eq!(video.url, "https://example.com/v.mp4");
+
+        let file: File = starlark_one("{\"file_id\": \"file_123\"}", &params);
+        assert_eq!(file.file_id.as_deref(), Some("file_123"));
+    }
+
+    #[test]
+    fn expression_outputs_message_and_tool_types() {
+        let params = empty_params();
+
+        let msg: MessageExpression =
+            starlark_one("{\"role\": \"user\", \"content\": \"hi\"}", &params);
+        match msg {
+            MessageExpression::User(_) => {}
+            other => panic!("expected MessageExpression::User, got {:?}", other),
+        }
+
+        let messages: Vec<WithExpression<MessageExpression>> = starlark_one(
+            "[{\"role\": \"user\", \"content\": \"hi\"}, {\"role\": \"system\", \"content\": \"s\"}]",
+            &params,
+        );
+        assert_eq!(messages.len(), 2);
+        assert!(matches!(messages[0], WithExpression::Value(_)));
+
+        let tool: ToolExpression = starlark_one(
+            "{\"type\": \"function\", \"function\": {\"name\": \"do_thing\"}}",
+            &params,
+        );
+        match tool {
+            ToolExpression::Function { .. } => {}
+        }
+
+        let tools: Vec<WithExpression<ToolExpression>> = starlark_one(
+            "[{\"type\": \"function\", \"function\": {\"name\": \"do_thing\"}}]",
+            &params,
+        );
+        assert_eq!(tools.len(), 1);
+    }
+
+    #[test]
+    fn expression_outputs_function_tool_and_assistant_tool_call_types() {
+        let params = empty_params();
+
+        let fte: FunctionToolExpression =
+            starlark_one("{\"name\": \"do_thing\"}", &params);
+        assert!(matches!(fte.name, WithExpression::Value(ref s) if s == "do_thing"));
+
+        let atcf: AssistantToolCallFunctionExpression = starlark_one(
+            "{\"name\": \"do_thing\", \"arguments\": \"{}\"}",
+            &params,
+        );
+        assert!(matches!(atcf.name, WithExpression::Value(ref s) if s == "do_thing"));
+
+        let atc: AssistantToolCallExpression = starlark_one(
+            "{\"type\": \"function\", \"id\": \"call_1\", \"function\": {\"name\": \"do_thing\", \"arguments\": \"{}\"}}",
+            &params,
+        );
+        match atc {
+            AssistantToolCallExpression::Function { .. } => {}
+        }
+
+        let atcs: Vec<WithExpression<AssistantToolCallExpression>> = starlark_one(
+            "[{\"type\": \"function\", \"id\": \"call_1\", \"function\": {\"name\": \"do_thing\", \"arguments\": \"{}\"}}]",
+            &params,
+        );
+        assert_eq!(atcs.len(), 1);
+    }
+
+    #[test]
+    fn expression_outputs_function_output_scalar_and_vector() {
+        let params = empty_params();
+
+        let scalar: FunctionOutput = starlark_one("0.75", &params);
+        match scalar {
+            FunctionOutput::Scalar(_) => {}
+            other => panic!("expected FunctionOutput::Scalar, got {:?}", other),
+        }
+
+        let vector: FunctionOutput = starlark_one("[0.1, 0.2, 0.7]", &params);
+        match vector {
+            FunctionOutput::Vector(v) => assert_eq!(v.len(), 3),
+            other => panic!("expected FunctionOutput::Vector, got {:?}", other),
         }
     }
 }
