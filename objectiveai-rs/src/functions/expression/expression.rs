@@ -247,3 +247,144 @@ where
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::functions::expression::{ExpressionError, Input, Params, ParamsOwned};
+    use indexmap::IndexMap;
+
+    fn empty_params() -> Params<'static, 'static, 'static> {
+        Params::Owned(ParamsOwned {
+            input: Input::Object(IndexMap::new()),
+            output: None,
+            map: None,
+        })
+    }
+
+    fn params_with_object(
+        pairs: Vec<(&str, Input)>,
+    ) -> Params<'static, 'static, 'static> {
+        let mut map = IndexMap::new();
+        for (k, v) in pairs {
+            map.insert(k.to_string(), v);
+        }
+        Params::Owned(ParamsOwned {
+            input: Input::Object(map),
+            output: None,
+            map: None,
+        })
+    }
+
+    #[test]
+    fn expression_compile_one_string_starlark() {
+        let params = params_with_object(vec![(
+            "name",
+            Input::String("alice".to_string()),
+        )]);
+        let expr = Expression::Starlark("input['name']".to_string());
+
+        let value: String = expr.compile_one(&params).unwrap();
+        assert_eq!(value, "alice");
+    }
+
+    #[test]
+    fn expression_compile_one_or_many_integers_from_array() {
+        let params = params_with_object(vec![(
+            "numbers",
+            Input::Array(vec![
+                Input::Integer(1),
+                Input::Integer(2),
+                Input::Integer(3),
+            ]),
+        )]);
+        let expr = Expression::Starlark("input['numbers']".to_string());
+
+        let result: OneOrMany<i64> = expr.compile_one_or_many(&params).unwrap();
+        match result {
+            OneOrMany::Many(values) => assert_eq!(values, vec![1, 2, 3]),
+            other => panic!("expected Many variant, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn expression_compile_one_or_many_filters_nulls_and_empty_is_many() {
+        let params = empty_params();
+
+        // Single null becomes an empty Many
+        let expr_null = Expression::Starlark("None".to_string());
+        let result: OneOrMany<i64> = expr_null.compile_one_or_many(&params).unwrap();
+        match result {
+            OneOrMany::Many(values) => assert!(values.is_empty()),
+            other => panic!("expected Many([]), got {:?}", other),
+        }
+
+        // Array with nulls filters them out
+        let expr_array = Expression::Starlark("[1, None, 3]".to_string());
+        let result: OneOrMany<i64> = expr_array.compile_one_or_many(&params).unwrap();
+        match result {
+            OneOrMany::Many(values) => assert_eq!(values, vec![1, 3]),
+            other => panic!("expected Many([1, 3]), got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn expression_compile_one_errors_when_many() {
+        let params = empty_params();
+        let expr = Expression::Starlark("[1, 2]".to_string());
+
+        let err = expr.compile_one::<i64>(&params).unwrap_err();
+        match err {
+            ExpressionError::ExpectedOneValueFoundMany => {}
+            other => panic!("expected ExpectedOneValueFoundMany, got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn withexpression_literal_passthrough_one_and_one_or_many() {
+        let params = empty_params();
+        let with_expr = WithExpression::Value::<String>("hello".to_string());
+
+        let one = with_expr.clone().compile_one(&params).unwrap();
+        assert_eq!(one, "hello");
+
+        let one_or_many = with_expr.compile_one_or_many(&params).unwrap();
+        match one_or_many {
+            OneOrMany::One(value) => assert_eq!(value, "hello"),
+            other => panic!("expected One(\"hello\"), got {:?}", other),
+        }
+    }
+
+    #[test]
+    fn withexpression_expression_uses_underlying_expression_for_one_and_many() {
+        // Use an input with a scalar and an array to exercise both paths.
+        let params = params_with_object(vec![
+            ("value", Input::Integer(42)),
+            (
+                "values",
+                Input::Array(vec![
+                    Input::Integer(1),
+                    Input::Integer(2),
+                    Input::Integer(3),
+                ]),
+            ),
+        ]);
+
+        // compile_one with scalar output
+        let with_scalar =
+            WithExpression::Expression::<i64>(Expression::Starlark("input['value']".to_string()));
+        let scalar = with_scalar.compile_one(&params).unwrap();
+        assert_eq!(scalar, 42);
+
+        // compile_one_or_many with array output
+        let with_many = WithExpression::Expression::<i64>(Expression::Starlark(
+            "input['values']".to_string(),
+        ));
+        let result = with_many.compile_one_or_many(&params).unwrap();
+        match result {
+            OneOrMany::Many(values) => assert_eq!(values, vec![1, 2, 3]),
+            other => panic!("expected Many([1, 2, 3]), got {:?}", other),
+        }
+    }
+}
+
