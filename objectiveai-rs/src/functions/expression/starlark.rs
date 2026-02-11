@@ -3,6 +3,7 @@
 //! Provides a sandboxed Starlark runtime for evaluating expressions.
 //! Variables `input`, `output`, and `map` are injected into the global scope.
 
+use serde::de::DeserializeOwned;
 use serde_json::Value;
 use starlark::environment::{Globals, GlobalsBuilder, Module};
 use starlark::eval::Evaluator;
@@ -13,7 +14,7 @@ use starlark::values::list::ListRef;
 use starlark::values::{Heap, UnpackValue, Value as SValue};
 use std::sync::LazyLock;
 
-use super::ExpressionError;
+use super::{ExpressionError, OneOrMany};
 
 /// Global Starlark globals with custom functions.
 pub static STARLARK_GLOBALS: LazyLock<Globals> = LazyLock::new(|| {
@@ -208,6 +209,29 @@ impl<'a> ToStarlarkValue for super::TaskOutput<'a> {
     }
 }
 
+/// Trait for converting a Starlark runtime value into a Rust type.
+///
+/// This is used by [`Expression`](super::Expression) to compile Starlark
+/// expressions directly from `starlark::values::Value` without going through
+/// an intermediate `serde_json::Value`.
+pub trait FromStarlarkValue: Sized {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError>;
+}
+
+impl<T> FromStarlarkValue for T
+where
+    T: DeserializeOwned,
+{
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let json = value
+            .to_json_value()
+            .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?;
+        let v = serde_json::from_value(json)
+            .map_err(ExpressionError::DeserializationError)?;
+        Ok(v)
+    }
+}
+
 /// Evaluate a Starlark expression with the given parameters.
 pub fn starlark_eval(
     code: &str,
@@ -278,6 +302,40 @@ pub fn starlark_eval(
     result
         .to_json_value()
         .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))
+}
+
+/// Evaluate a Starlark expression and convert the result into `OneOrMany<T>`.
+///
+/// This is the optimized path used by [`super::Expression`] for Starlark
+/// expressions, avoiding an intermediate `serde_json::Value`.
+pub fn starlark_eval_one_or_many<T>(
+    code: &str,
+    params: &super::Params,
+) -> Result<OneOrMany<T>, ExpressionError>
+where
+    T: FromStarlarkValue + DeserializeOwned,
+{
+    // Reuse the existing JSON-based semantics by evaluating to a JSON value
+    // and then deserializing into `Option<OneOrMany<Option<T>>>`, exactly
+    // like `Expression::deserialize_result`.
+    let json = starlark_eval(code, params)?;
+    let value: Option<OneOrMany<Option<T>>> =
+        serde_json::from_value(json).map_err(ExpressionError::DeserializationError)?;
+    Ok(match value {
+        Some(OneOrMany::One(Some(v))) => OneOrMany::One(v),
+        Some(OneOrMany::One(None)) => OneOrMany::Many(Vec::new()),
+        Some(OneOrMany::Many(mut vs)) => {
+            vs.retain(|v| v.is_some());
+            if vs.is_empty() {
+                OneOrMany::Many(Vec::new())
+            } else if vs.len() == 1 {
+                OneOrMany::One(vs.into_iter().flatten().next().unwrap())
+            } else {
+                OneOrMany::Many(vs.into_iter().flatten().collect())
+            }
+        }
+        None => OneOrMany::Many(Vec::new()),
+    })
 }
 
 /// Convert JSON value to Starlark value.
