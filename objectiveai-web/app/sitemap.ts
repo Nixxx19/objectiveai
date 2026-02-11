@@ -13,8 +13,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/ensembles/create",
     "/ensemble-llms",
     "/ensemble-llms/create",
-    "/chat",
-    "/vector",
     "/people",
     "/information",
     "/legal",

@@ -56,6 +56,16 @@ const nextConfig: NextConfig = {
         destination: '/information',
         permanent: false,
       },
+      {
+        source: '/chat',
+        destination: '/information',
+        permanent: false,
+      },
+      {
+        source: '/vector',
+        destination: '/information',
+        permanent: false,
+      },
     ];
   },
 };

@@ -103,14 +103,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       ],
     },
     {
-      href: "/chat",
-      label: "Freeform",
-      subLinks: [
-        { href: "/chat", label: "Chat" },
-        { href: "/vector", label: "Vector" },
-      ],
-    },
-    {
       href: "/information",
       label: "Information",
       subLinks: [

@@ -131,12 +131,17 @@ export default function Home() {
             justifyContent: 'center',
             flexWrap: 'wrap',
           }}>
-            <Link href="/chat" className="pillBtn">
-              Try Chat
+            <Link href="/functions" className="pillBtn">
+              Functions
             </Link>
-            <Link href="/vector" className="pillBtn">
-              Try Vector
-            </Link>
+            <a
+              href="https://github.com/ObjectiveAI/objectiveai"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pillBtn"
+            >
+              GitHub
+            </a>
           </div>
         </div>
       </section>
