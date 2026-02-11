@@ -128,6 +128,8 @@ pub struct MapFunctionFlatTaskProfile {
     /// Expression to transform the task result from the parent task definition.
     /// Receives: `input` (function input), `output` (the raw FunctionOutput).
     pub task_output: objectiveai::functions::expression::Expression,
+    /// Whether to invert the compiled output after applying `task_output`.
+    pub invert_output: bool,
 }
 
 impl MapFunctionFlatTaskProfile {
@@ -173,6 +175,10 @@ pub struct FunctionFlatTaskProfile {
     /// Receives: `input` (function input), `output` (the raw FunctionOutput).
     /// None for root-level functions (not called as a task from a parent).
     pub task_output: Option<objectiveai::functions::expression::Expression>,
+    /// Whether to invert the compiled output after applying `task_output`.
+    ///
+    /// Only meaningful when `task_output` is `Some(_)`.
+    pub invert_output: bool,
 }
 
 impl FunctionFlatTaskProfile {
@@ -247,6 +253,8 @@ pub struct MapVectorCompletionFlatTaskProfile {
     /// Expression to transform the combined MapVectorCompletion output.
     /// Receives: `input` (function input), `output` (the MapVectorCompletion variant).
     pub task_output: objectiveai::functions::expression::Expression,
+    /// Whether to invert the compiled output after applying `task_output`.
+    pub invert_output: bool,
 }
 
 impl MapVectorCompletionFlatTaskProfile {
@@ -281,6 +289,8 @@ pub struct VectorCompletionFlatTaskProfile {
     /// Expression to transform the raw VectorCompletionOutput into a FunctionOutput.
     /// Receives: `output` (the raw VectorCompletionOutput).
     pub output: objectiveai::functions::expression::Expression,
+    /// Whether to invert the compiled output after applying `output`.
+    pub invert_output: bool,
 }
 
 impl VectorCompletionFlatTaskProfile {
@@ -337,6 +347,7 @@ pub async fn get_flat_task_profile<CTXEXT>(
     profile: ProfileParam,
     input: objectiveai::functions::expression::Input,
     task_output: Option<objectiveai::functions::expression::Expression>,
+    invert_output: bool,
     function_fetcher: Arc<
         impl super::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     >,
@@ -496,19 +507,30 @@ where
         )));
     }
 
-    // take profile weights
-    let profile_weights = match &profile {
-        objectiveai::functions::Profile::Remote(rp) => rp.profile.clone(),
-        objectiveai::functions::Profile::Inline(ip) => ip.profile.clone(),
+    // normalize profile into (weight, invert) pairs
+    let profile_pairs: Vec<(rust_decimal::Decimal, bool)> = match &profile {
+        objectiveai::functions::Profile::Remote(rp) => {
+            rp.profile.to_weights_and_invert()
+        }
+        objectiveai::functions::Profile::Inline(ip) => {
+            ip.profile.to_weights_and_invert()
+        }
     };
 
     // validate profile weights length matches function tasks length
-    if profile_weights.len() != function_tasks_len {
+    if profile_pairs.len() != function_tasks_len {
         return Err(super::executions::Error::InvalidProfile(format!(
             "profile weights length ({}) does not match function tasks length ({})",
-            profile_weights.len(), function_tasks_len
+            profile_pairs.len(),
+            function_tasks_len
         )));
     }
+
+    // split into weights and invert flags
+    let (profile_weights, profile_invert_flags): (
+        Vec<rust_decimal::Decimal>,
+        Vec<bool>,
+    ) = profile_pairs.into_iter().unzip();
 
     // take description
     let description = function.description().map(str::to_owned);
@@ -603,6 +625,7 @@ where
                         commit,
                         input,
                         output,
+                        invert_output,
                     },
                 ),
             )
@@ -614,9 +637,12 @@ where
                         commit,
                         input,
                         output,
+                        invert_output,
                     },
                 ),
             ) => {
+                let effective_invert_output =
+                    invert_output || profile_invert_flags[i];
                 flat_tasks_or_futs.push(TaskFut::FunctionTaskFut(Box::pin(
                     get_flat_task_profile(
                         ctx.clone(),
@@ -650,6 +676,7 @@ where
                         },
                         input,
                         Some(output),
+                        effective_invert_output,
                         function_fetcher.clone(),
                         profile_fetcher.clone(),
                         ensemble_fetcher.clone(),
@@ -668,6 +695,8 @@ where
                         "expected VectorCompletion profile for vector completion task".to_string()
                     )),
                 };
+                let effective_invert_output =
+                    task.invert_output || profile_invert_flags[i];
                 flat_tasks_or_futs.push(TaskFut::VectorTaskFut(Box::pin(
                     get_vector_completion_flat_task_profile(
                         ctx.clone(),
@@ -675,34 +704,37 @@ where
                         task,
                         ensemble,
                         profile,
+                        effective_invert_output,
                         ensemble_fetcher.clone(),
                     ),
                 )));
             }
             objectiveai::functions::CompiledTask::Many(tasks) => {
                 // Determine task type and extract shared output expression before consuming tasks
-                let (is_vector_completion, map_task_output) = match tasks
+                let (is_vector_completion, map_task_output, map_invert_output) = match tasks
                     .first()
                 {
                     Some(objectiveai::functions::Task::VectorCompletion(
                         vc,
-                    )) => (true, vc.output.clone()),
+                    )) => (true, vc.output.clone(), vc.invert_output),
                     Some(objectiveai::functions::Task::ScalarFunction(sf)) => {
-                        (false, sf.output.clone())
+                        (false, sf.output.clone(), sf.invert_output)
                     }
                     Some(objectiveai::functions::Task::VectorFunction(vf)) => {
-                        (false, vf.output.clone())
+                        (false, vf.output.clone(), vf.invert_output)
                     }
                     None => {
                         // Empty mapped task - need a placeholder expression
                         // This case shouldn't normally happen, but handle gracefully
                         (true, objectiveai::functions::expression::Expression::JMESPath(
                             "output".to_string()
-                        ))
+                        ), false)
                     }
                 };
 
                 if is_vector_completion {
+                    let map_invert_output =
+                        map_invert_output || profile_invert_flags[i];
                     let mut futs = Vec::with_capacity(tasks.len());
                     for (j, task) in tasks.into_iter().enumerate() {
                         let mut task_path = task_path.clone();
@@ -727,12 +759,14 @@ where
                             },
                             ensemble,
                             profile,
+                            map_invert_output,
                             ensemble_fetcher.clone(),
                         ));
                     }
                     flat_tasks_or_futs.push(TaskFut::MapVectorTaskFut((
                         task_path,
                         map_task_output,
+                        map_invert_output,
                         futures::future::try_join_all(futs),
                     )));
                 } else {
@@ -805,6 +839,7 @@ where
                             },
                             // Pass None for individual mapped functions - the task_output is stored on MapFunctionFlatTaskProfile
                             None,
+                            false,
                             function_fetcher.clone(),
                             profile_fetcher.clone(),
                             ensemble_fetcher.clone(),
@@ -813,6 +848,7 @@ where
                     flat_tasks_or_futs.push(TaskFut::MapFunctionTaskFut((
                         task_path,
                         map_task_output,
+                        map_invert_output,
                         futures::future::try_join_all(futs),
                     )));
                 }
@@ -834,6 +870,7 @@ where
         profile: profile_weights,
         r#type,
         task_output,
+        invert_output,
     })
 }
 
@@ -842,7 +879,8 @@ async fn get_vector_completion_flat_task_profile<CTXEXT>(
     path: Vec<u64>,
     task: objectiveai::functions::VectorCompletionTask,
     ensemble: objectiveai::vector::completions::request::Ensemble,
-    profile: Vec<rust_decimal::Decimal>,
+    profile: objectiveai::vector::completions::request::Profile,
+    invert_output: bool,
     ensemble_fetcher: Arc<
         crate::ensemble::fetcher::CachingFetcher<
             CTXEXT,
@@ -877,13 +915,18 @@ where
         }
     };
 
-    // validate profile length
-    if profile.len() != ensemble.llms.len() {
+    // normalize profile into (weight, invert) pairs and validate length
+    let profile_pairs = profile.to_weights_and_invert();
+    if profile_pairs.len() != ensemble.llms.len() {
         return Err(super::executions::Error::InvalidProfile(format!(
             "vector completion profile weights length ({}) does not match ensemble LLMs length ({})",
-            profile.len(), ensemble.llms.len()
+            profile_pairs.len(),
+            ensemble.llms.len()
         )));
     }
+
+    let profile: Vec<rust_decimal::Decimal> =
+        profile_pairs.into_iter().map(|(w, _)| w).collect();
 
     // construct flat task profile
     Ok(super::VectorCompletionFlatTaskProfile {
@@ -911,6 +954,7 @@ where
         tools: task.tools,
         responses: task.responses,
         output: task.output,
+        invert_output,
     })
 }
 
@@ -935,6 +979,7 @@ enum TaskFut<
         (
             Vec<u64>,
             objectiveai::functions::expression::Expression,
+            bool,
             futures::future::TryJoinAll<VFUT>,
         ),
     ),
@@ -943,6 +988,7 @@ enum TaskFut<
         (
             Vec<u64>,
             objectiveai::functions::expression::Expression,
+            bool,
             futures::future::TryJoinAll<FFUT>,
         ),
     ),
@@ -976,13 +1022,14 @@ where
                 .poll(cx)
                 .map_ok(FlatTaskProfile::VectorCompletion)
                 .map_ok(Some),
-            TaskFut::MapVectorTaskFut((path, task_output, futs)) => {
+            TaskFut::MapVectorTaskFut((path, task_output, invert_output, futs)) => {
                 Pin::new(futs).poll(cx).map_ok(|results| {
                     Some(FlatTaskProfile::MapVectorCompletion(
                         MapVectorCompletionFlatTaskProfile {
                             path: path.clone(),
                             vector_completions: results,
                             task_output: task_output.clone(),
+                            invert_output: *invert_output,
                         },
                     ))
                 })
@@ -991,13 +1038,14 @@ where
                 .poll(cx)
                 .map_ok(FlatTaskProfile::Function)
                 .map_ok(Some),
-            TaskFut::MapFunctionTaskFut((path, task_output, futs)) => {
+            TaskFut::MapFunctionTaskFut((path, task_output, invert_output, futs)) => {
                 Pin::new(futs).poll(cx).map_ok(|results| {
                     Some(FlatTaskProfile::MapFunction(
                         MapFunctionFlatTaskProfile {
                             path: path.clone(),
                             functions: results,
                             task_output: task_output.clone(),
+                            invert_output: *invert_output,
                         },
                     ))
                 })
