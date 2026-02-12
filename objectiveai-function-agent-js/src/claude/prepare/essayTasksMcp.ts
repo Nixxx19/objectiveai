@@ -11,7 +11,7 @@ import {
   makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
 import { makeReadFunctionSchema } from "../../tools/claude/function";
-import { ToolState } from "../../tools/claude/toolState";
+import { ToolState, formatReadList } from "../../tools/claude/toolState";
 
 function essayTasksIsNonEmpty(): boolean {
   return (
@@ -43,8 +43,18 @@ export async function essayTasksMcp(
       ? `exactly ${state.minWidth}`
       : `between ${state.minWidth} and ${state.maxWidth}`;
 
+  const reads: string[] = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("name.txt");
+  if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
+  reads.push("example functions");
+
+  const readPrefix = reads.length > 0
+    ? `Read ${formatReadList(reads)} to understand the context, then create`
+    : "Create";
+
   const prompt =
-    "Read SPEC.md, name.txt, ESSAY.md, and example functions to understand the context, then create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md." +
+    `${readPrefix} ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md.` +
     " Each task is a plain language description of a task which will go into the function's `tasks` array." +
     ` There must be ${widthDesc} tasks.`;
 

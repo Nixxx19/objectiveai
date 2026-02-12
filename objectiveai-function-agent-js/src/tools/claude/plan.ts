@@ -9,7 +9,10 @@ export function makeReadPlan(state: ToolState) {
     "ReadPlan",
     "Read the plan",
     {},
-    async () => resultFromResult(readPlan(state.readPlanIndex)),
+    async () => {
+      state.hasReadOrWrittenPlan = true;
+      return resultFromResult(readPlan(state.readPlanIndex));
+    },
   );
 }
 
@@ -18,7 +21,10 @@ export function makeWritePlan(state: ToolState) {
     "WritePlan",
     "Write the plan",
     { content: z.string() },
-    async ({ content }) => resultFromResult(writePlan(state.writePlanIndex, content)),
+    async ({ content }) => {
+      state.hasReadOrWrittenPlan = true;
+      return resultFromResult(writePlan(state.writePlanIndex, content));
+    },
   );
 }
 

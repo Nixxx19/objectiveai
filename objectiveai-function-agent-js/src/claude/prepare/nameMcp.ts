@@ -10,7 +10,7 @@ import {
   makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
 import { makeReadFunctionSchema } from "../../tools/claude/function";
-import { ToolState } from "../../tools/claude/toolState";
+import { ToolState, formatReadList } from "../../tools/claude/toolState";
 
 function nameIsNonEmpty(): boolean {
   return (
@@ -42,10 +42,18 @@ export async function nameMcp(
   ];
   const mcpServer = createSdkMcpServer({ name: "name", tools });
 
+  const reads: string[] = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("example functions");
+
+  const readPrefix = reads.length > 0
+    ? `Read ${formatReadList(reads)} to understand the context, then create`
+    : "Create";
+
   sessionId = await consumeStream(
     query({
       prompt:
-        "Read SPEC.md and example functions to understand the context, then create name.txt with the function name.\n" +
+        `${readPrefix} name.txt with the function name.\n` +
         '**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n' +
         "- Use all lowercase\n" +
         "- Use dashes (`-`) to separate words if there's more than one",

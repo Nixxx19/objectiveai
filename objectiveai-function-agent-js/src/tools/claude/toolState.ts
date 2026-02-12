@@ -13,7 +13,17 @@ export interface ToolState {
   ghToken: string;
   minWidth: number;
   maxWidth: number;
-  hasReadSpecOnce: boolean;
+  hasReadOrWrittenSpec: boolean;
+  hasReadOrWrittenEssay: boolean;
+  hasReadOrWrittenEssayTasks: boolean;
+  hasReadOrWrittenPlan: boolean;
+}
+
+export function formatReadList(items: string[]): string {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
 }
 
 export function makeToolState(options: {
@@ -42,6 +52,9 @@ export function makeToolState(options: {
     ghToken: options.ghToken,
     minWidth: options.minWidth,
     maxWidth: options.maxWidth,
-    hasReadSpecOnce: false,
+    hasReadOrWrittenSpec: false,
+    hasReadOrWrittenEssay: false,
+    hasReadOrWrittenEssayTasks: false,
+    hasReadOrWrittenPlan: false,
   };
 }

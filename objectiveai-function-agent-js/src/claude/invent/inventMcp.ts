@@ -3,7 +3,7 @@ import { AgentOptions, LogFn } from "../../agentOptions";
 import { submit } from "../../tools/submit";
 import { createFileLogger, consumeStream } from "../../logging";
 import { registerSchemaRefs } from "../../tools/schemaRefs";
-import { ToolState } from "../../tools/claude/toolState";
+import { ToolState, formatReadList } from "../../tools/claude/toolState";
 
 // Tools - read-only context
 import { makeReadSpec } from "../../tools/claude/spec";
@@ -305,11 +305,23 @@ function widthText(minWidth: number, maxWidth: number): string {
   return `between **${minWidth}** and **${maxWidth}**`;
 }
 
+function buildReadLine(state: ToolState): string {
+  const reads: string[] = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("name.txt");
+  if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
+  if (!state.hasReadOrWrittenEssayTasks) reads.push("ESSAY_TASKS.md");
+  if (!state.hasReadOrWrittenPlan) reads.push("the plan");
+  reads.push("example functions");
+  if (reads.length === 0) return "";
+  return `\nRead ${formatReadList(reads)} to understand the context, if needed.\n`;
+}
+
 function buildFunctionTasksPrompt(state: ToolState): string {
   const w = widthText(state.minWidth, state.maxWidth);
+  const readLine = buildReadLine(state);
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
-
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
+${readLine}
 
 ## Phase 1: Implementation
 
@@ -407,9 +419,9 @@ Once all tests pass and SPEC.md compliance is verified:
 
 function buildVectorTasksPrompt(state: ToolState): string {
   const w = widthText(state.minWidth, state.maxWidth);
+  const readLine = buildReadLine(state);
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
-
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
+${readLine}
 
 ## Phase 1: Implementation
 

@@ -380,19 +380,20 @@ function resultFromResult(result) {
   return textResult(JSON.stringify(result.value, null, 2));
 }
 function makeReadSpec(state) {
-  return claudeAgentSdk.tool(
-    "ReadSpec",
-    "Read SPEC.md",
-    {},
-    async () => resultFromResult(readSpec())
-  );
+  return claudeAgentSdk.tool("ReadSpec", "Read SPEC.md", {}, async () => {
+    state.hasReadOrWrittenSpec = true;
+    return resultFromResult(readSpec());
+  });
 }
 function makeWriteSpec(state) {
   return claudeAgentSdk.tool(
     "WriteSpec",
     "Write SPEC.md",
     { content: z19__default.default.string() },
-    async ({ content }) => resultFromResult(writeSpec(content))
+    async ({ content }) => {
+      state.hasReadOrWrittenSpec = true;
+      return resultFromResult(writeSpec(content));
+    }
   );
 }
 function listExampleFunctions() {
@@ -1608,7 +1609,7 @@ async function specMcp(state, log, sessionId, spec) {
     return sessionId;
   }
   const tools = [
-    makeWriteSpec(),
+    makeWriteSpec(state),
     makeListExampleFunctions(),
     makeReadExampleFunction(),
     makeReadFunctionSchema()
@@ -1715,6 +1716,36 @@ function makeWriteName(state) {
   );
 }
 
+// src/tools/claude/toolState.ts
+function formatReadList(items) {
+  if (items.length === 0) return "";
+  if (items.length === 1) return items[0];
+  if (items.length === 2) return `${items[0]} and ${items[1]}`;
+  return `${items.slice(0, -1).join(", ")}, and ${items[items.length - 1]}`;
+}
+function makeToolState(options) {
+  return {
+    spawnFunctionAgentsHasSpawned: false,
+    spawnFunctionAgentsRespawnRejected: false,
+    editInputSchemaModalityRemovalRejected: false,
+    runNetworkTestsApiBase: options.apiBase,
+    runNetworkTestsApiKey: options.apiKey,
+    readPlanIndex: options.readPlanIndex,
+    writePlanIndex: options.writePlanIndex,
+    submitApiBase: options.apiBase,
+    submitApiKey: options.apiKey,
+    gitUserName: options.gitUserName,
+    gitUserEmail: options.gitUserEmail,
+    ghToken: options.ghToken,
+    minWidth: options.minWidth,
+    maxWidth: options.maxWidth,
+    hasReadOrWrittenSpec: false,
+    hasReadOrWrittenEssay: false,
+    hasReadOrWrittenEssayTasks: false,
+    hasReadOrWrittenPlan: false
+  };
+}
+
 // src/claude/prepare/nameMcp.ts
 function nameIsNonEmpty() {
   return fs.existsSync("name.txt") && fs.readFileSync("name.txt", "utf-8").trim().length > 0;
@@ -1726,7 +1757,7 @@ async function nameMcp(state, log, sessionId, name) {
     return sessionId;
   }
   const tools = [
-    makeReadSpec(),
+    makeReadSpec(state),
     makeReadName(),
     makeWriteName(state),
     makeListExampleFunctions(),
@@ -1734,9 +1765,16 @@ async function nameMcp(state, log, sessionId, name) {
     makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "name", tools });
+  const reads = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("example functions");
+  const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then create` : "Create";
   sessionId = await consumeStream(
     claudeAgentSdk.query({
-      prompt: 'Read SPEC.md and example functions to understand the context, then create name.txt with the function name.\n**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:\n- Use all lowercase\n- Use dashes (`-`) to separate words if there\'s more than one',
+      prompt: `${readPrefix} name.txt with the function name.
+**Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:
+- Use all lowercase
+- Use dashes (\`-\`) to separate words if there's more than one`,
       options: {
         tools: [],
         mcpServers: { name: mcpServer },
@@ -1774,19 +1812,20 @@ async function nameMcp(state, log, sessionId, name) {
   return sessionId;
 }
 function makeReadEssay(state) {
-  return claudeAgentSdk.tool(
-    "ReadEssay",
-    "Read ESSAY.md",
-    {},
-    async () => resultFromResult(readEssay())
-  );
+  return claudeAgentSdk.tool("ReadEssay", "Read ESSAY.md", {}, async () => {
+    state.hasReadOrWrittenEssay = true;
+    return resultFromResult(readEssay());
+  });
 }
 function makeWriteEssay(state) {
   return claudeAgentSdk.tool(
     "WriteEssay",
     "Write ESSAY.md",
     { content: z19__default.default.string() },
-    async ({ content }) => resultFromResult(writeEssay(content))
+    async ({ content }) => {
+      state.hasReadOrWrittenEssay = true;
+      return resultFromResult(writeEssay(content));
+    }
   );
 }
 
@@ -1797,15 +1836,20 @@ function essayIsNonEmpty() {
 async function essayMcp(state, log, sessionId) {
   if (essayIsNonEmpty()) return sessionId;
   const tools = [
-    makeReadSpec(),
+    makeReadSpec(state),
     makeReadName(),
-    makeWriteEssay(),
+    makeWriteEssay(state),
     makeListExampleFunctions(),
     makeReadExampleFunction(),
     makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essay", tools });
-  const prompt = "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
+  const reads = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("name.txt");
+  reads.push("example functions");
+  const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context. ` : "";
+  const prompt = readPrefix + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
   sessionId = await consumeStream(
     claudeAgentSdk.query({
       prompt,
@@ -1850,7 +1894,10 @@ function makeReadEssayTasks(state) {
     "ReadEssayTasks",
     "Read ESSAY_TASKS.md",
     {},
-    async () => resultFromResult(readEssayTasks())
+    async () => {
+      state.hasReadOrWrittenEssayTasks = true;
+      return resultFromResult(readEssayTasks());
+    }
   );
 }
 function makeWriteEssayTasks(state) {
@@ -1858,7 +1905,10 @@ function makeWriteEssayTasks(state) {
     "WriteEssayTasks",
     "Write ESSAY_TASKS.md",
     { content: z19__default.default.string() },
-    async ({ content }) => resultFromResult(writeEssayTasks(content))
+    async ({ content }) => {
+      state.hasReadOrWrittenEssayTasks = true;
+      return resultFromResult(writeEssayTasks(content));
+    }
   );
 }
 
@@ -1869,17 +1919,23 @@ function essayTasksIsNonEmpty() {
 async function essayTasksMcp(state, log, sessionId) {
   if (essayTasksIsNonEmpty()) return sessionId;
   const tools = [
-    makeReadSpec(),
+    makeReadSpec(state),
     makeReadName(),
-    makeReadEssay(),
-    makeWriteEssayTasks(),
+    makeReadEssay(state),
+    makeWriteEssayTasks(state),
     makeListExampleFunctions(),
     makeReadExampleFunction(),
     makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essayTasks", tools });
   const widthDesc = state.minWidth === state.maxWidth ? `exactly ${state.minWidth}` : `between ${state.minWidth} and ${state.maxWidth}`;
-  const prompt = `Read SPEC.md, name.txt, ESSAY.md, and example functions to understand the context, then create ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's \`tasks\` array. There must be ${widthDesc} tasks.`;
+  const reads = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("name.txt");
+  if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
+  reads.push("example functions");
+  const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then create` : "Create";
+  const prompt = `${readPrefix} ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's \`tasks\` array. There must be ${widthDesc} tasks.`;
   sessionId = await consumeStream(
     claudeAgentSdk.query({
       prompt,
@@ -1924,7 +1980,10 @@ function makeReadPlan(state) {
     "ReadPlan",
     "Read the plan",
     {},
-    async () => resultFromResult(readPlan(state.readPlanIndex))
+    async () => {
+      state.hasReadOrWrittenPlan = true;
+      return resultFromResult(readPlan(state.readPlanIndex));
+    }
   );
 }
 function makeWritePlan(state) {
@@ -1932,24 +1991,35 @@ function makeWritePlan(state) {
     "WritePlan",
     "Write the plan",
     { content: z19__default.default.string() },
-    async ({ content }) => resultFromResult(writePlan(state.writePlanIndex, content))
+    async ({ content }) => {
+      state.hasReadOrWrittenPlan = true;
+      return resultFromResult(writePlan(state.writePlanIndex, content));
+    }
   );
 }
 
 // src/claude/prepare/planMcp.ts
 async function planMcp(state, log, sessionId, instructions) {
   const tools = [
-    makeReadSpec(),
+    makeReadSpec(state),
     makeReadName(),
-    makeReadEssay(),
-    makeReadEssayTasks(),
+    makeReadEssay(state),
+    makeReadEssayTasks(state),
     makeWritePlan(state),
     makeListExampleFunctions(),
     makeReadExampleFunction(),
     makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "plan", tools });
-  let prompt = `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context. Then write your implementation plan using the WritePlan tool. Include:
+  const reads = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("name.txt");
+  if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
+  if (!state.hasReadOrWrittenEssayTasks) reads.push("ESSAY_TASKS.md");
+  reads.push("the function type");
+  reads.push("example functions");
+  const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context. Then write` : "Write";
+  let prompt = `${readPrefix} your implementation plan using the WritePlan tool. Include:
 - The input schema structure and field descriptions
 - Whether any input maps are needed for mapped task execution
 - What the function definition will look like
@@ -4397,10 +4467,10 @@ function getCommonTools(state) {
   registerSchemaRefs();
   return [
     // Core Context
-    makeReadSpec(),
+    makeReadSpec(state),
     makeReadName(),
-    makeReadEssay(),
-    makeReadEssayTasks(),
+    makeReadEssay(state),
+    makeReadEssayTasks(state),
     makeReadPlan(state),
     makeListExampleFunctions(),
     makeReadExampleFunction(),
@@ -4516,11 +4586,24 @@ function widthText(minWidth, maxWidth) {
   if (minWidth === maxWidth) return `exactly **${minWidth}**`;
   return `between **${minWidth}** and **${maxWidth}**`;
 }
+function buildReadLine(state) {
+  const reads = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("name.txt");
+  if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
+  if (!state.hasReadOrWrittenEssayTasks) reads.push("ESSAY_TASKS.md");
+  if (!state.hasReadOrWrittenPlan) reads.push("the plan");
+  reads.push("example functions");
+  if (reads.length === 0) return "";
+  return `
+Read ${formatReadList(reads)} to understand the context, if needed.
+`;
+}
 function buildFunctionTasksPrompt(state) {
   const w = widthText(state.minWidth, state.maxWidth);
+  const readLine = buildReadLine(state);
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
-
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
+${readLine}
 
 ## Phase 1: Implementation
 
@@ -4617,9 +4700,9 @@ Once all tests pass and SPEC.md compliance is verified:
 }
 function buildVectorTasksPrompt(state) {
   const w = widthText(state.minWidth, state.maxWidth);
+  const readLine = buildReadLine(state);
   return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
-
-Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the plan, and example functions to understand the context, if needed.
+${readLine}
 
 ## Phase 1: Implementation
 
@@ -4766,27 +4849,6 @@ async function inventMcp(state, options) {
   } else {
     await inventFunctionTasksMcp(state, options);
   }
-}
-
-// src/tools/claude/toolState.ts
-function makeToolState(options) {
-  return {
-    spawnFunctionAgentsHasSpawned: false,
-    spawnFunctionAgentsRespawnRejected: false,
-    editInputSchemaModalityRemovalRejected: false,
-    runNetworkTestsApiBase: options.apiBase,
-    runNetworkTestsApiKey: options.apiKey,
-    readPlanIndex: options.readPlanIndex,
-    writePlanIndex: options.writePlanIndex,
-    submitApiBase: options.apiBase,
-    submitApiKey: options.apiKey,
-    gitUserName: options.gitUserName,
-    gitUserEmail: options.gitUserEmail,
-    ghToken: options.ghToken,
-    minWidth: options.minWidth,
-    maxWidth: options.maxWidth,
-    hasReadSpecOnce: false
-  };
 }
 function getNextPlanIndex() {
   const plansDir = "plans";

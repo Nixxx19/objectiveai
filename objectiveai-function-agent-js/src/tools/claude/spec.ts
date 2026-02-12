@@ -5,9 +5,10 @@ import { readSpec, writeSpec } from "../markdown";
 import { ToolState } from "./toolState";
 
 export function makeReadSpec(state: ToolState) {
-  return tool("ReadSpec", "Read SPEC.md", {}, async () =>
-    resultFromResult(readSpec()),
-  );
+  return tool("ReadSpec", "Read SPEC.md", {}, async () => {
+    state.hasReadOrWrittenSpec = true;
+    return resultFromResult(readSpec());
+  });
 }
 
 export function makeWriteSpec(state: ToolState) {
@@ -15,6 +16,9 @@ export function makeWriteSpec(state: ToolState) {
     "WriteSpec",
     "Write SPEC.md",
     { content: z.string() },
-    async ({ content }) => resultFromResult(writeSpec(content)),
+    async ({ content }) => {
+      state.hasReadOrWrittenSpec = true;
+      return resultFromResult(writeSpec(content));
+    },
   );
 }

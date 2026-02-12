@@ -9,7 +9,10 @@ export function makeReadEssayTasks(state: ToolState) {
     "ReadEssayTasks",
     "Read ESSAY_TASKS.md",
     {},
-    async () => resultFromResult(readEssayTasks()),
+    async () => {
+      state.hasReadOrWrittenEssayTasks = true;
+      return resultFromResult(readEssayTasks());
+    },
   );
 }
 
@@ -18,6 +21,9 @@ export function makeWriteEssayTasks(state: ToolState) {
     "WriteEssayTasks",
     "Write ESSAY_TASKS.md",
     { content: z.string() },
-    async ({ content }) => resultFromResult(writeEssayTasks(content)),
+    async ({ content }) => {
+      state.hasReadOrWrittenEssayTasks = true;
+      return resultFromResult(writeEssayTasks(content));
+    },
   );
 }

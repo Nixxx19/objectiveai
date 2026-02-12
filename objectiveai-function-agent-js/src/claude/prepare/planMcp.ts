@@ -11,7 +11,7 @@ import {
   makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
 import { makeReadFunctionSchema } from "../../tools/claude/function";
-import { ToolState } from "../../tools/claude/toolState";
+import { ToolState, formatReadList } from "../../tools/claude/toolState";
 
 export async function planMcp(
   state: ToolState,
@@ -31,9 +31,20 @@ export async function planMcp(
   ];
   const mcpServer = createSdkMcpServer({ name: "plan", tools });
 
+  const reads: string[] = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("name.txt");
+  if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
+  if (!state.hasReadOrWrittenEssayTasks) reads.push("ESSAY_TASKS.md");
+  reads.push("the function type");
+  reads.push("example functions");
+
+  const readPrefix = reads.length > 0
+    ? `Read ${formatReadList(reads)} to understand the context. Then write`
+    : "Write";
+
   let prompt =
-    `Read SPEC.md, name.txt, ESSAY.md, ESSAY_TASKS.md, the function type, and example functions to understand the context.` +
-    ` Then write your implementation plan using the WritePlan tool. Include:` +
+    `${readPrefix} your implementation plan using the WritePlan tool. Include:` +
     `\n- The input schema structure and field descriptions` +
     `\n- Whether any input maps are needed for mapped task execution` +
     `\n- What the function definition will look like` +

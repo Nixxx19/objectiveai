@@ -5,9 +5,10 @@ import { readEssay, writeEssay } from "../markdown";
 import { ToolState } from "./toolState";
 
 export function makeReadEssay(state: ToolState) {
-  return tool("ReadEssay", "Read ESSAY.md", {}, async () =>
-    resultFromResult(readEssay()),
-  );
+  return tool("ReadEssay", "Read ESSAY.md", {}, async () => {
+    state.hasReadOrWrittenEssay = true;
+    return resultFromResult(readEssay());
+  });
 }
 
 export function makeWriteEssay(state: ToolState) {
@@ -15,6 +16,9 @@ export function makeWriteEssay(state: ToolState) {
     "WriteEssay",
     "Write ESSAY.md",
     { content: z.string() },
-    async ({ content }) => resultFromResult(writeEssay(content)),
+    async ({ content }) => {
+      state.hasReadOrWrittenEssay = true;
+      return resultFromResult(writeEssay(content));
+    },
   );
 }

@@ -10,7 +10,7 @@ import {
   makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
 import { makeReadFunctionSchema } from "../../tools/claude/function";
-import { ToolState } from "../../tools/claude/toolState";
+import { ToolState, formatReadList } from "../../tools/claude/toolState";
 
 function essayIsNonEmpty(): boolean {
   return (
@@ -36,7 +36,17 @@ export async function essayMcp(
   ];
   const mcpServer = createSdkMcpServer({ name: "essay", tools });
 
+  const reads: string[] = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  reads.push("name.txt");
+  reads.push("example functions");
+
+  const readPrefix = reads.length > 0
+    ? `Read ${formatReadList(reads)} to understand the context. `
+    : "";
+
   const prompt =
+    readPrefix +
     "Create ESSAY.md describing the ObjectiveAI Function you are building." +
     " Explore the purpose, inputs, outputs, and use-cases of the function in detail." +
     " Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function." +
