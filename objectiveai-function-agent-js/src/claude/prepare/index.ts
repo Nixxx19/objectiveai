@@ -35,7 +35,7 @@ export async function prepare(
   sessionId = await essayTasksMcp(state, log, sessionId);
 
   log("=== Step 5: Plan ===");
-  sessionId = await planMcp(state, log, sessionId, options.instructions);
+  sessionId = await planMcp(state, log, options.depth, sessionId, options.instructions);
 
   return sessionId;
 }

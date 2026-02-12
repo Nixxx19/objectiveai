@@ -375,22 +375,6 @@ Use ListAgentFunctions and ReadAgentFunction to inspect spawned sub-functions.
 ### Function Definition
 - Use the Edit* tools to define each function field
 - Read the *Schema tools to understand what types are expected
-- **Use Starlark expressions** (\`{"$starlark": "..."}\`) for most expressions - it's Python-like and more readable
-- Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions
-- Starlark example: \`{"$starlark": "input['items'][0]"}\`
-- JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)
-
-### Expression Context
-Expressions receive a single object with these fields:
-- \`input\` - Always present, the function input
-- \`map\` - Present in mapped tasks, the current map element
-- \`output\` - Present in task output expressions, the raw task result (FunctionOutput, or array of FunctionOutputs if mapped)
-
-### Example Inputs
-- Use AppendExampleInput to add diverse test inputs (minimum 10, maximum 100)
-- **Diversity in structure**: Include edge cases like empty arrays, single items, boundary values, missing optional fields, maximum lengths
-- **Diversity in intended output**: Cover the full range of expected scores (low, medium, high quality inputs that should produce different outputs)
-- **Multimodal content**: If your input schema uses multimodal types (image, video, audio, file), call ReadInputSchemaSchema first to understand the exact format for these types. Use bogus/placeholder URLs (e.g. \`"https://example.com/image.jpg"\`) — this is fine for testing.
 
 ### Build and Test
 - Fix issues and repeat until all tests pass
@@ -413,7 +397,6 @@ Once all tests pass and SPEC.md compliance is verified:
 
 - **SPEC.md is the universal source of truth** - never contradict it
 - **No API key is needed for tests** - tests run against a local server
-- **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 `;
 }
 
@@ -434,32 +417,6 @@ This function must use **vector completion tasks** (type: \`vector.completion\`)
 ### Function Definition
 - Use the Edit* tools to define each function field
 - Read the *Schema tools to understand what types are expected
-- **Use Starlark expressions** (\`{"$starlark": "..."}\`) for most expressions - it's Python-like and more readable
-- Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions
-- Starlark example: \`{"$starlark": "input['items'][0]"}\`
-- JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)
-- **Never use \`str()\` on multimodal content** (images, audio, video). Pass rich content directly via expressions so the model receives the actual media, not a stringified representation.
-
-### Message and Response Content Format
-- **Messages**: Always use array-of-parts format for message \`content\`, never plain strings.
-  - Correct: \`{"role": "user", "content": [{"type": "text", "text": "What is the quality of this?"}]}\`
-  - Wrong: \`{"role": "user", "content": "What is the quality of this?"}\`
-- **Responses**: Always use array-of-parts format for each response, never plain strings.
-  - Correct: \`[[{"type": "text", "text": "good"}], [{"type": "text", "text": "bad"}]]\`
-  - Wrong: \`["good", "bad"]\`
-- This ensures compiled tasks can carry multimodal content (images, audio, etc.) alongside text.
-
-### Expression Context
-Expressions receive a single object with these fields:
-- \`input\` - Always present, the function input
-- \`map\` - Present in mapped tasks, the current map element
-- \`output\` - Present in task output expressions, the raw task result (VectorCompletionOutput, or array of VectorCompletionOutputs if mapped)
-
-### Example Inputs
-- Use AppendExampleInput to add diverse test inputs (minimum 10, maximum 100)
-- **Diversity in structure**: Include edge cases like empty arrays, single items, boundary values, missing optional fields, maximum lengths
-- **Diversity in intended output**: Cover the full range of expected scores (low, medium, high quality inputs that should produce different outputs)
-- **Multimodal content**: If your input schema uses multimodal types (image, video, audio, file), call ReadInputSchemaSchema first to understand the exact format for these types. Use bogus/placeholder URLs (e.g. \`"https://example.com/image.jpg"\`) — this is fine for testing.
 
 ### Build and Test
 - Fix issues and repeat until all tests pass
@@ -482,7 +439,6 @@ Once all tests pass and SPEC.md compliance is verified:
 
 - **SPEC.md is the universal source of truth** - never contradict it
 - **No API key is needed for tests** - tests run against a local server
-- **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 `;
 }
 

@@ -77,6 +77,7 @@ import {
 export async function planMcp(
   state: ToolState,
   log: LogFn,
+  depth: number,
   sessionId?: string,
   instructions?: string,
 ): Promise<string | undefined> {
@@ -168,13 +169,62 @@ export async function planMcp(
       ? `Read ${formatReadList(reads)} to understand the context. Then write`
       : "Write";
 
+  const widthDesc =
+    state.minWidth === state.maxWidth
+      ? `exactly ${state.minWidth}`
+      : `between ${state.minWidth} and ${state.maxWidth}`;
+
+  const useFunctionTasks = depth > 0;
+
+  const taskStructure = useFunctionTasks
+    ? `\n\n### Task Structure` +
+      `\nThis function must use **function tasks** (type: \`scalar.function\` or \`vector.function\`). Plan ${widthDesc} sub-functions, each responsible for a distinct evaluation task from ESSAY_TASKS.md.` +
+      `\n- Each sub-function will be spawned as a child agent` +
+      `\n- The parent function's input schema must support deriving each sub-function's input` +
+      `\n- Plan whether any input_maps are needed for mapped task execution` +
+      `\n- For each sub-function, describe: what it evaluates, its input schema, whether it's scalar or vector`
+    : `\n\n### Task Structure` +
+      `\nThis function must use **vector completion tasks** (type: \`vector.completion\`). Plan ${widthDesc} inline vector completion tasks.` +
+      `\n- Use \`map\` if a task needs to iterate over input items` +
+      `\n- Each task's prompt and responses define what gets evaluated`;
+
+  const contentFormat = useFunctionTasks
+    ? ""
+    : `\n\n### Message and Response Content Format` +
+      `\n- **Messages**: Always use array-of-parts format for message \`content\`, never plain strings` +
+      `\n  - Correct: \`{"role": "user", "content": [{"type": "text", "text": "..."}]}\`` +
+      `\n  - Wrong: \`{"role": "user", "content": "..."}\`` +
+      `\n- **Responses**: Always use array-of-parts format for each response, never plain strings` +
+      `\n  - Correct: \`[[{"type": "text", "text": "good"}], [{"type": "text", "text": "bad"}]]\`` +
+      `\n  - Wrong: \`["good", "bad"]\`` +
+      `\n- **Never use \`str()\` on multimodal content** — pass rich content directly via expressions`;
+
   let prompt =
     `${readPrefix} your implementation plan using the WritePlan tool. Include:` +
     `\n- The input schema structure and field descriptions` +
     `\n- Whether any input maps are needed for mapped task execution` +
     `\n- What the function definition will look like` +
     `\n- What expressions need to be written` +
-    `\n- What test inputs will cover edge cases and diverse scenarios`;
+    `\n- What test inputs will cover edge cases and diverse scenarios` +
+    taskStructure +
+    `\n\n### Expression Language` +
+    `\n- **Prefer Starlark** (\`{"$starlark": "..."}\`) for most expressions — it's Python-like and more readable` +
+    `\n- Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions` +
+    `\n- Starlark example: \`{"$starlark": "input['items'][0]"}\`` +
+    `\n- JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)` +
+    `\n\n### Expression Context` +
+    `\nExpressions receive a single object with these fields:` +
+    `\n- \`input\` — Always present, the function input` +
+    `\n- \`map\` — Present in mapped tasks, the current map element` +
+    `\n- \`output\` — Present in task output expressions, the raw task result` +
+    contentFormat +
+    `\n\n### Example Inputs` +
+    `\nPlan for diverse test inputs (minimum 10, maximum 100):` +
+    `\n- **Diversity in structure**: edge cases, empty arrays, single items, boundary values, missing optional fields` +
+    `\n- **Diversity in intended output**: cover the full range of expected scores (low, medium, high)` +
+    `\n- **Multimodal content**: if using image/video/audio/file types, use placeholder URLs for testing` +
+    `\n\n### Important` +
+    `\n- **SPEC.md is the universal source of truth** — never contradict it`;
 
   if (instructions) {
     prompt += `\n\n## Extra Instructions\n\n${instructions}`;

@@ -3508,7 +3508,7 @@ function makeReadSwissSystemNetworkTest(state) {
 }
 
 // src/claude/prepare/planMcp.ts
-async function planMcp(state, log, sessionId, instructions) {
+async function planMcp(state, log, depth, sessionId, instructions) {
   const tools = [
     makeReadSpec(state),
     makeReadName(),
@@ -3579,12 +3579,58 @@ async function planMcp(state, log, sessionId, instructions) {
   reads.push("the function type");
   if (!state.hasReadExampleFunctions) reads.push("example functions");
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context. Then write` : "Write";
+  const widthDesc = state.minWidth === state.maxWidth ? `exactly ${state.minWidth}` : `between ${state.minWidth} and ${state.maxWidth}`;
+  const useFunctionTasks = depth > 0;
+  const taskStructure = useFunctionTasks ? `
+
+### Task Structure
+This function must use **function tasks** (type: \`scalar.function\` or \`vector.function\`). Plan ${widthDesc} sub-functions, each responsible for a distinct evaluation task from ESSAY_TASKS.md.
+- Each sub-function will be spawned as a child agent
+- The parent function's input schema must support deriving each sub-function's input
+- Plan whether any input_maps are needed for mapped task execution
+- For each sub-function, describe: what it evaluates, its input schema, whether it's scalar or vector` : `
+
+### Task Structure
+This function must use **vector completion tasks** (type: \`vector.completion\`). Plan ${widthDesc} inline vector completion tasks.
+- Use \`map\` if a task needs to iterate over input items
+- Each task's prompt and responses define what gets evaluated`;
+  const contentFormat = useFunctionTasks ? "" : `
+
+### Message and Response Content Format
+- **Messages**: Always use array-of-parts format for message \`content\`, never plain strings
+  - Correct: \`{"role": "user", "content": [{"type": "text", "text": "..."}]}\`
+  - Wrong: \`{"role": "user", "content": "..."}\`
+- **Responses**: Always use array-of-parts format for each response, never plain strings
+  - Correct: \`[[{"type": "text", "text": "good"}], [{"type": "text", "text": "bad"}]]\`
+  - Wrong: \`["good", "bad"]\`
+- **Never use \`str()\` on multimodal content** \u2014 pass rich content directly via expressions`;
   let prompt = `${readPrefix} your implementation plan using the WritePlan tool. Include:
 - The input schema structure and field descriptions
 - Whether any input maps are needed for mapped task execution
 - What the function definition will look like
 - What expressions need to be written
-- What test inputs will cover edge cases and diverse scenarios`;
+- What test inputs will cover edge cases and diverse scenarios` + taskStructure + `
+
+### Expression Language
+- **Prefer Starlark** (\`{"$starlark": "..."}\`) for most expressions \u2014 it's Python-like and more readable
+- Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions
+- Starlark example: \`{"$starlark": "input['items'][0]"}\`
+- JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)
+
+### Expression Context
+Expressions receive a single object with these fields:
+- \`input\` \u2014 Always present, the function input
+- \`map\` \u2014 Present in mapped tasks, the current map element
+- \`output\` \u2014 Present in task output expressions, the raw task result` + contentFormat + `
+
+### Example Inputs
+Plan for diverse test inputs (minimum 10, maximum 100):
+- **Diversity in structure**: edge cases, empty arrays, single items, boundary values, missing optional fields
+- **Diversity in intended output**: cover the full range of expected scores (low, medium, high)
+- **Multimodal content**: if using image/video/audio/file types, use placeholder URLs for testing
+
+### Important
+- **SPEC.md is the universal source of truth** \u2014 never contradict it`;
   if (instructions) {
     prompt += `
 
@@ -3623,7 +3669,7 @@ async function prepare(state, options) {
   log("=== Step 4: ESSAY_TASKS.md ===");
   sessionId = await essayTasksMcp(state, log, sessionId);
   log("=== Step 5: Plan ===");
-  sessionId = await planMcp(state, log, sessionId, options.instructions);
+  sessionId = await planMcp(state, log, options.depth, sessionId, options.instructions);
   return sessionId;
 }
 function ghEnv2(ghToken) {
@@ -4707,22 +4753,6 @@ Use ListAgentFunctions and ReadAgentFunction to inspect spawned sub-functions.
 ### Function Definition
 - Use the Edit* tools to define each function field
 - Read the *Schema tools to understand what types are expected
-- **Use Starlark expressions** (\`{"$starlark": "..."}\`) for most expressions - it's Python-like and more readable
-- Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions
-- Starlark example: \`{"$starlark": "input['items'][0]"}\`
-- JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)
-
-### Expression Context
-Expressions receive a single object with these fields:
-- \`input\` - Always present, the function input
-- \`map\` - Present in mapped tasks, the current map element
-- \`output\` - Present in task output expressions, the raw task result (FunctionOutput, or array of FunctionOutputs if mapped)
-
-### Example Inputs
-- Use AppendExampleInput to add diverse test inputs (minimum 10, maximum 100)
-- **Diversity in structure**: Include edge cases like empty arrays, single items, boundary values, missing optional fields, maximum lengths
-- **Diversity in intended output**: Cover the full range of expected scores (low, medium, high quality inputs that should produce different outputs)
-- **Multimodal content**: If your input schema uses multimodal types (image, video, audio, file), call ReadInputSchemaSchema first to understand the exact format for these types. Use bogus/placeholder URLs (e.g. \`"https://example.com/image.jpg"\`) \u2014 this is fine for testing.
 
 ### Build and Test
 - Fix issues and repeat until all tests pass
@@ -4745,7 +4775,6 @@ Once all tests pass and SPEC.md compliance is verified:
 
 - **SPEC.md is the universal source of truth** - never contradict it
 - **No API key is needed for tests** - tests run against a local server
-- **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 `;
 }
 function buildVectorTasksPrompt(state) {
@@ -4765,32 +4794,6 @@ This function must use **vector completion tasks** (type: \`vector.completion\`)
 ### Function Definition
 - Use the Edit* tools to define each function field
 - Read the *Schema tools to understand what types are expected
-- **Use Starlark expressions** (\`{"$starlark": "..."}\`) for most expressions - it's Python-like and more readable
-- Only use JMESPath (\`{"$jmespath": "..."}\`) for very simple field access expressions
-- Starlark example: \`{"$starlark": "input['items'][0]"}\`
-- JMESPath example: \`{"$jmespath": "input.name"}\` (simple field access only)
-- **Never use \`str()\` on multimodal content** (images, audio, video). Pass rich content directly via expressions so the model receives the actual media, not a stringified representation.
-
-### Message and Response Content Format
-- **Messages**: Always use array-of-parts format for message \`content\`, never plain strings.
-  - Correct: \`{"role": "user", "content": [{"type": "text", "text": "What is the quality of this?"}]}\`
-  - Wrong: \`{"role": "user", "content": "What is the quality of this?"}\`
-- **Responses**: Always use array-of-parts format for each response, never plain strings.
-  - Correct: \`[[{"type": "text", "text": "good"}], [{"type": "text", "text": "bad"}]]\`
-  - Wrong: \`["good", "bad"]\`
-- This ensures compiled tasks can carry multimodal content (images, audio, etc.) alongside text.
-
-### Expression Context
-Expressions receive a single object with these fields:
-- \`input\` - Always present, the function input
-- \`map\` - Present in mapped tasks, the current map element
-- \`output\` - Present in task output expressions, the raw task result (VectorCompletionOutput, or array of VectorCompletionOutputs if mapped)
-
-### Example Inputs
-- Use AppendExampleInput to add diverse test inputs (minimum 10, maximum 100)
-- **Diversity in structure**: Include edge cases like empty arrays, single items, boundary values, missing optional fields, maximum lengths
-- **Diversity in intended output**: Cover the full range of expected scores (low, medium, high quality inputs that should produce different outputs)
-- **Multimodal content**: If your input schema uses multimodal types (image, video, audio, file), call ReadInputSchemaSchema first to understand the exact format for these types. Use bogus/placeholder URLs (e.g. \`"https://example.com/image.jpg"\`) \u2014 this is fine for testing.
 
 ### Build and Test
 - Fix issues and repeat until all tests pass
@@ -4813,7 +4816,6 @@ Once all tests pass and SPEC.md compliance is verified:
 
 - **SPEC.md is the universal source of truth** - never contradict it
 - **No API key is needed for tests** - tests run against a local server
-- **Prefer Starlark over JMESPath** - Starlark is more readable and powerful
 `;
 }
 async function inventLoop(state, log, useFunctionTasks, sessionId) {

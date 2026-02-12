@@ -51,7 +51,7 @@ declare function essayMcp(state: ToolState, log: LogFn, sessionId?: string): Pro
 
 declare function essayTasksMcp(state: ToolState, log: LogFn, sessionId?: string): Promise<string | undefined>;
 
-declare function planMcp(state: ToolState, log: LogFn, sessionId?: string, instructions?: string): Promise<string | undefined>;
+declare function planMcp(state: ToolState, log: LogFn, depth: number, sessionId?: string, instructions?: string): Promise<string | undefined>;
 
 declare function prepare(state: ToolState, options: AgentOptions): Promise<string | undefined>;
 
