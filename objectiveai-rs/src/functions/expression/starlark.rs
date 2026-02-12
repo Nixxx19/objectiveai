@@ -224,9 +224,7 @@ where
     T: DeserializeOwned,
 {
     fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
-        let json = value
-            .to_json_value()
-            .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?;
+        let json = starlark_value_to_json(value)?;
         let v = serde_json::from_value(json)
             .map_err(ExpressionError::DeserializationError)?;
         Ok(v)
