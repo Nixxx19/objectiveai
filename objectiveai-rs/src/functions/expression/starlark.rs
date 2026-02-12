@@ -363,11 +363,7 @@ pub fn starlark_eval(
     let result = eval
         .eval_module(ast, &STARLARK_GLOBALS)
         .map_err(|e| ExpressionError::StarlarkEvalError(e.to_string()))?;
-
-    // Convert result to JSON
-    result
-        .to_json_value()
-        .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))
+    starlark_value_to_json(&result)
 }
 
 /// Evaluate a Starlark expression and convert the result into `OneOrMany<T>`.
