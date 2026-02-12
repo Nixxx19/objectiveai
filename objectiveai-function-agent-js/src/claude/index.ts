@@ -100,6 +100,7 @@ export async function invent(partialOptions: Partial<AgentOptions> = {}): Promis
   });
 
   setMessageQueue(toolState.messageQueue);
+  toolState.messageQueue.onDrain = (msgs) => msgs.forEach((m) => options.log(`[USER MESSAGE]: ${m}`));
   const closeStdin = !isChild ? startStdinReader(toolState.messageQueue) : undefined;
 
   options.log("=== Initializing workspace ===");
@@ -150,6 +151,7 @@ export async function amend(partialOptions: Partial<AgentOptions> = {}): Promise
   });
 
   setMessageQueue(toolState.messageQueue);
+  toolState.messageQueue.onDrain = (msgs) => msgs.forEach((m) => options.log(`[USER MESSAGE]: ${m}`));
   const closeStdin = !isChild ? startStdinReader(toolState.messageQueue) : undefined;
 
   options.log("=== Initializing workspace ===");

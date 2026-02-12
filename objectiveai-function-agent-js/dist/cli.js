@@ -2521,6 +2521,7 @@ function compiledTasksEqual(a, b) {
 var MessageQueue = class {
   messages = [];
   waiter = null;
+  onDrain;
   push(message) {
     this.messages.push(message);
     if (this.waiter) {
@@ -2530,7 +2531,11 @@ var MessageQueue = class {
     }
   }
   drain() {
-    return this.messages.splice(0);
+    const drained = this.messages.splice(0);
+    if (drained.length > 0 && this.onDrain) {
+      this.onDrain(drained);
+    }
+    return drained;
   }
   get length() {
     return this.messages.length;
@@ -5913,6 +5918,7 @@ async function invent(partialOptions = {}) {
     onChildEvent
   });
   setMessageQueue(toolState.messageQueue);
+  toolState.messageQueue.onDrain = (msgs) => msgs.forEach((m) => options.log(`[USER MESSAGE]: ${m}`));
   const closeStdin = !isChild ? startStdinReader(toolState.messageQueue) : void 0;
   options.log("=== Initializing workspace ===");
   await init(options);
@@ -5951,6 +5957,7 @@ async function amend(partialOptions = {}) {
     onChildEvent
   });
   setMessageQueue(toolState.messageQueue);
+  toolState.messageQueue.onDrain = (msgs) => msgs.forEach((m) => options.log(`[USER MESSAGE]: ${m}`));
   const closeStdin = !isChild ? startStdinReader(toolState.messageQueue) : void 0;
   options.log("=== Initializing workspace ===");
   await init(options);

@@ -41,6 +41,7 @@ declare function makeAgentOptions(options?: Partial<AgentOptions>): AgentOptions
 declare class MessageQueue {
     private messages;
     private waiter;
+    onDrain?: (messages: string[]) => void;
     push(message: string): void;
     drain(): string[];
     get length(): number;
