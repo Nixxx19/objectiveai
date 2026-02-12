@@ -9,7 +9,10 @@ export function makeListExampleFunctions(state: ToolState) {
     "ListExampleFunctions",
     "List root example functions",
     {},
-    async () => resultFromResult(listExampleFunctions()),
+    async () => {
+      state.hasReadExampleFunctions = true;
+      return resultFromResult(listExampleFunctions());
+    },
   );
 }
 
@@ -22,7 +25,9 @@ export function makeReadExampleFunction(state: ToolState) {
       repository: z.string(),
       commit: z.string(),
     },
-    async ({ owner, repository, commit }) =>
-      resultFromResult(readExampleFunction(owner, repository, commit)),
+    async ({ owner, repository, commit }) => {
+      state.hasReadExampleFunctions = true;
+      return resultFromResult(readExampleFunction(owner, repository, commit));
+    },
   );
 }

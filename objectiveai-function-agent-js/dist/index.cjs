@@ -427,7 +427,10 @@ function makeListExampleFunctions(state) {
     "ListExampleFunctions",
     "List root example functions",
     {},
-    async () => resultFromResult(listExampleFunctions())
+    async () => {
+      state.hasReadExampleFunctions = true;
+      return resultFromResult(listExampleFunctions());
+    }
   );
 }
 function makeReadExampleFunction(state) {
@@ -439,7 +442,10 @@ function makeReadExampleFunction(state) {
       repository: z10__default.default.string(),
       commit: z10__default.default.string()
     },
-    async ({ owner, repository, commit }) => resultFromResult(readExampleFunction(owner, repository, commit))
+    async ({ owner, repository, commit }) => {
+      state.hasReadExampleFunctions = true;
+      return resultFromResult(readExampleFunction(owner, repository, commit));
+    }
   );
 }
 
@@ -1610,8 +1616,8 @@ async function specMcp(state, log, sessionId, spec) {
   }
   const tools = [
     makeWriteSpec(state),
-    makeListExampleFunctions(),
-    makeReadExampleFunction(),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
     makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "spec", tools });
@@ -1742,7 +1748,8 @@ function makeToolState(options) {
     hasReadOrWrittenSpec: false,
     hasReadOrWrittenEssay: false,
     hasReadOrWrittenEssayTasks: false,
-    hasReadOrWrittenPlan: false
+    hasReadOrWrittenPlan: false,
+    hasReadExampleFunctions: false
   };
 }
 
@@ -1760,14 +1767,14 @@ async function nameMcp(state, log, sessionId, name) {
     makeReadSpec(state),
     makeReadName(),
     makeWriteName(state),
-    makeListExampleFunctions(),
-    makeReadExampleFunction(),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
     makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "name", tools });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then create` : "Create";
   sessionId = await consumeStream(
     claudeAgentSdk.query({
@@ -1839,15 +1846,15 @@ async function essayMcp(state, log, sessionId) {
     makeReadSpec(state),
     makeReadName(),
     makeWriteEssay(state),
-    makeListExampleFunctions(),
-    makeReadExampleFunction(),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
     makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essay", tools });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   reads.push("name.txt");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context. ` : "";
   const prompt = readPrefix + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
   sessionId = await consumeStream(
@@ -1923,8 +1930,8 @@ async function essayTasksMcp(state, log, sessionId) {
     makeReadName(),
     makeReadEssay(state),
     makeWriteEssayTasks(state),
-    makeListExampleFunctions(),
-    makeReadExampleFunction(),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
     makeReadFunctionSchema()
   ];
   const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essayTasks", tools });
@@ -1933,7 +1940,7 @@ async function essayTasksMcp(state, log, sessionId) {
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   reads.push("name.txt");
   if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then create` : "Create";
   const prompt = `${readPrefix} ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's \`tasks\` array. There must be ${widthDesc} tasks.`;
   sessionId = await consumeStream(
@@ -3514,8 +3521,8 @@ async function planMcp(state, log, sessionId, instructions) {
     makeReadEssay(state),
     makeReadEssayTasks(state),
     makeWritePlan(state),
-    makeListExampleFunctions(),
-    makeReadExampleFunction(),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
     makeReadFunctionSchema(),
     // Function
     makeReadFunction(),
@@ -3576,7 +3583,7 @@ async function planMcp(state, log, sessionId, instructions) {
   if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
   if (!state.hasReadOrWrittenEssayTasks) reads.push("ESSAY_TASKS.md");
   reads.push("the function type");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context. Then write` : "Write";
   let prompt = `${readPrefix} your implementation plan using the WritePlan tool. Include:
 - The input schema structure and field descriptions
@@ -4521,8 +4528,8 @@ function getCommonTools(state) {
     makeReadEssay(state),
     makeReadEssayTasks(state),
     makeReadPlan(state),
-    makeListExampleFunctions(),
-    makeReadExampleFunction(),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state),
     makeReadFunctionSchema(),
     // Function
     makeReadFunction(),
@@ -4642,7 +4649,7 @@ function buildReadLine(state) {
   if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
   if (!state.hasReadOrWrittenEssayTasks) reads.push("ESSAY_TASKS.md");
   if (!state.hasReadOrWrittenPlan) reads.push("the plan");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
   if (reads.length === 0) return "";
   return `
 Read ${formatReadList(reads)} to understand the context, if needed.

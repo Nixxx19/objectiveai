@@ -161,7 +161,7 @@ export async function planMcp(
   if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
   if (!state.hasReadOrWrittenEssayTasks) reads.push("ESSAY_TASKS.md");
   reads.push("the function type");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
 
   const readPrefix =
     reads.length > 0

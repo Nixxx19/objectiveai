@@ -312,7 +312,7 @@ function buildReadLine(state: ToolState): string {
   if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
   if (!state.hasReadOrWrittenEssayTasks) reads.push("ESSAY_TASKS.md");
   if (!state.hasReadOrWrittenPlan) reads.push("the plan");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
   if (reads.length === 0) return "";
   return `\nRead ${formatReadList(reads)} to understand the context, if needed.\n`;
 }

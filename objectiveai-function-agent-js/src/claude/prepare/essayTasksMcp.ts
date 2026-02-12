@@ -47,7 +47,7 @@ export async function essayTasksMcp(
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   reads.push("name.txt");
   if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
 
   const readPrefix = reads.length > 0
     ? `Read ${formatReadList(reads)} to understand the context, then create`

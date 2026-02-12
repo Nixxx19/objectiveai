@@ -39,7 +39,7 @@ export async function essayMcp(
   const reads: string[] = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   reads.push("name.txt");
-  reads.push("example functions");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
 
   const readPrefix = reads.length > 0
     ? `Read ${formatReadList(reads)} to understand the context. `
