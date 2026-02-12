@@ -99,11 +99,14 @@ declare function inventMcp(state: ToolState, options: AgentOptions): Promise<voi
 
 declare function amendMcp(state: ToolState, options: AgentOptions, amendment: string): Promise<void>;
 
+declare function dryrun(): Promise<void>;
+
 declare function invent(partialOptions?: Partial<AgentOptions>): Promise<void>;
 declare function amend(partialOptions?: Partial<AgentOptions>): Promise<void>;
 
 declare const index$7_amend: typeof amend;
 declare const index$7_amendMcp: typeof amendMcp;
+declare const index$7_dryrun: typeof dryrun;
 declare const index$7_essayMcp: typeof essayMcp;
 declare const index$7_essayTasksMcp: typeof essayTasksMcp;
 declare const index$7_invent: typeof invent;
@@ -112,7 +115,7 @@ declare const index$7_nameMcp: typeof nameMcp;
 declare const index$7_prepare: typeof prepare;
 declare const index$7_specMcp: typeof specMcp;
 declare namespace index$7 {
-  export { index$7_amend as amend, index$7_amendMcp as amendMcp, index$7_essayMcp as essayMcp, index$7_essayTasksMcp as essayTasksMcp, index$7_invent as invent, index$7_inventMcp as inventMcp, index$7_nameMcp as nameMcp, index$7_prepare as prepare, index$7_specMcp as specMcp };
+  export { index$7_amend as amend, index$7_amendMcp as amendMcp, index$7_dryrun as dryrun, index$7_essayMcp as essayMcp, index$7_essayTasksMcp as essayTasksMcp, index$7_invent as invent, index$7_inventMcp as inventMcp, index$7_nameMcp as nameMcp, index$7_prepare as prepare, index$7_specMcp as specMcp };
 }
 
 type Result<T> = {

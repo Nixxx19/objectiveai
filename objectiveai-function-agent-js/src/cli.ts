@@ -81,4 +81,11 @@ program
     });
   });
 
+program
+  .command("dryrun")
+  .description("Preview the CLI dashboard with simulated agents")
+  .action(async () => {
+    await Claude.dryrun();
+  });
+
 program.parse(process.argv);

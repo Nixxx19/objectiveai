@@ -18,6 +18,7 @@ import { appendAmendment } from "../tools/markdown";
 export * from "./prepare";
 export * from "./invent";
 export * from "./amend";
+export { dryrun } from "./dryrun";
 
 function setupLogging() {
   const isChild = !!process.env.OBJECTIVEAI_PARENT_PID;
