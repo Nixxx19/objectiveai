@@ -10,6 +10,7 @@ import {
 } from "../function";
 import { isDefaultExampleInputs } from "../inputs";
 import { isDefaultReadme } from "../markdown";
+import type { AgentEvent } from "../../events";
 
 export interface ToolState {
   spawnFunctionAgentsHasSpawned: boolean;
@@ -41,6 +42,7 @@ export interface ToolState {
   hasReadInputMerge: boolean;
   hasReadExampleInputs: boolean;
   hasReadReadme: boolean;
+  onChildEvent?: (evt: AgentEvent) => void;
 }
 
 export function formatReadList(items: string[]): string {
@@ -65,6 +67,7 @@ export function makeToolState(options: {
   ghToken: string;
   minWidth: number;
   maxWidth: number;
+  onChildEvent?: (evt: AgentEvent) => void;
 }): ToolState {
   return {
     spawnFunctionAgentsHasSpawned: false,
@@ -96,5 +99,6 @@ export function makeToolState(options: {
     hasReadInputMerge: isDefaultInputMerge(),
     hasReadExampleInputs: isDefaultExampleInputs(),
     hasReadReadme: isDefaultReadme(),
+    onChildEvent: options.onChildEvent,
   };
 }

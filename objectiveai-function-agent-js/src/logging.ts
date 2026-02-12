@@ -1,6 +1,8 @@
 import { existsSync, mkdirSync, readdirSync, writeFileSync, appendFileSync } from "fs";
 import type { SDKMessage } from "@anthropic-ai/claude-agent-sdk";
 import { LogFn } from "./agentOptions";
+import { Dashboard } from "./dashboard";
+import { serializeEvent } from "./events";
 
 // Find the next available log index
 function getNextLogIndex(): number {
@@ -23,13 +25,12 @@ function getNextLogIndex(): number {
 }
 
 /**
- * Creates a log function that writes to both a file and console.
- * Returns the log function and the path to the log file.
+ * Creates a file appender: sets up the logs directory and returns
+ * the log path and an append function.
  */
-export function createFileLogger(): { log: LogFn; logPath: string } {
+function createFileAppender(): { logPath: string; append: (message: string) => void } {
   const logsDir = "logs";
 
-  // Ensure logs directory exists
   if (!existsSync(logsDir)) {
     mkdirSync(logsDir, { recursive: true });
   }
@@ -37,16 +38,67 @@ export function createFileLogger(): { log: LogFn; logPath: string } {
   const logIndex = getNextLogIndex();
   const logPath = `${logsDir}/${logIndex}.txt`;
 
-  // Create empty log file
   writeFileSync(logPath, "");
+
+  const append = (message: string) => {
+    appendFileSync(logPath, message + "\n");
+  };
+
+  return { logPath, append };
+}
+
+/**
+ * Creates a log function that writes to both a file and console.
+ * Returns the log function and the path to the log file.
+ */
+export function createFileLogger(): { log: LogFn; logPath: string } {
+  const { logPath, append } = createFileAppender();
 
   const log: LogFn = (...args: unknown[]) => {
     const message = args
       .map((arg) => (typeof arg === "string" ? arg : String(arg)))
       .join(" ");
 
-    appendFileSync(logPath, message + "\n");
+    append(message);
     console.log(message);
+  };
+
+  return { log, logPath };
+}
+
+/**
+ * Creates a root logger that writes to a file and sends log events to the dashboard.
+ * No console.log — the dashboard handles terminal output.
+ */
+export function createRootLogger(dashboard: Dashboard): { log: LogFn; logPath: string } {
+  const { logPath, append } = createFileAppender();
+
+  const log: LogFn = (...args: unknown[]) => {
+    const message = args
+      .map((arg) => (typeof arg === "string" ? arg : String(arg)))
+      .join(" ");
+
+    append(message);
+    dashboard.handleEvent({ event: "log", path: "", line: message });
+  };
+
+  return { log, logPath };
+}
+
+/**
+ * Creates a child logger that writes to a file and emits JSON events to stdout.
+ * No console.log — the parent process reads stdout for events.
+ */
+export function createChildLogger(): { log: LogFn; logPath: string } {
+  const { logPath, append } = createFileAppender();
+
+  const log: LogFn = (...args: unknown[]) => {
+    const message = args
+      .map((arg) => (typeof arg === "string" ? arg : String(arg)))
+      .join(" ");
+
+    append(message);
+    process.stdout.write(serializeEvent({ event: "log", path: "", line: message }) + "\n");
   };
 
   return { log, logPath };

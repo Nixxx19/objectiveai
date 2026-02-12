@@ -28,6 +28,37 @@ __export(claude_exports, {
   prepare: () => prepare,
   specMcp: () => specMcp
 });
+
+// src/events.ts
+function serializeEvent(evt) {
+  return JSON.stringify(evt);
+}
+function parseEvent(line) {
+  try {
+    const obj = JSON.parse(line);
+    if (typeof obj !== "object" || obj === null) return null;
+    if (typeof obj.event !== "string" || typeof obj.path !== "string") return null;
+    switch (obj.event) {
+      case "log":
+        return typeof obj.line === "string" ? obj : null;
+      case "name":
+        return typeof obj.name === "string" ? obj : null;
+      case "start":
+      case "done":
+        return obj;
+      default:
+        return null;
+    }
+  } catch {
+    return null;
+  }
+}
+function prefixEvent(evt, prefix) {
+  const path = evt.path ? `${prefix}/${evt.path}` : prefix;
+  return { ...evt, path };
+}
+
+// src/logging.ts
 function getNextLogIndex() {
   const logsDir = "logs";
   let nextIndex = 1;
@@ -40,7 +71,7 @@ function getNextLogIndex() {
   }
   return nextIndex;
 }
-function createFileLogger() {
+function createFileAppender() {
   const logsDir = "logs";
   if (!fs.existsSync(logsDir)) {
     fs.mkdirSync(logsDir, { recursive: true });
@@ -48,10 +79,35 @@ function createFileLogger() {
   const logIndex = getNextLogIndex();
   const logPath = `${logsDir}/${logIndex}.txt`;
   fs.writeFileSync(logPath, "");
+  const append = (message) => {
+    fs.appendFileSync(logPath, message + "\n");
+  };
+  return { logPath, append };
+}
+function createFileLogger() {
+  const { logPath, append } = createFileAppender();
   const log = (...args) => {
     const message = args.map((arg) => typeof arg === "string" ? arg : String(arg)).join(" ");
-    fs.appendFileSync(logPath, message + "\n");
+    append(message);
     console.log(message);
+  };
+  return { log, logPath };
+}
+function createRootLogger(dashboard) {
+  const { logPath, append } = createFileAppender();
+  const log = (...args) => {
+    const message = args.map((arg) => typeof arg === "string" ? arg : String(arg)).join(" ");
+    append(message);
+    dashboard.handleEvent({ event: "log", path: "", line: message });
+  };
+  return { log, logPath };
+}
+function createChildLogger() {
+  const { logPath, append } = createFileAppender();
+  const log = (...args) => {
+    const message = args.map((arg) => typeof arg === "string" ? arg : String(arg)).join(" ");
+    append(message);
+    process.stdout.write(serializeEvent({ event: "log", path: "", line: message }) + "\n");
   };
   return { log, logPath };
 }
@@ -2671,7 +2727,8 @@ function makeToolState(options) {
     hasReadInputSplit: isDefaultInputSplit(),
     hasReadInputMerge: isDefaultInputMerge(),
     hasReadExampleInputs: isDefaultExampleInputs(),
-    hasReadReadme: isDefaultReadme()
+    hasReadReadme: isDefaultReadme(),
+    onChildEvent: options.onChildEvent
   };
 }
 
@@ -4503,11 +4560,31 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
       }
     );
     childProcesses.push(child);
-    child.stdout?.on("data", () => {
+    opts?.onChildEvent?.({ event: "start", path: name });
+    let stdoutBuffer = "";
+    child.stdout?.on("data", (data) => {
+      if (!opts?.onChildEvent) return;
+      stdoutBuffer += data.toString();
+      const lines = stdoutBuffer.split("\n");
+      stdoutBuffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const evt = parseEvent(line);
+        if (evt) {
+          opts.onChildEvent(prefixEvent(evt, name));
+        }
+      }
     });
     child.stderr?.on("data", () => {
     });
     child.on("close", (code) => {
+      if (opts?.onChildEvent && stdoutBuffer.trim()) {
+        const evt = parseEvent(stdoutBuffer);
+        if (evt) {
+          opts.onChildEvent(prefixEvent(evt, name));
+        }
+      }
+      opts?.onChildEvent?.({ event: "done", path: name });
       if (code !== 0) {
         resolve({
           name,
@@ -4663,7 +4740,8 @@ function makeSpawnFunctionAgents(state) {
     gitUserEmail: state.gitUserEmail,
     ghToken: state.ghToken,
     minWidth: state.minWidth,
-    maxWidth: state.maxWidth
+    maxWidth: state.maxWidth,
+    onChildEvent: state.onChildEvent
   });
   return claudeAgentSdk.tool(
     "SpawnFunctionAgents",
@@ -5154,9 +5232,125 @@ function getNextPlanIndex() {
   return nextPlanIndex;
 }
 
+// src/dashboard.ts
+var Dashboard = class {
+  panels = /* @__PURE__ */ new Map();
+  lastRenderedHeight = 0;
+  maxLines;
+  dirty = false;
+  renderTimer = null;
+  constructor(maxLines = 5) {
+    this.maxLines = maxLines;
+    this.panels.set("", { name: "unnamed function", lines: [] });
+  }
+  setRootName(name) {
+    const panel = this.panels.get("");
+    if (panel) panel.name = name;
+    this.scheduleRender();
+  }
+  handleEvent(evt) {
+    switch (evt.event) {
+      case "start": {
+        if (!this.panels.has(evt.path)) {
+          this.panels.set(evt.path, { name: evt.path, lines: [] });
+        }
+        break;
+      }
+      case "name": {
+        const panel = this.panels.get(evt.path);
+        if (panel) {
+          const parts = evt.path.split("/");
+          parts[parts.length - 1] = evt.name;
+          panel.name = parts.join("/");
+          if (evt.path === "") panel.name = evt.name;
+        }
+        break;
+      }
+      case "log": {
+        let panel = this.panels.get(evt.path);
+        if (!panel) {
+          panel = { name: evt.path, lines: [] };
+          this.panels.set(evt.path, panel);
+        }
+        const logLines = evt.line.split("\n");
+        for (const l of logLines) {
+          panel.lines.push(l);
+          if (panel.lines.length > this.maxLines) {
+            panel.lines.shift();
+          }
+        }
+        break;
+      }
+      case "done": {
+        this.panels.delete(evt.path);
+        this.renderNow();
+        return;
+      }
+    }
+    this.scheduleRender();
+  }
+  scheduleRender() {
+    this.dirty = true;
+    if (this.renderTimer) return;
+    this.renderTimer = setTimeout(() => {
+      this.renderTimer = null;
+      if (this.dirty) this.renderNow();
+    }, 50);
+  }
+  renderNow() {
+    this.dirty = false;
+    const sections = [];
+    const root = this.panels.get("");
+    if (root) {
+      sections.push(this.formatPanel(root));
+    }
+    const sortedPaths = [...this.panels.keys()].filter((p) => p !== "").sort();
+    for (const path of sortedPaths) {
+      const panel = this.panels.get(path);
+      sections.push(this.formatPanel(panel));
+    }
+    const output = sections.join("\n\n") + "\n";
+    const newHeight = output.split("\n").length;
+    if (this.lastRenderedHeight > 0) {
+      process.stdout.write(`\x1B[${this.lastRenderedHeight}A\x1B[0J`);
+    }
+    process.stdout.write(output);
+    this.lastRenderedHeight = newHeight;
+  }
+  formatPanel(panel) {
+    const header = `\x1B[1m=== ${panel.name} ===\x1B[0m`;
+    const lines = panel.lines.map((l) => `  ${l}`);
+    return [header, ...lines].join("\n");
+  }
+  dispose() {
+    if (this.renderTimer) {
+      clearTimeout(this.renderTimer);
+      this.renderTimer = null;
+    }
+  }
+};
+
 // src/claude/index.ts
 async function invent(partialOptions = {}) {
-  const options = makeAgentOptions(partialOptions);
+  const isChild = !!process.env.OBJECTIVEAI_PARENT_PID;
+  let dashboard;
+  let onChildEvent;
+  let logOverride;
+  if (isChild) {
+    logOverride = createChildLogger();
+    onChildEvent = (evt) => {
+      process.stdout.write(serializeEvent(evt) + "\n");
+    };
+  } else if (process.stdout.isTTY) {
+    dashboard = new Dashboard(5);
+    logOverride = createRootLogger(dashboard);
+    onChildEvent = (evt) => dashboard.handleEvent(evt);
+  }
+  const options = makeAgentOptions({
+    ...partialOptions,
+    ...logOverride && { log: logOverride.log },
+    onChildEvent
+  });
   const nextPlanIndex = getNextPlanIndex();
   const toolState = makeToolState({
     apiBase: options.apiBase,
@@ -5167,14 +5361,31 @@ async function invent(partialOptions = {}) {
     gitUserEmail: options.gitUserEmail,
     ghToken: options.ghToken,
     minWidth: options.minWidth,
-    maxWidth: options.maxWidth
+    maxWidth: options.maxWidth,
+    onChildEvent
   });
   options.log("=== Initializing workspace ===");
   await init(options);
   options.log("=== Preparing ===");
   const sessionId = await prepare(toolState, options);
+  const nameResult = readName();
+  if (nameResult.ok && nameResult.value) {
+    const name = nameResult.value.trim();
+    if (dashboard) {
+      dashboard.setRootName(name);
+    }
+    if (isChild) {
+      process.stdout.write(serializeEvent({ event: "name", path: "", name }) + "\n");
+    }
+  }
   options.log("=== Inventing ===");
   await inventMcp(toolState, { ...options, sessionId });
+  if (isChild) {
+    process.stdout.write(serializeEvent({ event: "done", path: "" }) + "\n");
+  }
+  if (dashboard) {
+    dashboard.dispose();
+  }
 }
 
 // src/tools/index.ts
@@ -5201,7 +5412,9 @@ exports.ExampleInputsSchema = ExampleInputsSchema;
 exports.SpawnFunctionAgentsParamsSchema = SpawnFunctionAgentsParamsSchema;
 exports.Tools = tools_exports;
 exports.consumeStream = consumeStream;
+exports.createChildLogger = createChildLogger;
 exports.createFileLogger = createFileLogger;
+exports.createRootLogger = createRootLogger;
 exports.formatMessage = formatMessage;
 exports.getLatestLogPath = getLatestLogPath;
 exports.init = init;

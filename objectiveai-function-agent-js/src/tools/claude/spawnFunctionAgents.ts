@@ -13,6 +13,7 @@ export function makeSpawnFunctionAgents(state: ToolState) {
     ghToken: state.ghToken,
     minWidth: state.minWidth,
     maxWidth: state.maxWidth,
+    onChildEvent: state.onChildEvent,
   });
 
   return tool(

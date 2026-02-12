@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import { createFileLogger } from "./logging";
 import { readSession } from "./tools/session";
+import type { AgentEvent } from "./events";
 
 export type LogFn = (...args: unknown[]) => void;
 
@@ -18,6 +19,7 @@ export interface AgentOptions {
   gitUserName: string;
   gitUserEmail: string;
   ghToken: string;
+  onChildEvent?: (evt: AgentEvent) => void;
 }
 
 function readEnv(name: string): string | undefined {

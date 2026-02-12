@@ -3,6 +3,22 @@ import * as objectiveai from 'objectiveai';
 import { Functions } from 'objectiveai';
 import { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 
+type AgentEvent = {
+    event: "log";
+    path: string;
+    line: string;
+} | {
+    event: "name";
+    path: string;
+    name: string;
+} | {
+    event: "start";
+    path: string;
+} | {
+    event: "done";
+    path: string;
+};
+
 type LogFn = (...args: unknown[]) => void;
 interface AgentOptions {
     name?: string;
@@ -18,6 +34,7 @@ interface AgentOptions {
     gitUserName: string;
     gitUserEmail: string;
     ghToken: string;
+    onChildEvent?: (evt: AgentEvent) => void;
 }
 declare function makeAgentOptions(options?: Partial<AgentOptions>): AgentOptions;
 
@@ -51,6 +68,7 @@ interface ToolState {
     hasReadInputMerge: boolean;
     hasReadExampleInputs: boolean;
     hasReadReadme: boolean;
+    onChildEvent?: (evt: AgentEvent) => void;
 }
 
 declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;
@@ -58234,11 +58252,42 @@ interface Parameters {
 }
 declare function init(options: AgentOptions): Promise<void>;
 
+declare class Dashboard {
+    private panels;
+    private lastRenderedHeight;
+    private maxLines;
+    private dirty;
+    private renderTimer;
+    constructor(maxLines?: number);
+    setRootName(name: string): void;
+    handleEvent(evt: AgentEvent): void;
+    private scheduleRender;
+    private renderNow;
+    private formatPanel;
+    dispose(): void;
+}
+
 /**
  * Creates a log function that writes to both a file and console.
  * Returns the log function and the path to the log file.
  */
 declare function createFileLogger(): {
+    log: LogFn;
+    logPath: string;
+};
+/**
+ * Creates a root logger that writes to a file and sends log events to the dashboard.
+ * No console.log — the dashboard handles terminal output.
+ */
+declare function createRootLogger(dashboard: Dashboard): {
+    log: LogFn;
+    logPath: string;
+};
+/**
+ * Creates a child logger that writes to a file and emits JSON events to stdout.
+ * No console.log — the parent process reads stdout for events.
+ */
+declare function createChildLogger(): {
     log: LogFn;
     logPath: string;
 };
@@ -58263,4 +58312,4 @@ declare const SpawnFunctionAgentsParamsSchema: z$1.ZodArray<z$1.ZodObject<{
 }, z$1.core.$strip>>;
 type SpawnFunctionAgentsParams = z$1.infer<typeof SpawnFunctionAgentsParamsSchema>;
 
-export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, consumeStream, createFileLogger, formatMessage, getLatestLogPath, init, makeAgentOptions };
+export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, consumeStream, createChildLogger, createFileLogger, createRootLogger, formatMessage, getLatestLogPath, init, makeAgentOptions };

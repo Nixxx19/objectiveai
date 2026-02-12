@@ -11,6 +11,7 @@ import {
 import { join } from "path";
 import { Result } from "./result";
 import { SpawnFunctionAgentsParams } from "../spawnFunctionAgentsParams";
+import { AgentEvent, parseEvent, prefixEvent } from "../events";
 
 interface AgentResult {
   name: string;
@@ -91,7 +92,7 @@ function getCurrentDepth(): number {
   return params.depth ?? 0;
 }
 
-interface RunAgentOptions {
+export interface RunAgentOptions {
   apiBase?: string;
   apiKey?: string;
   gitUserName?: string;
@@ -99,6 +100,7 @@ interface RunAgentOptions {
   ghToken?: string;
   minWidth?: number;
   maxWidth?: number;
+  onChildEvent?: (evt: AgentEvent) => void;
 }
 
 function runAgentInSubdir(
@@ -143,10 +145,40 @@ function runAgentInSubdir(
 
     childProcesses.push(child);
 
-    child.stdout?.on("data", () => {});
+    // Emit start event
+    opts?.onChildEvent?.({ event: "start", path: name });
+
+    // Parse JSON events from child stdout
+    let stdoutBuffer = "";
+    child.stdout?.on("data", (data: Buffer) => {
+      if (!opts?.onChildEvent) return;
+      stdoutBuffer += data.toString();
+      const lines = stdoutBuffer.split("\n");
+      // Keep the last incomplete line in the buffer
+      stdoutBuffer = lines.pop() ?? "";
+      for (const line of lines) {
+        if (!line.trim()) continue;
+        const evt = parseEvent(line);
+        if (evt) {
+          opts.onChildEvent!(prefixEvent(evt, name));
+        }
+      }
+    });
+
     child.stderr?.on("data", () => {});
 
     child.on("close", (code) => {
+      // Flush remaining stdout buffer
+      if (opts?.onChildEvent && stdoutBuffer.trim()) {
+        const evt = parseEvent(stdoutBuffer);
+        if (evt) {
+          opts.onChildEvent(prefixEvent(evt, name));
+        }
+      }
+
+      // Emit done event (always, even on crash)
+      opts?.onChildEvent?.({ event: "done", path: name });
+
       if (code !== 0) {
         resolve({
           name,
