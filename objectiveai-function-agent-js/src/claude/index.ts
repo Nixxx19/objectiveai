@@ -1,13 +1,15 @@
 import { createInterface } from "readline";
+import type { Writable } from "stream";
 import { AgentOptions, makeAgentOptions } from "../agentOptions";
 import { init } from "../init";
 import { prepare } from "./prepare";
 import { inventMcp } from "./invent";
 import { amendMcp } from "./amend";
-import { makeToolState } from "../tools/claude/toolState";
+import { makeToolState, ToolState } from "../tools/claude/toolState";
 import { setMessageQueue } from "../tools/claude/util";
 import { getNextPlanIndex } from "./planIndex";
 import { Dashboard } from "../dashboard";
+import { MessageQueue } from "../messageQueue";
 import { createRootLogger, createChildLogger } from "../logging";
 import { serializeEvent, AgentEvent } from "../events";
 import { readName } from "../tools/name";
@@ -54,12 +56,67 @@ function emitNameEvent(
   }
 }
 
-function startStdinReader(queue: { push(msg: string): void }): (() => void) | undefined {
-  if (!process.stdin.isTTY) return undefined;
+function routeForward(
+  forward: string,
+  message: string,
+  activeChildren: Map<string, Writable>,
+): void {
+  const slashIdx = forward.indexOf("/");
+  const childName = slashIdx === -1 ? forward : forward.substring(0, slashIdx);
+  const remaining = slashIdx === -1 ? undefined : forward.substring(slashIdx + 1);
+
+  const childStdin = activeChildren.get(childName);
+  if (!childStdin) return;
+
+  if (remaining) {
+    childStdin.write(JSON.stringify({ forward: remaining, message }) + "\n");
+  } else {
+    childStdin.write(message + "\n");
+  }
+}
+
+function startStdinReader(
+  queue: MessageQueue,
+  activeChildren: Map<string, Writable>,
+  dashboard?: Dashboard,
+): (() => void) | undefined {
+  if (!process.stdin.readable) return undefined;
   const rl = createInterface({ input: process.stdin });
   rl.on("line", (line) => {
     const trimmed = line.trim();
-    if (trimmed) queue.push(trimmed);
+    if (!trimmed) return;
+
+    // Forwarding protocol (child processes receive these from parent)
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed && typeof parsed.forward === "string" && typeof parsed.message === "string") {
+        routeForward(parsed.forward, parsed.message, activeChildren);
+        return;
+      }
+    } catch {}
+
+    // @name prefix targets a specific agent (root process with dashboard)
+    if (dashboard && trimmed.startsWith("@")) {
+      const spaceIdx = trimmed.indexOf(" ");
+      if (spaceIdx > 1) {
+        const targetName = trimmed.substring(1, spaceIdx);
+        const message = trimmed.substring(spaceIdx + 1).trim();
+        if (message) {
+          const path = dashboard.findPathByName(targetName);
+          if (path) {
+            routeForward(path, message, activeChildren);
+            return;
+          }
+          // Known but not active — silently drop
+          if (dashboard.isKnownName(targetName)) {
+            return;
+          }
+        }
+      }
+    }
+
+    // Regular message for this agent
+    queue.push(trimmed);
   });
   return () => rl.close();
 }
@@ -101,7 +158,7 @@ export async function invent(partialOptions: Partial<AgentOptions> = {}): Promis
 
   setMessageQueue(toolState.messageQueue);
   toolState.messageQueue.onDrain = (msgs) => msgs.forEach((m) => options.log(`[USER MESSAGE]: ${m}`));
-  const closeStdin = !isChild ? startStdinReader(toolState.messageQueue) : undefined;
+  const closeStdin = startStdinReader(toolState.messageQueue, toolState.activeChildren, dashboard);
 
   options.log("=== Initializing workspace ===");
   await init(options);
@@ -152,7 +209,7 @@ export async function amend(partialOptions: Partial<AgentOptions> = {}): Promise
 
   setMessageQueue(toolState.messageQueue);
   toolState.messageQueue.onDrain = (msgs) => msgs.forEach((m) => options.log(`[USER MESSAGE]: ${m}`));
-  const closeStdin = !isChild ? startStdinReader(toolState.messageQueue) : undefined;
+  const closeStdin = startStdinReader(toolState.messageQueue, toolState.activeChildren, dashboard);
 
   options.log("=== Initializing workspace ===");
   await init(options);

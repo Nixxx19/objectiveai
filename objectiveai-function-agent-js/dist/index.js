@@ -2794,7 +2794,8 @@ function makeToolState(options) {
     hasReadReadme: isDefaultReadme(),
     onChildEvent: options.onChildEvent,
     messageQueue: new MessageQueue(),
-    pendingAgentResults: null
+    pendingAgentResults: null,
+    activeChildren: /* @__PURE__ */ new Map()
   };
 }
 
@@ -4595,7 +4596,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
       args,
       {
         cwd: subdir,
-        stdio: ["inherit", "pipe", "pipe"],
+        stdio: ["pipe", "pipe", "pipe"],
         shell: true,
         env: {
           ...process.env,
@@ -4605,6 +4606,9 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
       }
     );
     childProcesses.push(child);
+    if (child.stdin && opts?.activeChildren) {
+      opts.activeChildren.set(name, child.stdin);
+    }
     opts?.onChildEvent?.({ event: "start", path: name });
     let stdoutBuffer = "";
     child.stdout?.on("data", (data) => {
@@ -4623,6 +4627,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
     child.stderr?.on("data", () => {
     });
     child.on("close", (code) => {
+      opts?.activeChildren?.delete(name);
       if (opts?.onChildEvent && stdoutBuffer.trim()) {
         const evt = parseEvent(stdoutBuffer);
         if (evt) {
@@ -4759,7 +4764,8 @@ function makeSpawnFunctionAgents(state) {
     ghToken: state.ghToken,
     minWidth: state.minWidth,
     maxWidth: state.maxWidth,
-    onChildEvent: state.onChildEvent
+    onChildEvent: state.onChildEvent,
+    activeChildren: state.activeChildren
   });
   return tool(
     "SpawnFunctionAgents",
@@ -5411,7 +5417,7 @@ function runAmendInSubdir(name, childProcesses, opts) {
       args,
       {
         cwd: subdir,
-        stdio: ["inherit", "pipe", "pipe"],
+        stdio: ["pipe", "pipe", "pipe"],
         shell: true,
         env: {
           ...process.env,
@@ -5421,6 +5427,9 @@ function runAmendInSubdir(name, childProcesses, opts) {
       }
     );
     childProcesses.push(child);
+    if (child.stdin && opts?.activeChildren) {
+      opts.activeChildren.set(name, child.stdin);
+    }
     opts?.onChildEvent?.({ event: "start", path: name });
     let stdoutBuffer = "";
     child.stdout?.on("data", (data) => {
@@ -5439,6 +5448,7 @@ function runAmendInSubdir(name, childProcesses, opts) {
     child.stderr?.on("data", () => {
     });
     child.on("close", (code) => {
+      opts?.activeChildren?.delete(name);
       if (opts?.onChildEvent && stdoutBuffer.trim()) {
         const evt = parseEvent(stdoutBuffer);
         if (evt) {
@@ -5587,7 +5597,8 @@ function makeAmendFunctionAgents(state) {
     ghToken: state.ghToken,
     minWidth: state.minWidth,
     maxWidth: state.maxWidth,
-    onChildEvent: state.onChildEvent
+    onChildEvent: state.onChildEvent,
+    activeChildren: state.activeChildren
   });
   return tool(
     "AmendFunctionAgents",
@@ -5965,6 +5976,7 @@ function getNextPlanIndex() {
 // src/dashboard.ts
 var Dashboard = class {
   panels = /* @__PURE__ */ new Map();
+  knownNames = /* @__PURE__ */ new Set();
   lastRenderedHeight = 0;
   maxLines;
   dirty = false;
@@ -5984,6 +5996,7 @@ var Dashboard = class {
         if (!this.panels.has(evt.path)) {
           this.panels.set(evt.path, { name: evt.path, lines: [] });
         }
+        this.knownNames.add(evt.path.split("/").pop());
         break;
       }
       case "name": {
@@ -6052,6 +6065,17 @@ var Dashboard = class {
     const lines = panel.lines.map((l) => `  ${l}`);
     return [header, ...lines].join("\n");
   }
+  findPathByName(name) {
+    for (const [path] of this.panels) {
+      if (!path) continue;
+      const lastSegment = path.split("/").pop();
+      if (lastSegment === name) return path;
+    }
+    return void 0;
+  }
+  isKnownName(name) {
+    return this.knownNames.has(name);
+  }
   dispose() {
     if (this.renderTimer) {
       clearTimeout(this.renderTimer);
@@ -6090,12 +6114,50 @@ function emitNameEvent(isChild, dashboard) {
     }
   }
 }
-function startStdinReader(queue) {
-  if (!process.stdin.isTTY) return void 0;
+function routeForward(forward, message, activeChildren) {
+  const slashIdx = forward.indexOf("/");
+  const childName = slashIdx === -1 ? forward : forward.substring(0, slashIdx);
+  const remaining = slashIdx === -1 ? void 0 : forward.substring(slashIdx + 1);
+  const childStdin = activeChildren.get(childName);
+  if (!childStdin) return;
+  if (remaining) {
+    childStdin.write(JSON.stringify({ forward: remaining, message }) + "\n");
+  } else {
+    childStdin.write(message + "\n");
+  }
+}
+function startStdinReader(queue, activeChildren, dashboard) {
+  if (!process.stdin.readable) return void 0;
   const rl = createInterface({ input: process.stdin });
   rl.on("line", (line) => {
     const trimmed = line.trim();
-    if (trimmed) queue.push(trimmed);
+    if (!trimmed) return;
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (parsed && typeof parsed.forward === "string" && typeof parsed.message === "string") {
+        routeForward(parsed.forward, parsed.message, activeChildren);
+        return;
+      }
+    } catch {
+    }
+    if (dashboard && trimmed.startsWith("@")) {
+      const spaceIdx = trimmed.indexOf(" ");
+      if (spaceIdx > 1) {
+        const targetName = trimmed.substring(1, spaceIdx);
+        const message = trimmed.substring(spaceIdx + 1).trim();
+        if (message) {
+          const path = dashboard.findPathByName(targetName);
+          if (path) {
+            routeForward(path, message, activeChildren);
+            return;
+          }
+          if (dashboard.isKnownName(targetName)) {
+            return;
+          }
+        }
+      }
+    }
+    queue.push(trimmed);
   });
   return () => rl.close();
 }
@@ -6129,7 +6191,7 @@ async function invent(partialOptions = {}) {
   });
   setMessageQueue(toolState.messageQueue);
   toolState.messageQueue.onDrain = (msgs) => msgs.forEach((m) => options.log(`[USER MESSAGE]: ${m}`));
-  const closeStdin = !isChild ? startStdinReader(toolState.messageQueue) : void 0;
+  const closeStdin = startStdinReader(toolState.messageQueue, toolState.activeChildren, dashboard);
   options.log("=== Initializing workspace ===");
   await init(options);
   options.log("=== Preparing ===");
@@ -6168,7 +6230,7 @@ async function amend(partialOptions = {}) {
   });
   setMessageQueue(toolState.messageQueue);
   toolState.messageQueue.onDrain = (msgs) => msgs.forEach((m) => options.log(`[USER MESSAGE]: ${m}`));
-  const closeStdin = !isChild ? startStdinReader(toolState.messageQueue) : void 0;
+  const closeStdin = startStdinReader(toolState.messageQueue, toolState.activeChildren, dashboard);
   options.log("=== Initializing workspace ===");
   await init(options);
   options.log("=== Preparing ===");

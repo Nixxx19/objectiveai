@@ -42,7 +42,7 @@ function runAmendInSubdir(
       args,
       {
         cwd: subdir,
-        stdio: ["inherit", "pipe", "pipe"],
+        stdio: ["pipe", "pipe", "pipe"],
         shell: true,
         env: {
           ...process.env,
@@ -53,6 +53,11 @@ function runAmendInSubdir(
     );
 
     childProcesses.push(child);
+
+    // Register child stdin for messaging
+    if (child.stdin && opts?.activeChildren) {
+      opts.activeChildren.set(name, child.stdin);
+    }
 
     // Emit start event
     opts?.onChildEvent?.({ event: "start", path: name });
@@ -76,6 +81,9 @@ function runAmendInSubdir(
     child.stderr?.on("data", () => {});
 
     child.on("close", (code) => {
+      // Unregister child stdin
+      opts?.activeChildren?.delete(name);
+
       // Flush remaining stdout buffer
       if (opts?.onChildEvent && stdoutBuffer.trim()) {
         const evt = parseEvent(stdoutBuffer);

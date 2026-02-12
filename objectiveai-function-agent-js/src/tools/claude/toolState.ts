@@ -10,6 +10,7 @@ import {
 } from "../function";
 import { isDefaultExampleInputs } from "../inputs";
 import { isDefaultReadme } from "../markdown";
+import type { Writable } from "stream";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { AgentEvent } from "../../events";
 import { MessageQueue } from "../../messageQueue";
@@ -47,6 +48,7 @@ export interface ToolState {
   onChildEvent?: (evt: AgentEvent) => void;
   messageQueue: MessageQueue;
   pendingAgentResults: Promise<CallToolResult> | null;
+  activeChildren: Map<string, import("stream").Writable>;
 }
 
 export function formatReadList(items: string[]): string {
@@ -106,5 +108,6 @@ export function makeToolState(options: {
     onChildEvent: options.onChildEvent,
     messageQueue: new MessageQueue(),
     pendingAgentResults: null,
+    activeChildren: new Map(),
   };
 }

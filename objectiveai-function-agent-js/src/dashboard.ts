@@ -7,6 +7,7 @@ interface AgentPanel {
 
 export class Dashboard {
   private panels: Map<string, AgentPanel> = new Map();
+  private knownNames: Set<string> = new Set();
   private lastRenderedHeight = 0;
   private maxLines: number;
   private dirty = false;
@@ -30,6 +31,7 @@ export class Dashboard {
         if (!this.panels.has(evt.path)) {
           this.panels.set(evt.path, { name: evt.path, lines: [] });
         }
+        this.knownNames.add(evt.path.split("/").pop()!);
         break;
       }
       case "name": {
@@ -115,6 +117,19 @@ export class Dashboard {
     const header = `\x1b[1m=== ${panel.name} ===\x1b[0m`;
     const lines = panel.lines.map((l) => `  ${l}`);
     return [header, ...lines].join("\n");
+  }
+
+  findPathByName(name: string): string | undefined {
+    for (const [path] of this.panels) {
+      if (!path) continue;
+      const lastSegment = path.split("/").pop()!;
+      if (lastSegment === name) return path;
+    }
+    return undefined;
+  }
+
+  isKnownName(name: string): boolean {
+    return this.knownNames.has(name);
   }
 
   dispose(): void {

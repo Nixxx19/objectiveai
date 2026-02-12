@@ -14,6 +14,7 @@ export function makeAmendFunctionAgents(state: ToolState) {
     minWidth: state.minWidth,
     maxWidth: state.maxWidth,
     onChildEvent: state.onChildEvent,
+    activeChildren: state.activeChildren,
   });
 
   return tool(

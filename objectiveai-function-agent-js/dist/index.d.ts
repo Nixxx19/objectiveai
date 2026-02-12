@@ -1,3 +1,4 @@
+import * as stream from 'stream';
 import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import z, { z as z$1 } from 'zod';
 import * as objectiveai from 'objectiveai';
@@ -81,6 +82,7 @@ interface ToolState {
     onChildEvent?: (evt: AgentEvent) => void;
     messageQueue: MessageQueue;
     pendingAgentResults: Promise<CallToolResult> | null;
+    activeChildren: Map<string, stream.Writable>;
 }
 
 declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;
@@ -58275,6 +58277,7 @@ declare function init(options: AgentOptions): Promise<void>;
 
 declare class Dashboard {
     private panels;
+    private knownNames;
     private lastRenderedHeight;
     private maxLines;
     private dirty;
@@ -58285,6 +58288,8 @@ declare class Dashboard {
     private scheduleRender;
     private renderNow;
     private formatPanel;
+    findPathByName(name: string): string | undefined;
+    isKnownName(name: string): boolean;
     dispose(): void;
 }
 

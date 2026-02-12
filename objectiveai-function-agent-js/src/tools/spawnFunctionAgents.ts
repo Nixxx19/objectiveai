@@ -71,6 +71,7 @@ export interface RunAgentOptions {
   minWidth?: number;
   maxWidth?: number;
   onChildEvent?: (evt: AgentEvent) => void;
+  activeChildren?: Map<string, import("stream").Writable>;
 }
 
 function runAgentInSubdir(
@@ -103,7 +104,7 @@ function runAgentInSubdir(
       args,
       {
         cwd: subdir,
-        stdio: ["inherit", "pipe", "pipe"],
+        stdio: ["pipe", "pipe", "pipe"],
         shell: true,
         env: {
           ...process.env,
@@ -114,6 +115,11 @@ function runAgentInSubdir(
     );
 
     childProcesses.push(child);
+
+    // Register child stdin for messaging
+    if (child.stdin && opts?.activeChildren) {
+      opts.activeChildren.set(name, child.stdin);
+    }
 
     // Emit start event
     opts?.onChildEvent?.({ event: "start", path: name });
@@ -138,6 +144,9 @@ function runAgentInSubdir(
     child.stderr?.on("data", () => {});
 
     child.on("close", (code) => {
+      // Unregister child stdin
+      opts?.activeChildren?.delete(name);
+
       // Flush remaining stdout buffer
       if (opts?.onChildEvent && stdoutBuffer.trim()) {
         const evt = parseEvent(stdoutBuffer);
