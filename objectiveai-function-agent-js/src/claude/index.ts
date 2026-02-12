@@ -1,7 +1,7 @@
 import { createInterface } from "readline";
 import type { Writable } from "stream";
 import { AgentOptions, makeAgentOptions } from "../agentOptions";
-import { printBanner } from "../banner";
+import { printBanner, bannerLines } from "../banner";
 import { init } from "../init";
 import { prepare } from "./prepare";
 import { inventMcp } from "./invent";
@@ -83,6 +83,42 @@ function startStdinReader(
   dashboard?: Dashboard,
 ): (() => void) | undefined {
   if (!process.stdin.readable) return undefined;
+
+  // Root process with dashboard + TTY: raw stdin with input bar
+  if (dashboard && process.stdin.isTTY) {
+    dashboard.enableInput();
+    dashboard.onInputSubmit = (line) => {
+      // @name prefix targets a specific child agent
+      if (line.startsWith("@")) {
+        const spaceIdx = line.indexOf(" ");
+        if (spaceIdx > 1) {
+          const targetName = line.substring(1, spaceIdx);
+          const message = line.substring(spaceIdx + 1).trim();
+          if (message) {
+            const path = dashboard.findPathByName(targetName);
+            if (path) {
+              routeForward(path, message, activeChildren);
+              return;
+            }
+            if (dashboard.isKnownName(targetName)) return;
+          }
+        }
+      }
+      queue.push(line);
+    };
+
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    const handler = (data: Buffer) => dashboard.handleKeystroke(data);
+    process.stdin.on("data", handler);
+    return () => {
+      process.stdin.removeListener("data", handler);
+      if (process.stdin.isTTY) process.stdin.setRawMode(false);
+      process.stdin.pause();
+    };
+  }
+
+  // Child process or no dashboard: readline for forwarding protocol
   const rl = createInterface({ input: process.stdin });
   rl.on("line", (line) => {
     const trimmed = line.trim();
@@ -96,26 +132,6 @@ function startStdinReader(
         return;
       }
     } catch {}
-
-    // @name prefix targets a specific agent (root process with dashboard)
-    if (dashboard && trimmed.startsWith("@")) {
-      const spaceIdx = trimmed.indexOf(" ");
-      if (spaceIdx > 1) {
-        const targetName = trimmed.substring(1, spaceIdx);
-        const message = trimmed.substring(spaceIdx + 1).trim();
-        if (message) {
-          const path = dashboard.findPathByName(targetName);
-          if (path) {
-            routeForward(path, message, activeChildren);
-            return;
-          }
-          // Known but not active — silently drop
-          if (dashboard.isKnownName(targetName)) {
-            return;
-          }
-        }
-      }
-    }
 
     // Regular message for this agent
     queue.push(trimmed);
@@ -137,7 +153,13 @@ function emitDoneAndDispose(
 
 export async function invent(partialOptions: Partial<AgentOptions> = {}): Promise<void> {
   const { isChild, dashboard, onChildEvent, logOverride } = setupLogging();
-  if (!isChild) printBanner();
+  if (!isChild) {
+    if (dashboard) {
+      dashboard.setHeader(bannerLines());
+    } else {
+      printBanner();
+    }
+  }
 
   const options = makeAgentOptions({
     ...partialOptions,
@@ -180,7 +202,13 @@ export async function invent(partialOptions: Partial<AgentOptions> = {}): Promis
 
 export async function amend(partialOptions: Partial<AgentOptions> = {}): Promise<void> {
   const { isChild, dashboard, onChildEvent, logOverride } = setupLogging();
-  if (!isChild) printBanner();
+  if (!isChild) {
+    if (dashboard) {
+      dashboard.setHeader(bannerLines());
+    } else {
+      printBanner();
+    }
+  }
 
   const options = makeAgentOptions({
     ...partialOptions,

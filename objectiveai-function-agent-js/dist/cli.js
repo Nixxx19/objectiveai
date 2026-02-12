@@ -232,23 +232,17 @@ function makeAgentOptions(options = {}) {
 var PURPLE = "\x1B[38;2;107;92;255m";
 var BOLD = "\x1B[1m";
 var RESET = "\x1B[0m";
-var LOGO = [
-  `  ${PURPLE}\u256D\u2500\u256E${RESET}              ${PURPLE}\u256D\u2500\u256E${RESET}`,
-  ` ${PURPLE}\u256D\u256F \u2502${RESET}   __ _  (_)  ${PURPLE}\u2502 \u2570\u256E${RESET}`,
-  `${PURPLE}\u256D\u256F  \u2502${RESET}  / _\` | |   ${PURPLE}\u2502  \u2570\u256E${RESET}`,
-  `${PURPLE}\u2570\u256E  \u2502${RESET}  \\__,_| |   ${PURPLE}\u2502  \u256D\u256F${RESET}`,
-  ` ${PURPLE}\u2570\u256E \u2502${RESET}       |_|   ${PURPLE}\u2502 \u256D\u256F${RESET}`,
-  `  ${PURPLE}\u2570\u2500\u256F${RESET}              ${PURPLE}\u2570\u2500\u256F${RESET}`
-];
+function bannerLines() {
+  return [
+    "",
+    `  ${PURPLE}${BOLD}{ai}${RESET} ${BOLD}| ObjectiveAI${RESET}`,
+    ""
+  ];
+}
 function printBanner() {
-  const title = `${BOLD}ObjectiveAI${RESET}`;
-  console.log();
-  console.log(`      ${title}`);
-  console.log();
-  for (const line of LOGO) {
+  for (const line of bannerLines()) {
     console.log(line);
   }
-  console.log();
 }
 function getFunctionPath(ref) {
   return join(
@@ -5795,9 +5789,21 @@ var Dashboard = class {
   maxLines;
   dirty = false;
   renderTimer = null;
+  headerLines = [];
+  inputBuffer = "";
+  inputEnabled = false;
+  /** Called when the user presses Enter with a non-empty line */
+  onInputSubmit;
   constructor(maxLines = 5) {
     this.maxLines = maxLines;
     this.panels.set("", { name: "unnamed function", lines: [] });
+  }
+  setHeader(lines) {
+    this.headerLines = lines;
+  }
+  enableInput() {
+    this.inputEnabled = true;
+    this.scheduleRender();
   }
   setRootName(name) {
     const panel = this.panels.get("");
@@ -5808,7 +5814,7 @@ var Dashboard = class {
     switch (evt.event) {
       case "start": {
         if (!this.panels.has(evt.path)) {
-          this.panels.set(evt.path, { name: evt.path, lines: [] });
+          this.panels.set(evt.path, { name: evt.path.split("/").pop(), lines: [] });
         }
         this.knownNames.add(evt.path.split("/").pop());
         break;
@@ -5816,10 +5822,7 @@ var Dashboard = class {
       case "name": {
         const panel = this.panels.get(evt.path);
         if (panel) {
-          const parts = evt.path.split("/");
-          parts[parts.length - 1] = evt.name;
-          panel.name = parts.join("/");
-          if (evt.path === "") panel.name = evt.name;
+          panel.name = evt.name;
         }
         break;
       }
@@ -5846,6 +5849,39 @@ var Dashboard = class {
     }
     this.scheduleRender();
   }
+  /** Process raw stdin data. Call this when stdin is in raw mode. */
+  handleKeystroke(data) {
+    const str = data.toString("utf-8");
+    if (str.charCodeAt(0) === 27) return;
+    for (const ch of str) {
+      const code = ch.charCodeAt(0);
+      if (code === 3) {
+        this.dispose();
+        if (process.stdin.isTTY) process.stdin.setRawMode(false);
+        process.exit(0);
+      } else if (ch === "\r" || ch === "\n") {
+        const line = this.inputBuffer.trim();
+        this.inputBuffer = "";
+        if (line && this.onInputSubmit) {
+          this.onInputSubmit(line);
+        }
+        this.scheduleRender();
+      } else if (code === 127 || code === 8) {
+        if (this.inputBuffer.length > 0) {
+          this.inputBuffer = this.inputBuffer.slice(0, -1);
+          this.repaintInputLine();
+        }
+      } else if (code >= 32) {
+        this.inputBuffer += ch;
+        this.repaintInputLine();
+      }
+    }
+  }
+  /** Repaint only the input line in-place (no full re-render). */
+  repaintInputLine() {
+    if (!this.inputEnabled) return;
+    process.stdout.write(`\r\x1B[2K\x1B[2m>\x1B[0m ${this.inputBuffer}`);
+  }
   scheduleRender() {
     this.dirty = true;
     if (this.renderTimer) return;
@@ -5854,30 +5890,68 @@ var Dashboard = class {
       if (this.dirty) this.renderNow();
     }, 50);
   }
+  /** Check if path is the last sibling among sorted non-root paths */
+  isLastSibling(path, index, sortedPaths) {
+    const segments = path.split("/");
+    const depth = segments.length;
+    const parentPrefix = depth === 1 ? "" : segments.slice(0, depth - 1).join("/");
+    for (let j = index + 1; j < sortedPaths.length; j++) {
+      const otherSegs = sortedPaths[j].split("/");
+      if (otherSegs.length < depth) continue;
+      const otherParent = depth === 1 ? "" : otherSegs.slice(0, depth - 1).join("/");
+      if (otherParent === parentPrefix && otherSegs[depth - 1] !== segments[depth - 1]) {
+        return false;
+      }
+    }
+    return true;
+  }
   renderNow() {
     this.dirty = false;
-    const sections = [];
+    const out = [];
+    for (const line of this.headerLines) {
+      out.push(line);
+    }
+    if (this.headerLines.length > 0) {
+      out.push("");
+    }
     const root = this.panels.get("");
     if (root) {
-      sections.push(this.formatPanel(root));
+      out.push(`\x1B[1m=== ${root.name} ===\x1B[0m`);
+      for (const l of root.lines) {
+        out.push(`  ${l}`);
+      }
     }
     const sortedPaths = [...this.panels.keys()].filter((p) => p !== "").sort();
-    for (const path of sortedPaths) {
+    const active = [];
+    for (let i = 0; i < sortedPaths.length; i++) {
+      const path = sortedPaths[i];
       const panel = this.panels.get(path);
-      sections.push(this.formatPanel(panel));
+      const depth = path.split("/").length;
+      const isLast = this.isLastSibling(path, i, sortedPaths);
+      active.length = depth - 1;
+      const sepChars = active.map((a) => a ? "\u2502 " : "  ").join("");
+      out.push(sepChars.trimEnd());
+      let hPfx = active.map((a) => a ? "\u2502 " : "  ").join("");
+      hPfx += isLast ? "\u2514\u2500 " : "\u251C\u2500 ";
+      out.push(`${hPfx}\x1B[1m${panel.name}\x1B[0m`);
+      active.push(!isLast);
+      const cPfx = active.map((a) => a ? "\u2502 " : "  ").join("") + " ";
+      for (const l of panel.lines) {
+        out.push(`${cPfx}${l}`);
+      }
     }
-    const output = sections.join("\n\n") + "\n";
-    const newHeight = output.split("\n").length;
+    if (this.inputEnabled) {
+      out.push("");
+      out.push(`\x1B[2m>\x1B[0m ${this.inputBuffer}`);
+    }
+    const hasInput = this.inputEnabled;
+    const output = hasInput ? out.join("\n") : out.join("\n") + "\n";
+    const newHeight = hasInput ? out.length - 1 : out.length;
     if (this.lastRenderedHeight > 0) {
-      process.stdout.write(`\x1B[${this.lastRenderedHeight}A\x1B[0J`);
+      process.stdout.write(`\x1B[${this.lastRenderedHeight}A\r\x1B[0J`);
     }
     process.stdout.write(output);
     this.lastRenderedHeight = newHeight;
-  }
-  formatPanel(panel) {
-    const header = `\x1B[1m=== ${panel.name} ===\x1B[0m`;
-    const lines = panel.lines.map((l) => `  ${l}`);
-    return [header, ...lines].join("\n");
   }
   findPathByName(name) {
     for (const [path] of this.panels) {
@@ -5991,9 +6065,33 @@ function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 async function dryrun() {
-  printBanner();
   const dashboard = new Dashboard(5);
+  dashboard.setHeader(bannerLines());
   dashboard.setRootName(AGENTS[0].name);
+  dashboard.enableInput();
+  dashboard.onInputSubmit = (line) => {
+    if (line.startsWith("@")) {
+      const spaceIdx = line.indexOf(" ");
+      if (spaceIdx > 1) {
+        const targetName = line.substring(1, spaceIdx);
+        const message = line.substring(spaceIdx + 1).trim();
+        if (message) {
+          const path = dashboard.findPathByName(targetName);
+          if (path !== void 0) {
+            dashboard.handleEvent({ event: "log", path, line: `[USER]: ${message}` });
+            return;
+          }
+          if (dashboard.isKnownName(targetName)) return;
+        }
+      }
+    }
+    dashboard.handleEvent({ event: "log", path: "", line: `[USER]: ${line}` });
+  };
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.on("data", (data) => dashboard.handleKeystroke(Buffer.from(data)));
+  }
   for (const agent of AGENTS) {
     if (agent.path) {
       dashboard.handleEvent({ event: "start", path: agent.path });
@@ -6006,8 +6104,8 @@ async function dryrun() {
       await sleep(150 + Math.random() * 200);
     }
   }
-  await sleep(6e4);
-  dashboard.dispose();
+  await new Promise(() => {
+  });
 }
 
 // src/claude/index.ts
@@ -6054,6 +6152,36 @@ function routeForward(forward, message, activeChildren) {
 }
 function startStdinReader(queue, activeChildren, dashboard) {
   if (!process.stdin.readable) return void 0;
+  if (dashboard && process.stdin.isTTY) {
+    dashboard.enableInput();
+    dashboard.onInputSubmit = (line) => {
+      if (line.startsWith("@")) {
+        const spaceIdx = line.indexOf(" ");
+        if (spaceIdx > 1) {
+          const targetName = line.substring(1, spaceIdx);
+          const message = line.substring(spaceIdx + 1).trim();
+          if (message) {
+            const path = dashboard.findPathByName(targetName);
+            if (path) {
+              routeForward(path, message, activeChildren);
+              return;
+            }
+            if (dashboard.isKnownName(targetName)) return;
+          }
+        }
+      }
+      queue.push(line);
+    };
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    const handler = (data) => dashboard.handleKeystroke(data);
+    process.stdin.on("data", handler);
+    return () => {
+      process.stdin.removeListener("data", handler);
+      if (process.stdin.isTTY) process.stdin.setRawMode(false);
+      process.stdin.pause();
+    };
+  }
   const rl = createInterface({ input: process.stdin });
   rl.on("line", (line) => {
     const trimmed = line.trim();
@@ -6065,23 +6193,6 @@ function startStdinReader(queue, activeChildren, dashboard) {
         return;
       }
     } catch {
-    }
-    if (dashboard && trimmed.startsWith("@")) {
-      const spaceIdx = trimmed.indexOf(" ");
-      if (spaceIdx > 1) {
-        const targetName = trimmed.substring(1, spaceIdx);
-        const message = trimmed.substring(spaceIdx + 1).trim();
-        if (message) {
-          const path = dashboard.findPathByName(targetName);
-          if (path) {
-            routeForward(path, message, activeChildren);
-            return;
-          }
-          if (dashboard.isKnownName(targetName)) {
-            return;
-          }
-        }
-      }
     }
     queue.push(trimmed);
   });
@@ -6097,7 +6208,13 @@ function emitDoneAndDispose(isChild, dashboard) {
 }
 async function invent(partialOptions = {}) {
   const { isChild, dashboard, onChildEvent, logOverride } = setupLogging();
-  if (!isChild) printBanner();
+  if (!isChild) {
+    if (dashboard) {
+      dashboard.setHeader(bannerLines());
+    } else {
+      printBanner();
+    }
+  }
   const options = makeAgentOptions({
     ...partialOptions,
     ...logOverride && { log: logOverride.log },
@@ -6131,7 +6248,13 @@ async function invent(partialOptions = {}) {
 }
 async function amend(partialOptions = {}) {
   const { isChild, dashboard, onChildEvent, logOverride } = setupLogging();
-  if (!isChild) printBanner();
+  if (!isChild) {
+    if (dashboard) {
+      dashboard.setHeader(bannerLines());
+    } else {
+      printBanner();
+    }
+  }
   const options = makeAgentOptions({
     ...partialOptions,
     ...logOverride && { log: logOverride.log },

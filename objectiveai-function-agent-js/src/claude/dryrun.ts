@@ -1,4 +1,4 @@
-import { printBanner } from "../banner";
+import { bannerLines } from "../banner";
 import { Dashboard } from "../dashboard";
 
 interface SimAgent {
@@ -101,11 +101,37 @@ function sleep(ms: number): Promise<void> {
 }
 
 export async function dryrun(): Promise<void> {
-  printBanner();
   const dashboard = new Dashboard(5);
-
-  // Set root name
+  dashboard.setHeader(bannerLines());
   dashboard.setRootName(AGENTS[0].name);
+
+  // Enable input bar and route @name messages
+  dashboard.enableInput();
+  dashboard.onInputSubmit = (line) => {
+    if (line.startsWith("@")) {
+      const spaceIdx = line.indexOf(" ");
+      if (spaceIdx > 1) {
+        const targetName = line.substring(1, spaceIdx);
+        const message = line.substring(spaceIdx + 1).trim();
+        if (message) {
+          const path = dashboard.findPathByName(targetName);
+          if (path !== undefined) {
+            dashboard.handleEvent({ event: "log", path, line: `[USER]: ${message}` });
+            return;
+          }
+          if (dashboard.isKnownName(targetName)) return;
+        }
+      }
+    }
+    dashboard.handleEvent({ event: "log", path: "", line: `[USER]: ${line}` });
+  };
+
+  // Raw stdin for keystroke capture
+  if (process.stdin.isTTY) {
+    process.stdin.setRawMode(true);
+    process.stdin.resume();
+    process.stdin.on("data", (data) => dashboard.handleKeystroke(Buffer.from(data)));
+  }
 
   // Drip-feed events
   for (const agent of AGENTS) {
@@ -122,7 +148,6 @@ export async function dryrun(): Promise<void> {
     }
   }
 
-  // Keep running so user can see the final state
-  await sleep(60000);
-  dashboard.dispose();
+  // Keep running — Ctrl+C handled by dashboard.handleKeystroke
+  await new Promise<void>(() => {});
 }

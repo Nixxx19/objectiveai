@@ -12,11 +12,26 @@ export class Dashboard {
   private maxLines: number;
   private dirty = false;
   private renderTimer: ReturnType<typeof setTimeout> | null = null;
+  private headerLines: string[] = [];
+  private inputBuffer = "";
+  private inputEnabled = false;
+
+  /** Called when the user presses Enter with a non-empty line */
+  onInputSubmit?: (line: string) => void;
 
   constructor(maxLines = 5) {
     this.maxLines = maxLines;
     // Create root panel
     this.panels.set("", { name: "unnamed function", lines: [] });
+  }
+
+  setHeader(lines: string[]): void {
+    this.headerLines = lines;
+  }
+
+  enableInput(): void {
+    this.inputEnabled = true;
+    this.scheduleRender();
   }
 
   setRootName(name: string): void {
@@ -29,7 +44,7 @@ export class Dashboard {
     switch (evt.event) {
       case "start": {
         if (!this.panels.has(evt.path)) {
-          this.panels.set(evt.path, { name: evt.path, lines: [] });
+          this.panels.set(evt.path, { name: evt.path.split("/").pop()!, lines: [] });
         }
         this.knownNames.add(evt.path.split("/").pop()!);
         break;
@@ -37,12 +52,7 @@ export class Dashboard {
       case "name": {
         const panel = this.panels.get(evt.path);
         if (panel) {
-          // Update panel name: replace last segment with actual name
-          const parts = evt.path.split("/");
-          parts[parts.length - 1] = evt.name;
-          panel.name = parts.join("/");
-          // Re-key if this is root
-          if (evt.path === "") panel.name = evt.name;
+          panel.name = evt.name;
         }
         break;
       }
@@ -71,6 +81,47 @@ export class Dashboard {
     this.scheduleRender();
   }
 
+  /** Process raw stdin data. Call this when stdin is in raw mode. */
+  handleKeystroke(data: Buffer): void {
+    const str = data.toString("utf-8");
+
+    // Skip escape sequences (arrow keys, etc.)
+    if (str.charCodeAt(0) === 0x1b) return;
+
+    for (const ch of str) {
+      const code = ch.charCodeAt(0);
+      if (code === 0x03) {
+        // Ctrl+C
+        this.dispose();
+        if (process.stdin.isTTY) process.stdin.setRawMode(false);
+        process.exit(0);
+      } else if (ch === "\r" || ch === "\n") {
+        const line = this.inputBuffer.trim();
+        this.inputBuffer = "";
+        if (line && this.onInputSubmit) {
+          this.onInputSubmit(line);
+        }
+        this.scheduleRender();
+      } else if (code === 0x7f || code === 0x08) {
+        // Backspace
+        if (this.inputBuffer.length > 0) {
+          this.inputBuffer = this.inputBuffer.slice(0, -1);
+          this.repaintInputLine();
+        }
+      } else if (code >= 0x20) {
+        // Printable character
+        this.inputBuffer += ch;
+        this.repaintInputLine();
+      }
+    }
+  }
+
+  /** Repaint only the input line in-place (no full re-render). */
+  private repaintInputLine(): void {
+    if (!this.inputEnabled) return;
+    process.stdout.write(`\r\x1b[2K\x1b[2m>\x1b[0m ${this.inputBuffer}`);
+  }
+
   private scheduleRender(): void {
     this.dirty = true;
     if (this.renderTimer) return;
@@ -80,43 +131,100 @@ export class Dashboard {
     }, 50);
   }
 
+  /** Check if path is the last sibling among sorted non-root paths */
+  private isLastSibling(path: string, index: number, sortedPaths: string[]): boolean {
+    const segments = path.split("/");
+    const depth = segments.length;
+    const parentPrefix = depth === 1 ? "" : segments.slice(0, depth - 1).join("/");
+
+    for (let j = index + 1; j < sortedPaths.length; j++) {
+      const otherSegs = sortedPaths[j].split("/");
+      if (otherSegs.length < depth) continue;
+      const otherParent = depth === 1 ? "" : otherSegs.slice(0, depth - 1).join("/");
+      if (otherParent === parentPrefix && otherSegs[depth - 1] !== segments[depth - 1]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   private renderNow(): void {
     this.dirty = false;
 
-    // Build output
-    const sections: string[] = [];
+    const out: string[] = [];
 
-    // Root panel first
+    // Header
+    for (const line of this.headerLines) {
+      out.push(line);
+    }
+    if (this.headerLines.length > 0) {
+      out.push("");
+    }
+
+    // Root panel
     const root = this.panels.get("");
     if (root) {
-      sections.push(this.formatPanel(root));
+      out.push(`\x1b[1m=== ${root.name} ===\x1b[0m`);
+      for (const l of root.lines) {
+        out.push(`  ${l}`);
+      }
     }
 
     // Children sorted by path
     const sortedPaths = [...this.panels.keys()]
       .filter((p) => p !== "")
       .sort();
-    for (const path of sortedPaths) {
+
+    // Track which depth levels have active (non-last) branches
+    const active: boolean[] = [];
+
+    for (let i = 0; i < sortedPaths.length; i++) {
+      const path = sortedPaths[i];
       const panel = this.panels.get(path)!;
-      sections.push(this.formatPanel(panel));
+      const depth = path.split("/").length;
+      const isLast = this.isLastSibling(path, i, sortedPaths);
+
+      // Trim active stack to this panel's parent depth
+      active.length = depth - 1;
+
+      // Separator line: show active ancestor branches
+      const sepChars = active.map((a) => (a ? "│ " : "  ")).join("");
+      out.push(sepChars.trimEnd());
+
+      // Header line: ancestor bars + connector
+      let hPfx = active.map((a) => (a ? "│ " : "  ")).join("");
+      hPfx += isLast ? "└─ " : "├─ ";
+      out.push(`${hPfx}\x1b[1m${panel.name}\x1b[0m`);
+
+      // Update active: this depth is active if not last
+      active.push(!isLast);
+
+      // Content lines: ancestor bars + continuation
+      const cPfx = active.map((a) => (a ? "│ " : "  ")).join("") + " ";
+      for (const l of panel.lines) {
+        out.push(`${cPfx}${l}`);
+      }
     }
 
-    const output = sections.join("\n\n") + "\n";
-    const newHeight = output.split("\n").length;
+    // Input bar at the bottom
+    if (this.inputEnabled) {
+      out.push("");
+      out.push(`\x1b[2m>\x1b[0m ${this.inputBuffer}`);
+    }
+
+    // When input is enabled, omit trailing newline so cursor stays at end of input
+    const hasInput = this.inputEnabled;
+    const output = hasInput ? out.join("\n") : out.join("\n") + "\n";
+    // Lines to move up on next render to reach the start of output
+    const newHeight = hasInput ? out.length - 1 : out.length;
 
     // Clear previous render
     if (this.lastRenderedHeight > 0) {
-      process.stdout.write(`\x1b[${this.lastRenderedHeight}A\x1b[0J`);
+      process.stdout.write(`\x1b[${this.lastRenderedHeight}A\r\x1b[0J`);
     }
 
     process.stdout.write(output);
     this.lastRenderedHeight = newHeight;
-  }
-
-  private formatPanel(panel: AgentPanel): string {
-    const header = `\x1b[1m=== ${panel.name} ===\x1b[0m`;
-    const lines = panel.lines.map((l) => `  ${l}`);
-    return [header, ...lines].join("\n");
   }
 
   findPathByName(name: string): string | undefined {

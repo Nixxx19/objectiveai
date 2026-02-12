@@ -58285,12 +58285,24 @@ declare class Dashboard {
     private maxLines;
     private dirty;
     private renderTimer;
+    private headerLines;
+    private inputBuffer;
+    private inputEnabled;
+    /** Called when the user presses Enter with a non-empty line */
+    onInputSubmit?: (line: string) => void;
     constructor(maxLines?: number);
+    setHeader(lines: string[]): void;
+    enableInput(): void;
     setRootName(name: string): void;
     handleEvent(evt: AgentEvent): void;
+    /** Process raw stdin data. Call this when stdin is in raw mode. */
+    handleKeystroke(data: Buffer): void;
+    /** Repaint only the input line in-place (no full re-render). */
+    private repaintInputLine;
     private scheduleRender;
+    /** Check if path is the last sibling among sorted non-root paths */
+    private isLastSibling;
     private renderNow;
-    private formatPanel;
     findPathByName(name: string): string | undefined;
     isKnownName(name: string): boolean;
     dispose(): void;
