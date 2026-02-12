@@ -3,8 +3,6 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  rmSync,
-  statSync,
   writeFileSync,
 } from "fs";
 
@@ -52,34 +50,6 @@ export function repoExists(owner: string, name: string, ghToken: string): boolea
     return true;
   } catch {
     return false;
-  }
-}
-
-const OVERWRITE_FILES = [
-  "SPEC.md",
-  "ESSAY.md",
-  "ESSAY_TASKS.md",
-  "README.md",
-];
-
-function clearForOverwrite(dir: string): void {
-  for (const file of OVERWRITE_FILES) {
-    const path = join(dir, file);
-    if (existsSync(path)) {
-      rmSync(path);
-    }
-  }
-
-  // Clear description from function.json
-  const functionPath = join(dir, "function.json");
-  if (existsSync(functionPath)) {
-    try {
-      const fn = JSON.parse(readFileSync(functionPath, "utf-8"));
-      if (typeof fn === "object" && fn !== null) {
-        delete fn.description;
-        writeFileSync(functionPath, JSON.stringify(fn, null, 2));
-      }
-    } catch {}
   }
 }
 
@@ -233,41 +203,11 @@ export async function spawnFunctionAgents(
     };
   }
 
-  // Process overwrites first
-  for (const param of params) {
-    const dir = join("agent_functions", param.name);
-    if (param.overwrite && existsSync(dir)) {
-      try {
-        clearForOverwrite(dir);
-      } catch (err) {
-        return {
-          ok: false,
-          value: undefined,
-          error: `Failed to clear ${dir} for overwrite: ${err}.`,
-        };
-      }
-    }
-  }
-
-  // Check for existing directories (non-overwrite only)
-  for (const param of params) {
-    if (param.overwrite) continue;
-    const dir = join("agent_functions", param.name);
-    if (existsSync(dir) && statSync(dir).isDirectory()) {
-      return {
-        ok: false,
-        value: undefined,
-        error: `agent_functions/${param.name} already exists. Set "overwrite": true to replace it, or use a different name.`,
-      };
-    }
-  }
-
-  // Check that no repos already exist on GitHub (non-overwrite only)
-  const nonOverwriteParams = params.filter((p) => !p.overwrite);
-  if (nonOverwriteParams.length > 0 && opts?.ghToken) {
+  // Check that no repos already exist on GitHub
+  if (opts?.ghToken) {
     const owner = getGitHubOwner(opts.ghToken);
     if (owner) {
-      for (const param of nonOverwriteParams) {
+      for (const param of params) {
         if (repoExists(owner, param.name, opts.ghToken)) {
           return {
             ok: false,

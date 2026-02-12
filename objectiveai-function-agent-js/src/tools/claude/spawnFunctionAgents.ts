@@ -44,8 +44,7 @@ export function makeSpawnFunctionAgents(state: ToolState) {
           });
         }
 
-        const overwritten = params.map((p) => ({ ...p, overwrite: true }));
-        return resultFromResult(await spawnFunctionAgents(overwritten, opts()));
+        return resultFromResult(await spawnFunctionAgents(params, opts()));
       }
 
       state.spawnFunctionAgentsHasSpawned = true;

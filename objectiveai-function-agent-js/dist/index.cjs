@@ -4528,31 +4528,6 @@ function repoExists2(owner, name, ghToken) {
     return false;
   }
 }
-var OVERWRITE_FILES = [
-  "SPEC.md",
-  "ESSAY.md",
-  "ESSAY_TASKS.md",
-  "README.md"
-];
-function clearForOverwrite(dir) {
-  for (const file of OVERWRITE_FILES) {
-    const path$1 = path.join(dir, file);
-    if (fs.existsSync(path$1)) {
-      fs.rmSync(path$1);
-    }
-  }
-  const functionPath = path.join(dir, "function.json");
-  if (fs.existsSync(functionPath)) {
-    try {
-      const fn = JSON.parse(fs.readFileSync(functionPath, "utf-8"));
-      if (typeof fn === "object" && fn !== null) {
-        delete fn.description;
-        fs.writeFileSync(functionPath, JSON.stringify(fn, null, 2));
-      }
-    } catch {
-    }
-  }
-}
 function getCurrentDepth() {
   if (!fs.existsSync("parameters.json")) {
     return 0;
@@ -4656,36 +4631,10 @@ async function spawnFunctionAgents(params, opts) {
       error: `Duplicate names: ${[...new Set(duplicates)].join(", ")}`
     };
   }
-  for (const param of params) {
-    const dir = path.join("agent_functions", param.name);
-    if (param.overwrite && fs.existsSync(dir)) {
-      try {
-        clearForOverwrite(dir);
-      } catch (err) {
-        return {
-          ok: false,
-          value: void 0,
-          error: `Failed to clear ${dir} for overwrite: ${err}.`
-        };
-      }
-    }
-  }
-  for (const param of params) {
-    if (param.overwrite) continue;
-    const dir = path.join("agent_functions", param.name);
-    if (fs.existsSync(dir) && fs.statSync(dir).isDirectory()) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `agent_functions/${param.name} already exists. Set "overwrite": true to replace it, or use a different name.`
-      };
-    }
-  }
-  const nonOverwriteParams = params.filter((p) => !p.overwrite);
-  if (nonOverwriteParams.length > 0 && opts?.ghToken) {
+  if (opts?.ghToken) {
     const owner = getGitHubOwner2(opts.ghToken);
     if (owner) {
-      for (const param of nonOverwriteParams) {
+      for (const param of params) {
         if (repoExists2(owner, param.name, opts.ghToken)) {
           return {
             ok: false,
@@ -4755,8 +4704,7 @@ async function spawnFunctionAgents(params, opts) {
 var SpawnFunctionAgentsParamsSchema = z18.z.array(
   z18.z.object({
     name: z18.z.string(),
-    spec: z18.z.string(),
-    overwrite: z18.z.boolean().optional()
+    spec: z18.z.string()
   })
 );
 
@@ -4794,8 +4742,7 @@ function makeSpawnFunctionAgents(state) {
             error: `Cannot respawn agents that already succeeded: ${alreadyOnGitHub.join(", ")}. Only include agents that failed (no repository on GitHub).`
           });
         }
-        const overwritten = params.map((p) => ({ ...p, overwrite: true }));
-        return resultFromResult(await spawnFunctionAgents(overwritten, opts()));
+        return resultFromResult(await spawnFunctionAgents(params, opts()));
       }
       state.spawnFunctionAgentsHasSpawned = true;
       return resultFromResult(await spawnFunctionAgents(params, opts()));
@@ -5464,14 +5411,22 @@ async function amendFunctionAgents(params, opts) {
       error: `Duplicate names: ${[...new Set(duplicates)].join(", ")}`
     };
   }
-  for (const param of params) {
-    const dir = path.join("agent_functions", param.name);
-    if (!fs.existsSync(dir) || !fs.statSync(dir).isDirectory()) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `agent_functions/${param.name} does not exist. Cannot amend a function that was never invented.`
-      };
+  if (opts?.ghToken) {
+    const owner = getGitHubOwner2(opts.ghToken);
+    if (owner) {
+      const missing = [];
+      for (const param of params) {
+        if (!repoExists2(owner, param.name, opts.ghToken)) {
+          missing.push(param.name);
+        }
+      }
+      if (missing.length > 0) {
+        return {
+          ok: false,
+          value: void 0,
+          error: `Cannot amend agents that haven't completed invent: ${missing.join(", ")}. Repository must exist on GitHub first.`
+        };
+      }
     }
   }
   const originalCwd = process.cwd();

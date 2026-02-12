@@ -58316,7 +58316,6 @@ declare function getLatestLogPath(): string | null;
 declare const SpawnFunctionAgentsParamsSchema: z$1.ZodArray<z$1.ZodObject<{
     name: z$1.ZodString;
     spec: z$1.ZodString;
-    overwrite: z$1.ZodOptional<z$1.ZodBoolean>;
 }, z$1.core.$strip>>;
 type SpawnFunctionAgentsParams = z$1.infer<typeof SpawnFunctionAgentsParamsSchema>;
 

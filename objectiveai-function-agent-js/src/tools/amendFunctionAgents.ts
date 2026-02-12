@@ -1,10 +1,9 @@
 import { ChildProcess, execSync, spawn } from "child_process";
-import { existsSync, statSync } from "fs";
 import { join } from "path";
 import { Result } from "./result";
 import { AmendFunctionAgentsParams } from "../amendFunctionAgentsParams";
 import { AgentEvent, parseEvent, prefixEvent } from "../events";
-import { RunAgentOptions } from "./spawnFunctionAgents";
+import { RunAgentOptions, getGitHubOwner, repoExists } from "./spawnFunctionAgents";
 import { appendAmendment } from "./markdown";
 
 interface AgentResult {
@@ -142,15 +141,23 @@ export async function amendFunctionAgents(
     };
   }
 
-  // Verify all directories exist
-  for (const param of params) {
-    const dir = join("agent_functions", param.name);
-    if (!existsSync(dir) || !statSync(dir).isDirectory()) {
-      return {
-        ok: false,
-        value: undefined,
-        error: `agent_functions/${param.name} does not exist. Cannot amend a function that was never invented.`,
-      };
+  // Verify all agents have completed invent (repo exists on GitHub)
+  if (opts?.ghToken) {
+    const owner = getGitHubOwner(opts.ghToken);
+    if (owner) {
+      const missing: string[] = [];
+      for (const param of params) {
+        if (!repoExists(owner, param.name, opts.ghToken)) {
+          missing.push(param.name);
+        }
+      }
+      if (missing.length > 0) {
+        return {
+          ok: false,
+          value: undefined,
+          error: `Cannot amend agents that haven't completed invent: ${missing.join(", ")}. Repository must exist on GitHub first.`,
+        };
+      }
     }
   }
 

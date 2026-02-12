@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import { execSync, spawn } from 'child_process';
-import { existsSync, readFileSync, writeFileSync, readdirSync, appendFileSync, mkdirSync, unlinkSync, statSync, rmSync } from 'fs';
+import { existsSync, readFileSync, writeFileSync, readdirSync, appendFileSync, mkdirSync, unlinkSync, statSync } from 'fs';
 import { join, dirname } from 'path';
 import { Functions, Chat, ObjectiveAI, JsonValueSchema, JsonValueExpressionSchema } from 'objectiveai';
 import { createSdkMcpServer, query, tool } from '@anthropic-ai/claude-agent-sdk';
@@ -4312,31 +4312,6 @@ function repoExists2(owner, name, ghToken) {
     return false;
   }
 }
-var OVERWRITE_FILES = [
-  "SPEC.md",
-  "ESSAY.md",
-  "ESSAY_TASKS.md",
-  "README.md"
-];
-function clearForOverwrite(dir) {
-  for (const file of OVERWRITE_FILES) {
-    const path = join(dir, file);
-    if (existsSync(path)) {
-      rmSync(path);
-    }
-  }
-  const functionPath = join(dir, "function.json");
-  if (existsSync(functionPath)) {
-    try {
-      const fn = JSON.parse(readFileSync(functionPath, "utf-8"));
-      if (typeof fn === "object" && fn !== null) {
-        delete fn.description;
-        writeFileSync(functionPath, JSON.stringify(fn, null, 2));
-      }
-    } catch {
-    }
-  }
-}
 function getCurrentDepth() {
   if (!existsSync("parameters.json")) {
     return 0;
@@ -4440,36 +4415,10 @@ async function spawnFunctionAgents(params, opts) {
       error: `Duplicate names: ${[...new Set(duplicates)].join(", ")}`
     };
   }
-  for (const param of params) {
-    const dir = join("agent_functions", param.name);
-    if (param.overwrite && existsSync(dir)) {
-      try {
-        clearForOverwrite(dir);
-      } catch (err) {
-        return {
-          ok: false,
-          value: void 0,
-          error: `Failed to clear ${dir} for overwrite: ${err}.`
-        };
-      }
-    }
-  }
-  for (const param of params) {
-    if (param.overwrite) continue;
-    const dir = join("agent_functions", param.name);
-    if (existsSync(dir) && statSync(dir).isDirectory()) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `agent_functions/${param.name} already exists. Set "overwrite": true to replace it, or use a different name.`
-      };
-    }
-  }
-  const nonOverwriteParams = params.filter((p) => !p.overwrite);
-  if (nonOverwriteParams.length > 0 && opts?.ghToken) {
+  if (opts?.ghToken) {
     const owner = getGitHubOwner2(opts.ghToken);
     if (owner) {
-      for (const param of nonOverwriteParams) {
+      for (const param of params) {
         if (repoExists2(owner, param.name, opts.ghToken)) {
           return {
             ok: false,
@@ -4539,8 +4488,7 @@ async function spawnFunctionAgents(params, opts) {
 var SpawnFunctionAgentsParamsSchema = z.array(
   z.object({
     name: z.string(),
-    spec: z.string(),
-    overwrite: z.boolean().optional()
+    spec: z.string()
   })
 );
 
@@ -4578,8 +4526,7 @@ function makeSpawnFunctionAgents(state) {
             error: `Cannot respawn agents that already succeeded: ${alreadyOnGitHub.join(", ")}. Only include agents that failed (no repository on GitHub).`
           });
         }
-        const overwritten = params.map((p) => ({ ...p, overwrite: true }));
-        return resultFromResult(await spawnFunctionAgents(overwritten, opts()));
+        return resultFromResult(await spawnFunctionAgents(params, opts()));
       }
       state.spawnFunctionAgentsHasSpawned = true;
       return resultFromResult(await spawnFunctionAgents(params, opts()));
@@ -5248,14 +5195,22 @@ async function amendFunctionAgents(params, opts) {
       error: `Duplicate names: ${[...new Set(duplicates)].join(", ")}`
     };
   }
-  for (const param of params) {
-    const dir = join("agent_functions", param.name);
-    if (!existsSync(dir) || !statSync(dir).isDirectory()) {
-      return {
-        ok: false,
-        value: void 0,
-        error: `agent_functions/${param.name} does not exist. Cannot amend a function that was never invented.`
-      };
+  if (opts?.ghToken) {
+    const owner = getGitHubOwner2(opts.ghToken);
+    if (owner) {
+      const missing = [];
+      for (const param of params) {
+        if (!repoExists2(owner, param.name, opts.ghToken)) {
+          missing.push(param.name);
+        }
+      }
+      if (missing.length > 0) {
+        return {
+          ok: false,
+          value: void 0,
+          error: `Cannot amend agents that haven't completed invent: ${missing.join(", ")}. Repository must exist on GitHub first.`
+        };
+      }
     }
   }
   const originalCwd = process.cwd();
