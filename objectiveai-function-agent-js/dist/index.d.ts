@@ -1,3 +1,4 @@
+import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import z, { z as z$1 } from 'zod';
 import * as objectiveai from 'objectiveai';
 import { Functions } from 'objectiveai';
@@ -37,6 +38,15 @@ interface AgentOptions {
 }
 declare function makeAgentOptions(options?: Partial<AgentOptions>): AgentOptions;
 
+declare class MessageQueue {
+    private messages;
+    private waiter;
+    push(message: string): void;
+    drain(): string[];
+    get length(): number;
+    waitForMessage(): Promise<void>;
+}
+
 interface ToolState {
     spawnFunctionAgentsHasSpawned: boolean;
     editInputSchemaModalityRemovalRejected: boolean;
@@ -68,7 +78,8 @@ interface ToolState {
     hasReadExampleInputs: boolean;
     hasReadReadme: boolean;
     onChildEvent?: (evt: AgentEvent) => void;
-    messageQueue: string[];
+    messageQueue: MessageQueue;
+    pendingAgentResults: Promise<CallToolResult> | null;
 }
 
 declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;

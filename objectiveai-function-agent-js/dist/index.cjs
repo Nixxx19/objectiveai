@@ -445,7 +445,7 @@ function setMessageQueue(queue) {
 }
 function drainMessages(result) {
   if (!_messageQueue || _messageQueue.length === 0) return result;
-  const messages = _messageQueue.splice(0);
+  const messages = _messageQueue.drain();
   const suffix = "\n\n[USER MESSAGE]: " + messages.join("\n[USER MESSAGE]: ");
   const last = result.content[result.content.length - 1];
   if (last && "type" in last && last.type === "text") {
@@ -2716,7 +2716,7 @@ function compiledTasksEqual(a, b) {
     return b !== null && !Array.isArray(b) && b.type === "vector.function" && b.owner === a.owner && b.repository === a.repository && b.commit === a.commit && JSON.stringify(a.input) === JSON.stringify(b.input);
   } else if (a.type === "vector.completion") {
     return b !== null && !Array.isArray(b) && b.type === "vector.completion" && JSON.stringify(a.messages) === JSON.stringify(b.messages) && JSON.stringify(a.responses) === JSON.stringify(b.responses) && a.tools === void 0 ? b.tools === void 0 : b.tools !== void 0 && a.tools.length === b.tools.length && a.tools.every(
-      (tool29, index) => JSON.stringify(tool29) === JSON.stringify(
+      (tool30, index) => JSON.stringify(tool30) === JSON.stringify(
         b.tools[index]
       )
     );
@@ -2724,6 +2724,32 @@ function compiledTasksEqual(a, b) {
     return false;
   }
 }
+
+// src/messageQueue.ts
+var MessageQueue = class {
+  messages = [];
+  waiter = null;
+  push(message) {
+    this.messages.push(message);
+    if (this.waiter) {
+      const resolve = this.waiter;
+      this.waiter = null;
+      resolve();
+    }
+  }
+  drain() {
+    return this.messages.splice(0);
+  }
+  get length() {
+    return this.messages.length;
+  }
+  waitForMessage() {
+    if (this.messages.length > 0) return Promise.resolve();
+    return new Promise((resolve) => {
+      this.waiter = resolve;
+    });
+  }
+};
 
 // src/tools/claude/toolState.ts
 function formatReadList(items) {
@@ -2768,7 +2794,8 @@ function makeToolState(options) {
     hasReadExampleInputs: isDefaultExampleInputs(),
     hasReadReadme: isDefaultReadme(),
     onChildEvent: options.onChildEvent,
-    messageQueue: []
+    messageQueue: new MessageQueue(),
+    pendingAgentResults: null
   };
 }
 
@@ -4740,6 +4767,13 @@ function makeSpawnFunctionAgents(state) {
     "Spawn child function agents in parallel",
     { params: SpawnFunctionAgentsParamsSchema },
     async ({ params }) => {
+      if (state.pendingAgentResults) {
+        return resultFromResult({
+          ok: false,
+          value: void 0,
+          error: "Agents are already running. Call WaitFunctionAgents to wait for results."
+        });
+      }
       if (state.spawnFunctionAgentsHasSpawned) {
         const owner = getGitHubOwner2(state.ghToken);
         const alreadyOnGitHub = [];
@@ -4757,10 +4791,38 @@ function makeSpawnFunctionAgents(state) {
             error: `Cannot respawn agents that already succeeded: ${alreadyOnGitHub.join(", ")}. Only include agents that failed (no repository on GitHub).`
           });
         }
-        return resultFromResult(await spawnFunctionAgents(params, opts()));
       }
       state.spawnFunctionAgentsHasSpawned = true;
-      return resultFromResult(await spawnFunctionAgents(params, opts()));
+      state.pendingAgentResults = spawnFunctionAgents(params, opts()).then(
+        (r) => resultFromResult(r)
+      );
+      return textResult(
+        "Agents spawned. Call WaitFunctionAgents to wait for results."
+      );
+    }
+  );
+}
+function makeWaitFunctionAgents(state) {
+  return claudeAgentSdk.tool(
+    "WaitFunctionAgents",
+    "Wait for running function agents to finish",
+    {},
+    async () => {
+      if (!state.pendingAgentResults) {
+        return errorResult("No agents are currently running.");
+      }
+      const outcome = await Promise.race([
+        state.pendingAgentResults.then((r) => ({ type: "done", result: r })),
+        state.messageQueue.waitForMessage().then(() => ({ type: "message" }))
+      ]);
+      if (outcome.type === "done") {
+        state.pendingAgentResults = null;
+        return outcome.result;
+      }
+      const messages = state.messageQueue.drain();
+      return textResult(
+        "Function agents are still running. Call WaitFunctionAgents again to continue waiting.\n\n" + messages.map((m) => "[USER MESSAGE]: " + m).join("\n")
+      );
     }
   );
 }
@@ -4971,6 +5033,7 @@ function getCommonTools(state) {
 function getFunctionTasksTools(state) {
   return [
     makeSpawnFunctionAgents(state),
+    makeWaitFunctionAgents(state),
     makeListAgentFunctions(),
     makeReadAgentFunction()
   ];
@@ -5529,10 +5592,22 @@ function makeAmendFunctionAgents(state) {
   });
   return claudeAgentSdk.tool(
     "AmendFunctionAgents",
-    "Amend existing child function agents in parallel. Each agent's spec is appended as an amendment to its SPEC.md.",
+    "Amend existing child function agents in parallel",
     { params: AmendFunctionAgentsParamsSchema },
     async ({ params }) => {
-      return resultFromResult(await amendFunctionAgents(params, opts()));
+      if (state.pendingAgentResults) {
+        return resultFromResult({
+          ok: false,
+          value: void 0,
+          error: "Agents are already running. Call WaitFunctionAgents to wait for results."
+        });
+      }
+      state.pendingAgentResults = amendFunctionAgents(params, opts()).then(
+        (r) => resultFromResult(r)
+      );
+      return textResult(
+        "Agents spawned. Call WaitFunctionAgents to wait for results."
+      );
     }
   );
 }
@@ -5655,6 +5730,7 @@ function getFunctionTasksTools2(state) {
   return [
     makeSpawnFunctionAgents(state),
     makeAmendFunctionAgents(state),
+    makeWaitFunctionAgents(state),
     makeListAgentFunctions(),
     makeReadAgentFunction()
   ];

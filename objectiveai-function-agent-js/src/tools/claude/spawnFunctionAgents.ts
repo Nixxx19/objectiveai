@@ -1,6 +1,6 @@
 import { tool } from "@anthropic-ai/claude-agent-sdk";
 import { ToolState } from "./toolState";
-import { resultFromResult } from "./util";
+import { textResult, resultFromResult } from "./util";
 import { spawnFunctionAgents, getGitHubOwner, repoExists } from "../spawnFunctionAgents";
 import { SpawnFunctionAgentsParamsSchema } from "../../spawnFunctionAgentsParams";
 
@@ -21,6 +21,14 @@ export function makeSpawnFunctionAgents(state: ToolState) {
     "Spawn child function agents in parallel",
     { params: SpawnFunctionAgentsParamsSchema },
     async ({ params }) => {
+      if (state.pendingAgentResults) {
+        return resultFromResult({
+          ok: false,
+          value: undefined,
+          error: "Agents are already running. Call WaitFunctionAgents to wait for results.",
+        });
+      }
+
       if (state.spawnFunctionAgentsHasSpawned) {
         // Only allow respawning agents whose repos don't exist on GitHub (i.e. they failed)
         const owner = getGitHubOwner(state.ghToken);
@@ -43,12 +51,16 @@ export function makeSpawnFunctionAgents(state: ToolState) {
               "Only include agents that failed (no repository on GitHub).",
           });
         }
-
-        return resultFromResult(await spawnFunctionAgents(params, opts()));
       }
 
       state.spawnFunctionAgentsHasSpawned = true;
-      return resultFromResult(await spawnFunctionAgents(params, opts()));
+      state.pendingAgentResults = spawnFunctionAgents(params, opts()).then((r) =>
+        resultFromResult(r),
+      );
+
+      return textResult(
+        "Agents spawned. Call WaitFunctionAgents to wait for results.",
+      );
     },
   );
 }

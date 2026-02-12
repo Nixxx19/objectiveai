@@ -1,15 +1,16 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { Result } from "../result";
+import { MessageQueue } from "../../messageQueue";
 
-let _messageQueue: string[] | undefined;
+let _messageQueue: MessageQueue | undefined;
 
-export function setMessageQueue(queue: string[]): void {
+export function setMessageQueue(queue: MessageQueue): void {
   _messageQueue = queue;
 }
 
 function drainMessages(result: CallToolResult): CallToolResult {
   if (!_messageQueue || _messageQueue.length === 0) return result;
-  const messages = _messageQueue.splice(0);
+  const messages = _messageQueue.drain();
   const suffix = "\n\n[USER MESSAGE]: " + messages.join("\n[USER MESSAGE]: ");
   const last = result.content[result.content.length - 1];
   if (last && "type" in last && last.type === "text") {

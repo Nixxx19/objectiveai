@@ -1,6 +1,6 @@
 import { tool } from "@anthropic-ai/claude-agent-sdk";
 import { ToolState } from "./toolState";
-import { resultFromResult } from "./util";
+import { textResult, resultFromResult } from "./util";
 import { amendFunctionAgents } from "../amendFunctionAgents";
 import { AmendFunctionAgentsParamsSchema } from "../../amendFunctionAgentsParams";
 
@@ -18,10 +18,24 @@ export function makeAmendFunctionAgents(state: ToolState) {
 
   return tool(
     "AmendFunctionAgents",
-    "Amend existing child function agents in parallel. Each agent's spec is appended as an amendment to its SPEC.md.",
+    "Amend existing child function agents in parallel",
     { params: AmendFunctionAgentsParamsSchema },
     async ({ params }) => {
-      return resultFromResult(await amendFunctionAgents(params, opts()));
+      if (state.pendingAgentResults) {
+        return resultFromResult({
+          ok: false,
+          value: undefined,
+          error: "Agents are already running. Call WaitFunctionAgents to wait for results.",
+        });
+      }
+
+      state.pendingAgentResults = amendFunctionAgents(params, opts()).then((r) =>
+        resultFromResult(r),
+      );
+
+      return textResult(
+        "Agents spawned. Call WaitFunctionAgents to wait for results.",
+      );
     },
   );
 }

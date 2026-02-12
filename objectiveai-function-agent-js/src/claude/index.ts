@@ -54,7 +54,7 @@ function emitNameEvent(
   }
 }
 
-function startStdinReader(queue: string[]): (() => void) | undefined {
+function startStdinReader(queue: { push(msg: string): void }): (() => void) | undefined {
   if (!process.stdin.isTTY) return undefined;
   const rl = createInterface({ input: process.stdin });
   rl.on("line", (line) => {
