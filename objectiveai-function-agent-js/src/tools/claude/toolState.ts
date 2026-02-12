@@ -18,6 +18,7 @@ export interface ToolState {
   hasReadOrWrittenEssayTasks: boolean;
   hasReadOrWrittenPlan: boolean;
   hasReadExampleFunctions: boolean;
+  anyStepRan: boolean;
 }
 
 export function formatReadList(items: string[]): string {
@@ -58,5 +59,6 @@ export function makeToolState(options: {
     hasReadOrWrittenEssayTasks: false,
     hasReadOrWrittenPlan: false,
     hasReadExampleFunctions: false,
+    anyStepRan: false,
   };
 }

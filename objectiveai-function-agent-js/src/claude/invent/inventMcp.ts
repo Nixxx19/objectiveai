@@ -484,21 +484,34 @@ Please try again. Remember to:
 `;
     }
 
-    sessionId = await consumeStream(
-      query({
-        prompt,
-        options: {
-          tools: [],
-          mcpServers: { invent: mcpServer },
-          allowedTools: ["mcp__invent__*"],
-          disallowedTools: ["AskUserQuestion"],
-          permissionMode: "dontAsk",
-          resume: sessionId,
-        },
-      }),
-      log,
-      sessionId,
-    );
+    const runQuery = (sid?: string) =>
+      consumeStream(
+        query({
+          prompt,
+          options: {
+            tools: [],
+            mcpServers: { invent: mcpServer },
+            allowedTools: ["mcp__invent__*"],
+            disallowedTools: ["AskUserQuestion"],
+            permissionMode: "dontAsk",
+            resume: sid,
+          },
+        }),
+        log,
+        sid,
+      );
+
+    try {
+      sessionId = await runQuery(sessionId);
+    } catch (e) {
+      if (!state.anyStepRan) {
+        log("Session may be invalid, retrying without session...");
+        sessionId = await runQuery(undefined);
+      } else {
+        throw e;
+      }
+    }
+    state.anyStepRan = true;
 
     // Validate and submit
     log("Running submit...");
@@ -511,6 +524,7 @@ Please try again. Remember to:
         userName: state.gitUserName,
         userEmail: state.gitUserEmail,
       },
+      sessionId,
     );
     if (submitResult.ok) {
       success = true;
@@ -539,7 +553,17 @@ export async function inventMcp(
   const useFunctionTasks = depth > 0;
 
   log("=== Plan ===");
-  const sessionId = await planMcp(state, log, depth, options.sessionId, options.instructions);
+  let sessionId: string | undefined;
+  try {
+    sessionId = await planMcp(state, log, depth, options.sessionId, options.instructions);
+  } catch (e) {
+    if (!state.anyStepRan) {
+      log("Session may be invalid, retrying without session...");
+      sessionId = await planMcp(state, log, depth, undefined, options.instructions);
+    } else {
+      throw e;
+    }
+  }
 
   log(`=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
   await inventLoop(state, log, useFunctionTasks, sessionId);

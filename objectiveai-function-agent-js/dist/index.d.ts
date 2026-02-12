@@ -41,6 +41,7 @@ interface ToolState {
     hasReadOrWrittenEssayTasks: boolean;
     hasReadOrWrittenPlan: boolean;
     hasReadExampleFunctions: boolean;
+    anyStepRan: boolean;
 }
 
 declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;

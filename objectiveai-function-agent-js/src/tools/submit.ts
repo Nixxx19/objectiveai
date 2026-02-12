@@ -1,6 +1,7 @@
 import { execSync } from "child_process";
 import { existsSync, readFileSync } from "fs";
 import { Result } from "./result";
+import { writeSession } from "./session";
 import { checkFunction } from "./function/function";
 import { buildProfile } from "./profile";
 import { checkExampleInputs } from "./inputs";
@@ -59,7 +60,7 @@ export interface SubmitGitIdentity {
   ghToken?: string;
 }
 
-export async function submit(message: string, apiBase?: string, apiKey?: string, git?: SubmitGitIdentity): Promise<Result<string>> {
+export async function submit(message: string, apiBase?: string, apiKey?: string, git?: SubmitGitIdentity, sessionId?: string): Promise<Result<string>> {
   // 0. Build profile from current function definition
   const profileBuild = buildProfile();
   if (!profileBuild.ok) {
@@ -138,6 +139,7 @@ export async function submit(message: string, apiBase?: string, apiKey?: string,
   const name = nameResult.value.trim();
 
   // 7. Commit
+  if (sessionId) writeSession(sessionId);
   execSync("git add -A", { stdio: "pipe" });
   try {
     execSync("git diff --cached --quiet", { stdio: "pipe" });

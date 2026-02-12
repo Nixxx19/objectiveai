@@ -16,6 +16,7 @@ import {
   makeReadFunctionSchema,
 } from "../../tools/claude/function";
 import { ToolState, formatReadList } from "../../tools/claude/toolState";
+import { writeSession } from "../../tools/session";
 import {
   makeReadInputParamSchema,
   makeReadMapParamSchema,
@@ -246,5 +247,7 @@ export async function planMcp(
     sessionId,
   );
 
+  state.anyStepRan = true;
+  if (sessionId) writeSession(sessionId);
   return sessionId;
 }

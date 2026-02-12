@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
 import { createFileLogger } from "./logging";
+import { readSession } from "./tools/session";
 
 export type LogFn = (...args: unknown[]) => void;
 
@@ -90,10 +91,13 @@ export function makeAgentOptions(options: Partial<AgentOptions> = {}): AgentOpti
     throw new Error("GitHub token is required. Set GH_TOKEN or pass ghToken.");
   }
 
+  const sessionId = options.sessionId ?? readSession();
+
   return {
     ...options,
     apiBase,
     apiKey,
+    sessionId,
     log,
     depth,
     minWidth,

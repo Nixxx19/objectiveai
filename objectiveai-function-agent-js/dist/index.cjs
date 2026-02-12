@@ -112,6 +112,14 @@ function getLatestLogPath() {
   const maxIndex = Math.max(...logNumbers);
   return `${logsDir}/${maxIndex}.txt`;
 }
+function readSession() {
+  if (!fs.existsSync("session.txt")) return void 0;
+  const content = fs.readFileSync("session.txt", "utf-8").trim();
+  return content || void 0;
+}
+function writeSession(sessionId) {
+  fs.writeFileSync("session.txt", sessionId);
+}
 
 // src/agentOptions.ts
 function readEnv(name) {
@@ -161,10 +169,12 @@ function makeAgentOptions(options = {}) {
   if (!ghToken) {
     throw new Error("GitHub token is required. Set GH_TOKEN or pass ghToken.");
   }
+  const sessionId = options.sessionId ?? readSession();
   return {
     ...options,
     apiBase,
     apiKey,
+    sessionId,
     log,
     depth,
     minWidth,
@@ -1656,6 +1666,8 @@ async function specMcp(state, log, sessionId, spec) {
     );
     retry += 1;
   }
+  state.anyStepRan = true;
+  if (sessionId) writeSession(sessionId);
   return sessionId;
 }
 function readName() {
@@ -1746,7 +1758,8 @@ function makeToolState(options) {
     hasReadOrWrittenEssay: false,
     hasReadOrWrittenEssayTasks: false,
     hasReadOrWrittenPlan: false,
-    hasReadExampleFunctions: false
+    hasReadExampleFunctions: false,
+    anyStepRan: false
   };
 }
 
@@ -1813,6 +1826,8 @@ async function nameMcp(state, log, sessionId, name) {
     );
     retry += 1;
   }
+  state.anyStepRan = true;
+  if (sessionId) writeSession(sessionId);
   return sessionId;
 }
 function makeReadEssay(state) {
@@ -1891,6 +1906,8 @@ async function essayMcp(state, log, sessionId) {
     );
     retry += 1;
   }
+  state.anyStepRan = true;
+  if (sessionId) writeSession(sessionId);
   return sessionId;
 }
 function makeReadEssayTasks(state) {
@@ -1977,21 +1994,55 @@ async function essayTasksMcp(state, log, sessionId) {
     );
     retry += 1;
   }
+  state.anyStepRan = true;
+  if (sessionId) writeSession(sessionId);
   return sessionId;
 }
 
 // src/claude/prepare/index.ts
+async function runStep(state, log, sessionId, fn) {
+  try {
+    return await fn(sessionId);
+  } catch (e) {
+    if (!state.anyStepRan) {
+      log("Session may be invalid, retrying without session...");
+      return await fn(void 0);
+    } else {
+      throw e;
+    }
+  }
+}
 async function prepare(state, options) {
   const log = options.log;
   let sessionId = options.sessionId;
   log("=== Step 1: SPEC.md ===");
-  sessionId = await specMcp(state, log, sessionId, options.spec);
+  sessionId = await runStep(
+    state,
+    log,
+    sessionId,
+    (sid) => specMcp(state, log, sid, options.spec)
+  );
   log("=== Step 2: name.txt ===");
-  sessionId = await nameMcp(state, log, sessionId, options.name);
+  sessionId = await runStep(
+    state,
+    log,
+    sessionId,
+    (sid) => nameMcp(state, log, sid, options.name)
+  );
   log("=== Step 3: ESSAY.md ===");
-  sessionId = await essayMcp(state, log, sessionId);
+  sessionId = await runStep(
+    state,
+    log,
+    sessionId,
+    (sid) => essayMcp(state, log, sid)
+  );
   log("=== Step 4: ESSAY_TASKS.md ===");
-  sessionId = await essayTasksMcp(state, log, sessionId);
+  sessionId = await runStep(
+    state,
+    log,
+    sessionId,
+    (sid) => essayTasksMcp(state, log, sid)
+  );
   return sessionId;
 }
 
@@ -3070,7 +3121,7 @@ function ensureGitHubRepo(name, description, ghToken) {
     child_process.execSync("git push", { stdio: "inherit", env: ghEnv2(ghToken) });
   }
 }
-async function submit(message, apiBase, apiKey, git) {
+async function submit(message, apiBase, apiKey, git, sessionId) {
   const profileBuild = buildProfile();
   if (!profileBuild.ok) {
     return {
@@ -3140,6 +3191,7 @@ Use the EditDescription tool to fix it.`
     };
   }
   const name = nameResult.value.trim();
+  if (sessionId) writeSession(sessionId);
   child_process.execSync("git add -A", { stdio: "pipe" });
   try {
     child_process.execSync("git diff --cached --quiet", { stdio: "pipe" });
@@ -4182,6 +4234,8 @@ ${instructions}`;
     log,
     sessionId
   );
+  state.anyStepRan = true;
+  if (sessionId) writeSession(sessionId);
   return sessionId;
 }
 function ghEnv3(ghToken) {
@@ -4844,7 +4898,7 @@ Please try again. Remember to:
 2. Use Submit to validate, commit, and push
 `;
     }
-    sessionId = await consumeStream(
+    const runQuery = (sid) => consumeStream(
       claudeAgentSdk.query({
         prompt,
         options: {
@@ -4853,12 +4907,23 @@ Please try again. Remember to:
           allowedTools: ["mcp__invent__*"],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
-          resume: sessionId
+          resume: sid
         }
       }),
       log,
-      sessionId
+      sid
     );
+    try {
+      sessionId = await runQuery(sessionId);
+    } catch (e) {
+      if (!state.anyStepRan) {
+        log("Session may be invalid, retrying without session...");
+        sessionId = await runQuery(void 0);
+      } else {
+        throw e;
+      }
+    }
+    state.anyStepRan = true;
     log("Running submit...");
     lastFailureReasons = [];
     const submitResult = await submit(
@@ -4868,7 +4933,8 @@ Please try again. Remember to:
       {
         userName: state.gitUserName,
         userEmail: state.gitUserEmail
-      }
+      },
+      sessionId
     );
     if (submitResult.ok) {
       success = true;
@@ -4888,7 +4954,17 @@ async function inventMcp(state, options) {
   const depth = options.depth;
   const useFunctionTasks = depth > 0;
   log("=== Plan ===");
-  const sessionId = await planMcp(state, log, depth, options.sessionId, options.instructions);
+  let sessionId;
+  try {
+    sessionId = await planMcp(state, log, depth, options.sessionId, options.instructions);
+  } catch (e) {
+    if (!state.anyStepRan) {
+      log("Session may be invalid, retrying without session...");
+      sessionId = await planMcp(state, log, depth, void 0, options.instructions);
+    } else {
+      throw e;
+    }
+  }
   log(`=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
   await inventLoop(state, log, useFunctionTasks, sessionId);
   log("=== ObjectiveAI Function invention complete ===");

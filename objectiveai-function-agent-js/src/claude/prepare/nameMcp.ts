@@ -11,6 +11,7 @@ import {
 } from "../../tools/claude/exampleFunctions";
 import { makeReadFunctionSchema } from "../../tools/claude/function";
 import { ToolState, formatReadList } from "../../tools/claude/toolState";
+import { writeSession } from "../../tools/session";
 
 function nameIsNonEmpty(): boolean {
   return (
@@ -98,5 +99,7 @@ export async function nameMcp(
     retry += 1;
   }
 
+  state.anyStepRan = true;
+  if (sessionId) writeSession(sessionId);
   return sessionId;
 }
