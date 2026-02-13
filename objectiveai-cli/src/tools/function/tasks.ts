@@ -98,6 +98,25 @@ export function appendTask(value: unknown): Result<string> {
     };
   }
 
+  // map is only allowed on scalar.function tasks inside a vector.function
+  const task = value as Record<string, unknown> | null;
+  if (task && typeof task === "object" && "map" in task) {
+    if (fn.value.type !== "vector.function") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `Task "map" is only allowed when the function type is "vector.function" (current type: "${fn.value.type}").`,
+      };
+    }
+    if (task.type !== "scalar.function") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `Task "map" is only allowed on "scalar.function" tasks (this task type: "${task.type}").`,
+      };
+    }
+  }
+
   const existing = Array.isArray(fn.value.tasks) ? fn.value.tasks : [];
   const newTasks = [...existing, value];
 

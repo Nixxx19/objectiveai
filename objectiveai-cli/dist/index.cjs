@@ -1247,6 +1247,23 @@ function appendTask(value) {
       error: `Unable to append task: ${fn.error}`
     };
   }
+  const task = value;
+  if (task && typeof task === "object" && "map" in task) {
+    if (fn.value.type !== "vector.function") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `Task "map" is only allowed when the function type is "vector.function" (current type: "${fn.value.type}").`
+      };
+    }
+    if (task.type !== "scalar.function") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `Task "map" is only allowed on "scalar.function" tasks (this task type: "${task.type}").`
+      };
+    }
+  }
   const existing = Array.isArray(fn.value.tasks) ? fn.value.tasks : [];
   const newTasks = [...existing, value];
   const result = validateTasks({ tasks: newTasks });
