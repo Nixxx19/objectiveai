@@ -12,6 +12,8 @@ mod client;
 pub mod completion_votes_fetcher;
 mod error;
 mod get_vote;
+/// Multimodal mutations for embedding response keys into content.
+pub mod mutations;
 mod pfx;
 mod response_key;
 /// Usage tracking for vector completions.
