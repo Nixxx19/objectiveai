@@ -3402,7 +3402,7 @@ function ensureGitHubRepo(name, description, ghToken) {
         );
       }
     }
-    execSync("git push", { stdio: "inherit", env: ghEnv2(ghToken) });
+    execSync("git push", { stdio: "pipe", env: ghEnv2(ghToken) });
   }
 }
 async function submit(message, apiBase, apiKey, git, sessionId) {
@@ -3486,7 +3486,7 @@ Use the EditDescription tool to fix it.`
       ...git?.userEmail && { GIT_AUTHOR_EMAIL: git.userEmail, GIT_COMMITTER_EMAIL: git.userEmail }
     };
     execSync(`git commit -m "${message.replace(/"/g, '\\"')}"`, {
-      stdio: "inherit",
+      stdio: "pipe",
       env: commitEnv
     });
   }
