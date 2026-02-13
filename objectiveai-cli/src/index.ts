@@ -7,13 +7,15 @@ export * from "./logging";
 export * from "./spawnFunctionAgentsParams";
 
 import type { AgentOptions } from "./agentOptions";
+import { resolveAgentUpstream } from "./agentOptions";
 import * as ClaudeModule from "./claude";
+import { dryrun } from "./claude/dryrun";
 
 export async function invent(
   partialOptions: Partial<AgentOptions> = {},
 ): Promise<void> {
   const { agentUpstream } = partialOptions as any;
-  const resolvedUpstream = agentUpstream ?? "claude";
+  const resolvedUpstream = resolveAgentUpstream(agentUpstream).value;
 
   if (resolvedUpstream === "claude") {
     return ClaudeModule.invent(partialOptions);
@@ -25,7 +27,7 @@ export async function amend(
   partialOptions: Partial<AgentOptions> = {},
 ): Promise<void> {
   const { agentUpstream } = partialOptions as any;
-  const resolvedUpstream = agentUpstream ?? "claude";
+  const resolvedUpstream = resolveAgentUpstream(agentUpstream).value;
 
   if (resolvedUpstream === "claude") {
     return ClaudeModule.amend(partialOptions);
@@ -33,14 +35,4 @@ export async function amend(
   throw new Error(`Unknown agent upstream: ${resolvedUpstream}`);
 }
 
-export async function dryrun(
-  partialOptions: Partial<AgentOptions> = {},
-): Promise<void> {
-  const { agentUpstream } = partialOptions as any;
-  const resolvedUpstream = agentUpstream ?? "claude";
-
-  if (resolvedUpstream === "claude") {
-    return ClaudeModule.dryrun();
-  }
-  throw new Error(`Unknown agent upstream: ${resolvedUpstream}`);
-}
+export { dryrun };
