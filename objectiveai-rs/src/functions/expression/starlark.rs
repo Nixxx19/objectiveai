@@ -683,11 +683,23 @@ impl FromStarlarkValue for crate::chat::completions::request::FunctionToolExpres
         let name = dict_get(&dict, "name").ok_or_else(|| ExpressionError::StarlarkConversionError("expected name".to_string()))?;
         let name = String::from_starlark_value(&name)?;
         let description = dict_get(&dict, "description").and_then(|v| Option::<String>::from_starlark_value(&v).ok()).map(super::WithExpression::Value);
+        let parameters = dict_get(&dict, "parameters")
+            .map(|v| {
+                if v.is_none() {
+                    Ok(super::WithExpression::Value(None))
+                } else {
+                    indexmap::IndexMap::<String, super::WithExpression<crate::chat::completions::request::ValueExpression>>::from_starlark_value(&v)
+                        .map(|m| super::WithExpression::Value(Some(m)))
+                }
+            })
+            .transpose()
+            .ok()
+            .flatten();
         let strict = dict_get(&dict, "strict").and_then(|v| Option::<bool>::from_starlark_value(&v).ok()).map(super::WithExpression::Value);
         Ok(crate::chat::completions::request::FunctionToolExpression {
             name: super::WithExpression::Value(name),
             description,
-            parameters: None,
+            parameters,
             strict,
         })
     }
