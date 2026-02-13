@@ -756,10 +756,16 @@ impl FromStarlarkValue for crate::chat::completions::request::MessageExpression 
             "user" => {
                 let content = dict_get(&dict, "content").ok_or_else(|| ExpressionError::StarlarkConversionError("expected content".to_string()))?;
                 let content = crate::chat::completions::request::RichContentExpression::from_starlark_value(&content)?;
+                let name = dict_get(&dict, "name")
+                    .map(|v| Option::<String>::from_starlark_value(&v))
+                    .transpose()
+                    .ok()
+                    .flatten()
+                    .map(super::WithExpression::Value);
                 Ok(crate::chat::completions::request::MessageExpression::User(
                     crate::chat::completions::request::UserMessageExpression {
                         content: super::WithExpression::Value(content),
-                        name: None,
+                        name,
                     },
                 ))
             }
