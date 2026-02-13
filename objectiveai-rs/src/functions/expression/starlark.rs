@@ -528,9 +528,17 @@ impl FromStarlarkValue for crate::chat::completions::request::ImageUrl {
         let url = dict_get(&dict, "url")
             .ok_or_else(|| ExpressionError::StarlarkConversionError("expected url".to_string()))?;
         let url = String::from_starlark_value(&url)?;
+        let detail = dict_get(&dict, "detail")
+            .and_then(|v| <&str as UnpackValue>::unpack_value(v).ok().flatten())
+            .and_then(|s| match s {
+                "auto" => Some(crate::chat::completions::request::ImageUrlDetail::Auto),
+                "low" => Some(crate::chat::completions::request::ImageUrlDetail::Low),
+                "high" => Some(crate::chat::completions::request::ImageUrlDetail::High),
+                _ => None,
+            });
         Ok(crate::chat::completions::request::ImageUrl {
             url,
-            detail: None,
+            detail,
         })
     }
 }
