@@ -3,7 +3,6 @@
 //! Provides a sandboxed Starlark runtime for evaluating expressions.
 //! Variables `input`, `output`, and `map` are injected into the global scope.
 
-use serde::de::DeserializeOwned;
 use serde_json::{Map as JsonMap, Number as JsonNumber, Value};
 use starlark::environment::{Globals, GlobalsBuilder, Module};
 use starlark::eval::Evaluator;
@@ -212,192 +211,694 @@ impl<'a> ToStarlarkValue for super::TaskOutput<'a> {
 
 /// Trait for converting a Starlark runtime value into a Rust type.
 ///
-/// This is used by [`Expression`](super::Expression) to compile Starlark
-/// expressions directly from `starlark::values::Value` without going through
-/// an intermediate `serde_json::Value`.
+/// Used by [`Expression`](super::Expression) to compile Starlark expressions
+/// directly from `starlark::values::Value` to the target type.
 pub trait FromStarlarkValue: Sized {
     fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError>;
 }
 
-impl<T> FromStarlarkValue for T
-where
-    T: DeserializeOwned,
-{
+// Primitives and common types
+impl FromStarlarkValue for bool {
     fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
-        let json = starlark_value_to_json(value)?;
-        let v = serde_json::from_value(json)
-            .map_err(ExpressionError::DeserializationError)?;
-        Ok(v)
+        bool::unpack_value(*value)
+            .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))
+            .and_then(|o| o.ok_or_else(|| ExpressionError::StarlarkConversionError("expected bool".to_string())))
     }
 }
 
-/// Convert a Starlark value to `serde_json::Value` without using `to_json_value`.
-fn starlark_value_to_json(value: &SValue) -> Result<Value, ExpressionError> {
-    // None -> null
+impl FromStarlarkValue for i64 {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        i64::unpack_value(*value)
+            .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))
+            .and_then(|o| o.ok_or_else(|| ExpressionError::StarlarkConversionError("expected int".to_string())))
+    }
+}
+
+impl FromStarlarkValue for u64 {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let i = i64::unpack_value(*value)
+            .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected int".to_string()))?;
+        if i < 0 {
+            return Err(ExpressionError::StarlarkConversionError("expected non-negative int".to_string()));
+        }
+        Ok(i as u64)
+    }
+}
+
+impl FromStarlarkValue for f64 {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        if let Ok(Some(i)) = i64::unpack_value(*value) {
+            return Ok(i as f64);
+        }
+        UnpackFloat::unpack_value(*value)
+            .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))
+            .and_then(|o| o.ok_or_else(|| ExpressionError::StarlarkConversionError("expected number".to_string())))
+            .map(|u| u.0)
+    }
+}
+
+impl FromStarlarkValue for String {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        <&str as UnpackValue>::unpack_value(*value)
+            .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?
+            .map(|s| s.to_owned())
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected string".to_string()))
+    }
+}
+
+impl<T: FromStarlarkValue> FromStarlarkValue for Option<T> {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        if value.is_none() {
+            return Ok(None);
+        }
+        T::from_starlark_value(value).map(Some)
+    }
+}
+
+impl<T: FromStarlarkValue> FromStarlarkValue for Vec<T> {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let list = ListRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected list".to_string()))?;
+        let mut out = Vec::with_capacity(list.len());
+        for v in list.iter() {
+            out.push(T::from_starlark_value(&v)?);
+        }
+        Ok(out)
+    }
+}
+
+impl<T: FromStarlarkValue> FromStarlarkValue for super::WithExpression<T> {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        T::from_starlark_value(value).map(super::WithExpression::Value)
+    }
+}
+
+impl<V: FromStarlarkValue> FromStarlarkValue for indexmap::IndexMap<String, V> {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let mut map = indexmap::IndexMap::new();
+        for (k, v) in dict.iter() {
+            let key = <&str as UnpackValue>::unpack_value(k)
+                .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?
+                .ok_or_else(|| ExpressionError::StarlarkConversionError("expected string key".to_string()))?
+                .to_owned();
+            map.insert(key, V::from_starlark_value(&v)?);
+        }
+        Ok(map)
+    }
+}
+
+fn dict_get<'v>(dict: &DictRef<'v>, key: &str) -> Option<SValue<'v>> {
+    for (k, v) in dict.iter() {
+        if let Ok(Some(s)) = <&str as UnpackValue>::unpack_value(k) {
+            if s == key {
+                return Some(v);
+            }
+        }
+    }
+    None
+}
+
+fn svalue_to_serde_value(value: &SValue) -> Result<Value, ExpressionError> {
     if value.is_none() {
         return Ok(Value::Null);
     }
-
-    // Booleans
     if let Ok(Some(b)) = bool::unpack_value(*value) {
         return Ok(Value::Bool(b));
     }
-
-    // Integers (prefer i64, fall back to f64 for non-integral numbers)
     if let Ok(Some(i)) = i64::unpack_value(*value) {
         return Ok(Value::Number(JsonNumber::from(i)));
     }
-
-    // Floats
     if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(*value) {
-        let n = JsonNumber::from_f64(f).ok_or_else(|| {
-            ExpressionError::StarlarkConversionError(
-                "cannot represent float as JSON number".to_string(),
-            )
-        })?;
-        return Ok(Value::Number(n));
+        if let Some(n) = JsonNumber::from_f64(f) {
+            return Ok(Value::Number(n));
+        }
     }
-
-    // Strings
     if let Ok(Some(s)) = <&str as UnpackValue>::unpack_value(*value) {
         return Ok(Value::String(s.to_owned()));
     }
-
-    // Lists / arrays
     if let Some(list) = ListRef::from_value(*value) {
         let mut items = Vec::with_capacity(list.len());
         for v in list.iter() {
-            items.push(starlark_value_to_json(&v)?);
+            items.push(svalue_to_serde_value(&v)?);
         }
         return Ok(Value::Array(items));
     }
-
-    // Dicts / objects
     if let Some(dict) = DictRef::from_value(*value) {
         let mut obj = JsonMap::with_capacity(dict.len());
         for (k, v) in dict.iter() {
-            // We only support string keys here, which matches how we construct
-            // objects when injecting inputs into the Starlark heap.
             let key = <&str as UnpackValue>::unpack_value(k)
-                .map_err(|e| {
-                    ExpressionError::StarlarkConversionError(e.to_string())
-                })?
-                .ok_or_else(|| {
-                    ExpressionError::StarlarkConversionError(
-                        "expected string key in Starlark dict".to_string(),
-                    )
-                })?;
-            obj.insert(key.to_owned(), starlark_value_to_json(&v)?);
+                .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?
+                .ok_or_else(|| ExpressionError::StarlarkConversionError("expected string key".to_string()))?;
+            obj.insert(key.to_owned(), svalue_to_serde_value(&v)?);
         }
         return Ok(Value::Object(obj));
     }
-
     Err(ExpressionError::StarlarkConversionError(format!(
-        "unsupported Starlark value type: {}",
+        "unsupported type: {}",
         value.get_type()
     )))
 }
 
-/// Evaluate a Starlark expression with the given parameters.
-pub fn starlark_eval(
+impl FromStarlarkValue for super::Input {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        if value.is_none() {
+            return Err(ExpressionError::StarlarkConversionError("expected value".to_string()));
+        }
+        if let Ok(Some(b)) = bool::unpack_value(*value) {
+            return Ok(super::Input::Boolean(b));
+        }
+        if let Ok(Some(i)) = i64::unpack_value(*value) {
+            return Ok(super::Input::Integer(i));
+        }
+        if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(*value) {
+            return Ok(super::Input::Number(f));
+        }
+        if let Ok(Some(s)) = <&str as UnpackValue>::unpack_value(*value) {
+            return Ok(super::Input::String(s.to_owned()));
+        }
+        if let Some(list) = ListRef::from_value(*value) {
+            let items = list.iter().map(|v| super::Input::from_starlark_value(&v)).collect::<Result<Vec<_>, _>>()?;
+            return Ok(super::Input::Array(items));
+        }
+        if let Some(dict) = DictRef::from_value(*value) {
+            let mut map = indexmap::IndexMap::new();
+            for (k, v) in dict.iter() {
+                let key = <&str as UnpackValue>::unpack_value(k)
+                    .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?
+                    .ok_or_else(|| ExpressionError::StarlarkConversionError("expected string key".to_string()))?
+                    .to_owned();
+                map.insert(key, super::Input::from_starlark_value(&v)?);
+            }
+            return Ok(super::Input::Object(map));
+        }
+        Err(ExpressionError::StarlarkConversionError(format!(
+            "unsupported type: {}",
+            value.get_type()
+        )))
+    }
+}
+
+impl FromStarlarkValue for super::input::InputExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        if value.is_none() {
+            return Err(ExpressionError::StarlarkConversionError("expected value".to_string()));
+        }
+        if let Ok(Some(b)) = bool::unpack_value(*value) {
+            return Ok(super::input::InputExpression::Boolean(b));
+        }
+        if let Ok(Some(i)) = i64::unpack_value(*value) {
+            return Ok(super::input::InputExpression::Integer(i));
+        }
+        if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(*value) {
+            return Ok(super::input::InputExpression::Number(f));
+        }
+        if let Ok(Some(s)) = <&str as UnpackValue>::unpack_value(*value) {
+            return Ok(super::input::InputExpression::String(s.to_owned()));
+        }
+        if let Some(list) = ListRef::from_value(*value) {
+            let items = list.iter()
+                .map(|v| super::input::InputExpression::from_starlark_value(&v))
+                .map(|r| r.map(super::WithExpression::Value))
+                .collect::<Result<Vec<_>, _>>()?;
+            return Ok(super::input::InputExpression::Array(items));
+        }
+        if let Some(dict) = DictRef::from_value(*value) {
+            let mut map = indexmap::IndexMap::new();
+            for (k, v) in dict.iter() {
+                let key = <&str as UnpackValue>::unpack_value(k)
+                    .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?
+                    .ok_or_else(|| ExpressionError::StarlarkConversionError("expected string key".to_string()))?
+                    .to_owned();
+                let val = super::input::InputExpression::from_starlark_value(&v)?;
+                map.insert(key, super::WithExpression::Value(val));
+            }
+            return Ok(super::input::InputExpression::Object(map));
+        }
+        Err(ExpressionError::StarlarkConversionError(format!(
+            "unsupported type: {}",
+            value.get_type()
+        )))
+    }
+}
+
+impl FromStarlarkValue for super::params::FunctionOutput {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        if value.is_none() {
+            return Err(ExpressionError::StarlarkConversionError("expected value".to_string()));
+        }
+        if let Some(list) = ListRef::from_value(*value) {
+            let mut decimals = Vec::with_capacity(list.len());
+            for v in list.iter() {
+                let f = f64::from_starlark_value(&v)?;
+                decimals.push(rust_decimal::Decimal::from_f64_retain(f).unwrap_or(rust_decimal::Decimal::ZERO));
+            }
+            return Ok(super::params::FunctionOutput::Vector(decimals));
+        }
+        if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(*value) {
+            let d = rust_decimal::Decimal::from_f64_retain(f).unwrap_or(rust_decimal::Decimal::ZERO);
+            return Ok(super::params::FunctionOutput::Scalar(d));
+        }
+        if let Ok(Some(i)) = i64::unpack_value(*value) {
+            let d = rust_decimal::Decimal::from(i);
+            return Ok(super::params::FunctionOutput::Scalar(d));
+        }
+        let v = svalue_to_serde_value(value)?;
+        Ok(super::params::FunctionOutput::Err(v))
+    }
+}
+
+// Chat/completions/request types (message.rs, tool.rs)
+impl FromStarlarkValue for crate::chat::completions::request::SimpleContentExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        if let Ok(Some(s)) = <&str as UnpackValue>::unpack_value(*value) {
+            return Ok(crate::chat::completions::request::SimpleContentExpression::Text(s.to_owned()));
+        }
+        if let Some(list) = ListRef::from_value(*value) {
+            let parts = list.iter()
+                .map(|v| crate::chat::completions::request::SimpleContentPartExpression::from_starlark_value(&v))
+                .map(|r| r.map(super::WithExpression::Value))
+                .collect::<Result<Vec<_>, _>>()?;
+            return Ok(crate::chat::completions::request::SimpleContentExpression::Parts(parts));
+        }
+        Err(ExpressionError::StarlarkConversionError("expected string or list".to_string()))
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::RichContentExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        if let Ok(Some(s)) = <&str as UnpackValue>::unpack_value(*value) {
+            return Ok(crate::chat::completions::request::RichContentExpression::Text(s.to_owned()));
+        }
+        if let Some(list) = ListRef::from_value(*value) {
+            let parts = list.iter()
+                .map(|v| crate::chat::completions::request::RichContentPartExpression::from_starlark_value(&v))
+                .map(|r| r.map(super::WithExpression::Value))
+                .collect::<Result<Vec<_>, _>>()?;
+            return Ok(crate::chat::completions::request::RichContentExpression::Parts(parts));
+        }
+        Err(ExpressionError::StarlarkConversionError("expected string or list".to_string()))
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::SimpleContentPartExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let typ = dict_get(&dict, "type")
+            .and_then(|v| <&str as UnpackValue>::unpack_value(v).ok().flatten())
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected type field".to_string()))?;
+        if typ == "text" {
+            let text = dict_get(&dict, "text")
+                .ok_or_else(|| ExpressionError::StarlarkConversionError("expected text".to_string()))?;
+            let s = String::from_starlark_value(&text)?;
+            return Ok(crate::chat::completions::request::SimpleContentPartExpression::Text {
+                text: super::WithExpression::Value(s),
+            });
+        }
+        Err(ExpressionError::StarlarkConversionError("expected text part".to_string()))
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::ImageUrl {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let url = dict_get(&dict, "url")
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected url".to_string()))?;
+        let url = String::from_starlark_value(&url)?;
+        Ok(crate::chat::completions::request::ImageUrl {
+            url,
+            detail: None,
+        })
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::InputAudio {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let data = dict_get(&dict, "data").and_then(|v| String::from_starlark_value(&v).ok()).unwrap_or_default();
+        let format = dict_get(&dict, "format").and_then(|v| String::from_starlark_value(&v).ok()).unwrap_or_default();
+        Ok(crate::chat::completions::request::InputAudio { data, format })
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::VideoUrl {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let url = dict_get(&dict, "url")
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected url".to_string()))?;
+        Ok(crate::chat::completions::request::VideoUrl {
+            url: String::from_starlark_value(&url)?,
+        })
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::File {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let file_data = dict_get(&dict, "file_data").and_then(|v| Option::<String>::from_starlark_value(&v).ok()).flatten();
+        let file_id = dict_get(&dict, "file_id").and_then(|v| Option::<String>::from_starlark_value(&v).ok()).flatten();
+        let filename = dict_get(&dict, "filename").and_then(|v| Option::<String>::from_starlark_value(&v).ok()).flatten();
+        let filename = dict_get(&dict, "filename").and_then(|v| Option::<String>::from_starlark_value(&v).ok()).flatten();
+        let file_url = dict_get(&dict, "file_url").and_then(|v| Option::<String>::from_starlark_value(&v).ok()).flatten();
+        Ok(crate::chat::completions::request::File {
+            file_data,
+            file_id,
+            filename,
+            file_url,
+        })
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::RichContentPartExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let typ = dict_get(&dict, "type")
+            .and_then(|v| <&str as UnpackValue>::unpack_value(v).ok().flatten())
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected type field".to_string()))?;
+        match typ {
+            "text" => {
+                let text = dict_get(&dict, "text").ok_or_else(|| ExpressionError::StarlarkConversionError("expected text".to_string()))?;
+                Ok(crate::chat::completions::request::RichContentPartExpression::Text {
+                    text: super::WithExpression::Value(String::from_starlark_value(&text)?),
+                })
+            }
+            "image_url" => {
+                let image_url = dict_get(&dict, "image_url").ok_or_else(|| ExpressionError::StarlarkConversionError("expected image_url".to_string()))?;
+                Ok(crate::chat::completions::request::RichContentPartExpression::ImageUrl {
+                    image_url: super::WithExpression::Value(crate::chat::completions::request::ImageUrl::from_starlark_value(&image_url)?),
+                })
+            }
+            "input_audio" => {
+                let input_audio = dict_get(&dict, "input_audio").ok_or_else(|| ExpressionError::StarlarkConversionError("expected input_audio".to_string()))?;
+                Ok(crate::chat::completions::request::RichContentPartExpression::InputAudio {
+                    input_audio: super::WithExpression::Value(crate::chat::completions::request::InputAudio::from_starlark_value(&input_audio)?),
+                })
+            }
+            "input_video" | "video_url" => {
+                let key = if typ == "input_video" { "video_url" } else { "video_url" };
+                let video_url = dict_get(&dict, key).ok_or_else(|| ExpressionError::StarlarkConversionError("expected video_url".to_string()))?;
+                let v = crate::chat::completions::request::VideoUrl::from_starlark_value(&video_url)?;
+                if typ == "input_video" {
+                    Ok(crate::chat::completions::request::RichContentPartExpression::InputVideo {
+                        video_url: super::WithExpression::Value(v),
+                    })
+                } else {
+                    Ok(crate::chat::completions::request::RichContentPartExpression::VideoUrl {
+                        video_url: super::WithExpression::Value(v),
+                    })
+                }
+            }
+            "file" => {
+                let file = dict_get(&dict, "file").ok_or_else(|| ExpressionError::StarlarkConversionError("expected file".to_string()))?;
+                Ok(crate::chat::completions::request::RichContentPartExpression::File {
+                    file: super::WithExpression::Value(crate::chat::completions::request::File::from_starlark_value(&file)?),
+                })
+            }
+            _ => Err(ExpressionError::StarlarkConversionError(format!("unknown part type: {}", typ))),
+        }
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::ValueExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        if value.is_none() {
+            return Ok(crate::chat::completions::request::ValueExpression::Null);
+        }
+        if let Ok(Some(b)) = bool::unpack_value(*value) {
+            return Ok(crate::chat::completions::request::ValueExpression::Bool(b));
+        }
+        if let Ok(Some(i)) = i64::unpack_value(*value) {
+            return Ok(crate::chat::completions::request::ValueExpression::Number(JsonNumber::from(i)));
+        }
+        if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(*value) {
+            if let Some(n) = JsonNumber::from_f64(f) {
+                return Ok(crate::chat::completions::request::ValueExpression::Number(n));
+            }
+        }
+        if let Ok(Some(s)) = <&str as UnpackValue>::unpack_value(*value) {
+            return Ok(crate::chat::completions::request::ValueExpression::String(s.to_owned()));
+        }
+        if let Some(list) = ListRef::from_value(*value) {
+            let arr = list.iter()
+                .map(|v| crate::chat::completions::request::ValueExpression::from_starlark_value(&v))
+                .map(|r| r.map(super::WithExpression::Value))
+                .collect::<Result<Vec<_>, _>>()?;
+            return Ok(crate::chat::completions::request::ValueExpression::Array(arr));
+        }
+        if let Some(dict) = DictRef::from_value(*value) {
+            let mut map = indexmap::IndexMap::new();
+            for (k, v) in dict.iter() {
+                let key = <&str as UnpackValue>::unpack_value(k)
+                    .map_err(|e| ExpressionError::StarlarkConversionError(e.to_string()))?
+                    .ok_or_else(|| ExpressionError::StarlarkConversionError("expected string key".to_string()))?
+                    .to_owned();
+                let val = crate::chat::completions::request::ValueExpression::from_starlark_value(&v)?;
+                map.insert(key, super::WithExpression::Value(val));
+            }
+            return Ok(crate::chat::completions::request::ValueExpression::Object(map));
+        }
+        Err(ExpressionError::StarlarkConversionError("unsupported value type".to_string()))
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::FunctionToolExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let name = dict_get(&dict, "name").ok_or_else(|| ExpressionError::StarlarkConversionError("expected name".to_string()))?;
+        let name = String::from_starlark_value(&name)?;
+        let description = dict_get(&dict, "description").and_then(|v| Option::<String>::from_starlark_value(&v).ok()).map(super::WithExpression::Value);
+        let strict = dict_get(&dict, "strict").and_then(|v| Option::<bool>::from_starlark_value(&v).ok()).map(super::WithExpression::Value);
+        Ok(crate::chat::completions::request::FunctionToolExpression {
+            name: super::WithExpression::Value(name),
+            description,
+            parameters: None,
+            strict,
+        })
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::AssistantToolCallFunctionExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let name = dict_get(&dict, "name").ok_or_else(|| ExpressionError::StarlarkConversionError("expected name".to_string()))?;
+        let name = String::from_starlark_value(&name)?;
+        let arguments = dict_get(&dict, "arguments").and_then(|v| String::from_starlark_value(&v).ok()).unwrap_or_else(|| "{}".to_string());
+        Ok(crate::chat::completions::request::AssistantToolCallFunctionExpression {
+            name: super::WithExpression::Value(name),
+            arguments: super::WithExpression::Value(arguments),
+        })
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::AssistantToolCallExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let id = dict_get(&dict, "id").and_then(|v| String::from_starlark_value(&v).ok()).unwrap_or_default();
+        let function = dict_get(&dict, "function").ok_or_else(|| ExpressionError::StarlarkConversionError("expected function".to_string()))?;
+        let function = crate::chat::completions::request::AssistantToolCallFunctionExpression::from_starlark_value(&function)?;
+        Ok(crate::chat::completions::request::AssistantToolCallExpression::Function {
+            id: super::WithExpression::Value(id),
+            function: super::WithExpression::Value(function),
+        })
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::ToolExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let function = dict_get(&dict, "function").ok_or_else(|| ExpressionError::StarlarkConversionError("expected function".to_string()))?;
+        let function = crate::chat::completions::request::FunctionToolExpression::from_starlark_value(&function)?;
+        Ok(crate::chat::completions::request::ToolExpression::Function {
+            function: super::WithExpression::Value(function),
+        })
+    }
+}
+
+impl FromStarlarkValue for crate::chat::completions::request::MessageExpression {
+    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+        let dict = DictRef::from_value(*value)
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected dict".to_string()))?;
+        let role = dict_get(&dict, "role")
+            .and_then(|v| <&str as UnpackValue>::unpack_value(v).ok().flatten())
+            .ok_or_else(|| ExpressionError::StarlarkConversionError("expected role".to_string()))?;
+        match role {
+            "user" => {
+                let content = dict_get(&dict, "content").ok_or_else(|| ExpressionError::StarlarkConversionError("expected content".to_string()))?;
+                let content = crate::chat::completions::request::RichContentExpression::from_starlark_value(&content)?;
+                Ok(crate::chat::completions::request::MessageExpression::User(
+                    crate::chat::completions::request::UserMessageExpression {
+                        content: super::WithExpression::Value(content),
+                        name: None,
+                    },
+                ))
+            }
+            "system" => {
+                let content = dict_get(&dict, "content").ok_or_else(|| ExpressionError::StarlarkConversionError("expected content".to_string()))?;
+                let content = crate::chat::completions::request::SimpleContentExpression::from_starlark_value(&content)?;
+                Ok(crate::chat::completions::request::MessageExpression::System(
+                    crate::chat::completions::request::SystemMessageExpression {
+                        content: super::WithExpression::Value(content),
+                        name: None,
+                    },
+                ))
+            }
+            "assistant" => {
+                let content = dict_get(&dict, "content")
+                    .map(|v| Option::<crate::chat::completions::request::RichContentExpression>::from_starlark_value(&v))
+                    .transpose()
+                    .ok()
+                    .flatten()
+                    .map(super::WithExpression::Value);
+                Ok(crate::chat::completions::request::MessageExpression::Assistant(
+                    crate::chat::completions::request::AssistantMessageExpression {
+                        content,
+                        name: None,
+                        tool_calls: None,
+                        reasoning: None,
+                        refusal: None,
+                    },
+                ))
+            }
+            "tool" => {
+                let tool_call_id = dict_get(&dict, "tool_call_id").and_then(|v| String::from_starlark_value(&v).ok()).unwrap_or_default();
+                let content = dict_get(&dict, "content").ok_or_else(|| ExpressionError::StarlarkConversionError("expected content".to_string()))?;
+                let content = crate::chat::completions::request::RichContentExpression::from_starlark_value(&content)?;
+                Ok(crate::chat::completions::request::MessageExpression::Tool(
+                    crate::chat::completions::request::ToolMessageExpression {
+                        tool_call_id: super::WithExpression::Value(tool_call_id),
+                        content: super::WithExpression::Value(content),
+                    },
+                ))
+            }
+            "developer" => {
+                let content = dict_get(&dict, "content").ok_or_else(|| ExpressionError::StarlarkConversionError("expected content".to_string()))?;
+                let content = crate::chat::completions::request::SimpleContentExpression::from_starlark_value(&content)?;
+                Ok(crate::chat::completions::request::MessageExpression::Developer(
+                    crate::chat::completions::request::DeveloperMessageExpression {
+                        content: super::WithExpression::Value(content),
+                        name: None,
+                    },
+                ))
+            }
+            _ => Err(ExpressionError::StarlarkConversionError(format!("unknown role: {}", role))),
+        }
+    }
+}
+
+/// Run a Starlark expression and pass the result (while still valid) to `f`.
+fn with_eval_result<F, R>(
     code: &str,
     params: &super::Params,
-) -> Result<Value, ExpressionError> {
-    // Create module and inject variables directly (no JSON intermediate)
+    f: F,
+) -> Result<R, ExpressionError>
+where
+    F: FnOnce(&SValue) -> Result<R, ExpressionError>,
+{
     let module = Module::new();
     {
         let heap = module.heap();
         match params {
             super::Params::Owned(owned) => {
-                module.set(
-                    "input",
-                    owned.input.to_starlark_value(heap),
-                );
+                module.set("input", owned.input.to_starlark_value(heap));
                 module.set(
                     "output",
                     owned
                         .output
                         .as_ref()
-                        .map_or(SValue::new_none(), |o| {
-                            o.to_starlark_value(heap)
-                        }),
+                        .map_or(SValue::new_none(), |o| o.to_starlark_value(heap)),
                 );
                 module.set(
                     "map",
                     owned
                         .map
                         .as_ref()
-                        .map_or(SValue::new_none(), |m| {
-                            m.to_starlark_value(heap)
-                        }),
+                        .map_or(SValue::new_none(), |m| m.to_starlark_value(heap)),
                 );
             }
             super::Params::Ref(r) => {
-                module
-                    .set("input", r.input.to_starlark_value(heap));
+                module.set("input", r.input.to_starlark_value(heap));
                 module.set(
                     "output",
                     r.output
                         .as_ref()
-                        .map_or(SValue::new_none(), |o| {
-                            o.to_starlark_value(heap)
-                        }),
+                        .map_or(SValue::new_none(), |o| o.to_starlark_value(heap)),
                 );
                 module.set(
                     "map",
-                    r.map.map_or(SValue::new_none(), |m| {
-                        m.to_starlark_value(heap)
-                    }),
+                    r.map.map_or(SValue::new_none(), |m| m.to_starlark_value(heap)),
                 );
             }
         }
     }
-
-    // Parse the expression directly
     let ast =
         AstModule::parse("expression", code.to_string(), &Dialect::Extended)
             .map_err(|e| ExpressionError::StarlarkParseError(e.to_string()))?;
-
-    // Evaluate - eval_module returns the value of the last statement
     let mut eval = Evaluator::new(&module);
     let result = eval
         .eval_module(ast, &STARLARK_GLOBALS)
         .map_err(|e| ExpressionError::StarlarkEvalError(e.to_string()))?;
-    starlark_value_to_json(&result)
+    f(&result)
+}
+
+/// Evaluate a Starlark expression and convert the result to `T`.
+pub fn starlark_eval<T: FromStarlarkValue>(
+    code: &str,
+    params: &super::Params,
+) -> Result<T, ExpressionError> {
+    with_eval_result(code, params, T::from_starlark_value)
+}
+
+fn svalue_to_one_or_many<T: FromStarlarkValue>(
+    value: &SValue,
+) -> Result<OneOrMany<T>, ExpressionError> {
+    if value.is_none() {
+        return Ok(OneOrMany::Many(Vec::new()));
+    }
+    if let Ok(v) = T::from_starlark_value(value) {
+        return Ok(OneOrMany::One(v));
+    }
+    if let Some(list) = ListRef::from_value(*value) {
+        let mut vs: Vec<T> = Vec::with_capacity(list.len());
+        for v in list.iter() {
+            if let Some(opt) = Option::<T>::from_starlark_value(&v)? {
+                vs.push(opt);
+            }
+        }
+        return Ok(if vs.is_empty() {
+            OneOrMany::Many(Vec::new())
+        } else if vs.len() == 1 {
+            OneOrMany::One(vs.into_iter().next().unwrap())
+        } else {
+            OneOrMany::Many(vs)
+        });
+    }
+    match Option::<T>::from_starlark_value(value)? {
+        Some(v) => Ok(OneOrMany::One(v)),
+        None => Ok(OneOrMany::Many(Vec::new())),
+    }
 }
 
 /// Evaluate a Starlark expression and convert the result into `OneOrMany<T>`.
-///
-/// This is the optimized path used by [`super::Expression`] for Starlark
-/// expressions, avoiding an intermediate `serde_json::Value`.
 pub fn starlark_eval_one_or_many<T>(
     code: &str,
     params: &super::Params,
 ) -> Result<OneOrMany<T>, ExpressionError>
 where
-    T: FromStarlarkValue + DeserializeOwned,
+    T: FromStarlarkValue,
 {
-    // Reuse the existing JSON-based semantics by evaluating to a JSON value
-    // and then deserializing into `Option<OneOrMany<Option<T>>>`, exactly
-    // like `Expression::deserialize_result`.
-    let json = starlark_eval(code, params)?;
-    let value: Option<OneOrMany<Option<T>>> =
-        serde_json::from_value(json).map_err(ExpressionError::DeserializationError)?;
-    Ok(match value {
-        Some(OneOrMany::One(Some(v))) => OneOrMany::One(v),
-        Some(OneOrMany::One(None)) => OneOrMany::Many(Vec::new()),
-        Some(OneOrMany::Many(mut vs)) => {
-            vs.retain(|v| v.is_some());
-            if vs.is_empty() {
-                OneOrMany::Many(Vec::new())
-            } else if vs.len() == 1 {
-                OneOrMany::One(vs.into_iter().flatten().next().unwrap())
-            } else {
-                OneOrMany::Many(vs.into_iter().flatten().collect())
-            }
-        }
-        None => OneOrMany::Many(Vec::new()),
-    })
+    with_eval_result(code, params, svalue_to_one_or_many)
 }
 
 /// Convert JSON value to Starlark value.
@@ -501,46 +1002,36 @@ mod tests {
     #[test]
     fn test_simple_literal() {
         let params = make_params(empty_input());
-        let result = starlark_eval("42", &params).unwrap();
-        assert_eq!(result, Value::Number(42.into()));
+        let result: i64 = starlark_eval("42", &params).unwrap();
+        assert_eq!(result, 42);
     }
 
     #[test]
     fn test_string_literal() {
         let params = make_params(empty_input());
-        let result = starlark_eval("\"hello\"", &params).unwrap();
-        assert_eq!(result, Value::String("hello".to_string()));
+        let result: String = starlark_eval("\"hello\"", &params).unwrap();
+        assert_eq!(result, "hello");
     }
 
     #[test]
     fn test_boolean_literal() {
         let params = make_params(empty_input());
-        assert_eq!(starlark_eval("True", &params).unwrap(), Value::Bool(true));
-        assert_eq!(
-            starlark_eval("False", &params).unwrap(),
-            Value::Bool(false)
-        );
+        assert_eq!(starlark_eval::<bool>("True", &params).unwrap(), true);
+        assert_eq!(starlark_eval::<bool>("False", &params).unwrap(), false);
     }
 
     #[test]
     fn test_none_literal() {
         let params = make_params(empty_input());
-        let result = starlark_eval("None", &params).unwrap();
-        assert_eq!(result, Value::Null);
+        let result: Option<i64> = starlark_eval("None", &params).unwrap();
+        assert_eq!(result, None);
     }
 
     #[test]
     fn test_list_literal() {
         let params = make_params(empty_input());
-        let result = starlark_eval("[1, 2, 3]", &params).unwrap();
-        assert_eq!(
-            result,
-            Value::Array(vec![
-                Value::Number(1.into()),
-                Value::Number(2.into()),
-                Value::Number(3.into())
-            ])
-        );
+        let result: Vec<i64> = starlark_eval("[1, 2, 3]", &params).unwrap();
+        assert_eq!(result, vec![1, 2, 3]);
     }
 
     #[test]
@@ -550,14 +1041,10 @@ mod tests {
             ("age", Input::Integer(30)),
         ]);
         let params = make_params(input);
-        assert_eq!(
-            starlark_eval("input['name']", &params).unwrap(),
-            Value::String("alice".to_string())
-        );
-        assert_eq!(
-            starlark_eval("input['age']", &params).unwrap(),
-            Value::Number(30.into())
-        );
+        let name: String = starlark_eval("input['name']", &params).unwrap();
+        assert_eq!(name, "alice");
+        let age: i64 = starlark_eval("input['age']", &params).unwrap();
+        assert_eq!(age, 30);
     }
 
     #[test]
@@ -573,10 +1060,10 @@ mod tests {
             )]),
         )]);
         let params = make_params(input);
-        let result =
+        let result: String =
             starlark_eval("input['user']['profile']['email']", &params)
                 .unwrap();
-        assert_eq!(result, Value::String("test@example.com".to_string()));
+        assert_eq!(result, "test@example.com");
     }
 
     #[test]
@@ -590,14 +1077,10 @@ mod tests {
             ]),
         )]);
         let params = make_params(input);
-        assert_eq!(
-            starlark_eval("input['items'][0]", &params).unwrap(),
-            Value::String("a".to_string())
-        );
-        assert_eq!(
-            starlark_eval("input['items'][-1]", &params).unwrap(),
-            Value::String("c".to_string())
-        );
+        let v0: String = starlark_eval("input['items'][0]", &params).unwrap();
+        assert_eq!(v0, "a");
+        let v1: String = starlark_eval("input['items'][-1]", &params).unwrap();
+        assert_eq!(v1, "c");
     }
 
     #[test]
@@ -611,17 +1094,10 @@ mod tests {
             ]),
         )]);
         let params = make_params(input);
-        let result =
+        let result: Vec<i64> =
             starlark_eval("[x * 2 for x in input['numbers']]", &params)
                 .unwrap();
-        assert_eq!(
-            result,
-            Value::Array(vec![
-                Value::Number(2.into()),
-                Value::Number(4.into()),
-                Value::Number(6.into())
-            ])
-        );
+        assert_eq!(result, vec![2, 4, 6]);
     }
 
     #[test]
@@ -638,96 +1114,59 @@ mod tests {
             ]),
         )]);
         let params = make_params(input);
-        let result = starlark_eval(
+        let result: Vec<i64> = starlark_eval(
             "[x for x in input['numbers'] if x % 2 == 0]",
             &params,
         )
         .unwrap();
-        assert_eq!(
-            result,
-            Value::Array(vec![
-                Value::Number(2.into()),
-                Value::Number(4.into()),
-                Value::Number(6.into())
-            ])
-        );
+        assert_eq!(result, vec![2, 4, 6]);
     }
 
     #[test]
     fn test_arithmetic() {
         let params = make_params(empty_input());
-        assert_eq!(
-            starlark_eval("1 + 2", &params).unwrap(),
-            Value::Number(3.into())
-        );
-        assert_eq!(
-            starlark_eval("10 - 3", &params).unwrap(),
-            Value::Number(7.into())
-        );
-        assert_eq!(
-            starlark_eval("4 * 5", &params).unwrap(),
-            Value::Number(20.into())
-        );
-        assert_eq!(
-            starlark_eval("15 // 4", &params).unwrap(),
-            Value::Number(3.into())
-        );
-        assert_eq!(
-            starlark_eval("15 % 4", &params).unwrap(),
-            Value::Number(3.into())
-        );
+        assert_eq!(starlark_eval::<i64>("1 + 2", &params).unwrap(), 3);
+        assert_eq!(starlark_eval::<i64>("10 - 3", &params).unwrap(), 7);
+        assert_eq!(starlark_eval::<i64>("4 * 5", &params).unwrap(), 20);
+        assert_eq!(starlark_eval::<i64>("15 // 4", &params).unwrap(), 3);
+        assert_eq!(starlark_eval::<i64>("15 % 4", &params).unwrap(), 3);
     }
 
     #[test]
     fn test_builtin_functions() {
         let params = make_params(empty_input());
-        assert_eq!(
-            starlark_eval("min([3, 1, 2])", &params).unwrap(),
-            Value::Number(1.into())
-        );
-        assert_eq!(
-            starlark_eval("max([3, 1, 2])", &params).unwrap(),
-            Value::Number(3.into())
-        );
-        assert_eq!(
-            starlark_eval("len([1, 2, 3])", &params).unwrap(),
-            Value::Number(3.into())
-        );
-        assert_eq!(
-            starlark_eval("sorted([3, 1, 2])", &params).unwrap(),
-            Value::Array(vec![
-                Value::Number(1.into()),
-                Value::Number(2.into()),
-                Value::Number(3.into()),
-            ])
-        );
+        assert_eq!(starlark_eval::<i64>("min([3, 1, 2])", &params).unwrap(), 1);
+        assert_eq!(starlark_eval::<i64>("max([3, 1, 2])", &params).unwrap(), 3);
+        assert_eq!(starlark_eval::<i64>("len([1, 2, 3])", &params).unwrap(), 3);
+        let sorted: Vec<i64> = starlark_eval("sorted([3, 1, 2])", &params).unwrap();
+        assert_eq!(sorted, vec![1, 2, 3]);
     }
 
     #[test]
     fn test_conditional_expression() {
         let input = obj(vec![("value", Input::Integer(10))]);
         let params = make_params(input);
-        let result = starlark_eval(
+        let result: String = starlark_eval(
             "\"big\" if input['value'] > 5 else \"small\"",
             &params,
         )
         .unwrap();
-        assert_eq!(result, Value::String("big".to_string()));
+        assert_eq!(result, "big");
 
         let input2 = obj(vec![("value", Input::Integer(3))]);
         let params2 = make_params(input2);
-        let result2 = starlark_eval(
+        let result2: String = starlark_eval(
             "\"big\" if input['value'] > 5 else \"small\"",
             &params2,
         )
         .unwrap();
-        assert_eq!(result2, Value::String("small".to_string()));
+        assert_eq!(result2, "small");
     }
 
     #[test]
     fn test_parse_error() {
         let params = make_params(empty_input());
-        let result = starlark_eval("invalid syntax [[[", &params);
+        let result: Result<i64, _> = starlark_eval("invalid syntax [[[", &params);
         assert!(matches!(
             result,
             Err(ExpressionError::StarlarkParseError(_))
@@ -737,7 +1176,7 @@ mod tests {
     #[test]
     fn test_eval_error() {
         let params = make_params(empty_input());
-        let result = starlark_eval("undefined_variable", &params);
+        let result: Result<i64, _> = starlark_eval("undefined_variable", &params);
         assert!(matches!(result, Err(ExpressionError::StarlarkEvalError(_))));
     }
 
@@ -749,10 +1188,10 @@ mod tests {
         let map = obj(vec![("multiplier", Input::Integer(3))]);
         let params = make_params_with_map(input, map);
 
-        let result =
+        let result: i64 =
             starlark_eval("input['base'] * map['multiplier']", &params)
                 .unwrap();
-        assert_eq!(result, Value::Number(300.into()));
+        assert_eq!(result, 300);
     }
 
     #[test]
@@ -764,13 +1203,13 @@ mod tests {
         ]);
         let params = make_params_with_map(input, map);
 
-        let result =
+        let result: String =
             starlark_eval("input['prefix'] + ' ' + map['name']", &params)
                 .unwrap();
-        assert_eq!(result, Value::String("Hello World".to_string()));
+        assert_eq!(result, "Hello World");
 
-        let result2 = starlark_eval("map['count'] * 10", &params).unwrap();
-        assert_eq!(result2, Value::Number(30.into()));
+        let result2: i64 = starlark_eval("map['count'] * 10", &params).unwrap();
+        assert_eq!(result2, 30);
     }
 
     #[test]
@@ -786,19 +1225,12 @@ mod tests {
         )]);
         let params = make_params_with_map(input, map);
 
-        let result = starlark_eval(
+        let result: Vec<i64> = starlark_eval(
             "[v * input['factor'] for v in map['values']]",
             &params,
         )
         .unwrap();
-        assert_eq!(
-            result,
-            Value::Array(vec![
-                Value::Number(2.into()),
-                Value::Number(4.into()),
-                Value::Number(6.into())
-            ])
-        );
+        assert_eq!(result, vec![2, 4, 6]);
     }
 
     // ==================== TESTS USING OUTPUT ====================
@@ -810,9 +1242,8 @@ mod tests {
             TaskOutputOwned::Function(FunctionOutput::Scalar(dec!(0.75)));
         let params = make_params_with_output(input, output);
 
-        // FunctionOutput::Scalar serializes as just the decimal value (float)
-        let result = starlark_eval("output", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 0.75);
+        let result: f64 = starlark_eval("output", &params).unwrap();
+        assert!((result - 0.75).abs() < 1e-9);
     }
 
     #[test]
@@ -825,9 +1256,8 @@ mod tests {
         ]));
         let params = make_params_with_output(input, output);
 
-        // FunctionOutput::Vector serializes as just the array of decimals
-        let result = starlark_eval("len(output)", &params).unwrap();
-        assert_eq!(result, Value::Number(3.into()));
+        let result: i64 = starlark_eval("len(output)", &params).unwrap();
+        assert_eq!(result, 3);
     }
 
     #[test]
@@ -840,11 +1270,11 @@ mod tests {
         });
         let params = make_params_with_output(input, output);
 
-        let result = starlark_eval("len(output['scores'])", &params).unwrap();
-        assert_eq!(result, Value::Number(3.into()));
+        let result: i64 = starlark_eval("len(output['scores'])", &params).unwrap();
+        assert_eq!(result, 3);
 
-        let result2 = starlark_eval("len(output['weights'])", &params).unwrap();
-        assert_eq!(result2, Value::Number(3.into()));
+        let result2: i64 = starlark_eval("len(output['weights'])", &params).unwrap();
+        assert_eq!(result2, 3);
     }
 
     #[test]
@@ -852,8 +1282,8 @@ mod tests {
         let input = empty_input();
         let params = make_params(input);
 
-        let result = starlark_eval("output == None", &params).unwrap();
-        assert_eq!(result, Value::Bool(true));
+        let result: bool = starlark_eval("output == None", &params).unwrap();
+        assert!(result);
     }
 
     #[test]
@@ -863,8 +1293,8 @@ mod tests {
             TaskOutputOwned::Function(FunctionOutput::Scalar(dec!(0.7)));
         let params = make_params_with_output(input, output);
 
-        let result = starlark_eval("output != None", &params).unwrap();
-        assert_eq!(result, Value::Bool(true));
+        let result: bool = starlark_eval("output != None", &params).unwrap();
+        assert!(result);
     }
 
     // ==================== TESTS USING ALL THREE ====================
@@ -880,12 +1310,11 @@ mod tests {
         let map = obj(vec![("index", Input::Integer(1))]);
         let params = make_full_params(input, output, map);
 
-        // Access all three: input, output, and map
-        let result = starlark_eval("len(output['scores'])", &params).unwrap();
-        assert_eq!(result, Value::Number(2.into()));
+        let result: i64 = starlark_eval("len(output['scores'])", &params).unwrap();
+        assert_eq!(result, 2);
 
-        let result2 = starlark_eval("map['index']", &params).unwrap();
-        assert_eq!(result2, Value::Number(1.into()));
+        let result2: i64 = starlark_eval("map['index']", &params).unwrap();
+        assert_eq!(result2, 1);
     }
 
     #[test]
@@ -903,15 +1332,13 @@ mod tests {
         let map = obj(vec![("selected_index", Input::Integer(1))]);
         let params = make_full_params(input, output, map);
 
-        // Use map to index into input
-        let result =
+        let result: String =
             starlark_eval("input['items'][map['selected_index']]", &params)
                 .unwrap();
-        assert_eq!(result, Value::String("b".to_string()));
+        assert_eq!(result, "b");
 
-        // Verify output is accessible
-        let result2 = starlark_eval("output", &params).unwrap();
-        assert_eq!(result2.as_f64().unwrap(), 0.5);
+        let result2: f64 = starlark_eval("output", &params).unwrap();
+        assert!((result2 - 0.5).abs() < 1e-9);
     }
 
     #[test]
@@ -924,8 +1351,8 @@ mod tests {
         ]);
         let params = make_params_with_output(input, output);
 
-        let result = starlark_eval("len(output)", &params).unwrap();
-        assert_eq!(result, Value::Number(3.into()));
+        let result: i64 = starlark_eval("len(output)", &params).unwrap();
+        assert_eq!(result, 3);
     }
 
     #[test]
@@ -945,14 +1372,12 @@ mod tests {
         ]);
         let params = make_params_with_output(input, output);
 
-        // Access first mapped output's scores length
-        let result = starlark_eval("len(output[0]['scores'])", &params).unwrap();
-        assert_eq!(result, Value::Number(2.into()));
+        let result: i64 = starlark_eval("len(output[0]['scores'])", &params).unwrap();
+        assert_eq!(result, 2);
 
-        // Access second mapped output
-        let result2 =
+        let result2: i64 =
             starlark_eval("len(output[1]['weights'])", &params).unwrap();
-        assert_eq!(result2, Value::Number(2.into()));
+        assert_eq!(result2, 2);
     }
 
     // ==================== TESTS FOR CUSTOM FUNCTIONS ====================
@@ -960,22 +1385,22 @@ mod tests {
     #[test]
     fn test_sum_integers() {
         let params = make_params(empty_input());
-        let result = starlark_eval("sum([1, 2, 3, 4, 5])", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 15.0);
+        let result: f64 = starlark_eval("sum([1, 2, 3, 4, 5])", &params).unwrap();
+        assert_eq!(result, 15.0);
     }
 
     #[test]
     fn test_sum_floats() {
         let params = make_params(empty_input());
-        let result = starlark_eval("sum([1.5, 2.5, 3.0])", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 7.0);
+        let result: f64 = starlark_eval("sum([1.5, 2.5, 3.0])", &params).unwrap();
+        assert_eq!(result, 7.0);
     }
 
     #[test]
     fn test_sum_empty() {
         let params = make_params(empty_input());
-        let result = starlark_eval("sum([])", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 0.0);
+        let result: f64 = starlark_eval("sum([])", &params).unwrap();
+        assert_eq!(result, 0.0);
     }
 
     #[test]
@@ -989,50 +1414,50 @@ mod tests {
             ]),
         )]);
         let params = make_params(input);
-        let result = starlark_eval("sum(input['values'])", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 60.0);
+        let result: f64 = starlark_eval("sum(input['values'])", &params).unwrap();
+        assert_eq!(result, 60.0);
     }
 
     #[test]
     fn test_abs_positive() {
         let params = make_params(empty_input());
-        let result = starlark_eval("abs(5)", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 5.0);
+        let result: f64 = starlark_eval("abs(5)", &params).unwrap();
+        assert_eq!(result, 5.0);
     }
 
     #[test]
     fn test_abs_negative() {
         let params = make_params(empty_input());
-        let result = starlark_eval("abs(-5)", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 5.0);
+        let result: f64 = starlark_eval("abs(-5)", &params).unwrap();
+        assert_eq!(result, 5.0);
     }
 
     #[test]
     fn test_abs_float() {
         let params = make_params(empty_input());
-        let result = starlark_eval("abs(-3.14)", &params).unwrap();
-        assert!((result.as_f64().unwrap() - 3.14).abs() < 0.001);
+        let result: f64 = starlark_eval("abs(-3.14)", &params).unwrap();
+        assert!((result - 3.14).abs() < 0.001);
     }
 
     #[test]
     fn test_float_from_int() {
         let params = make_params(empty_input());
-        let result = starlark_eval("float(42)", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 42.0);
+        let result: f64 = starlark_eval("float(42)", &params).unwrap();
+        assert_eq!(result, 42.0);
     }
 
     #[test]
     fn test_round_down() {
         let params = make_params(empty_input());
-        let result = starlark_eval("round(3.4)", &params).unwrap();
-        assert_eq!(result.as_i64().unwrap(), 3);
+        let result: i64 = starlark_eval("round(3.4)", &params).unwrap();
+        assert_eq!(result, 3);
     }
 
     #[test]
     fn test_round_up() {
         let params = make_params(empty_input());
-        let result = starlark_eval("round(3.6)", &params).unwrap();
-        assert_eq!(result.as_i64().unwrap(), 4);
+        let result: i64 = starlark_eval("round(3.6)", &params).unwrap();
+        assert_eq!(result, 4);
     }
 
     // ==================== TESTS FOR AVERAGING ====================
@@ -1040,9 +1465,9 @@ mod tests {
     #[test]
     fn test_average_simple() {
         let params = make_params(empty_input());
-        let result =
+        let result: f64 =
             starlark_eval("sum([2, 4, 6]) / len([2, 4, 6])", &params).unwrap();
-        assert_eq!(result.as_f64().unwrap(), 4.0);
+        assert_eq!(result, 4.0);
     }
 
     #[test]
@@ -1057,18 +1482,17 @@ mod tests {
             ]),
         )]);
         let params = make_params(input);
-        let result = starlark_eval(
+        let result: f64 = starlark_eval(
             "sum(input['scores']) / len(input['scores'])",
             &params,
         )
         .unwrap();
-        assert_eq!(result.as_f64().unwrap(), 0.75);
+        assert_eq!(result, 0.75);
     }
 
     #[test]
     fn test_average_mapped_outputs() {
         let input = empty_input();
-        // MapFunction contains multiple scalar outputs from mapped task execution
         let output = TaskOutputOwned::MapFunction(vec![
             FunctionOutput::Scalar(dec!(0.2)),
             FunctionOutput::Scalar(dec!(0.4)),
@@ -1076,10 +1500,9 @@ mod tests {
         ]);
         let params = make_params_with_output(input, output);
 
-        // FunctionOutput::Scalar serializes as just the float value
-        let result =
+        let result: f64 =
             starlark_eval("sum(output) / len(output)", &params).unwrap();
-        assert!((result.as_f64().unwrap() - 0.4).abs() < 0.0001);
+        assert!((result - 0.4).abs() < 0.0001);
     }
 
     // ==================== TESTS FOR L1 NORMALIZATION ====================
@@ -1087,33 +1510,29 @@ mod tests {
     #[test]
     fn test_l1_normalize_simple() {
         let params = make_params(empty_input());
-        // L1 normalize [2, 3, 5] -> sum of abs = 10 -> [0.2, 0.3, 0.5]
-        let result = starlark_eval(
+        let result: Vec<f64> = starlark_eval(
             "[x / sum([abs(y) for y in [2, 3, 5]]) for x in [2, 3, 5]]",
             &params,
         )
         .unwrap();
-        let arr = result.as_array().unwrap();
-        assert_eq!(arr.len(), 3);
-        assert_eq!(arr[0].as_f64().unwrap(), 0.2);
-        assert_eq!(arr[1].as_f64().unwrap(), 0.3);
-        assert_eq!(arr[2].as_f64().unwrap(), 0.5);
+        assert_eq!(result.len(), 3);
+        assert!((result[0] - 0.2).abs() < 1e-9);
+        assert!((result[1] - 0.3).abs() < 1e-9);
+        assert!((result[2] - 0.5).abs() < 1e-9);
     }
 
     #[test]
     fn test_l1_normalize_with_negatives() {
         let params = make_params(empty_input());
-        // L1 normalize [-2, 3, -5] -> sum of abs = 10 -> [-0.2, 0.3, -0.5]
-        let result = starlark_eval(
+        let result: Vec<f64> = starlark_eval(
             "[x / sum([abs(y) for y in [-2, 3, -5]]) for x in [-2, 3, -5]]",
             &params,
         )
         .unwrap();
-        let arr = result.as_array().unwrap();
-        assert_eq!(arr.len(), 3);
-        assert_eq!(arr[0].as_f64().unwrap(), -0.2);
-        assert_eq!(arr[1].as_f64().unwrap(), 0.3);
-        assert_eq!(arr[2].as_f64().unwrap(), -0.5);
+        assert_eq!(result.len(), 3);
+        assert!((result[0] - (-0.2)).abs() < 1e-9);
+        assert!((result[1] - 0.3).abs() < 1e-9);
+        assert!((result[2] - (-0.5)).abs() < 1e-9);
     }
 
     #[test]
@@ -1127,17 +1546,15 @@ mod tests {
             ]),
         )]);
         let params = make_params(input);
-        // L1 normalize [1, 2, 2] -> sum = 5 -> [0.2, 0.4, 0.4]
-        let result = starlark_eval(
+        let result: Vec<f64> = starlark_eval(
             "[w / sum(input['weights']) for w in input['weights']]",
             &params,
         )
         .unwrap();
-        let arr = result.as_array().unwrap();
-        assert_eq!(arr.len(), 3);
-        assert_eq!(arr[0].as_f64().unwrap(), 0.2);
-        assert_eq!(arr[1].as_f64().unwrap(), 0.4);
-        assert_eq!(arr[2].as_f64().unwrap(), 0.4);
+        assert_eq!(result.len(), 3);
+        assert!((result[0] - 0.2).abs() < 1e-9);
+        assert!((result[1] - 0.4).abs() < 1e-9);
+        assert!((result[2] - 0.4).abs() < 1e-9);
     }
 
     #[test]
@@ -1152,12 +1569,11 @@ mod tests {
             ]),
         )]);
         let params = make_params(input);
-        // Normalize and verify sum equals 1.0
-        let result = starlark_eval(
+        let result: f64 = starlark_eval(
             "sum([v / sum(input['values']) for v in input['values']])",
             &params,
         )
         .unwrap();
-        assert!((result.as_f64().unwrap() - 1.0).abs() < 0.0001);
+        assert!((result - 1.0).abs() < 0.0001);
     }
 }
