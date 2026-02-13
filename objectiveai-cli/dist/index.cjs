@@ -332,6 +332,22 @@ function resolveGhToken(override, config) {
     return { value: cfg.ghToken, source: configSource("ghToken", config) };
   return { value: void 0, source: "not set" };
 }
+var CLAUDE_MODEL_KEYS = [
+  "claudeSpecModel",
+  "claudeNameModel",
+  "claudeEssayModel",
+  "claudeEssayTasksModel",
+  "claudePlanModel",
+  "claudeInventModel",
+  "claudeAmendModel"
+];
+function resolveClaudeModel(configKey, override, config) {
+  if (override) return { value: override, source: "flag" };
+  const cfg = config ?? getConfig();
+  const value = cfg[configKey];
+  if (value) return { value, source: configSource(configKey, config) };
+  return { value: void 0, source: "not set" };
+}
 function resolveAgentUpstream(override, config) {
   if (override) return { value: override, source: "flag" };
   const env = readEnv("OBJECTIVEAI_AGENT_UPSTREAM");
@@ -438,6 +454,11 @@ function makeAgentOptions(options = {}) {
     options.agentUpstream,
     config
   ).value;
+  const claudeModels = {};
+  for (const key of CLAUDE_MODEL_KEYS) {
+    const resolved = resolveClaudeModel(key, options[key], config);
+    if (resolved.value) claudeModels[key] = resolved.value;
+  }
   const sessionId = options.sessionId ?? readSession();
   return {
     ...options,
@@ -451,7 +472,8 @@ function makeAgentOptions(options = {}) {
     gitUserName,
     gitUserEmail,
     ghToken,
-    agentUpstream
+    agentUpstream,
+    ...claudeModels
   };
 }
 
@@ -532,7 +554,7 @@ async function fetchExamples(apiBase, apiKey) {
 function writeGitignore() {
   fs.writeFileSync(
     ".gitignore",
-    ["examples/", "agent_functions/", "network_tests/", "logs/", ""].join("\n")
+    ["examples/", "agent_functions/", "network_tests/", "logs/", ".objectiveai/", ""].join("\n")
   );
 }
 async function init(options) {
@@ -1983,7 +2005,7 @@ function makeCheckFunction(state) {
 function specIsNonEmpty() {
   return fs.existsSync("SPEC.md") && fs.readFileSync("SPEC.md", "utf-8").trim().length > 0;
 }
-async function specMcp(state, log, sessionId, spec) {
+async function specMcp(state, log, sessionId, spec, model) {
   if (specIsNonEmpty()) return sessionId;
   if (spec) {
     writeSpec(spec);
@@ -2006,7 +2028,8 @@ async function specMcp(state, log, sessionId, spec) {
         allowedTools: ["mcp__spec__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -3038,7 +3061,7 @@ function makeToolState(options) {
 function nameIsNonEmpty() {
   return fs.existsSync("name.txt") && fs.readFileSync("name.txt", "utf-8").trim().length > 0;
 }
-async function nameMcp(state, log, sessionId, name) {
+async function nameMcp(state, log, sessionId, name, model) {
   if (nameIsNonEmpty()) return sessionId;
   if (name) {
     writeName(name, state.ghToken);
@@ -3069,7 +3092,8 @@ async function nameMcp(state, log, sessionId, name) {
         allowedTools: ["mcp__name__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -3123,7 +3147,7 @@ function makeWriteEssay(state) {
 function essayIsNonEmpty() {
   return fs.existsSync("ESSAY.md") && fs.readFileSync("ESSAY.md", "utf-8").trim().length > 0;
 }
-async function essayMcp(state, log, sessionId) {
+async function essayMcp(state, log, sessionId, model) {
   if (essayIsNonEmpty()) return sessionId;
   const tools = [
     makeReadSpec(state),
@@ -3149,7 +3173,8 @@ async function essayMcp(state, log, sessionId) {
         allowedTools: ["mcp__essay__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -3208,7 +3233,7 @@ function makeWriteEssayTasks(state) {
 function essayTasksIsNonEmpty() {
   return fs.existsSync("ESSAY_TASKS.md") && fs.readFileSync("ESSAY_TASKS.md", "utf-8").trim().length > 0;
 }
-async function essayTasksMcp(state, log, sessionId) {
+async function essayTasksMcp(state, log, sessionId, model) {
   if (essayTasksIsNonEmpty()) return sessionId;
   const tools = [
     makeReadSpec(state),
@@ -3237,7 +3262,8 @@ async function essayTasksMcp(state, log, sessionId) {
         allowedTools: ["mcp__essayTasks__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -3291,28 +3317,28 @@ async function prepare(state, options) {
     state,
     log,
     sessionId,
-    (sid) => specMcp(state, log, sid, options.spec)
+    (sid) => specMcp(state, log, sid, options.spec, options.claudeSpecModel)
   );
   log("=== Step 2: name.txt ===");
   sessionId = await runStep(
     state,
     log,
     sessionId,
-    (sid) => nameMcp(state, log, sid, options.name)
+    (sid) => nameMcp(state, log, sid, options.name, options.claudeNameModel)
   );
   log("=== Step 3: ESSAY.md ===");
   sessionId = await runStep(
     state,
     log,
     sessionId,
-    (sid) => essayMcp(state, log, sid)
+    (sid) => essayMcp(state, log, sid, options.claudeEssayModel)
   );
   log("=== Step 4: ESSAY_TASKS.md ===");
   sessionId = await runStep(
     state,
     log,
     sessionId,
-    (sid) => essayTasksMcp(state, log, sid)
+    (sid) => essayTasksMcp(state, log, sid, options.claudeEssayTasksModel)
   );
   return sessionId;
 }
@@ -4638,7 +4664,7 @@ function makeSubmit(state) {
     }))
   );
 }
-async function planMcp(state, log, depth, sessionId) {
+async function planMcp(state, log, depth, sessionId, model) {
   const tools = [
     makeReadSpec(state),
     makeReadName(),
@@ -4773,7 +4799,8 @@ Plan for diverse test inputs (minimum 10, maximum 100):
         allowedTools: ["mcp__plan__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -5425,7 +5452,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **No API key is needed for tests** - tests run against a local server
 `;
 }
-async function inventLoop(state, log, useFunctionTasks, sessionId) {
+async function inventLoop(state, log, useFunctionTasks, sessionId, model) {
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -5459,7 +5486,8 @@ Please try again. Remember to:
           allowedTools: ["mcp__invent__*"],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
-          resume: sid
+          resume: sid,
+          model
         }
       }),
       log,
@@ -5508,20 +5536,22 @@ async function inventMcp(state, options) {
   log("=== Plan ===");
   let sessionId;
   try {
-    sessionId = await planMcp(state, log, depth, options.sessionId);
+    sessionId = await planMcp(state, log, depth, options.sessionId, options.claudePlanModel);
   } catch (e) {
     if (!state.anyStepRan) {
       log("Session may be invalid, retrying without session...");
-      sessionId = await planMcp(state, log, depth, void 0);
+      sessionId = await planMcp(state, log, depth, void 0, options.claudePlanModel);
     } else {
       throw e;
     }
   }
-  log(`=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await inventLoop(state, log, useFunctionTasks, sessionId);
+  log(
+    `=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`
+  );
+  await inventLoop(state, log, useFunctionTasks, sessionId, options.claudeInventModel);
   log("=== ObjectiveAI Function invention complete ===");
 }
-async function planMcp2(state, log, depth, amendment, sessionId) {
+async function planMcp2(state, log, depth, amendment, sessionId, model) {
   const tools = [
     makeReadSpec(state),
     makeReadName(),
@@ -5635,7 +5665,8 @@ ${readPrefix} your amendment plan using the WritePlan tool. Include:
         allowedTools: ["mcp__amend-plan__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -6111,7 +6142,7 @@ Once all tests pass and compliance is verified:
 - **No API key is needed for tests** \u2014 tests run against a local server
 `;
 }
-async function amendLoop(state, log, useFunctionTasks, amendment, sessionId) {
+async function amendLoop(state, log, useFunctionTasks, amendment, sessionId, model) {
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -6145,7 +6176,8 @@ Please try again. Remember to:
           allowedTools: ["mcp__amend__*"],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
-          resume: sid
+          resume: sid,
+          model
         }
       }),
       log,
@@ -6194,17 +6226,17 @@ async function amendMcp(state, options, amendment) {
   log("=== Amend Plan ===");
   let sessionId;
   try {
-    sessionId = await planMcp2(state, log, depth, amendment, options.sessionId);
+    sessionId = await planMcp2(state, log, depth, amendment, options.sessionId, options.claudePlanModel);
   } catch (e) {
     if (!state.anyStepRan) {
       log("Session may be invalid, retrying without session...");
-      sessionId = await planMcp2(state, log, depth, amendment, void 0);
+      sessionId = await planMcp2(state, log, depth, amendment, void 0, options.claudePlanModel);
     } else {
       throw e;
     }
   }
   log(`=== Amend Loop: Modifying function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await amendLoop(state, log, useFunctionTasks, amendment, sessionId);
+  await amendLoop(state, log, useFunctionTasks, amendment, sessionId, options.claudeAmendModel);
   log("=== ObjectiveAI Function amendment complete ===");
 }
 function getNextPlanIndex() {
@@ -6765,6 +6797,7 @@ async function amend2(partialOptions = {}) {
   throw new Error(`Unknown agent upstream: ${resolvedUpstream}`);
 }
 
+exports.CLAUDE_MODEL_KEYS = CLAUDE_MODEL_KEYS;
 exports.Claude = claude_exports;
 exports.ExampleInputSchema = ExampleInputSchema;
 exports.ExampleInputsSchema = ExampleInputsSchema;
@@ -6787,6 +6820,7 @@ exports.makeAgentOptions = makeAgentOptions;
 exports.resolveAgentUpstream = resolveAgentUpstream;
 exports.resolveApiBase = resolveApiBase;
 exports.resolveApiKey = resolveApiKey;
+exports.resolveClaudeModel = resolveClaudeModel;
 exports.resolveGhToken = resolveGhToken;
 exports.resolveGitUserEmail = resolveGitUserEmail;
 exports.resolveGitUserName = resolveGitUserName;

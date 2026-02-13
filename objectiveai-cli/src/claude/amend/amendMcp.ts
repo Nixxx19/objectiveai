@@ -442,6 +442,7 @@ async function amendLoop(
   useFunctionTasks: boolean,
   amendment: string,
   sessionId?: string,
+  model?: string,
 ): Promise<string | undefined> {
   const maxAttempts = 5;
   let attempt = 0;
@@ -487,6 +488,7 @@ Please try again. Remember to:
             disallowedTools: ["AskUserQuestion"],
             permissionMode: "dontAsk",
             resume: sid,
+            model,
           },
         }),
         log,
@@ -546,18 +548,18 @@ export async function amendMcp(
   log("=== Amend Plan ===");
   let sessionId: string | undefined;
   try {
-    sessionId = await amendPlanMcp(state, log, depth, amendment, options.sessionId);
+    sessionId = await amendPlanMcp(state, log, depth, amendment, options.sessionId, options.claudePlanModel);
   } catch (e) {
     if (!state.anyStepRan) {
       log("Session may be invalid, retrying without session...");
-      sessionId = await amendPlanMcp(state, log, depth, amendment, undefined);
+      sessionId = await amendPlanMcp(state, log, depth, amendment, undefined, options.claudePlanModel);
     } else {
       throw e;
     }
   }
 
   log(`=== Amend Loop: Modifying function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await amendLoop(state, log, useFunctionTasks, amendment, sessionId);
+  await amendLoop(state, log, useFunctionTasks, amendment, sessionId, options.claudeAmendModel);
 
   log("=== ObjectiveAI Function amendment complete ===");
 }

@@ -23,6 +23,7 @@ export async function specMcp(
   log: LogFn,
   sessionId?: string,
   spec?: string,
+  model?: string,
 ): Promise<string | undefined> {
   if (specIsNonEmpty()) return sessionId;
 
@@ -56,6 +57,7 @@ export async function specMcp(
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId,
+        model,
       },
     }),
     log,

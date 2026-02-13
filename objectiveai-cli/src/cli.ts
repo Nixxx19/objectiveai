@@ -8,13 +8,27 @@ import {
   resolveGitUserEmail,
   resolveGhToken,
   resolveAgentUpstream,
+  resolveClaudeModel,
   checkConfig,
   isGitAvailable,
   isGhAvailable,
   ResolvedValue,
+  CLAUDE_MODEL_KEYS,
+  type ClaudeModelKey,
 } from "./agentOptions";
 import { setConfigValue, ConfigJson } from "./config";
 import { printBanner } from "./banner";
+import { getClaudeSupportedModels, validateClaudeModel, validateClaudeModels } from "./claude/supportedModels";
+
+const claudeModelConfigs = [
+  { key: "claudeSpecModel" as ClaudeModelKey, flag: "--claude-spec-model", label: "Claude Spec Model", desc: "Model for SPEC.md generation" },
+  { key: "claudeNameModel" as ClaudeModelKey, flag: "--claude-name-model", label: "Claude Name Model", desc: "Model for name generation" },
+  { key: "claudeEssayModel" as ClaudeModelKey, flag: "--claude-essay-model", label: "Claude Essay Model", desc: "Model for ESSAY.md generation" },
+  { key: "claudeEssayTasksModel" as ClaudeModelKey, flag: "--claude-essay-tasks-model", label: "Claude Essay Tasks Model", desc: "Model for ESSAY_TASKS.md generation" },
+  { key: "claudePlanModel" as ClaudeModelKey, flag: "--claude-plan-model", label: "Claude Plan Model", desc: "Model for plan step" },
+  { key: "claudeInventModel" as ClaudeModelKey, flag: "--claude-invent-model", label: "Claude Invent Model", desc: "Model for invent loop" },
+  { key: "claudeAmendModel" as ClaudeModelKey, flag: "--claude-amend-model", label: "Claude Amend Model", desc: "Model for amend loop" },
+];
 
 // If spawned by a parent agent, exit when the parent dies.
 const parentPid = process.env.OBJECTIVEAI_PARENT_PID
@@ -36,6 +50,7 @@ const RED = "\x1b[31m";
 const GREEN = "\x1b[32m";
 const BOLD = "\x1b[1m";
 const DIM = "\x1b[2m";
+const UNDERLINE = "\x1b[4m";
 const RESET = "\x1b[0m";
 
 function statusLabel(ok: boolean, label: string): string {
@@ -61,14 +76,14 @@ program
 
     console.log(`${BOLD}Status${RESET}\n`);
     console.log(anyConfigMissing
-      ? `  ${RED}config: missing values${RESET}  ${DIM}(run objectiveai config)${RESET}`
-      : `  ${GREEN}config: all values set${RESET}`);
+      ? `  ${RED}${UNDERLINE}config${RESET}${RED}  missing values  ${DIM}(run objectiveai config)${RESET}`
+      : `  ${GREEN}${UNDERLINE}config${RESET}${GREEN}  all values set${RESET}`);
     console.log(git
-      ? `  ${GREEN}git: installed${RESET}`
-      : `  ${RED}git: not installed${RESET}`);
+      ? `  ${GREEN}${UNDERLINE}git${RESET}${GREEN}     installed${RESET}`
+      : `  ${RED}${UNDERLINE}git${RESET}${RED}     not installed${RESET}`);
     console.log(gh
-      ? `  ${GREEN}gh: installed${RESET}`
-      : `  ${RED}gh: not installed${RESET}`);
+      ? `  ${GREEN}${UNDERLINE}gh${RESET}${GREEN}      installed${RESET}`
+      : `  ${RED}${UNDERLINE}gh${RESET}${RED}      not installed${RESET}`);
 
     console.log(`\n${BOLD}Commands${RESET}\n`);
     console.log("  objectiveai invent [spec]   Invent a new function");
@@ -78,7 +93,7 @@ program
     console.log("");
   });
 
-program
+const inventCmd = program
   .command("invent")
   .description("Invent a new ObjectiveAI Function")
   .argument("[spec]", "Optional spec string for SPEC.md")
@@ -92,9 +107,12 @@ program
   .option("--agent-upstream <upstream>", "Agent upstream (default: claude)")
   .option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt)
   .option("--min-width <n>", "Minimum number of tasks", parseInt)
-  .option("--max-width <n>", "Maximum number of tasks", parseInt)
-  .action(async (spec: string | undefined, opts: Record<string, string | number | undefined>) => {
-    const partialOpts = {
+  .option("--max-width <n>", "Maximum number of tasks", parseInt);
+for (const cfg of claudeModelConfigs) {
+  inventCmd.option(`${cfg.flag} <model>`, cfg.desc);
+}
+inventCmd.action(async (spec: string | undefined, opts: Record<string, string | number | undefined>) => {
+    const partialOpts: Record<string, unknown> = {
       spec,
       name: opts.name as string | undefined,
       depth: opts.depth as number | undefined,
@@ -107,11 +125,18 @@ program
       ghToken: opts.ghToken as string | undefined,
       agentUpstream: opts.agentUpstream as string | undefined,
     };
+    for (const cfg of claudeModelConfigs) {
+      if (opts[cfg.key]) partialOpts[cfg.key] = opts[cfg.key] as string;
+    }
     checkConfig(partialOpts);
+    const upstream = resolveAgentUpstream(opts.agentUpstream as string | undefined).value;
+    if (upstream === "claude") {
+      await validateClaudeModels(partialOpts);
+    }
     await Claude.invent(partialOpts);
   });
 
-program
+const amendCmd = program
   .command("amend")
   .description("Amend an existing ObjectiveAI Function")
   .argument("[spec]", "Amendment spec to append to SPEC.md")
@@ -125,9 +150,12 @@ program
   .option("--agent-upstream <upstream>", "Agent upstream (default: claude)")
   .option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt)
   .option("--min-width <n>", "Minimum number of tasks", parseInt)
-  .option("--max-width <n>", "Maximum number of tasks", parseInt)
-  .action(async (spec: string | undefined, opts: Record<string, string | number | undefined>) => {
-    const partialOpts = {
+  .option("--max-width <n>", "Maximum number of tasks", parseInt);
+for (const cfg of claudeModelConfigs) {
+  amendCmd.option(`${cfg.flag} <model>`, cfg.desc);
+}
+amendCmd.action(async (spec: string | undefined, opts: Record<string, string | number | undefined>) => {
+    const partialOpts: Record<string, unknown> = {
       spec,
       name: opts.name as string | undefined,
       depth: opts.depth as number | undefined,
@@ -140,7 +168,14 @@ program
       ghToken: opts.ghToken as string | undefined,
       agentUpstream: opts.agentUpstream as string | undefined,
     };
+    for (const cfg of claudeModelConfigs) {
+      if (opts[cfg.key]) partialOpts[cfg.key] = opts[cfg.key] as string;
+    }
     checkConfig(partialOpts);
+    const upstream = resolveAgentUpstream(opts.agentUpstream as string | undefined).value;
+    if (upstream === "claude") {
+      await validateClaudeModels(partialOpts);
+    }
     await Claude.amend(partialOpts);
   });
 
@@ -158,12 +193,35 @@ function mask(value: string): string {
   return value.slice(0, 4) + "*".repeat(value.length - 8) + value.slice(-4);
 }
 
-function formatRow(label: string, resolved: ResolvedValue, secret = false): string {
-  if (!resolved.value) {
-    return `${RED}  ${label}: (not set)${RESET}`;
+interface RowData {
+  label: string;
+  resolved: ResolvedValue;
+  secret?: boolean;
+}
+
+function printRows(rows: RowData[]): void {
+  const labelWidth = Math.max(...rows.map((r) => r.label.length));
+  const displayValues = rows.map((r) => {
+    if (!r.resolved.value) return "(not set)";
+    return r.secret ? mask(r.resolved.value) : r.resolved.value;
+  });
+  const valueWidth = Math.max(...displayValues.map((v) => v.length));
+
+  for (let i = 0; i < rows.length; i++) {
+    const { label, resolved } = rows[i];
+    const display = displayValues[i];
+    const color = resolved.value ? GREEN : RED;
+    const labelPad = " ".repeat(labelWidth - label.length);
+    const source = resolved.value
+      ? `  ${DIM}(${resolved.source})${RESET}`
+      : "";
+    console.log(
+      `  ${color}${UNDERLINE}${label}${RESET}${color}` +
+      `${labelPad}  ${display.padEnd(valueWidth)}` +
+      source +
+      RESET,
+    );
   }
-  const display = secret ? mask(resolved.value) : resolved.value;
-  return `${GREEN}  ${label}: ${display} ${DIM}(${resolved.source})${RESET}`;
 }
 
 interface SourceEntry {
@@ -185,9 +243,9 @@ function showConfigDetail(
 
   if (resolved.value) {
     const display = secret ? mask(resolved.value) : resolved.value;
-    console.log(`${GREEN}  Current value: ${display} ${DIM}(${resolved.source})${RESET}`);
+    console.log(`  ${GREEN}${UNDERLINE}current value${RESET}${GREEN}  ${display}  ${DIM}(${resolved.source})${RESET}`);
   } else {
-    console.log(`${RED}  Current value: (not set)${RESET}`);
+    console.log(`  ${RED}${UNDERLINE}current value${RESET}${RED}  (not set)${RESET}`);
   }
 
   console.log(`\n${BOLD}Sources${RESET} (highest to lowest priority)\n`);
@@ -307,12 +365,18 @@ configCmd
     const agentUpstream = resolveAgentUpstream();
 
     console.log(`${BOLD}Current Configuration${RESET}\n`);
-    console.log(formatRow("ObjectiveAI API Base", apiBase));
-    console.log(formatRow("ObjectiveAI API Key", apiKey, true));
-    console.log(formatRow("Git User Name", gitUserName));
-    console.log(formatRow("Git User Email", gitUserEmail));
-    console.log(formatRow("GitHub Token", ghToken, true));
-    console.log(formatRow("Agent Upstream", agentUpstream));
+    printRows([
+      { label: "ObjectiveAI API Base", resolved: apiBase },
+      { label: "ObjectiveAI API Key", resolved: apiKey, secret: true },
+      { label: "Git User Name", resolved: gitUserName },
+      { label: "Git User Email", resolved: gitUserEmail },
+      { label: "GitHub Token", resolved: ghToken, secret: true },
+      { label: "Agent Upstream", resolved: agentUpstream },
+      ...claudeModelConfigs.map((cfg) => ({
+        label: cfg.label,
+        resolved: resolveClaudeModel(cfg.key),
+      })),
+    ]);
 
     console.log(`\n${BOLD}Configuration Sources${RESET} (highest to lowest priority)\n`);
     console.log("  1. CLI flags (--api-key, --gh-token, etc.)");
@@ -321,13 +385,22 @@ configCmd
     console.log("  4. ~/.objectiveai/config.json (user)");
     console.log("  5. git config (user.name, user.email)");
 
+    const configCommands: [string, string][] = [
+      ["apiBase", "Show ObjectiveAI API base URL"],
+      ["apiKey", "Show ObjectiveAI API key"],
+      ["gitUserName", "Show git user name"],
+      ["gitUserEmail", "Show git user email"],
+      ["ghToken", "Show GitHub token"],
+      ["agentUpstream", "Show agent upstream"],
+      ["claudeModels", "List available Claude models"],
+      ...claudeModelConfigs.map((cfg): [string, string] => [cfg.key, `Show ${cfg.label.toLowerCase()}`]),
+    ];
+    const pad = Math.max(...configCommands.map(([k]) => k.length)) + 2;
+
     console.log(`\n${BOLD}Commands${RESET}\n`);
-    console.log("  objectiveai config apiBase      Show ObjectiveAI API base URL");
-    console.log("  objectiveai config apiKey       Show ObjectiveAI API key");
-    console.log("  objectiveai config gitUserName  Show git user name");
-    console.log("  objectiveai config gitUserEmail Show git user email");
-    console.log("  objectiveai config ghToken      Show GitHub token");
-    console.log("  objectiveai config agentUpstream Show agent upstream");
+    for (const [key, desc] of configCommands) {
+      console.log(`  objectiveai config ${key.padEnd(pad)} ${desc}`);
+    }
     console.log("");
   });
 
@@ -482,5 +555,59 @@ configCmd
       );
     }
   });
+
+configCmd
+  .command("claudeModels")
+  .description("List available Claude models")
+  .action(async () => {
+    printBanner();
+    console.log(`${BOLD}Available Claude Models${RESET}\n`);
+    try {
+      const models = await getClaudeSupportedModels();
+      for (const m of models) {
+        console.log(`  ${GREEN}${m.value}${RESET}`);
+        console.log(`${DIM}    ${m.displayName} — ${m.description}${RESET}`);
+      }
+      console.log("");
+    } catch (e) {
+      console.error(`\n${RED}  Failed to fetch models: ${e instanceof Error ? e.message : e}${RESET}\n`);
+      process.exit(1);
+    }
+  });
+
+// ── Claude model config subcommands ─────────────────────────────────
+
+for (const cfg of claudeModelConfigs) {
+  configCmd
+    .command(cfg.key)
+    .description(`Show or set ${cfg.label.toLowerCase()}`)
+    .argument("[value]", "Model name to set")
+    .option("--project", "Write to project config instead of user config")
+    .action(async (value: string | undefined, opts: { project?: boolean }) => {
+      if (value) {
+        const error = await validateClaudeModel(value);
+        if (error) {
+          console.error(`\n\x1b[31m  Error: ${error}\x1b[0m\n`);
+          process.exit(1);
+        }
+        const path = setConfigValue(cfg.key, value, !!opts.project);
+        const where = opts.project ? "project" : "user";
+        console.log(`\n  Set ${cfg.key} in ${where} config (${path})\n`);
+      } else {
+        showConfigDetail(
+          cfg.label,
+          resolveClaudeModel(cfg.key),
+          `${cfg.desc}. Leave unset to use the default Claude model.`,
+          [
+            { label: `CLI flag: ${cfg.flag} <model>`, key: "flag" },
+            { label: ".objectiveai/config.json (project)", key: "project" },
+            { label: "~/.objectiveai/config.json (user)", key: "user config" },
+            { label: "Default: (not set, uses SDK default)", key: "not set" },
+          ],
+          cfg.key,
+        );
+      }
+    });
+}
 
 program.parse(process.argv);

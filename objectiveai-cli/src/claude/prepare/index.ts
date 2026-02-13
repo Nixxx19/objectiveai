@@ -40,22 +40,22 @@ export async function prepare(
 
   log("=== Step 1: SPEC.md ===");
   sessionId = await runStep(state, log, sessionId, (sid) =>
-    specMcp(state, log, sid, options.spec),
+    specMcp(state, log, sid, options.spec, options.claudeSpecModel),
   );
 
   log("=== Step 2: name.txt ===");
   sessionId = await runStep(state, log, sessionId, (sid) =>
-    nameMcp(state, log, sid, options.name),
+    nameMcp(state, log, sid, options.name, options.claudeNameModel),
   );
 
   log("=== Step 3: ESSAY.md ===");
   sessionId = await runStep(state, log, sessionId, (sid) =>
-    essayMcp(state, log, sid),
+    essayMcp(state, log, sid, options.claudeEssayModel),
   );
 
   log("=== Step 4: ESSAY_TASKS.md ===");
   sessionId = await runStep(state, log, sessionId, (sid) =>
-    essayTasksMcp(state, log, sid),
+    essayTasksMcp(state, log, sid, options.claudeEssayTasksModel),
   );
 
   return sessionId;

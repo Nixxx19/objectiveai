@@ -20,6 +20,13 @@ export interface AgentOptions {
   gitUserEmail: string;
   ghToken: string;
   agentUpstream: string;
+  claudeSpecModel?: string;
+  claudeNameModel?: string;
+  claudeEssayModel?: string;
+  claudeEssayTasksModel?: string;
+  claudePlanModel?: string;
+  claudeInventModel?: string;
+  claudeAmendModel?: string;
   onChildEvent?: (evt: AgentEvent) => void;
 }
 
@@ -165,6 +172,37 @@ export function resolveGhToken(
   return { value: undefined, source: "not set" };
 }
 
+export type ClaudeModelKey =
+  | "claudeSpecModel"
+  | "claudeNameModel"
+  | "claudeEssayModel"
+  | "claudeEssayTasksModel"
+  | "claudePlanModel"
+  | "claudeInventModel"
+  | "claudeAmendModel";
+
+export const CLAUDE_MODEL_KEYS: ClaudeModelKey[] = [
+  "claudeSpecModel",
+  "claudeNameModel",
+  "claudeEssayModel",
+  "claudeEssayTasksModel",
+  "claudePlanModel",
+  "claudeInventModel",
+  "claudeAmendModel",
+];
+
+export function resolveClaudeModel(
+  configKey: ClaudeModelKey,
+  override?: string,
+  config?: ConfigJson,
+): ResolvedValue {
+  if (override) return { value: override, source: "flag" };
+  const cfg = config ?? getConfig();
+  const value = cfg[configKey];
+  if (value) return { value, source: configSource(configKey, config) };
+  return { value: undefined, source: "not set" };
+}
+
 export function resolveAgentUpstream(
   override?: string,
   config?: ConfigJson,
@@ -298,6 +336,12 @@ export function makeAgentOptions(
     config,
   ).value!;
 
+  const claudeModels: Partial<Pick<AgentOptions, ClaudeModelKey>> = {};
+  for (const key of CLAUDE_MODEL_KEYS) {
+    const resolved = resolveClaudeModel(key, options[key], config);
+    if (resolved.value) claudeModels[key] = resolved.value;
+  }
+
   const sessionId = options.sessionId ?? readSession();
 
   return {
@@ -313,5 +357,6 @@ export function makeAgentOptions(
     gitUserEmail,
     ghToken,
     agentUpstream,
+    ...claudeModels,
   };
 }

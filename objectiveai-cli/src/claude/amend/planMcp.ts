@@ -81,6 +81,7 @@ export async function planMcp(
   depth: number,
   amendment: string,
   sessionId?: string,
+  model?: string,
 ): Promise<string | undefined> {
   const tools = [
     makeReadSpec(state),
@@ -212,6 +213,7 @@ export async function planMcp(
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId,
+        model,
       },
     }),
     log,

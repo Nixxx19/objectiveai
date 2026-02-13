@@ -25,6 +25,7 @@ export async function essayTasksMcp(
   state: ToolState,
   log: LogFn,
   sessionId?: string,
+  model?: string,
 ): Promise<string | undefined> {
   if (essayTasksIsNonEmpty()) return sessionId;
 
@@ -69,6 +70,7 @@ export async function essayTasksMcp(
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId,
+        model,
       },
     }),
     log,

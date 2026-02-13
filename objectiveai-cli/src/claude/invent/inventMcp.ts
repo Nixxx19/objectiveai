@@ -456,6 +456,7 @@ async function inventLoop(
   log: LogFn,
   useFunctionTasks: boolean,
   sessionId?: string,
+  model?: string,
 ): Promise<string | undefined> {
   const maxAttempts = 5;
   let attempt = 0;
@@ -501,6 +502,7 @@ Please try again. Remember to:
             disallowedTools: ["AskUserQuestion"],
             permissionMode: "dontAsk",
             resume: sid,
+            model,
           },
         }),
         log,
@@ -561,18 +563,20 @@ export async function inventMcp(
   log("=== Plan ===");
   let sessionId: string | undefined;
   try {
-    sessionId = await planMcp(state, log, depth, options.sessionId);
+    sessionId = await planMcp(state, log, depth, options.sessionId, options.claudePlanModel);
   } catch (e) {
     if (!state.anyStepRan) {
       log("Session may be invalid, retrying without session...");
-      sessionId = await planMcp(state, log, depth, undefined);
+      sessionId = await planMcp(state, log, depth, undefined, options.claudePlanModel);
     } else {
       throw e;
     }
   }
 
-  log(`=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await inventLoop(state, log, useFunctionTasks, sessionId);
+  log(
+    `=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`,
+  );
+  await inventLoop(state, log, useFunctionTasks, sessionId, options.claudeInventModel);
 
   log("=== ObjectiveAI Function invention complete ===");
 }

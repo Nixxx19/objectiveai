@@ -25,6 +25,7 @@ export async function nameMcp(
   log: LogFn,
   sessionId?: string,
   name?: string,
+  model?: string,
 ): Promise<string | undefined> {
   if (nameIsNonEmpty()) return sessionId;
 
@@ -65,6 +66,7 @@ export async function nameMcp(
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
         resume: sessionId,
+        model,
       },
     }),
     log,

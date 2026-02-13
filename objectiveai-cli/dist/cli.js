@@ -6,7 +6,7 @@ import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, append
 import { join, resolve, dirname } from 'path';
 import { homedir } from 'os';
 import { Functions, Chat, ObjectiveAI, JsonValueSchema, JsonValueExpressionSchema } from 'objectiveai';
-import { createSdkMcpServer, query, tool } from '@anthropic-ai/claude-agent-sdk';
+import { query, createSdkMcpServer, tool } from '@anthropic-ai/claude-agent-sdk';
 import z18, { z } from 'zod';
 
 var __defProp = Object.defineProperty;
@@ -333,6 +333,22 @@ function resolveGhToken(override, config) {
     return { value: cfg.ghToken, source: configSource("ghToken", config) };
   return { value: void 0, source: "not set" };
 }
+var CLAUDE_MODEL_KEYS = [
+  "claudeSpecModel",
+  "claudeNameModel",
+  "claudeEssayModel",
+  "claudeEssayTasksModel",
+  "claudePlanModel",
+  "claudeInventModel",
+  "claudeAmendModel"
+];
+function resolveClaudeModel(configKey, override, config) {
+  if (override) return { value: override, source: "flag" };
+  const cfg = config ?? getConfig();
+  const value = cfg[configKey];
+  if (value) return { value, source: configSource(configKey, config) };
+  return { value: void 0, source: "not set" };
+}
 function resolveAgentUpstream(override, config) {
   if (override) return { value: override, source: "flag" };
   const env = readEnv("OBJECTIVEAI_AGENT_UPSTREAM");
@@ -439,6 +455,11 @@ function makeAgentOptions(options = {}) {
     options.agentUpstream,
     config
   ).value;
+  const claudeModels = {};
+  for (const key of CLAUDE_MODEL_KEYS) {
+    const resolved = resolveClaudeModel(key, options[key], config);
+    if (resolved.value) claudeModels[key] = resolved.value;
+  }
   const sessionId = options.sessionId ?? readSession();
   return {
     ...options,
@@ -452,7 +473,8 @@ function makeAgentOptions(options = {}) {
     gitUserName,
     gitUserEmail,
     ghToken,
-    agentUpstream
+    agentUpstream,
+    ...claudeModels
   };
 }
 
@@ -533,7 +555,7 @@ async function fetchExamples(apiBase, apiKey) {
 function writeGitignore() {
   writeFileSync(
     ".gitignore",
-    ["examples/", "agent_functions/", "network_tests/", "logs/", ""].join("\n")
+    ["examples/", "agent_functions/", "network_tests/", "logs/", ".objectiveai/", ""].join("\n")
   );
 }
 async function init(options) {
@@ -1839,7 +1861,7 @@ function makeCheckFunction(state) {
 function specIsNonEmpty() {
   return existsSync("SPEC.md") && readFileSync("SPEC.md", "utf-8").trim().length > 0;
 }
-async function specMcp(state, log, sessionId, spec) {
+async function specMcp(state, log, sessionId, spec, model) {
   if (specIsNonEmpty()) return sessionId;
   if (spec) {
     writeSpec(spec);
@@ -1862,7 +1884,8 @@ async function specMcp(state, log, sessionId, spec) {
         allowedTools: ["mcp__spec__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -2848,7 +2871,7 @@ function makeToolState(options) {
 function nameIsNonEmpty() {
   return existsSync("name.txt") && readFileSync("name.txt", "utf-8").trim().length > 0;
 }
-async function nameMcp(state, log, sessionId, name) {
+async function nameMcp(state, log, sessionId, name, model) {
   if (nameIsNonEmpty()) return sessionId;
   if (name) {
     writeName(name, state.ghToken);
@@ -2879,7 +2902,8 @@ async function nameMcp(state, log, sessionId, name) {
         allowedTools: ["mcp__name__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -2933,7 +2957,7 @@ function makeWriteEssay(state) {
 function essayIsNonEmpty() {
   return existsSync("ESSAY.md") && readFileSync("ESSAY.md", "utf-8").trim().length > 0;
 }
-async function essayMcp(state, log, sessionId) {
+async function essayMcp(state, log, sessionId, model) {
   if (essayIsNonEmpty()) return sessionId;
   const tools = [
     makeReadSpec(state),
@@ -2959,7 +2983,8 @@ async function essayMcp(state, log, sessionId) {
         allowedTools: ["mcp__essay__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -3018,7 +3043,7 @@ function makeWriteEssayTasks(state) {
 function essayTasksIsNonEmpty() {
   return existsSync("ESSAY_TASKS.md") && readFileSync("ESSAY_TASKS.md", "utf-8").trim().length > 0;
 }
-async function essayTasksMcp(state, log, sessionId) {
+async function essayTasksMcp(state, log, sessionId, model) {
   if (essayTasksIsNonEmpty()) return sessionId;
   const tools = [
     makeReadSpec(state),
@@ -3047,7 +3072,8 @@ async function essayTasksMcp(state, log, sessionId) {
         allowedTools: ["mcp__essayTasks__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -3101,28 +3127,28 @@ async function prepare(state, options) {
     state,
     log,
     sessionId,
-    (sid) => specMcp(state, log, sid, options.spec)
+    (sid) => specMcp(state, log, sid, options.spec, options.claudeSpecModel)
   );
   log("=== Step 2: name.txt ===");
   sessionId = await runStep(
     state,
     log,
     sessionId,
-    (sid) => nameMcp(state, log, sid, options.name)
+    (sid) => nameMcp(state, log, sid, options.name, options.claudeNameModel)
   );
   log("=== Step 3: ESSAY.md ===");
   sessionId = await runStep(
     state,
     log,
     sessionId,
-    (sid) => essayMcp(state, log, sid)
+    (sid) => essayMcp(state, log, sid, options.claudeEssayModel)
   );
   log("=== Step 4: ESSAY_TASKS.md ===");
   sessionId = await runStep(
     state,
     log,
     sessionId,
-    (sid) => essayTasksMcp(state, log, sid)
+    (sid) => essayTasksMcp(state, log, sid, options.claudeEssayTasksModel)
   );
   return sessionId;
 }
@@ -4440,7 +4466,7 @@ function makeSubmit(state) {
     }))
   );
 }
-async function planMcp(state, log, depth, sessionId) {
+async function planMcp(state, log, depth, sessionId, model) {
   const tools = [
     makeReadSpec(state),
     makeReadName(),
@@ -4575,7 +4601,8 @@ Plan for diverse test inputs (minimum 10, maximum 100):
         allowedTools: ["mcp__plan__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -5227,7 +5254,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **No API key is needed for tests** - tests run against a local server
 `;
 }
-async function inventLoop(state, log, useFunctionTasks, sessionId) {
+async function inventLoop(state, log, useFunctionTasks, sessionId, model) {
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -5261,7 +5288,8 @@ Please try again. Remember to:
           allowedTools: ["mcp__invent__*"],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
-          resume: sid
+          resume: sid,
+          model
         }
       }),
       log,
@@ -5310,20 +5338,22 @@ async function inventMcp(state, options) {
   log("=== Plan ===");
   let sessionId;
   try {
-    sessionId = await planMcp(state, log, depth, options.sessionId);
+    sessionId = await planMcp(state, log, depth, options.sessionId, options.claudePlanModel);
   } catch (e) {
     if (!state.anyStepRan) {
       log("Session may be invalid, retrying without session...");
-      sessionId = await planMcp(state, log, depth, void 0);
+      sessionId = await planMcp(state, log, depth, void 0, options.claudePlanModel);
     } else {
       throw e;
     }
   }
-  log(`=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await inventLoop(state, log, useFunctionTasks, sessionId);
+  log(
+    `=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`
+  );
+  await inventLoop(state, log, useFunctionTasks, sessionId, options.claudeInventModel);
   log("=== ObjectiveAI Function invention complete ===");
 }
-async function planMcp2(state, log, depth, amendment, sessionId) {
+async function planMcp2(state, log, depth, amendment, sessionId, model) {
   const tools = [
     makeReadSpec(state),
     makeReadName(),
@@ -5437,7 +5467,8 @@ ${readPrefix} your amendment plan using the WritePlan tool. Include:
         allowedTools: ["mcp__amend-plan__*"],
         disallowedTools: ["AskUserQuestion"],
         permissionMode: "dontAsk",
-        resume: sessionId
+        resume: sessionId,
+        model
       }
     }),
     log,
@@ -5913,7 +5944,7 @@ Once all tests pass and compliance is verified:
 - **No API key is needed for tests** \u2014 tests run against a local server
 `;
 }
-async function amendLoop(state, log, useFunctionTasks, amendment, sessionId) {
+async function amendLoop(state, log, useFunctionTasks, amendment, sessionId, model) {
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -5947,7 +5978,8 @@ Please try again. Remember to:
           allowedTools: ["mcp__amend__*"],
           disallowedTools: ["AskUserQuestion"],
           permissionMode: "dontAsk",
-          resume: sid
+          resume: sid,
+          model
         }
       }),
       log,
@@ -5996,17 +6028,17 @@ async function amendMcp(state, options, amendment) {
   log("=== Amend Plan ===");
   let sessionId;
   try {
-    sessionId = await planMcp2(state, log, depth, amendment, options.sessionId);
+    sessionId = await planMcp2(state, log, depth, amendment, options.sessionId, options.claudePlanModel);
   } catch (e) {
     if (!state.anyStepRan) {
       log("Session may be invalid, retrying without session...");
-      sessionId = await planMcp2(state, log, depth, amendment, void 0);
+      sessionId = await planMcp2(state, log, depth, amendment, void 0, options.claudePlanModel);
     } else {
       throw e;
     }
   }
   log(`=== Amend Loop: Modifying function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await amendLoop(state, log, useFunctionTasks, amendment, sessionId);
+  await amendLoop(state, log, useFunctionTasks, amendment, sessionId, options.claudeAmendModel);
   log("=== ObjectiveAI Function amendment complete ===");
 }
 function getNextPlanIndex() {
@@ -6530,8 +6562,87 @@ async function amend(partialOptions = {}) {
   closeStdin?.();
   emitDoneAndDispose(isChild, dashboard);
 }
+var CACHE_TTL = 30 * 60 * 1e3;
+var _memoryCache;
+function cachePath() {
+  return join(homedir(), ".objectiveai", "claude-supported-models-cache.json");
+}
+function readCache() {
+  if (_memoryCache) return _memoryCache;
+  const path = cachePath();
+  if (!existsSync(path)) return void 0;
+  try {
+    const raw = JSON.parse(readFileSync(path, "utf-8"));
+    if (Date.now() - raw.timestamp < CACHE_TTL) {
+      _memoryCache = raw.models;
+      return raw.models;
+    }
+  } catch {
+  }
+  return void 0;
+}
+function writeCache(models) {
+  const dir = join(homedir(), ".objectiveai");
+  if (!existsSync(dir)) {
+    mkdirSync(dir, { recursive: true });
+  }
+  const data = { timestamp: Date.now(), models };
+  writeFileSync(cachePath(), JSON.stringify(data, null, 2), "utf-8");
+}
+async function fetchFromSdk() {
+  const q = query({ prompt: "" });
+  const models = await q.supportedModels();
+  return models;
+}
+async function getClaudeSupportedModels() {
+  const cached = readCache();
+  if (cached) return cached;
+  const models = await fetchFromSdk();
+  _memoryCache = models;
+  writeCache(models);
+  return models;
+}
+async function validateClaudeModel(value) {
+  const models = await getClaudeSupportedModels();
+  if (!models.some((m) => m.value === value)) {
+    return `Unknown model "${value}". Supported: ${models.map((m) => m.value).join(", ")}`;
+  }
+  return null;
+}
+async function validateClaudeModels(options) {
+  const models = await getClaudeSupportedModels();
+  const modelValues = new Set(models.map((m) => m.value));
+  const errors = [];
+  for (const key of CLAUDE_MODEL_KEYS) {
+    const val = options[key];
+    if (val && !modelValues.has(val)) {
+      errors.push(`  ${key}: "${val}" is not a supported model`);
+    }
+  }
+  if (errors.length > 0) {
+    console.error("\n\x1B[31m  Invalid Claude models:\x1B[0m\n");
+    for (const e of errors) {
+      console.error(e);
+    }
+    console.error(
+      `
+  Supported: ${[...modelValues].join(", ")}
+`
+    );
+    process.exit(1);
+  }
+}
 
 // src/cli.ts
+var claudeModelConfigs = [
+  { key: "claudeSpecModel", flag: "--claude-spec-model", label: "Claude Spec Model", desc: "Model for SPEC.md generation" },
+  { key: "claudeNameModel", flag: "--claude-name-model", label: "Claude Name Model", desc: "Model for name generation" },
+  { key: "claudeEssayModel", flag: "--claude-essay-model", label: "Claude Essay Model", desc: "Model for ESSAY.md generation" },
+  { key: "claudeEssayTasksModel", flag: "--claude-essay-tasks-model", label: "Claude Essay Tasks Model", desc: "Model for ESSAY_TASKS.md generation" },
+  { key: "claudePlanModel", flag: "--claude-plan-model", label: "Claude Plan Model", desc: "Model for plan step" },
+  { key: "claudeInventModel", flag: "--claude-invent-model", label: "Claude Invent Model", desc: "Model for invent loop" },
+  { key: "claudeAmendModel", flag: "--claude-amend-model", label: "Claude Amend Model", desc: "Model for amend loop" }
+];
 var parentPid = process.env.OBJECTIVEAI_PARENT_PID ? parseInt(process.env.OBJECTIVEAI_PARENT_PID, 10) : void 0;
 if (parentPid) {
   const watchdog = setInterval(() => {
@@ -6548,6 +6659,7 @@ var RED = "\x1B[31m";
 var GREEN = "\x1B[32m";
 var BOLD2 = "\x1B[1m";
 var DIM = "\x1B[2m";
+var UNDERLINE = "\x1B[4m";
 var RESET2 = "\x1B[0m";
 var program = new Command();
 program.name("objectiveai").description("ObjectiveAI").action(() => {
@@ -6561,9 +6673,9 @@ program.name("objectiveai").description("ObjectiveAI").action(() => {
   const anyConfigMissing = !apiKey.value || !gitUserName.value || !gitUserEmail.value || !ghToken.value;
   console.log(`${BOLD2}Status${RESET2}
 `);
-  console.log(anyConfigMissing ? `  ${RED}config: missing values${RESET2}  ${DIM}(run objectiveai config)${RESET2}` : `  ${GREEN}config: all values set${RESET2}`);
-  console.log(git ? `  ${GREEN}git: installed${RESET2}` : `  ${RED}git: not installed${RESET2}`);
-  console.log(gh2 ? `  ${GREEN}gh: installed${RESET2}` : `  ${RED}gh: not installed${RESET2}`);
+  console.log(anyConfigMissing ? `  ${RED}${UNDERLINE}config${RESET2}${RED}  missing values  ${DIM}(run objectiveai config)${RESET2}` : `  ${GREEN}${UNDERLINE}config${RESET2}${GREEN}  all values set${RESET2}`);
+  console.log(git ? `  ${GREEN}${UNDERLINE}git${RESET2}${GREEN}     installed${RESET2}` : `  ${RED}${UNDERLINE}git${RESET2}${RED}     not installed${RESET2}`);
+  console.log(gh2 ? `  ${GREEN}${UNDERLINE}gh${RESET2}${GREEN}      installed${RESET2}` : `  ${RED}${UNDERLINE}gh${RESET2}${RED}      not installed${RESET2}`);
   console.log(`
 ${BOLD2}Commands${RESET2}
 `);
@@ -6573,7 +6685,11 @@ ${BOLD2}Commands${RESET2}
   console.log("  objectiveai dryrun          Preview the dashboard with simulated agents");
   console.log("");
 });
-program.command("invent").description("Invent a new ObjectiveAI Function").argument("[spec]", "Optional spec string for SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--agent-upstream <upstream>", "Agent upstream (default: claude)").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt).action(async (spec, opts) => {
+var inventCmd = program.command("invent").description("Invent a new ObjectiveAI Function").argument("[spec]", "Optional spec string for SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--agent-upstream <upstream>", "Agent upstream (default: claude)").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt);
+for (const cfg of claudeModelConfigs) {
+  inventCmd.option(`${cfg.flag} <model>`, cfg.desc);
+}
+inventCmd.action(async (spec, opts) => {
   const partialOpts = {
     spec,
     name: opts.name,
@@ -6587,10 +6703,21 @@ program.command("invent").description("Invent a new ObjectiveAI Function").argum
     ghToken: opts.ghToken,
     agentUpstream: opts.agentUpstream
   };
+  for (const cfg of claudeModelConfigs) {
+    if (opts[cfg.key]) partialOpts[cfg.key] = opts[cfg.key];
+  }
   checkConfig(partialOpts);
+  const upstream = resolveAgentUpstream(opts.agentUpstream).value;
+  if (upstream === "claude") {
+    await validateClaudeModels(partialOpts);
+  }
   await claude_exports.invent(partialOpts);
 });
-program.command("amend").description("Amend an existing ObjectiveAI Function").argument("[spec]", "Amendment spec to append to SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--agent-upstream <upstream>", "Agent upstream (default: claude)").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt).action(async (spec, opts) => {
+var amendCmd = program.command("amend").description("Amend an existing ObjectiveAI Function").argument("[spec]", "Amendment spec to append to SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--agent-upstream <upstream>", "Agent upstream (default: claude)").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt);
+for (const cfg of claudeModelConfigs) {
+  amendCmd.option(`${cfg.flag} <model>`, cfg.desc);
+}
+amendCmd.action(async (spec, opts) => {
   const partialOpts = {
     spec,
     name: opts.name,
@@ -6604,7 +6731,14 @@ program.command("amend").description("Amend an existing ObjectiveAI Function").a
     ghToken: opts.ghToken,
     agentUpstream: opts.agentUpstream
   };
+  for (const cfg of claudeModelConfigs) {
+    if (opts[cfg.key]) partialOpts[cfg.key] = opts[cfg.key];
+  }
   checkConfig(partialOpts);
+  const upstream = resolveAgentUpstream(opts.agentUpstream).value;
+  if (upstream === "claude") {
+    await validateClaudeModels(partialOpts);
+  }
   await claude_exports.amend(partialOpts);
 });
 program.command("dryrun").description("Preview the CLI dashboard with simulated agents").action(async () => {
@@ -6614,12 +6748,23 @@ function mask(value) {
   if (value.length <= 8) return "*".repeat(value.length);
   return value.slice(0, 4) + "*".repeat(value.length - 8) + value.slice(-4);
 }
-function formatRow(label, resolved, secret = false) {
-  if (!resolved.value) {
-    return `${RED}  ${label}: (not set)${RESET2}`;
+function printRows(rows) {
+  const labelWidth = Math.max(...rows.map((r) => r.label.length));
+  const displayValues = rows.map((r) => {
+    if (!r.resolved.value) return "(not set)";
+    return r.secret ? mask(r.resolved.value) : r.resolved.value;
+  });
+  const valueWidth = Math.max(...displayValues.map((v) => v.length));
+  for (let i = 0; i < rows.length; i++) {
+    const { label, resolved } = rows[i];
+    const display = displayValues[i];
+    const color = resolved.value ? GREEN : RED;
+    const labelPad = " ".repeat(labelWidth - label.length);
+    const source = resolved.value ? `  ${DIM}(${resolved.source})${RESET2}` : "";
+    console.log(
+      `  ${color}${UNDERLINE}${label}${RESET2}${color}${labelPad}  ${display.padEnd(valueWidth)}` + source + RESET2
+    );
   }
-  const display = secret ? mask(resolved.value) : resolved.value;
-  return `${GREEN}  ${label}: ${display} ${DIM}(${resolved.source})${RESET2}`;
 }
 function showConfigDetail(label, resolved, description, sources, configKey, secret = false) {
   printBanner();
@@ -6629,9 +6774,9 @@ function showConfigDetail(label, resolved, description, sources, configKey, secr
 `);
   if (resolved.value) {
     const display = secret ? mask(resolved.value) : resolved.value;
-    console.log(`${GREEN}  Current value: ${display} ${DIM}(${resolved.source})${RESET2}`);
+    console.log(`  ${GREEN}${UNDERLINE}current value${RESET2}${GREEN}  ${display}  ${DIM}(${resolved.source})${RESET2}`);
   } else {
-    console.log(`${RED}  Current value: (not set)${RESET2}`);
+    console.log(`  ${RED}${UNDERLINE}current value${RESET2}${RED}  (not set)${RESET2}`);
   }
   console.log(`
 ${BOLD2}Sources${RESET2} (highest to lowest priority)
@@ -6733,12 +6878,18 @@ configCmd.action(() => {
   const agentUpstream = resolveAgentUpstream();
   console.log(`${BOLD2}Current Configuration${RESET2}
 `);
-  console.log(formatRow("ObjectiveAI API Base", apiBase));
-  console.log(formatRow("ObjectiveAI API Key", apiKey, true));
-  console.log(formatRow("Git User Name", gitUserName));
-  console.log(formatRow("Git User Email", gitUserEmail));
-  console.log(formatRow("GitHub Token", ghToken, true));
-  console.log(formatRow("Agent Upstream", agentUpstream));
+  printRows([
+    { label: "ObjectiveAI API Base", resolved: apiBase },
+    { label: "ObjectiveAI API Key", resolved: apiKey, secret: true },
+    { label: "Git User Name", resolved: gitUserName },
+    { label: "Git User Email", resolved: gitUserEmail },
+    { label: "GitHub Token", resolved: ghToken, secret: true },
+    { label: "Agent Upstream", resolved: agentUpstream },
+    ...claudeModelConfigs.map((cfg) => ({
+      label: cfg.label,
+      resolved: resolveClaudeModel(cfg.key)
+    }))
+  ]);
   console.log(`
 ${BOLD2}Configuration Sources${RESET2} (highest to lowest priority)
 `);
@@ -6747,15 +6898,23 @@ ${BOLD2}Configuration Sources${RESET2} (highest to lowest priority)
   console.log("  3. .objectiveai/config.json (project)");
   console.log("  4. ~/.objectiveai/config.json (user)");
   console.log("  5. git config (user.name, user.email)");
+  const configCommands = [
+    ["apiBase", "Show ObjectiveAI API base URL"],
+    ["apiKey", "Show ObjectiveAI API key"],
+    ["gitUserName", "Show git user name"],
+    ["gitUserEmail", "Show git user email"],
+    ["ghToken", "Show GitHub token"],
+    ["agentUpstream", "Show agent upstream"],
+    ["claudeModels", "List available Claude models"],
+    ...claudeModelConfigs.map((cfg) => [cfg.key, `Show ${cfg.label.toLowerCase()}`])
+  ];
+  const pad = Math.max(...configCommands.map(([k]) => k.length)) + 2;
   console.log(`
 ${BOLD2}Commands${RESET2}
 `);
-  console.log("  objectiveai config apiBase      Show ObjectiveAI API base URL");
-  console.log("  objectiveai config apiKey       Show ObjectiveAI API key");
-  console.log("  objectiveai config gitUserName  Show git user name");
-  console.log("  objectiveai config gitUserEmail Show git user email");
-  console.log("  objectiveai config ghToken      Show GitHub token");
-  console.log("  objectiveai config agentUpstream Show agent upstream");
+  for (const [key, desc] of configCommands) {
+    console.log(`  objectiveai config ${key.padEnd(pad)} ${desc}`);
+  }
   console.log("");
 });
 configCmd.command("apiBase").description("Show or set ObjectiveAI API base URL").argument("[value]", "URL to set").option("--project", "Write to project config instead of user config").action((value, opts) => {
@@ -6874,4 +7033,53 @@ configCmd.command("agentUpstream").description("Show or set agent upstream").arg
     );
   }
 });
+configCmd.command("claudeModels").description("List available Claude models").action(async () => {
+  printBanner();
+  console.log(`${BOLD2}Available Claude Models${RESET2}
+`);
+  try {
+    const models = await getClaudeSupportedModels();
+    for (const m of models) {
+      console.log(`  ${GREEN}${m.value}${RESET2}`);
+      console.log(`${DIM}    ${m.displayName} \u2014 ${m.description}${RESET2}`);
+    }
+    console.log("");
+  } catch (e) {
+    console.error(`
+${RED}  Failed to fetch models: ${e instanceof Error ? e.message : e}${RESET2}
+`);
+    process.exit(1);
+  }
+});
+for (const cfg of claudeModelConfigs) {
+  configCmd.command(cfg.key).description(`Show or set ${cfg.label.toLowerCase()}`).argument("[value]", "Model name to set").option("--project", "Write to project config instead of user config").action(async (value, opts) => {
+    if (value) {
+      const error = await validateClaudeModel(value);
+      if (error) {
+        console.error(`
+\x1B[31m  Error: ${error}\x1B[0m
+`);
+        process.exit(1);
+      }
+      const path = setConfigValue(cfg.key, value, !!opts.project);
+      const where = opts.project ? "project" : "user";
+      console.log(`
+  Set ${cfg.key} in ${where} config (${path})
+`);
+    } else {
+      showConfigDetail(
+        cfg.label,
+        resolveClaudeModel(cfg.key),
+        `${cfg.desc}. Leave unset to use the default Claude model.`,
+        [
+          { label: `CLI flag: ${cfg.flag} <model>`, key: "flag" },
+          { label: ".objectiveai/config.json (project)", key: "project" },
+          { label: "~/.objectiveai/config.json (user)", key: "user config" },
+          { label: "Default: (not set, uses SDK default)", key: "not set" }
+        ],
+        cfg.key
+      );
+    }
+  });
+}
 program.parse(process.argv);

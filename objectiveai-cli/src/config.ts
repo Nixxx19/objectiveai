@@ -9,6 +9,13 @@ export interface ConfigJson {
   gitUserEmail?: string;
   ghToken?: string;
   agentUpstream?: string;
+  claudeSpecModel?: string;
+  claudeNameModel?: string;
+  claudeEssayModel?: string;
+  claudeEssayTasksModel?: string;
+  claudePlanModel?: string;
+  claudeInventModel?: string;
+  claudeAmendModel?: string;
 }
 
 function readConfigFile(dir: string): ConfigJson | undefined {

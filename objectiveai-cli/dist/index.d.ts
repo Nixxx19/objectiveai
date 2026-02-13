@@ -12,6 +12,13 @@ interface ConfigJson {
     gitUserEmail?: string;
     ghToken?: string;
     agentUpstream?: string;
+    claudeSpecModel?: string;
+    claudeNameModel?: string;
+    claudeEssayModel?: string;
+    claudeEssayTasksModel?: string;
+    claudePlanModel?: string;
+    claudeInventModel?: string;
+    claudeAmendModel?: string;
 }
 
 type AgentEvent = {
@@ -45,6 +52,13 @@ interface AgentOptions {
     gitUserEmail: string;
     ghToken: string;
     agentUpstream: string;
+    claudeSpecModel?: string;
+    claudeNameModel?: string;
+    claudeEssayModel?: string;
+    claudeEssayTasksModel?: string;
+    claudePlanModel?: string;
+    claudeInventModel?: string;
+    claudeAmendModel?: string;
     onChildEvent?: (evt: AgentEvent) => void;
 }
 declare function isGitAvailable(): boolean;
@@ -58,6 +72,9 @@ declare function resolveApiKey(override?: string, config?: ConfigJson): Resolved
 declare function resolveGitUserName(override?: string, config?: ConfigJson): ResolvedValue;
 declare function resolveGitUserEmail(override?: string, config?: ConfigJson): ResolvedValue;
 declare function resolveGhToken(override?: string, config?: ConfigJson): ResolvedValue;
+type ClaudeModelKey = "claudeSpecModel" | "claudeNameModel" | "claudeEssayModel" | "claudeEssayTasksModel" | "claudePlanModel" | "claudeInventModel" | "claudeAmendModel";
+declare const CLAUDE_MODEL_KEYS: ClaudeModelKey[];
+declare function resolveClaudeModel(configKey: ClaudeModelKey, override?: string, config?: ConfigJson): ResolvedValue;
 declare function resolveAgentUpstream(override?: string, config?: ConfigJson): ResolvedValue;
 declare function checkConfig(options?: Partial<AgentOptions>): void;
 declare function makeAgentOptions(options?: Partial<AgentOptions>): AgentOptions;
@@ -108,13 +125,13 @@ interface ToolState {
     activeChildren: Map<string, stream.Writable>;
 }
 
-declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string): Promise<string | undefined>;
+declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?: string, model?: string): Promise<string | undefined>;
 
-declare function nameMcp(state: ToolState, log: LogFn, sessionId?: string, name?: string): Promise<string | undefined>;
+declare function nameMcp(state: ToolState, log: LogFn, sessionId?: string, name?: string, model?: string): Promise<string | undefined>;
 
-declare function essayMcp(state: ToolState, log: LogFn, sessionId?: string): Promise<string | undefined>;
+declare function essayMcp(state: ToolState, log: LogFn, sessionId?: string, model?: string): Promise<string | undefined>;
 
-declare function essayTasksMcp(state: ToolState, log: LogFn, sessionId?: string): Promise<string | undefined>;
+declare function essayTasksMcp(state: ToolState, log: LogFn, sessionId?: string, model?: string): Promise<string | undefined>;
 
 declare function prepare(state: ToolState, options: AgentOptions): Promise<string | undefined>;
 
@@ -58376,4 +58393,4 @@ type SpawnFunctionAgentsParams = z$1.infer<typeof SpawnFunctionAgentsParamsSchem
 declare function invent(partialOptions?: Partial<AgentOptions>): Promise<void>;
 declare function amend(partialOptions?: Partial<AgentOptions>): Promise<void>;
 
-export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type ResolvedValue, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, amend, checkConfig, consumeStream, createChildLogger, createFileLogger, createRootLogger, dryrun, formatMessage, getLatestLogPath, init, invent, isGhAvailable, isGitAvailable, makeAgentOptions, resolveAgentUpstream, resolveApiBase, resolveApiKey, resolveGhToken, resolveGitUserEmail, resolveGitUserName };
+export { type AgentOptions, CLAUDE_MODEL_KEYS, index$7 as Claude, type ClaudeModelKey, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type ResolvedValue, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, amend, checkConfig, consumeStream, createChildLogger, createFileLogger, createRootLogger, dryrun, formatMessage, getLatestLogPath, init, invent, isGhAvailable, isGitAvailable, makeAgentOptions, resolveAgentUpstream, resolveApiBase, resolveApiKey, resolveClaudeModel, resolveGhToken, resolveGitUserEmail, resolveGitUserName };
