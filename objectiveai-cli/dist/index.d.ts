@@ -14,6 +14,7 @@ interface ConfigJson {
     agentUpstream?: string;
     claudeSpecModel?: string;
     claudeNameModel?: string;
+    claudeTypeModel?: string;
     claudeEssayModel?: string;
     claudeEssayTasksModel?: string;
     claudePlanModel?: string;
@@ -41,6 +42,7 @@ type LogFn = (...args: unknown[]) => void;
 interface AgentOptions {
     name?: string;
     spec?: string;
+    type?: "scalar.function" | "vector.function";
     apiBase: string;
     apiKey: string;
     sessionId?: string;
@@ -54,6 +56,7 @@ interface AgentOptions {
     agentUpstream: string;
     claudeSpecModel?: string;
     claudeNameModel?: string;
+    claudeTypeModel?: string;
     claudeEssayModel?: string;
     claudeEssayTasksModel?: string;
     claudePlanModel?: string;
@@ -72,7 +75,7 @@ declare function resolveApiKey(override?: string, config?: ConfigJson): Resolved
 declare function resolveGitUserName(override?: string, config?: ConfigJson): ResolvedValue;
 declare function resolveGitUserEmail(override?: string, config?: ConfigJson): ResolvedValue;
 declare function resolveGhToken(override?: string, config?: ConfigJson): ResolvedValue;
-type ClaudeModelKey = "claudeSpecModel" | "claudeNameModel" | "claudeEssayModel" | "claudeEssayTasksModel" | "claudePlanModel" | "claudeInventModel" | "claudeAmendModel";
+type ClaudeModelKey = "claudeSpecModel" | "claudeNameModel" | "claudeTypeModel" | "claudeEssayModel" | "claudeEssayTasksModel" | "claudePlanModel" | "claudeInventModel" | "claudeAmendModel";
 declare const CLAUDE_MODEL_KEYS: ClaudeModelKey[];
 declare function resolveClaudeModel(configKey: ClaudeModelKey, override?: string, config?: ConfigJson): ResolvedValue;
 declare function resolveAgentUpstream(override?: string, config?: ConfigJson): ResolvedValue;
@@ -129,6 +132,8 @@ declare function specMcp(state: ToolState, log: LogFn, sessionId?: string, spec?
 
 declare function nameMcp(state: ToolState, log: LogFn, sessionId?: string, name?: string, model?: string): Promise<string | undefined>;
 
+declare function typeMcp(state: ToolState, log: LogFn, sessionId?: string, type?: "scalar.function" | "vector.function", model?: string): Promise<string | undefined>;
+
 declare function essayMcp(state: ToolState, log: LogFn, sessionId?: string, model?: string): Promise<string | undefined>;
 
 declare function essayTasksMcp(state: ToolState, log: LogFn, sessionId?: string, model?: string): Promise<string | undefined>;
@@ -152,8 +157,9 @@ declare const index$7_inventMcp: typeof inventMcp;
 declare const index$7_nameMcp: typeof nameMcp;
 declare const index$7_prepare: typeof prepare;
 declare const index$7_specMcp: typeof specMcp;
+declare const index$7_typeMcp: typeof typeMcp;
 declare namespace index$7 {
-  export { amend$1 as amend, index$7_amendMcp as amendMcp, index$7_dryrun as dryrun, index$7_essayMcp as essayMcp, index$7_essayTasksMcp as essayTasksMcp, invent$1 as invent, index$7_inventMcp as inventMcp, index$7_nameMcp as nameMcp, index$7_prepare as prepare, index$7_specMcp as specMcp };
+  export { amend$1 as amend, index$7_amendMcp as amendMcp, index$7_dryrun as dryrun, index$7_essayMcp as essayMcp, index$7_essayTasksMcp as essayTasksMcp, invent$1 as invent, index$7_inventMcp as inventMcp, index$7_nameMcp as nameMcp, index$7_prepare as prepare, index$7_specMcp as specMcp, index$7_typeMcp as typeMcp };
 }
 
 type Result<T> = {
@@ -58388,6 +58394,10 @@ declare function getLatestLogPath(): string | null;
 declare const SpawnFunctionAgentsParamsSchema: z$1.ZodArray<z$1.ZodObject<{
     name: z$1.ZodString;
     spec: z$1.ZodString;
+    type: z$1.ZodEnum<{
+        "scalar.function": "scalar.function";
+        "vector.function": "vector.function";
+    }>;
 }, z$1.core.$strip>>;
 type SpawnFunctionAgentsParams = z$1.infer<typeof SpawnFunctionAgentsParamsSchema>;
 

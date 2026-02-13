@@ -1,10 +1,5 @@
 import { ChildProcess, execSync, spawn } from "child_process";
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  writeFileSync,
-} from "fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "fs";
 
 import { join } from "path";
 import { Result } from "./result";
@@ -41,7 +36,11 @@ export function getGitHubOwner(ghToken: string): string | null {
   }
 }
 
-export function repoExists(owner: string, name: string, ghToken: string): boolean {
+export function repoExists(
+  owner: string,
+  name: string,
+  ghToken: string,
+): boolean {
   try {
     execSync(`gh repo view ${owner}/${name}`, {
       stdio: "ignore",
@@ -77,6 +76,7 @@ export interface RunAgentOptions {
 function runAgentInSubdir(
   name: string,
   spec: string,
+  type: "scalar.function" | "vector.function",
   childDepth: number,
   childProcesses: ChildProcess[],
   opts?: RunAgentOptions,
@@ -98,22 +98,20 @@ function runAgentInSubdir(
     if (opts?.ghToken) args.push("--gh-token", opts.ghToken);
     if (opts?.minWidth) args.push("--min-width", String(opts.minWidth));
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
+    if (type === "scalar.function") args.push("--scalar");
+    if (type === "vector.function") args.push("--vector");
 
-    const child = spawn(
-      "objectiveai",
-      args,
-      {
-        cwd: subdir,
-        stdio: ["pipe", "pipe", "pipe"],
-        shell: true,
-        env: {
-          ...process.env,
-          OBJECTIVEAI_PARENT_PID: String(process.pid),
-          OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
-          ...(opts?.ghToken && { GH_TOKEN: opts.ghToken }),
-        },
+    const child = spawn("objectiveai", args, {
+      cwd: subdir,
+      stdio: ["pipe", "pipe", "pipe"],
+      shell: true,
+      env: {
+        ...process.env,
+        OBJECTIVEAI_PARENT_PID: String(process.pid),
+        OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
+        ...(opts?.ghToken && { GH_TOKEN: opts.ghToken }),
       },
-    );
+    });
 
     childProcesses.push(child);
 
@@ -275,7 +273,14 @@ export async function spawnFunctionAgents(
   try {
     const results = await Promise.all(
       params.map((param) =>
-        runAgentInSubdir(param.name, param.spec, childDepth, childProcesses, opts),
+        runAgentInSubdir(
+          param.name,
+          param.spec,
+          param.type,
+          childDepth,
+          childProcesses,
+          opts,
+        ),
       ),
     );
     return { ok: true, value: results, error: undefined };

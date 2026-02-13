@@ -31,7 +31,6 @@ import {
 import {
   makeReadType,
   makeReadTypeSchema,
-  makeEditType,
   makeCheckType,
 } from "../../tools/claude/type";
 import {
@@ -189,7 +188,6 @@ function getCommonTools(state: ToolState) {
     makeCheckFunction(state),
     makeReadType(state),
     makeReadTypeSchema(state),
-    makeEditType(state),
     makeCheckType(state),
     makeReadDescription(state),
     makeReadDescriptionSchema(state),

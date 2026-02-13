@@ -31,7 +31,8 @@ __export(claude_exports, {
   inventMcp: () => inventMcp,
   nameMcp: () => nameMcp,
   prepare: () => prepare,
-  specMcp: () => specMcp
+  specMcp: () => specMcp,
+  typeMcp: () => typeMcp
 });
 
 // src/events.ts
@@ -335,6 +336,7 @@ function resolveGhToken(override, config) {
 var CLAUDE_MODEL_KEYS = [
   "claudeSpecModel",
   "claudeNameModel",
+  "claudeTypeModel",
   "claudeEssayModel",
   "claudeEssayTasksModel",
   "claudePlanModel",
@@ -3138,6 +3140,108 @@ async function nameMcp(state, log, sessionId, name, model) {
   if (sessionId) writeSession(sessionId);
   return sessionId;
 }
+function makeReadType(state) {
+  return claudeAgentSdk.tool("ReadType", "Read the Function's `type` field", {}, async () => {
+    state.hasReadType = true;
+    return resultFromResult(readType());
+  });
+}
+function makeReadTypeSchema(state) {
+  return claudeAgentSdk.tool(
+    "ReadTypeSchema",
+    "Read the schema for Function `type` field",
+    {},
+    async () => textResult(formatZodSchema(readTypeSchema()))
+  );
+}
+function makeEditType(state) {
+  return claudeAgentSdk.tool(
+    "EditType",
+    "Edit the Function's `type` field",
+    { value: z18__default.default.string() },
+    async ({ value }) => {
+      const err = mustRead(state.hasReadType, "type");
+      if (err) return errorResult(err);
+      return resultFromResult(editType(value));
+    }
+  );
+}
+function makeCheckType(state) {
+  return claudeAgentSdk.tool(
+    "CheckType",
+    "Validate the Function's `type` field",
+    {},
+    async () => resultFromResult(checkType())
+  );
+}
+
+// src/claude/prepare/typeMcp.ts
+async function typeMcp(state, log, sessionId, type, model) {
+  if (!isDefaultType()) return sessionId;
+  if (type) {
+    editType(type);
+    return sessionId;
+  }
+  const tools = [
+    makeReadSpec(state),
+    makeReadType(state),
+    makeReadTypeSchema(),
+    makeEditType(state),
+    makeCheckType(),
+    makeListExampleFunctions(state),
+    makeReadExampleFunction(state)
+  ];
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "type", tools });
+  const reads = [];
+  if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
+  if (!state.hasReadExampleFunctions) reads.push("example functions");
+  const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then choose` : "Choose";
+  sessionId = await consumeStream(
+    claudeAgentSdk.query({
+      prompt: `${readPrefix} the function type based on the SPEC:
+- Use \`scalar.function\` if the input is a single item and the function **scores** it (output: single number 0-1)
+- Use \`vector.function\` if the input is multiple items and the function **ranks** them (output: array of scores summing to ~1)
+
+Use EditType to set the type.`,
+      options: {
+        tools: [],
+        mcpServers: { type: mcpServer },
+        allowedTools: ["mcp__type__*"],
+        disallowedTools: ["AskUserQuestion"],
+        permissionMode: "dontAsk",
+        resume: sessionId,
+        model
+      }
+    }),
+    log,
+    sessionId
+  );
+  let retry = 1;
+  while (isDefaultType()) {
+    if (retry > 10) {
+      throw new Error("type is not set after type phase");
+    }
+    sessionId = await consumeStream(
+      claudeAgentSdk.query({
+        prompt: "type is not set after your type phase.\nUse EditType to set the type to either `scalar.function` or `vector.function`.",
+        options: {
+          tools: [],
+          mcpServers: { type: mcpServer },
+          allowedTools: ["mcp__type__*"],
+          disallowedTools: ["AskUserQuestion"],
+          permissionMode: "dontAsk",
+          resume: sessionId
+        }
+      }),
+      log,
+      sessionId
+    );
+    retry += 1;
+  }
+  state.anyStepRan = true;
+  if (sessionId) writeSession(sessionId);
+  return sessionId;
+}
 function makeReadEssay(state) {
   return claudeAgentSdk.tool("ReadEssay", "Read ESSAY.md", {}, async () => {
     state.hasReadOrWrittenEssay = true;
@@ -3339,14 +3443,21 @@ async function prepare(state, options) {
     sessionId,
     (sid) => nameMcp(state, log, sid, options.name, options.claudeNameModel)
   );
-  log("=== Step 3: ESSAY.md ===");
+  log("=== Step 3: type ===");
+  sessionId = await runStep(
+    state,
+    log,
+    sessionId,
+    (sid) => typeMcp(state, log, sid, options.type, options.claudeTypeModel)
+  );
+  log("=== Step 4: ESSAY.md ===");
   sessionId = await runStep(
     state,
     log,
     sessionId,
     (sid) => essayMcp(state, log, sid, options.claudeEssayModel)
   );
-  log("=== Step 4: ESSAY_TASKS.md ===");
+  log("=== Step 5: ESSAY_TASKS.md ===");
   sessionId = await runStep(
     state,
     log,
@@ -3815,40 +3926,6 @@ function makeReadOutputParamSchema(state) {
     "Read the schema for `output` available in task output expression context.",
     {},
     async () => textResult(formatZodSchema(readOutputParamSchema()))
-  );
-}
-function makeReadType(state) {
-  return claudeAgentSdk.tool("ReadType", "Read the Function's `type` field", {}, async () => {
-    state.hasReadType = true;
-    return resultFromResult(readType());
-  });
-}
-function makeReadTypeSchema(state) {
-  return claudeAgentSdk.tool(
-    "ReadTypeSchema",
-    "Read the schema for Function `type` field",
-    {},
-    async () => textResult(formatZodSchema(readTypeSchema()))
-  );
-}
-function makeEditType(state) {
-  return claudeAgentSdk.tool(
-    "EditType",
-    "Edit the Function's `type` field",
-    { value: z18__default.default.string() },
-    async ({ value }) => {
-      const err = mustRead(state.hasReadType, "type");
-      if (err) return errorResult(err);
-      return resultFromResult(editType(value));
-    }
-  );
-}
-function makeCheckType(state) {
-  return claudeAgentSdk.tool(
-    "CheckType",
-    "Validate the Function's `type` field",
-    {},
-    async () => resultFromResult(checkType())
   );
 }
 function makeReadDescription(state) {
@@ -4856,7 +4933,7 @@ function getCurrentDepth() {
   const params = JSON.parse(content);
   return params.depth ?? 0;
 }
-function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
+function runAgentInSubdir(name, spec, type, childDepth, childProcesses, opts) {
   const subdir = path.join("agent_functions", name);
   fs.mkdirSync(subdir, { recursive: true });
   fs.writeFileSync(path.join(subdir, "SPEC.md"), spec, "utf-8");
@@ -4869,21 +4946,19 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
     if (opts?.ghToken) args.push("--gh-token", opts.ghToken);
     if (opts?.minWidth) args.push("--min-width", String(opts.minWidth));
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
-    const child = child_process.spawn(
-      "objectiveai",
-      args,
-      {
-        cwd: subdir,
-        stdio: ["pipe", "pipe", "pipe"],
-        shell: true,
-        env: {
-          ...process.env,
-          OBJECTIVEAI_PARENT_PID: String(process.pid),
-          OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
-          ...opts?.ghToken && { GH_TOKEN: opts.ghToken }
-        }
+    if (type === "scalar.function") args.push("--scalar");
+    if (type === "vector.function") args.push("--vector");
+    const child = child_process.spawn("objectiveai", args, {
+      cwd: subdir,
+      stdio: ["pipe", "pipe", "pipe"],
+      shell: true,
+      env: {
+        ...process.env,
+        OBJECTIVEAI_PARENT_PID: String(process.pid),
+        OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
+        ...opts?.ghToken && { GH_TOKEN: opts.ghToken }
       }
-    );
+    });
     childProcesses.push(child);
     if (child.stdin && opts?.activeChildren) {
       opts.activeChildren.set(name, child.stdin);
@@ -5010,7 +5085,14 @@ async function spawnFunctionAgents(params, opts) {
   try {
     const results = await Promise.all(
       params.map(
-        (param) => runAgentInSubdir(param.name, param.spec, childDepth, childProcesses, opts)
+        (param) => runAgentInSubdir(
+          param.name,
+          param.spec,
+          param.type,
+          childDepth,
+          childProcesses,
+          opts
+        )
       )
     );
     return { ok: true, value: results, error: void 0 };
@@ -5029,7 +5111,8 @@ async function spawnFunctionAgents(params, opts) {
 var SpawnFunctionAgentsParamsSchema = z18.z.array(
   z18.z.object({
     name: z18.z.string(),
-    spec: z18.z.string()
+    spec: z18.z.string(),
+    type: z18.z.enum(["scalar.function", "vector.function"])
   })
 );
 
@@ -5219,7 +5302,6 @@ function getCommonTools(state) {
     makeCheckFunction(),
     makeReadType(state),
     makeReadTypeSchema(),
-    makeEditType(state),
     makeCheckType(),
     makeReadDescription(state),
     makeReadDescriptionSchema(),
@@ -5924,7 +6006,6 @@ function getCommonTools2(state) {
     makeCheckFunction(),
     makeReadType(state),
     makeReadTypeSchema(),
-    makeEditType(state),
     makeCheckType(),
     makeReadDescription(state),
     makeReadDescriptionSchema(),

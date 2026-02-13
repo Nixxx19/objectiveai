@@ -9,6 +9,7 @@ export type LogFn = (...args: unknown[]) => void;
 export interface AgentOptions {
   name?: string;
   spec?: string;
+  type?: "scalar.function" | "vector.function";
   apiBase: string;
   apiKey: string;
   sessionId?: string;
@@ -22,6 +23,7 @@ export interface AgentOptions {
   agentUpstream: string;
   claudeSpecModel?: string;
   claudeNameModel?: string;
+  claudeTypeModel?: string;
   claudeEssayModel?: string;
   claudeEssayTasksModel?: string;
   claudePlanModel?: string;
@@ -175,6 +177,7 @@ export function resolveGhToken(
 export type ClaudeModelKey =
   | "claudeSpecModel"
   | "claudeNameModel"
+  | "claudeTypeModel"
   | "claudeEssayModel"
   | "claudeEssayTasksModel"
   | "claudePlanModel"
@@ -184,6 +187,7 @@ export type ClaudeModelKey =
 export const CLAUDE_MODEL_KEYS: ClaudeModelKey[] = [
   "claudeSpecModel",
   "claudeNameModel",
+  "claudeTypeModel",
   "claudeEssayModel",
   "claudeEssayTasksModel",
   "claudePlanModel",

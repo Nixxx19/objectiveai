@@ -11,6 +11,7 @@ export interface ConfigJson {
   agentUpstream?: string;
   claudeSpecModel?: string;
   claudeNameModel?: string;
+  claudeTypeModel?: string;
   claudeEssayModel?: string;
   claudeEssayTasksModel?: string;
   claudePlanModel?: string;

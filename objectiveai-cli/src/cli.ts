@@ -23,6 +23,7 @@ import { getClaudeSupportedModels, validateClaudeModel, validateClaudeModels } f
 const claudeModelConfigs = [
   { key: "claudeSpecModel" as ClaudeModelKey, flag: "--claude-spec-model", label: "Claude Spec Model", desc: "Model for SPEC.md generation" },
   { key: "claudeNameModel" as ClaudeModelKey, flag: "--claude-name-model", label: "Claude Name Model", desc: "Model for name generation" },
+  { key: "claudeTypeModel" as ClaudeModelKey, flag: "--claude-type-model", label: "Claude Type Model", desc: "Model for type selection" },
   { key: "claudeEssayModel" as ClaudeModelKey, flag: "--claude-essay-model", label: "Claude Essay Model", desc: "Model for ESSAY.md generation" },
   { key: "claudeEssayTasksModel" as ClaudeModelKey, flag: "--claude-essay-tasks-model", label: "Claude Essay Tasks Model", desc: "Model for ESSAY_TASKS.md generation" },
   { key: "claudePlanModel" as ClaudeModelKey, flag: "--claude-plan-model", label: "Claude Plan Model", desc: "Model for plan step" },
@@ -107,14 +108,22 @@ const inventCmd = program
   .option("--agent-upstream <upstream>", "Agent upstream (default: claude)")
   .option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt)
   .option("--min-width <n>", "Minimum number of tasks", parseInt)
-  .option("--max-width <n>", "Maximum number of tasks", parseInt);
+  .option("--max-width <n>", "Maximum number of tasks", parseInt)
+  .option("--scalar", "Set function type to scalar.function")
+  .option("--vector", "Set function type to vector.function");
 for (const cfg of claudeModelConfigs) {
   inventCmd.option(`${cfg.flag} <model>`, cfg.desc);
 }
-inventCmd.action(async (spec: string | undefined, opts: Record<string, string | number | undefined>) => {
+inventCmd.action(async (spec: string | undefined, opts: Record<string, string | number | boolean | undefined>) => {
+    if (opts.scalar && opts.vector) {
+      console.error("Cannot use both --scalar and --vector");
+      process.exit(1);
+    }
+    const type = opts.scalar ? "scalar.function" : opts.vector ? "vector.function" : undefined;
     const partialOpts: Record<string, unknown> = {
       spec,
       name: opts.name as string | undefined,
+      type,
       depth: opts.depth as number | undefined,
       minWidth: (opts.width as number | undefined) ?? (opts.minWidth as number | undefined),
       maxWidth: (opts.width as number | undefined) ?? (opts.maxWidth as number | undefined),
@@ -150,14 +159,22 @@ const amendCmd = program
   .option("--agent-upstream <upstream>", "Agent upstream (default: claude)")
   .option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt)
   .option("--min-width <n>", "Minimum number of tasks", parseInt)
-  .option("--max-width <n>", "Maximum number of tasks", parseInt);
+  .option("--max-width <n>", "Maximum number of tasks", parseInt)
+  .option("--scalar", "Set function type to scalar.function")
+  .option("--vector", "Set function type to vector.function");
 for (const cfg of claudeModelConfigs) {
   amendCmd.option(`${cfg.flag} <model>`, cfg.desc);
 }
-amendCmd.action(async (spec: string | undefined, opts: Record<string, string | number | undefined>) => {
+amendCmd.action(async (spec: string | undefined, opts: Record<string, string | number | boolean | undefined>) => {
+    if (opts.scalar && opts.vector) {
+      console.error("Cannot use both --scalar and --vector");
+      process.exit(1);
+    }
+    const type = opts.scalar ? "scalar.function" : opts.vector ? "vector.function" : undefined;
     const partialOpts: Record<string, unknown> = {
       spec,
       name: opts.name as string | undefined,
+      type,
       depth: opts.depth as number | undefined,
       minWidth: (opts.width as number | undefined) ?? (opts.minWidth as number | undefined),
       maxWidth: (opts.width as number | undefined) ?? (opts.maxWidth as number | undefined),
