@@ -5328,7 +5328,8 @@ Please try again. Remember to:
       state.submitApiKey,
       {
         userName: state.gitUserName,
-        userEmail: state.gitUserEmail
+        userEmail: state.gitUserEmail,
+        ghToken: state.ghToken
       },
       sessionId
     );
@@ -6011,7 +6012,8 @@ Please try again. Remember to:
       state.submitApiKey,
       {
         userName: state.gitUserName,
-        userEmail: state.gitUserEmail
+        userEmail: state.gitUserEmail,
+        ghToken: state.ghToken
       },
       sessionId
     );

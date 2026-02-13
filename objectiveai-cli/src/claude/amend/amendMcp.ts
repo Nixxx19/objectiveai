@@ -517,6 +517,7 @@ Please try again. Remember to:
       {
         userName: state.gitUserName,
         userEmail: state.gitUserEmail,
+        ghToken: state.ghToken,
       },
       sessionId,
     );
