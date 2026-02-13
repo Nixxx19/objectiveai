@@ -38,7 +38,7 @@ function runAmendInSubdir(
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
 
     const child = spawn(
-      "objectiveai-function-agent",
+      "objectiveai",
       args,
       {
         cwd: subdir,
@@ -47,6 +47,7 @@ function runAmendInSubdir(
         env: {
           ...process.env,
           OBJECTIVEAI_PARENT_PID: String(process.pid),
+          OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
           ...(opts?.ghToken && { GH_TOKEN: opts.ghToken }),
         },
       },

@@ -5,6 +5,14 @@ import * as objectiveai from 'objectiveai';
 import { Functions } from 'objectiveai';
 import { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
 
+interface ConfigJson {
+    apiBase?: string;
+    apiKey?: string;
+    gitUserName?: string;
+    gitUserEmail?: string;
+    ghToken?: string;
+}
+
 type AgentEvent = {
     event: "log";
     path: string;
@@ -37,6 +45,18 @@ interface AgentOptions {
     ghToken: string;
     onChildEvent?: (evt: AgentEvent) => void;
 }
+declare function isGitAvailable(): boolean;
+declare function isGhAvailable(): boolean;
+interface ResolvedValue {
+    value: string | undefined;
+    source: string;
+}
+declare function resolveApiBase(override?: string, config?: ConfigJson): ResolvedValue;
+declare function resolveApiKey(override?: string, config?: ConfigJson): ResolvedValue;
+declare function resolveGitUserName(override?: string, config?: ConfigJson): ResolvedValue;
+declare function resolveGitUserEmail(override?: string, config?: ConfigJson): ResolvedValue;
+declare function resolveGhToken(override?: string, config?: ConfigJson): ResolvedValue;
+declare function checkConfig(options?: Partial<AgentOptions>): void;
 declare function makeAgentOptions(options?: Partial<AgentOptions>): AgentOptions;
 
 declare class MessageQueue {
@@ -58352,4 +58372,4 @@ declare const SpawnFunctionAgentsParamsSchema: z$1.ZodArray<z$1.ZodObject<{
 }, z$1.core.$strip>>;
 type SpawnFunctionAgentsParams = z$1.infer<typeof SpawnFunctionAgentsParamsSchema>;
 
-export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, consumeStream, createChildLogger, createFileLogger, createRootLogger, formatMessage, getLatestLogPath, init, makeAgentOptions };
+export { type AgentOptions, index$7 as Claude, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type ResolvedValue, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, checkConfig, consumeStream, createChildLogger, createFileLogger, createRootLogger, formatMessage, getLatestLogPath, init, isGhAvailable, isGitAvailable, makeAgentOptions, resolveApiBase, resolveApiKey, resolveGhToken, resolveGitUserEmail, resolveGitUserName };

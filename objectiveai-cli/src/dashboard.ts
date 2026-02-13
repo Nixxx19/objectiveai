@@ -157,14 +157,11 @@ export class Dashboard {
     for (const line of this.headerLines) {
       out.push(line);
     }
-    if (this.headerLines.length > 0) {
-      out.push("");
-    }
 
     // Root panel
     const root = this.panels.get("");
     if (root) {
-      out.push(`\x1b[1m=== ${root.name} ===\x1b[0m`);
+      out.push(`\x1b[1m${root.name}\x1b[0m`);
       for (const l of root.lines) {
         out.push(`  ${l}`);
       }

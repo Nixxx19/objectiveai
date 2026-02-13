@@ -4,6 +4,7 @@ var readline = require('readline');
 var child_process = require('child_process');
 var fs = require('fs');
 var path = require('path');
+var os = require('os');
 var objectiveai = require('objectiveai');
 var claudeAgentSdk = require('@anthropic-ai/claude-agent-sdk');
 var z18 = require('zod');
@@ -180,24 +181,188 @@ function readSession() {
 function writeSession(sessionId) {
   fs.writeFileSync("session.txt", sessionId);
 }
+function readConfigFile(dir) {
+  try {
+    const raw = fs.readFileSync(path.join(dir, ".objectiveai", "config.json"), "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return void 0;
+  }
+}
+function collectAncestorConfigs() {
+  const configs = [];
+  const cwd = path.resolve(process.cwd());
+  const rootCwd = process.env.OBJECTIVEAI_ROOT_CWD ? path.resolve(process.env.OBJECTIVEAI_ROOT_CWD) : cwd;
+  let dir = cwd;
+  const seen = /* @__PURE__ */ new Set();
+  while (!seen.has(dir)) {
+    seen.add(dir);
+    const cfg = readConfigFile(dir);
+    if (cfg) configs.push(cfg);
+    if (dir === rootCwd) break;
+    dir = path.dirname(dir);
+  }
+  return configs;
+}
+var _merged;
+var _configLoaded = false;
+function getMergedConfig() {
+  if (!_configLoaded) {
+    const ancestors = collectAncestorConfigs();
+    const user = readConfigFile(os.homedir()) ?? {};
+    const project = {};
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      Object.assign(project, ancestors[i]);
+    }
+    const merged = { ...user, ...project };
+    _merged = { merged, project, user };
+    _configLoaded = true;
+  }
+  return _merged;
+}
+function getConfig() {
+  return getMergedConfig().merged;
+}
 
 // src/agentOptions.ts
+var _gitAvailable;
+var _ghAvailable;
+function isGitAvailable() {
+  if (_gitAvailable === void 0) {
+    try {
+      child_process.execSync("git --version", { encoding: "utf-8", stdio: "pipe" });
+      _gitAvailable = true;
+    } catch {
+      _gitAvailable = false;
+    }
+  }
+  return _gitAvailable;
+}
+function isGhAvailable() {
+  if (_ghAvailable === void 0) {
+    try {
+      child_process.execSync("gh --version", { encoding: "utf-8", stdio: "pipe" });
+      _ghAvailable = true;
+    } catch {
+      _ghAvailable = false;
+    }
+  }
+  return _ghAvailable;
+}
 function readEnv(name) {
   return typeof process !== "undefined" ? process.env?.[name]?.trim() || void 0 : void 0;
 }
 function getGitConfig(key) {
+  if (!isGitAvailable()) return void 0;
   try {
     return child_process.execSync(`git config ${key}`, { encoding: "utf-8", stdio: "pipe" }).trim() || void 0;
   } catch {
     return void 0;
   }
 }
+function configSource(key, config) {
+  if (config) return "config";
+  const { project, user } = getMergedConfig();
+  if (project[key] !== void 0) return "project";
+  if (user[key] !== void 0) return "user config";
+  return "config";
+}
+function resolveApiBase(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const env = readEnv("OBJECTIVEAI_API_BASE");
+  if (env) return { value: env, source: "env OBJECTIVEAI_API_BASE" };
+  if (cfg.apiBase) return { value: cfg.apiBase, source: configSource("apiBase", config) };
+  return { value: "https://api.objective-ai.io", source: "default" };
+}
+function resolveApiKey(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const env = readEnv("OBJECTIVEAI_API_KEY");
+  if (env) return { value: env, source: "env OBJECTIVEAI_API_KEY" };
+  if (cfg.apiKey) return { value: cfg.apiKey, source: configSource("apiKey", config) };
+  return { value: void 0, source: "not set" };
+}
+function resolveGitUserName(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const authorName = readEnv("GIT_AUTHOR_NAME");
+  if (authorName) return { value: authorName, source: "env GIT_AUTHOR_NAME" };
+  const committerName = readEnv("GIT_COMMITTER_NAME");
+  if (committerName) return { value: committerName, source: "env GIT_COMMITTER_NAME" };
+  if (cfg.gitUserName) return { value: cfg.gitUserName, source: configSource("gitUserName", config) };
+  const gitCfg = getGitConfig("user.name");
+  if (gitCfg) return { value: gitCfg, source: "git config" };
+  return { value: void 0, source: "not set" };
+}
+function resolveGitUserEmail(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const authorEmail = readEnv("GIT_AUTHOR_EMAIL");
+  if (authorEmail) return { value: authorEmail, source: "env GIT_AUTHOR_EMAIL" };
+  const committerEmail = readEnv("GIT_COMMITTER_EMAIL");
+  if (committerEmail) return { value: committerEmail, source: "env GIT_COMMITTER_EMAIL" };
+  if (cfg.gitUserEmail) return { value: cfg.gitUserEmail, source: configSource("gitUserEmail", config) };
+  const gitCfg = getGitConfig("user.email");
+  if (gitCfg) return { value: gitCfg, source: "git config" };
+  return { value: void 0, source: "not set" };
+}
+function resolveGhToken(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const env = readEnv("GH_TOKEN");
+  if (env) return { value: env, source: "env GH_TOKEN" };
+  if (cfg.ghToken) return { value: cfg.ghToken, source: configSource("ghToken", config) };
+  return { value: void 0, source: "not set" };
+}
+function checkConfig(options = {}) {
+  const problems = [];
+  if (!isGitAvailable()) {
+    problems.push("\x1B[31m  - git is not installed\x1B[0m");
+  }
+  if (!isGhAvailable()) {
+    problems.push("\x1B[31m  - gh (GitHub CLI) is not installed\x1B[0m");
+  }
+  const config = getConfig();
+  const missing = [];
+  if (!resolveApiKey(options.apiKey, config).value) {
+    missing.push({ label: "ObjectiveAI API Key", configKey: "apiKey" });
+  }
+  if (!resolveGitUserName(options.gitUserName, config).value) {
+    missing.push({ label: "Git User Name", configKey: "gitUserName" });
+  }
+  if (!resolveGitUserEmail(options.gitUserEmail, config).value) {
+    missing.push({ label: "Git User Email", configKey: "gitUserEmail" });
+  }
+  if (!resolveGhToken(options.ghToken, config).value) {
+    missing.push({ label: "GitHub Token", configKey: "ghToken" });
+  }
+  for (const m of missing) {
+    problems.push(`\x1B[31m  - ${m.label} is not set\x1B[0m`);
+  }
+  if (problems.length > 0) {
+    console.error("\n\x1B[31m  Missing requirements:\x1B[0m\n");
+    for (const p of problems) {
+      console.error(p);
+    }
+    if (missing.length > 0) {
+      console.error("\n  Set with:\n");
+      for (const m of missing) {
+        console.error(`  objectiveai config ${m.configKey} <value>`);
+      }
+    }
+    console.error("\n  Run \x1B[1mobjectiveai config\x1B[0m to see all options.\n");
+    process.exit(1);
+  }
+}
 function makeAgentOptions(options = {}) {
-  const apiBase = options.apiBase ?? readEnv("OBJECTIVEAI_API_BASE") ?? "https://api.objective-ai.io";
-  const apiKey = options.apiKey ?? readEnv("OBJECTIVEAI_API_KEY");
-  if (!apiKey) {
+  const config = getConfig();
+  const apiBase = resolveApiBase(options.apiBase, config).value;
+  const apiKeyResult = resolveApiKey(options.apiKey, config);
+  if (!apiKeyResult.value) {
     throw new Error("API key is required. Set OBJECTIVEAI_API_KEY or pass apiKey.");
   }
+  const apiKey = apiKeyResult.value;
   const log = options.log ?? createFileLogger().log;
   const depth = options.depth ?? 0;
   const rawMin = options.minWidth && options.minWidth > 0 ? Math.round(options.minWidth) : void 0;
@@ -217,18 +382,21 @@ function makeAgentOptions(options = {}) {
     minWidth = 5;
     maxWidth = 10;
   }
-  const gitUserName = options.gitUserName ?? readEnv("GIT_AUTHOR_NAME") ?? readEnv("GIT_COMMITTER_NAME") ?? getGitConfig("user.name");
-  if (!gitUserName) {
+  const gitUserNameResult = resolveGitUserName(options.gitUserName, config);
+  if (!gitUserNameResult.value) {
     throw new Error("Git user name is required. Set GIT_AUTHOR_NAME, configure git config user.name, or pass gitUserName.");
   }
-  const gitUserEmail = options.gitUserEmail ?? readEnv("GIT_AUTHOR_EMAIL") ?? readEnv("GIT_COMMITTER_EMAIL") ?? getGitConfig("user.email");
-  if (!gitUserEmail) {
+  const gitUserName = gitUserNameResult.value;
+  const gitUserEmailResult = resolveGitUserEmail(options.gitUserEmail, config);
+  if (!gitUserEmailResult.value) {
     throw new Error("Git user email is required. Set GIT_AUTHOR_EMAIL, configure git config user.email, or pass gitUserEmail.");
   }
-  const ghToken = options.ghToken ?? readEnv("GH_TOKEN");
-  if (!ghToken) {
+  const gitUserEmail = gitUserEmailResult.value;
+  const ghTokenResult = resolveGhToken(options.ghToken, config);
+  if (!ghTokenResult.value) {
     throw new Error("GitHub token is required. Set GH_TOKEN or pass ghToken.");
   }
+  const ghToken = ghTokenResult.value;
   const sessionId = options.sessionId ?? readSession();
   return {
     ...options,
@@ -249,10 +417,11 @@ function makeAgentOptions(options = {}) {
 var PURPLE = "\x1B[38;2;107;92;255m";
 var BOLD = "\x1B[1m";
 var RESET = "\x1B[0m";
+var BANNER_LINE = `${PURPLE}${BOLD}{ai} | ObjectiveAI${RESET}`;
 function bannerLines() {
   return [
     "",
-    `  ${PURPLE}${BOLD}{ai}${RESET} ${BOLD}| ObjectiveAI${RESET}`,
+    BANNER_LINE,
     ""
   ];
 }
@@ -2751,9 +2920,9 @@ var MessageQueue = class {
   push(message) {
     this.messages.push(message);
     if (this.waiter) {
-      const resolve = this.waiter;
+      const resolve2 = this.waiter;
       this.waiter = null;
-      resolve();
+      resolve2();
     }
   }
   drain() {
@@ -2768,8 +2937,8 @@ var MessageQueue = class {
   }
   waitForMessage() {
     if (this.messages.length > 0) return Promise.resolve();
-    return new Promise((resolve) => {
-      this.waiter = resolve;
+    return new Promise((resolve2) => {
+      this.waiter = resolve2;
     });
   }
 };
@@ -4609,7 +4778,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
   const subdir = path.join("agent_functions", name);
   fs.mkdirSync(subdir, { recursive: true });
   fs.writeFileSync(path.join(subdir, "SPEC.md"), spec, "utf-8");
-  return new Promise((resolve) => {
+  return new Promise((resolve2) => {
     const args = ["invent", "--name", name, "--depth", String(childDepth)];
     if (opts?.apiBase) args.push("--api-base", opts.apiBase);
     if (opts?.apiKey) args.push("--api-key", opts.apiKey);
@@ -4619,7 +4788,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
     if (opts?.minWidth) args.push("--min-width", String(opts.minWidth));
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
     const child = child_process.spawn(
-      "objectiveai-function-agent",
+      "objectiveai",
       args,
       {
         cwd: subdir,
@@ -4628,6 +4797,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
         env: {
           ...process.env,
           OBJECTIVEAI_PARENT_PID: String(process.pid),
+          OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
           ...opts?.ghToken && { GH_TOKEN: opts.ghToken }
         }
       }
@@ -4663,7 +4833,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
       }
       opts?.onChildEvent?.({ event: "done", path: name });
       if (code !== 0) {
-        resolve({
+        resolve2({
           name,
           error: `Agent exited with code ${code}. See ${subdir}/logs/ for details.`
         });
@@ -4681,13 +4851,13 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
           cwd: subdir,
           encoding: "utf-8"
         }).trim();
-        resolve({ name, owner, repository, commit });
+        resolve2({ name, owner, repository, commit });
       } catch (err) {
-        resolve({ name, error: `Failed to extract result: ${err}` });
+        resolve2({ name, error: `Failed to extract result: ${err}` });
       }
     });
     child.on("error", (err) => {
-      resolve({ name, error: `Failed to spawn agent: ${err.message}` });
+      resolve2({ name, error: `Failed to spawn agent: ${err.message}` });
     });
   });
 }
@@ -5435,7 +5605,7 @@ ${readPrefix} your amendment plan using the WritePlan tool. Include:
 }
 function runAmendInSubdir(name, childProcesses, opts) {
   const subdir = path.join("agent_functions", name);
-  return new Promise((resolve) => {
+  return new Promise((resolve2) => {
     const args = ["amend"];
     if (opts?.apiBase) args.push("--api-base", opts.apiBase);
     if (opts?.apiKey) args.push("--api-key", opts.apiKey);
@@ -5445,7 +5615,7 @@ function runAmendInSubdir(name, childProcesses, opts) {
     if (opts?.minWidth) args.push("--min-width", String(opts.minWidth));
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
     const child = child_process.spawn(
-      "objectiveai-function-agent",
+      "objectiveai",
       args,
       {
         cwd: subdir,
@@ -5454,6 +5624,7 @@ function runAmendInSubdir(name, childProcesses, opts) {
         env: {
           ...process.env,
           OBJECTIVEAI_PARENT_PID: String(process.pid),
+          OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
           ...opts?.ghToken && { GH_TOKEN: opts.ghToken }
         }
       }
@@ -5489,7 +5660,7 @@ function runAmendInSubdir(name, childProcesses, opts) {
       }
       opts?.onChildEvent?.({ event: "done", path: name });
       if (code !== 0) {
-        resolve({
+        resolve2({
           name,
           error: `Agent exited with code ${code}. See ${subdir}/logs/ for details.`
         });
@@ -5507,13 +5678,13 @@ function runAmendInSubdir(name, childProcesses, opts) {
           cwd: subdir,
           encoding: "utf-8"
         }).trim();
-        resolve({ name, owner, repository, commit });
+        resolve2({ name, owner, repository, commit });
       } catch (err) {
-        resolve({ name, error: `Failed to extract result: ${err}` });
+        resolve2({ name, error: `Failed to extract result: ${err}` });
       }
     });
     child.on("error", (err) => {
-      resolve({ name, error: `Failed to spawn agent: ${err.message}` });
+      resolve2({ name, error: `Failed to spawn agent: ${err.message}` });
     });
   });
 }
@@ -6137,12 +6308,9 @@ var Dashboard = class {
     for (const line of this.headerLines) {
       out.push(line);
     }
-    if (this.headerLines.length > 0) {
-      out.push("");
-    }
     const root = this.panels.get("");
     if (root) {
-      out.push(`\x1B[1m=== ${root.name} ===\x1B[0m`);
+      out.push(`\x1B[1m${root.name}\x1B[0m`);
       for (const l of root.lines) {
         out.push(`  ${l}`);
       }
@@ -6288,7 +6456,7 @@ var AGENTS = [
   }
 ];
 function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve2) => setTimeout(resolve2, ms));
 }
 async function dryrun() {
   const dashboard = new Dashboard(5);
@@ -6542,6 +6710,7 @@ exports.ExampleInputSchema = ExampleInputSchema;
 exports.ExampleInputsSchema = ExampleInputsSchema;
 exports.SpawnFunctionAgentsParamsSchema = SpawnFunctionAgentsParamsSchema;
 exports.Tools = tools_exports;
+exports.checkConfig = checkConfig;
 exports.consumeStream = consumeStream;
 exports.createChildLogger = createChildLogger;
 exports.createFileLogger = createFileLogger;
@@ -6549,4 +6718,11 @@ exports.createRootLogger = createRootLogger;
 exports.formatMessage = formatMessage;
 exports.getLatestLogPath = getLatestLogPath;
 exports.init = init;
+exports.isGhAvailable = isGhAvailable;
+exports.isGitAvailable = isGitAvailable;
 exports.makeAgentOptions = makeAgentOptions;
+exports.resolveApiBase = resolveApiBase;
+exports.resolveApiKey = resolveApiKey;
+exports.resolveGhToken = resolveGhToken;
+exports.resolveGitUserEmail = resolveGitUserEmail;
+exports.resolveGitUserName = resolveGitUserName;

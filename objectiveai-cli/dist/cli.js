@@ -1,9 +1,10 @@
 #!/usr/bin/env node
+import { execSync, spawn } from 'child_process';
 import { Command } from 'commander';
 import { createInterface } from 'readline';
-import { execSync, spawn } from 'child_process';
-import { existsSync, readFileSync, writeFileSync, readdirSync, appendFileSync, mkdirSync, unlinkSync, statSync } from 'fs';
-import { join, dirname } from 'path';
+import { readFileSync, existsSync, mkdirSync, writeFileSync, readdirSync, appendFileSync, unlinkSync, statSync } from 'fs';
+import { join, resolve, dirname } from 'path';
+import { homedir } from 'os';
 import { Functions, Chat, ObjectiveAI, JsonValueSchema, JsonValueExpressionSchema } from 'objectiveai';
 import { createSdkMcpServer, query, tool } from '@anthropic-ai/claude-agent-sdk';
 import z18, { z } from 'zod';
@@ -163,24 +164,206 @@ function readSession() {
 function writeSession(sessionId) {
   writeFileSync("session.txt", sessionId);
 }
+function readConfigFile(dir) {
+  try {
+    const raw = readFileSync(join(dir, ".objectiveai", "config.json"), "utf-8");
+    return JSON.parse(raw);
+  } catch {
+    return void 0;
+  }
+}
+function collectAncestorConfigs() {
+  const configs = [];
+  const cwd = resolve(process.cwd());
+  const rootCwd = process.env.OBJECTIVEAI_ROOT_CWD ? resolve(process.env.OBJECTIVEAI_ROOT_CWD) : cwd;
+  let dir = cwd;
+  const seen = /* @__PURE__ */ new Set();
+  while (!seen.has(dir)) {
+    seen.add(dir);
+    const cfg = readConfigFile(dir);
+    if (cfg) configs.push(cfg);
+    if (dir === rootCwd) break;
+    dir = dirname(dir);
+  }
+  return configs;
+}
+var _merged;
+var _configLoaded = false;
+function getMergedConfig() {
+  if (!_configLoaded) {
+    const ancestors = collectAncestorConfigs();
+    const user = readConfigFile(homedir()) ?? {};
+    const project = {};
+    for (let i = ancestors.length - 1; i >= 0; i--) {
+      Object.assign(project, ancestors[i]);
+    }
+    const merged = { ...user, ...project };
+    _merged = { merged, project, user };
+    _configLoaded = true;
+  }
+  return _merged;
+}
+function getConfig() {
+  return getMergedConfig().merged;
+}
+function setConfigValue(key, value, project) {
+  const dir = project ? process.cwd() : homedir();
+  const configDir = join(dir, ".objectiveai");
+  const configPath = join(configDir, "config.json");
+  let existing = {};
+  try {
+    existing = JSON.parse(readFileSync(configPath, "utf-8"));
+  } catch {
+  }
+  existing[key] = value;
+  if (!existsSync(configDir)) {
+    mkdirSync(configDir, { recursive: true });
+  }
+  writeFileSync(configPath, JSON.stringify(existing, null, 2) + "\n", "utf-8");
+  _configLoaded = false;
+  _merged = void 0;
+  return configPath;
+}
 
 // src/agentOptions.ts
+var _gitAvailable;
+var _ghAvailable;
+function isGitAvailable() {
+  if (_gitAvailable === void 0) {
+    try {
+      execSync("git --version", { encoding: "utf-8", stdio: "pipe" });
+      _gitAvailable = true;
+    } catch {
+      _gitAvailable = false;
+    }
+  }
+  return _gitAvailable;
+}
+function isGhAvailable() {
+  if (_ghAvailable === void 0) {
+    try {
+      execSync("gh --version", { encoding: "utf-8", stdio: "pipe" });
+      _ghAvailable = true;
+    } catch {
+      _ghAvailable = false;
+    }
+  }
+  return _ghAvailable;
+}
 function readEnv(name) {
   return typeof process !== "undefined" ? process.env?.[name]?.trim() || void 0 : void 0;
 }
 function getGitConfig(key) {
+  if (!isGitAvailable()) return void 0;
   try {
     return execSync(`git config ${key}`, { encoding: "utf-8", stdio: "pipe" }).trim() || void 0;
   } catch {
     return void 0;
   }
 }
+function configSource(key, config) {
+  if (config) return "config";
+  const { project, user } = getMergedConfig();
+  if (project[key] !== void 0) return "project";
+  if (user[key] !== void 0) return "user config";
+  return "config";
+}
+function resolveApiBase(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const env = readEnv("OBJECTIVEAI_API_BASE");
+  if (env) return { value: env, source: "env OBJECTIVEAI_API_BASE" };
+  if (cfg.apiBase) return { value: cfg.apiBase, source: configSource("apiBase", config) };
+  return { value: "https://api.objective-ai.io", source: "default" };
+}
+function resolveApiKey(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const env = readEnv("OBJECTIVEAI_API_KEY");
+  if (env) return { value: env, source: "env OBJECTIVEAI_API_KEY" };
+  if (cfg.apiKey) return { value: cfg.apiKey, source: configSource("apiKey", config) };
+  return { value: void 0, source: "not set" };
+}
+function resolveGitUserName(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const authorName = readEnv("GIT_AUTHOR_NAME");
+  if (authorName) return { value: authorName, source: "env GIT_AUTHOR_NAME" };
+  const committerName = readEnv("GIT_COMMITTER_NAME");
+  if (committerName) return { value: committerName, source: "env GIT_COMMITTER_NAME" };
+  if (cfg.gitUserName) return { value: cfg.gitUserName, source: configSource("gitUserName", config) };
+  const gitCfg = getGitConfig("user.name");
+  if (gitCfg) return { value: gitCfg, source: "git config" };
+  return { value: void 0, source: "not set" };
+}
+function resolveGitUserEmail(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const authorEmail = readEnv("GIT_AUTHOR_EMAIL");
+  if (authorEmail) return { value: authorEmail, source: "env GIT_AUTHOR_EMAIL" };
+  const committerEmail = readEnv("GIT_COMMITTER_EMAIL");
+  if (committerEmail) return { value: committerEmail, source: "env GIT_COMMITTER_EMAIL" };
+  if (cfg.gitUserEmail) return { value: cfg.gitUserEmail, source: configSource("gitUserEmail", config) };
+  const gitCfg = getGitConfig("user.email");
+  if (gitCfg) return { value: gitCfg, source: "git config" };
+  return { value: void 0, source: "not set" };
+}
+function resolveGhToken(override, config) {
+  const cfg = config ?? getConfig();
+  if (override) return { value: override, source: "flag" };
+  const env = readEnv("GH_TOKEN");
+  if (env) return { value: env, source: "env GH_TOKEN" };
+  if (cfg.ghToken) return { value: cfg.ghToken, source: configSource("ghToken", config) };
+  return { value: void 0, source: "not set" };
+}
+function checkConfig(options = {}) {
+  const problems = [];
+  if (!isGitAvailable()) {
+    problems.push("\x1B[31m  - git is not installed\x1B[0m");
+  }
+  if (!isGhAvailable()) {
+    problems.push("\x1B[31m  - gh (GitHub CLI) is not installed\x1B[0m");
+  }
+  const config = getConfig();
+  const missing = [];
+  if (!resolveApiKey(options.apiKey, config).value) {
+    missing.push({ label: "ObjectiveAI API Key", configKey: "apiKey" });
+  }
+  if (!resolveGitUserName(options.gitUserName, config).value) {
+    missing.push({ label: "Git User Name", configKey: "gitUserName" });
+  }
+  if (!resolveGitUserEmail(options.gitUserEmail, config).value) {
+    missing.push({ label: "Git User Email", configKey: "gitUserEmail" });
+  }
+  if (!resolveGhToken(options.ghToken, config).value) {
+    missing.push({ label: "GitHub Token", configKey: "ghToken" });
+  }
+  for (const m of missing) {
+    problems.push(`\x1B[31m  - ${m.label} is not set\x1B[0m`);
+  }
+  if (problems.length > 0) {
+    console.error("\n\x1B[31m  Missing requirements:\x1B[0m\n");
+    for (const p of problems) {
+      console.error(p);
+    }
+    if (missing.length > 0) {
+      console.error("\n  Set with:\n");
+      for (const m of missing) {
+        console.error(`  objectiveai config ${m.configKey} <value>`);
+      }
+    }
+    console.error("\n  Run \x1B[1mobjectiveai config\x1B[0m to see all options.\n");
+    process.exit(1);
+  }
+}
 function makeAgentOptions(options = {}) {
-  const apiBase = options.apiBase ?? readEnv("OBJECTIVEAI_API_BASE") ?? "https://api.objective-ai.io";
-  const apiKey = options.apiKey ?? readEnv("OBJECTIVEAI_API_KEY");
-  if (!apiKey) {
+  const config = getConfig();
+  const apiBase = resolveApiBase(options.apiBase, config).value;
+  const apiKeyResult = resolveApiKey(options.apiKey, config);
+  if (!apiKeyResult.value) {
     throw new Error("API key is required. Set OBJECTIVEAI_API_KEY or pass apiKey.");
   }
+  const apiKey = apiKeyResult.value;
   const log = options.log ?? createFileLogger().log;
   const depth = options.depth ?? 0;
   const rawMin = options.minWidth && options.minWidth > 0 ? Math.round(options.minWidth) : void 0;
@@ -200,18 +383,21 @@ function makeAgentOptions(options = {}) {
     minWidth = 5;
     maxWidth = 10;
   }
-  const gitUserName = options.gitUserName ?? readEnv("GIT_AUTHOR_NAME") ?? readEnv("GIT_COMMITTER_NAME") ?? getGitConfig("user.name");
-  if (!gitUserName) {
+  const gitUserNameResult = resolveGitUserName(options.gitUserName, config);
+  if (!gitUserNameResult.value) {
     throw new Error("Git user name is required. Set GIT_AUTHOR_NAME, configure git config user.name, or pass gitUserName.");
   }
-  const gitUserEmail = options.gitUserEmail ?? readEnv("GIT_AUTHOR_EMAIL") ?? readEnv("GIT_COMMITTER_EMAIL") ?? getGitConfig("user.email");
-  if (!gitUserEmail) {
+  const gitUserName = gitUserNameResult.value;
+  const gitUserEmailResult = resolveGitUserEmail(options.gitUserEmail, config);
+  if (!gitUserEmailResult.value) {
     throw new Error("Git user email is required. Set GIT_AUTHOR_EMAIL, configure git config user.email, or pass gitUserEmail.");
   }
-  const ghToken = options.ghToken ?? readEnv("GH_TOKEN");
-  if (!ghToken) {
+  const gitUserEmail = gitUserEmailResult.value;
+  const ghTokenResult = resolveGhToken(options.ghToken, config);
+  if (!ghTokenResult.value) {
     throw new Error("GitHub token is required. Set GH_TOKEN or pass ghToken.");
   }
+  const ghToken = ghTokenResult.value;
   const sessionId = options.sessionId ?? readSession();
   return {
     ...options,
@@ -232,10 +418,11 @@ function makeAgentOptions(options = {}) {
 var PURPLE = "\x1B[38;2;107;92;255m";
 var BOLD = "\x1B[1m";
 var RESET = "\x1B[0m";
+var BANNER_LINE = `${PURPLE}${BOLD}{ai} | ObjectiveAI${RESET}`;
 function bannerLines() {
   return [
     "",
-    `  ${PURPLE}${BOLD}{ai}${RESET} ${BOLD}| ObjectiveAI${RESET}`,
+    BANNER_LINE,
     ""
   ];
 }
@@ -2543,9 +2730,9 @@ var MessageQueue = class {
   push(message) {
     this.messages.push(message);
     if (this.waiter) {
-      const resolve = this.waiter;
+      const resolve2 = this.waiter;
       this.waiter = null;
-      resolve();
+      resolve2();
     }
   }
   drain() {
@@ -2560,8 +2747,8 @@ var MessageQueue = class {
   }
   waitForMessage() {
     if (this.messages.length > 0) return Promise.resolve();
-    return new Promise((resolve) => {
-      this.waiter = resolve;
+    return new Promise((resolve2) => {
+      this.waiter = resolve2;
     });
   }
 };
@@ -4393,7 +4580,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
   const subdir = join("agent_functions", name);
   mkdirSync(subdir, { recursive: true });
   writeFileSync(join(subdir, "SPEC.md"), spec, "utf-8");
-  return new Promise((resolve) => {
+  return new Promise((resolve2) => {
     const args = ["invent", "--name", name, "--depth", String(childDepth)];
     if (opts?.apiBase) args.push("--api-base", opts.apiBase);
     if (opts?.apiKey) args.push("--api-key", opts.apiKey);
@@ -4403,7 +4590,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
     if (opts?.minWidth) args.push("--min-width", String(opts.minWidth));
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
     const child = spawn(
-      "objectiveai-function-agent",
+      "objectiveai",
       args,
       {
         cwd: subdir,
@@ -4412,6 +4599,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
         env: {
           ...process.env,
           OBJECTIVEAI_PARENT_PID: String(process.pid),
+          OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
           ...opts?.ghToken && { GH_TOKEN: opts.ghToken }
         }
       }
@@ -4447,7 +4635,7 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
       }
       opts?.onChildEvent?.({ event: "done", path: name });
       if (code !== 0) {
-        resolve({
+        resolve2({
           name,
           error: `Agent exited with code ${code}. See ${subdir}/logs/ for details.`
         });
@@ -4465,13 +4653,13 @@ function runAgentInSubdir(name, spec, childDepth, childProcesses, opts) {
           cwd: subdir,
           encoding: "utf-8"
         }).trim();
-        resolve({ name, owner, repository, commit });
+        resolve2({ name, owner, repository, commit });
       } catch (err) {
-        resolve({ name, error: `Failed to extract result: ${err}` });
+        resolve2({ name, error: `Failed to extract result: ${err}` });
       }
     });
     child.on("error", (err) => {
-      resolve({ name, error: `Failed to spawn agent: ${err.message}` });
+      resolve2({ name, error: `Failed to spawn agent: ${err.message}` });
     });
   });
 }
@@ -5219,7 +5407,7 @@ ${readPrefix} your amendment plan using the WritePlan tool. Include:
 }
 function runAmendInSubdir(name, childProcesses, opts) {
   const subdir = join("agent_functions", name);
-  return new Promise((resolve) => {
+  return new Promise((resolve2) => {
     const args = ["amend"];
     if (opts?.apiBase) args.push("--api-base", opts.apiBase);
     if (opts?.apiKey) args.push("--api-key", opts.apiKey);
@@ -5229,7 +5417,7 @@ function runAmendInSubdir(name, childProcesses, opts) {
     if (opts?.minWidth) args.push("--min-width", String(opts.minWidth));
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
     const child = spawn(
-      "objectiveai-function-agent",
+      "objectiveai",
       args,
       {
         cwd: subdir,
@@ -5238,6 +5426,7 @@ function runAmendInSubdir(name, childProcesses, opts) {
         env: {
           ...process.env,
           OBJECTIVEAI_PARENT_PID: String(process.pid),
+          OBJECTIVEAI_ROOT_CWD: process.env.OBJECTIVEAI_ROOT_CWD ?? process.cwd(),
           ...opts?.ghToken && { GH_TOKEN: opts.ghToken }
         }
       }
@@ -5273,7 +5462,7 @@ function runAmendInSubdir(name, childProcesses, opts) {
       }
       opts?.onChildEvent?.({ event: "done", path: name });
       if (code !== 0) {
-        resolve({
+        resolve2({
           name,
           error: `Agent exited with code ${code}. See ${subdir}/logs/ for details.`
         });
@@ -5291,13 +5480,13 @@ function runAmendInSubdir(name, childProcesses, opts) {
           cwd: subdir,
           encoding: "utf-8"
         }).trim();
-        resolve({ name, owner, repository, commit });
+        resolve2({ name, owner, repository, commit });
       } catch (err) {
-        resolve({ name, error: `Failed to extract result: ${err}` });
+        resolve2({ name, error: `Failed to extract result: ${err}` });
       }
     });
     child.on("error", (err) => {
-      resolve({ name, error: `Failed to spawn agent: ${err.message}` });
+      resolve2({ name, error: `Failed to spawn agent: ${err.message}` });
     });
   });
 }
@@ -5921,12 +6110,9 @@ var Dashboard = class {
     for (const line of this.headerLines) {
       out.push(line);
     }
-    if (this.headerLines.length > 0) {
-      out.push("");
-    }
     const root = this.panels.get("");
     if (root) {
-      out.push(`\x1B[1m=== ${root.name} ===\x1B[0m`);
+      out.push(`\x1B[1m${root.name}\x1B[0m`);
       for (const l of root.lines) {
         out.push(`  ${l}`);
       }
@@ -6072,7 +6258,7 @@ var AGENTS = [
   }
 ];
 function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+  return new Promise((resolve2) => setTimeout(resolve2, ms));
 }
 async function dryrun() {
   const dashboard = new Dashboard(5);
@@ -6316,10 +6502,36 @@ if (parentPid) {
   }, 3e3);
   watchdog.unref();
 }
+var RED = "\x1B[31m";
+var GREEN = "\x1B[32m";
+var BOLD2 = "\x1B[1m";
+var DIM = "\x1B[2m";
+var RESET2 = "\x1B[0m";
 var program = new Command();
-program.name("objectiveai").description("ObjectiveAI CLI");
+program.name("objectiveai").description("ObjectiveAI").action(() => {
+  printBanner();
+  const git = isGitAvailable();
+  const gh2 = isGhAvailable();
+  const apiKey = resolveApiKey();
+  const gitUserName = resolveGitUserName();
+  const gitUserEmail = resolveGitUserEmail();
+  const ghToken = resolveGhToken();
+  const anyConfigMissing = !apiKey.value || !gitUserName.value || !gitUserEmail.value || !ghToken.value;
+  console.log(`${BOLD2}Status${RESET2}
+`);
+  console.log(anyConfigMissing ? `  ${RED}config: missing values${RESET2}  ${DIM}(run objectiveai config)${RESET2}` : `  ${GREEN}config: all values set${RESET2}`);
+  console.log(git ? `  ${GREEN}git: installed${RESET2}` : `  ${RED}git: not installed${RESET2}`);
+  console.log(gh2 ? `  ${GREEN}gh: installed${RESET2}` : `  ${RED}gh: not installed${RESET2}`);
+  console.log(`
+${BOLD2}Commands${RESET2}
+`);
+  console.log("  objectiveai invent [spec]   Invent a new function");
+  console.log("  objectiveai amend [spec]    Amend an existing function");
+  console.log("  objectiveai config          Show configuration details");
+  console.log("");
+});
 program.command("invent").description("Invent a new ObjectiveAI Function").argument("[spec]", "Optional spec string for SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt).action(async (spec, opts) => {
-  await claude_exports.invent({
+  const partialOpts = {
     spec,
     name: opts.name,
     depth: opts.depth,
@@ -6330,10 +6542,12 @@ program.command("invent").description("Invent a new ObjectiveAI Function").argum
     gitUserName: opts.gitUserName,
     gitUserEmail: opts.gitUserEmail,
     ghToken: opts.ghToken
-  });
+  };
+  checkConfig(partialOpts);
+  await claude_exports.invent(partialOpts);
 });
 program.command("amend").description("Amend an existing ObjectiveAI Function").argument("[spec]", "Amendment spec to append to SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt).action(async (spec, opts) => {
-  await claude_exports.amend({
+  const partialOpts = {
     spec,
     name: opts.name,
     depth: opts.depth,
@@ -6344,9 +6558,246 @@ program.command("amend").description("Amend an existing ObjectiveAI Function").a
     gitUserName: opts.gitUserName,
     gitUserEmail: opts.gitUserEmail,
     ghToken: opts.ghToken
-  });
+  };
+  checkConfig(partialOpts);
+  await claude_exports.amend(partialOpts);
 });
 program.command("dryrun").description("Preview the CLI dashboard with simulated agents").action(async () => {
   await claude_exports.dryrun();
+});
+function mask(value) {
+  if (value.length <= 8) return "*".repeat(value.length);
+  return value.slice(0, 4) + "*".repeat(value.length - 8) + value.slice(-4);
+}
+function formatRow(label, resolved, secret = false) {
+  if (!resolved.value) {
+    return `${RED}  ${label}: (not set)${RESET2}`;
+  }
+  const display = secret ? mask(resolved.value) : resolved.value;
+  return `${GREEN}  ${label}: ${display} ${DIM}(${resolved.source})${RESET2}`;
+}
+function showConfigDetail(label, resolved, description, sources, configKey, secret = false) {
+  printBanner();
+  console.log(`${BOLD2}${label}${RESET2}
+`);
+  console.log(`  ${description}
+`);
+  if (resolved.value) {
+    const display = secret ? mask(resolved.value) : resolved.value;
+    console.log(`${GREEN}  Current value: ${display} ${DIM}(${resolved.source})${RESET2}`);
+  } else {
+    console.log(`${RED}  Current value: (not set)${RESET2}`);
+  }
+  console.log(`
+${BOLD2}Sources${RESET2} (highest to lowest priority)
+`);
+  for (let i = 0; i < sources.length; i++) {
+    const active = resolved.value && resolved.source === sources[i].key;
+    if (active) {
+      console.log(`${GREEN}  ${i + 1}. ${sources[i].label}${RESET2}`);
+    } else {
+      console.log(`${DIM}  ${i + 1}. ${sources[i].label}${RESET2}`);
+    }
+  }
+  console.log(`
+${BOLD2}Set${RESET2}
+`);
+  console.log(`  objectiveai config ${configKey} <value>`);
+  console.log(`  objectiveai config ${configKey} <value> --project`);
+  console.log("");
+}
+function validateApiBase(value) {
+  try {
+    const url = new URL(value);
+    if (url.protocol !== "http:" && url.protocol !== "https:") {
+      return "URL must use http or https protocol.";
+    }
+    return null;
+  } catch {
+    return "Invalid URL.";
+  }
+}
+function validateApiKey(value) {
+  if (!/^apk[0-9a-f]{32}$/.test(value)) {
+    return "Invalid API key. Expected format: apk followed by 32 hex characters (e.g. apk1234567890abcdef1234567890abcdef).";
+  }
+  return null;
+}
+function validateGitUserName(value) {
+  if (value.length === 0) {
+    return "Git user name cannot be empty.";
+  }
+  return null;
+}
+function validateGitUserEmail(value) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+    return "Invalid email address.";
+  }
+  return null;
+}
+function validateGhToken(value) {
+  if (value.length === 0) {
+    return "GitHub token cannot be empty.";
+  }
+  if (!isGhAvailable()) {
+    return "gh (GitHub CLI) is not installed. Install it from https://cli.github.com to verify and use GitHub tokens.";
+  }
+  try {
+    const result = execSync("gh api user --jq .login", {
+      encoding: "utf-8",
+      stdio: "pipe",
+      env: { ...process.env, GH_TOKEN: value }
+    }).trim();
+    if (!result) {
+      return "GitHub token is not valid (no user returned).";
+    }
+    return null;
+  } catch {
+    return "GitHub token is not valid (authentication failed).";
+  }
+}
+function setAndReport(configKey, value, project, validate) {
+  const error = validate(value);
+  if (error) {
+    console.error(`
+\x1B[31m  Error: ${error}\x1B[0m
+`);
+    process.exit(1);
+  }
+  const path = setConfigValue(configKey, value, project);
+  const where = project ? "project" : "user";
+  console.log(`
+  Set ${configKey} in ${where} config (${path})
+`);
+}
+var configCmd = program.command("config").description("Display or set configuration values");
+configCmd.action(() => {
+  printBanner();
+  const apiBase = resolveApiBase();
+  const apiKey = resolveApiKey();
+  const gitUserName = resolveGitUserName();
+  const gitUserEmail = resolveGitUserEmail();
+  const ghToken = resolveGhToken();
+  console.log(`${BOLD2}Current Configuration${RESET2}
+`);
+  console.log(formatRow("ObjectiveAI API Base", apiBase));
+  console.log(formatRow("ObjectiveAI API Key", apiKey, true));
+  console.log(formatRow("Git User Name", gitUserName));
+  console.log(formatRow("Git User Email", gitUserEmail));
+  console.log(formatRow("GitHub Token", ghToken, true));
+  console.log(`
+${BOLD2}Configuration Sources${RESET2} (highest to lowest priority)
+`);
+  console.log("  1. CLI flags (--api-key, --gh-token, etc.)");
+  console.log("  2. Environment variables (OBJECTIVEAI_API_KEY, GH_TOKEN, etc.)");
+  console.log("  3. .objectiveai/config.json (project)");
+  console.log("  4. ~/.objectiveai/config.json (user)");
+  console.log("  5. git config (user.name, user.email)");
+  console.log(`
+${BOLD2}Commands${RESET2}
+`);
+  console.log("  objectiveai config apiBase      Show ObjectiveAI API base URL");
+  console.log("  objectiveai config apiKey       Show ObjectiveAI API key");
+  console.log("  objectiveai config gitUserName  Show git user name");
+  console.log("  objectiveai config gitUserEmail Show git user email");
+  console.log("  objectiveai config ghToken      Show GitHub token");
+  console.log("");
+});
+configCmd.command("apiBase").description("Show or set ObjectiveAI API base URL").argument("[value]", "URL to set").option("--project", "Write to project config instead of user config").action((value, opts) => {
+  if (value) {
+    setAndReport("apiBase", value, !!opts.project, validateApiBase);
+  } else {
+    showConfigDetail(
+      "ObjectiveAI API Base",
+      resolveApiBase(),
+      "Base URL for the ObjectiveAI API. Used for all API requests.",
+      [
+        { label: "CLI flag: --api-base <url>", key: "flag" },
+        { label: "Environment variable: OBJECTIVEAI_API_BASE", key: "env OBJECTIVEAI_API_BASE" },
+        { label: ".objectiveai/config.json (project)", key: "project" },
+        { label: "~/.objectiveai/config.json (user)", key: "user config" },
+        { label: "Default: https://api.objective-ai.io", key: "default" }
+      ],
+      "apiBase"
+    );
+  }
+});
+configCmd.command("apiKey").description("Show or set ObjectiveAI API key").argument("[value]", "API key to set (apk + 32 hex chars)").option("--project", "Write to project config instead of user config").action((value, opts) => {
+  if (value) {
+    setAndReport("apiKey", value, !!opts.project, validateApiKey);
+  } else {
+    showConfigDetail(
+      "ObjectiveAI API Key",
+      resolveApiKey(),
+      "API key for authenticating with the ObjectiveAI API. Format: apk followed by 32 hex characters.",
+      [
+        { label: "CLI flag: --api-key <key>", key: "flag" },
+        { label: "Environment variable: OBJECTIVEAI_API_KEY", key: "env OBJECTIVEAI_API_KEY" },
+        { label: ".objectiveai/config.json (project)", key: "project" },
+        { label: "~/.objectiveai/config.json (user)", key: "user config" }
+      ],
+      "apiKey",
+      true
+    );
+  }
+});
+configCmd.command("gitUserName").description("Show or set git user name").argument("[value]", "Git user name to set").option("--project", "Write to project config instead of user config").action((value, opts) => {
+  if (value) {
+    setAndReport("gitUserName", value, !!opts.project, validateGitUserName);
+  } else {
+    showConfigDetail(
+      "Git User Name",
+      resolveGitUserName(),
+      "Name used for git commits when creating and publishing functions.",
+      [
+        { label: "CLI flag: --git-user-name <name>", key: "flag" },
+        { label: "Environment variable: GIT_AUTHOR_NAME", key: "env GIT_AUTHOR_NAME" },
+        { label: "Environment variable: GIT_COMMITTER_NAME", key: "env GIT_COMMITTER_NAME" },
+        { label: ".objectiveai/config.json (project)", key: "project" },
+        { label: "~/.objectiveai/config.json (user)", key: "user config" },
+        { label: "git config user.name", key: "git config" }
+      ],
+      "gitUserName"
+    );
+  }
+});
+configCmd.command("gitUserEmail").description("Show or set git user email").argument("[value]", "Git user email to set").option("--project", "Write to project config instead of user config").action((value, opts) => {
+  if (value) {
+    setAndReport("gitUserEmail", value, !!opts.project, validateGitUserEmail);
+  } else {
+    showConfigDetail(
+      "Git User Email",
+      resolveGitUserEmail(),
+      "Email used for git commits when creating and publishing functions.",
+      [
+        { label: "CLI flag: --git-user-email <email>", key: "flag" },
+        { label: "Environment variable: GIT_AUTHOR_EMAIL", key: "env GIT_AUTHOR_EMAIL" },
+        { label: "Environment variable: GIT_COMMITTER_EMAIL", key: "env GIT_COMMITTER_EMAIL" },
+        { label: ".objectiveai/config.json (project)", key: "project" },
+        { label: "~/.objectiveai/config.json (user)", key: "user config" },
+        { label: "git config user.email", key: "git config" }
+      ],
+      "gitUserEmail"
+    );
+  }
+});
+configCmd.command("ghToken").description("Show or set GitHub token").argument("[value]", "GitHub token to set").option("--project", "Write to project config instead of user config").action((value, opts) => {
+  if (value) {
+    setAndReport("ghToken", value, !!opts.project, validateGhToken);
+  } else {
+    showConfigDetail(
+      "GitHub Token",
+      resolveGhToken(),
+      "GitHub personal access token. Used for creating repositories and pushing function code via the gh CLI.",
+      [
+        { label: "CLI flag: --gh-token <token>", key: "flag" },
+        { label: "Environment variable: GH_TOKEN", key: "env GH_TOKEN" },
+        { label: ".objectiveai/config.json (project)", key: "project" },
+        { label: "~/.objectiveai/config.json (user)", key: "user config" }
+      ],
+      "ghToken",
+      true
+    );
+  }
 });
 program.parse(process.argv);
