@@ -3260,7 +3260,9 @@ async function nameMcp(state, log, sessionId, name, model) {
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then create` : "Create";
   sessionId = await consumeStream(
     claudeAgentSdk.query({
-      prompt: `${readPrefix} name.txt with the function name.
+      prompt: `Do not re-read anything you have already read or written in your conversation history.
+
+${readPrefix} name.txt with the function name.
 **Do NOT include "objectiveai" or "function" or "scalar" or "vector" in the name.** Name it like you would name a function:
 - Use all lowercase
 - Use dashes (\`-\`) to separate words if there's more than one`,
@@ -3361,7 +3363,9 @@ async function typeMcp(state, log, sessionId, type, model) {
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then choose` : "Choose";
   sessionId = await consumeStream(
     claudeAgentSdk.query({
-      prompt: `${readPrefix} the function type based on the SPEC:
+      prompt: `Do not re-read anything you have already read or written in your conversation history.
+
+${readPrefix} the function type based on the SPEC:
 - Use \`scalar.function\` if the input is a single item and the function **scores** it (output: single number 0-1)
 - Use \`vector.function\` if the input is multiple items and the function **ranks** them (output: array of scores summing to ~1)
 
@@ -3484,8 +3488,8 @@ function makeCheckInputSchema(state) {
 }
 
 // src/claude/prepare/inputSchemaMcp.ts
-async function inputSchemaMcp(state, log, sessionId, inputSchema, model) {
-  if (!isDefaultInputSchema()) return sessionId;
+async function inputSchemaMcp(state, log, sessionId, inputSchema, model, overwriteInputSchema) {
+  if (!isDefaultInputSchema() && !(overwriteInputSchema && inputSchema)) return sessionId;
   if (inputSchema) {
     const parsed = JSON.parse(inputSchema);
     const result = editInputSchema(parsed);
@@ -3512,7 +3516,9 @@ async function inputSchemaMcp(state, log, sessionId, inputSchema, model) {
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then define` : "Define";
   sessionId = await consumeStream(
     claudeAgentSdk.query({
-      prompt: `${readPrefix} the input_schema for this function.
+      prompt: `Do not re-read anything you have already read or written in your conversation history.
+
+${readPrefix} the input_schema for this function.
 
 The input_schema is a JSON Schema object that describes the shape of the function's input.
 - For **scalar** functions: the input describes a single item to score
@@ -3598,7 +3604,7 @@ async function essayMcp(state, log, sessionId, model) {
   reads.push("name.txt");
   if (!state.hasReadExampleFunctions) reads.push("example functions");
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context. ` : "";
-  const prompt = readPrefix + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
+  const prompt = "Do not re-read anything you have already read or written in your conversation history.\n\n" + readPrefix + "Create ESSAY.md describing the ObjectiveAI Function you are building. Explore the purpose, inputs, outputs, and use-cases of the function in detail. Explore, in great detail, the various qualities, values, and sentiments that must be evaluated by the function. This essay will guide the development of the function and underpins its philosophy.";
   sessionId = await consumeStream(
     claudeAgentSdk.query({
       prompt,
@@ -3689,7 +3695,9 @@ async function essayTasksMcp(state, log, sessionId, model) {
   if (!state.hasReadOrWrittenEssay) reads.push("ESSAY.md");
   if (!state.hasReadExampleFunctions) reads.push("example functions");
   const readPrefix = reads.length > 0 ? `Read ${formatReadList(reads)} to understand the context, then create` : "Create";
-  const prompt = `${readPrefix} ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's \`tasks\` array. There must be ${widthDesc} tasks.`;
+  const prompt = `Do not re-read anything you have already read or written in your conversation history.
+
+${readPrefix} ESSAY_TASKS.md listing and describing the key tasks the ObjectiveAI Function must perform in order to fulfill the quality, value, and sentiment evaluations defined within ESSAY.md. Each task is a plain language description of a task which will go into the function's \`tasks\` array. There must be ${widthDesc} tasks.`;
   sessionId = await consumeStream(
     claudeAgentSdk.query({
       prompt,
@@ -3775,7 +3783,7 @@ async function prepare(state, options) {
     state,
     log,
     sessionId,
-    (sid) => inputSchemaMcp(state, log, sid, options.inputSchema, options.claudeInputSchemaModel)
+    (sid) => inputSchemaMcp(state, log, sid, options.inputSchema, options.claudeInputSchemaModel, options.overwriteInputSchema)
   );
   log("=== Step 5: ESSAY.md ===");
   sessionId = await runStep(
@@ -5115,7 +5123,9 @@ This function must use **vector completion tasks** (type: \`vector.completion\`)
   - Correct: \`[[{"type": "text", "text": "good"}], [{"type": "text", "text": "bad"}]]\`
   - Wrong: \`["good", "bad"]\`
 - **Never use \`str()\` on multimodal content** \u2014 pass rich content directly (or via expressions)`;
-  let prompt = `${readPrefix} your implementation plan using the WritePlan tool. Include:
+  let prompt = `Do not re-read anything you have already read or written in your conversation history.
+
+${readPrefix} your implementation plan using the WritePlan tool. Include:
 - The input schema structure and field descriptions
 - Whether any input maps are needed for mapped task execution
 - What the function definition will look like
@@ -5438,7 +5448,7 @@ function makeSpawnFunctionAgents(state) {
     }
   );
 }
-function runAmendInSubdir(name, childProcesses, opts) {
+function runAmendInSubdir(name, overwriteInputSchema, childProcesses, opts) {
   const subdir = path.join("agent_functions", name);
   return new Promise((resolve2) => {
     const args = ["amend"];
@@ -5449,6 +5459,10 @@ function runAmendInSubdir(name, childProcesses, opts) {
     if (opts?.ghToken) args.push("--gh-token", opts.ghToken);
     if (opts?.minWidth) args.push("--min-width", String(opts.minWidth));
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
+    if (overwriteInputSchema) {
+      args.push("--input-schema", JSON.stringify(overwriteInputSchema));
+      args.push("--overwrite-input-schema");
+    }
     const child = child_process.spawn(
       "objectiveai",
       args,
@@ -5602,7 +5616,7 @@ async function amendFunctionAgents(params, opts) {
   try {
     const results = await Promise.all(
       params.map(
-        (param) => runAmendInSubdir(param.name, childProcesses, opts)
+        (param) => runAmendInSubdir(param.name, param.overwriteInputSchema, childProcesses, opts)
       )
     );
     return { ok: true, value: results, error: void 0 };
@@ -5621,7 +5635,8 @@ async function amendFunctionAgents(params, opts) {
 var AmendFunctionAgentsParamsSchema = z18.z.array(
   z18.z.object({
     name: z18.z.string(),
-    spec: z18.z.string()
+    spec: z18.z.string(),
+    overwriteInputSchema: z18.z.record(z18.z.string(), z18.z.unknown()).optional()
   })
 );
 
@@ -5643,6 +5658,14 @@ function makeAmendFunctionAgents(state) {
     "Amend existing child function agents in parallel",
     { params: AmendFunctionAgentsParamsSchema },
     async ({ params }) => {
+      for (const param of params) {
+        if (param.overwriteInputSchema) {
+          const schemaResult = validateInputSchema({ input_schema: param.overwriteInputSchema });
+          if (!schemaResult.ok) {
+            return errorResult(`Invalid overwriteInputSchema for "${param.name}": ${schemaResult.error}`);
+          }
+        }
+      }
       state.pendingAgentResults.push(
         amendFunctionAgents(params, opts()).then((r) => resultFromResult(r))
       );
@@ -5932,7 +5955,9 @@ Read ${formatReadList(reads)} to understand the context, if needed.
 function buildFunctionTasksPrompt(state) {
   const w = widthText(state.minWidth, state.maxWidth);
   const readLine = buildReadLine(state);
-  return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
+  return `Do not re-read anything you have already read or written in your conversation history.
+
+You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
 ${readLine}
 
 ## Phase 1: Implementation
@@ -6014,7 +6039,9 @@ Once all tests pass and SPEC.md compliance is verified:
 function buildVectorTasksPrompt(state) {
   const w = widthText(state.minWidth, state.maxWidth);
   const readLine = buildReadLine(state);
-  return `You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
+  return `Do not re-read anything you have already read or written in your conversation history.
+
+You are inventing a new ObjectiveAI Function. Your goal is to complete the implementation, add example inputs, ensure all tests pass, and submit the result.
 ${readLine}
 
 ## Phase 1: Implementation
@@ -6244,7 +6271,9 @@ This function uses **vector completion tasks** (type: \`vector.completion\`). Pl
 - Add or remove tasks if the amendment requires it
 - Responses should be phrased as potential assistant messages (e.g. if ranking dating profiles, ask "what is a good dating profile" and make each response a dating profile)
 - If a task ranks items from an input array, the array items go into \`responses\`, not \`messages\``;
-  const prompt = `You are amending an existing ObjectiveAI Function. The following amendment describes what needs to change:
+  const prompt = `Do not re-read anything you have already read or written in your conversation history.
+
+You are amending an existing ObjectiveAI Function. The following amendment describes what needs to change:
 
 ## Amendment
 
@@ -6436,7 +6465,9 @@ Read ${formatReadList(reads)} to understand the current state.
 }
 function buildAmendFunctionTasksPrompt(state, amendment) {
   const readLine = buildReadLine2(state);
-  return `You are amending an existing ObjectiveAI Function. Your goal is to implement the following amendment, ensure all tests pass, and submit the result.
+  return `Do not re-read anything you have already read or written in your conversation history.
+
+You are amending an existing ObjectiveAI Function. Your goal is to implement the following amendment, ensure all tests pass, and submit the result.
 
 ## Amendment
 
@@ -6489,7 +6520,9 @@ Once all tests pass and compliance is verified:
 }
 function buildAmendVectorTasksPrompt(state, amendment) {
   const readLine = buildReadLine2(state);
-  return `You are amending an existing ObjectiveAI Function. Your goal is to implement the following amendment, ensure all tests pass, and submit the result.
+  return `Do not re-read anything you have already read or written in your conversation history.
+
+You are amending an existing ObjectiveAI Function. Your goal is to implement the following amendment, ensure all tests pass, and submit the result.
 
 ## Amendment
 

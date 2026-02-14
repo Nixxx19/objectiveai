@@ -46,6 +46,7 @@ interface AgentOptions {
     type?: "scalar.function" | "vector.function";
     inputSchema?: string;
     mutableInputSchema?: boolean;
+    overwriteInputSchema?: boolean;
     apiBase: string;
     apiKey: string;
     sessionId?: string;
@@ -138,7 +139,7 @@ declare function nameMcp(state: ToolState, log: LogFn, sessionId?: string, name?
 
 declare function typeMcp(state: ToolState, log: LogFn, sessionId?: string, type?: "scalar.function" | "vector.function", model?: string): Promise<string | undefined>;
 
-declare function inputSchemaMcp(state: ToolState, log: LogFn, sessionId?: string, inputSchema?: string, model?: string): Promise<string | undefined>;
+declare function inputSchemaMcp(state: ToolState, log: LogFn, sessionId?: string, inputSchema?: string, model?: string, overwriteInputSchema?: boolean): Promise<string | undefined>;
 
 declare function essayMcp(state: ToolState, log: LogFn, sessionId?: string, model?: string): Promise<string | undefined>;
 
