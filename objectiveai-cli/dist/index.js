@@ -5769,7 +5769,7 @@ function makeReadAgentFunction(state) {
 }
 
 // src/claude/invent/inventMcp.ts
-function getCommonTools(state, useFunctionTasks) {
+function getCommonTools(state, useFunctionTasks, mutableInputSchema) {
   registerSchemaRefs();
   const fnType = readType();
   const isScalar = fnType.ok && fnType.value === "scalar.function";
@@ -5800,7 +5800,7 @@ function getCommonTools(state, useFunctionTasks) {
     makeCheckDescription(),
     makeReadInputSchema(state),
     makeReadInputSchemaSchema(),
-    makeEditInputSchema(state),
+    ...mutableInputSchema ? [makeEditInputSchema(state)] : [],
     makeCheckInputSchema(),
     ...includeInputMaps ? [
       makeReadInputMaps(state),
@@ -6049,7 +6049,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **No API key is needed for tests** - tests run against a local server
 `;
 }
-async function inventLoop(state, log, useFunctionTasks, sessionId, model) {
+async function inventLoop(state, log, useFunctionTasks, mutableInputSchema, sessionId, model) {
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -6058,7 +6058,7 @@ async function inventLoop(state, log, useFunctionTasks, sessionId, model) {
     attempt++;
     log(`Invent loop attempt ${attempt}/${maxAttempts}`);
     const tools = [
-      ...getCommonTools(state, useFunctionTasks),
+      ...getCommonTools(state, useFunctionTasks, mutableInputSchema),
       ...useFunctionTasks ? getFunctionTasksTools(state) : []
     ];
     const mcpServer = createSdkMcpServer({ name: "invent", tools });
@@ -6143,10 +6143,11 @@ async function inventMcp(state, options) {
       throw e;
     }
   }
+  const mutableInputSchema = !!options.mutableInputSchema;
   log(
     `=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`
   );
-  await inventLoop(state, log, useFunctionTasks, sessionId, options.claudeInventModel);
+  await inventLoop(state, log, useFunctionTasks, mutableInputSchema, sessionId, options.claudeInventModel);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function planMcp2(state, log, depth, amendment, sessionId, model) {
@@ -6276,7 +6277,7 @@ ${readPrefix} your amendment plan using the WritePlan tool. Include:
 }
 
 // src/claude/amend/amendMcp.ts
-function getCommonTools2(state, useFunctionTasks) {
+function getCommonTools2(state, useFunctionTasks, mutableInputSchema) {
   registerSchemaRefs();
   const fnType = readType();
   const isScalar = fnType.ok && fnType.value === "scalar.function";
@@ -6307,7 +6308,7 @@ function getCommonTools2(state, useFunctionTasks) {
     makeCheckDescription(),
     makeReadInputSchema(state),
     makeReadInputSchemaSchema(),
-    makeEditInputSchema(state),
+    ...mutableInputSchema ? [makeEditInputSchema(state)] : [],
     makeCheckInputSchema(),
     ...includeInputMaps ? [
       makeReadInputMaps(state),
@@ -6534,7 +6535,7 @@ Once all tests pass and compliance is verified:
 - **No API key is needed for tests** \u2014 tests run against a local server
 `;
 }
-async function amendLoop(state, log, useFunctionTasks, amendment, sessionId, model) {
+async function amendLoop(state, log, useFunctionTasks, mutableInputSchema, amendment, sessionId, model) {
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -6543,7 +6544,7 @@ async function amendLoop(state, log, useFunctionTasks, amendment, sessionId, mod
     attempt++;
     log(`Amend loop attempt ${attempt}/${maxAttempts}`);
     const tools = [
-      ...getCommonTools2(state, useFunctionTasks),
+      ...getCommonTools2(state, useFunctionTasks, mutableInputSchema),
       ...useFunctionTasks ? getFunctionTasksTools2(state) : []
     ];
     const mcpServer = createSdkMcpServer({ name: "amend", tools });
@@ -6628,8 +6629,9 @@ async function amendMcp(state, options, amendment) {
       throw e;
     }
   }
+  const mutableInputSchema = !!options.mutableInputSchema;
   log(`=== Amend Loop: Modifying function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await amendLoop(state, log, useFunctionTasks, amendment, sessionId, options.claudeAmendModel);
+  await amendLoop(state, log, useFunctionTasks, mutableInputSchema, amendment, sessionId, options.claudeAmendModel);
   log("=== ObjectiveAI Function amendment complete ===");
 }
 function getNextPlanIndex() {

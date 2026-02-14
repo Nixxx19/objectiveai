@@ -178,7 +178,7 @@ import {
 } from "../../tools/claude/agentFunctions";
 
 // Common tools shared by both variants
-function getCommonTools(state: ToolState, useFunctionTasks: boolean) {
+function getCommonTools(state: ToolState, useFunctionTasks: boolean, mutableInputSchema: boolean) {
   registerSchemaRefs();
 
   // Conditionally hide tools that aren't relevant for the current function type
@@ -213,7 +213,7 @@ function getCommonTools(state: ToolState, useFunctionTasks: boolean) {
     makeCheckDescription(state),
     makeReadInputSchema(state),
     makeReadInputSchemaSchema(state),
-    makeEditInputSchema(state),
+    ...(mutableInputSchema ? [makeEditInputSchema(state)] : []),
     makeCheckInputSchema(state),
     ...(includeInputMaps ? [
       makeReadInputMaps(state),
@@ -482,6 +482,7 @@ async function inventLoop(
   state: ToolState,
   log: LogFn,
   useFunctionTasks: boolean,
+  mutableInputSchema: boolean,
   sessionId?: string,
   model?: string,
 ): Promise<string | undefined> {
@@ -496,7 +497,7 @@ async function inventLoop(
 
     // Build tools list
     const tools = [
-      ...getCommonTools(state, useFunctionTasks),
+      ...getCommonTools(state, useFunctionTasks, mutableInputSchema),
       ...(useFunctionTasks ? getFunctionTasksTools(state) : []),
     ];
     const mcpServer = createSdkMcpServer({ name: "invent", tools });
@@ -601,10 +602,11 @@ export async function inventMcp(
     }
   }
 
+  const mutableInputSchema = !!options.mutableInputSchema;
   log(
     `=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`,
   );
-  await inventLoop(state, log, useFunctionTasks, sessionId, options.claudeInventModel);
+  await inventLoop(state, log, useFunctionTasks, mutableInputSchema, sessionId, options.claudeInventModel);
 
   log("=== ObjectiveAI Function invention complete ===");
 }

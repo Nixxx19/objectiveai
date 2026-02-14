@@ -169,7 +169,8 @@ const inventCmd = program
   .option("--max-width <n>", "Maximum number of tasks", parseInt)
   .option("--scalar", "Set function type to scalar.function")
   .option("--vector", "Set function type to vector.function")
-  .option("--input-schema <json>", "Input schema JSON string");
+  .option("--input-schema <json>", "Input schema JSON string")
+  .option("--mutable-input-schema", "Allow editing input schema in the main loop");
 for (const cfg of claudeModelConfigs) {
   inventCmd.option(`${cfg.flag} <model>`, cfg.desc);
 }
@@ -187,6 +188,7 @@ inventCmd.action(async (spec: string | undefined, opts: Record<string, string | 
       name: opts.name as string | undefined,
       type,
       inputSchema: inputSchemaStr,
+      mutableInputSchema: !!opts.mutableInputSchema,
       depth: opts.depth as number | undefined,
       minWidth: (opts.width as number | undefined) ?? (opts.minWidth as number | undefined),
       maxWidth: (opts.width as number | undefined) ?? (opts.maxWidth as number | undefined),
@@ -225,7 +227,8 @@ const amendCmd = program
   .option("--max-width <n>", "Maximum number of tasks", parseInt)
   .option("--scalar", "Set function type to scalar.function")
   .option("--vector", "Set function type to vector.function")
-  .option("--input-schema <json>", "Input schema JSON string");
+  .option("--input-schema <json>", "Input schema JSON string")
+  .option("--mutable-input-schema", "Allow editing input schema in the main loop");
 for (const cfg of claudeModelConfigs) {
   amendCmd.option(`${cfg.flag} <model>`, cfg.desc);
 }
@@ -243,6 +246,7 @@ amendCmd.action(async (spec: string | undefined, opts: Record<string, string | n
       name: opts.name as string | undefined,
       type,
       inputSchema: inputSchemaStr,
+      mutableInputSchema: !!opts.mutableInputSchema,
       depth: opts.depth as number | undefined,
       minWidth: (opts.width as number | undefined) ?? (opts.minWidth as number | undefined),
       maxWidth: (opts.width as number | undefined) ?? (opts.maxWidth as number | undefined),

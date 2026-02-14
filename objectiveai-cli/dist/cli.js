@@ -5575,7 +5575,7 @@ function makeReadAgentFunction(state) {
 }
 
 // src/claude/invent/inventMcp.ts
-function getCommonTools(state, useFunctionTasks) {
+function getCommonTools(state, useFunctionTasks, mutableInputSchema) {
   registerSchemaRefs();
   const fnType = readType();
   const isScalar = fnType.ok && fnType.value === "scalar.function";
@@ -5606,7 +5606,7 @@ function getCommonTools(state, useFunctionTasks) {
     makeCheckDescription(),
     makeReadInputSchema(state),
     makeReadInputSchemaSchema(),
-    makeEditInputSchema(state),
+    ...mutableInputSchema ? [makeEditInputSchema(state)] : [],
     makeCheckInputSchema(),
     ...includeInputMaps ? [
       makeReadInputMaps(state),
@@ -5855,7 +5855,7 @@ Once all tests pass and SPEC.md compliance is verified:
 - **No API key is needed for tests** - tests run against a local server
 `;
 }
-async function inventLoop(state, log, useFunctionTasks, sessionId, model) {
+async function inventLoop(state, log, useFunctionTasks, mutableInputSchema, sessionId, model) {
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -5864,7 +5864,7 @@ async function inventLoop(state, log, useFunctionTasks, sessionId, model) {
     attempt++;
     log(`Invent loop attempt ${attempt}/${maxAttempts}`);
     const tools = [
-      ...getCommonTools(state, useFunctionTasks),
+      ...getCommonTools(state, useFunctionTasks, mutableInputSchema),
       ...useFunctionTasks ? getFunctionTasksTools(state) : []
     ];
     const mcpServer = createSdkMcpServer({ name: "invent", tools });
@@ -5949,10 +5949,11 @@ async function inventMcp(state, options) {
       throw e;
     }
   }
+  const mutableInputSchema = !!options.mutableInputSchema;
   log(
     `=== Invent Loop: Creating new function (${useFunctionTasks ? "function" : "vector"} tasks) ===`
   );
-  await inventLoop(state, log, useFunctionTasks, sessionId, options.claudeInventModel);
+  await inventLoop(state, log, useFunctionTasks, mutableInputSchema, sessionId, options.claudeInventModel);
   log("=== ObjectiveAI Function invention complete ===");
 }
 async function planMcp2(state, log, depth, amendment, sessionId, model) {
@@ -6082,7 +6083,7 @@ ${readPrefix} your amendment plan using the WritePlan tool. Include:
 }
 
 // src/claude/amend/amendMcp.ts
-function getCommonTools2(state, useFunctionTasks) {
+function getCommonTools2(state, useFunctionTasks, mutableInputSchema) {
   registerSchemaRefs();
   const fnType = readType();
   const isScalar = fnType.ok && fnType.value === "scalar.function";
@@ -6113,7 +6114,7 @@ function getCommonTools2(state, useFunctionTasks) {
     makeCheckDescription(),
     makeReadInputSchema(state),
     makeReadInputSchemaSchema(),
-    makeEditInputSchema(state),
+    ...mutableInputSchema ? [makeEditInputSchema(state)] : [],
     makeCheckInputSchema(),
     ...includeInputMaps ? [
       makeReadInputMaps(state),
@@ -6340,7 +6341,7 @@ Once all tests pass and compliance is verified:
 - **No API key is needed for tests** \u2014 tests run against a local server
 `;
 }
-async function amendLoop(state, log, useFunctionTasks, amendment, sessionId, model) {
+async function amendLoop(state, log, useFunctionTasks, mutableInputSchema, amendment, sessionId, model) {
   const maxAttempts = 5;
   let attempt = 0;
   let success = false;
@@ -6349,7 +6350,7 @@ async function amendLoop(state, log, useFunctionTasks, amendment, sessionId, mod
     attempt++;
     log(`Amend loop attempt ${attempt}/${maxAttempts}`);
     const tools = [
-      ...getCommonTools2(state, useFunctionTasks),
+      ...getCommonTools2(state, useFunctionTasks, mutableInputSchema),
       ...useFunctionTasks ? getFunctionTasksTools2(state) : []
     ];
     const mcpServer = createSdkMcpServer({ name: "amend", tools });
@@ -6434,8 +6435,9 @@ async function amendMcp(state, options, amendment) {
       throw e;
     }
   }
+  const mutableInputSchema = !!options.mutableInputSchema;
   log(`=== Amend Loop: Modifying function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await amendLoop(state, log, useFunctionTasks, amendment, sessionId, options.claudeAmendModel);
+  await amendLoop(state, log, useFunctionTasks, mutableInputSchema, amendment, sessionId, options.claudeAmendModel);
   log("=== ObjectiveAI Function amendment complete ===");
 }
 function getNextPlanIndex() {
@@ -7121,7 +7123,7 @@ ${BOLD2}Commands${RESET2}
   console.log("  objectiveai dryrun          Preview the dashboard with simulated agents");
   console.log("");
 });
-var inventCmd = program.command("invent").description("Invent a new ObjectiveAI Function").argument("[spec]", "Optional spec string for SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--agent-upstream <upstream>", "Agent upstream (default: claude)").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt).option("--scalar", "Set function type to scalar.function").option("--vector", "Set function type to vector.function").option("--input-schema <json>", "Input schema JSON string");
+var inventCmd = program.command("invent").description("Invent a new ObjectiveAI Function").argument("[spec]", "Optional spec string for SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--agent-upstream <upstream>", "Agent upstream (default: claude)").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt).option("--scalar", "Set function type to scalar.function").option("--vector", "Set function type to vector.function").option("--input-schema <json>", "Input schema JSON string").option("--mutable-input-schema", "Allow editing input schema in the main loop");
 for (const cfg of claudeModelConfigs) {
   inventCmd.option(`${cfg.flag} <model>`, cfg.desc);
 }
@@ -7138,6 +7140,7 @@ inventCmd.action(async (spec, opts) => {
     name: opts.name,
     type,
     inputSchema: inputSchemaStr,
+    mutableInputSchema: !!opts.mutableInputSchema,
     depth: opts.depth,
     minWidth: opts.width ?? opts.minWidth,
     maxWidth: opts.width ?? opts.maxWidth,
@@ -7158,7 +7161,7 @@ inventCmd.action(async (spec, opts) => {
   }
   await claude_exports.invent(partialOpts);
 });
-var amendCmd = program.command("amend").description("Amend an existing ObjectiveAI Function").argument("[spec]", "Amendment spec to append to SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--agent-upstream <upstream>", "Agent upstream (default: claude)").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt).option("--scalar", "Set function type to scalar.function").option("--vector", "Set function type to vector.function").option("--input-schema <json>", "Input schema JSON string");
+var amendCmd = program.command("amend").description("Amend an existing ObjectiveAI Function").argument("[spec]", "Amendment spec to append to SPEC.md").option("--name <name>", "Function name for name.txt").option("--depth <n>", "Depth level (0=vector, >0=function tasks)", parseInt).option("--api-base <url>", "API base URL").option("--api-key <key>", "ObjectiveAI API key").option("--git-user-name <name>", "Git author/committer name").option("--git-user-email <email>", "Git author/committer email").option("--gh-token <token>", "GitHub token for gh CLI").option("--agent-upstream <upstream>", "Agent upstream (default: claude)").option("--width <n>", "Exact number of tasks (sets both min and max)", parseInt).option("--min-width <n>", "Minimum number of tasks", parseInt).option("--max-width <n>", "Maximum number of tasks", parseInt).option("--scalar", "Set function type to scalar.function").option("--vector", "Set function type to vector.function").option("--input-schema <json>", "Input schema JSON string").option("--mutable-input-schema", "Allow editing input schema in the main loop");
 for (const cfg of claudeModelConfigs) {
   amendCmd.option(`${cfg.flag} <model>`, cfg.desc);
 }
@@ -7175,6 +7178,7 @@ amendCmd.action(async (spec, opts) => {
     name: opts.name,
     type,
     inputSchema: inputSchemaStr,
+    mutableInputSchema: !!opts.mutableInputSchema,
     depth: opts.depth,
     minWidth: opts.width ?? opts.minWidth,
     maxWidth: opts.width ?? opts.maxWidth,

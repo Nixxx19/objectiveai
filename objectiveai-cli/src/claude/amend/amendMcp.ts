@@ -178,7 +178,7 @@ import {
 } from "../../tools/claude/agentFunctions";
 
 // Common tools shared by both variants
-function getCommonTools(state: ToolState, useFunctionTasks: boolean) {
+function getCommonTools(state: ToolState, useFunctionTasks: boolean, mutableInputSchema: boolean) {
   registerSchemaRefs();
 
   // Conditionally hide tools that aren't relevant for the current function type
@@ -213,7 +213,7 @@ function getCommonTools(state: ToolState, useFunctionTasks: boolean) {
     makeCheckDescription(state),
     makeReadInputSchema(state),
     makeReadInputSchemaSchema(state),
-    makeEditInputSchema(state),
+    ...(mutableInputSchema ? [makeEditInputSchema(state)] : []),
     makeCheckInputSchema(state),
     ...(includeInputMaps ? [
       makeReadInputMaps(state),
@@ -465,6 +465,7 @@ async function amendLoop(
   state: ToolState,
   log: LogFn,
   useFunctionTasks: boolean,
+  mutableInputSchema: boolean,
   amendment: string,
   sessionId?: string,
   model?: string,
@@ -480,7 +481,7 @@ async function amendLoop(
 
     // Build tools list
     const tools = [
-      ...getCommonTools(state, useFunctionTasks),
+      ...getCommonTools(state, useFunctionTasks, mutableInputSchema),
       ...(useFunctionTasks ? getFunctionTasksTools(state) : []),
     ];
     const mcpServer = createSdkMcpServer({ name: "amend", tools });
@@ -584,8 +585,9 @@ export async function amendMcp(
     }
   }
 
+  const mutableInputSchema = !!options.mutableInputSchema;
   log(`=== Amend Loop: Modifying function (${useFunctionTasks ? "function" : "vector"} tasks) ===`);
-  await amendLoop(state, log, useFunctionTasks, amendment, sessionId, options.claudeAmendModel);
+  await amendLoop(state, log, useFunctionTasks, mutableInputSchema, amendment, sessionId, options.claudeAmendModel);
 
   log("=== ObjectiveAI Function amendment complete ===");
 }
