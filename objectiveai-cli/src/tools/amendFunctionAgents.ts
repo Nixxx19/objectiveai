@@ -84,7 +84,10 @@ function runAmendInSubdir(
       }
     });
 
-    child.stderr?.on("data", () => {});
+    let stderrBuffer = "";
+    child.stderr?.on("data", (data: Buffer) => {
+      stderrBuffer += data.toString();
+    });
 
     child.on("close", (code) => {
       // Unregister child stdin
@@ -102,9 +105,13 @@ function runAmendInSubdir(
       opts?.onChildEvent?.({ event: "done", path: name });
 
       if (code !== 0) {
+        const stderr = stderrBuffer.trim();
+        const detail = stderr
+          ? stderr
+          : `See ${subdir}/logs/ for details.`;
         resolve({
           name,
-          error: `Agent exited with code ${code}. See ${subdir}/logs/ for details.`,
+          error: `Agent exited with code ${code}. ${detail}`,
         });
         return;
       }
