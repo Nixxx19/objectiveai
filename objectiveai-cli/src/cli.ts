@@ -1,5 +1,5 @@
 import { execSync } from "child_process";
-import { readFileSync } from "fs";
+import { existsSync, readFileSync } from "fs";
 import { Command } from "commander";
 import { Claude } from "./index";
 import {
@@ -63,6 +63,15 @@ const RESET = "\x1b[0m";
 
 function statusLabel(ok: boolean, label: string): string {
   return ok ? `${GREEN}${label}${RESET}` : `${RED}${label}${RESET}`;
+}
+
+/** If the value is a path to an existing file, read and return its contents. */
+function readIfFile(value: string | undefined): string | undefined {
+  if (!value) return value;
+  try {
+    if (existsSync(value)) return readFileSync(value, "utf-8");
+  } catch {}
+  return value;
 }
 
 /**
@@ -170,9 +179,7 @@ const inventCmd = program
   .option("--max-width <n>", "Maximum number of tasks", parseInt)
   .option("--scalar", "Set function type to scalar.function")
   .option("--vector", "Set function type to vector.function")
-  .option("--input-schema <json>", "Input schema JSON string")
-  .option("--spec-file <path>", "Read spec from file instead of CLI arg")
-  .option("--input-schema-file <path>", "Read input schema JSON from file instead of CLI arg")
+  .option("--input-schema <json>", "Input schema JSON string (or path to JSON file)")
   .option("--mutable-input-schema", "Allow editing input schema in the main loop");
 for (const cfg of claudeModelConfigs) {
   inventCmd.option(`${cfg.flag} <model>`, cfg.desc);
@@ -182,15 +189,10 @@ inventCmd.action(async (spec: string | undefined, opts: Record<string, string | 
       console.error("Cannot use both --scalar and --vector");
       process.exit(1);
     }
-    if (opts.specFile) {
-      spec = readFileSync(opts.specFile as string, "utf-8");
-    }
+    spec = readIfFile(spec);
     let type: "scalar.function" | "vector.function" | undefined =
       opts.scalar ? "scalar.function" : opts.vector ? "vector.function" : undefined;
-    let inputSchemaStr = opts.inputSchema as string | undefined;
-    if (opts.inputSchemaFile) {
-      inputSchemaStr = readFileSync(opts.inputSchemaFile as string, "utf-8");
-    }
+    const inputSchemaStr = readIfFile(opts.inputSchema as string | undefined);
     type = validateCliInputSchema(inputSchemaStr, type);
     const partialOpts: Record<string, unknown> = {
       spec,
@@ -236,8 +238,7 @@ const amendCmd = program
   .option("--max-width <n>", "Maximum number of tasks", parseInt)
   .option("--scalar", "Set function type to scalar.function")
   .option("--vector", "Set function type to vector.function")
-  .option("--input-schema <json>", "Input schema JSON string")
-  .option("--input-schema-file <path>", "Read input schema JSON from file instead of CLI arg")
+  .option("--input-schema <json>", "Input schema JSON string (or path to JSON file)")
   .option("--mutable-input-schema", "Allow editing input schema in the main loop")
   .option("--overwrite-input-schema", "Overwrite existing input schema with --input-schema value");
 for (const cfg of claudeModelConfigs) {
@@ -248,12 +249,10 @@ amendCmd.action(async (spec: string | undefined, opts: Record<string, string | n
       console.error("Cannot use both --scalar and --vector");
       process.exit(1);
     }
+    spec = readIfFile(spec);
     let type: "scalar.function" | "vector.function" | undefined =
       opts.scalar ? "scalar.function" : opts.vector ? "vector.function" : undefined;
-    let inputSchemaStr = opts.inputSchema as string | undefined;
-    if (opts.inputSchemaFile) {
-      inputSchemaStr = readFileSync(opts.inputSchemaFile as string, "utf-8");
-    }
+    const inputSchemaStr = readIfFile(opts.inputSchema as string | undefined);
     type = validateCliInputSchema(inputSchemaStr, type);
     const partialOpts: Record<string, unknown> = {
       spec,

@@ -5303,8 +5303,8 @@ function runAgentInSubdir(name, spec, type, inputSchema, childDepth, childProces
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
     if (type === "scalar.function") args.push("--scalar");
     if (type === "vector.function") args.push("--vector");
-    args.push("--spec-file", ".tmp.spec.md");
-    args.push("--input-schema-file", ".tmp.input-schema.json");
+    args.push("--input-schema", ".tmp.input-schema.json");
+    args.push(".tmp.spec.md");
     const child = child_process.spawn("objectiveai", args, {
       cwd: subdir,
       stdio: ["pipe", "pipe", "pipe"],
@@ -5559,7 +5559,7 @@ function runAmendInSubdir(name, overwriteInputSchema, childProcesses, opts) {
         JSON.stringify(overwriteInputSchema, null, 2),
         "utf-8"
       );
-      args.push("--input-schema-file", ".tmp.input-schema.json");
+      args.push("--input-schema", ".tmp.input-schema.json");
       args.push("--overwrite-input-schema");
     }
     const child = child_process.spawn(

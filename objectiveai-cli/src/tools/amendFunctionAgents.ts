@@ -44,7 +44,7 @@ function runAmendInSubdir(
         JSON.stringify(overwriteInputSchema, null, 2),
         "utf-8",
       );
-      args.push("--input-schema-file", ".tmp.input-schema.json");
+      args.push("--input-schema", ".tmp.input-schema.json");
       args.push("--overwrite-input-schema");
     }
 

@@ -107,8 +107,8 @@ function runAgentInSubdir(
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
     if (type === "scalar.function") args.push("--scalar");
     if (type === "vector.function") args.push("--vector");
-    args.push("--spec-file", ".tmp.spec.md");
-    args.push("--input-schema-file", ".tmp.input-schema.json");
+    args.push("--input-schema", ".tmp.input-schema.json");
+    args.push(".tmp.spec.md");
 
     const child = spawn("objectiveai", args, {
       cwd: subdir,
