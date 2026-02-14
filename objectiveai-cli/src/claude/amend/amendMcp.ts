@@ -1,7 +1,7 @@
 import { createSdkMcpServer, query } from "@anthropic-ai/claude-agent-sdk";
 import { AgentOptions, LogFn } from "../../agentOptions";
 import { submit } from "../../tools/submit";
-import { createFileLogger, consumeStream, wrapToolsWithLogging } from "../../logging";
+import { consumeStream, wrapToolsWithLogging } from "../../logging";
 import { registerSchemaRefs } from "../../tools/schemaRefs";
 import { ToolState, formatReadList } from "../../tools/claude/toolState";
 
@@ -332,11 +332,6 @@ function getFunctionTasksTools(state: ToolState) {
     makeListAgentFunctions(state),
     makeReadAgentFunction(state),
   ];
-}
-
-function widthText(minWidth: number, maxWidth: number): string {
-  if (minWidth === maxWidth) return `exactly **${minWidth}**`;
-  return `between **${minWidth}** and **${maxWidth}**`;
 }
 
 function buildReadLine(state: ToolState): string {

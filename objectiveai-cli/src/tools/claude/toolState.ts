@@ -10,7 +10,7 @@ import {
 } from "../function";
 import { isDefaultExampleInputs } from "../inputs";
 import { isDefaultReadme } from "../markdown";
-import type { Writable } from "stream";
+
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import type { AgentEvent } from "../../events";
 import { MessageQueue } from "../../messageQueue";

@@ -3,7 +3,7 @@ import { writeFileSync } from "fs";
 import { join } from "path";
 import { Result } from "./result";
 import { AmendFunctionAgentsParams } from "../amendFunctionAgentsParams";
-import { AgentEvent, parseEvent, prefixEvent } from "../events";
+import { parseEvent, prefixEvent } from "../events";
 import { RunAgentOptions, getGitHubOwner, repoExists } from "./spawnFunctionAgents";
 import { appendAmendment } from "./markdown";
 

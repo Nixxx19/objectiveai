@@ -6,7 +6,6 @@ import {
   appendFileSync,
 } from "fs";
 import type {
-  AnyZodRawShape,
   SdkMcpToolDefinition,
   SDKMessage,
 } from "@anthropic-ai/claude-agent-sdk";

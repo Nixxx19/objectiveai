@@ -6,7 +6,7 @@ import { init } from "../init";
 import { prepare } from "./prepare";
 import { inventMcp } from "./invent";
 import { amendMcp } from "./amend";
-import { makeToolState, ToolState } from "../tools/claude/toolState";
+import { makeToolState } from "../tools/claude/toolState";
 import { setMessageQueue } from "../tools/claude/util";
 import { getNextPlanIndex } from "./planIndex";
 import { Dashboard } from "../dashboard";

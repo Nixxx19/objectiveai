@@ -5164,7 +5164,10 @@ async function planMcp(state, log, depth, sessionId, model) {
     makeReadDefaultNetworkTest(),
     makeReadSwissSystemNetworkTest()
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "plan", tools: wrapToolsWithLogging(tools, log) });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({
+    name: "plan",
+    tools: wrapToolsWithLogging(tools, log)
+  });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   reads.push("name.txt");

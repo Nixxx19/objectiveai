@@ -14,7 +14,6 @@ import {
   isGitAvailable,
   isGhAvailable,
   ResolvedValue,
-  CLAUDE_MODEL_KEYS,
   type ClaudeModelKey,
 } from "./agentOptions";
 import { setConfigValue, ConfigJson } from "./config";
@@ -60,10 +59,6 @@ const BOLD = "\x1b[1m";
 const DIM = "\x1b[2m";
 const UNDERLINE = "\x1b[4m";
 const RESET = "\x1b[0m";
-
-function statusLabel(ok: boolean, label: string): string {
-  return ok ? `${GREEN}${label}${RESET}` : `${RED}${label}${RESET}`;
-}
 
 /** If the value is a path to an existing file, read and return its contents. */
 function readIfFile(value: string | undefined): string | undefined {
