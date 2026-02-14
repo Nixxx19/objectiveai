@@ -11,6 +11,8 @@ import {
   makeReadExampleFunction,
 } from "../../tools/claude/exampleFunctions";
 import { makeReadFunctionSchema } from "../../tools/claude/function";
+import { makeReadType } from "../../tools/claude/type";
+import { makeReadInputSchema } from "../../tools/claude/inputSchema";
 import { ToolState, formatReadList } from "../../tools/claude/toolState";
 import { writeSession } from "../../tools/session";
 
@@ -32,6 +34,8 @@ export async function essayTasksMcp(
   const tools = [
     makeReadSpec(state),
     makeReadName(state),
+    makeReadType(state),
+    makeReadInputSchema(state),
     makeReadEssay(state),
     makeWriteEssayTasks(state),
     makeListExampleFunctions(state),

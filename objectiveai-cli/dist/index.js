@@ -3522,6 +3522,8 @@ async function essayMcp(state, log, sessionId, model) {
   const tools = [
     makeReadSpec(state),
     makeReadName(),
+    makeReadType(state),
+    makeReadInputSchema(state),
     makeWriteEssay(state),
     makeListExampleFunctions(state),
     makeReadExampleFunction(state),
@@ -3608,6 +3610,8 @@ async function essayTasksMcp(state, log, sessionId, model) {
   const tools = [
     makeReadSpec(state),
     makeReadName(),
+    makeReadType(state),
+    makeReadInputSchema(state),
     makeReadEssay(state),
     makeWriteEssayTasks(state),
     makeListExampleFunctions(state),
