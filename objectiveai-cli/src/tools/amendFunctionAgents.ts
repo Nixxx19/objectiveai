@@ -22,6 +22,7 @@ type AmendResult = AgentResult | AgentError;
 
 function runAmendInSubdir(
   name: string,
+  overwriteInputSchema: Record<string, unknown> | undefined,
   childProcesses: ChildProcess[],
   opts?: RunAgentOptions,
 ): Promise<AmendResult> {
@@ -36,6 +37,10 @@ function runAmendInSubdir(
     if (opts?.ghToken) args.push("--gh-token", opts.ghToken);
     if (opts?.minWidth) args.push("--min-width", String(opts.minWidth));
     if (opts?.maxWidth) args.push("--max-width", String(opts.maxWidth));
+    if (overwriteInputSchema) {
+      args.push("--input-schema", JSON.stringify(overwriteInputSchema));
+      args.push("--overwrite-input-schema");
+    }
 
     const child = spawn(
       "objectiveai",
@@ -223,7 +228,7 @@ export async function amendFunctionAgents(
   try {
     const results = await Promise.all(
       params.map((param) =>
-        runAmendInSubdir(param.name, childProcesses, opts),
+        runAmendInSubdir(param.name, param.overwriteInputSchema, childProcesses, opts),
       ),
     );
     return { ok: true, value: results, error: undefined };

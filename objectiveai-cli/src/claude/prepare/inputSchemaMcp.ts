@@ -29,8 +29,9 @@ export async function inputSchemaMcp(
   sessionId?: string,
   inputSchema?: string,
   model?: string,
+  overwriteInputSchema?: boolean,
 ): Promise<string | undefined> {
-  if (!isDefaultInputSchema()) return sessionId;
+  if (!isDefaultInputSchema() && !(overwriteInputSchema && inputSchema)) return sessionId;
 
   if (inputSchema) {
     const parsed = JSON.parse(inputSchema);
@@ -65,6 +66,7 @@ export async function inputSchemaMcp(
   sessionId = await consumeStream(
     query({
       prompt:
+        "Do not re-read anything you have already read or written in your conversation history.\n\n" +
         `${readPrefix} the input_schema for this function.\n\n` +
         "The input_schema is a JSON Schema object that describes the shape of the function's input.\n" +
         "- For **scalar** functions: the input describes a single item to score\n" +

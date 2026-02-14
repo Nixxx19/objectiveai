@@ -228,7 +228,8 @@ const amendCmd = program
   .option("--scalar", "Set function type to scalar.function")
   .option("--vector", "Set function type to vector.function")
   .option("--input-schema <json>", "Input schema JSON string")
-  .option("--mutable-input-schema", "Allow editing input schema in the main loop");
+  .option("--mutable-input-schema", "Allow editing input schema in the main loop")
+  .option("--overwrite-input-schema", "Overwrite existing input schema with --input-schema value");
 for (const cfg of claudeModelConfigs) {
   amendCmd.option(`${cfg.flag} <model>`, cfg.desc);
 }
@@ -247,6 +248,7 @@ amendCmd.action(async (spec: string | undefined, opts: Record<string, string | n
       type,
       inputSchema: inputSchemaStr,
       mutableInputSchema: !!opts.mutableInputSchema,
+      overwriteInputSchema: !!opts.overwriteInputSchema,
       depth: opts.depth as number | undefined,
       minWidth: (opts.width as number | undefined) ?? (opts.minWidth as number | undefined),
       maxWidth: (opts.width as number | undefined) ?? (opts.maxWidth as number | undefined),

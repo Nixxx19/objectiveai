@@ -59,7 +59,7 @@ export async function prepare(
 
   log("=== Step 4: input_schema ===");
   sessionId = await runStep(state, log, sessionId, (sid) =>
-    inputSchemaMcp(state, log, sid, options.inputSchema, options.claudeInputSchemaModel),
+    inputSchemaMcp(state, log, sid, options.inputSchema, options.claudeInputSchemaModel, options.overwriteInputSchema),
   );
 
   log("=== Step 5: ESSAY.md ===");

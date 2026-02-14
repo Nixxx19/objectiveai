@@ -12,6 +12,7 @@ export interface AgentOptions {
   type?: "scalar.function" | "vector.function";
   inputSchema?: string;
   mutableInputSchema?: boolean;
+  overwriteInputSchema?: boolean;
   apiBase: string;
   apiKey: string;
   sessionId?: string;

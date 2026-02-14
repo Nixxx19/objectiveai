@@ -1,8 +1,9 @@
 import { tool } from "@anthropic-ai/claude-agent-sdk";
 import { ToolState } from "./toolState";
-import { textResult, resultFromResult } from "./util";
+import { textResult, resultFromResult, errorResult } from "./util";
 import { amendFunctionAgents } from "../amendFunctionAgents";
 import { AmendFunctionAgentsParamsSchema } from "../../amendFunctionAgentsParams";
+import { validateInputSchema } from "../function/inputSchema";
 
 export function makeAmendFunctionAgents(state: ToolState) {
   const opts = () => ({
@@ -22,6 +23,16 @@ export function makeAmendFunctionAgents(state: ToolState) {
     "Amend existing child function agents in parallel",
     { params: AmendFunctionAgentsParamsSchema },
     async ({ params }) => {
+      // Validate overwriteInputSchema if provided
+      for (const param of params) {
+        if (param.overwriteInputSchema) {
+          const schemaResult = validateInputSchema({ input_schema: param.overwriteInputSchema });
+          if (!schemaResult.ok) {
+            return errorResult(`Invalid overwriteInputSchema for "${param.name}": ${schemaResult.error}`);
+          }
+        }
+      }
+
       state.pendingAgentResults.push(
         amendFunctionAgents(params, opts()).then((r) => resultFromResult(r)),
       );
