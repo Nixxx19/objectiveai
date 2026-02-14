@@ -114,7 +114,9 @@ function createChildLogger() {
   const log = (...args) => {
     const message = args.map((arg) => typeof arg === "string" ? arg : String(arg)).join(" ");
     append(message);
-    process.stdout.write(serializeEvent({ event: "log", path: "", line: message }) + "\n");
+    process.stdout.write(
+      serializeEvent({ event: "log", path: "", line: message }) + "\n"
+    );
   };
   return { log, logPath };
 }
@@ -135,8 +137,6 @@ function formatMessage(msg) {
         if (block.type === "text") {
           const text = block.text.trim();
           if (text) parts.push(text);
-        } else if (block.type === "tool_use") {
-          parts.push(`[tool_use] ${block.name}`);
         }
       }
       return parts.length > 0 ? parts.join("\n") : null;
@@ -151,6 +151,24 @@ function formatMessage(msg) {
     default:
       return null;
   }
+}
+function formatCallToolResult(result) {
+  if (result.isError) {
+    const texts = result.content.filter((b) => b.type === "text").map((b) => b.text);
+    const text = texts.join("").replace(/\n/g, " ").trim();
+    return `{ok:false,error:${JSON.stringify(text || "unknown")}}`;
+  }
+  return "{ok:true}";
+}
+function wrapToolsWithLogging(tools, log) {
+  return tools.map((t) => ({
+    ...t,
+    handler: async (args, extra) => {
+      const result = await t.handler(args, extra);
+      log(`[tool_use] ${t.name}: ${formatCallToolResult(result)}`);
+      return result;
+    }
+  }));
 }
 async function consumeStream(stream, log, sessionId) {
   for await (const message of stream) {
@@ -1031,7 +1049,7 @@ function checkInputMaps(fn) {
   return { ok: true, value: void 0, error: void 0 };
 }
 function delInputMaps() {
-  return editFunction({ input_maps: void 0 });
+  return editFunction({ input_maps: null });
 }
 function editInputMaps(value) {
   const result = validateInputMaps({ input_maps: value });
@@ -1094,7 +1112,7 @@ function delInputMap(index) {
   }
   const newInputMaps = [...fn.value.input_maps];
   newInputMaps.splice(index, 1);
-  const editResult = editFunction({ input_maps: newInputMaps.length > 0 ? newInputMaps : void 0 });
+  const editResult = editFunction({ input_maps: newInputMaps.length > 0 ? newInputMaps : null });
   if (!editResult.ok) {
     return editResult;
   }
@@ -1344,7 +1362,10 @@ function appendTask(value) {
   }
   const task = value;
   if (task && typeof task === "object") {
-    const constraintResult = validateTaskConstraints(task, fn.value.type);
+    const constraintResult = validateTaskConstraints(
+      task,
+      fn.value.type
+    );
     if (!constraintResult.ok) {
       return { ok: false, value: void 0, error: constraintResult.error };
     }
@@ -1394,7 +1415,10 @@ function editTask(index, value) {
   }
   const task = value;
   if (task && typeof task === "object") {
-    const constraintResult = validateTaskConstraints(task, fn.value.type);
+    const constraintResult = validateTaskConstraints(
+      task,
+      fn.value.type
+    );
     if (!constraintResult.ok) {
       return { ok: false, value: void 0, error: constraintResult.error };
     }
@@ -2192,7 +2216,7 @@ async function specMcp(state, log, sessionId, spec, model) {
     makeReadExampleFunction(state),
     makeReadFunctionSchema()
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "spec", tools });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "spec", tools: wrapToolsWithLogging(tools, log) });
   const prompt = "Read example functions to understand what ObjectiveAI Functions look like, then create SPEC.md specifying the ObjectiveAI Function to be built. Think deeply about what function to invent:\n- **Scalar Function**: For scoring (outputs a single number in [0, 1])\n- **Vector Function**: For ranking (outputs scores for multiple items that sum to ~1)\n\nBe creative and describe a function with plain language.";
   sessionId = await consumeStream(
     claudeAgentSdk.query({
@@ -3307,7 +3331,7 @@ async function nameMcp(state, log, sessionId, name, model) {
     makeReadExampleFunction(state),
     makeReadFunctionSchema()
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "name", tools });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "name", tools: wrapToolsWithLogging(tools, log) });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   if (!state.hasReadExampleFunctions) reads.push("example functions");
@@ -3410,7 +3434,7 @@ async function typeMcp(state, log, sessionId, type, model) {
     makeListExampleFunctions(state),
     makeReadExampleFunction(state)
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "type", tools });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "type", tools: wrapToolsWithLogging(tools, log) });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   if (!state.hasReadExampleFunctions) reads.push("example functions");
@@ -3563,7 +3587,7 @@ async function inputSchemaMcp(state, log, sessionId, inputSchema, model, overwri
     makeListExampleFunctions(state),
     makeReadExampleFunction(state)
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "input-schema", tools });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "input-schema", tools: wrapToolsWithLogging(tools, log) });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   if (!state.hasReadExampleFunctions) reads.push("example functions");
@@ -3652,7 +3676,7 @@ async function essayMcp(state, log, sessionId, model) {
     makeReadExampleFunction(state),
     makeReadFunctionSchema()
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essay", tools });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essay", tools: wrapToolsWithLogging(tools, log) });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   reads.push("name.txt");
@@ -3741,7 +3765,7 @@ async function essayTasksMcp(state, log, sessionId, model) {
     makeReadExampleFunction(state),
     makeReadFunctionSchema()
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essayTasks", tools });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "essayTasks", tools: wrapToolsWithLogging(tools, log) });
   const widthDesc = state.minWidth === state.maxWidth ? `exactly ${state.minWidth}` : `between ${state.minWidth} and ${state.maxWidth}`;
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
@@ -5140,7 +5164,7 @@ async function planMcp(state, log, depth, sessionId, model) {
     makeReadDefaultNetworkTest(),
     makeReadSwissSystemNetworkTest()
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "plan", tools });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "plan", tools: wrapToolsWithLogging(tools, log) });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   reads.push("name.txt");
@@ -5305,7 +5329,9 @@ function runAgentInSubdir(name, spec, type, inputSchema, childDepth, childProces
         }
       }
     });
-    child.stderr?.on("data", () => {
+    let stderrBuffer = "";
+    child.stderr?.on("data", (data) => {
+      stderrBuffer += data.toString();
     });
     child.on("close", (code) => {
       opts?.activeChildren?.delete(name);
@@ -5317,9 +5343,11 @@ function runAgentInSubdir(name, spec, type, inputSchema, childDepth, childProces
       }
       opts?.onChildEvent?.({ event: "done", path: name });
       if (code !== 0) {
+        const stderr = stderrBuffer.trim();
+        const detail = stderr ? stderr : `See ${subdir}/logs/ for details.`;
         resolve2({
           name,
-          error: `Agent exited with code ${code}. See ${subdir}/logs/ for details.`
+          error: `Agent exited with code ${code}. ${detail}`
         });
         return;
       }
@@ -5494,7 +5522,13 @@ function makeSpawnFunctionAgents(state) {
       }
       state.spawnFunctionAgentsHasSpawned = true;
       state.pendingAgentResults.push(
-        spawnFunctionAgents(params, opts()).then((r) => resultFromResult(r))
+        spawnFunctionAgents(params, opts()).then((r) => {
+          if (!r.ok) return errorResult(r.error);
+          const text = JSON.stringify(r.value, null, 2);
+          const hasErrors = r.value.some((s) => "error" in s);
+          if (hasErrors) return errorResult(text);
+          return textResult(text);
+        })
       );
       return textResult(
         "Agents spawned. Call WaitFunctionAgents to wait for results."
@@ -5551,7 +5585,9 @@ function runAmendInSubdir(name, overwriteInputSchema, childProcesses, opts) {
         }
       }
     });
-    child.stderr?.on("data", () => {
+    let stderrBuffer = "";
+    child.stderr?.on("data", (data) => {
+      stderrBuffer += data.toString();
     });
     child.on("close", (code) => {
       opts?.activeChildren?.delete(name);
@@ -5563,9 +5599,11 @@ function runAmendInSubdir(name, overwriteInputSchema, childProcesses, opts) {
       }
       opts?.onChildEvent?.({ event: "done", path: name });
       if (code !== 0) {
+        const stderr = stderrBuffer.trim();
+        const detail = stderr ? stderr : `See ${subdir}/logs/ for details.`;
         resolve2({
           name,
-          error: `Agent exited with code ${code}. See ${subdir}/logs/ for details.`
+          error: `Agent exited with code ${code}. ${detail}`
         });
         return;
       }
@@ -5721,7 +5759,13 @@ function makeAmendFunctionAgents(state) {
         }
       }
       state.pendingAgentResults.push(
-        amendFunctionAgents(params, opts()).then((r) => resultFromResult(r))
+        amendFunctionAgents(params, opts()).then((r) => {
+          if (!r.ok) return errorResult(r.error);
+          const text = JSON.stringify(r.value, null, 2);
+          const hasErrors = r.value.some((s) => "error" in s);
+          if (hasErrors) return errorResult(text);
+          return textResult(text);
+        })
       );
       return textResult(
         "Agents spawned. Call WaitFunctionAgents to wait for results."
@@ -6148,7 +6192,7 @@ async function inventLoop(state, log, useFunctionTasks, mutableInputSchema, sess
       ...getCommonTools(state, useFunctionTasks, mutableInputSchema),
       ...useFunctionTasks ? getFunctionTasksTools(state) : []
     ];
-    const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "invent", tools });
+    const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "invent", tools: wrapToolsWithLogging(tools, log) });
     let prompt;
     if (attempt === 1) {
       prompt = useFunctionTasks ? buildFunctionTasksPrompt(state) : buildVectorTasksPrompt(state);
@@ -6301,7 +6345,7 @@ async function planMcp2(state, log, depth, amendment, sessionId, model) {
     makeReadDefaultNetworkTest(),
     makeReadSwissSystemNetworkTest()
   ];
-  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "amend-plan", tools });
+  const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "amend-plan", tools: wrapToolsWithLogging(tools, log) });
   const reads = [];
   if (!state.hasReadOrWrittenSpec) reads.push("SPEC.md");
   reads.push("name.txt");
@@ -6640,7 +6684,7 @@ async function amendLoop(state, log, useFunctionTasks, mutableInputSchema, amend
       ...getCommonTools2(state, useFunctionTasks, mutableInputSchema),
       ...useFunctionTasks ? getFunctionTasksTools2(state) : []
     ];
-    const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "amend", tools });
+    const mcpServer = claudeAgentSdk.createSdkMcpServer({ name: "amend", tools: wrapToolsWithLogging(tools, log) });
     let prompt;
     if (attempt === 1) {
       prompt = useFunctionTasks ? buildAmendFunctionTasksPrompt(state, amendment) : buildAmendVectorTasksPrompt(state, amendment);
@@ -7316,3 +7360,4 @@ exports.resolveClaudeModel = resolveClaudeModel;
 exports.resolveGhToken = resolveGhToken;
 exports.resolveGitUserEmail = resolveGitUserEmail;
 exports.resolveGitUserName = resolveGitUserName;
+exports.wrapToolsWithLogging = wrapToolsWithLogging;

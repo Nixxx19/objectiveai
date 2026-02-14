@@ -3,7 +3,7 @@ import { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import z, { z as z$1 } from 'zod';
 import * as objectiveai from 'objectiveai';
 import { Functions } from 'objectiveai';
-import { SDKMessage } from '@anthropic-ai/claude-agent-sdk';
+import { SDKMessage, SdkMcpToolDefinition } from '@anthropic-ai/claude-agent-sdk';
 
 interface ConfigJson {
     apiBase?: string;
@@ -58394,6 +58394,10 @@ declare function createChildLogger(): {
  */
 declare function formatMessage(msg: SDKMessage): string | null;
 /**
+ * Wrap an array of MCP tools so each handler logs `[tool_use] <name>: <result>`.
+ */
+declare function wrapToolsWithLogging(tools: Array<SdkMcpToolDefinition<any>>, log: LogFn): Array<SdkMcpToolDefinition<any>>;
+/**
  * Consume an SDK message stream, extract session_id, and log formatted messages.
  */
 declare function consumeStream(stream: AsyncIterable<SDKMessage>, log: LogFn, sessionId?: string): Promise<string | undefined>;
@@ -58416,4 +58420,4 @@ type SpawnFunctionAgentsParams = z$1.infer<typeof SpawnFunctionAgentsParamsSchem
 declare function invent(partialOptions?: Partial<AgentOptions>): Promise<void>;
 declare function amend(partialOptions?: Partial<AgentOptions>): Promise<void>;
 
-export { type AgentOptions, CLAUDE_MODEL_KEYS, index$7 as Claude, type ClaudeModelKey, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type ResolvedValue, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, amend, checkConfig, consumeStream, createChildLogger, createFileLogger, createRootLogger, dryrun, formatMessage, getLatestLogPath, init, invent, isGhAvailable, isGitAvailable, makeAgentOptions, resolveAgentUpstream, resolveApiBase, resolveApiKey, resolveClaudeModel, resolveGhToken, resolveGitUserEmail, resolveGitUserName };
+export { type AgentOptions, CLAUDE_MODEL_KEYS, index$7 as Claude, type ClaudeModelKey, type ExampleInput, ExampleInputSchema, type ExampleInputs, ExampleInputsSchema, type LogFn, type Parameters, type ResolvedValue, type SpawnFunctionAgentsParams, SpawnFunctionAgentsParamsSchema, index as Tools, amend, checkConfig, consumeStream, createChildLogger, createFileLogger, createRootLogger, dryrun, formatMessage, getLatestLogPath, init, invent, isGhAvailable, isGitAvailable, makeAgentOptions, resolveAgentUpstream, resolveApiBase, resolveApiKey, resolveClaudeModel, resolveGhToken, resolveGitUserEmail, resolveGitUserName, wrapToolsWithLogging };
