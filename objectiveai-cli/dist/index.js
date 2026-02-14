@@ -822,7 +822,6 @@ __export(function_exports, {
   editInputSplit: () => editInputSplit,
   editOutputLength: () => editOutputLength,
   editTask: () => editTask,
-  editTasks: () => editTasks,
   editType: () => editType,
   isDefaultDescription: () => isDefaultDescription,
   isDefaultInputMaps: () => isDefaultInputMaps,
@@ -1259,16 +1258,74 @@ function checkTasks(fn) {
   }
   return { ok: true, value: void 0, error: void 0 };
 }
-function editTasks(value) {
-  const result = validateTasks({ tasks: value });
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: void 0,
-      error: `Invalid tasks: ${result.error}`
-    };
+function validateTaskConstraints(task, fnType) {
+  const paramsRaw = readParameters();
+  const paramsResult = paramsRaw.ok ? validateParameters(paramsRaw.value) : void 0;
+  const depth = paramsResult?.ok ? paramsResult.value.depth : 0;
+  const taskType = task.type;
+  const hasMap = "map" in task;
+  if (depth > 0) {
+    if (taskType !== "scalar.function" && taskType !== "vector.function") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `At depth ${depth}, tasks must be function tasks ("scalar.function" or "vector.function"), not "${taskType}".`
+      };
+    }
+  } else {
+    if (taskType !== "vector.completion") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `At depth 0, tasks must be "vector.completion", not "${taskType}".`
+      };
+    }
   }
-  return editFunction({ tasks: result.value });
+  if (hasMap) {
+    if (fnType !== "vector.function") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `Task "map" is only allowed when the function type is "vector.function" (current type: "${fnType}").`
+      };
+    }
+    if (taskType !== "scalar.function") {
+      return {
+        ok: false,
+        value: void 0,
+        error: `Task "map" is only allowed on "scalar.function" tasks (this task type: "${taskType}").`
+      };
+    }
+  }
+  if (depth > 0) {
+    if (fnType === "scalar.function") {
+      if (taskType !== "scalar.function") {
+        return {
+          ok: false,
+          value: void 0,
+          error: `Scalar functions require "scalar.function" tasks, not "${taskType}".`
+        };
+      }
+      if (hasMap) {
+        return {
+          ok: false,
+          value: void 0,
+          error: `Scalar functions do not support mapped tasks. Remove the "map" field.`
+        };
+      }
+    } else if (fnType === "vector.function") {
+      const isUnmappedVector = taskType === "vector.function" && !hasMap;
+      const isMappedScalar = taskType === "scalar.function" && hasMap;
+      if (!isUnmappedVector && !isMappedScalar) {
+        return {
+          ok: false,
+          value: void 0,
+          error: `Vector functions require either an un-mapped "vector.function" task or a mapped "scalar.function" task (got ${hasMap ? "mapped" : "un-mapped"} "${taskType}").`
+        };
+      }
+    }
+  }
+  return { ok: true, value: void 0, error: void 0 };
 }
 function appendTask(value) {
   const fn = readFunction();
@@ -1280,20 +1337,10 @@ function appendTask(value) {
     };
   }
   const task = value;
-  if (task && typeof task === "object" && "map" in task) {
-    if (fn.value.type !== "vector.function") {
-      return {
-        ok: false,
-        value: void 0,
-        error: `Task "map" is only allowed when the function type is "vector.function" (current type: "${fn.value.type}").`
-      };
-    }
-    if (task.type !== "scalar.function") {
-      return {
-        ok: false,
-        value: void 0,
-        error: `Task "map" is only allowed on "scalar.function" tasks (this task type: "${task.type}").`
-      };
+  if (task && typeof task === "object") {
+    const constraintResult = validateTaskConstraints(task, fn.value.type);
+    if (!constraintResult.ok) {
+      return { ok: false, value: void 0, error: constraintResult.error };
     }
   }
   const existing = Array.isArray(fn.value.tasks) ? fn.value.tasks : [];
@@ -1338,6 +1385,13 @@ function editTask(index, value) {
       value: void 0,
       error: `Unable to edit task: index ${index} is out of bounds (length ${fn.value.tasks.length})`
     };
+  }
+  const task = value;
+  if (task && typeof task === "object") {
+    const constraintResult = validateTaskConstraints(task, fn.value.type);
+    if (!constraintResult.ok) {
+      return { ok: false, value: void 0, error: constraintResult.error };
+    }
   }
   const newTasks = [...fn.value.tasks];
   newTasks[index] = value;

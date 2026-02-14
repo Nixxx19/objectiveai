@@ -90,16 +90,106 @@ export function checkTasks(fn?: DeserializedFunction): Result<undefined> {
   return { ok: true, value: undefined, error: undefined };
 }
 
-export function editTasks(value: unknown): Result<undefined> {
-  const result = validateTasks({ tasks: value });
-  if (!result.ok) {
-    return {
-      ok: false,
-      value: undefined,
-      error: `Invalid tasks: ${result.error}`,
-    };
+// export function editTasks(value: unknown): Result<undefined> {
+//   const result = validateTasks({ tasks: value });
+//   if (!result.ok) {
+//     return {
+//       ok: false,
+//       value: undefined,
+//       error: `Invalid tasks: ${result.error}`,
+//     };
+//   }
+//   return editFunction({ tasks: result.value });
+// }
+
+/**
+ * Validate a single task against depth and function type constraints.
+ * Shared by appendTask and editTask.
+ */
+function validateTaskConstraints(
+  task: Record<string, unknown>,
+  fnType: string,
+): Result<undefined> {
+  // Read depth from parameters
+  const paramsRaw = readParameters();
+  const paramsResult = paramsRaw.ok
+    ? validateParameters(paramsRaw.value)
+    : undefined;
+  const depth = paramsResult?.ok ? paramsResult.value.depth : 0;
+
+  const taskType = task.type as string | undefined;
+  const hasMap = "map" in task;
+
+  // Depth-based task type validation
+  if (depth > 0) {
+    if (taskType !== "scalar.function" && taskType !== "vector.function") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `At depth ${depth}, tasks must be function tasks ("scalar.function" or "vector.function"), not "${taskType}".`,
+      };
+    }
+  } else {
+    if (taskType !== "vector.completion") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `At depth 0, tasks must be "vector.completion", not "${taskType}".`,
+      };
+    }
   }
-  return editFunction({ tasks: result.value });
+
+  // Map validation: only allowed on scalar.function tasks inside a vector.function
+  if (hasMap) {
+    if (fnType !== "vector.function") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `Task "map" is only allowed when the function type is "vector.function" (current type: "${fnType}").`,
+      };
+    }
+    if (taskType !== "scalar.function") {
+      return {
+        ok: false,
+        value: undefined,
+        error: `Task "map" is only allowed on "scalar.function" tasks (this task type: "${taskType}").`,
+      };
+    }
+  }
+
+  // Depth > 0: validate task type + map combinations against function type
+  if (depth > 0) {
+    if (fnType === "scalar.function") {
+      // Scalar parent: must be un-mapped scalar.function task
+      if (taskType !== "scalar.function") {
+        return {
+          ok: false,
+          value: undefined,
+          error: `Scalar functions require "scalar.function" tasks, not "${taskType}".`,
+        };
+      }
+      if (hasMap) {
+        return {
+          ok: false,
+          value: undefined,
+          error: `Scalar functions do not support mapped tasks. Remove the "map" field.`,
+        };
+      }
+    } else if (fnType === "vector.function") {
+      // Vector parent: un-mapped vector.function OR mapped scalar.function
+      const isUnmappedVector = taskType === "vector.function" && !hasMap;
+      const isMappedScalar = taskType === "scalar.function" && hasMap;
+      if (!isUnmappedVector && !isMappedScalar) {
+        return {
+          ok: false,
+          value: undefined,
+          error: `Vector functions require either an un-mapped "vector.function" task or a mapped "scalar.function" task (got ${hasMap ? "mapped" : "un-mapped"} "${taskType}").`,
+        };
+      }
+    }
+  }
+
+  return { ok: true, value: undefined, error: undefined };
 }
 
 export function appendTask(value: unknown): Result<string> {
@@ -112,22 +202,14 @@ export function appendTask(value: unknown): Result<string> {
     };
   }
 
-  // map is only allowed on scalar.function tasks inside a vector.function
   const task = value as Record<string, unknown> | null;
-  if (task && typeof task === "object" && "map" in task) {
-    if (fn.value.type !== "vector.function") {
-      return {
-        ok: false,
-        value: undefined,
-        error: `Task "map" is only allowed when the function type is "vector.function" (current type: "${fn.value.type}").`,
-      };
-    }
-    if (task.type !== "scalar.function") {
-      return {
-        ok: false,
-        value: undefined,
-        error: `Task "map" is only allowed on "scalar.function" tasks (this task type: "${task.type}").`,
-      };
+  if (task && typeof task === "object") {
+    const constraintResult = validateTaskConstraints(
+      task,
+      fn.value.type as string,
+    );
+    if (!constraintResult.ok) {
+      return { ok: false, value: undefined, error: constraintResult.error! };
     }
   }
 
@@ -176,6 +258,17 @@ export function editTask(index: number, value: unknown): Result<undefined> {
       value: undefined,
       error: `Unable to edit task: index ${index} is out of bounds (length ${fn.value.tasks.length})`,
     };
+  }
+
+  const task = value as Record<string, unknown> | null;
+  if (task && typeof task === "object") {
+    const constraintResult = validateTaskConstraints(
+      task,
+      fn.value.type as string,
+    );
+    if (!constraintResult.ok) {
+      return { ok: false, value: undefined, error: constraintResult.error! };
+    }
   }
 
   const newTasks = [...fn.value.tasks];
