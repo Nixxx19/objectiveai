@@ -977,12 +977,35 @@ fn json_to_starlark<'v>(heap: &'v Heap, json: &Value) -> SValue<'v> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::chat::completions::request::{
+        AssistantMessageExpression, AssistantToolCallExpression,
+        AssistantToolCallFunctionExpression, DeveloperMessageExpression, File,
+        FunctionToolExpression, ImageUrl, ImageUrlDetail, InputAudio,
+        MessageExpression, RichContentExpression, RichContentPartExpression,
+        SimpleContentExpression, SimpleContentPartExpression,
+        SystemMessageExpression, ToolExpression, ToolMessageExpression,
+        UserMessageExpression, ValueExpression, VideoUrl,
+    };
     use crate::functions::expression::{
-        FunctionOutput, Input, Params, ParamsOwned, TaskOutputOwned,
-        VectorCompletionOutput,
+        FunctionOutput, Input, InputExpression, Params, ParamsOwned, TaskOutputOwned,
+        VectorCompletionOutput, WithExpression,
     };
     use indexmap::IndexMap;
     use rust_decimal::dec;
+    use serde::Serialize;
+    use serde_json::Number as JsonNumber;
+
+    fn assert_starlark_deep_eq<T: FromStarlarkValue + Serialize>(
+        code: &str,
+        params: &Params<'_, '_, '_>,
+        expected: &T,
+    ) {
+        let result: T = starlark_eval(code, params).unwrap();
+        assert_eq!(
+            serde_json::to_value(&result).unwrap(),
+            serde_json::to_value(expected).unwrap()
+        );
+    }
 
     fn empty_input() -> Input {
         Input::Object(IndexMap::new())
