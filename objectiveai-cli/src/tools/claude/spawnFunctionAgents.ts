@@ -55,7 +55,8 @@ export function makeSpawnFunctionAgents(state: ToolState) {
             value: undefined,
             error:
               `Cannot respawn agents that already succeeded: ${alreadyOnGitHub.join(", ")}. ` +
-              "Only include agents that failed (no repository on GitHub).",
+              "Only include agents that failed (no repository on GitHub). " +
+              "To modify an existing agent, use AmendFunctionAgents instead.",
           });
         }
       }

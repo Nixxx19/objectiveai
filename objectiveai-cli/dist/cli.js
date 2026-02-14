@@ -5102,7 +5102,7 @@ async function spawnFunctionAgents(params, opts) {
           return {
             ok: false,
             value: void 0,
-            error: `Repository ${owner}/${param.name} already exists on GitHub. Choose a different name.`
+            error: `Repository ${owner}/${param.name} already exists on GitHub. Choose a different name, or use AmendFunctionAgents to modify the existing function.`
           };
         }
       }
@@ -5224,7 +5224,7 @@ function makeSpawnFunctionAgents(state) {
           return resultFromResult({
             ok: false,
             value: void 0,
-            error: `Cannot respawn agents that already succeeded: ${alreadyOnGitHub.join(", ")}. Only include agents that failed (no repository on GitHub).`
+            error: `Cannot respawn agents that already succeeded: ${alreadyOnGitHub.join(", ")}. Only include agents that failed (no repository on GitHub). To modify an existing agent, use AmendFunctionAgents instead.`
           });
         }
       }

@@ -222,7 +222,7 @@ export async function spawnFunctionAgents(
           return {
             ok: false,
             value: undefined,
-            error: `Repository ${owner}/${param.name} already exists on GitHub. Choose a different name.`,
+            error: `Repository ${owner}/${param.name} already exists on GitHub. Choose a different name, or use AmendFunctionAgents to modify the existing function.`,
           };
         }
       }
