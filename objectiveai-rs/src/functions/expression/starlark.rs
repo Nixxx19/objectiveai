@@ -2,7 +2,6 @@
 //! Provides a sandboxed Starlark runtime for evaluating expressions.
 //! Variables `input`, `output`, and `map` are injected into the global scope.
 
-use serde_json::{Map as JsonMap, Number as JsonNumber, Value};
 use starlark::environment::{Globals, GlobalsBuilder, Module};
 use starlark::eval::Evaluator;
 use starlark::starlark_module;
@@ -10,7 +9,7 @@ use starlark::syntax::{AstModule, Dialect};
 use starlark::values::dict::DictRef;
 use starlark::values::float::UnpackFloat;
 use starlark::values::list::ListRef;
-use starlark::values::{Heap, UnpackValue, Value as SValue};
+use starlark::values::{Heap, UnpackValue, Value as StarlarkValue};
 use std::sync::LazyLock;
 
 use super::{ExpressionError, OneOrMany};
@@ -68,92 +67,92 @@ fn register_custom_functions(builder: &mut GlobalsBuilder) {
 
 /// Trait for direct conversion to Starlark values (bypassing serde_json).
 pub trait ToStarlarkValue {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v>;
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v>;
 }
 
 impl ToStarlarkValue for str {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         heap.alloc_str(self).to_value()
     }
 }
 
 impl ToStarlarkValue for String {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         heap.alloc_str(self).to_value()
     }
 }
 
 impl ToStarlarkValue for i32 {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         heap.alloc(*self as i64)
     }
 }
 
 impl ToStarlarkValue for i64 {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         heap.alloc(*self)
     }
 }
 
 impl ToStarlarkValue for u32 {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         heap.alloc(*self as i64)
     }
 }
 
 impl ToStarlarkValue for u64 {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         heap.alloc(*self as i64)
     }
 }
 
 impl ToStarlarkValue for f64 {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         heap.alloc(*self)
     }
 }
 
 impl ToStarlarkValue for bool {
-    fn to_starlark_value<'v>(&self, _heap: &'v Heap) -> SValue<'v> {
-        SValue::new_bool(*self)
+    fn to_starlark_value<'v>(&self, _heap: &'v Heap) -> StarlarkValue<'v> {
+        StarlarkValue::new_bool(*self)
     }
 }
 
 impl ToStarlarkValue for rust_decimal::Decimal {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         use rust_decimal::prelude::ToPrimitive;
         heap.alloc(self.to_f64().unwrap_or(0.0))
     }
 }
 
 impl<T: ToStarlarkValue> ToStarlarkValue for Vec<T> {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
-        let items: Vec<SValue> =
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
+        let items: Vec<StarlarkValue> =
             self.iter().map(|v| v.to_starlark_value(heap)).collect();
         heap.alloc(items)
     }
 }
 
 impl<T: ToStarlarkValue> ToStarlarkValue for [T] {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
-        let items: Vec<SValue> =
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
+        let items: Vec<StarlarkValue> =
             self.iter().map(|v| v.to_starlark_value(heap)).collect();
         heap.alloc(items)
     }
 }
 
 impl<T: ToStarlarkValue> ToStarlarkValue for Option<T> {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         match self {
             Some(v) => v.to_starlark_value(heap),
-            None => SValue::new_none(),
+            None => StarlarkValue::new_none(),
         }
     }
 }
 
 impl<T: ToStarlarkValue> ToStarlarkValue for indexmap::IndexMap<String, T> {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
-        let pairs: Vec<(&str, SValue)> = self
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
+        let pairs: Vec<(&str, StarlarkValue)> = self
             .iter()
             .map(|(k, v)| (k.as_str(), v.to_starlark_value(heap)))
             .collect();
@@ -162,9 +161,9 @@ impl<T: ToStarlarkValue> ToStarlarkValue for indexmap::IndexMap<String, T> {
 }
 
 impl ToStarlarkValue for serde_json::Value {
-    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> SValue<'v> {
+    fn to_starlark_value<'v>(&self, heap: &'v Heap) -> StarlarkValue<'v> {
         match self {
-            serde_json::Value::Null => SValue::new_none(),
+            serde_json::Value::Null => StarlarkValue::new_none(),
             serde_json::Value::Bool(b) => b.to_starlark_value(heap),
             serde_json::Value::Number(n) => {
                 if let Some(i) = n.as_i64() {
@@ -175,12 +174,12 @@ impl ToStarlarkValue for serde_json::Value {
             }
             serde_json::Value::String(s) => s.to_starlark_value(heap),
             serde_json::Value::Array(arr) => {
-                let items: Vec<SValue> =
+                let items: Vec<StarlarkValue> =
                     arr.iter().map(|v| v.to_starlark_value(heap)).collect();
                 heap.alloc(items)
             }
             serde_json::Value::Object(obj) => {
-                let pairs: Vec<(&str, SValue)> = obj
+                let pairs: Vec<(&str, StarlarkValue)> = obj
                     .iter()
                     .map(|(k, v)| (k.as_str(), v.to_starlark_value(heap)))
                     .collect();
@@ -194,12 +193,16 @@ impl ToStarlarkValue for serde_json::Value {
 /// Used by [`Expression`](super::Expression) to compile Starlark expressions
 /// directly from `starlark::values::Value` to the target type.
 pub trait FromStarlarkValue: Sized {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError>;
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError>;
 }
 
 // Primitives and common types
 impl FromStarlarkValue for rust_decimal::Decimal {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         if let Ok(Some(i)) = i64::unpack_value(*value) {
             return Ok(rust_decimal::Decimal::from(i));
         }
@@ -218,7 +221,9 @@ impl FromStarlarkValue for rust_decimal::Decimal {
 }
 
 impl FromStarlarkValue for bool {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         bool::unpack_value(*value)
             .map_err(|e| {
                 ExpressionError::StarlarkConversionError(e.to_string())
@@ -234,7 +239,9 @@ impl FromStarlarkValue for bool {
 }
 
 impl FromStarlarkValue for i64 {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         i64::unpack_value(*value)
             .map_err(|e| {
                 ExpressionError::StarlarkConversionError(e.to_string())
@@ -250,7 +257,9 @@ impl FromStarlarkValue for i64 {
 }
 
 impl FromStarlarkValue for u64 {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         let i = i64::unpack_value(*value)
             .map_err(|e| {
                 ExpressionError::StarlarkConversionError(e.to_string())
@@ -270,7 +279,9 @@ impl FromStarlarkValue for u64 {
 }
 
 impl FromStarlarkValue for f64 {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         if let Ok(Some(i)) = i64::unpack_value(*value) {
             return Ok(i as f64);
         }
@@ -290,7 +301,9 @@ impl FromStarlarkValue for f64 {
 }
 
 impl FromStarlarkValue for String {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         <&str as UnpackValue>::unpack_value(*value)
             .map_err(|e| {
                 ExpressionError::StarlarkConversionError(e.to_string())
@@ -305,7 +318,9 @@ impl FromStarlarkValue for String {
 }
 
 impl<T: FromStarlarkValue> FromStarlarkValue for Option<T> {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         if value.is_none() {
             return Ok(None);
         }
@@ -314,7 +329,9 @@ impl<T: FromStarlarkValue> FromStarlarkValue for Option<T> {
 }
 
 impl<T: FromStarlarkValue> FromStarlarkValue for Vec<T> {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         let list = ListRef::from_value(*value).ok_or_else(|| {
             ExpressionError::StarlarkConversionError(
                 "expected list".to_string(),
@@ -329,7 +346,9 @@ impl<T: FromStarlarkValue> FromStarlarkValue for Vec<T> {
 }
 
 impl<V: FromStarlarkValue> FromStarlarkValue for indexmap::IndexMap<String, V> {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         let dict = DictRef::from_value(*value).ok_or_else(|| {
             ExpressionError::StarlarkConversionError(
                 "expected dict".to_string(),
@@ -354,7 +373,9 @@ impl<V: FromStarlarkValue> FromStarlarkValue for indexmap::IndexMap<String, V> {
 }
 
 impl FromStarlarkValue for serde_json::Value {
-    fn from_starlark_value(value: &SValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         if value.is_none() {
             return Ok(serde_json::Value::Null);
         }
@@ -362,10 +383,10 @@ impl FromStarlarkValue for serde_json::Value {
             return Ok(serde_json::Value::Bool(b));
         }
         if let Ok(Some(i)) = i64::unpack_value(*value) {
-            return Ok(serde_json::Value::Number(JsonNumber::from(i)));
+            return Ok(serde_json::Value::Number(serde_json::Number::from(i)));
         }
         if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(*value) {
-            if let Some(n) = JsonNumber::from_f64(f) {
+            if let Some(n) = serde_json::Number::from_f64(f) {
                 return Ok(serde_json::Value::Number(n));
             }
         }
@@ -380,7 +401,7 @@ impl FromStarlarkValue for serde_json::Value {
             return Ok(serde_json::Value::Array(items));
         }
         if let Some(dict) = DictRef::from_value(*value) {
-            let mut obj = JsonMap::with_capacity(dict.len());
+            let mut obj = serde_json::Map::with_capacity(dict.len());
             for (k, v) in dict.iter() {
                 let key = <&str as UnpackValue>::unpack_value(k)
                     .map_err(|e| {
@@ -412,7 +433,7 @@ fn with_eval_result<F, R>(
     f: F,
 ) -> Result<R, ExpressionError>
 where
-    F: FnOnce(&SValue) -> Result<R, ExpressionError>,
+    F: FnOnce(&StarlarkValue) -> Result<R, ExpressionError>,
 {
     let module = Module::new();
     {
@@ -422,13 +443,16 @@ where
                 module.set("input", owned.input.to_starlark_value(heap));
                 module.set(
                     "output",
-                    owned.output.as_ref().map_or(SValue::new_none(), |o| {
-                        o.to_starlark_value(heap)
-                    }),
+                    owned
+                        .output
+                        .as_ref()
+                        .map_or(StarlarkValue::new_none(), |o| {
+                            o.to_starlark_value(heap)
+                        }),
                 );
                 module.set(
                     "map",
-                    owned.map.map_or(SValue::new_none(), |m| {
+                    owned.map.map_or(StarlarkValue::new_none(), |m| {
                         heap.alloc(m as i64)
                     }),
                 );
@@ -437,13 +461,13 @@ where
                 module.set("input", r.input.to_starlark_value(heap));
                 module.set(
                     "output",
-                    r.output.as_ref().map_or(SValue::new_none(), |o| {
+                    r.output.as_ref().map_or(StarlarkValue::new_none(), |o| {
                         o.to_starlark_value(heap)
                     }),
                 );
                 module.set(
                     "map",
-                    r.map.map_or(SValue::new_none(), |m| {
+                    r.map.map_or(StarlarkValue::new_none(), |m| {
                         heap.alloc(m as i64)
                     }),
                 );
@@ -460,16 +484,8 @@ where
     f(&result)
 }
 
-/// Evaluate a Starlark expression and convert the result to `T`.
-fn starlark_eval<T: FromStarlarkValue>(
-    code: &str,
-    params: &super::Params,
-) -> Result<T, ExpressionError> {
-    with_eval_result(code, params, T::from_starlark_value)
-}
-
 fn svalue_to_one_or_many<T: FromStarlarkValue>(
-    value: &SValue,
+    value: &StarlarkValue,
 ) -> Result<OneOrMany<T>, ExpressionError> {
     if value.is_none() {
         return Ok(OneOrMany::Many(Vec::new()));
@@ -498,15 +514,21 @@ fn svalue_to_one_or_many<T: FromStarlarkValue>(
     }
 }
 
-/// Evaluate a Starlark expression and convert the result into `OneOrMany<T>`.
-pub fn starlark_eval_one_or_many<T>(
-    code: &str,
-    params: &super::Params,
-) -> Result<OneOrMany<T>, ExpressionError>
-where
-    T: FromStarlarkValue,
-{
-    with_eval_result(code, params, svalue_to_one_or_many)
+impl<T: FromStarlarkValue> FromStarlarkValue for OneOrMany<T> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
+        svalue_to_one_or_many(value)
+    }
+}
+
+impl<T: FromStarlarkValue> OneOrMany<T> {
+    pub fn from_starlark(
+        code: &str,
+        params: &super::Params,
+    ) -> Result<Self, ExpressionError> {
+        with_eval_result(code, params, svalue_to_one_or_many)
+    }
 }
 
 #[cfg(test)]
@@ -528,7 +550,14 @@ mod tests {
     use indexmap::IndexMap;
     use rust_decimal::dec;
     use serde::Serialize;
-    use serde_json::Number as JsonNumber;
+
+    /// Evaluate a Starlark expression and convert the result to `T`.
+    fn starlark_eval<T: FromStarlarkValue>(
+        code: &str,
+        params: &super::super::Params,
+    ) -> Result<T, ExpressionError> {
+        with_eval_result(code, params, T::from_starlark_value)
+    }
 
     fn assert_starlark_deep_eq<T: FromStarlarkValue + Serialize>(
         code: &str,
@@ -790,7 +819,10 @@ mod tests {
     fn test_map_access() {
         let input = obj(vec![
             ("base", Input::Integer(100)),
-            ("multipliers", arr(vec![Input::Integer(3), Input::Integer(5)])),
+            (
+                "multipliers",
+                arr(vec![Input::Integer(3), Input::Integer(5)]),
+            ),
         ]);
         let params = make_params_with_map(input, 0);
 
@@ -812,8 +844,7 @@ mod tests {
         let params = make_params_with_map(input, 1);
 
         let result: String =
-            starlark_eval("input['items'][map]", &params)
-                .unwrap();
+            starlark_eval("input['items'][map]", &params).unwrap();
         assert_eq!(result, "World");
 
         let result2: i64 = starlark_eval("map * 10", &params).unwrap();
@@ -824,19 +855,20 @@ mod tests {
     fn test_map_in_list_comprehension() {
         let input = obj(vec![
             ("factor", Input::Integer(2)),
-            ("values", arr(vec![
-                Input::Integer(10),
-                Input::Integer(20),
-                Input::Integer(30),
-            ])),
+            (
+                "values",
+                arr(vec![
+                    Input::Integer(10),
+                    Input::Integer(20),
+                    Input::Integer(30),
+                ]),
+            ),
         ]);
         let params = make_params_with_map(input, 1);
 
-        let result: i64 = starlark_eval(
-            "input['values'][map] * input['factor']",
-            &params,
-        )
-        .unwrap();
+        let result: i64 =
+            starlark_eval("input['values'][map] * input['factor']", &params)
+                .unwrap();
         assert_eq!(result, 40);
     }
 
@@ -943,8 +975,7 @@ mod tests {
         let params = make_full_params(input, output, 1);
 
         let result: String =
-            starlark_eval("input['items'][map]", &params)
-                .unwrap();
+            starlark_eval("input['items'][map]", &params).unwrap();
         assert_eq!(result, "b");
 
         let result2: f64 = starlark_eval("output", &params).unwrap();
@@ -1751,12 +1782,14 @@ mod tests {
         assert_starlark_deep_eq(
             "42",
             &params,
-            &ValueExpression::Number(JsonNumber::from(42)),
+            &ValueExpression::Number(serde_json::Number::from(42)),
         );
         assert_starlark_deep_eq(
             "3.14",
             &params,
-            &ValueExpression::Number(JsonNumber::from_f64(3.14).unwrap()),
+            &ValueExpression::Number(
+                serde_json::Number::from_f64(3.14).unwrap(),
+            ),
         );
     }
 
@@ -1774,7 +1807,9 @@ mod tests {
     fn test_starlark_value_expression_array() {
         let params = make_params(empty_input());
         let expected = ValueExpression::Array(vec![
-            WithExpression::Value(ValueExpression::Number(JsonNumber::from(1))),
+            WithExpression::Value(ValueExpression::Number(
+                serde_json::Number::from(1),
+            )),
             WithExpression::Value(ValueExpression::String("a".to_string())),
         ]);
         assert_starlark_deep_eq("[1, \"a\"]", &params, &expected);
@@ -1863,7 +1898,9 @@ mod tests {
         let mut params_map = IndexMap::new();
         params_map.insert(
             "a".to_string(),
-            WithExpression::Value(ValueExpression::Number(JsonNumber::from(1))),
+            WithExpression::Value(ValueExpression::Number(
+                serde_json::Number::from(1),
+            )),
         );
         let expected = FunctionToolExpression {
             name: WithExpression::Value("all".to_string()),
