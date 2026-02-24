@@ -38,15 +38,16 @@
 //! - [`expression`] - Expression evaluation engine (JMESPath and Starlark)
 //! - [`profiles`] - Profile management and computation
 
+pub mod alpha;
 pub mod executions;
 pub mod expression;
 mod function;
 mod profile;
 pub mod profiles;
+pub mod quality;
 mod remote;
 pub mod response;
 mod task;
-pub mod quality;
 
 pub use function::*;
 pub use profile::*;
