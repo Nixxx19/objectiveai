@@ -505,7 +505,7 @@ impl Function {
     /// Returns the function's expected output length expression, if defined.
     pub fn output_length(
         &self,
-    ) -> Option<&super::expression::WithExpression<u64>> {
+    ) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => {
                 remote_function.output_length()
@@ -517,8 +517,7 @@ impl Function {
     /// Returns the function's input_split expression, if defined.
     pub fn input_split(
         &self,
-    ) -> Option<&super::expression::WithExpression<Vec<super::expression::Input>>>
-    {
+    ) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => remote_function.input_split(),
             Function::Inline(inline_function) => inline_function.input_split(),
@@ -528,8 +527,7 @@ impl Function {
     /// Returns the function's input_merge expression, if defined.
     pub fn input_merge(
         &self,
-    ) -> Option<&super::expression::WithExpression<super::expression::Input>>
-    {
+    ) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => remote_function.input_merge(),
             Function::Inline(inline_function) => inline_function.input_merge(),
@@ -582,18 +580,16 @@ pub enum RemoteFunction {
         tasks: Vec<super::TaskExpression>,
         /// Expression computing the expected output vector length for task outputs.
         /// Receives: `input`.
-        output_length: super::expression::WithExpression<u64>,
+        output_length: super::expression::Expression,
         /// Expression transforming input into an input array of the output_length
         /// When the Function is executed with any input from the array,
         /// The output_length should be 1.
         /// Receives: `input`.
-        input_split:
-            super::expression::WithExpression<Vec<super::expression::Input>>,
+        input_split: super::expression::Expression,
         /// Expression transforming an array of inputs computed by `input_split`
         /// into a single Input object for the Function.
         /// Receives: `input` (as an array).
-        input_merge:
-            super::expression::WithExpression<super::expression::Input>,
+        input_merge: super::expression::Expression,
     },
 }
 
@@ -633,7 +629,7 @@ impl RemoteFunction {
     /// Returns the function's expected output length, if defined (vector functions only).
     pub fn output_length(
         &self,
-    ) -> Option<&super::expression::WithExpression<u64>> {
+    ) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { output_length, .. } => Some(output_length),
@@ -643,8 +639,7 @@ impl RemoteFunction {
     /// Returns the function's input_split expression, if defined (vector functions only).
     pub fn input_split(
         &self,
-    ) -> Option<&super::expression::WithExpression<Vec<super::expression::Input>>>
-    {
+    ) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { input_split, .. } => Some(input_split),
@@ -654,8 +649,7 @@ impl RemoteFunction {
     /// Returns the function's input_merge expression, if defined (vector functions only).
     pub fn input_merge(
         &self,
-    ) -> Option<&super::expression::WithExpression<super::expression::Input>>
-    {
+    ) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { input_merge, .. } => Some(input_merge),
@@ -703,15 +697,12 @@ pub enum InlineFunction {
         /// The output_length should be 1.
         /// Receives: `input`.
         /// Only required if the request uses a strategy that needs input splitting.
-        input_split: Option<
-            super::expression::WithExpression<Vec<super::expression::Input>>,
-        >,
+        input_split: Option<super::expression::Expression>,
         /// Expression transforming an array of inputs computed by `input_split`
         /// into a single Input object for the Function.
         /// Receives: `input` (as an array).
         /// Only required if the request uses a strategy that needs input splitting.
-        input_merge:
-            Option<super::expression::WithExpression<super::expression::Input>>,
+        input_merge: Option<super::expression::Expression>,
     },
 }
 
@@ -735,8 +726,7 @@ impl InlineFunction {
     /// Returns the function's input_split expression, if defined (vector functions only).
     pub fn input_split(
         &self,
-    ) -> Option<&super::expression::WithExpression<Vec<super::expression::Input>>>
-    {
+    ) -> Option<&super::expression::Expression> {
         match self {
             InlineFunction::Scalar { .. } => None,
             InlineFunction::Vector { input_split, .. } => input_split.as_ref(),
@@ -746,8 +736,7 @@ impl InlineFunction {
     /// Returns the function's input_merge expression, if defined (vector functions only).
     pub fn input_merge(
         &self,
-    ) -> Option<&super::expression::WithExpression<super::expression::Input>>
-    {
+    ) -> Option<&super::expression::Expression> {
         match self {
             InlineFunction::Scalar { .. } => None,
             InlineFunction::Vector { input_merge, .. } => input_merge.as_ref(),

@@ -8,16 +8,16 @@ use serde::Deserialize;
 
 use super::check_input_schema::check_input_schema;
 use super::example_inputs;
-use crate::functions::expression::{Input, InputSchema, WithExpression};
+use crate::functions::expression::{Expression, Input, InputSchema};
 use crate::functions::{Function, RemoteFunction};
 
 /// The 4 fields needed to validate a vector function's split/merge behavior.
 #[derive(Debug, Clone, Deserialize)]
 pub struct VectorFieldsValidation {
     pub input_schema: InputSchema,
-    pub output_length: WithExpression<u64>,
-    pub input_split: WithExpression<Vec<Input>>,
-    pub input_merge: WithExpression<Input>,
+    pub output_length: Expression,
+    pub input_split: Expression,
+    pub input_merge: Expression,
 }
 
 impl VectorFieldsValidation {

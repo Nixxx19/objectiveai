@@ -80,15 +80,15 @@ fn input_schema_string() {
                 output: Expression::Starlark("output".to_string()),
             },
         )],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input)".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[[x] for x in input]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "[x[0] for x in input]".to_string(),
-        )),
+        ),
     };
     test_err(&f, "LV14");
 }
@@ -122,15 +122,15 @@ fn input_schema_object_no_required_array() {
                 output: Expression::Starlark("output".to_string()),
             },
         )],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input)".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[[x] for x in input]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "[x[0] for x in input]".to_string(),
-        )),
+        ),
     };
     test_err(&f, "LV13");
 }
@@ -181,9 +181,9 @@ fn scalar_function_without_map() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV03");
 }
@@ -234,9 +234,9 @@ fn placeholder_scalar_without_map() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV04");
 }
@@ -275,9 +275,9 @@ fn vector_function_with_map() {
             input: WithExpression::Expression(Expression::Starlark("input".to_string())),
             output: Expression::Starlark("output".to_string()),
         })],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV05");
 }
@@ -326,17 +326,17 @@ fn placeholder_vector_with_map() {
                 },
                 required: Some(vec!["items".to_string(), "label".to_string()]),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-            input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-            input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+            output_length: Expression::Starlark("len(input['items'])".to_string()),
+            input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+            input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
             skip: None,
             map: Some(0),
             input: WithExpression::Expression(Expression::Starlark("input".to_string())),
             output: Expression::Starlark("output".to_string()),
         })],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV06");
 }
@@ -385,9 +385,9 @@ fn contains_vector_completion() {
             ]),
             output: Expression::Starlark("output['scores']".to_string()),
         })],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV07");
 }
@@ -428,9 +428,9 @@ fn single_mapped_scalar_task() {
             input: WithExpression::Expression(Expression::Starlark("map".to_string())),
             output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
         })],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV08");
 }
@@ -493,9 +493,9 @@ fn over_50_percent_mapped_scalar() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV09");
 }
@@ -536,9 +536,9 @@ fn valid_single_vector_function() {
             input: WithExpression::Expression(Expression::Starlark("input".to_string())),
             output: Expression::Starlark("output".to_string()),
         })],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -587,17 +587,17 @@ fn valid_single_placeholder_vector() {
                 },
                 required: Some(vec!["items".to_string(), "label".to_string()]),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-            input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-            input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+            output_length: Expression::Starlark("len(input['items'])".to_string()),
+            input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+            input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
             skip: None,
             map: None,
             input: WithExpression::Expression(Expression::Starlark("input".to_string())),
             output: Expression::Starlark("output".to_string()),
         })],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -650,9 +650,9 @@ fn valid_50_50_split() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -715,9 +715,9 @@ fn valid_mixed_tasks() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -768,9 +768,9 @@ fn valid_all_unmapped_vector() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -811,15 +811,15 @@ fn description_too_long() {
                 output: Expression::Starlark("output".to_string()),
             },
         )],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input['items'])".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[{'items': [x]} for x in input['items']]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "{'items': [x['items'][0] for x in input]}".to_string(),
-        )),
+        ),
     };
     test_err(&f, "QD02");
 }
@@ -858,15 +858,15 @@ fn description_empty() {
                 output: Expression::Starlark("output".to_string()),
             },
         )],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input['items'])".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[{'items': [x]} for x in input['items']]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "{'items': [x['items'][0] for x in input]}".to_string(),
-        )),
+        ),
     };
     test_err(&f, "QD01");
 }
@@ -932,9 +932,9 @@ fn input_diversity_fail_third_task_fixed_input() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV18");
 }
@@ -1007,9 +1007,9 @@ fn input_diversity_fail_third_task_mapped_fixed() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV18");
 }
@@ -1062,9 +1062,9 @@ fn input_diversity_pass_vector_function_passthrough() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -1117,9 +1117,9 @@ fn input_diversity_pass_mixed_mapped_and_unmapped() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -1165,9 +1165,9 @@ fn input_diversity_pass_placeholder_vector_tasks() {
                     },
                     required: Some(vec!["items".to_string()]),
                 }),
-                output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-                input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x]} for x in input['items']]".to_string())),
-                input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input]}".to_string())),
+                output_length: Expression::Starlark("len(input['items'])".to_string()),
+                input_split: Expression::Starlark("[{'items': [x]} for x in input['items']]".to_string()),
+                input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input]}".to_string()),
                 skip: None,
                 map: None,
                 input: WithExpression::Expression(Expression::Starlark("input".to_string())),
@@ -1189,18 +1189,18 @@ fn input_diversity_pass_placeholder_vector_tasks() {
                     },
                     required: Some(vec!["items".to_string()]),
                 }),
-                output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-                input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x]} for x in input['items']]".to_string())),
-                input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input]}".to_string())),
+                output_length: Expression::Starlark("len(input['items'])".to_string()),
+                input_split: Expression::Starlark("[{'items': [x]} for x in input['items']]".to_string()),
+                input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input]}".to_string()),
                 skip: None,
                 map: None,
                 input: WithExpression::Expression(Expression::Starlark("{'items': [x + ' alt' for x in input['items']]}".to_string())),
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -1263,9 +1263,9 @@ fn input_diversity_pass_mapped_scalar_with_two_vectors() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -1323,18 +1323,18 @@ fn input_diversity_fail_child_min_items_3() {
             }),
             TaskExpression::PlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression {
                 input_schema: child_schema,
-                output_length: WithExpression::Expression(Expression::Starlark("len(input['entries'])".to_string())),
-                input_split: WithExpression::Expression(Expression::Starlark("[{'entries': [x]} for x in input['entries']]".to_string())),
-                input_merge: WithExpression::Expression(Expression::Starlark("{'entries': [x['entries'][0] for x in input]}".to_string())),
+                output_length: Expression::Starlark("len(input['entries'])".to_string()),
+                input_split: Expression::Starlark("[{'entries': [x]} for x in input['entries']]".to_string()),
+                input_merge: Expression::Starlark("{'entries': [x['entries'][0] for x in input]}".to_string()),
                 skip: None,
                 map: None,
                 input: WithExpression::Expression(Expression::Starlark("{'entries': input['entries']}".to_string())),
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['entries'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'entries': [e], 'tag': input['tag']} for e in input['entries']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'entries': [x['entries'][0] for x in input], 'tag': input[0]['tag']}".to_string())),
+        output_length: Expression::Starlark("len(input['entries'])".to_string()),
+        input_split: Expression::Starlark("[{'entries': [e], 'tag': input['tag']} for e in input['entries']]".to_string()),
+        input_merge: Expression::Starlark("{'entries': [x['entries'][0] for x in input], 'tag': input[0]['tag']}".to_string()),
     };
     test_err(&f, "VF21");
 }
@@ -1385,9 +1385,9 @@ fn input_diversity_pass_no_input_maps() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -1442,9 +1442,9 @@ fn input_diversity_fail_with_input_maps_fixed() {
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV18");
 }
@@ -1474,9 +1474,9 @@ fn rejects_no_tasks() {
         }),
         input_maps: None,
         tasks: vec![],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV02");
 }
@@ -1531,9 +1531,9 @@ fn rejects_unused_input_maps() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV12");
 }
@@ -1589,9 +1589,9 @@ fn valid_with_skip_last_task_boolean() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label'], 'skip_last_task': input['skip_last_task']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label'], 'skip_last_task': input[0]['skip_last_task']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label'], 'skip_last_task': input['skip_last_task']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label'], 'skip_last_task': input[0]['skip_last_task']}".to_string()),
     };
     test(&f);
 }
@@ -1642,9 +1642,9 @@ fn valid_with_skip_on_quick_mode() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'mode': input['mode']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'mode': input[0]['mode']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'mode': input['mode']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'mode': input[0]['mode']}".to_string()),
     };
     test(&f);
 }
@@ -1717,9 +1717,9 @@ fn rejects_out_of_bounds_map_index() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV11");
 }
@@ -1774,9 +1774,9 @@ fn output_distribution_pass_mapped_scalar_max_items_10() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -1839,9 +1839,9 @@ fn output_distribution_pass_mixed_tasks_max_items_10() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -1896,9 +1896,9 @@ fn output_distribution_fail_biased_mapped_scalar() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "OD06");
 }
@@ -1939,9 +1939,9 @@ fn output_distribution_fail_biased_unmapped_vector() {
                 "[x * 0.1 + 0.45 for x in output]".to_string(),
             ),
         })],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "OD06");
 }
@@ -1994,9 +1994,9 @@ fn output_distribution_fail_mapped_scalar_division_by_zero() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "OD09");
 }
@@ -2035,9 +2035,9 @@ fn output_distribution_pass_identity() {
             input: WithExpression::Expression(Expression::Starlark("input".to_string())),
             output: Expression::Starlark("output".to_string()),
         })],
-        output_length: WithExpression::Expression(Expression::Starlark("len(input['items'])".to_string())),
-        input_split: WithExpression::Expression(Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string())),
-        input_merge: WithExpression::Expression(Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string())),
+        output_length: Expression::Starlark("len(input['items'])".to_string()),
+        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
+        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test(&f);
 }
@@ -2070,15 +2070,15 @@ fn rejects_single_permutation_string_enum() {
                 output: Expression::Starlark("output".to_string()),
             },
         )],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input)".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[[x] for x in input]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "[x[0] for x in input]".to_string(),
-        )),
+        ),
     };
     test_err(&f, "QI01");
 }
@@ -2123,15 +2123,15 @@ fn all_tasks_skipped() {
                 output: Expression::Starlark("output".to_string()),
             }),
         ],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input)".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[[x] for x in input]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "[x[0] for x in input]".to_string(),
-        )),
+        ),
     };
     test_err(&f, "CV42");
 }
@@ -2165,15 +2165,15 @@ fn rejects_single_permutation_integer() {
                 output: Expression::Starlark("output".to_string()),
             },
         )],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input)".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[[x] for x in input]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "[x[0] for x in input]".to_string(),
-        )),
+        ),
     };
     test_err(&f, "QI01");
 }
@@ -2206,15 +2206,15 @@ fn output_length_less_than_2() {
                 output: Expression::Starlark("output".to_string()),
             },
         )],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input)".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[[x] for x in input]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "[x[0] for x in input]".to_string(),
-        )),
+        ),
     };
     test_err(&f, "VF03");
 }

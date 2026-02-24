@@ -78,7 +78,7 @@ function decodeBase64(base64) {
 
 const wasmBytes = decodeBase64(WASM_BASE64);
 const wasmModule = new WebAssembly.Module(wasmBytes);
-const wasm = exports.__wasm = new WebAssembly.Instance(wasmModule, imports).exports;
+const wasm = exports.__wasm = new WebAssembly.Instance(wasmModule, __wbg_get_imports()).exports;
 
 wasm.__wbindgen_start();`;
 

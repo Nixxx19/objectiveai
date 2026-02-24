@@ -256,17 +256,9 @@ pub enum FunctionType {
         /// Expected output length, if known from output_length expression.
         output_length: Option<u64>,
         /// input_split expression if defined
-        input_split: Option<
-            objectiveai::functions::expression::WithExpression<
-                Vec<objectiveai::functions::expression::Input>,
-            >,
-        >,
+        input_split: Option<objectiveai::functions::expression::Expression>,
         /// input_merge expression if defined
-        input_merge: Option<
-            objectiveai::functions::expression::WithExpression<
-                objectiveai::functions::expression::Input,
-            >,
-        >,
+        input_merge: Option<objectiveai::functions::expression::Expression>,
     },
 }
 
@@ -379,12 +371,8 @@ pub struct PlaceholderVectorFunctionFlatTaskProfile {
     pub path: Vec<u64>,
     pub input: objectiveai::functions::expression::Input,
     pub output_length: u64,
-    pub input_split: objectiveai::functions::expression::WithExpression<
-        Vec<objectiveai::functions::expression::Input>,
-    >,
-    pub input_merge: objectiveai::functions::expression::WithExpression<
-        objectiveai::functions::expression::Input,
-    >,
+    pub input_split: objectiveai::functions::expression::Expression,
+    pub input_merge: objectiveai::functions::expression::Expression,
     pub output: objectiveai::functions::expression::Expression,
     pub invert_output: bool,
 }

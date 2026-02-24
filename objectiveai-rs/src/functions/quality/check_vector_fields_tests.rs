@@ -7,7 +7,7 @@ use super::check_vector_fields::{
 };
 use crate::functions::expression::{
     ArrayInputSchema, Expression, Input, InputSchema, IntegerInputSchema,
-    ObjectInputSchema, StringInputSchema, WithExpression,
+    ObjectInputSchema, StringInputSchema,
 };
 use crate::util::index_map;
 
@@ -161,15 +161,15 @@ fn test_valid_array_schema() {
                 r#enum: None,
             })),
         }),
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input)".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[[x] for x in input]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "[x[0] for x in input]".to_string(),
-        )),
+        ),
     });
 }
 
@@ -195,17 +195,17 @@ fn test_valid_object_schema() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input['items'])".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[{'items': [x], 'label': input['label']} for x in input['items']]"
                 .to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "{'items': [x['items'][0] for x in input], 'label': input[0]['label']}"
                 .to_string(),
-        )),
+        ),
     });
 }
 
@@ -224,15 +224,15 @@ fn test_output_length_compilation_error() {
                     r#enum: None,
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "undefined_var".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[[x] for x in input]".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "[x[0] for x in input]".to_string(),
-            )),
+            ),
         },
         "VF01",
     );
@@ -251,15 +251,15 @@ fn test_input_split_compilation_error() {
                     r#enum: None,
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "len(input)".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "undefined_var".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "[x[0] for x in input]".to_string(),
-            )),
+            ),
         },
         "VF04",
     );
@@ -278,15 +278,15 @@ fn test_input_split_length_mismatch() {
                     r#enum: None,
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "len(input)".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[input[0:1], input[1:2]]".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "[x[0] for x in input]".to_string(),
-            )),
+            ),
         },
         "VF06",
     );
@@ -305,15 +305,15 @@ fn test_split_element_output_length_not_one() {
                     r#enum: None,
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "len(input)".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[[x, x] for x in input]".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "[x[0] for x in input]".to_string(),
-            )),
+            ),
         },
         "VF09",
     );
@@ -332,15 +332,15 @@ fn test_merge_does_not_reconstruct_original() {
                     r#enum: None,
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "len(input)".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[[x] for x in input]".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "[x[0] for x in reversed(input)]".to_string(),
-            )),
+            ),
         },
         "VF12",
     );
@@ -359,15 +359,15 @@ fn test_input_merge_compilation_error() {
                     r#enum: None,
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "len(input)".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[[x] for x in input]".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "undefined_var".to_string(),
-            )),
+            ),
         },
         "VF10",
     );
@@ -386,15 +386,15 @@ fn test_valid_with_integer_array_schema() {
                 maximum: Some(100),
             })),
         }),
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input)".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[[x] for x in input]".to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "[x[0] for x in input]".to_string(),
-        )),
+        ),
     });
 }
 
@@ -421,17 +421,17 @@ fn test_merged_subset_violates_min_items() {
                 },
                 required: Some(vec!["entries".to_string(), "tag".to_string()]),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "len(input['entries'])".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[{'entries': [e], 'tag': input['tag']} for e in input['entries']]"
                     .to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "{'entries': [x['entries'][0] for x in input], 'tag': input[0]['tag']}"
                     .to_string(),
-            )),
+            ),
         },
         "VF21",
     );
@@ -450,15 +450,15 @@ fn test_output_length_wrong_type_returns_error() {
                     r#enum: None,
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "'not_a_number'".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[[x] for x in input]".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "[x[0] for x in input]".to_string(),
-            )),
+            ),
         },
         "VF01",
     );
@@ -477,15 +477,15 @@ fn rejects_single_permutation_string_enum() {
                     r#enum: Some(vec!["only".to_string()]),
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "len(input)".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[[x] for x in input]".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "[x[0] for x in input]".to_string(),
-            )),
+            ),
         },
         "QI01",
     );
@@ -505,15 +505,15 @@ fn rejects_single_permutation_integer() {
                     maximum: Some(0),
                 })),
             }),
-            output_length: WithExpression::Expression(Expression::Starlark(
+            output_length: Expression::Starlark(
                 "len(input)".to_string(),
-            )),
-            input_split: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_split: Expression::Starlark(
                 "[[x] for x in input]".to_string(),
-            )),
-            input_merge: WithExpression::Expression(Expression::Starlark(
+            ),
+            input_merge: Expression::Starlark(
                 "[x[0] for x in input]".to_string(),
-            )),
+            ),
         },
         "QI01",
     );
@@ -541,14 +541,14 @@ fn job_application_ranker_1() {
             },
             required: Some(vec!["apps".to_string(), "job_description".to_string()]),
         }),
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             r#"len(input["apps"])"#.to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             r#"[{"apps": [app], "job_description": input["job_description"]} for app in input["apps"]]"#.to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             r#"{"apps": [app for sub in input for app in sub["apps"]], "job_description": input[0]["job_description"]}"#.to_string(),
-        )),
+        ),
     }, "VF03")
 }

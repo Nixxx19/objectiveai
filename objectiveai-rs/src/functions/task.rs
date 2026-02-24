@@ -615,17 +615,15 @@ pub struct PlaceholderVectorFunctionTaskExpression {
 
     /// Expression computing the expected output vector length.
     /// Receives: `input`.
-    pub output_length: super::expression::WithExpression<u64>,
+    pub output_length: super::expression::Expression,
 
     /// Expression transforming input into sub-inputs for swiss system.
     /// Receives: `input`.
-    pub input_split:
-        super::expression::WithExpression<Vec<super::expression::Input>>,
+    pub input_split: super::expression::Expression,
 
     /// Expression merging sub-inputs back into one input.
     /// Receives: `input` (as an array).
-    pub input_merge:
-        super::expression::WithExpression<super::expression::Input>,
+    pub input_merge: super::expression::Expression,
 
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -672,13 +670,11 @@ pub struct PlaceholderVectorFunctionTask {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
     /// Expression computing the expected output vector length.
-    pub output_length: super::expression::WithExpression<u64>,
+    pub output_length: super::expression::Expression,
     /// Expression transforming input into sub-inputs for swiss system.
-    pub input_split:
-        super::expression::WithExpression<Vec<super::expression::Input>>,
+    pub input_split: super::expression::Expression,
     /// Expression merging sub-inputs back into one input.
-    pub input_merge:
-        super::expression::WithExpression<super::expression::Input>,
+    pub input_merge: super::expression::Expression,
     /// The resolved input.
     pub input: super::expression::Input,
     /// Expression to transform the equalized vector output.

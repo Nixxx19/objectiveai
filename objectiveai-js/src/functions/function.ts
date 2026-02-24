@@ -92,14 +92,9 @@ export const RemoteScalarFunctionJsonSchema: JSONSchema = convert(
 export const RemoteVectorFunctionSchema = InlineVectorFunctionSchema.extend({
   description: z.string().describe("The description of the vector function."),
   input_schema: InputSchemaSchema,
-  output_length: z
-    .union([
-      z.uint32().describe("The fixed length of the output vector."),
-      ExpressionSchema.describe(
-        "An expression which evaluates to the length of the output vector. The output length must be determinable from the input alone. Receives: `input`.",
-      ),
-    ])
-    .describe("The length of the output vector."),
+  output_length: ExpressionSchema.describe(
+    "An expression which evaluates to the length of the output vector. The output length must be determinable from the input alone. Receives: `input`.",
+  ),
   input_split: ExpressionSchema.describe(
     "Splits the function input into an array of sub-inputs, one per output element. " +
       "The array length must equal `output_length`. Each sub-input, when executed independently, must produce `output_length = 1`. " +

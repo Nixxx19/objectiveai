@@ -258,14 +258,9 @@ export const PlaceholderVectorFunctionTaskExpressionSchema = z
   .object({
     type: z.literal("placeholder.vector.function"),
     input_schema: InputSchemaSchema,
-    output_length: z
-      .union([
-        z.uint32().describe("The fixed length of the output vector."),
-        ExpressionSchema.describe(
-          "An expression which evaluates to the length of the output vector. Receives: `input`.",
-        ),
-      ])
-      .describe("The length of the output vector."),
+    output_length: ExpressionSchema.describe(
+      "An expression which evaluates to the length of the output vector. Receives: `input`.",
+    ),
     input_split: ExpressionSchema.describe(
       "Splits the function input into an array of sub-inputs, one per output element. Receives: `input`.",
     ),
@@ -570,14 +565,9 @@ export const PlaceholderVectorFunctionTaskSchema = z
   .object({
     type: z.literal("placeholder.vector.function"),
     input_schema: InputSchemaSchema,
-    output_length: z
-      .union([
-        z.uint32().describe("The fixed length of the output vector."),
-        ExpressionSchema.describe(
-          "An expression which evaluates to the length of the output vector. Receives: `input`.",
-        ),
-      ])
-      .describe("The length of the output vector."),
+    output_length: ExpressionSchema.describe(
+      "An expression which evaluates to the length of the output vector. Receives: `input`.",
+    ),
     input_split: ExpressionSchema.describe(
       "Splits the function input into an array of sub-inputs, one per output element. Receives: `input`.",
     ),

@@ -52,17 +52,17 @@ fn wrong_type_vector() {
         }),
         input_maps: None,
         tasks: vec![],
-        output_length: WithExpression::Expression(Expression::Starlark(
+        output_length: Expression::Starlark(
             "len(input['items'])".to_string(),
-        )),
-        input_split: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_split: Expression::Starlark(
             "[{'items': [x], 'label': input['label']} for x in input['items']]"
                 .to_string(),
-        )),
-        input_merge: WithExpression::Expression(Expression::Starlark(
+        ),
+        input_merge: Expression::Starlark(
             "{'items': [x['items'][0] for x in input], 'label': input[0]['label']}"
                 .to_string(),
-        )),
+        ),
     };
     test_err(&f, "BS01");
 }
@@ -207,15 +207,13 @@ fn contains_placeholder_vector() {
                         r#enum: None,
                     })),
                 }),
-                output_length: WithExpression::Expression(
-                    Expression::Starlark("len(input['items'])".to_string()),
-                ),
-                input_split: WithExpression::Expression(Expression::Starlark(
+                output_length: Expression::Starlark("len(input['items'])".to_string()),
+                input_split: Expression::Starlark(
                     "[{'items': [x]} for x in input['items']]".to_string(),
-                )),
-                input_merge: WithExpression::Expression(Expression::Starlark(
+                ),
+                input_merge: Expression::Starlark(
                     "{'items': [x['items'][0] for x in input]}".to_string(),
-                )),
+                ),
                 skip: None,
                 map: None,
                 input: WithExpression::Expression(Expression::Starlark(

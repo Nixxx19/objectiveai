@@ -809,7 +809,7 @@ where
             }
 
             // split input
-            let split_input = input_split.compile_one(
+            let split_input: Vec<objectiveai::functions::expression::Input> = input_split.compile_one(
                 &objectiveai::functions::expression::Params::Ref(
                     objectiveai::functions::expression::ParamsRef {
                         input: &request.base().input,
@@ -831,7 +831,7 @@ where
             );
             for chunk in chunks {
                 pool_chunk_sizes.push(chunk.len());
-                let joined_input = input_merge.clone().compile_one(
+                let joined_input: objectiveai::functions::expression::Input = input_merge.compile_one(
                     &objectiveai::functions::expression::Params::Owned(
                         objectiveai::functions::expression::ParamsOwned {
                             input: objectiveai::functions::expression::Input::Array(
@@ -1135,7 +1135,7 @@ where
                         let mut ftp_futs = Vec::with_capacity(chunks.len());
                         for chunk in chunks {
                             pool_chunk_sizes.push(chunk.len());
-                            let joined_input = match input_merge.clone().compile_one(
+                            let joined_input: objectiveai::functions::expression::Input = match input_merge.compile_one(
                                 &objectiveai::functions::expression::Params::Owned(
                                     objectiveai::functions::expression::ParamsOwned {
                                         input: objectiveai::functions::expression::Input::Array(

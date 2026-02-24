@@ -30801,11 +30801,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -31366,11 +31366,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -32721,11 +32721,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -33286,11 +33286,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -34642,11 +34642,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -35207,11 +35207,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -36563,11 +36563,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -37128,11 +37128,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -38484,11 +38484,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -39049,11 +39049,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -41149,11 +41149,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -41714,11 +41714,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -43815,11 +43815,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -44380,11 +44380,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -46481,11 +46481,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -47046,11 +47046,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -48372,11 +48372,11 @@ declare const InlineScalarFunctionSchema: z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -48940,11 +48940,11 @@ declare const InlineVectorFunctionSchema: z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -49518,11 +49518,11 @@ declare const InlineFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -50083,11 +50083,11 @@ declare const InlineFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -50661,11 +50661,11 @@ declare const RemoteScalarFunctionSchema: z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -51260,11 +51260,11 @@ declare const RemoteVectorFunctionSchema: z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -51319,11 +51319,11 @@ declare const RemoteVectorFunctionSchema: z.ZodObject<{
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -51874,11 +51874,11 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -52470,11 +52470,11 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -52529,11 +52529,11 @@ declare const RemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -53084,11 +53084,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -53649,11 +53649,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -54224,11 +54224,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -54820,11 +54820,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -54879,11 +54879,11 @@ declare const FunctionSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[z.Zo
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -55322,11 +55322,11 @@ declare const QualityLeafRemoteScalarFunctionJsonSchema: JSONSchema;
 declare const QualityLeafRemoteVectorFunctionSchema: z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     description: z.ZodString;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -56111,11 +56111,11 @@ declare const QualityLeafRemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodObj
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     description: z.ZodString;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -56584,11 +56584,11 @@ declare const QualityBranchRemoteScalarFunctionJsonSchema: JSONSchema;
 declare const QualityBranchRemoteVectorFunctionSchema: z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     description: z.ZodString;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -56723,11 +56723,11 @@ declare const QualityBranchRemoteVectorFunctionSchema: z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -56857,11 +56857,11 @@ declare const QualityBranchRemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodO
 }, z.core.$strip>, z.ZodObject<{
     type: z.ZodLiteral<"vector.function">;
     description: z.ZodString;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -56996,11 +56996,11 @@ declare const QualityBranchRemoteFunctionSchema: z.ZodDiscriminatedUnion<[z.ZodO
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -60137,11 +60137,11 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -60740,11 +60740,11 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -60799,11 +60799,11 @@ declare const RetrieveSchema$2: z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -61410,11 +61410,11 @@ declare const RetrievePairSchema: z.ZodObject<{
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -62013,11 +62013,11 @@ declare const RetrievePairSchema: z.ZodObject<{
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -62072,11 +62072,11 @@ declare const RetrievePairSchema: z.ZodObject<{
             type: z.ZodLiteral<"file">;
             description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
         }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-        output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
             $starlark: z.ZodString;
-        }, z.core.$strict>]>]>;
+        }, z.core.$strict>]>;
         input_split: z.ZodUnion<readonly [z.ZodObject<{
             $jmespath: z.ZodString;
         }, z.core.$strict>, z.ZodObject<{
@@ -69487,11 +69487,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -70052,11 +70052,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -71414,11 +71414,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -71979,11 +71979,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -73342,11 +73342,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -73907,11 +73907,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -75270,11 +75270,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -75835,11 +75835,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
                 type: z.ZodLiteral<"file">;
                 description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
             }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-            output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
                 $starlark: z.ZodString;
-            }, z.core.$strict>]>]>;
+            }, z.core.$strict>]>;
             input_split: z.ZodUnion<readonly [z.ZodObject<{
                 $jmespath: z.ZodString;
             }, z.core.$strict>, z.ZodObject<{
@@ -78960,11 +78960,11 @@ declare const PlaceholderVectorFunctionTaskExpressionSchema: z.ZodObject<{
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -79516,11 +79516,11 @@ declare const TaskExpressionSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -80072,11 +80072,11 @@ declare const TaskExpressionsSchema: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodOb
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -80300,11 +80300,11 @@ declare const QualityUnmappedPlaceholderVectorFunctionTaskExpressionSchema: z.Zo
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -80584,11 +80584,11 @@ declare const QualityBranchVectorFunctionTasksExpressionSchema: z.ZodDiscriminat
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -80732,11 +80732,11 @@ declare const QualityBranchVectorFunctionTasksExpressionsSchema: z.ZodArray<z.Zo
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -81816,11 +81816,11 @@ declare const PlaceholderVectorFunctionTaskSchema: z.ZodObject<{
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -82146,11 +82146,11 @@ declare const TaskSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -82476,11 +82476,11 @@ declare const CompiledTaskSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -82803,11 +82803,11 @@ declare const CompiledTaskSchema: z.ZodUnion<readonly [z.ZodDiscriminatedUnion<[
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -83133,11 +83133,11 @@ declare const CompiledTasksSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodDiscrimi
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -83460,11 +83460,11 @@ declare const CompiledTasksSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodDiscrimi
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -83999,11 +83999,11 @@ declare const QualityTaskSchema: z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -84329,11 +84329,11 @@ declare const QualityCompiledTaskSchema: z.ZodUnion<readonly [z.ZodDiscriminated
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -84656,11 +84656,11 @@ declare const QualityCompiledTaskSchema: z.ZodUnion<readonly [z.ZodDiscriminated
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -84986,11 +84986,11 @@ declare const QualityCompiledTasksSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodD
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
@@ -85313,11 +85313,11 @@ declare const QualityCompiledTasksSchema: z.ZodArray<z.ZodUnion<readonly [z.ZodD
         type: z.ZodLiteral<"file">;
         description: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     }, z.core.$strip>, z.ZodType<AnyOfInputSchema, unknown, z.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
-    output_length: z.ZodUnion<readonly [z.ZodUInt32, z.ZodUnion<readonly [z.ZodObject<{
+    output_length: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{
         $starlark: z.ZodString;
-    }, z.core.$strict>]>]>;
+    }, z.core.$strict>]>;
     input_split: z.ZodUnion<readonly [z.ZodObject<{
         $jmespath: z.ZodString;
     }, z.core.$strict>, z.ZodObject<{

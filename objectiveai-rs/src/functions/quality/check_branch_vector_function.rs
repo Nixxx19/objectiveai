@@ -253,9 +253,8 @@ pub fn check_branch_vector_function(
                 output: None,
                 map: None,
             });
-            let ol = output_length
-                .clone()
-                .compile_one(&params)
+            let ol: usize = output_length
+                .compile_one::<u64>(&params)
                 .unwrap_or(0) as usize;
 
             for (j, compiled_task) in compiled_tasks.iter().enumerate() {
