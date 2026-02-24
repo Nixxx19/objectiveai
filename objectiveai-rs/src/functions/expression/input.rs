@@ -12,52 +12,6 @@ use starlark::values::float::UnpackFloat;
 use starlark::values::list::ListRef as StarlarkListRef;
 use starlark::values::{Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue};
 
-/// Expressions that produce the 2D array used for mapped tasks.
-///
-/// Can be a single expression (producing one sub-array) or multiple
-/// expressions (each producing a sub-array).
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum InputMaps {
-    /// A single expression producing one sub-array.
-    One(super::Expression),
-    /// Multiple expressions, each producing a sub-array.
-    Many(Vec<super::Expression>),
-}
-
-impl InputMaps {
-    /// Compiles the input maps expressions into concrete 2D arrays.
-    pub fn compile(
-        self,
-        params: &super::Params,
-    ) -> Result<Vec<Vec<Input>>, super::ExpressionError> {
-        match self {
-            InputMaps::One(expression) => {
-                match expression.compile_one_or_many::<Vec<Input>>(params)? {
-                    super::OneOrMany::One(one) => Ok(vec![one]),
-                    super::OneOrMany::Many(many) => Ok(many),
-                }
-            }
-            InputMaps::Many(expressions) => {
-                let mut compiled = Vec::with_capacity(expressions.len());
-                for expression in expressions {
-                    match expression
-                        .compile_one_or_many::<Vec<Input>>(params)?
-                    {
-                        super::OneOrMany::One(one) => compiled.push(one),
-                        super::OneOrMany::Many(many) => {
-                            for item in many {
-                                compiled.push(item);
-                            }
-                        }
-                    }
-                }
-                Ok(compiled)
-            }
-        }
-    }
-}
-
 /// A concrete input value (post-compilation).
 ///
 /// Represents any JSON-like value that can be passed to a Function,
