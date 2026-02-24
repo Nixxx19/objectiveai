@@ -50,7 +50,7 @@ fn wrong_type_vector() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![],
         output_length: Expression::Starlark(
             "len(input['items'])".to_string(),
@@ -68,36 +68,6 @@ fn wrong_type_vector() {
 }
 
 #[test]
-fn has_input_maps() {
-    let f = RemoteFunction::Scalar {
-        description: "test".to_string(),
-        input_schema: InputSchema::Integer(IntegerInputSchema {
-            description: None,
-            minimum: Some(1),
-            maximum: Some(10),
-        }),
-        input_maps: Some(crate::functions::expression::InputMaps::One(
-            Expression::Starlark("input".to_string()),
-        )),
-        tasks: vec![TaskExpression::ScalarFunction(
-            ScalarFunctionTaskExpression {
-            remote: Remote::Github,
-                owner: "test".to_string(),
-                repository: "test".to_string(),
-                commit: "abc123".to_string(),
-                skip: None,
-                map: None,
-                input: WithExpression::Expression(Expression::Starlark(
-                    "input".to_string(),
-                )),
-                output: Expression::Starlark("output".to_string()),
-            },
-        )],
-    };
-    test_err(&f, "BS02");
-}
-
-#[test]
 fn scalar_function_has_map() {
     let f = RemoteFunction::Scalar {
         description: "test".to_string(),
@@ -106,7 +76,7 @@ fn scalar_function_has_map() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -114,7 +84,7 @@ fn scalar_function_has_map() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
+                map: Some(Expression::Starlark("len(input)".to_string())),
                 input: WithExpression::Expression(Expression::Starlark(
                     "input".to_string(),
                 )),
@@ -136,7 +106,7 @@ fn placeholder_scalar_has_map() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::PlaceholderScalarFunction(
             PlaceholderScalarFunctionTaskExpression {
                 input_schema: InputSchema::Integer(IntegerInputSchema {
@@ -145,7 +115,7 @@ fn placeholder_scalar_has_map() {
                     maximum: Some(10),
                 }),
                 skip: None,
-                map: Some(0),
+                map: Some(Expression::Starlark("len(input)".to_string())),
                 input: WithExpression::Expression(Expression::Starlark(
                     "input".to_string(),
                 )),
@@ -167,7 +137,7 @@ fn contains_vector_function() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -195,7 +165,7 @@ fn contains_placeholder_vector() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::PlaceholderVectorFunction(
             PlaceholderVectorFunctionTaskExpression {
                 input_schema: InputSchema::Array(ArrayInputSchema {
@@ -235,7 +205,7 @@ fn contains_vector_completion() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -297,7 +267,7 @@ fn valid_single_scalar_function() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -325,7 +295,7 @@ fn valid_single_placeholder_scalar() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::PlaceholderScalarFunction(
             PlaceholderScalarFunctionTaskExpression {
                 input_schema: InputSchema::Integer(IntegerInputSchema {
@@ -354,7 +324,7 @@ fn valid_multiple_tasks() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -397,7 +367,7 @@ fn rejects_no_tasks() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![],
     };
     test_err(&f, "BS03");
@@ -413,7 +383,7 @@ fn description_too_long() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -440,7 +410,7 @@ fn description_empty() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -469,7 +439,7 @@ fn scalar_diversity_fail_fixed_input() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -509,7 +479,7 @@ fn scalar_diversity_fail_fixed_integer() {
             minimum: Some(1),
             maximum: Some(100),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -559,7 +529,7 @@ fn scalar_diversity_fail_third_task_fixed_object() {
             },
             required: Some(vec!["name".to_string(), "score".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -612,7 +582,7 @@ fn scalar_diversity_pass_string_passthrough() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -652,7 +622,7 @@ fn scalar_diversity_pass_integer_derived() {
             minimum: Some(1),
             maximum: Some(1000),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -701,7 +671,7 @@ fn scalar_diversity_pass_object_extract_field() {
             },
             required: Some(vec!["title".to_string(), "author".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -750,7 +720,7 @@ fn scalar_diversity_pass_placeholder_with_transform() {
             },
             required: Some(vec!["text".to_string(), "category".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::PlaceholderScalarFunction(
                 PlaceholderScalarFunctionTaskExpression {
@@ -804,7 +774,7 @@ fn scalar_diversity_pass_optional_field_used() {
             },
             required: Some(vec!["name".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -848,7 +818,7 @@ fn scalar_diversity_pass_array_input() {
                 r#enum: None,
             })),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -898,7 +868,7 @@ fn valid_with_skip_last_task_boolean() {
             },
             required: Some(vec!["text".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -948,7 +918,7 @@ fn valid_with_skip_on_low_priority() {
             },
             required: Some(vec!["text".to_string(), "priority".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -990,7 +960,7 @@ fn output_distribution_fail_biased_output_expression() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1020,7 +990,7 @@ fn output_distribution_pass_identity() {
             minimum: Some(1),
             maximum: Some(10),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1047,7 +1017,7 @@ fn rejects_single_permutation_string_enum() {
             description: None,
             r#enum: Some(vec!["only".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1075,7 +1045,7 @@ fn rejects_single_permutation_integer() {
             minimum: Some(0),
             maximum: Some(0),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1102,7 +1072,7 @@ fn all_tasks_skipped() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,

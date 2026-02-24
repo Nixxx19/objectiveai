@@ -60,14 +60,14 @@ impl TaskExpression {
         }
     }
 
-    /// Returns the map index, if this is a mapped task.
-    pub fn input_map(&self) -> Option<u64> {
+    /// Returns the map expression, if this is a mapped task.
+    pub fn map(&self) -> Option<&super::expression::Expression> {
         match self {
-            TaskExpression::ScalarFunction(task) => task.map,
-            TaskExpression::VectorFunction(task) => task.map,
-            TaskExpression::VectorCompletion(task) => task.map,
-            TaskExpression::PlaceholderScalarFunction(task) => task.map,
-            TaskExpression::PlaceholderVectorFunction(task) => task.map,
+            TaskExpression::ScalarFunction(task) => task.map.as_ref(),
+            TaskExpression::VectorFunction(task) => task.map.as_ref(),
+            TaskExpression::VectorCompletion(task) => task.map.as_ref(),
+            TaskExpression::PlaceholderScalarFunction(task) => task.map.as_ref(),
+            TaskExpression::PlaceholderVectorFunction(task) => task.map.as_ref(),
         }
     }
 
@@ -165,10 +165,10 @@ pub struct ScalarFunctionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution. If set, this task is
-    /// expanded into multiple instances.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the function.
     /// Receives: `input`, `map` (if mapped).
@@ -269,10 +269,10 @@ pub struct VectorFunctionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution. If set, this task is
-    /// expanded into multiple instances.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the function.
     /// Receives: `input`, `map` (if mapped).
@@ -364,10 +364,10 @@ pub struct VectorCompletionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution. If set, this task is
-    /// expanded into multiple instances.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the conversation messages (the prompt).
     /// Receives: `input`, `map` (if mapped).
@@ -541,9 +541,10 @@ pub struct PlaceholderScalarFunctionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the placeholder function.
     /// Receives: `input`, `map` (if mapped).
@@ -629,9 +630,10 @@ pub struct PlaceholderVectorFunctionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<super::expression::Expression>,
 
-    /// Index into `input_maps` for mapped execution.
+    /// Expression that evaluates to the number of mapped task instances.
+    /// Each instance receives `map` as an integer index (0-based).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub map: Option<u64>,
+    pub map: Option<super::expression::Expression>,
 
     /// Expression for the input to pass to the placeholder function.
     /// Receives: `input`, `map` (if mapped).
@@ -704,8 +706,8 @@ impl PlaceholderVectorFunctionTask {
 /// The result of compiling a task expression.
 ///
 /// Tasks without a `map` field compile to a single task. Tasks with a `map`
-/// field are expanded into multiple tasks, one per element in the referenced
-/// input map sub-array.
+/// expression are expanded into multiple tasks, one per integer index from
+/// 0 to the evaluated count.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum CompiledTask {

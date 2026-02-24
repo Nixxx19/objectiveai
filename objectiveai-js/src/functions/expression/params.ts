@@ -5,21 +5,7 @@ import { VectorCompletion } from "src/vector/completions/response/unary";
 import { VotesSchema } from "src/vector/completions/response/vote";
 import { WeightsSchema } from "src/vector/completions/response/weights";
 import z from "zod";
-import { InputValueSchema } from "./input";
 import { convert, type JSONSchema } from "../../json_schema";
-
-export const InputMapsAsParameterSchema = z
-  .array(InputValueSchema)
-  .describe(
-    "The `map` variable in mapped task expressions. " +
-      "For a task with `map: i`, the task is compiled once per element in `input_maps[i]`. " +
-      "Each compiled instance receives the current element as `map`.",
-  )
-  .meta({ title: "InputMapsAsParameter" });
-export type InputMapsAsParameter = z.infer<typeof InputMapsAsParameterSchema>;
-export const InputMapsAsParameterJsonSchema: JSONSchema = convert(
-  InputMapsAsParameterSchema,
-);
 
 export const VectorCompletionOutputSchema = z
   .object({

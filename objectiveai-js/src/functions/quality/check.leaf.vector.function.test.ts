@@ -194,7 +194,7 @@ describe("checkLeafVectorFunction", () => {
 
   // map on vc task
   it("rejects vc task with map", () => {
-    const task = { ...qualityVcTask(), map: 0 };
+    const task = { ...qualityVcTask(), map: { $starlark: "len(input)" } };
     const f = leafVector(arrayOfStringsSchema, [task]);
     expect(() => Functions.Quality.checkLeafVectorFunction(f)).toThrow(
       /LV04/,

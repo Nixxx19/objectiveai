@@ -178,14 +178,6 @@ pub fn check_branch_vector_function(
     let func_template = Function::Remote(function.clone());
     let task_count = tasks.len();
 
-    // Input maps validation setup
-    let has_input_maps = function.input_maps().is_some();
-    let task_map_indices: HashSet<u64> = function
-        .tasks()
-        .iter()
-        .filter_map(|t| t.input_map())
-        .collect();
-
     // Function input diversity tracking
     let mut per_task_inputs: Vec<HashSet<String>> =
         vec![HashSet::new(); task_count];
@@ -203,41 +195,6 @@ pub fn check_branch_vector_function(
     for ref input in example_inputs::generate(input_schema) {
         count += 1;
         let input_label = serde_json::to_string(input).unwrap_or_default();
-
-        // Input maps validation
-        if has_input_maps {
-            let compiled = func_template
-                .clone()
-                .compile_input_maps(input)
-                .map_err(|e| {
-                    format!(
-                        "BV10: Input {}: input_maps compilation failed: {}",
-                        input_label, e
-                    )
-                })?;
-
-            if let Some(compiled_maps) = compiled {
-                let len = compiled_maps.len() as u64;
-                for &idx in &task_map_indices {
-                    if idx >= len {
-                        return Err(format!(
-                            "BV11: Input {}: task has map index {} but compiled \
-                             input_maps has only {} sub-arrays",
-                            input_label, idx, len
-                        ));
-                    }
-                }
-                for idx in 0..len {
-                    if !task_map_indices.contains(&idx) {
-                        return Err(format!(
-                            "BV12: Input {}: compiled input_maps has {} sub-arrays \
-                             but index {} is not referenced by any task's map field",
-                            input_label, len, idx
-                        ));
-                    }
-                }
-            }
-        }
 
         // Vector fields validation
         check_vector_fields_for_input(&vector_fields, &input_label, input)?;

@@ -15,17 +15,18 @@ function qualityVcTask() {
   };
 }
 
-function branchScalar(tasks: unknown[], inputMaps?: unknown) {
+function branchScalar(tasks: unknown[]) {
   return {
     type: "scalar.function",
     description: "test",
     input_schema: { type: "integer", minimum: 1, maximum: 10 },
     tasks,
-    ...(inputMaps !== undefined ? { input_maps: inputMaps } : {}),
   };
 }
 
-function scalarFunctionTask(map?: number) {
+const mapExpr = { $starlark: "len(input)" };
+
+function scalarFunctionTask(map?: unknown) {
   return {
     type: "scalar.function",
     remote: "github",
@@ -38,7 +39,7 @@ function scalarFunctionTask(map?: number) {
   };
 }
 
-function vectorFunctionTask(map?: number) {
+function vectorFunctionTask(map?: unknown) {
   return {
     type: "vector.function",
     remote: "github",
@@ -51,7 +52,7 @@ function vectorFunctionTask(map?: number) {
   };
 }
 
-function placeholderScalarTask(map?: number) {
+function placeholderScalarTask(map?: unknown) {
   return {
     type: "placeholder.scalar.function",
     input_schema: { type: "integer", minimum: 1, maximum: 10 },
@@ -61,7 +62,7 @@ function placeholderScalarTask(map?: number) {
   };
 }
 
-function placeholderVectorTask(map?: number) {
+function placeholderVectorTask(map?: unknown) {
   return {
     type: "placeholder.vector.function",
     input_schema: {
@@ -108,27 +109,16 @@ describe("checkBranchScalarFunction", () => {
     );
   });
 
-  // input_maps
-  it("rejects input_maps", () => {
-    const f = branchScalar(
-      [scalarFunctionTask()],
-      [{ $starlark: "input" }],
-    );
-    expect(() => Functions.Quality.checkBranchScalarFunction(f)).toThrow(
-      /BS02/,
-    );
-  });
-
   // map on tasks
   it("rejects scalar.function task with map", () => {
-    const f = branchScalar([scalarFunctionTask(0)]);
+    const f = branchScalar([scalarFunctionTask(mapExpr)]);
     expect(() => Functions.Quality.checkBranchScalarFunction(f)).toThrow(
       /BS04/,
     );
   });
 
   it("rejects placeholder.scalar.function task with map", () => {
-    const f = branchScalar([placeholderScalarTask(0)]);
+    const f = branchScalar([placeholderScalarTask(mapExpr)]);
     expect(() => Functions.Quality.checkBranchScalarFunction(f)).toThrow(
       /BS05/,
     );

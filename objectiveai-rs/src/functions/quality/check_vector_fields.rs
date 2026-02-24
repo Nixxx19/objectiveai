@@ -26,7 +26,6 @@ impl VectorFieldsValidation {
         Function::Remote(RemoteFunction::Vector {
             description: String::new(),
             input_schema: self.input_schema.clone(),
-            input_maps: None,
             tasks: vec![],
             output_length: self.output_length.clone(),
             input_split: self.input_split.clone(),

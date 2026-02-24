@@ -60,60 +60,6 @@ impl Function {
         }
     }
 
-    /// Compiles the `input_maps` expressions to transform input into a 2D array.
-    ///
-    /// Evaluates the `input_maps` expressions to transform the input into a 2D array
-    /// that can be referenced by mapped tasks. Each sub-array can be accessed by
-    /// tasks via their `map` index.
-    ///
-    /// # Arguments
-    ///
-    /// * `input` - The function input to transform
-    ///
-    /// # Returns
-    ///
-    /// - `Ok(Some(Vec<Vec<Input>>))` - The compiled input maps (2D array)
-    /// - `Ok(None)` - If the function has no `input_maps` defined
-    /// - `Err(ExpressionError)` - If the expression fails to compile
-    pub fn compile_input_maps(
-        self,
-        input: &super::expression::Input,
-    ) -> Result<
-        Option<Vec<Vec<super::expression::Input>>>,
-        super::expression::ExpressionError,
-    > {
-        let input_maps_expr = match self {
-            Function::Remote(RemoteFunction::Scalar { input_maps, .. }) => {
-                input_maps
-            }
-            Function::Remote(RemoteFunction::Vector { input_maps, .. }) => {
-                input_maps
-            }
-            Function::Inline(InlineFunction::Scalar { input_maps, .. }) => {
-                input_maps
-            }
-            Function::Inline(InlineFunction::Vector { input_maps, .. }) => {
-                input_maps
-            }
-        };
-        match input_maps_expr {
-            Some(input_maps_expr) => {
-                // prepare params for compiling input_maps expression
-                let params = super::expression::Params::Ref(
-                    super::expression::ParamsRef {
-                        input,
-                        output: None,
-                        map: None,
-                    },
-                );
-                // compile input_maps
-                let input_maps = input_maps_expr.compile(&params)?;
-                Ok(Some(input_maps))
-            }
-            None => Ok(None),
-        }
-    }
-
     /// Compiles task expressions to show the final tasks for a given input.
     ///
     /// Evaluates all expressions (JMESPath or Starlark) in the function's tasks
@@ -133,28 +79,24 @@ impl Function {
         Vec<Option<super::CompiledTask>>,
         super::expression::ExpressionError,
     > {
-        // extract input_maps expression and task expressions
-        let (input_maps_expr, task_exprs) = match self {
+        // extract task expressions
+        let task_exprs = match self {
             Function::Remote(RemoteFunction::Scalar {
-                input_maps,
                 tasks,
                 ..
-            }) => (input_maps, tasks),
+            }) => tasks,
             Function::Remote(RemoteFunction::Vector {
-                input_maps,
                 tasks,
                 ..
-            }) => (input_maps, tasks),
+            }) => tasks,
             Function::Inline(InlineFunction::Scalar {
-                input_maps,
                 tasks,
                 ..
-            }) => (input_maps, tasks),
+            }) => tasks,
             Function::Inline(InlineFunction::Vector {
-                input_maps,
                 tasks,
                 ..
-            }) => (input_maps, tasks),
+            }) => tasks,
         };
 
         // prepare params for compiling expressions
@@ -165,13 +107,6 @@ impl Function {
                 map: None,
             });
 
-        // compile input_maps
-        let input_maps = if let Some(input_maps_expr) = input_maps_expr {
-            Some(input_maps_expr.compile(&params)?)
-        } else {
-            None
-        };
-
         // compile tasks
         let mut tasks = Vec::with_capacity(task_exprs.len());
         for mut task_expr in task_exprs {
@@ -181,37 +116,30 @@ impl Function {
                 {
                     // None if task is skipped
                     None
-                } else if let Some(input_map_index) = task_expr.input_map() {
-                    // for map tasks, map input to multiple instances of the task
-                    if let Some(input_maps) = &input_maps
-                        && let Some(input_map) =
-                            input_maps.get(input_map_index as usize)
-                    {
-                        // compile task for each map input
-                        let mut map_tasks = Vec::with_capacity(input_map.len());
-                        for input in input_map {
-                            // set map input
-                            match &mut params {
-                                super::expression::Params::Ref(params_ref) => {
-                                    params_ref.map = Some(input);
-                                }
-                                _ => unreachable!(),
+                } else if let Some(map_expr) = task_expr.map() {
+                    // evaluate map expression to get count
+                    let count: u64 = map_expr.compile_one(&params)?;
+                    // compile task for each map index
+                    let mut map_tasks = Vec::with_capacity(count as usize);
+                    for i in 0..count {
+                        // set map index
+                        match &mut params {
+                            super::expression::Params::Ref(params_ref) => {
+                                params_ref.map = Some(i);
                             }
-                            // compile task with map input
-                            map_tasks.push(task_expr.clone().compile(&params)?);
-                            // reset map input
-                            match &mut params {
-                                super::expression::Params::Ref(params_ref) => {
-                                    params_ref.map = None;
-                                }
-                                _ => unreachable!(),
-                            }
+                            _ => unreachable!(),
                         }
-                        Some(super::CompiledTask::Many(map_tasks))
-                    } else {
-                        // no map found is treated as empty map
-                        Some(super::CompiledTask::Many(Vec::new()))
+                        // compile task with map index
+                        map_tasks.push(task_expr.clone().compile(&params)?);
+                        // reset map index
+                        match &mut params {
+                            super::expression::Params::Ref(params_ref) => {
+                                params_ref.map = None;
+                            }
+                            _ => unreachable!(),
+                        }
                     }
+                    Some(super::CompiledTask::Many(map_tasks))
                 } else {
                     // compile single task
                     Some(super::CompiledTask::One(task_expr.compile(&params)?))
@@ -486,14 +414,6 @@ impl Function {
         }
     }
 
-    /// Returns the function's input maps, if defined.
-    pub fn input_maps(&self) -> Option<&super::expression::InputMaps> {
-        match self {
-            Function::Remote(remote_function) => remote_function.input_maps(),
-            Function::Inline(inline_function) => inline_function.input_maps(),
-        }
-    }
-
     /// Returns the function's tasks.
     pub fn tasks(&self) -> &[super::TaskExpression] {
         match self {
@@ -550,14 +470,9 @@ pub enum RemoteFunction {
         description: String,
         /// JSON Schema defining the expected input structure.
         input_schema: super::expression::InputSchema,
-        /// Expressions that transform input into a 2D array for mapped tasks.
-        /// Each sub-array can be referenced by tasks via their `map` index.
-        /// Receives: `input`.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        input_maps: Option<super::expression::InputMaps>,
-        /// The list of tasks to execute. Tasks with a `map` index are expanded
-        /// into multiple instances, one per element in the referenced sub-array.
-        /// Each instance is compiled with `map` set to that element's value.
+        /// The list of tasks to execute. Tasks with a `map` expression are
+        /// expanded into multiple instances. Each instance is compiled with
+        /// `map` set to the current integer index.
         /// Receives: `input`, `map` (if mapped).
         tasks: Vec<super::TaskExpression>,
     },
@@ -568,14 +483,9 @@ pub enum RemoteFunction {
         description: String,
         /// JSON Schema defining the expected input structure.
         input_schema: super::expression::InputSchema,
-        /// Expressions that transform input into a 2D array for mapped tasks.
-        /// Each sub-array can be referenced by tasks via their `map` index.
-        /// Receives: `input`.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        input_maps: Option<super::expression::InputMaps>,
-        /// The list of tasks to execute. Tasks with a `map` index are expanded
-        /// into multiple instances, one per element in the referenced sub-array.
-        /// Each instance is compiled with `map` set to that element's value.
+        /// The list of tasks to execute. Tasks with a `map` expression are
+        /// expanded into multiple instances. Each instance is compiled with
+        /// `map` set to the current integer index.
         /// Receives: `input`, `map` (if mapped).
         tasks: Vec<super::TaskExpression>,
         /// Expression computing the expected output vector length for task outputs.
@@ -607,14 +517,6 @@ impl RemoteFunction {
         match self {
             RemoteFunction::Scalar { input_schema, .. } => input_schema,
             RemoteFunction::Vector { input_schema, .. } => input_schema,
-        }
-    }
-
-    /// Returns the function's input maps, if defined.
-    pub fn input_maps(&self) -> Option<&super::expression::InputMaps> {
-        match self {
-            RemoteFunction::Scalar { input_maps, .. } => input_maps.as_ref(),
-            RemoteFunction::Vector { input_maps, .. } => input_maps.as_ref(),
         }
     }
 
@@ -668,28 +570,18 @@ pub enum InlineFunction {
     /// Produces a single score in [0, 1].
     #[serde(rename = "scalar.function")]
     Scalar {
-        /// Expressions that transform input into a 2D array for mapped tasks.
-        /// Each sub-array can be referenced by tasks via their `map` index.
-        /// Receives: `input`.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        input_maps: Option<super::expression::InputMaps>,
-        /// The list of tasks to execute. Tasks with a `map` index are expanded
-        /// into multiple instances, one per element in the referenced sub-array.
-        /// Each instance is compiled with `map` set to that element's value.
+        /// The list of tasks to execute. Tasks with a `map` expression are
+        /// expanded into multiple instances. Each instance is compiled with
+        /// `map` set to the current integer index.
         /// Receives: `input`, `map` (if mapped).
         tasks: Vec<super::TaskExpression>,
     },
     /// Produces a vector of scores that sums to 1.
     #[serde(rename = "vector.function")]
     Vector {
-        /// Expressions that transform input into a 2D array for mapped tasks.
-        /// Each sub-array can be referenced by tasks via their `map` index.
-        /// Receives: `input`.
-        #[serde(skip_serializing_if = "Option::is_none")]
-        input_maps: Option<super::expression::InputMaps>,
-        /// The list of tasks to execute. Tasks with a `map` index are expanded
-        /// into multiple instances, one per element in the referenced sub-array.
-        /// Each instance is compiled with `map` set to that element's value.
+        /// The list of tasks to execute. Tasks with a `map` expression are
+        /// expanded into multiple instances. Each instance is compiled with
+        /// `map` set to the current integer index.
         /// Receives: `input`, `map` (if mapped).
         tasks: Vec<super::TaskExpression>,
         /// Expression transforming input into an input array of the output_length
@@ -707,14 +599,6 @@ pub enum InlineFunction {
 }
 
 impl InlineFunction {
-    /// Returns the function's input maps, if defined.
-    pub fn input_maps(&self) -> Option<&super::expression::InputMaps> {
-        match self {
-            InlineFunction::Scalar { input_maps, .. } => input_maps.as_ref(),
-            InlineFunction::Vector { input_maps, .. } => input_maps.as_ref(),
-        }
-    }
-
     /// Returns the function's tasks.
     pub fn tasks(&self) -> &[super::TaskExpression] {
         match self {

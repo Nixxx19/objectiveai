@@ -147,7 +147,7 @@ impl FlatTaskProfile {
 
 /// Multiple function tasks from a mapped expression.
 ///
-/// Created when a task has a `map` index pointing to an input_maps sub-array.
+/// Created when a task has a `map` expression that expands into multiple instances.
 /// Each element in that array produces one function instance.
 #[derive(Debug, Clone)]
 pub struct MapFunctionFlatTaskProfile {

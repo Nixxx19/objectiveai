@@ -53,10 +53,8 @@ import {
 import {
   ObjectInputSchemaSchema,
   InputSchemaSchema,
-  InputMapsExpressionSchema,
   QualityVectorFunctionObjectInputSchemaSchema,
   QualityVectorFunctionInputSchemaSchema,
-  QualityInputMapsExpressionSchema,
 } from "./expression/input";
 
 // message.ts
@@ -165,12 +163,12 @@ const unmappedPlaceholderScalarFunctionTaskExpression = {
 
 const mappedScalarFunctionTaskExpression = {
   ...unmappedScalarFunctionTaskExpression,
-  map: 0,
+  map: { $starlark: "len(input['items'])" },
 };
 
 const mappedPlaceholderScalarFunctionTaskExpression = {
   ...unmappedPlaceholderScalarFunctionTaskExpression,
-  map: 0,
+  map: { $starlark: "len(input['items'])" },
 };
 
 const unmappedVectorFunctionTaskExpression = {
@@ -256,7 +254,6 @@ const baseBranchVectorFunction = {
   output_length: { $starlark: "len(input['items'])" },
   input_split: { $starlark: "[{'items': [x]} for x in input['items']]" },
   input_merge: { $starlark: "{'items': [x['items'][0] for x in input]}" },
-  input_maps: [{ $starlark: "input['items']" }],
   tasks: [mappedScalarFunctionTaskExpression],
 };
 
@@ -292,18 +289,6 @@ describe("Quality schemas are subtypes of base schemas", () => {
         InputSchemaSchema,
         arrayInputSchema,
         "array-schema",
-      );
-    });
-  });
-
-  describe("QualityInputMapsExpressionSchema", () => {
-    it("accepts array of expressions and passes InputMapsExpressionSchema", () => {
-      const value = [{ $starlark: "input['items']" }];
-      assertSubtype(
-        QualityInputMapsExpressionSchema,
-        InputMapsExpressionSchema,
-        value,
-        "input-maps-array",
       );
     });
   });
@@ -546,14 +531,13 @@ describe("Quality schemas are subtypes of base schemas", () => {
 
   describe("QualityTaskExpressionMapSchema", () => {
     it("passes TaskExpressionMapSchema", () => {
-      assertSubtype(QualityTaskExpressionMapSchema, TaskExpressionMapSchema, 0, "map-0");
-      assertSubtype(QualityTaskExpressionMapSchema, TaskExpressionMapSchema, 5, "map-5");
+      assertSubtype(QualityTaskExpressionMapSchema, TaskExpressionMapSchema, { $starlark: "len(input['items'])" }, "map-expr");
     });
   });
 
   describe("QualityScalarFunctionTaskExpressionSchema", () => {
     it("passes ScalarFunctionTaskExpressionSchema", () => {
-      const value = { ...unmappedScalarFunctionTaskExpression, map: 0 };
+      const value = { ...unmappedScalarFunctionTaskExpression, map: { $starlark: "len(input['items'])" } };
       assertSubtype(
         QualityScalarFunctionTaskExpressionSchema,
         ScalarFunctionTaskExpressionSchema,
@@ -565,7 +549,7 @@ describe("Quality schemas are subtypes of base schemas", () => {
 
   describe("QualityVectorFunctionTaskExpressionSchema", () => {
     it("passes VectorFunctionTaskExpressionSchema", () => {
-      const value = { ...unmappedVectorFunctionTaskExpression, map: 0 };
+      const value = { ...unmappedVectorFunctionTaskExpression, map: { $starlark: "len(input['items'])" } };
       assertSubtype(
         QualityVectorFunctionTaskExpressionSchema,
         VectorFunctionTaskExpressionSchema,
@@ -962,7 +946,7 @@ describe("Quality schemas reject invalid values", () => {
   it("QualityScalarVectorCompletionTaskExpressionSchema rejects map field", () => {
     const result = QualityScalarVectorCompletionTaskExpressionSchema.safeParse({
       ...qualityVectorCompletionTaskExpression,
-      map: 0,
+      map: { $starlark: "len(input['items'])" },
     });
     expect(result.success).toBe(false);
   });
@@ -1001,30 +985,6 @@ describe("Quality schemas reject invalid values", () => {
   it("QualityVectorFunctionInputSchemaSchema rejects non-array non-object schemas", () => {
     const result = QualityVectorFunctionInputSchemaSchema.safeParse({
       type: "string",
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("QualityLeafRemoteScalarFunctionSchema rejects input_maps", () => {
-    const result = QualityLeafRemoteScalarFunctionSchema.safeParse({
-      ...baseLeafScalarFunction,
-      input_maps: [{ $starlark: "input['items']" }],
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("QualityLeafRemoteVectorFunctionSchema rejects input_maps", () => {
-    const result = QualityLeafRemoteVectorFunctionSchema.safeParse({
-      ...baseLeafVectorFunction,
-      input_maps: [{ $starlark: "input['items']" }],
-    });
-    expect(result.success).toBe(false);
-  });
-
-  it("QualityBranchRemoteScalarFunctionSchema rejects input_maps", () => {
-    const result = QualityBranchRemoteScalarFunctionSchema.safeParse({
-      ...baseBranchScalarFunction,
-      input_maps: [{ $starlark: "input['items']" }],
     });
     expect(result.success).toBe(false);
   });

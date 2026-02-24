@@ -35,21 +35,18 @@ export const TaskExpressionSkipJsonSchema: JSONSchema = convert(
   TaskExpressionSkipSchema,
 );
 
-export const TaskExpressionMapSchema = z
-  .uint32()
-  .describe(
-    "Index into the function's `input_maps` 2D array. " +
-      "When present, this task is compiled once per element in `input_maps[map]`, producing multiple task instances. " +
-      "Each compiled instance's expressions receive the current element as `map`.",
-  );
+export const TaskExpressionMapSchema = ExpressionSchema.describe(
+  "Expression that evaluates to the number of mapped task instances. " +
+    "Each instance receives `map` as an integer index (0-based).",
+).meta({ title: "Expression", wrapper: true });
 export type TaskExpressionMap = z.infer<typeof TaskExpressionMapSchema>;
 export const TaskExpressionMapJsonSchema: JSONSchema = convert(
   TaskExpressionMapSchema,
 );
 
-export const QualityTaskExpressionMapSchema = z
-  .uint32()
-  .describe(TaskExpressionMapSchema.description! + " Unique across tasks.");
+export const QualityTaskExpressionMapSchema = ExpressionSchema.describe(
+  TaskExpressionMapSchema.description!,
+).meta({ title: "Expression", wrapper: true });
 export type QualityTaskExpressionMap = z.infer<
   typeof QualityTaskExpressionMapSchema
 >;
@@ -430,7 +427,6 @@ export const QualityBranchVectorFunctionTasksExpressionsSchema = z
   .describe(
     "Tasks for a vector function. Each task must be either a mapped scalar-like task or an unmapped vector-like task. " +
       "Must contain at least 1 task. At most 50% of tasks may have a map index (unless there is only 1 task). " +
-      "Map indices must be unique across tasks and reference valid input_maps entries. " +
       "Task count must be within min_width and max_width from parameters. " +
       "At depth 0, only vector.completion tasks are allowed instead.",
   );

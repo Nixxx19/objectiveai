@@ -29,21 +29,19 @@ use super::example_inputs;
 ///
 /// # Checks
 ///
-/// 1. No `input_maps` — scalar functions must not use input maps
-/// 2. All tasks must be `vector.completion`
+/// 1. All tasks must be `vector.completion`
 /// 3. No `map` on any task — scalar leaf tasks are never mapped
 /// 4. Message content must be content parts arrays, not plain strings
 /// 5. Response content must be content parts arrays, not plain strings
 pub fn check_leaf_scalar_function(
     function: &RemoteFunction,
 ) -> Result<(), String> {
-    let (description, input_maps, tasks) = match function {
+    let (description, tasks) = match function {
         RemoteFunction::Scalar {
             description,
-            input_maps,
             tasks,
             ..
-        } => (description, input_maps, tasks),
+        } => (description, tasks),
         RemoteFunction::Vector { .. } => {
             return Err(
                 "LS01: Expected scalar function, got vector function".to_string()
@@ -56,11 +54,6 @@ pub fn check_leaf_scalar_function(
 
     // Input schema permutations
     check_input_schema(function.input_schema())?;
-
-    // No input_maps
-    if input_maps.is_some() {
-        return Err("LS02: Scalar functions must not have input_maps".to_string());
-    }
 
     // Must have at least one task
     if tasks.is_empty() {

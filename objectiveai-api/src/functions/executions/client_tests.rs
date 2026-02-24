@@ -362,7 +362,6 @@ fn empty_input() -> objectiveai::functions::expression::Input {
 /// Creates a simple inline vector function with one vector completion task.
 fn create_simple_vector_function() -> objectiveai::functions::InlineFunction {
     objectiveai::functions::InlineFunction::Vector {
-        input_maps: None,
         tasks: vec![objectiveai::functions::TaskExpression::VectorCompletion(
             objectiveai::functions::VectorCompletionTaskExpression {
                 skip: None,
@@ -427,7 +426,6 @@ fn create_simple_profile() -> objectiveai::functions::InlineProfile {
 /// Creates a simple inline scalar function with one vector completion task.
 fn create_simple_scalar_function() -> objectiveai::functions::InlineFunction {
     objectiveai::functions::InlineFunction::Scalar {
-        input_maps: None,
         tasks: vec![objectiveai::functions::TaskExpression::VectorCompletion(
             objectiveai::functions::VectorCompletionTaskExpression {
                 skip: None,
@@ -704,7 +702,6 @@ mod tests {
 
         // Create a function with two tasks
         let function = objectiveai::functions::InlineFunction::Vector {
-            input_maps: None,
             tasks: vec![
                 objectiveai::functions::TaskExpression::VectorCompletion(
                     objectiveai::functions::VectorCompletionTaskExpression {

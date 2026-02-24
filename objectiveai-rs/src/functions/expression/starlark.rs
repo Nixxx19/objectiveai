@@ -428,8 +428,8 @@ where
                 );
                 module.set(
                     "map",
-                    owned.map.as_ref().map_or(SValue::new_none(), |m| {
-                        m.to_starlark_value(heap)
+                    owned.map.map_or(SValue::new_none(), |m| {
+                        heap.alloc(m as i64)
                     }),
                 );
             }
@@ -444,7 +444,7 @@ where
                 module.set(
                     "map",
                     r.map.map_or(SValue::new_none(), |m| {
-                        m.to_starlark_value(heap)
+                        heap.alloc(m as i64)
                     }),
                 );
             }
@@ -532,7 +532,7 @@ mod tests {
 
     fn assert_starlark_deep_eq<T: FromStarlarkValue + Serialize>(
         code: &str,
-        params: &Params<'_, '_, '_>,
+        params: &Params<'_, '_>,
         expected: &T,
     ) {
         let result: T = starlark_eval(code, params).unwrap();
@@ -546,7 +546,7 @@ mod tests {
         Input::Object(IndexMap::new())
     }
 
-    fn make_params(input: Input) -> Params<'static, 'static, 'static> {
+    fn make_params(input: Input) -> Params<'static, 'static> {
         Params::Owned(ParamsOwned {
             input,
             output: None,
@@ -557,7 +557,7 @@ mod tests {
     fn make_params_with_output(
         input: Input,
         output: TaskOutputOwned,
-    ) -> Params<'static, 'static, 'static> {
+    ) -> Params<'static, 'static> {
         Params::Owned(ParamsOwned {
             input,
             output: Some(output),
@@ -567,8 +567,8 @@ mod tests {
 
     fn make_params_with_map(
         input: Input,
-        map: Input,
-    ) -> Params<'static, 'static, 'static> {
+        map: u64,
+    ) -> Params<'static, 'static> {
         Params::Owned(ParamsOwned {
             input,
             output: None,
@@ -579,8 +579,8 @@ mod tests {
     fn make_full_params(
         input: Input,
         output: TaskOutputOwned,
-        map: Input,
-    ) -> Params<'static, 'static, 'static> {
+        map: u64,
+    ) -> Params<'static, 'static> {
         Params::Owned(ParamsOwned {
             input,
             output: Some(output),
@@ -788,53 +788,56 @@ mod tests {
 
     #[test]
     fn test_map_access() {
-        let input = obj(vec![("base", Input::Integer(100))]);
-        let map = obj(vec![("multiplier", Input::Integer(3))]);
-        let params = make_params_with_map(input, map);
+        let input = obj(vec![
+            ("base", Input::Integer(100)),
+            ("multipliers", arr(vec![Input::Integer(3), Input::Integer(5)])),
+        ]);
+        let params = make_params_with_map(input, 0);
 
         let result: i64 =
-            starlark_eval("input['base'] * map['multiplier']", &params)
+            starlark_eval("input['base'] * input['multipliers'][map]", &params)
                 .unwrap();
         assert_eq!(result, 300);
     }
 
     #[test]
-    fn test_map_with_nested_data() {
-        let input = obj(vec![("prefix", Input::String("Hello".to_string()))]);
-        let map = obj(vec![
-            ("name", Input::String("World".to_string())),
-            ("count", Input::Integer(3)),
-        ]);
-        let params = make_params_with_map(input, map);
+    fn test_map_as_index() {
+        let input = obj(vec![(
+            "items",
+            arr(vec![
+                Input::String("Hello".to_string()),
+                Input::String("World".to_string()),
+            ]),
+        )]);
+        let params = make_params_with_map(input, 1);
 
         let result: String =
-            starlark_eval("input['prefix'] + ' ' + map['name']", &params)
+            starlark_eval("input['items'][map]", &params)
                 .unwrap();
-        assert_eq!(result, "Hello World");
+        assert_eq!(result, "World");
 
-        let result2: i64 = starlark_eval("map['count'] * 10", &params).unwrap();
-        assert_eq!(result2, 30);
+        let result2: i64 = starlark_eval("map * 10", &params).unwrap();
+        assert_eq!(result2, 10);
     }
 
     #[test]
-    fn test_map_array_iteration() {
-        let input = obj(vec![("factor", Input::Integer(2))]);
-        let map = obj(vec![(
-            "values",
-            arr(vec![
-                Input::Integer(1),
-                Input::Integer(2),
-                Input::Integer(3),
-            ]),
-        )]);
-        let params = make_params_with_map(input, map);
+    fn test_map_in_list_comprehension() {
+        let input = obj(vec![
+            ("factor", Input::Integer(2)),
+            ("values", arr(vec![
+                Input::Integer(10),
+                Input::Integer(20),
+                Input::Integer(30),
+            ])),
+        ]);
+        let params = make_params_with_map(input, 1);
 
-        let result: Vec<i64> = starlark_eval(
-            "[v * input['factor'] for v in map['values']]",
+        let result: i64 = starlark_eval(
+            "input['values'][map] * input['factor']",
             &params,
         )
         .unwrap();
-        assert_eq!(result, vec![2, 4, 6]);
+        assert_eq!(result, 40);
     }
 
     // ==================== TESTS USING OUTPUT ====================
@@ -915,14 +918,13 @@ mod tests {
                 scores: vec![dec!(0.3), dec!(0.7)],
                 weights: vec![dec!(1.0), dec!(1.0)],
             });
-        let map = obj(vec![("index", Input::Integer(1))]);
-        let params = make_full_params(input, output, map);
+        let params = make_full_params(input, output, 1);
 
         let result: i64 =
             starlark_eval("len(output['scores'])", &params).unwrap();
         assert_eq!(result, 2);
 
-        let result2: i64 = starlark_eval("map['index']", &params).unwrap();
+        let result2: i64 = starlark_eval("map", &params).unwrap();
         assert_eq!(result2, 1);
     }
 
@@ -938,11 +940,10 @@ mod tests {
         )]);
         let output =
             TaskOutputOwned::Function(FunctionOutput::Scalar(dec!(0.5)));
-        let map = obj(vec![("selected_index", Input::Integer(1))]);
-        let params = make_full_params(input, output, map);
+        let params = make_full_params(input, output, 1);
 
         let result: String =
-            starlark_eval("input['items'][map['selected_index']]", &params)
+            starlark_eval("input['items'][map]", &params)
                 .unwrap();
         assert_eq!(result, "b");
 

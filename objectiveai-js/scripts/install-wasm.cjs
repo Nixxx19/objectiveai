@@ -117,7 +117,6 @@ const _wasm = (() => {
 export const validateEnsembleLlm = _wasm.validateEnsembleLlm;
 export const validateEnsemble = _wasm.validateEnsemble;
 export const validateFunctionInput = _wasm.validateFunctionInput;
-export const compileFunctionInputMaps = _wasm.compileFunctionInputMaps;
 export const compileFunctionTasks = _wasm.compileFunctionTasks;
 export const compileFunctionOutput = _wasm.compileFunctionOutput;
 export const compileFunctionOutputLength = _wasm.compileFunctionOutputLength;

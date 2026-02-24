@@ -7,7 +7,7 @@ use crate::chat::completions::request::{
     UserMessageExpression,
 };
 use crate::functions::expression::{
-    ArrayInputSchema, BooleanInputSchema, Expression, InputMaps, InputSchema,
+    ArrayInputSchema, BooleanInputSchema, Expression, InputSchema,
     IntegerInputSchema, ObjectInputSchema, StringInputSchema, WithExpression,
 };
 use crate::functions::quality::check_branch_vector_function;
@@ -38,7 +38,7 @@ fn wrong_type_scalar() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -65,7 +65,7 @@ fn input_schema_string() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -107,7 +107,7 @@ fn input_schema_object_no_required_array() {
             },
             required: Some(vec!["name".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -158,7 +158,7 @@ fn scalar_function_without_map() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -211,7 +211,7 @@ fn placeholder_scalar_without_map() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::PlaceholderScalarFunction(PlaceholderScalarFunctionTaskExpression {
                 input_schema: InputSchema::String(StringInputSchema {
@@ -264,14 +264,14 @@ fn vector_function_with_map() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
             owner: "test".to_string(),
             repository: "test".to_string(),
             commit: "abc123".to_string(),
             skip: None,
-            map: Some(0),
+            map: Some(Expression::Starlark("len(input['items'])".to_string())),
             input: WithExpression::Expression(Expression::Starlark("input".to_string())),
             output: Expression::Starlark("output".to_string()),
         })],
@@ -305,7 +305,7 @@ fn placeholder_vector_with_map() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::PlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression {
             input_schema: InputSchema::Object(ObjectInputSchema {
                 description: None,
@@ -330,7 +330,7 @@ fn placeholder_vector_with_map() {
             input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
             input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
             skip: None,
-            map: Some(0),
+            map: Some(Expression::Starlark("len(input['items'])".to_string())),
             input: WithExpression::Expression(Expression::Starlark("input".to_string())),
             output: Expression::Starlark("output".to_string()),
         })],
@@ -364,7 +364,7 @@ fn contains_vector_completion() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(VectorCompletionTaskExpression {
             skip: None,
             map: None,
@@ -415,17 +415,14 @@ fn single_mapped_scalar_task() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
             owner: "test".to_string(),
             repository: "test".to_string(),
             commit: "abc123".to_string(),
             skip: None,
-            map: Some(0),
-            input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+            map: Some(Expression::Starlark("len(input['items'])".to_string())),
+            input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
             output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
         })],
         output_length: Expression::Starlark("len(input['items'])".to_string()),
@@ -458,9 +455,6 @@ fn over_50_percent_mapped_scalar() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -468,8 +462,8 @@ fn over_50_percent_mapped_scalar() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
@@ -478,8 +472,8 @@ fn over_50_percent_mapped_scalar() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -525,7 +519,7 @@ fn valid_single_vector_function() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
             owner: "test".to_string(),
@@ -566,7 +560,7 @@ fn valid_single_placeholder_vector() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::PlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression {
             input_schema: InputSchema::Object(ObjectInputSchema {
                 description: None,
@@ -625,9 +619,6 @@ fn valid_50_50_split() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -635,8 +626,8 @@ fn valid_50_50_split() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -680,9 +671,6 @@ fn valid_mixed_tasks() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -690,8 +678,8 @@ fn valid_mixed_tasks() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -745,7 +733,7 @@ fn valid_all_unmapped_vector() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -796,7 +784,7 @@ fn description_too_long() {
             },
             required: Some(vec!["items".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -843,7 +831,7 @@ fn description_empty() {
             },
             required: Some(vec!["items".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -896,7 +884,7 @@ fn input_diversity_fail_third_task_fixed_input() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             // Task 0: passes parent input through — OK
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -962,9 +950,6 @@ fn input_diversity_fail_third_task_mapped_fixed() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -992,7 +977,7 @@ fn input_diversity_fail_third_task_mapped_fixed() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
                 input: WithExpression::Expression(Expression::Starlark("'constant'".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
@@ -1039,7 +1024,7 @@ fn input_diversity_pass_vector_function_passthrough() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -1092,9 +1077,6 @@ fn input_diversity_pass_mixed_mapped_and_unmapped() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1102,8 +1084,8 @@ fn input_diversity_pass_mixed_mapped_and_unmapped() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -1147,7 +1129,7 @@ fn input_diversity_pass_placeholder_vector_tasks() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::PlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression {
                 input_schema: InputSchema::Object(ObjectInputSchema {
@@ -1228,9 +1210,6 @@ fn input_diversity_pass_mapped_scalar_with_two_vectors() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1238,8 +1217,8 @@ fn input_diversity_pass_mapped_scalar_with_two_vectors() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -1309,7 +1288,7 @@ fn input_diversity_fail_child_min_items_3() {
     let f = RemoteFunction::Vector {
         description: "test".to_string(),
         input_schema: parent_schema,
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -1362,7 +1341,7 @@ fn input_diversity_pass_no_input_maps() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -1415,9 +1394,6 @@ fn input_diversity_fail_with_input_maps_fixed() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             // Task 0: unmapped vector passes input — OK
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -1437,7 +1413,7 @@ fn input_diversity_fail_with_input_maps_fixed() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
                 input: WithExpression::Expression(Expression::Starlark("'always_same'".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
@@ -1472,70 +1448,13 @@ fn rejects_no_tasks() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![],
         output_length: Expression::Starlark("len(input['items'])".to_string()),
         input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
         input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
     };
     test_err(&f, "BV02");
-}
-
-// --- Unused input_maps tests ---
-
-#[test]
-fn rejects_unused_input_maps() {
-    let f = RemoteFunction::Vector {
-        description: "test".to_string(),
-        input_schema: InputSchema::Object(ObjectInputSchema {
-            description: None,
-            properties: index_map! {
-                "items" => InputSchema::Array(ArrayInputSchema {
-                    description: None,
-                    min_items: Some(2),
-                    max_items: Some(2),
-                    items: Box::new(InputSchema::String(StringInputSchema {
-                        description: None,
-                        r#enum: None,
-                    })),
-                }),
-                "label" => InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })
-            },
-            required: Some(vec!["items".to_string(), "label".to_string()]),
-        }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
-        tasks: vec![
-            TaskExpression::VectorFunction(VectorFunctionTaskExpression {
-            remote: Remote::Github,
-                owner: "test".to_string(),
-                repository: "test".to_string(),
-                commit: "abc123".to_string(),
-                skip: None,
-                map: None,
-                input: WithExpression::Expression(Expression::Starlark("input".to_string())),
-                output: Expression::Starlark("output".to_string()),
-            }),
-            TaskExpression::VectorFunction(VectorFunctionTaskExpression {
-            remote: Remote::Github,
-                owner: "test".to_string(),
-                repository: "test".to_string(),
-                commit: "abc123".to_string(),
-                skip: None,
-                map: None,
-                input: WithExpression::Expression(Expression::Starlark("{'items': input['items'], 'label': input['label']}".to_string())),
-                output: Expression::Starlark("output".to_string()),
-            }),
-        ],
-        output_length: Expression::Starlark("len(input['items'])".to_string()),
-        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
-        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
-    };
-    test_err(&f, "BV12");
 }
 
 // --- Skip expression tests ---
@@ -1566,7 +1485,7 @@ fn valid_with_skip_last_task_boolean() {
             },
             required: Some(vec!["items".to_string(), "label".to_string(), "skip_last_task".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -1619,7 +1538,7 @@ fn valid_with_skip_on_quick_mode() {
             },
             required: Some(vec!["items".to_string(), "mode".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -1649,81 +1568,6 @@ fn valid_with_skip_on_quick_mode() {
     test(&f);
 }
 
-#[test]
-fn rejects_out_of_bounds_map_index() {
-    let f = RemoteFunction::Vector {
-        description: "test".to_string(),
-        input_schema: InputSchema::Object(ObjectInputSchema {
-            description: None,
-            properties: index_map! {
-                "items" => InputSchema::Array(ArrayInputSchema {
-                    description: None,
-                    min_items: Some(2),
-                    max_items: Some(2),
-                    items: Box::new(InputSchema::String(StringInputSchema {
-                        description: None,
-                        r#enum: None,
-                    })),
-                }),
-                "label" => InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })
-            },
-            required: Some(vec!["items".to_string(), "label".to_string()]),
-        }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
-        tasks: vec![
-            TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
-            remote: Remote::Github,
-                owner: "test".to_string(),
-                repository: "test".to_string(),
-                commit: "abc123".to_string(),
-                skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
-                output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
-            }),
-            TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
-            remote: Remote::Github,
-                owner: "test".to_string(),
-                repository: "test".to_string(),
-                commit: "abc123".to_string(),
-                skip: None,
-                map: Some(1), // index 1 doesn't exist
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
-                output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
-            }),
-            TaskExpression::VectorFunction(VectorFunctionTaskExpression {
-            remote: Remote::Github,
-                owner: "test".to_string(),
-                repository: "test".to_string(),
-                commit: "abc123".to_string(),
-                skip: None,
-                map: None,
-                input: WithExpression::Expression(Expression::Starlark("input".to_string())),
-                output: Expression::Starlark("output".to_string()),
-            }),
-            TaskExpression::VectorFunction(VectorFunctionTaskExpression {
-            remote: Remote::Github,
-                owner: "test".to_string(),
-                repository: "test".to_string(),
-                commit: "abc123".to_string(),
-                skip: None,
-                map: None,
-                input: WithExpression::Expression(Expression::Starlark("{'items': input['items'], 'label': input['label']}".to_string())),
-                output: Expression::Starlark("output".to_string()),
-            }),
-        ],
-        output_length: Expression::Starlark("len(input['items'])".to_string()),
-        input_split: Expression::Starlark("[{'items': [x], 'label': input['label']} for x in input['items']]".to_string()),
-        input_merge: Expression::Starlark("{'items': [x['items'][0] for x in input], 'label': input[0]['label']}".to_string()),
-    };
-    test_err(&f, "BV11");
-}
-
 // --- Output expression distribution tests ---
 
 #[test]
@@ -1749,9 +1593,6 @@ fn output_distribution_pass_mapped_scalar_max_items_10() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1759,8 +1600,8 @@ fn output_distribution_pass_mapped_scalar_max_items_10() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -1804,9 +1645,6 @@ fn output_distribution_pass_mixed_tasks_max_items_10() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1814,8 +1652,8 @@ fn output_distribution_pass_mixed_tasks_max_items_10() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) if sum(output) > 0 else 1.0 / len(output) for x in output]".to_string()),
             }),
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -1869,9 +1707,6 @@ fn output_distribution_fail_biased_mapped_scalar() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1879,8 +1714,8 @@ fn output_distribution_fail_biased_mapped_scalar() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark(
                     "[x * 0.1 + 0.45 for x in [y / sum(output) if sum(output) > 0 else 1.0 / len(output) for y in output]]".to_string(),
                 ),
@@ -1926,7 +1761,7 @@ fn output_distribution_fail_biased_unmapped_vector() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
             owner: "test".to_string(),
@@ -1969,9 +1804,6 @@ fn output_distribution_fail_mapped_scalar_division_by_zero() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: Some(InputMaps::Many(vec![
-            Expression::Starlark("input['items']".to_string()),
-        ])),
         tasks: vec![
             TaskExpression::ScalarFunction(ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -1979,8 +1811,8 @@ fn output_distribution_fail_mapped_scalar_division_by_zero() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                map: Some(0),
-                input: WithExpression::Expression(Expression::Starlark("map".to_string())),
+                map: Some(Expression::Starlark("len(input['items'])".to_string())),
+                input: WithExpression::Expression(Expression::Starlark("input['items'][map]".to_string())),
                 output: Expression::Starlark("[x / sum(output) for x in output]".to_string()),
             }),
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
@@ -2024,7 +1856,7 @@ fn output_distribution_pass_identity() {
             },
             required: Some(vec!["items".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
             owner: "test".to_string(),
@@ -2055,7 +1887,7 @@ fn rejects_single_permutation_string_enum() {
                 r#enum: Some(vec!["only".to_string()]),
             })),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -2096,7 +1928,7 @@ fn all_tasks_skipped() {
                 r#enum: None,
             })),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorFunction(VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -2150,7 +1982,7 @@ fn rejects_single_permutation_integer() {
                 maximum: Some(0),
             })),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -2191,7 +2023,7 @@ fn output_length_less_than_2() {
                 r#enum: None,
             })),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,

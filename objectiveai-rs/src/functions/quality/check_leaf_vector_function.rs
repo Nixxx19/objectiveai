@@ -29,8 +29,7 @@ use super::example_inputs;
 ///
 /// # Checks
 ///
-/// 1. No `input_maps` — leaf vector tasks are never mapped
-/// 2. Input schema must be an array or an object with at least one required array property
+/// 1. Input schema must be an array or an object with at least one required array property
 /// 3. All tasks must be `vector.completion`
 /// 4. No `map` on vector.completion tasks
 /// 5. Message content must be content parts arrays, not plain strings
@@ -41,7 +40,6 @@ pub fn check_leaf_vector_function(
 ) -> Result<(), String> {
     let (
         description,
-        input_maps,
         input_schema,
         tasks,
         output_length,
@@ -50,7 +48,6 @@ pub fn check_leaf_vector_function(
     ) = match function {
         RemoteFunction::Vector {
             description,
-            input_maps,
             input_schema,
             tasks,
             output_length,
@@ -59,7 +56,6 @@ pub fn check_leaf_vector_function(
             ..
         } => (
             description,
-            input_maps,
             input_schema,
             tasks,
             output_length,
@@ -78,13 +74,6 @@ pub fn check_leaf_vector_function(
 
     // Input schema permutations
     check_input_schema(input_schema)?;
-
-    // No input_maps
-    if input_maps.is_some() {
-        return Err(
-            "LV02: Leaf vector functions must not have input_maps".to_string()
-        );
-    }
 
     // Input schema must be array or object with ≥1 required array property
     check_vector_input_schema(input_schema)?;

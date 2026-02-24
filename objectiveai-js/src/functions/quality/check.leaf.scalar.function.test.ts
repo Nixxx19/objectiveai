@@ -31,20 +31,16 @@ function qualityVcTask() {
   };
 }
 
-function leafScalar(
-  tasks: unknown[],
-  inputMaps?: unknown,
-) {
+function leafScalar(tasks: unknown[]) {
   return {
     type: "scalar.function",
     description: "test",
     input_schema: { type: "string" },
     tasks,
-    ...(inputMaps !== undefined ? { input_maps: inputMaps } : {}),
   };
 }
 
-function scalarFunctionTask(map?: number) {
+function scalarFunctionTask(map?: unknown) {
   return {
     type: "scalar.function",
     remote: "github",
@@ -57,7 +53,7 @@ function scalarFunctionTask(map?: number) {
   };
 }
 
-function vectorFunctionTask(map?: number) {
+function vectorFunctionTask(map?: unknown) {
   return {
     type: "vector.function",
     remote: "github",
@@ -70,7 +66,7 @@ function vectorFunctionTask(map?: number) {
   };
 }
 
-function placeholderScalarTask(map?: number) {
+function placeholderScalarTask(map?: unknown) {
   return {
     type: "placeholder.scalar.function",
     input_schema: { type: "integer", minimum: 1, maximum: 10 },
@@ -80,7 +76,7 @@ function placeholderScalarTask(map?: number) {
   };
 }
 
-function placeholderVectorTask(map?: number) {
+function placeholderVectorTask(map?: unknown) {
   return {
     type: "placeholder.vector.function",
     input_schema: {
@@ -121,17 +117,9 @@ describe("checkLeafScalarFunction", () => {
     );
   });
 
-  // input_maps
-  it("rejects input_maps", () => {
-    const f = leafScalar([qualityVcTask()], [{ $starlark: "input" }]);
-    expect(() => Functions.Quality.checkLeafScalarFunction(f)).toThrow(
-      /LS02/,
-    );
-  });
-
   // map on vc task
   it("rejects vc task with map", () => {
-    const task = { ...qualityVcTask(), map: 0 };
+    const task = { ...qualityVcTask(), map: { $starlark: "len(input)" } };
     const f = leafScalar([task]);
     expect(() => Functions.Quality.checkLeafScalarFunction(f)).toThrow(
       /LS04/,

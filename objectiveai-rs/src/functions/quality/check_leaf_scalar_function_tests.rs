@@ -44,7 +44,7 @@ fn wrong_type_vector() {
                 r#enum: None,
             })),
         }),
-        input_maps: None,
+
         tasks: vec![],
         output_length: Expression::Starlark(
             "len(input)".to_string(),
@@ -60,67 +60,6 @@ fn wrong_type_vector() {
 }
 
 #[test]
-fn has_input_maps() {
-    let f = RemoteFunction::Scalar {
-        description: "test".to_string(),
-        input_schema: InputSchema::String(StringInputSchema {
-            description: None,
-            r#enum: None,
-        }),
-        input_maps: Some(crate::functions::expression::InputMaps::One(
-            Expression::Starlark("input".to_string()),
-        )),
-        tasks: vec![TaskExpression::VectorCompletion(
-            VectorCompletionTaskExpression {
-                skip: None,
-                map: None,
-                messages: WithExpression::Value(vec![WithExpression::Value(
-                    MessageExpression::User(UserMessageExpression {
-                        content: WithExpression::Value(
-                            RichContentExpression::Parts(vec![
-                                WithExpression::Value(
-                                    RichContentPartExpression::Text {
-                                        text: WithExpression::Value(
-                                            "Hello".to_string(),
-                                        ),
-                                    },
-                                ),
-                            ]),
-                        ),
-                        name: None,
-                    }),
-                )]),
-                tools: None,
-                responses: WithExpression::Value(vec![
-                    WithExpression::Value(RichContentExpression::Parts(
-                        vec![WithExpression::Value(
-                            RichContentPartExpression::Text {
-                                text: WithExpression::Value(
-                                    "Option A".to_string(),
-                                ),
-                            },
-                        )],
-                    )),
-                    WithExpression::Value(RichContentExpression::Parts(
-                        vec![WithExpression::Value(
-                            RichContentPartExpression::Text {
-                                text: WithExpression::Value(
-                                    "Option A".to_string(),
-                                ),
-                            },
-                        )],
-                    )),
-                ]),
-                output: Expression::Starlark(
-                    "output['scores'][0]".to_string(),
-                ),
-            },
-        )],
-    };
-    test_err(&f, "LS02");
-}
-
-#[test]
 fn vc_task_has_map() {
     let f = RemoteFunction::Scalar {
         description: "test".to_string(),
@@ -128,11 +67,11 @@ fn vc_task_has_map() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
-                map: Some(0),
+                map: Some(Expression::Starlark("len(input)".to_string())),
                 messages: WithExpression::Value(vec![WithExpression::Value(
                     MessageExpression::User(UserMessageExpression {
                         content: WithExpression::Value(
@@ -187,7 +126,7 @@ fn contains_scalar_function_task() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::ScalarFunction(
             ScalarFunctionTaskExpression {
             remote: Remote::Github,
@@ -214,7 +153,7 @@ fn contains_vector_function_task() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorFunction(
             VectorFunctionTaskExpression {
             remote: Remote::Github,
@@ -241,7 +180,7 @@ fn contains_placeholder_scalar_task() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::PlaceholderScalarFunction(
             PlaceholderScalarFunctionTaskExpression {
                 input_schema: InputSchema::Integer(IntegerInputSchema {
@@ -269,7 +208,7 @@ fn contains_placeholder_vector_task() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::PlaceholderVectorFunction(
             PlaceholderVectorFunctionTaskExpression {
                 input_schema: InputSchema::Array(ArrayInputSchema {
@@ -312,7 +251,7 @@ fn empty_messages() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -356,7 +295,7 @@ fn one_response() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -406,7 +345,7 @@ fn one_response_expression() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -450,7 +389,7 @@ fn response_plain_string() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -503,7 +442,7 @@ fn developer_message_plain_string() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -558,7 +497,7 @@ fn system_message_plain_string() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -611,7 +550,7 @@ fn user_message_plain_string() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -662,7 +601,7 @@ fn assistant_message_plain_string() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -720,7 +659,7 @@ fn tool_message_plain_string() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -775,7 +714,7 @@ fn valid_single_task() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -822,7 +761,7 @@ fn valid_multiple_tasks() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorCompletion(
                 VectorCompletionTaskExpression {
@@ -945,7 +884,7 @@ fn rejects_no_tasks() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![],
     };
     test_err(&f, "LS03");
@@ -965,7 +904,7 @@ fn valid_expression_messages_skip_structural_check() {
             },
             required: Some(vec!["text".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -998,7 +937,7 @@ fn derived_scalar_output_expression_passes() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1045,7 +984,7 @@ fn fixed_scalar_output_expression() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1102,7 +1041,7 @@ fn branching_scalar_output_three_values() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1162,7 +1101,7 @@ fn description_too_long() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1209,7 +1148,7 @@ fn description_empty() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1256,7 +1195,7 @@ fn valid_developer_message_parts() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1324,7 +1263,7 @@ fn diversity_fail_all_fixed_parameters() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1355,7 +1294,7 @@ fn diversity_fail_second_task_fixed() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorCompletion(
                 VectorCompletionTaskExpression {
@@ -1425,7 +1364,7 @@ fn diversity_fail_object_input_ignored() {
             },
             required: Some(vec!["name".to_string(), "score".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1458,7 +1397,7 @@ fn diversity_pass_message_derives_from_input() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1489,7 +1428,7 @@ fn diversity_pass_responses_derive_from_input() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1533,7 +1472,7 @@ fn diversity_pass_object_fields_in_messages() {
                 "context".to_string(),
             ]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorCompletion(
                 VectorCompletionTaskExpression {
@@ -1592,7 +1531,7 @@ fn diversity_pass_both_messages_and_responses_derived() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorCompletion(
                 VectorCompletionTaskExpression {
@@ -1651,7 +1590,7 @@ fn diversity_pass_value_messages_with_expression_text() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1724,7 +1663,7 @@ fn valid_with_skip_last_task_boolean() {
             },
             required: Some(vec!["text".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorCompletion(VectorCompletionTaskExpression {
                 skip: None,
@@ -1792,7 +1731,7 @@ fn valid_with_skip_on_high_confidence() {
             },
             required: Some(vec!["text".to_string(), "confidence".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorCompletion(VectorCompletionTaskExpression {
                 skip: None,
@@ -1851,7 +1790,7 @@ fn output_distribution_fail_biased() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1890,7 +1829,7 @@ fn output_distribution_pass() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1929,7 +1868,7 @@ fn output_distribution_fail_division_by_zero() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -1968,7 +1907,7 @@ fn rejects_single_permutation_string_enum() {
             description: None,
             r#enum: Some(vec!["only".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -2016,7 +1955,7 @@ fn rejects_single_permutation_integer() {
             minimum: Some(0),
             maximum: Some(0),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -2074,7 +2013,7 @@ fn modality_fail_image_in_schema_but_str_in_messages() {
             },
             required: Some(vec!["photo".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -2120,7 +2059,7 @@ fn modality_fail_image_in_schema_but_text_only_responses() {
             },
             required: Some(vec!["image".to_string(), "text".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -2158,7 +2097,7 @@ fn modality_pass_image_in_messages() {
             },
             required: Some(vec!["photo".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -2204,7 +2143,7 @@ fn modality_pass_image_in_responses() {
             },
             required: Some(vec!["photo".to_string(), "label".to_string()]),
         }),
-        input_maps: None,
+
         tasks: vec![TaskExpression::VectorCompletion(
             VectorCompletionTaskExpression {
                 skip: None,
@@ -2233,7 +2172,7 @@ fn all_tasks_skipped() {
             description: None,
             r#enum: None,
         }),
-        input_maps: None,
+
         tasks: vec![
             TaskExpression::VectorCompletion(VectorCompletionTaskExpression {
                 skip: Some(Expression::Starlark("True".to_string())),

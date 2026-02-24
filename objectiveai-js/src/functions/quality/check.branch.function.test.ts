@@ -80,11 +80,10 @@ describe("checkBranchFunction", () => {
       type: "scalar.function",
       description: "test",
       input_schema: { type: "integer", minimum: 1, maximum: 10 },
-      input_maps: [{ $starlark: "input" }],
-      tasks: [scalarFunctionTask()],
+      tasks: [{ ...scalarFunctionTask(), map: { $starlark: "len(input)" } }],
     };
     expect(() => Functions.Quality.checkBranchFunction(f as any)).toThrow(
-      /BS02/,
+      /BS04/,
     );
   });
 

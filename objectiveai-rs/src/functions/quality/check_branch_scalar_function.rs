@@ -22,8 +22,7 @@ use super::example_inputs;
 ///
 /// # Checks
 ///
-/// 1. No `input_maps` — scalar functions must not use input maps
-/// 2. All tasks must be scalar-like: `scalar.function` or `placeholder.scalar.function`
+/// 1. All tasks must be scalar-like: `scalar.function` or `placeholder.scalar.function`
 /// 3. No `map` on any task — branch scalar tasks are never mapped
 /// 4. No `vector.completion` tasks (branch functions delegate to child functions)
 /// 5. No vector-like tasks (`vector.function`, `placeholder.vector.function`)
@@ -32,13 +31,12 @@ pub fn check_branch_scalar_function(
     function: &RemoteFunction,
     children: Option<&HashMap<String, RemoteFunction>>,
 ) -> Result<(), String> {
-    let (description, input_maps, tasks) = match function {
+    let (description, tasks) = match function {
         RemoteFunction::Scalar {
             description,
-            input_maps,
             tasks,
             ..
-        } => (description, input_maps, tasks),
+        } => (description, tasks),
         RemoteFunction::Vector { .. } => {
             return Err(
                 "BS01: Expected scalar function, got vector function".to_string()
@@ -51,11 +49,6 @@ pub fn check_branch_scalar_function(
 
     // Input schema permutations
     check_input_schema(function.input_schema())?;
-
-    // No input_maps
-    if input_maps.is_some() {
-        return Err("BS02: Scalar functions must not have input_maps".to_string());
-    }
 
     // Must have at least one task
     if tasks.is_empty() {

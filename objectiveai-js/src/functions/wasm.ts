@@ -1,6 +1,5 @@
 import {
   validateFunctionInput as wasmValidateFunctionInput,
-  compileFunctionInputMaps as wasmCompileFunctionInputMaps,
   compileFunctionTasks as wasmCompileFunctionTasks,
   // compileFunctionOutput as wasmCompileFunctionOutput, // TODO: Update for new per-task output expression architecture
   compileFunctionOutputLength as wasmCompileFunctionOutputLength,
@@ -18,16 +17,6 @@ export function validateFunctionInput(
 ): boolean | null {
   const result = wasmValidateFunctionInput(function_, input);
   return result === undefined ? null : result;
-}
-
-export function compileFunctionInputMaps(
-  function_: Function,
-  input: InputValue,
-): InputValue[][] | null {
-  const result = wasmCompileFunctionInputMaps(function_, input);
-  if (result === undefined) return null;
-  const unmapped = mapsToRecords(result);
-  return unmapped as InputValue[][];
 }
 
 export function compileFunctionTasks(

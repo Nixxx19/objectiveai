@@ -274,7 +274,7 @@ mod tests {
     };
     use indexmap::IndexMap;
 
-    fn empty_params() -> Params<'static, 'static, 'static> {
+    fn empty_params() -> Params<'static, 'static> {
         Params::Owned(ParamsOwned {
             input: Input::Object(IndexMap::new()),
             output: None,
@@ -293,7 +293,7 @@ mod tests {
 
     fn params_with_object(
         pairs: Vec<(&str, Input)>,
-    ) -> Params<'static, 'static, 'static> {
+    ) -> Params<'static, 'static> {
         let mut map = IndexMap::new();
         for (k, v) in pairs {
             map.insert(k.to_string(), v);

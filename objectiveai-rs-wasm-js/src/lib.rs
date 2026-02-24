@@ -123,46 +123,6 @@ pub fn validateFunctionInput(
     Ok(function.validate_input(&input))
 }
 
-/// Compiles a Function's input_maps expressions for a given input.
-///
-/// Evaluates the `input_maps` expressions to transform the input into a 2D array
-/// that can be referenced by mapped tasks. Each sub-array can be accessed by
-/// tasks via their `map` index.
-///
-/// # Arguments
-///
-/// * `function` - JavaScript object representing a Function definition
-/// * `input` - JavaScript object representing the function input
-///
-/// # Returns
-///
-/// - An array of input arrays if `input_maps` is defined
-/// - `null` if the function has no `input_maps`
-///
-/// # Errors
-///
-/// Returns an error string if expression evaluation fails.
-#[wasm_bindgen]
-pub fn compileFunctionInputMaps(
-    function: JsValue,
-    input: JsValue,
-) -> Result<Option<JsValue>, JsValue> {
-    // deserialize
-    let function: objectiveai::functions::Function =
-        serde_wasm_bindgen::from_value(function)?;
-    let input: objectiveai::functions::expression::Input =
-        serde_wasm_bindgen::from_value(input)?;
-    // compile input maps
-    let input_maps = function
-        .compile_input_maps(&input)
-        .map_err(|e| JsValue::from_str(&e.to_string()))?;
-    // serialize
-    let input_maps: Option<JsValue> = input_maps
-        .map(|maps| serde_wasm_bindgen::to_value(&maps))
-        .transpose()?;
-    Ok(input_maps)
-}
-
 /// Compiles a Function's task expressions for a given input.
 ///
 /// Evaluates all expressions (JMESPath or Starlark) in the function's tasks
@@ -179,7 +139,7 @@ pub fn compileFunctionInputMaps(
 /// An array where each element corresponds to a task definition:
 /// - `null` if the task was skipped (skip expression evaluated to true)
 /// - `{ One: task }` for non-mapped tasks
-/// - `{ Many: [task, ...] }` for mapped tasks (expanded from input_maps)
+/// - `{ Many: [task, ...] }` for mapped tasks (expanded from map expression)
 ///
 /// # Errors
 ///
@@ -440,7 +400,7 @@ pub fn qualityCheckBranchFunction(function: JsValue, children: JsValue) -> Resul
 
 /// Quality check for a leaf scalar function (depth 0, scalar output).
 ///
-/// Validates: no input_maps, only vector.completion tasks, no map,
+/// Validates: only vector.completion tasks, no map,
 /// content parts (not plain strings), messages >= 1, responses >= 2.
 #[wasm_bindgen]
 pub fn qualityCheckLeafScalarFunction(function: JsValue) -> Result<(), JsValue> {
@@ -452,7 +412,7 @@ pub fn qualityCheckLeafScalarFunction(function: JsValue) -> Result<(), JsValue> 
 
 /// Quality check for a leaf vector function (depth 0, vector output).
 ///
-/// Validates: vector input schema, only vector.completion tasks, no map,
+/// Validates: vector input schema, only vector.completion tasks,
 /// content parts, vector field round-trip (output_length/input_split/input_merge).
 #[wasm_bindgen]
 pub fn qualityCheckLeafVectorFunction(function: JsValue) -> Result<(), JsValue> {
@@ -464,7 +424,7 @@ pub fn qualityCheckLeafVectorFunction(function: JsValue) -> Result<(), JsValue> 
 
 /// Quality check for a branch scalar function (depth > 0, scalar output).
 ///
-/// Validates: no input_maps, only scalar-like tasks, no map, no vector.completion,
+/// Validates: only scalar-like tasks, no map, no vector.completion,
 /// example inputs compile and placeholder inputs match schemas.
 #[wasm_bindgen]
 pub fn qualityCheckBranchScalarFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
@@ -482,8 +442,8 @@ pub fn qualityCheckBranchScalarFunction(function: JsValue, children: JsValue) ->
 
 /// Quality check for a branch vector function (depth > 0, vector output).
 ///
-/// Validates: vector input schema, task type/map constraints, single-task-must-be-vector,
-/// <= 50% mapped scalar, vector field round-trip, example input compilation.
+/// Validates: vector input schema, task type/map constraints,
+/// vector field round-trip, example input compilation.
 #[wasm_bindgen]
 pub fn qualityCheckBranchVectorFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
     let function: objectiveai::functions::RemoteFunction =

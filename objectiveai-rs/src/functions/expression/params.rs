@@ -10,17 +10,17 @@ use starlark::values::{Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue
 
 /// Context for evaluating expressions (JMESPath or Starlark).
 ///
-/// Contains all data accessible within expressions: `input`, `tasks`, and `map`.
+/// Contains all data accessible within expressions: `input`, `output`, and `map`.
 #[derive(Debug, Clone, Serialize)]
 #[serde(untagged)]
-pub enum Params<'i, 'to, 'm> {
+pub enum Params<'i, 'to> {
     /// Owned version (for deserialization).
     Owned(ParamsOwned),
     /// Borrowed version (for efficient evaluation).
-    Ref(ParamsRef<'i, 'to, 'm>),
+    Ref(ParamsRef<'i, 'to>),
 }
 
-impl<'de> serde::Deserialize<'de> for Params<'static, 'static, 'static> {
+impl<'de> serde::Deserialize<'de> for Params<'static, 'static> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -37,19 +37,19 @@ pub struct ParamsOwned {
     pub input: super::Input,
     /// Results from executed tasks. Only populated for task output expressions.
     pub output: Option<TaskOutputOwned>,
-    /// Current map element. Only populated for mapped task expressions.
-    pub map: Option<super::Input>,
+    /// Current map index. Only populated for mapped task expressions.
+    pub map: Option<u64>,
 }
 
 /// Borrowed version of expression parameters.
 #[derive(Debug, Clone, Serialize)]
-pub struct ParamsRef<'i, 'to, 'm> {
+pub struct ParamsRef<'i, 'to> {
     /// The function's input data.
     pub input: &'i super::Input,
     /// Results from executed tasks. Only populated for task output expressions.
     pub output: Option<TaskOutput<'to>>,
-    /// Current map element. Only populated for mapped task expressions.
-    pub map: Option<&'m super::Input>,
+    /// Current map index. Only populated for mapped task expressions.
+    pub map: Option<u64>,
 }
 
 /// Output from an executed task.

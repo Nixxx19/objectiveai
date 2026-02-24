@@ -1,8 +1,6 @@
 import z from "zod";
 import {
-  InputMapsExpressionSchema,
   InputSchemaSchema,
-  QualityInputMapsExpressionSchema,
   QualityVectorFunctionInputSchemaSchema,
 } from "./expression/input";
 import {
@@ -20,7 +18,6 @@ import { convert, type JSONSchema } from "../json_schema";
 export const InlineScalarFunctionSchema = z
   .object({
     type: z.literal("scalar.function"),
-    input_maps: InputMapsExpressionSchema.optional().nullable(),
     tasks: TaskExpressionsSchema,
   })
   .describe(
@@ -35,7 +32,6 @@ export const InlineScalarFunctionJsonSchema: JSONSchema = convert(
 export const InlineVectorFunctionSchema = z
   .object({
     type: z.literal("vector.function"),
-    input_maps: InputMapsExpressionSchema.optional().nullable(),
     tasks: TaskExpressionsSchema,
     input_split: ExpressionSchema.optional()
       .nullable()
@@ -139,7 +135,6 @@ export const FunctionJsonSchema: JSONSchema = convert(FunctionSchema);
 
 export const QualityLeafRemoteScalarFunctionSchema =
   RemoteScalarFunctionSchema.extend({
-    input_maps: z.undefined(),
     tasks: QualityLeafScalarTasksExpressionsSchema,
   })
     .describe(RemoteScalarFunctionSchema.description!)
@@ -154,7 +149,6 @@ export const QualityLeafRemoteScalarFunctionJsonSchema: JSONSchema = convert(
 export const QualityLeafRemoteVectorFunctionSchema =
   RemoteVectorFunctionSchema.extend({
     input_schema: QualityVectorFunctionInputSchemaSchema,
-    input_maps: z.undefined(),
     tasks: QualityLeafVectorTasksExpressionsSchema,
   })
     .describe(RemoteVectorFunctionSchema.description!)
@@ -184,7 +178,6 @@ export const QualityLeafRemoteFunctionJsonSchema: JSONSchema = convert(
 
 export const QualityBranchRemoteScalarFunctionSchema =
   RemoteScalarFunctionSchema.extend({
-    input_maps: z.undefined(),
     tasks: QualityBranchScalarFunctionTasksExpressionsSchema,
   })
     .describe(RemoteScalarFunctionSchema.description!)
@@ -199,7 +192,6 @@ export const QualityBranchRemoteScalarFunctionJsonSchema: JSONSchema = convert(
 export const QualityBranchRemoteVectorFunctionSchema =
   RemoteVectorFunctionSchema.extend({
     input_schema: QualityVectorFunctionInputSchemaSchema,
-    input_maps: QualityInputMapsExpressionSchema.optional().nullable(),
     tasks: QualityBranchVectorFunctionTasksExpressionsSchema,
   })
     .describe(RemoteVectorFunctionSchema.description!)

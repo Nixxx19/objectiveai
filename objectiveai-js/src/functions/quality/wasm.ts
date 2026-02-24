@@ -65,7 +65,7 @@ export function checkBranchFunction(
 /**
  * Quality check for a leaf scalar function (depth 0, scalar output).
  *
- * Validates: no input_maps, only vector.completion tasks, no map,
+ * Validates: only vector.completion tasks, no map,
  * content parts (not plain strings), messages >= 1, responses >= 2.
  * Throws a descriptive error string on failure.
  */
@@ -87,7 +87,7 @@ export function checkLeafVectorFunction(func: RemoteFunction): void {
 /**
  * Quality check for a branch scalar function (depth > 0, scalar output).
  *
- * Validates: no input_maps, only scalar-like tasks, no map, no vector.completion,
+ * Validates: only scalar-like tasks, no map, no vector.completion,
  * example inputs compile and placeholder inputs match schemas.
  *
  * @param children - Optional map of `"owner/repository/commit"` → RemoteFunction for

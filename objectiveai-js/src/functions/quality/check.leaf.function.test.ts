@@ -72,11 +72,10 @@ describe("checkLeafFunction", () => {
       type: "scalar.function",
       description: "test",
       input_schema: { type: "string" },
-      input_maps: [{ $starlark: "input" }],
-      tasks: [scalarVcTask()],
+      tasks: [{ ...scalarVcTask(), map: { $starlark: "len(input)" } }],
     };
     expect(() => Functions.Quality.checkLeafFunction(f)).toThrow(
-      /LS02/,
+      /LS04/,
     );
   });
 
