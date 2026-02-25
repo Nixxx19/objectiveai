@@ -28,6 +28,7 @@ mod expression;
 mod input;
 mod params;
 mod runtime;
+mod special;
 mod starlark;
 
 pub use error::*;
@@ -35,4 +36,6 @@ pub use expression::*;
 pub use input::*;
 pub use params::*;
 pub use runtime::*;
+pub use special::{FromSpecial, Special};
+pub(crate) use special::impl_from_special_unsupported;
 pub use starlark::{FromStarlarkValue, ToStarlarkValue};

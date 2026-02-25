@@ -6,7 +6,9 @@
 use super::{ExpressionError, FromStarlarkValue, ToStarlarkValue};
 use crate::vector;
 use serde::{Deserialize, Serialize};
-use starlark::values::{Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue};
+use starlark::values::{
+    Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue,
+};
 
 /// Context for evaluating expressions (JMESPath or Starlark).
 ///
@@ -63,8 +65,10 @@ pub enum TaskOutput<'a> {
 }
 
 impl<'a> super::ToStarlarkValue for TaskOutput<'a> {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
-
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
         match self {
             TaskOutput::Owned(o) => o.to_starlark_value(heap),
             TaskOutput::Ref(r) => r.to_starlark_value(heap),
@@ -97,12 +101,17 @@ pub enum TaskOutputOwned {
 }
 
 impl ToStarlarkValue for TaskOutputOwned {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
         match self {
             TaskOutputOwned::Function(f) => f.to_starlark_value(heap),
             TaskOutputOwned::MapFunction(fs) => fs.to_starlark_value(heap),
             TaskOutputOwned::VectorCompletion(vc) => vc.to_starlark_value(heap),
-            TaskOutputOwned::MapVectorCompletion(vcs) => vcs.to_starlark_value(heap),
+            TaskOutputOwned::MapVectorCompletion(vcs) => {
+                vcs.to_starlark_value(heap)
+            }
         }
     }
 }
@@ -122,12 +131,17 @@ pub enum TaskOutputRef<'a> {
 }
 
 impl<'a> ToStarlarkValue for TaskOutputRef<'a> {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
         match self {
             TaskOutputRef::Function(f) => f.to_starlark_value(heap),
             TaskOutputRef::MapFunction(fs) => fs.to_starlark_value(heap),
             TaskOutputRef::VectorCompletion(vc) => vc.to_starlark_value(heap),
-            TaskOutputRef::MapVectorCompletion(vcs) => vcs.to_starlark_value(heap),
+            TaskOutputRef::MapVectorCompletion(vcs) => {
+                vcs.to_starlark_value(heap)
+            }
         }
     }
 }
@@ -202,8 +216,10 @@ impl From<vector::completions::response::unary::VectorCompletion>
 }
 
 impl ToStarlarkValue for VectorCompletionOutput {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
-
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
         use starlark::values::dict::AllocDict;
         heap.alloc(AllocDict([
             ("votes", self.votes.to_starlark_value(heap)),
@@ -225,11 +241,13 @@ pub enum FunctionOutput {
     Err(serde_json::Value),
 }
 
-impl FunctionOutput {
-}
+impl FunctionOutput {}
 
 impl ToStarlarkValue for FunctionOutput {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
         match self {
             FunctionOutput::Scalar(d) => d.to_starlark_value(heap),
             FunctionOutput::Vector(ds) => ds.to_starlark_value(heap),
@@ -239,21 +257,29 @@ impl ToStarlarkValue for FunctionOutput {
 }
 
 impl FromStarlarkValue for FunctionOutput {
-    fn from_starlark_value(value: &StarlarkValue) -> Result<Self, ExpressionError> {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         use starlark::values::float::UnpackFloat;
         if value.is_none() {
             return Ok(FunctionOutput::Err(serde_json::Value::Null));
         }
-        if let Some(list) = starlark::values::list::ListRef::from_value(*value) {
+        if let Some(list) = starlark::values::list::ListRef::from_value(*value)
+        {
             let mut decimals = Vec::with_capacity(list.len());
             let mut all_numeric = true;
             for v in list.iter() {
                 if let Ok(Some(i)) = i64::unpack_value(v) {
                     decimals.push(rust_decimal::Decimal::from(i));
-                } else if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(v) {
+                } else if let Ok(Some(UnpackFloat(f))) =
+                    UnpackFloat::unpack_value(v)
+                {
                     match rust_decimal::Decimal::try_from(f) {
                         Ok(d) => decimals.push(d),
-                        Err(_) => { all_numeric = false; break; }
+                        Err(_) => {
+                            all_numeric = false;
+                            break;
+                        }
                     }
                 } else {
                     all_numeric = false;
@@ -274,6 +300,165 @@ impl FromStarlarkValue for FunctionOutput {
         }
         let v = serde_json::Value::from_starlark_value(value)?;
         Ok(FunctionOutput::Err(v))
+    }
+}
+
+impl super::FromSpecial for FunctionOutput {
+    fn from_special(
+        special: &super::Special,
+        params: &super::Params,
+    ) -> Result<Self, super::ExpressionError> {
+        match special {
+            super::Special::Output => {
+                let output = params_output(params)?;
+                match output {
+                    TaskOutputBorrow::Owned(TaskOutputOwned::Function(fo)) => {
+                        Ok(fo.clone())
+                    }
+                    TaskOutputBorrow::Ref(TaskOutputRef::Function(fo)) => {
+                        Ok((*fo).clone())
+                    }
+                    other => Ok(FunctionOutput::Err(
+                        serde_json::to_value(other).unwrap(),
+                    )),
+                }
+            }
+            super::Special::L1NormalizedFunctionOutput => {
+                let output = params_output(params)?;
+                match output {
+                    TaskOutputBorrow::Owned(TaskOutputOwned::Function(
+                        FunctionOutput::Vector(v),
+                    )) => Ok(FunctionOutput::Vector(l1_normalize(v))),
+                    TaskOutputBorrow::Ref(TaskOutputRef::Function(
+                        FunctionOutput::Vector(v),
+                    )) => Ok(FunctionOutput::Vector(l1_normalize(v))),
+                    TaskOutputBorrow::Owned(TaskOutputOwned::MapFunction(
+                        fos,
+                    )) => match extract_scalars(fos.iter()) {
+                        Some(scalars) => {
+                            Ok(FunctionOutput::Vector(l1_normalize(&scalars)))
+                        }
+                        None => Ok(FunctionOutput::Err(
+                            serde_json::to_value(fos).unwrap(),
+                        )),
+                    },
+                    TaskOutputBorrow::Ref(TaskOutputRef::MapFunction(fos)) => {
+                        match extract_scalars(fos.iter()) {
+                            Some(scalars) => Ok(FunctionOutput::Vector(
+                                l1_normalize(&scalars),
+                            )),
+                            None => Ok(FunctionOutput::Err(
+                                serde_json::to_value(fos).unwrap(),
+                            )),
+                        }
+                    }
+                    TaskOutputBorrow::Owned(TaskOutputOwned::Function(fo)) => {
+                        Ok(fo.clone())
+                    }
+                    TaskOutputBorrow::Ref(TaskOutputRef::Function(fo)) => {
+                        Ok((*fo).clone())
+                    }
+                    _ => Err(super::ExpressionError::UnsupportedSpecial),
+                }
+            }
+            super::Special::VectorCompletionScores => {
+                let output = params_output(params)?;
+                match output {
+                    TaskOutputBorrow::Owned(
+                        TaskOutputOwned::VectorCompletion(vc),
+                    ) => Ok(FunctionOutput::Vector(vc.scores.clone())),
+                    TaskOutputBorrow::Ref(TaskOutputRef::VectorCompletion(
+                        vc,
+                    )) => Ok(FunctionOutput::Vector(vc.scores.clone())),
+                    _ => Err(super::ExpressionError::UnsupportedSpecial),
+                }
+            }
+            super::Special::VectorCompletionScoresWeightedSum => {
+                let output = params_output(params)?;
+                let scores = match output {
+                    TaskOutputBorrow::Owned(
+                        TaskOutputOwned::VectorCompletion(vc),
+                    ) => &vc.scores,
+                    TaskOutputBorrow::Ref(TaskOutputRef::VectorCompletion(
+                        vc,
+                    )) => &vc.scores,
+                    _ => {
+                        return Err(super::ExpressionError::UnsupportedSpecial);
+                    }
+                };
+                let len = scores.len();
+                if len <= 1 {
+                    let sum: rust_decimal::Decimal = scores.iter().sum();
+                    return Ok(FunctionOutput::Scalar(sum));
+                }
+                let mut weighted_sum = rust_decimal::Decimal::ZERO;
+                let last = len - 1;
+                for (i, score) in scores.iter().enumerate() {
+                    let weight = rust_decimal::Decimal::from(i)
+                        / rust_decimal::Decimal::from(last);
+                    weighted_sum += score * weight;
+                }
+                Ok(FunctionOutput::Scalar(weighted_sum))
+            }
+            _ => Err(super::ExpressionError::UnsupportedSpecial),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize)]
+#[serde(untagged)]
+enum TaskOutputBorrow<'a> {
+    Owned(&'a TaskOutputOwned),
+    Ref(&'a TaskOutputRef<'a>),
+}
+
+fn params_output<'a>(
+    params: &'a super::Params,
+) -> Result<TaskOutputBorrow<'a>, super::ExpressionError> {
+    match params {
+        super::Params::Owned(o) => o
+            .output
+            .as_ref()
+            .map(TaskOutputBorrow::Owned)
+            .ok_or(super::ExpressionError::UnsupportedSpecial),
+        super::Params::Ref(r) => match &r.output {
+            Some(TaskOutput::Owned(o)) => Ok(TaskOutputBorrow::Owned(o)),
+            Some(TaskOutput::Ref(r)) => Ok(TaskOutputBorrow::Ref(r)),
+            None => Err(super::ExpressionError::UnsupportedSpecial),
+        },
+    }
+}
+
+/// Extract scalars from function outputs, treating non-scalars as zero.
+/// Returns `None` if ALL outputs are non-scalar.
+fn extract_scalars<'a>(
+    fos: impl Iterator<Item = &'a FunctionOutput>,
+) -> Option<Vec<rust_decimal::Decimal>> {
+    let mut scalars = Vec::new();
+    let mut any_scalar = false;
+    for fo in fos {
+        match fo {
+            FunctionOutput::Scalar(d) => {
+                scalars.push(*d);
+                any_scalar = true;
+            }
+            _ => scalars.push(rust_decimal::Decimal::ZERO),
+        }
+    }
+    if any_scalar { Some(scalars) } else { None }
+}
+
+fn l1_normalize(v: &[rust_decimal::Decimal]) -> Vec<rust_decimal::Decimal> {
+    if v.is_empty() {
+        return Vec::new();
+    }
+    let sum: rust_decimal::Decimal = v.iter().map(|d| d.abs()).sum();
+    if sum.is_zero() {
+        let uniform =
+            rust_decimal::Decimal::ONE / rust_decimal::Decimal::from(v.len());
+        vec![uniform; v.len()]
+    } else {
+        v.iter().map(|d| d / sum).collect()
     }
 }
 

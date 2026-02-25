@@ -1072,3 +1072,124 @@ impl FileInputSchema {
         }
     }
 }
+
+impl super::FromSpecial for Input {
+    fn from_special(
+        special: &super::Special,
+        params: &super::Params,
+    ) -> Result<Self, super::ExpressionError> {
+        match special {
+            super::Special::Input => {
+                let input = match params {
+                    super::Params::Owned(o) => &o.input,
+                    super::Params::Ref(r) => r.input,
+                };
+                Ok(input.clone())
+            }
+            super::Special::InputItemsOptionalContextMerge => {
+                // Expects input to be an array of objects, each with 'items' (array)
+                // and optionally 'context'. Merges all items into one array and takes
+                // context from the first element.
+                let input = match params {
+                    super::Params::Owned(o) => &o.input,
+                    super::Params::Ref(r) => r.input,
+                };
+                let Input::Array(arr) = input else {
+                    return Err(super::ExpressionError::UnsupportedSpecial);
+                };
+                let mut merged_items = Vec::new();
+                let mut context = None;
+                for (i, elem) in arr.iter().enumerate() {
+                    let Input::Object(obj) = elem else {
+                        return Err(super::ExpressionError::UnsupportedSpecial);
+                    };
+                    if let Some(Input::Array(items)) = obj.get("items") {
+                        merged_items.extend(items.iter().cloned());
+                    }
+                    if i == 0 {
+                        context = obj.get("context").cloned();
+                    }
+                }
+                let mut result = IndexMap::new();
+                result.insert("items".to_string(), Input::Array(merged_items));
+                if let Some(ctx) = context {
+                    result.insert("context".to_string(), ctx);
+                }
+                Ok(Input::Object(result))
+            }
+            _ => Err(super::ExpressionError::UnsupportedSpecial),
+        }
+    }
+}
+
+impl super::FromSpecial for Vec<Input> {
+    fn from_special(
+        special: &super::Special,
+        params: &super::Params,
+    ) -> Result<Self, super::ExpressionError> {
+        match special {
+            super::Special::InputItemsOptionalContextSplit => {
+                // Expects input to be an object with 'items' (array) and optionally
+                // 'context'. Returns an array of objects, each with a 1-element 'items'
+                // array and a duplicated 'context' if present.
+                let input = match params {
+                    super::Params::Owned(o) => &o.input,
+                    super::Params::Ref(r) => r.input,
+                };
+                let Input::Object(obj) = input else {
+                    return Err(super::ExpressionError::UnsupportedSpecial);
+                };
+                let Some(Input::Array(items)) = obj.get("items") else {
+                    return Err(super::ExpressionError::UnsupportedSpecial);
+                };
+                let context = obj.get("context");
+                let mut result = Vec::with_capacity(items.len());
+                for item in items {
+                    let mut sub = IndexMap::new();
+                    sub.insert("items".to_string(), Input::Array(vec![item.clone()]));
+                    if let Some(ctx) = context {
+                        sub.insert("context".to_string(), ctx.clone());
+                    }
+                    result.push(Input::Object(sub));
+                }
+                Ok(result)
+            }
+            _ => Err(super::ExpressionError::UnsupportedSpecial),
+        }
+    }
+}
+
+impl super::FromSpecial for InputExpression {
+    fn from_special(
+        special: &super::Special,
+        params: &super::Params,
+    ) -> Result<Self, super::ExpressionError> {
+        let input = Input::from_special(special, params)?;
+        Ok(input_to_input_expression(input))
+    }
+}
+
+fn input_to_input_expression(input: Input) -> InputExpression {
+    match input {
+        Input::RichContentPart(p) => InputExpression::RichContentPart(p),
+        Input::Object(map) => InputExpression::Object(
+            map.into_iter()
+                .map(|(k, v)| {
+                    (
+                        k,
+                        super::WithExpression::Value(input_to_input_expression(v)),
+                    )
+                })
+                .collect(),
+        ),
+        Input::Array(arr) => InputExpression::Array(
+            arr.into_iter()
+                .map(|v| super::WithExpression::Value(input_to_input_expression(v)))
+                .collect(),
+        ),
+        Input::String(s) => InputExpression::String(s),
+        Input::Integer(i) => InputExpression::Integer(i),
+        Input::Number(n) => InputExpression::Number(n),
+        Input::Boolean(b) => InputExpression::Boolean(b),
+    }
+}

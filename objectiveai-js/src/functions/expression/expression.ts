@@ -21,9 +21,30 @@ export const StarlarkExpressionSchema = z
 export type StarlarkExpression = z.infer<typeof StarlarkExpressionSchema>;
 export const StarlarkExpressionJsonSchema: JSONSchema = convert(StarlarkExpressionSchema);
 
+export const SpecialExpressionSchema = z
+  .object({
+    $special: z
+      .enum([
+        "input",
+        "output",
+        "l1_normalized_function_output",
+        "input_items_output_length",
+        "input_items_optional_context_split",
+        "input_items_optional_context_merge",
+        "vector_completion_scores",
+        "vector_completion_scores_weighted_sum",
+      ])
+      .describe("A predefined special expression variant."),
+  })
+  .strict()
+  .describe("A special predefined expression.")
+  .meta({ title: "SpecialExpression" });
+export type SpecialExpression = z.infer<typeof SpecialExpressionSchema>;
+export const SpecialExpressionJsonSchema: JSONSchema = convert(SpecialExpressionSchema);
+
 export const ExpressionSchema = z
-  .union([JMESPathExpressionSchema, StarlarkExpressionSchema])
-  .describe("An expression (JMESPath or Starlark) which evaluates to a value.")
+  .union([JMESPathExpressionSchema, StarlarkExpressionSchema, SpecialExpressionSchema])
+  .describe("An expression (JMESPath, Starlark, or Special) which evaluates to a value.")
   .meta({ title: "Expression" });
 export type Expression = z.infer<typeof ExpressionSchema>;
 export const ExpressionJsonSchema: JSONSchema = convert(ExpressionSchema);

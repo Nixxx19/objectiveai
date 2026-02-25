@@ -1,6 +1,7 @@
 //! Core expression types for JMESPath and Starlark evaluation.
 
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use super::special::FromSpecial;
+use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 /// Result of an expression that may produce one or many values.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +34,8 @@ pub enum Expression {
     JMESPath(String),
     /// A Starlark expression.
     Starlark(String),
+    /// A predefined special expression variant.
+    Special(super::Special),
 }
 
 impl Serialize for Expression {
@@ -43,8 +46,15 @@ impl Serialize for Expression {
         use serde::ser::SerializeMap;
         let mut map = serializer.serialize_map(Some(1))?;
         match self {
-            Expression::JMESPath(expr) => map.serialize_entry("$jmespath", expr)?,
-            Expression::Starlark(expr) => map.serialize_entry("$starlark", expr)?,
+            Expression::JMESPath(expr) => {
+                map.serialize_entry("$jmespath", expr)?
+            }
+            Expression::Starlark(expr) => {
+                map.serialize_entry("$starlark", expr)?
+            }
+            Expression::Special(special) => {
+                map.serialize_entry("$special", special)?
+            }
         }
         map.end()
     }
@@ -65,7 +75,7 @@ impl<'de> Deserialize<'de> for Expression {
 
             fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
                 formatter.write_str(
-                    "a map with exactly one key '$jmespath' or '$starlark' containing a string",
+                    "a map with exactly one key '$jmespath', '$starlark', or '$special'",
                 )
             }
 
@@ -80,8 +90,24 @@ impl<'de> Deserialize<'de> for Expression {
                     ));
                 };
 
-                // Get the string value
-                let expr: String = map.next_value()?;
+                let result = match key.as_str() {
+                    "$jmespath" => {
+                        let expr: String = map.next_value()?;
+                        Ok(Expression::JMESPath(expr))
+                    }
+                    "$starlark" => {
+                        let expr: String = map.next_value()?;
+                        Ok(Expression::Starlark(expr))
+                    }
+                    "$special" => {
+                        let special: super::Special = map.next_value()?;
+                        Ok(Expression::Special(special))
+                    }
+                    other => Err(de::Error::custom(format!(
+                        "expected '$jmespath', '$starlark', or '$special', found '{}'",
+                        other
+                    ))),
+                };
 
                 // Ensure there are no more keys
                 if map.next_key::<String>()?.is_some() {
@@ -90,14 +116,7 @@ impl<'de> Deserialize<'de> for Expression {
                     ));
                 }
 
-                match key.as_str() {
-                    "$jmespath" => Ok(Expression::JMESPath(expr)),
-                    "$starlark" => Ok(Expression::Starlark(expr)),
-                    other => Err(de::Error::custom(format!(
-                        "expected '$jmespath' or '$starlark', found '{}'",
-                        other
-                    ))),
-                }
+                result
             }
         }
 
@@ -116,7 +135,9 @@ impl Expression {
         params: &super::Params,
     ) -> Result<OneOrMany<T>, super::ExpressionError>
     where
-        T: DeserializeOwned + super::starlark::FromStarlarkValue,
+        T: DeserializeOwned
+            + super::starlark::FromStarlarkValue
+            + super::special::FromSpecial,
     {
         match self {
             Expression::JMESPath(jmespath) => {
@@ -126,13 +147,18 @@ impl Expression {
                 Self::deserialize_result(json)
             }
             Expression::Starlark(starlark) => {
-                super::starlark::starlark_eval_one_or_many::<T>(starlark, params)
+                OneOrMany::<T>::from_starlark(starlark, params)
+            }
+            Expression::Special(special) => {
+                OneOrMany::<T>::from_special(special, params)
             }
         }
     }
 
     /// Deserialize expression result to the expected type.
-    fn deserialize_result<T>(value: serde_json::Value) -> Result<OneOrMany<T>, super::ExpressionError>
+    fn deserialize_result<T>(
+        value: serde_json::Value,
+    ) -> Result<OneOrMany<T>, super::ExpressionError>
     where
         T: DeserializeOwned,
     {
@@ -165,12 +191,16 @@ impl Expression {
         params: &super::Params,
     ) -> Result<T, super::ExpressionError>
     where
-        T: DeserializeOwned + super::starlark::FromStarlarkValue,
+        T: DeserializeOwned
+            + super::starlark::FromStarlarkValue
+            + super::special::FromSpecial,
     {
         let result = self.compile_one_or_many(params)?;
         match result {
             OneOrMany::One(value) => Ok(value),
-            OneOrMany::Many(_) => Err(super::ExpressionError::ExpectedOneValueFoundMany),
+            OneOrMany::Many(_) => {
+                Err(super::ExpressionError::ExpectedOneValueFoundMany)
+            }
         }
     }
 }
@@ -217,7 +247,9 @@ where
 
 impl<T> WithExpression<T>
 where
-    T: DeserializeOwned + super::starlark::FromStarlarkValue,
+    T: DeserializeOwned
+        + super::starlark::FromStarlarkValue
+        + super::special::FromSpecial,
 {
     /// Compiles the value, allowing array results from expressions.
     ///
@@ -260,17 +292,32 @@ impl<T: super::starlark::FromStarlarkValue> super::starlark::FromStarlarkValue
     }
 }
 
+impl<T: super::special::FromSpecial> FromSpecial
+    for super::expression::WithExpression<T>
+{
+    fn from_special(
+        special: &super::special::Special,
+        params: &super::Params,
+    ) -> Result<Self, super::ExpressionError> {
+        Ok(super::expression::WithExpression::Value(T::from_special(
+            special, params,
+        )?))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use crate::chat::completions::request::{
-        AssistantToolCallExpression, AssistantToolCallFunctionExpression,
-        File, FunctionToolExpression, ImageUrl, InputAudio, MessageExpression,
-        RichContentExpression, RichContentPartExpression, SimpleContentExpression,
-        SimpleContentPartExpression, ToolExpression, ValueExpression, VideoUrl,
+        AssistantToolCallExpression, AssistantToolCallFunctionExpression, File,
+        FunctionToolExpression, ImageUrl, InputAudio, MessageExpression,
+        RichContentExpression, RichContentPartExpression,
+        SimpleContentExpression, SimpleContentPartExpression, ToolExpression,
+        ValueExpression, VideoUrl,
     };
     use crate::functions::expression::{
-        ExpressionError, FunctionOutput, Input, InputExpression, Params, ParamsOwned,
+        ExpressionError, FunctionOutput, Input, InputExpression, Params,
+        ParamsOwned,
     };
     use indexmap::IndexMap;
 
@@ -282,7 +329,11 @@ mod tests {
         })
     }
 
-    fn starlark_one<T: serde::de::DeserializeOwned + crate::functions::expression::starlark::FromStarlarkValue>(
+    fn starlark_one<
+        T: serde::de::DeserializeOwned
+            + crate::functions::expression::starlark::FromStarlarkValue
+            + crate::functions::expression::FromSpecial,
+    >(
         code: &str,
         params: &Params,
     ) -> T {
@@ -342,7 +393,8 @@ mod tests {
 
         // Single null becomes an empty Many
         let expr_null = Expression::Starlark("None".to_string());
-        let result: OneOrMany<i64> = expr_null.compile_one_or_many(&params).unwrap();
+        let result: OneOrMany<i64> =
+            expr_null.compile_one_or_many(&params).unwrap();
         match result {
             OneOrMany::Many(values) => assert!(values.is_empty()),
             other => panic!("expected Many([]), got {:?}", other),
@@ -350,7 +402,8 @@ mod tests {
 
         // Array with nulls filters them out
         let expr_array = Expression::Starlark("[1, None, 3]".to_string());
-        let result: OneOrMany<i64> = expr_array.compile_one_or_many(&params).unwrap();
+        let result: OneOrMany<i64> =
+            expr_array.compile_one_or_many(&params).unwrap();
         match result {
             OneOrMany::Many(values) => assert_eq!(values, vec![1, 3]),
             other => panic!("expected Many([1, 3]), got {:?}", other),
@@ -365,7 +418,9 @@ mod tests {
         let err = expr.compile_one::<i64>(&params).unwrap_err();
         match err {
             ExpressionError::ExpectedOneValueFoundMany => {}
-            other => panic!("expected ExpectedOneValueFoundMany, got {:?}", other),
+            other => {
+                panic!("expected ExpectedOneValueFoundMany, got {:?}", other)
+            }
         }
     }
 
@@ -400,15 +455,16 @@ mod tests {
         ]);
 
         // compile_one with scalar output
-        let with_scalar =
-            WithExpression::Expression::<i64>(Expression::Starlark("input['value']".to_string()));
+        let with_scalar = WithExpression::Expression::<i64>(
+            Expression::Starlark("input['value']".to_string()),
+        );
         let scalar = with_scalar.compile_one(&params).unwrap();
         assert_eq!(scalar, 42);
 
         // compile_one_or_many with array output
-        let with_many = WithExpression::Expression::<i64>(Expression::Starlark(
-            "input['values']".to_string(),
-        ));
+        let with_many = WithExpression::Expression::<i64>(
+            Expression::Starlark("input['values']".to_string()),
+        );
         let result = with_many.compile_one_or_many(&params).unwrap();
         match result {
             OneOrMany::Many(values) => assert_eq!(values, vec![1, 2, 3]),
@@ -477,7 +533,9 @@ mod tests {
             InputExpression::Object(obj) => {
                 assert!(obj.contains_key("k"));
             }
-            other => panic!("expected InputExpression::Object, got {:?}", other),
+            other => {
+                panic!("expected InputExpression::Object, got {:?}", other)
+            }
         }
 
         let ve: ValueExpression = starlark_one("{\"x\": 1}", &params);
@@ -485,7 +543,9 @@ mod tests {
             ValueExpression::Object(map) => {
                 assert!(map.contains_key("x"));
             }
-            other => panic!("expected ValueExpression::Object, got {:?}", other),
+            other => {
+                panic!("expected ValueExpression::Object, got {:?}", other)
+            }
         }
     }
 
@@ -509,7 +569,10 @@ mod tests {
             starlark_one("{\"type\": \"text\", \"text\": \"hi\"}", &params);
         match rcp {
             RichContentPartExpression::Text { .. } => {}
-            other => panic!("expected RichContentPartExpression::Text, got {:?}", other),
+            other => panic!(
+                "expected RichContentPartExpression::Text, got {:?}",
+                other
+            ),
         }
     }
 
@@ -517,13 +580,18 @@ mod tests {
     fn expression_outputs_rich_media_structs() {
         let params = empty_params();
 
-        let image: ImageUrl = starlark_one("{\"url\": \"https://example.com/img.png\"}", &params);
+        let image: ImageUrl =
+            starlark_one("{\"url\": \"https://example.com/img.png\"}", &params);
         assert_eq!(image.url, "https://example.com/img.png");
 
-        let audio: InputAudio = starlark_one("{\"data\": \"BASE64\", \"format\": \"wav\"}", &params);
+        let audio: InputAudio = starlark_one(
+            "{\"data\": \"BASE64\", \"format\": \"wav\"}",
+            &params,
+        );
         assert_eq!(audio.format, "wav");
 
-        let video: VideoUrl = starlark_one("{\"url\": \"https://example.com/v.mp4\"}", &params);
+        let video: VideoUrl =
+            starlark_one("{\"url\": \"https://example.com/v.mp4\"}", &params);
         assert_eq!(video.url, "https://example.com/v.mp4");
 
         let file: File = starlark_one("{\"file_id\": \"file_123\"}", &params);
@@ -538,7 +606,9 @@ mod tests {
             starlark_one("{\"role\": \"user\", \"content\": \"hi\"}", &params);
         match msg {
             MessageExpression::User(_) => {}
-            other => panic!("expected MessageExpression::User, got {:?}", other),
+            other => {
+                panic!("expected MessageExpression::User, got {:?}", other)
+            }
         }
 
         let messages: Vec<WithExpression<MessageExpression>> = starlark_one(
@@ -569,13 +639,17 @@ mod tests {
 
         let fte: FunctionToolExpression =
             starlark_one("{\"name\": \"do_thing\"}", &params);
-        assert!(matches!(fte.name, WithExpression::Value(ref s) if s == "do_thing"));
+        assert!(
+            matches!(fte.name, WithExpression::Value(ref s) if s == "do_thing")
+        );
 
         let atcf: AssistantToolCallFunctionExpression = starlark_one(
             "{\"name\": \"do_thing\", \"arguments\": \"{}\"}",
             &params,
         );
-        assert!(matches!(atcf.name, WithExpression::Value(ref s) if s == "do_thing"));
+        assert!(
+            matches!(atcf.name, WithExpression::Value(ref s) if s == "do_thing")
+        );
 
         let atc: AssistantToolCallExpression = starlark_one(
             "{\"type\": \"function\", \"id\": \"call_1\", \"function\": {\"name\": \"do_thing\", \"arguments\": \"{}\"}}",
@@ -585,10 +659,11 @@ mod tests {
             AssistantToolCallExpression::Function { .. } => {}
         }
 
-        let atcs: Vec<WithExpression<AssistantToolCallExpression>> = starlark_one(
-            "[{\"type\": \"function\", \"id\": \"call_1\", \"function\": {\"name\": \"do_thing\", \"arguments\": \"{}\"}}]",
-            &params,
-        );
+        let atcs: Vec<WithExpression<AssistantToolCallExpression>> =
+            starlark_one(
+                "[{\"type\": \"function\", \"id\": \"call_1\", \"function\": {\"name\": \"do_thing\", \"arguments\": \"{}\"}}]",
+                &params,
+            );
         assert_eq!(atcs.len(), 1);
     }
 
@@ -609,4 +684,3 @@ mod tests {
         }
     }
 }
-

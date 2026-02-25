@@ -393,3 +393,20 @@ impl FromStarlarkValue for ValueExpression {
         )))
     }
 }
+
+crate::functions::expression::impl_from_special_unsupported!(
+    ToolExpression,
+    FunctionToolExpression,
+    ValueExpression,
+);
+
+impl crate::functions::expression::FromSpecial
+    for Vec<crate::functions::expression::WithExpression<ToolExpression>>
+{
+    fn from_special(
+        _special: &crate::functions::expression::Special,
+        _params: &crate::functions::expression::Params,
+    ) -> Result<Self, crate::functions::expression::ExpressionError> {
+        Err(crate::functions::expression::ExpressionError::UnsupportedSpecial)
+    }
+}
