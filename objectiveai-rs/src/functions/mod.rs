@@ -38,7 +38,8 @@
 //! - [`expression`] - Expression evaluation engine (JMESPath and Starlark)
 //! - [`profiles`] - Profile management and computation
 
-pub mod alpha;
+pub mod alpha_scalar;
+pub mod alpha_vector;
 pub mod executions;
 pub mod expression;
 mod function;
