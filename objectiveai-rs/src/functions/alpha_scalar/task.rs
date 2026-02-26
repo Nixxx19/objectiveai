@@ -113,12 +113,8 @@ impl ScalarFunctionTaskExpression {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlaceholderScalarFunctionTaskExpression {
-    pub depth: u64,
-    pub min_branch_width: u64,
-    pub max_branch_width: u64,
-    pub min_leaf_width: u64,
-    pub max_leaf_width: u64,
-    pub spec: String,
+    #[serde(flatten)]
+    pub params: functions::inventions::Params,
     pub input_schema: super::expression::ScalarFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
@@ -166,12 +162,14 @@ impl PartialPlaceholderScalarFunctionTaskExpression {
         max_leaf_width: u64,
     ) -> PlaceholderScalarFunctionTaskExpression {
         PlaceholderScalarFunctionTaskExpression {
-            depth,
-            min_branch_width,
-            max_branch_width,
-            min_leaf_width,
-            max_leaf_width,
-            spec: self.spec,
+            params: functions::inventions::Params {
+                depth,
+                min_branch_width,
+                max_branch_width,
+                min_leaf_width,
+                max_leaf_width,
+                spec: self.spec,
+            },
             input_schema: self.input_schema,
             skip: self.skip,
             input: self.input,

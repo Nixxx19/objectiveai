@@ -175,12 +175,14 @@ fn valid_single_placeholder_scalar() {
         },
         tasks: vec![BranchTaskExpression::PlaceholderScalarFunction(
             PlaceholderScalarFunctionTaskExpression {
-                depth: 1,
-                min_branch_width: 1,
-                max_branch_width: 3,
-                min_leaf_width: 1,
-                max_leaf_width: 5,
-                spec: "test spec".to_string(),
+                params: crate::functions::inventions::Params {
+                    depth: 1,
+                    min_branch_width: 1,
+                    max_branch_width: 3,
+                    min_leaf_width: 1,
+                    max_leaf_width: 5,
+                    spec: "test spec".to_string(),
+                },
                 input_schema: ObjectInputSchema {
                     description: None,
                     properties: index_map! {
@@ -226,12 +228,14 @@ fn valid_multiple_tasks() {
             }),
             BranchTaskExpression::PlaceholderScalarFunction(
                 PlaceholderScalarFunctionTaskExpression {
-                    depth: 1,
-                    min_branch_width: 1,
-                    max_branch_width: 3,
-                    min_leaf_width: 1,
-                    max_leaf_width: 5,
-                    spec: "test spec".to_string(),
+                    params: crate::functions::inventions::Params {
+                        depth: 1,
+                        min_branch_width: 1,
+                        max_branch_width: 3,
+                        min_leaf_width: 1,
+                        max_leaf_width: 5,
+                        spec: "test spec".to_string(),
+                    },
                     input_schema: ObjectInputSchema {
                         description: None,
                         properties: index_map! {
@@ -516,12 +520,14 @@ fn scalar_diversity_pass_placeholder_with_transform() {
         tasks: vec![
             BranchTaskExpression::PlaceholderScalarFunction(
                 PlaceholderScalarFunctionTaskExpression {
-                    depth: 1,
-                    min_branch_width: 1,
-                    max_branch_width: 3,
-                    min_leaf_width: 1,
-                    max_leaf_width: 5,
-                    spec: "test spec".to_string(),
+                    params: crate::functions::inventions::Params {
+                        depth: 1,
+                        min_branch_width: 1,
+                        max_branch_width: 3,
+                        min_leaf_width: 1,
+                        max_leaf_width: 5,
+                        spec: "test spec".to_string(),
+                    },
                     input_schema: ObjectInputSchema {
                         description: None,
                         properties: index_map! {
@@ -540,12 +546,14 @@ fn scalar_diversity_pass_placeholder_with_transform() {
             ),
             BranchTaskExpression::PlaceholderScalarFunction(
                 PlaceholderScalarFunctionTaskExpression {
-                    depth: 1,
-                    min_branch_width: 1,
-                    max_branch_width: 3,
-                    min_leaf_width: 1,
-                    max_leaf_width: 5,
-                    spec: "test spec".to_string(),
+                    params: crate::functions::inventions::Params {
+                        depth: 1,
+                        min_branch_width: 1,
+                        max_branch_width: 3,
+                        min_leaf_width: 1,
+                        max_leaf_width: 5,
+                        spec: "test spec".to_string(),
+                    },
                     input_schema: ObjectInputSchema {
                         description: None,
                         properties: index_map! {
@@ -845,12 +853,14 @@ fn placeholder_field_validation_single_permutation() {
             }),
             BranchTaskExpression::PlaceholderScalarFunction(
                 PlaceholderScalarFunctionTaskExpression {
-                    depth: 1,
-                    min_branch_width: 1,
-                    max_branch_width: 3,
-                    min_leaf_width: 1,
-                    max_leaf_width: 5,
-                    spec: "test spec".to_string(),
+                    params: crate::functions::inventions::Params {
+                        depth: 1,
+                        min_branch_width: 1,
+                        max_branch_width: 3,
+                        min_leaf_width: 1,
+                        max_leaf_width: 5,
+                        spec: "test spec".to_string(),
+                    },
                     input_schema: ObjectInputSchema {
                         description: None,
                         properties: index_map! {
