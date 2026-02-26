@@ -35,6 +35,15 @@ impl BranchTaskExpression {
             }
         }
     }
+
+    pub fn is_placeholder(&self) -> bool {
+        match self {
+            BranchTaskExpression::ScalarFunction(_) => false,
+            BranchTaskExpression::VectorFunction(_) => false,
+            BranchTaskExpression::PlaceholderScalarFunction(_) => true,
+            BranchTaskExpression::PlaceholderVectorFunction(_) => true,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

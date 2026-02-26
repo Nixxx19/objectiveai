@@ -81,22 +81,10 @@ impl Function {
     > {
         // extract task expressions
         let task_exprs = match self {
-            Function::Remote(RemoteFunction::Scalar {
-                tasks,
-                ..
-            }) => tasks,
-            Function::Remote(RemoteFunction::Vector {
-                tasks,
-                ..
-            }) => tasks,
-            Function::Inline(InlineFunction::Scalar {
-                tasks,
-                ..
-            }) => tasks,
-            Function::Inline(InlineFunction::Vector {
-                tasks,
-                ..
-            }) => tasks,
+            Function::Remote(RemoteFunction::Scalar { tasks, .. }) => tasks,
+            Function::Remote(RemoteFunction::Vector { tasks, .. }) => tasks,
+            Function::Inline(InlineFunction::Scalar { tasks, .. }) => tasks,
+            Function::Inline(InlineFunction::Vector { tasks, .. }) => tasks,
         };
 
         // prepare params for compiling expressions
@@ -423,9 +411,7 @@ impl Function {
     }
 
     /// Returns the function's expected output length expression, if defined.
-    pub fn output_length(
-        &self,
-    ) -> Option<&super::expression::Expression> {
+    pub fn output_length(&self) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => {
                 remote_function.output_length()
@@ -435,9 +421,7 @@ impl Function {
     }
 
     /// Returns the function's input_split expression, if defined.
-    pub fn input_split(
-        &self,
-    ) -> Option<&super::expression::Expression> {
+    pub fn input_split(&self) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => remote_function.input_split(),
             Function::Inline(inline_function) => inline_function.input_split(),
@@ -445,9 +429,7 @@ impl Function {
     }
 
     /// Returns the function's input_merge expression, if defined.
-    pub fn input_merge(
-        &self,
-    ) -> Option<&super::expression::Expression> {
+    pub fn input_merge(&self) -> Option<&super::expression::Expression> {
         match self {
             Function::Remote(remote_function) => remote_function.input_merge(),
             Function::Inline(inline_function) => inline_function.input_merge(),
@@ -529,9 +511,7 @@ impl RemoteFunction {
     }
 
     /// Returns the function's expected output length, if defined (vector functions only).
-    pub fn output_length(
-        &self,
-    ) -> Option<&super::expression::Expression> {
+    pub fn output_length(&self) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { output_length, .. } => Some(output_length),
@@ -539,9 +519,7 @@ impl RemoteFunction {
     }
 
     /// Returns the function's input_split expression, if defined (vector functions only).
-    pub fn input_split(
-        &self,
-    ) -> Option<&super::expression::Expression> {
+    pub fn input_split(&self) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { input_split, .. } => Some(input_split),
@@ -549,9 +527,7 @@ impl RemoteFunction {
     }
 
     /// Returns the function's input_merge expression, if defined (vector functions only).
-    pub fn input_merge(
-        &self,
-    ) -> Option<&super::expression::Expression> {
+    pub fn input_merge(&self) -> Option<&super::expression::Expression> {
         match self {
             RemoteFunction::Scalar { .. } => None,
             RemoteFunction::Vector { input_merge, .. } => Some(input_merge),
@@ -608,9 +584,7 @@ impl InlineFunction {
     }
 
     /// Returns the function's input_split expression, if defined (vector functions only).
-    pub fn input_split(
-        &self,
-    ) -> Option<&super::expression::Expression> {
+    pub fn input_split(&self) -> Option<&super::expression::Expression> {
         match self {
             InlineFunction::Scalar { .. } => None,
             InlineFunction::Vector { input_split, .. } => input_split.as_ref(),
@@ -618,12 +592,18 @@ impl InlineFunction {
     }
 
     /// Returns the function's input_merge expression, if defined (vector functions only).
-    pub fn input_merge(
-        &self,
-    ) -> Option<&super::expression::Expression> {
+    pub fn input_merge(&self) -> Option<&super::expression::Expression> {
         match self {
             InlineFunction::Scalar { .. } => None,
             InlineFunction::Vector { input_merge, .. } => input_merge.as_ref(),
         }
     }
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+pub enum FunctionType {
+    #[serde(rename = "scalar.function")]
+    Scalar,
+    #[serde(rename = "vector.function")]
+    Vector,
 }

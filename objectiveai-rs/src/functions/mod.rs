@@ -44,6 +44,7 @@ pub mod check;
 pub mod executions;
 pub mod expression;
 mod function;
+pub mod inventions;
 mod profile;
 pub mod profiles;
 mod remote;

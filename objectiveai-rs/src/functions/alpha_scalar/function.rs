@@ -90,3 +90,15 @@ impl InlineFunction {
         }
     }
 }
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+pub enum BranchFunctionType {
+    #[serde(rename = "alpha.scalar.branch.function")]
+    Branch,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+pub enum LeafFunctionType {
+    #[serde(rename = "alpha.scalar.leaf.function")]
+    Leaf,
+}

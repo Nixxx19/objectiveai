@@ -1,0 +1,9 @@
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum Object {
+    #[serde(rename = "alpha.scalar.function.invention.chunk")]
+    AlphaScalarFunctionInventionChunk,
+    #[serde(rename = "alpha.vector.function.invention.chunk")]
+    AlphaVectorFunctionInventionChunk,
+}
