@@ -8,9 +8,9 @@ pub enum BranchTaskExpression {
     ScalarFunction(ScalarFunctionTaskExpression),
     #[serde(rename = "alpha.vector.function")]
     VectorFunction(VectorFunctionTaskExpression),
-    #[serde(rename = "alpha.placeholder.scalar.function")]
+    #[serde(rename = "placeholder.alpha.scalar.function")]
     PlaceholderScalarFunction(PlaceholderScalarFunctionTaskExpression),
-    #[serde(rename = "alpha.placeholder.vector.function")]
+    #[serde(rename = "placeholder.alpha.vector.function")]
     PlaceholderVectorFunction(PlaceholderVectorFunctionTaskExpression),
 }
 
@@ -49,9 +49,9 @@ impl BranchTaskExpression {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum PartialPlaceholderBranchTaskExpression {
-    #[serde(rename = "alpha.placeholder.scalar.function")]
+    #[serde(rename = "placeholder.alpha.scalar.function")]
     PlaceholderScalarFunction(PartialPlaceholderScalarFunctionTaskExpression),
-    #[serde(rename = "alpha.placeholder.vector.function")]
+    #[serde(rename = "placeholder.alpha.vector.function")]
     PlaceholderVectorFunction(PartialPlaceholderVectorFunctionTaskExpression),
 }
 

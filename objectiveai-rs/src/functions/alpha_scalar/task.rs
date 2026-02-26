@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 pub enum BranchTaskExpression {
     #[serde(rename = "alpha.scalar.function")]
     ScalarFunction(ScalarFunctionTaskExpression),
-    #[serde(rename = "alpha.placeholder.scalar.function")]
+    #[serde(rename = "placeholder.alpha.scalar.function")]
     PlaceholderScalarFunction(PlaceholderScalarFunctionTaskExpression),
 }
 
@@ -35,7 +35,7 @@ impl BranchTaskExpression {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum PartialPlaceholderBranchTaskExpression {
-    #[serde(rename = "alpha.placeholder.scalar.function")]
+    #[serde(rename = "placeholder.alpha.scalar.function")]
     PlaceholderScalarFunction(PartialPlaceholderScalarFunctionTaskExpression),
 }
 
