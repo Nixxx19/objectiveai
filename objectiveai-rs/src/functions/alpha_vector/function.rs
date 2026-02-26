@@ -114,15 +114,3 @@ impl InlineFunction {
         }
     }
 }
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
-pub enum BranchFunctionType {
-    #[serde(rename = "alpha.vector.branch.function")]
-    Branch,
-}
-
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
-pub enum LeafFunctionType {
-    #[serde(rename = "alpha.vector.leaf.function")]
-    Leaf,
-}

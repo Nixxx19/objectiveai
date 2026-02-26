@@ -4,7 +4,6 @@ use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AlphaScalarBranchState {
-    pub r#type: functions::alpha_scalar::BranchFunctionType,
     pub depth: u64,
     pub min_branch_width: u64,
     pub max_branch_width: u64,
@@ -20,11 +19,11 @@ pub struct AlphaScalarBranchState {
 }
 
 impl AlphaScalarBranchState {
-    pub fn read_spec_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_spec_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadSpec",
             description: "Read Spec",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -35,11 +34,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_essay_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_essay_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadEssay",
             description: "Read Essay",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -53,11 +52,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_essay_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn write_essay_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "WriteEssay",
             description: "Write Essay",
-            args_type: super::ToolArgsType::String,
+            args_type: crate::functions::inventions::ToolArgsType::String,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -94,11 +93,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_input_schema_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_input_schema_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadInputSchema",
             description: "Read Input Schema",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -116,11 +115,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_input_schema_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn write_input_schema_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "WriteInputSchema",
             description: "Write Input Schema",
-            args_type: super::ToolArgsType::Object,
+            args_type: crate::functions::inventions::ToolArgsType::Object,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -188,11 +187,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadEssayTasks",
             description: "Read Essay Tasks",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -208,11 +207,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn write_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "WriteEssayTasks",
             description: "Write Essay Tasks",
-            args_type: super::ToolArgsType::String,
+            args_type: crate::functions::inventions::ToolArgsType::String,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -249,11 +248,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_tasks_length_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_tasks_length_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadTasksLength",
             description: "Read Tasks Length",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -267,11 +266,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_task_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadTask",
             description: "Read Task by index",
-            args_type: super::ToolArgsType::Number,
+            args_type: crate::functions::inventions::ToolArgsType::Number,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -309,11 +308,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn delete_task_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn delete_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "DeleteTask",
             description: "Delete Task by index",
-            args_type: super::ToolArgsType::Number,
+            args_type: crate::functions::inventions::ToolArgsType::Number,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -351,11 +350,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn append_task_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn append_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "AppendTask",
             description: "Append Task",
-            args_type: super::ToolArgsType::Object,
+            args_type: crate::functions::inventions::ToolArgsType::Object,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -418,11 +417,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn check_function_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn check_function_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "CheckFunction",
             description: "Check if function is valid",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -470,11 +469,11 @@ impl AlphaScalarBranchState {
         )
     }
 
-    pub fn read_description_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_description_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadDescription",
             description: "Read Description",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -490,11 +489,11 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_description_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn write_description_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "WriteDescription",
             description: "Write Description",
-            args_type: super::ToolArgsType::String,
+            args_type: crate::functions::inventions::ToolArgsType::String,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {

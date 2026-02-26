@@ -3,23 +3,22 @@ use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AlphaVectorLeafState {
-    pub r#type: functions::alpha_vector::LeafFunctionType,
+pub struct AlphaScalarLeafState {
     pub spec: String,
     pub essay: Option<String>,
     pub input_schema:
-        Option<functions::alpha_vector::expression::VectorFunctionInputSchema>,
+        Option<functions::alpha_scalar::expression::ScalarFunctionInputSchema>,
     pub essay_tasks: Option<String>,
-    pub tasks: Option<Vec<functions::alpha_vector::LeafTaskExpression>>,
+    pub tasks: Option<Vec<functions::alpha_scalar::LeafTaskExpression>>,
     pub description: Option<String>,
 }
 
-impl AlphaVectorLeafState {
-    pub fn read_spec_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+impl AlphaScalarLeafState {
+    pub fn read_spec_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadSpec",
             description: "Read Spec",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -30,11 +29,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn read_essay_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_essay_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadEssay",
             description: "Read Essay",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -48,11 +47,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn write_essay_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn write_essay_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "WriteEssay",
             description: "Write Essay",
-            args_type: super::ToolArgsType::String,
+            args_type: crate::functions::inventions::ToolArgsType::String,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -89,11 +88,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn read_input_schema_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_input_schema_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadInputSchema",
             description: "Read Input Schema",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -111,11 +110,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn write_input_schema_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn write_input_schema_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "WriteInputSchema",
             description: "Write Input Schema",
-            args_type: super::ToolArgsType::Object,
+            args_type: crate::functions::inventions::ToolArgsType::Object,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -131,7 +130,7 @@ impl AlphaVectorLeafState {
                     let mut de = serde_json::Deserializer::from_str(&args_str);
                     let input_schema = match serde_path_to_error::deserialize::<
                         _,
-                        functions::alpha_vector::expression::VectorFunctionInputSchema,
+                        functions::alpha_scalar::expression::ScalarFunctionInputSchema,
                     >(&mut de) {
                         Ok(s) => s,
                         Err(e) => {
@@ -141,9 +140,12 @@ impl AlphaVectorLeafState {
                             ));
                         }
                     };
-                    let transpiled = input_schema.clone().transpile();
+                    let input_schema_wrapped =
+                        functions::expression::InputSchema::Object(
+                            input_schema,
+                        );
                     match functions::check::check_input_schema(
-                        &transpiled,
+                        &input_schema_wrapped,
                     ) {
                         Ok(_) => (),
                         Err(e) => {
@@ -152,6 +154,10 @@ impl AlphaVectorLeafState {
                             );
                         }
                     }
+                    let input_schema = match input_schema_wrapped {
+                        functions::expression::InputSchema::Object(o) => o,
+                        _ => unreachable!(),
+                    };
                     let mut state = state.lock().unwrap();
                     state.input_schema = Some(input_schema);
                     Ok("Ok".to_string())
@@ -166,18 +172,21 @@ impl AlphaVectorLeafState {
         let state = this.lock().unwrap();
         match &state.input_schema {
             Some(input_schema) => {
-                let transpiled = input_schema.clone().transpile();
-                functions::check::check_input_schema(&transpiled)
+                let input_schema_wrapped =
+                    functions::expression::InputSchema::Object(
+                        input_schema.clone(),
+                    );
+                functions::check::check_input_schema(&input_schema_wrapped)
             }
             None => Err("Input schema has not been written".to_string()),
         }
     }
 
-    pub fn read_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadEssayTasks",
             description: "Read Essay Tasks",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -193,11 +202,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn write_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn write_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "WriteEssayTasks",
             description: "Write Essay Tasks",
-            args_type: super::ToolArgsType::String,
+            args_type: crate::functions::inventions::ToolArgsType::String,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -234,11 +243,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn read_tasks_length_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_tasks_length_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadTasksLength",
             description: "Read Tasks Length",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -252,11 +261,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn read_task_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadTask",
             description: "Read Task by index",
-            args_type: super::ToolArgsType::Number,
+            args_type: crate::functions::inventions::ToolArgsType::Number,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -294,11 +303,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn delete_task_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn delete_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "DeleteTask",
             description: "Delete Task by index",
-            args_type: super::ToolArgsType::Number,
+            args_type: crate::functions::inventions::ToolArgsType::Number,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -336,11 +345,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn append_task_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn append_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "AppendTask",
             description: "Append Task",
-            args_type: super::ToolArgsType::Object,
+            args_type: crate::functions::inventions::ToolArgsType::Object,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
@@ -355,7 +364,7 @@ impl AlphaVectorLeafState {
                     };
                     let task = match serde_path_to_error::deserialize::<
                         _,
-                        functions::alpha_vector::LeafTaskExpression,
+                        functions::alpha_scalar::LeafTaskExpression,
                     >(&mut serde_json::Deserializer::from_str(&args_str))
                     {
                         Ok(t) => t,
@@ -377,17 +386,17 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn check_function_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn check_function_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "CheckFunction",
             description: "Check if function is valid",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
                     let function =
-                        functions::alpha_vector::RemoteFunction::Leaf {
+                        functions::alpha_scalar::RemoteFunction::Leaf {
                             description: "placeholder".to_string(),
                             input_schema: state
                                 .input_schema
@@ -400,7 +409,7 @@ impl AlphaVectorLeafState {
                                 "Tasks have not been written".to_string()
                             })?,
                         };
-                    match functions::alpha_vector::check::check_alpha_leaf_vector_function(
+                    match functions::alpha_scalar::check::check_alpha_leaf_scalar_function(
                         &function,
                     ) {
                         Ok(_) => Ok("Function is valid".to_string()),
@@ -413,7 +422,7 @@ impl AlphaVectorLeafState {
 
     pub fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String> {
         let state = this.lock().unwrap();
-        let function = functions::alpha_vector::RemoteFunction::Leaf {
+        let function = functions::alpha_scalar::RemoteFunction::Leaf {
             description: "placeholder".to_string(),
             input_schema: state.input_schema.clone().ok_or_else(|| {
                 "Input schema has not been written".to_string()
@@ -423,16 +432,16 @@ impl AlphaVectorLeafState {
                 .clone()
                 .ok_or_else(|| "Tasks have not been written".to_string())?,
         };
-        functions::alpha_vector::check::check_alpha_leaf_vector_function(
+        functions::alpha_scalar::check::check_alpha_leaf_scalar_function(
             &function,
         )
     }
 
-    pub fn read_description_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn read_description_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "ReadDescription",
             description: "Read Description",
-            args_type: super::ToolArgsType::None,
+            args_type: crate::functions::inventions::ToolArgsType::None,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |_| {
@@ -448,11 +457,11 @@ impl AlphaVectorLeafState {
         }
     }
 
-    pub fn write_description_tool(this: &Arc<Mutex<Self>>) -> super::Tool {
-        super::Tool {
+    pub fn write_description_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+        crate::functions::inventions::Tool {
             name: "WriteDescription",
             description: "Write Description",
-            args_type: super::ToolArgsType::String,
+            args_type: crate::functions::inventions::ToolArgsType::String,
             call: Arc::new({
                 let state = Arc::clone(this);
                 move |args| {
