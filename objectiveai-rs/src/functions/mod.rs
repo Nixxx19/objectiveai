@@ -43,6 +43,7 @@ pub mod alpha_vector;
 pub mod check;
 pub mod executions;
 pub mod expression;
+mod full_function;
 mod function;
 pub mod inventions;
 mod profile;
@@ -51,6 +52,7 @@ mod remote;
 pub mod response;
 mod task;
 
+pub use full_function::*;
 pub use function::*;
 pub use profile::*;
 pub use remote::*;
