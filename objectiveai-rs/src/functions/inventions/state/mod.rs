@@ -31,7 +31,7 @@ pub enum State {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
-pub enum StateParam {
+pub enum ParamsState {
     #[serde(rename = "alpha.scalar.branch.function")]
     AlphaScalarBranch(AlphaScalarBranchState),
     #[serde(rename = "alpha.scalar.leaf.function")]
@@ -40,28 +40,26 @@ pub enum StateParam {
     AlphaVectorBranch(AlphaVectorBranchState),
     #[serde(rename = "alpha.vector.leaf.function")]
     AlphaVectorLeaf(AlphaVectorLeafState),
-    #[serde(rename = "alpha.scalar.function", alias = "placeholder.alpha.scalar.function")]
+    #[serde(
+        rename = "alpha.scalar.function",
+        alias = "placeholder.alpha.scalar.function"
+    )]
     AlphaScalar(AlphaScalarState),
-    #[serde(rename = "alpha.vector.function", alias = "placeholder.alpha.vector.function")]
+    #[serde(
+        rename = "alpha.vector.function",
+        alias = "placeholder.alpha.vector.function"
+    )]
     AlphaVector(AlphaVectorState),
 }
 
-impl StateParam {
+impl ParamsState {
     pub fn route(self) -> State {
         match self {
-            StateParam::AlphaScalarBranch(s) => {
-                State::AlphaScalarBranch(s)
-            }
-            StateParam::AlphaScalarLeaf(s) => {
-                State::AlphaScalarLeaf(s)
-            }
-            StateParam::AlphaVectorBranch(s) => {
-                State::AlphaVectorBranch(s)
-            }
-            StateParam::AlphaVectorLeaf(s) => {
-                State::AlphaVectorLeaf(s)
-            }
-            StateParam::AlphaScalar(s) => {
+            ParamsState::AlphaScalarBranch(s) => State::AlphaScalarBranch(s),
+            ParamsState::AlphaScalarLeaf(s) => State::AlphaScalarLeaf(s),
+            ParamsState::AlphaVectorBranch(s) => State::AlphaVectorBranch(s),
+            ParamsState::AlphaVectorLeaf(s) => State::AlphaVectorLeaf(s),
+            ParamsState::AlphaScalar(s) => {
                 if s.params.depth == 0 {
                     State::AlphaScalarLeaf(AlphaScalarLeafState {
                         params: s.params,
@@ -82,7 +80,7 @@ impl StateParam {
                     })
                 }
             }
-            StateParam::AlphaVector(s) => {
+            ParamsState::AlphaVector(s) => {
                 if s.params.depth == 0 {
                     State::AlphaVectorLeaf(AlphaVectorLeafState {
                         params: s.params,

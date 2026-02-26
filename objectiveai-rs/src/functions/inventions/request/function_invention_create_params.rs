@@ -3,13 +3,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FunctionInventionCreateParams {
-    pub r#type: functions::FunctionType,
-    pub depth: u64,
-    pub min_branch_width: u64,
-    pub max_branch_width: u64,
-    pub min_leaf_width: u64,
-    pub max_leaf_width: u64,
-    pub spec: String,
+    pub state: functions::inventions::ParamsState,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub upstreams: Option<Vec<chat::completions::Upstream>>,
     #[serde(skip_serializing_if = "Option::is_none")]
