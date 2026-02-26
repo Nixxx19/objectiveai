@@ -36,9 +36,9 @@ pub enum StateParam {
     AlphaVectorBranch(AlphaVectorBranchState),
     #[serde(rename = "alpha.vector.leaf.function")]
     AlphaVectorLeaf(AlphaVectorLeafState),
-    #[serde(rename = "alpha.scalar.function")]
+    #[serde(rename = "alpha.scalar.function", alias = "placeholder.alpha.scalar.function")]
     AlphaScalar(Params),
-    #[serde(rename = "alpha.vector.function")]
+    #[serde(rename = "alpha.vector.function", alias = "placeholder.alpha.vector.function")]
     AlphaVector(Params),
 }
 
