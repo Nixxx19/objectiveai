@@ -1,13 +1,17 @@
 mod alpha_scalar_branch_state;
 mod alpha_scalar_leaf_state;
+mod alpha_scalar_state;
 mod alpha_vector_branch_state;
 mod alpha_vector_leaf_state;
+mod alpha_vector_state;
 mod params;
 
 pub use alpha_scalar_branch_state::*;
 pub use alpha_scalar_leaf_state::*;
+pub use alpha_scalar_state::*;
 pub use alpha_vector_branch_state::*;
 pub use alpha_vector_leaf_state::*;
+pub use alpha_vector_state::*;
 pub use params::*;
 
 use serde::{Deserialize, Serialize};
@@ -37,9 +41,9 @@ pub enum StateParam {
     #[serde(rename = "alpha.vector.leaf.function")]
     AlphaVectorLeaf(AlphaVectorLeafState),
     #[serde(rename = "alpha.scalar.function", alias = "placeholder.alpha.scalar.function")]
-    AlphaScalar(Params),
+    AlphaScalar(AlphaScalarState),
     #[serde(rename = "alpha.vector.function", alias = "placeholder.alpha.vector.function")]
-    AlphaVector(Params),
+    AlphaVector(AlphaVectorState),
 }
 
 impl StateParam {
@@ -57,42 +61,42 @@ impl StateParam {
             StateParam::AlphaVectorLeaf(s) => {
                 State::AlphaVectorLeaf(s)
             }
-            StateParam::AlphaScalar(params) => {
-                if params.depth == 0 {
+            StateParam::AlphaScalar(s) => {
+                if s.params.depth == 0 {
                     State::AlphaScalarLeaf(AlphaScalarLeafState {
-                        params,
+                        params: s.params,
                         essay: None,
-                        input_schema: None,
+                        input_schema: s.input_schema,
                         essay_tasks: None,
                         tasks: None,
                         description: None,
                     })
                 } else {
                     State::AlphaScalarBranch(AlphaScalarBranchState {
-                        params,
+                        params: s.params,
                         essay: None,
-                        input_schema: None,
+                        input_schema: s.input_schema,
                         essay_tasks: None,
                         tasks: None,
                         description: None,
                     })
                 }
             }
-            StateParam::AlphaVector(params) => {
-                if params.depth == 0 {
+            StateParam::AlphaVector(s) => {
+                if s.params.depth == 0 {
                     State::AlphaVectorLeaf(AlphaVectorLeafState {
-                        params,
+                        params: s.params,
                         essay: None,
-                        input_schema: None,
+                        input_schema: s.input_schema,
                         essay_tasks: None,
                         tasks: None,
                         description: None,
                     })
                 } else {
                     State::AlphaVectorBranch(AlphaVectorBranchState {
-                        params,
+                        params: s.params,
                         essay: None,
-                        input_schema: None,
+                        input_schema: s.input_schema,
                         essay_tasks: None,
                         tasks: None,
                         description: None,
