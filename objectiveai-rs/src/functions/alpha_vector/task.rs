@@ -47,6 +47,51 @@ impl BranchTaskExpression {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
+pub enum PartialPlaceholderBranchTaskExpression {
+    #[serde(rename = "alpha.placeholder.scalar.function")]
+    PlaceholderScalarFunction(PartialPlaceholderScalarFunctionTaskExpression),
+    #[serde(rename = "alpha.placeholder.vector.function")]
+    PlaceholderVectorFunction(PartialPlaceholderVectorFunctionTaskExpression),
+}
+
+impl PartialPlaceholderBranchTaskExpression {
+    pub fn complete(
+        self,
+        depth: u64,
+        min_branch_width: u64,
+        max_branch_width: u64,
+        min_leaf_width: u64,
+        max_leaf_width: u64,
+    ) -> BranchTaskExpression {
+        match self {
+            PartialPlaceholderBranchTaskExpression::PlaceholderScalarFunction(
+                task,
+            ) => BranchTaskExpression::PlaceholderScalarFunction(
+                task.complete(
+                    depth,
+                    min_branch_width,
+                    max_branch_width,
+                    min_leaf_width,
+                    max_leaf_width,
+                ),
+            ),
+            PartialPlaceholderBranchTaskExpression::PlaceholderVectorFunction(
+                task,
+            ) => BranchTaskExpression::PlaceholderVectorFunction(
+                task.complete(
+                    depth,
+                    min_branch_width,
+                    max_branch_width,
+                    min_leaf_width,
+                    max_leaf_width,
+                ),
+            ),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum LeafTaskExpression {
     #[serde(rename = "alpha.vector.completion")]
     VectorCompletion(VectorCompletionTaskExpression),
@@ -158,6 +203,38 @@ impl PlaceholderScalarFunctionTaskExpression {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PartialPlaceholderScalarFunctionTaskExpression {
+    pub spec: String,
+    pub input_schema: super::expression::ScalarFunctionInputSchema,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skip: Option<functions::expression::Expression>,
+    pub input: super::expression::ScalarFunctionInputExpression,
+}
+
+impl PartialPlaceholderScalarFunctionTaskExpression {
+    pub fn complete(
+        self,
+        depth: u64,
+        min_branch_width: u64,
+        max_branch_width: u64,
+        min_leaf_width: u64,
+        max_leaf_width: u64,
+    ) -> PlaceholderScalarFunctionTaskExpression {
+        PlaceholderScalarFunctionTaskExpression {
+            depth,
+            min_branch_width,
+            max_branch_width,
+            min_leaf_width,
+            max_leaf_width,
+            spec: self.spec,
+            input_schema: self.input_schema,
+            skip: self.skip,
+            input: self.input,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlaceholderVectorFunctionTaskExpression {
     pub depth: u64,
     pub min_branch_width: u64,
@@ -192,6 +269,38 @@ impl PlaceholderVectorFunctionTaskExpression {
             output: functions::expression::Expression::Special(
                 functions::expression::Special::Output,
             ),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PartialPlaceholderVectorFunctionTaskExpression {
+    pub spec: String,
+    pub input_schema: super::expression::VectorFunctionInputSchema,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub skip: Option<functions::expression::Expression>,
+    pub input: super::expression::VectorFunctionInputExpression,
+}
+
+impl PartialPlaceholderVectorFunctionTaskExpression {
+    pub fn complete(
+        self,
+        depth: u64,
+        min_branch_width: u64,
+        max_branch_width: u64,
+        min_leaf_width: u64,
+        max_leaf_width: u64,
+    ) -> PlaceholderVectorFunctionTaskExpression {
+        PlaceholderVectorFunctionTaskExpression {
+            depth,
+            min_branch_width,
+            max_branch_width,
+            min_leaf_width,
+            max_leaf_width,
+            spec: self.spec,
+            input_schema: self.input_schema,
+            skip: self.skip,
+            input: self.input,
         }
     }
 }
