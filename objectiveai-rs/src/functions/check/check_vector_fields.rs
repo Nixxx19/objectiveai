@@ -67,7 +67,7 @@ pub fn check_vector_fields(
 /// 3. Each split element must produce output_length = 1
 /// 4. Merging all splits must reconstruct the original input
 /// 5. Merging random subsets must produce output_length = subset size
-pub(super) fn check_vector_fields_for_input(
+pub(crate) fn check_vector_fields_for_input(
     fields: &VectorFieldsValidation,
     input_label: &str,
     input: &Input,
@@ -321,7 +321,7 @@ fn validate_input_against_schema(
 }
 
 /// Deep equality check for Input values.
-pub(super) fn inputs_equal(a: &Input, b: &Input) -> bool {
+pub(crate) fn inputs_equal(a: &Input, b: &Input) -> bool {
     match (a, b) {
         (Input::String(a), Input::String(b)) => a == b,
         (Input::Integer(a), Input::Integer(b)) => a == b,
@@ -345,7 +345,7 @@ pub(super) fn inputs_equal(a: &Input, b: &Input) -> bool {
 }
 
 /// Generate random subsets of indices for subset merge testing.
-pub(super) fn random_subsets(length: usize, count: usize) -> Vec<Vec<usize>> {
+pub(crate) fn random_subsets(length: usize, count: usize) -> Vec<Vec<usize>> {
     if length < 2 {
         return vec![];
     }

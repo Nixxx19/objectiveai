@@ -25,7 +25,7 @@ enum FunctionType {
 
 /// Validates a single input: compiles tasks, checks all constraints, and
 /// returns the compiled tasks for further use (e.g. diversity tracking).
-pub(super) fn compile_and_validate_one_input(
+pub(crate) fn compile_and_validate_one_input(
     input_label: &str,
     function: &RemoteFunction,
     input: &crate::functions::expression::Input,
@@ -652,7 +652,7 @@ fn check_compiled_vector_completion(
 
 /// Extracts the serialized input from a compiled function/placeholder task.
 /// Returns empty string for vector.completion tasks (not applicable).
-pub(super) fn extract_task_input(task: &Task) -> String {
+pub(crate) fn extract_task_input(task: &Task) -> String {
     match extract_task_input_value(task) {
         Some(input) => serde_json::to_string(input).unwrap_or_default(),
         None => String::new(),
@@ -660,7 +660,7 @@ pub(super) fn extract_task_input(task: &Task) -> String {
 }
 
 /// Returns a reference to the compiled input of a function/placeholder task.
-pub(super) fn extract_task_input_value(
+pub(crate) fn extract_task_input_value(
     task: &Task,
 ) -> Option<&crate::functions::expression::Input> {
     match task {

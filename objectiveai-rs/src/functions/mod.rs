@@ -40,12 +40,12 @@
 
 pub mod alpha_scalar;
 pub mod alpha_vector;
+pub mod check;
 pub mod executions;
 pub mod expression;
 mod function;
 mod profile;
 pub mod profiles;
-pub mod quality;
 mod remote;
 pub mod response;
 mod task;

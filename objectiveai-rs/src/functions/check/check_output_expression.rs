@@ -143,7 +143,7 @@ fn systematic_vc_output(k: usize, n: usize) -> VectorCompletionOutput {
 // ---------------------------------------------------------------------------
 
 /// Shape descriptor for the raw output to generate.
-pub(super) enum ScalarOutputShape {
+pub(crate) enum ScalarOutputShape {
     /// Raw output is a scalar function result.
     Scalar,
     /// Raw output is a vector completion with `n` responses.
@@ -155,7 +155,7 @@ pub(super) enum ScalarOutputShape {
 ///
 /// Returns `Ok(())` if distribution is healthy, or `Err(message)` with a
 /// user-facing error message.
-pub(super) fn check_scalar_distribution(
+pub(crate) fn check_scalar_distribution(
     task_index: usize,
     input: &Input,
     task: &Task,
@@ -241,7 +241,7 @@ pub(super) fn check_scalar_distribution(
 // ---------------------------------------------------------------------------
 
 /// Shape descriptor for the raw output to generate for vector checks.
-pub(super) enum VectorOutputShape {
+pub(crate) enum VectorOutputShape {
     /// Raw output is a mapped scalar function: vec of scalars (not normalized).
     MapScalar(usize),
     /// Raw output is an unmapped vector function with given output_length.
@@ -255,7 +255,7 @@ pub(super) enum VectorOutputShape {
 ///
 /// Returns `Ok(())` if distribution is healthy, or `Err(message)` with a
 /// user-facing error message.
-pub(super) fn check_vector_distribution(
+pub(crate) fn check_vector_distribution(
     task_index: usize,
     input: &Input,
     task: &Task,

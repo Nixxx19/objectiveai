@@ -5,7 +5,7 @@ mod tests {
         FileInputSchema, ImageInputSchema, InputSchema, IntegerInputSchema, NumberInputSchema,
         ObjectInputSchema, StringInputSchema, VideoInputSchema,
     };
-    use crate::functions::quality::example_inputs;
+    use crate::functions::check::example_inputs;
     use crate::util::index_map;
 
     fn test(schema: &InputSchema, expected_perms: usize) {

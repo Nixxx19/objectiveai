@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 use crate::functions::expression::{
     ArrayInputSchema, BooleanInputSchema, Input, InputSchema, StringInputSchema,
 };
-use crate::functions::quality::example_inputs::array;
+use crate::functions::check::example_inputs::array;
 
 /// Collect all outputs from the array generator and verify:
 /// 1. Every unique length seen has every index covered with all item permutations.
