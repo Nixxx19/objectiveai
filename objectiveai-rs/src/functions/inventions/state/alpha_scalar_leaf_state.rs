@@ -4,12 +4,18 @@ use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AlphaScalarLeafState {
-    pub spec: String,
+    #[serde(flatten)]
+    pub params: super::Params,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub essay: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub input_schema:
         Option<functions::alpha_scalar::expression::ScalarFunctionInputSchema>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub essay_tasks: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tasks: Option<Vec<functions::alpha_scalar::LeafTaskExpression>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
 
@@ -23,7 +29,7 @@ impl AlphaScalarLeafState {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
-                    Ok(state.spec.clone())
+                    Ok(state.params.spec.clone())
                 }
             }),
         }

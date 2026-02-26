@@ -4,17 +4,18 @@ use std::sync::{Arc, Mutex};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AlphaVectorBranchState {
-    pub depth: u64,
-    pub min_branch_width: u64,
-    pub max_branch_width: u64,
-    pub min_leaf_width: u64,
-    pub max_leaf_width: u64,
-    pub spec: String,
+    #[serde(flatten)]
+    pub params: super::Params,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub essay: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub input_schema:
         Option<functions::alpha_vector::expression::VectorFunctionInputSchema>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub essay_tasks: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub tasks: Option<Vec<functions::alpha_vector::BranchTaskExpression>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
 }
 
@@ -28,7 +29,7 @@ impl AlphaVectorBranchState {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
-                    Ok(state.spec.clone())
+                    Ok(state.params.spec.clone())
                 }
             }),
         }
@@ -403,11 +404,11 @@ impl AlphaVectorBranchState {
                     }
                     let mut state = state.lock().unwrap();
                     let task = task.complete(
-                        state.depth - 1,
-                        state.min_branch_width,
-                        state.max_branch_width,
-                        state.min_leaf_width,
-                        state.max_leaf_width,
+                        state.params.depth - 1,
+                        state.params.min_branch_width,
+                        state.params.max_branch_width,
+                        state.params.min_leaf_width,
+                        state.params.max_leaf_width,
                     );
                     match &mut state.tasks {
                         Some(tasks) => tasks.push(task),
