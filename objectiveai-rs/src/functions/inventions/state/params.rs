@@ -7,5 +7,6 @@ pub struct Params {
     pub max_branch_width: u64,
     pub min_leaf_width: u64,
     pub max_leaf_width: u64,
+    pub name: String,
     pub spec: String,
 }

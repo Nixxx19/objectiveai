@@ -15,6 +15,15 @@ pub enum BranchTaskExpression {
 }
 
 impl BranchTaskExpression {
+    pub fn url(&self) -> Option<String> {
+        match self {
+            BranchTaskExpression::ScalarFunction(task) => Some(task.url()),
+            BranchTaskExpression::VectorFunction(task) => Some(task.url()),
+            BranchTaskExpression::PlaceholderScalarFunction(_) => None,
+            BranchTaskExpression::PlaceholderVectorFunction(_) => None,
+        }
+    }
+
     pub fn transpile(self) -> functions::TaskExpression {
         match self {
             BranchTaskExpression::ScalarFunction(task) => {
@@ -119,6 +128,10 @@ pub struct ScalarFunctionTaskExpression {
 }
 
 impl ScalarFunctionTaskExpression {
+    pub fn url(&self) -> String {
+        self.remote.url(&self.owner, &self.repository, &self.commit)
+    }
+
     pub fn transpile(self) -> functions::ScalarFunctionTaskExpression {
         functions::ScalarFunctionTaskExpression {
             remote: self.remote,
@@ -150,6 +163,10 @@ pub struct VectorFunctionTaskExpression {
 }
 
 impl VectorFunctionTaskExpression {
+    pub fn url(&self) -> String {
+        self.remote.url(&self.owner, &self.repository, &self.commit)
+    }
+
     pub fn transpile(self) -> functions::VectorFunctionTaskExpression {
         functions::VectorFunctionTaskExpression {
             remote: self.remote,
@@ -200,6 +217,7 @@ impl PlaceholderScalarFunctionTaskExpression {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PartialPlaceholderScalarFunctionTaskExpression {
+    pub name: String,
     pub spec: String,
     pub input_schema: super::expression::ScalarFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -223,6 +241,7 @@ impl PartialPlaceholderScalarFunctionTaskExpression {
                 max_branch_width,
                 min_leaf_width,
                 max_leaf_width,
+                name: self.name,
                 spec: self.spec,
             },
             input_schema: self.input_schema,
@@ -269,6 +288,7 @@ impl PlaceholderVectorFunctionTaskExpression {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PartialPlaceholderVectorFunctionTaskExpression {
+    pub name: String,
     pub spec: String,
     pub input_schema: super::expression::VectorFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -292,6 +312,7 @@ impl PartialPlaceholderVectorFunctionTaskExpression {
                 max_branch_width,
                 min_leaf_width,
                 max_leaf_width,
+                name: self.name,
                 spec: self.spec,
             },
             input_schema: self.input_schema,

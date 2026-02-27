@@ -1,5 +1,5 @@
-use crate::{error, functions, vector};
 use crate::functions::inventions::response;
+use crate::{error, functions, vector};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,23 +33,27 @@ impl From<response::streaming::FunctionInventionChunk> for FunctionInvention {
                 .into_iter()
                 .map(super::Completion::from)
                 .collect(),
-            state: state.unwrap_or(functions::inventions::State::AlphaScalarBranch(
-                functions::inventions::AlphaScalarBranchState {
-                    params: functions::inventions::Params {
-                        depth: 0,
-                        min_branch_width: 0,
-                        max_branch_width: 0,
-                        min_leaf_width: 0,
-                        max_leaf_width: 0,
-                        spec: String::new(),
+            state: state.unwrap_or(
+                functions::inventions::State::AlphaScalarBranch(
+                    functions::inventions::AlphaScalarBranchState {
+                        params: functions::inventions::Params {
+                            depth: 0,
+                            min_branch_width: 0,
+                            max_branch_width: 0,
+                            min_leaf_width: 0,
+                            max_leaf_width: 0,
+                            name: String::new(),
+                            spec: String::new(),
+                        },
+                        essay: None,
+                        input_schema: None,
+                        essay_tasks: None,
+                        tasks: None,
+                        description: None,
+                        readme: None,
                     },
-                    essay: None,
-                    input_schema: None,
-                    essay_tasks: None,
-                    tasks: None,
-                    description: None,
-                },
-            )),
+                ),
+            ),
             function,
             created,
             object: object.into(),

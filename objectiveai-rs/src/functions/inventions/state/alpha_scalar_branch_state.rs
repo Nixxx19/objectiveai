@@ -17,10 +17,14 @@ pub struct AlphaScalarBranchState {
     pub tasks: Option<Vec<functions::alpha_scalar::BranchTaskExpression>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub readme: Option<String>,
 }
 
 impl AlphaScalarBranchState {
-    pub fn read_spec_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn read_spec_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "ReadSpec",
             description: "Read Spec",
@@ -35,7 +39,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_essay_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn read_essay_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "ReadEssay",
             description: "Read Essay",
@@ -53,7 +59,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_essay_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn write_essay_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "WriteEssay",
             description: "Write Essay",
@@ -94,7 +102,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_input_schema_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn read_input_schema_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "ReadInputSchema",
             description: "Read Input Schema",
@@ -116,7 +126,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_input_schema_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn write_input_schema_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "WriteInputSchema",
             description: "Write Input Schema",
@@ -188,7 +200,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn read_essay_tasks_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "ReadEssayTasks",
             description: "Read Essay Tasks",
@@ -208,7 +222,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_essay_tasks_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn write_essay_tasks_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "WriteEssayTasks",
             description: "Write Essay Tasks",
@@ -249,7 +265,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_tasks_length_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn read_tasks_length_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "ReadTasksLength",
             description: "Read Tasks Length",
@@ -267,7 +285,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn read_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn read_task_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "ReadTask",
             description: "Read Task by index",
@@ -309,7 +329,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn delete_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn delete_task_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "DeleteTask",
             description: "Delete Task by index",
@@ -351,7 +373,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn append_task_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn append_task_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "AppendTask",
             description: "Append Task",
@@ -418,7 +442,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn check_function_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn check_function_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "CheckFunction",
             description: "Check if function is valid",
@@ -470,7 +496,9 @@ impl AlphaScalarBranchState {
         )
     }
 
-    pub fn read_description_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn read_description_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "ReadDescription",
             description: "Read Description",
@@ -490,7 +518,9 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_description_tool(this: &Arc<Mutex<Self>>) -> crate::functions::inventions::Tool {
+    pub fn write_description_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::Tool {
         crate::functions::inventions::Tool {
             name: "WriteDescription",
             description: "Write Description",
@@ -539,5 +569,28 @@ impl AlphaScalarBranchState {
             }
             None => Err("Description has not been written".to_string()),
         }
+    }
+
+    pub fn write_readme(this: &Arc<Mutex<Self>>) {
+        let mut state = this.lock().unwrap();
+        let description = match state.description.as_deref() {
+            Some(description) => description,
+            None => return,
+        };
+        let mut sub_functions = Vec::with_capacity(
+            state.tasks.as_ref().map(|tasks| tasks.len()).unwrap_or(0),
+        );
+        if let Some(tasks) = &state.tasks {
+            for task in tasks {
+                if let Some(url) = task.url() {
+                    sub_functions.push(url);
+                }
+            }
+        }
+        state.readme = Some(super::readme::readme(
+            &state.params.name,
+            description,
+            sub_functions,
+        ));
     }
 }

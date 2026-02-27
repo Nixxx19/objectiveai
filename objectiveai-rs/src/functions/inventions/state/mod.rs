@@ -5,6 +5,7 @@ mod alpha_vector_branch_state;
 mod alpha_vector_leaf_state;
 mod alpha_vector_state;
 mod params;
+mod readme;
 
 pub use alpha_scalar_branch_state::*;
 pub use alpha_scalar_leaf_state::*;
@@ -68,6 +69,7 @@ impl ParamsState {
                         essay_tasks: None,
                         tasks: None,
                         description: None,
+                        readme: None,
                     })
                 } else {
                     State::AlphaScalarBranch(AlphaScalarBranchState {
@@ -77,6 +79,7 @@ impl ParamsState {
                         essay_tasks: None,
                         tasks: None,
                         description: None,
+                        readme: None,
                     })
                 }
             }
@@ -89,6 +92,7 @@ impl ParamsState {
                         essay_tasks: None,
                         tasks: None,
                         description: None,
+                        readme: None,
                     })
                 } else {
                     State::AlphaVectorBranch(AlphaVectorBranchState {
@@ -98,6 +102,7 @@ impl ParamsState {
                         essay_tasks: None,
                         tasks: None,
                         description: None,
+                        readme: None,
                     })
                 }
             }

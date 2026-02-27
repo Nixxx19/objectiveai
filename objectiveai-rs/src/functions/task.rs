@@ -49,6 +49,16 @@ pub enum TaskExpression {
 }
 
 impl TaskExpression {
+    pub fn url(&self) -> Option<String> {
+        match self {
+            TaskExpression::ScalarFunction(task) => Some(task.url()),
+            TaskExpression::VectorFunction(task) => Some(task.url()),
+            TaskExpression::VectorCompletion(_) => None,
+            TaskExpression::PlaceholderScalarFunction(_) => None,
+            TaskExpression::PlaceholderVectorFunction(_) => None,
+        }
+    }
+
     /// Takes and returns the skip expression, if present.
     pub fn take_skip(&mut self) -> Option<super::expression::Expression> {
         match self {

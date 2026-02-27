@@ -17,11 +17,14 @@ impl Remote {
     pub fn url(&self, owner: &str, repository: &str, commit: &str) -> String {
         match self {
             Remote::Github => format!(
-                "https://github.com/{}/{}/commit/{}",
-                owner, repository, commit
+                "[{}](https://github.com/{}/{}/commit/{})",
+                repository, owner, repository, commit
             ),
             Remote::Filesystem => {
-                format!("file://{}/{} ({})", owner, repository, commit)
+                format!(
+                    "[{}](file://{}/{}) ({})",
+                    repository, owner, repository, commit
+                )
             }
         }
     }
