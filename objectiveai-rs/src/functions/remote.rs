@@ -13,6 +13,20 @@ pub enum Remote {
     Filesystem,
 }
 
+impl Remote {
+    pub fn url(&self, owner: &str, repository: &str, commit: &str) -> String {
+        match self {
+            Remote::Github => format!(
+                "https://github.com/{}/{}/commit/{}",
+                owner, repository, commit
+            ),
+            Remote::Filesystem => {
+                format!("file://{}/{} ({})", owner, repository, commit)
+            }
+        }
+    }
+}
+
 impl fmt::Display for Remote {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
