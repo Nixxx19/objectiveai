@@ -182,6 +182,7 @@ fn valid_single_placeholder_scalar() {
                     min_leaf_width: 1,
                     max_leaf_width: 5,
                     spec: "test spec".to_string(),
+                    name: "test".to_string(),
                 },
                 input_schema: ObjectInputSchema {
                     description: None,
@@ -235,6 +236,7 @@ fn valid_multiple_tasks() {
                         min_leaf_width: 1,
                         max_leaf_width: 5,
                         spec: "test spec".to_string(),
+                        name: "test".to_string(),
                     },
                     input_schema: ObjectInputSchema {
                         description: None,
@@ -527,6 +529,7 @@ fn scalar_diversity_pass_placeholder_with_transform() {
                         min_leaf_width: 1,
                         max_leaf_width: 5,
                         spec: "test spec".to_string(),
+                        name: "test".to_string(),
                     },
                     input_schema: ObjectInputSchema {
                         description: None,
@@ -553,6 +556,7 @@ fn scalar_diversity_pass_placeholder_with_transform() {
                         min_leaf_width: 1,
                         max_leaf_width: 5,
                         spec: "test spec".to_string(),
+                        name: "test".to_string(),
                     },
                     input_schema: ObjectInputSchema {
                         description: None,
@@ -860,6 +864,7 @@ fn placeholder_field_validation_single_permutation() {
                         min_leaf_width: 1,
                         max_leaf_width: 5,
                         spec: "test spec".to_string(),
+                        name: "test".to_string(),
                     },
                     input_schema: ObjectInputSchema {
                         description: None,

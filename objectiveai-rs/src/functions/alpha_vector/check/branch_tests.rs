@@ -197,6 +197,7 @@ fn single_placeholder_scalar_task_rejected() {
                     min_leaf_width: 1,
                     max_leaf_width: 3,
                     spec: "Score each item".to_string(),
+                    name: "test".to_string(),
                 },
                 input_schema: ObjectInputSchema {
                     description: None,
@@ -325,6 +326,7 @@ fn valid_single_placeholder_vector() {
                     min_leaf_width: 1,
                     max_leaf_width: 3,
                     spec: "Rank items".to_string(),
+                    name: "test".to_string(),
                 },
                 input_schema: VectorFunctionInputSchema {
                     context: None,
@@ -430,6 +432,7 @@ fn valid_mixed_placeholder_vector_tasks() {
                         min_leaf_width: 1,
                         max_leaf_width: 3,
                         spec: "Rank items differently".to_string(),
+                        name: "test".to_string(),
                     },
                     input_schema: VectorFunctionInputSchema {
                         context: None,
@@ -573,6 +576,7 @@ fn input_diversity_pass_placeholder_vector_tasks() {
                         min_leaf_width: 1,
                         max_leaf_width: 3,
                         spec: "Rank items by quality".to_string(),
+                        name: "test".to_string(),
                     },
                     input_schema: VectorFunctionInputSchema {
                         context: None,
@@ -602,6 +606,7 @@ fn input_diversity_pass_placeholder_vector_tasks() {
                         min_leaf_width: 1,
                         max_leaf_width: 3,
                         spec: "Rank items by relevance".to_string(),
+                        name: "test".to_string(),
                     },
                     input_schema: VectorFunctionInputSchema {
                         context: None,
@@ -784,6 +789,7 @@ fn placeholder_vector_field_validation() {
                     min_leaf_width: 1,
                     max_leaf_width: 3,
                     spec: "Rank items".to_string(),
+                    name: "test".to_string(),
                 },
                 input_schema: VectorFunctionInputSchema {
                     context: None,
