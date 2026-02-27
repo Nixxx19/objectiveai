@@ -7,3 +7,9 @@ pub struct ChatCompletionChunk {
     #[serde(flatten)]
     pub inner: chat::completions::response::streaming::ChatCompletionChunk,
 }
+
+impl ChatCompletionChunk {
+    pub fn push(&mut self, other: &ChatCompletionChunk) {
+        self.inner.push(&other.inner);
+    }
+}
