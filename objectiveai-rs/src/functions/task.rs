@@ -66,8 +66,12 @@ impl TaskExpression {
             TaskExpression::ScalarFunction(task) => task.map.as_ref(),
             TaskExpression::VectorFunction(task) => task.map.as_ref(),
             TaskExpression::VectorCompletion(task) => task.map.as_ref(),
-            TaskExpression::PlaceholderScalarFunction(task) => task.map.as_ref(),
-            TaskExpression::PlaceholderVectorFunction(task) => task.map.as_ref(),
+            TaskExpression::PlaceholderScalarFunction(task) => {
+                task.map.as_ref()
+            }
+            TaskExpression::PlaceholderVectorFunction(task) => {
+                task.map.as_ref()
+            }
         }
     }
 
@@ -191,10 +195,13 @@ pub struct ScalarFunctionTaskExpression {
     /// profile weights. If a function has only one task, that task's output becomes the function's
     /// output directly.
     pub output: super::expression::Expression,
-
 }
 
 impl ScalarFunctionTaskExpression {
+    pub fn url(&self) -> String {
+        self.remote.url(&self.owner, &self.repository, &self.commit)
+    }
+
     /// Compiles the expression into a concrete [`ScalarFunctionTask`].
     pub fn compile(
         self,
@@ -234,6 +241,10 @@ pub struct ScalarFunctionTask {
 }
 
 impl ScalarFunctionTask {
+    pub fn url(&self) -> String {
+        self.remote.url(&self.owner, &self.repository, &self.commit)
+    }
+
     pub fn compile_output(
         &self,
         input: &super::expression::Input,
@@ -295,10 +306,13 @@ pub struct VectorFunctionTaskExpression {
     /// profile weights. If a function has only one task, that task's output becomes the function's
     /// output directly.
     pub output: super::expression::Expression,
-
 }
 
 impl VectorFunctionTaskExpression {
+    pub fn url(&self) -> String {
+        self.remote.url(&self.owner, &self.repository, &self.commit)
+    }
+
     /// Compiles the expression into a concrete [`VectorFunctionTask`].
     pub fn compile(
         self,
@@ -338,6 +352,10 @@ pub struct VectorFunctionTask {
 }
 
 impl VectorFunctionTask {
+    pub fn url(&self) -> String {
+        self.remote.url(&self.owner, &self.repository, &self.commit)
+    }
+
     pub fn compile_output(
         &self,
         input: &super::expression::Input,
@@ -415,7 +433,6 @@ pub struct VectorCompletionTaskExpression {
     /// profile weights. If a function has only one task, that task's output becomes the function's
     /// output directly.
     pub output: super::expression::Expression,
-
 }
 
 impl VectorCompletionTaskExpression {
