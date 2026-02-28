@@ -1,3 +1,66 @@
 {
-  "$ref": "JSONSchema"
+  "type": "object",
+  "properties": {
+    "$ref": {
+      "type": "string"
+    },
+    "type": {
+      "enum": [
+        "string",
+        "number",
+        "integer",
+        "boolean",
+        "null",
+        "object",
+        "array"
+      ]
+    },
+    "description": {
+      "type": "string"
+    },
+    "format": {
+      "type": "string"
+    },
+    "enum": {
+      "type": "array",
+      "items": {}
+    },
+    "const": {},
+    "properties": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "JsonSchema"
+      }
+    },
+    "required": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "items": {
+      "$ref": "JsonSchema"
+    },
+    "prefixItems": {
+      "type": "array",
+      "items": {
+        "$ref": "JsonSchema"
+      }
+    },
+    "additionalProperties": {
+      "$ref": "JsonSchema"
+    },
+    "anyOf": {
+      "type": "array",
+      "items": {
+        "$ref": "JsonSchema"
+      }
+    },
+    "allOf": {
+      "type": "array",
+      "items": {
+        "$ref": "JsonSchema"
+      }
+    }
+  }
 }

@@ -1,3 +1,40 @@
 {
-  "$ref": "JsonValueExpression"
+  "anyOf": [
+    {
+      "type": "null"
+    },
+    {
+      "type": "boolean",
+      "description": "Boolean"
+    },
+    {
+      "type": "number",
+      "description": "Number"
+    },
+    {
+      "type": "string",
+      "description": "String"
+    },
+    {
+      "type": "array",
+      "items": {
+        "$ref": "JsonValueExpression",
+        "description": "A JSON value."
+      },
+      "description": "Array (values may be expressions)"
+    },
+    {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "JsonValueExpression",
+        "description": "A JSON value."
+      },
+      "description": "Object (values may be expressions)"
+    },
+    {
+      "$ref": "Expression",
+      "description": "An expression which evaluates to a JSON value. Receives: `input`, `map` (if mapped)."
+    }
+  ],
+  "description": "A JSON value."
 }

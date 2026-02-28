@@ -915,7 +915,7 @@ var init_json = __esm({
         ).describe("Object").meta({ title: "JsonValueObject" })
       ])
     ).describe("A JSON value.").meta({ title: "JsonValue" });
-    JsonValueJsonSchema = { "$ref": "JsonValue" };
+    JsonValueJsonSchema = { "anyOf": [{ "type": "null" }, { "type": "boolean", "description": "Boolean" }, { "type": "number", "description": "Number" }, { "type": "string", "description": "String" }, { "type": "array", "items": { "$ref": "JsonValue", "description": "A JSON value." }, "description": "Array" }, { "type": "object", "additionalProperties": { "$ref": "JsonValue", "description": "A JSON value." }, "description": "Object" }], "description": "A JSON value." };
     JsonValueExpressionSchema = z6.lazy(
       () => z6.union([
         z6.null().describe("Null").meta({ title: "JsonValueNull" }),
@@ -940,7 +940,7 @@ var init_json = __esm({
         )
       ])
     ).describe(JsonValueSchema.description).meta({ title: "JsonValueExpression" });
-    JsonValueExpressionJsonSchema = { "$ref": "JsonValueExpression" };
+    JsonValueExpressionJsonSchema = { "anyOf": [{ "type": "null" }, { "type": "boolean", "description": "Boolean" }, { "type": "number", "description": "Number" }, { "type": "string", "description": "String" }, { "type": "array", "items": { "$ref": "JsonValueExpression", "description": "A JSON value." }, "description": "Array (values may be expressions)" }, { "type": "object", "additionalProperties": { "$ref": "JsonValueExpression", "description": "A JSON value." }, "description": "Object (values may be expressions)" }, { "$ref": "Expression", "description": "An expression which evaluates to a JSON value. Receives: `input`, `map` (if mapped)." }], "description": "A JSON value." };
   }
 });
 var TextResponseFormatSchema, TextResponseFormatJsonSchema, JsonObjectResponseFormatSchema, JsonObjectResponseFormatJsonSchema, JsonSchemaResponseFormatJsonSchemaSchema, JsonSchemaResponseFormatJsonSchemaJsonSchema, JsonSchemaResponseFormatSchema, JsonSchemaResponseFormatJsonSchema, GrammarResponseFormatSchema, GrammarResponseFormatJsonSchema, PythonResponseFormatSchema, PythonResponseFormatJsonSchema, ResponseFormatSchema, ResponseFormatJsonSchema;
@@ -5492,7 +5492,7 @@ var init_params = __esm({
     ErrorFunctionOutputSchema = JsonValueSchema.describe(
       "The erroneous output of a function execution, containing the invalid output which failed validation."
     ).meta({ title: "JsonValue", wrapper: true });
-    ErrorFunctionOutputJsonSchema = { "$ref": "JsonValue" };
+    ErrorFunctionOutputJsonSchema = { "anyOf": [{ "type": "null" }, { "type": "boolean", "description": "Boolean" }, { "type": "number", "description": "Number" }, { "type": "string", "description": "String" }, { "type": "array", "items": { "$ref": "JsonValue", "description": "A JSON value." }, "description": "Array" }, { "type": "object", "additionalProperties": { "$ref": "JsonValue", "description": "A JSON value." }, "description": "Object" }], "description": "The erroneous output of a function execution, containing the invalid output which failed validation." };
     ValidScalarFunctionOutputSchema = z6.number().describe(
       "A valid output of a scalar function execution / function execution task. A number between 0 and 1."
     ).meta({ title: "ValidScalarFunctionOutput" });
@@ -7272,8 +7272,10 @@ function convert(schema, lazyDepth = 1, skipDirectRef = true) {
       );
     // --- recursive ---
     case "lazy": {
-      const ref = lazyToolRef(schema);
-      if (ref) return ref;
+      if (!skipDirectRef) {
+        const ref = lazyToolRef(schema);
+        if (ref) return ref;
+      }
       if (lazyDepth > 0) {
         const inner = def.getter();
         return withDesc(
@@ -7446,7 +7448,7 @@ var init_json_schema = __esm({
       "Upstream"
     ];
     propertyRefsBySchema = /* @__PURE__ */ new WeakMap();
-    JsonSchemaJsonSchema = { "$ref": "JsonSchema" };
+    JsonSchemaJsonSchema = { "type": "object", "properties": { "$ref": { "type": "string" }, "type": { "enum": ["string", "number", "integer", "boolean", "null", "object", "array"] }, "description": { "type": "string" }, "format": { "type": "string" }, "enum": { "type": "array", "items": {} }, "const": {}, "properties": { "type": "object", "additionalProperties": { "$ref": "JsonSchema" } }, "required": { "type": "array", "items": { "type": "string" } }, "items": { "$ref": "JsonSchema" }, "prefixItems": { "type": "array", "items": { "$ref": "JsonSchema" } }, "additionalProperties": { "$ref": "JsonSchema" }, "anyOf": { "type": "array", "items": { "$ref": "JsonSchema" } }, "allOf": { "type": "array", "items": { "$ref": "JsonSchema" } } } };
   }
 });
 function isZodSchema(value) {

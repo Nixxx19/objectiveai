@@ -297,9 +297,12 @@ export function convert(
 
     // --- recursive ---
     case "lazy": {
-      // Check for registration first to avoid calling getter on recursive schemas
-      const ref = lazyToolRef(schema);
-      if (ref) return ref;
+      // Check for registration first to avoid calling getter on recursive schemas.
+      // Skip when this is the direct (top-level) call so we don't self-ref.
+      if (!skipDirectRef) {
+        const ref = lazyToolRef(schema);
+        if (ref) return ref;
+      }
 
       if (lazyDepth > 0) {
         const inner = def.getter();
