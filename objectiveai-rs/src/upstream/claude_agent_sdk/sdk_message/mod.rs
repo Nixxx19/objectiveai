@@ -1,6 +1,5 @@
 mod api_key_source;
 mod fast_mode_state;
-mod non_nullable_usage;
 mod permission_mode;
 mod sdk_assistant_message;
 mod sdk_auth_status_message;
@@ -24,7 +23,6 @@ mod sdk_user_message_replay;
 
 pub use api_key_source::*;
 pub use fast_mode_state::*;
-pub use non_nullable_usage::*;
 pub use permission_mode::*;
 pub use sdk_assistant_message::*;
 pub use sdk_auth_status_message::*;

@@ -20,7 +20,7 @@ pub struct SDKResultSuccess {
     pub result: String,
     pub stop_reason: Option<String>,
     pub total_cost_usd: f64,
-    pub usage: super::NonNullableUsage,
+    pub usage: super::super::non_nullable_beta_usage::NonNullableBetaUsage,
     #[serde(rename = "modelUsage")]
     pub model_usage: HashMap<String, ModelUsage>,
     pub permission_denials: Vec<SDKPermissionDenial>,
@@ -43,7 +43,7 @@ pub struct SDKResultError {
     pub num_turns: f64,
     pub stop_reason: Option<String>,
     pub total_cost_usd: f64,
-    pub usage: super::NonNullableUsage,
+    pub usage: super::super::non_nullable_beta_usage::NonNullableBetaUsage,
     #[serde(rename = "modelUsage")]
     pub model_usage: HashMap<String, ModelUsage>,
     pub permission_denials: Vec<SDKPermissionDenial>,
