@@ -9,8 +9,7 @@ use std::{
 type Tool = objectiveai::functions::inventions::Tool;
 type FunctionInventionChunk =
     objectiveai::functions::inventions::response::streaming::FunctionInventionChunk;
-type Object =
-    objectiveai::functions::inventions::response::streaming::Object;
+type Object = objectiveai::functions::inventions::response::streaming::Object;
 type Params = objectiveai::functions::inventions::Params;
 type State = objectiveai::functions::inventions::State;
 
@@ -258,13 +257,11 @@ fn run_all_steps<T: InventionState>(
         let input_schema_prompt = if is_scalar {
             "Create the InputSchema for your Scalar Function. \
             Ensure that it adheres to the specifications outlined in your Spec \
-            and is consistent with the essay you wrote describing your function. \
-            Use CheckFunction after writing the input schema to validate it.".to_string()
+            and is consistent with the essay you wrote describing your function.".to_string()
         } else {
             "Create the InputSchema for your Vector Function. \
             Ensure that it adheres to the specifications outlined in your Spec \
-            and is consistent with the essay you wrote describing your function. \
-            Use CheckFunction after writing the input schema to validate it.".to_string()
+            and is consistent with the essay you wrote describing your function.".to_string()
         };
         let mut step = run_step(
             upstream_client.clone(), request.clone(),
@@ -315,65 +312,168 @@ fn run_all_steps<T: InventionState>(
         yield state_chunk(&state, &id, created, object);
 
         // Step 4: Tasks (Body)
+        let depth_propagation = if params.depth > 1 {
+            " The sub-function will also have its own sub-functions. \
+            The spec should include any instructions that should also be \
+            propagated down to the child agent's own child agents, if any are needed."
+        } else {
+            ""
+        };
         let tasks_prompt = if is_scalar {
             if params.depth > 0 {
                 format!(
-                    "Create the Tasks for your Scalar Function. Create {tasks_str} placeholder tasks \
-                    based on your EssayTasks. Each task defines a sub-function which will be \
-                    automatically invented after you finish. \
-                    Each task has: `name` (sub-function name), `spec` (detailed description of what \
-                    the sub-function should evaluate), `input_schema` (the sub-function's input schema), \
-                    `skip` (optional conditional skip expression), and `input` (expression deriving \
-                    the sub-function's input from the parent function's input). \
-                    Expression context: `input` (the parent function's input). \
-                    Use CheckFunction to validate. Re-read Spec first — it is the source of truth.",
+                    "Create the Tasks for your Scalar Function.\n\n\
+                    ## Task Structure\n\n\
+                    Create {tasks_str} placeholder tasks based on your EssayTasks. \
+                    Each task defines a sub-function which will be automatically invented \
+                    after you finish. Some tasks may have the same `input_schema` as the \
+                    parent, and some may contain only a subset so as to evaluate a specific \
+                    aspect of the input.\n\n\
+                    **TaskSpec:**\n\
+                    First, write a detailed `spec` for the task, describing what the \
+                    sub-function should evaluate. This is a plain language description \
+                    that will guide the child agent inventing the sub-function.{depth_propagation}\n\n\
+                    **Task Fields:**\n\
+                    - `name` — the sub-function's name\n\
+                    - `spec` — detailed description of what the sub-function should evaluate\n\
+                    - `input_schema` — the sub-function's input schema\n\
+                    - `skip` — optional conditional skip expression, typically used to skip \
+                    tasks which evaluate some optional field on the parent input\n\
+                    - `input` — expression deriving the task input from the parent input\n\n\
+                    ## Expression Context\n\n\
+                    - `input` — the parent function's input\n\n\
+                    ## Finishing\n\n\
+                    1. Use CheckFunction to validate — fix any errors and retry until it passes\n\
+                    2. Re-read the Spec. It is the universal source of truth — never contradict it.",
                 )
             } else {
                 format!(
-                    "Create the Tasks for your Scalar Function. Create {tasks_str} vector completion \
-                    tasks based on your EssayTasks. Each task defines a prompt for an LLM \
-                    as well as possible responses for the assistant to reply with. \
-                    The ObjectiveAI system will return a vector of scores evaluating which \
-                    response the LLM is most likely to reply with. These probabilities form \
-                    the fundamental basis for how the Function scores the input. \
-                    Each task has: `messages` (Starlark expression producing the prompt), \
-                    `responses` (array of possible assistant replies), and optional `skip`. \
-                    Be clever — do not ask the LLM to directly evaluate items. Make items \
-                    into real responses. Each response should correspond to some score. \
-                    Scores should be normalized so an equalized response vector yields a \
-                    final score of 0.5. \
-                    Expression context: `input` (the function's input). \
-                    Use CheckFunction to validate. Re-read Spec first — it is the source of truth.",
+                    "Create the Tasks for your Scalar Function.\n\n\
+                    ## Task Structure\n\n\
+                    Create {tasks_str} vector completion tasks based on your EssayTasks. \
+                    Each task defines a prompt for an LLM as well as possible responses \
+                    for the assistant to reply with. The ObjectiveAI system will return a \
+                    vector of scores evaluating which response the LLM is most likely to \
+                    reply with. These probabilities form the fundamental basis for how the \
+                    Function scores the input.\n\n\
+                    ### Messages\n\n\
+                    `messages` is a Starlark expression producing the conversation prompt. \
+                    Each message contains a role and an array of content parts. Typically, \
+                    messages will be a single user message containing context from the input.\n\n\
+                    ### Responses\n\n\
+                    `responses` is an array of potential responses the LLM could reply with. \
+                    Each response is an array of content parts. The responses are \
+                    fixed potential replies. Each response automatically corresponds to a score \
+                    with earlier responses being a low score, and later responses being a high \
+                    score.\n\n\
+                    ## Structure\n\n\
+                    Be clever in how you structure `messages` and `responses`. Do not ask \
+                    the LLM to directly score the input. Instead, make `responses` into real \
+                    responses that an assistant would actually reply with in a conversation. \
+                    For example, if asking for the quality of a joke, the message could be \
+                    'How funny is this joke: {{joke}}?' and the responses could be 'not funny at all', \
+                    'pretty funny', and 'hilarious'.\n\n\
+                    ### Multimodal Content\n\n\
+                    Multimodal content parts can be used in `messages` and are derived from the input. \
+                    Never use `str()` on multimodal content — this breaks the system and makes \
+                    it unintelligible to the LLM, ruining the scores.\n\n\
+                    ### Key Design Principles\n\n\
+                    - Some tasks may score a subset of the parent input. Other tasks may score \
+                    the entire parent input. Some tasks may contain partial context, and others \
+                    may contain full context.\n\
+                    - Tasks should not be identical to each other. They should vary — be creative \
+                    in how they vary, feel free to use multiple messages in some cases.\n\
+                    - `skip` expressions conditionally skip tasks. This is typically used to skip \
+                    tasks which use some optional field(s) on the parent input.\n\n\
+                    ## Expression Context\n\n\
+                    - `input` — the function's input\n\n\
+                    ## Finishing\n\n\
+                    1. Use CheckFunction to validate — fix any errors and retry until it passes\n\
+                    2. Re-read the Spec. It is the universal source of truth — never contradict it.",
                 )
             }
         } else if params.depth > 0 {
             format!(
-                "Create the Tasks for your Vector Function. Create {tasks_str} placeholder tasks \
-                based on your EssayTasks. You can mix two types: \
-                Vector sub-functions (placeholder.alpha.vector.function) rank the input items. \
-                Scalar sub-functions (placeholder.alpha.scalar.function) score individual items. \
-                Each task has: `name` (sub-function name), `spec` (detailed description of what \
-                the sub-function should evaluate), `input_schema` (the sub-function's input schema), \
-                `skip` (optional conditional skip expression), and `input` (expression deriving \
-                the sub-function's input from the parent function's input). \
-                Expression context: `input` (the parent function's input). \
-                Use CheckFunction to validate. Re-read Spec first — it is the source of truth.",
+                "Create the Tasks for your Vector Function.\n\n\
+                ## Task Structure\n\n\
+                Create {tasks_str} placeholder tasks based on your EssayTasks. \
+                Each task defines a sub-function which will be automatically invented \
+                after you finish. Some tasks may have the same `input_schema` as the \
+                parent, and some may contain only a subset so as to evaluate a specific \
+                aspect of the input.\n\
+                You can mix two types of placeholder tasks:\n\
+                - **Vector sub-functions** (`placeholder.alpha.vector.function`): Rank the \
+                input items provided to the task relative to each other.\n\
+                - **Scalar sub-functions** (`placeholder.alpha.scalar.function`): Score \
+                individual items.\n\n\
+                **TaskSpec:**\n\
+                First, write a detailed `spec` for the task, describing what the \
+                sub-function should evaluate. This is a plain language description \
+                that will guide the child agent inventing the sub-function.{depth_propagation}\n\n\
+                **Task Fields:**\n\
+                - `name` — the sub-function's name\n\
+                - `spec` — detailed description of what the sub-function should evaluate\n\
+                - `input_schema` — the sub-function's input schema\n\
+                - `skip` — optional conditional skip expression, typically used to skip \
+                tasks which evaluate some optional field on the parent input\n\
+                - `input` — expression deriving the task input from the parent input\n\n\
+                ## Expression Context\n\n\
+                - `input` — the parent function's input\n
+                - `map` - only present in scalar sub-functions, the index of the item being scored\n\n\
+                ## Finishing\n\n\
+                1. Use CheckFunction to validate — fix any errors and retry until it passes\n\
+                2. Re-read the Spec. It is the universal source of truth — never contradict it.",
             )
         } else {
             format!(
-                "Create the Tasks for your Vector Function. Create {tasks_str} vector completion \
-                tasks based on your EssayTasks. Each task defines a prompt for an LLM \
-                as well as possible responses for the assistant to reply with. \
-                The ObjectiveAI system will return a vector of scores evaluating which \
-                response the LLM is most likely to reply with. These probabilities form \
-                the fundamental basis for how the Function ranks items. \
-                Each task has: `messages` (Starlark expression producing the prompt), \
-                `responses` (Starlark expression producing possible assistant replies), \
-                and optional `skip`. \
-                Be clever — do not ask the LLM to directly evaluate items. Make items \
-                into real responses. \
-                Expression context: `input` (the function's input). \
-                Use CheckFunction to validate. Re-read Spec first — it is the source of truth.",
+                "Create the Tasks for your Vector Function.\n\n\
+                ## Task Structure\n\n\
+                Create {tasks_str} vector completion tasks based on your EssayTasks. \
+                Each task defines a prompt for an LLM as well as possible responses \
+                for the assistant to reply with. The ObjectiveAI system will return a \
+                vector of scores evaluating which response the LLM is most likely to \
+                reply with. These probabilities form the fundamental basis for how the \
+                Function ranks items.\n\n\
+                ### Messages\n\n\
+                `messages` is a Starlark expression producing the conversation prompt. \
+                Each message contains a role and an array of content parts. Typically, \
+                messages will be a single user message. Sometimes it is a fixed message. \
+                Other times, it contains context from the input. But it never contains \
+                the items to be ranked.\n\n\
+                ### Responses\n\n\
+                `responses` is a Starlark expression producing an array of potential \
+                responses the LLM could reply with. Each response is an array of content parts.\n\n\
+                ## Structure\n\n\
+                Be clever in how you structure `messages` and `responses`. Do not ask \
+                the LLM to directly evaluate items. Instead, make the items into real \
+                responses that an assistant would actually reply with in a conversation. \
+                For messages, do not structure it like 'Which item is best?' Instead, \
+                structure it like 'What would a good item look like?' and make the \
+                responses the items being ranked. If ranking search results, for example, \
+                the message would be the search query, and the responses would be the \
+                search results as-is.\n\n\
+                ### Multimodal Content\n\n\
+                Multimodal content parts can be used in both `messages` and `responses`. \
+                Put contextual multimodal content in `messages`, and put multimodal \
+                content which is being ranked into `responses`. Never use `str()` on \
+                multimodal content — this breaks the system and makes it unintelligible \
+                to the LLM, ruining the rankings.\n\n\
+                ### Key Design Principles\n\n\
+                - Some tasks may rank a subset of the parent input. Other tasks may rank \
+                the entire parent input. Some tasks may contain partial context, and others \
+                may contain full context. Tasks should not be identical to each other. They \
+                should vary — be creative in how they vary, feel free to use multiple messages \
+                in some cases.\n\
+                - `skip` expressions conditionally skip tasks. This is typically used to skip \
+                tasks which use some optional field(s) on the parent input.\n\
+                - Ensure that each task ranks items in the same order. This is critical for \
+                the ObjectiveAI system to be able to combine the rankings from different tasks \
+                together into a single ranking.\n\n\
+                ## Expression Context\n\n\
+                - `input` — the function's input\n\n\
+                ## Finishing\n\n\
+                1. Use CheckFunction to validate — fix any errors and retry until it passes\n\
+                2. Re-read the Spec. It is the universal source of truth — never contradict it.",
             )
         };
         let mut step = run_step(
