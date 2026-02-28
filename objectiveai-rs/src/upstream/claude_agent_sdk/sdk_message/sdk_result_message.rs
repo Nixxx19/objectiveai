@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use indexmap::IndexMap;
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
@@ -22,7 +22,7 @@ pub struct SDKResultSuccess {
     pub total_cost_usd: f64,
     pub usage: super::super::beta_usage::NonNullableBetaUsage,
     #[serde(rename = "modelUsage")]
-    pub model_usage: HashMap<String, ModelUsage>,
+    pub model_usage: IndexMap<String, ModelUsage>,
     pub permission_denials: Vec<SDKPermissionDenial>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub structured_output: Option<serde_json::Value>,
@@ -45,7 +45,7 @@ pub struct SDKResultError {
     pub total_cost_usd: f64,
     pub usage: super::super::beta_usage::NonNullableBetaUsage,
     #[serde(rename = "modelUsage")]
-    pub model_usage: HashMap<String, ModelUsage>,
+    pub model_usage: IndexMap<String, ModelUsage>,
     pub permission_denials: Vec<SDKPermissionDenial>,
     pub errors: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -67,7 +67,7 @@ pub enum SDKResultErrorSubtype {
 pub struct SDKPermissionDenial {
     pub tool_name: String,
     pub tool_use_id: String,
-    pub tool_input: HashMap<String, serde_json::Value>,
+    pub tool_input: serde_json::Map<String, serde_json::Value>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
