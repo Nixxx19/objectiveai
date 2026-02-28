@@ -2,16 +2,21 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
+pub type CallTool = Arc<
+    dyn Fn(
+            serde_json::Value,
+        )
+            -> Pin<Box<dyn Future<Output = Result<String, String>> + Send>>
+        + Send
+        + Sync,
+>;
+
 #[derive(Clone)]
 pub struct Tool {
     pub name: &'static str,
     pub description: &'static str,
     pub args_type: ToolArgsType,
-    pub call: Arc<
-        dyn Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<String, String>> + Send>>
-            + Send
-            + Sync,
-    >,
+    pub call: CallTool,
 }
 
 impl Tool {
@@ -19,7 +24,10 @@ impl Tool {
         name: &'static str,
         description: &'static str,
         args_type: ToolArgsType,
-        f: impl Fn(serde_json::Value) -> Result<String, String> + Send + Sync + 'static,
+        f: impl Fn(serde_json::Value) -> Result<String, String>
+        + Send
+        + Sync
+        + 'static,
     ) -> Self {
         Self {
             name,
@@ -36,10 +44,13 @@ impl Tool {
         name: &'static str,
         description: &'static str,
         args_type: ToolArgsType,
-        f: impl Fn(serde_json::Value) -> Pin<Box<dyn Future<Output = Result<String, String>> + Send>>
-            + Send
-            + Sync
-            + 'static,
+        f: impl Fn(
+            serde_json::Value,
+        )
+            -> Pin<Box<dyn Future<Output = Result<String, String>> + Send>>
+        + Send
+        + Sync
+        + 'static,
     ) -> Self {
         Self {
             name,
