@@ -332,61 +332,39 @@ pub fn compileFunctionInputMerge(
 /// Generates diverse example inputs from the input_schema and validates that the
 /// output_length, input_split, and input_merge expressions work correctly together
 /// via round-trip testing.
-///
-/// # Arguments
-///
-/// * `fields` - JavaScript object with `input_schema`, `output_length`, `input_split`, `input_merge`
-///
-/// # Returns
-///
-/// Nothing on success. Throws a descriptive error string on failure.
 #[wasm_bindgen]
-pub fn qualityCheckVectorFields(fields: JsValue) -> Result<(), JsValue> {
-    let fields: objectiveai::functions::quality::VectorFieldsValidation =
+pub fn checkVectorFields(fields: JsValue) -> Result<(), JsValue> {
+    let fields: objectiveai::functions::check::VectorFieldsValidation =
         serde_wasm_bindgen::from_value(fields)?;
-    objectiveai::functions::quality::check_vector_fields(fields)
+    objectiveai::functions::check::check_vector_fields(fields)
         .map_err(|e| JsValue::from_str(&e))
 }
 
-/// Quality check for scalar function fields (input_schema only).
-///
-/// # Arguments
-///
-/// * `fields` - JavaScript object with `input_schema`
-///
-/// # Returns
-///
-/// Nothing on success. Throws a descriptive error string on failure.
+/// Validates scalar function fields (input_schema only).
 #[wasm_bindgen]
-pub fn qualityCheckScalarFields(fields: JsValue) -> Result<(), JsValue> {
-    let fields: objectiveai::functions::quality::ScalarFieldsValidation =
+pub fn checkScalarFields(fields: JsValue) -> Result<(), JsValue> {
+    let fields: objectiveai::functions::check::ScalarFieldsValidation =
         serde_wasm_bindgen::from_value(fields)?;
-    objectiveai::functions::quality::check_scalar_fields(fields)
+    objectiveai::functions::check::check_scalar_fields(fields)
         .map_err(|e| JsValue::from_str(&e))
 }
 
-/// Quality check for a leaf function (depth 0).
-///
-/// Routes to leaf scalar or leaf vector checks based on the function type.
-/// Leaf functions contain only vector.completion tasks.
+/// Alpha check for a leaf scalar function (depth 0, scalar output).
 #[wasm_bindgen]
-pub fn qualityCheckLeafFunction(function: JsValue) -> Result<(), JsValue> {
-    let function: objectiveai::functions::RemoteFunction =
+pub fn alphaCheckLeafScalarFunction(function: JsValue) -> Result<(), JsValue> {
+    let function: objectiveai::functions::alpha_scalar::RemoteFunction =
         serde_wasm_bindgen::from_value(function)?;
-    objectiveai::functions::quality::check_leaf_function(&function)
+    objectiveai::functions::alpha_scalar::check::check_alpha_leaf_scalar_function(&function)
         .map_err(|e| JsValue::from_str(&e))
 }
 
-/// Quality check for a branch function (depth > 0).
+/// Alpha check for a branch scalar function (depth > 0, scalar output).
 ///
-/// Routes to branch scalar or branch vector checks based on the function type.
-/// Branch functions contain only function/placeholder tasks.
-///
-/// `children` is an optional map of `"owner/repository"` → RemoteFunction for
-/// validating compiled task inputs against child function input schemas.
+/// `children` is an optional map of child function name → RemoteFunction for
+/// validating placeholder task inputs against child function input schemas.
 #[wasm_bindgen]
-pub fn qualityCheckBranchFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
-    let function: objectiveai::functions::RemoteFunction =
+pub fn alphaCheckBranchScalarFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
+    let function: objectiveai::functions::alpha_scalar::RemoteFunction =
         serde_wasm_bindgen::from_value(function)?;
     let children: Option<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>> =
         if children.is_undefined() || children.is_null() {
@@ -394,41 +372,26 @@ pub fn qualityCheckBranchFunction(function: JsValue, children: JsValue) -> Resul
         } else {
             Some(serde_wasm_bindgen::from_value(children)?)
         };
-    objectiveai::functions::quality::check_branch_function(&function, children.as_ref())
+    objectiveai::functions::alpha_scalar::check::check_alpha_branch_scalar_function(&function, children.as_ref())
         .map_err(|e| JsValue::from_str(&e))
 }
 
-/// Quality check for a leaf scalar function (depth 0, scalar output).
-///
-/// Validates: only vector.completion tasks, no map,
-/// content parts (not plain strings), messages >= 1, responses >= 2.
+/// Alpha check for a leaf vector function (depth 0, vector output).
 #[wasm_bindgen]
-pub fn qualityCheckLeafScalarFunction(function: JsValue) -> Result<(), JsValue> {
-    let function: objectiveai::functions::RemoteFunction =
+pub fn alphaCheckLeafVectorFunction(function: JsValue) -> Result<(), JsValue> {
+    let function: objectiveai::functions::alpha_vector::RemoteFunction =
         serde_wasm_bindgen::from_value(function)?;
-    objectiveai::functions::quality::check_leaf_scalar_function(&function)
+    objectiveai::functions::alpha_vector::check::check_alpha_leaf_vector_function(&function)
         .map_err(|e| JsValue::from_str(&e))
 }
 
-/// Quality check for a leaf vector function (depth 0, vector output).
+/// Alpha check for a branch vector function (depth > 0, vector output).
 ///
-/// Validates: vector input schema, only vector.completion tasks,
-/// content parts, vector field round-trip (output_length/input_split/input_merge).
+/// `children` is an optional map of child function name → RemoteFunction for
+/// validating placeholder task inputs against child function input schemas.
 #[wasm_bindgen]
-pub fn qualityCheckLeafVectorFunction(function: JsValue) -> Result<(), JsValue> {
-    let function: objectiveai::functions::RemoteFunction =
-        serde_wasm_bindgen::from_value(function)?;
-    objectiveai::functions::quality::check_leaf_vector_function(&function)
-        .map_err(|e| JsValue::from_str(&e))
-}
-
-/// Quality check for a branch scalar function (depth > 0, scalar output).
-///
-/// Validates: only scalar-like tasks, no map, no vector.completion,
-/// example inputs compile and placeholder inputs match schemas.
-#[wasm_bindgen]
-pub fn qualityCheckBranchScalarFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
-    let function: objectiveai::functions::RemoteFunction =
+pub fn alphaCheckBranchVectorFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
+    let function: objectiveai::functions::alpha_vector::RemoteFunction =
         serde_wasm_bindgen::from_value(function)?;
     let children: Option<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>> =
         if children.is_undefined() || children.is_null() {
@@ -436,25 +399,7 @@ pub fn qualityCheckBranchScalarFunction(function: JsValue, children: JsValue) ->
         } else {
             Some(serde_wasm_bindgen::from_value(children)?)
         };
-    objectiveai::functions::quality::check_branch_scalar_function(&function, children.as_ref())
-        .map_err(|e| JsValue::from_str(&e))
-}
-
-/// Quality check for a branch vector function (depth > 0, vector output).
-///
-/// Validates: vector input schema, task type/map constraints,
-/// vector field round-trip, example input compilation.
-#[wasm_bindgen]
-pub fn qualityCheckBranchVectorFunction(function: JsValue, children: JsValue) -> Result<(), JsValue> {
-    let function: objectiveai::functions::RemoteFunction =
-        serde_wasm_bindgen::from_value(function)?;
-    let children: Option<std::collections::HashMap<String, objectiveai::functions::RemoteFunction>> =
-        if children.is_undefined() || children.is_null() {
-            None
-        } else {
-            Some(serde_wasm_bindgen::from_value(children)?)
-        };
-    objectiveai::functions::quality::check_branch_vector_function(&function, children.as_ref())
+    objectiveai::functions::alpha_vector::check::check_alpha_branch_vector_function(&function, children.as_ref())
         .map_err(|e| JsValue::from_str(&e))
 }
 

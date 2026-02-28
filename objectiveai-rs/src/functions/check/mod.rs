@@ -23,11 +23,9 @@ pub(crate) use check_output_expression::{
     ScalarOutputShape, VectorOutputShape, check_scalar_distribution,
     check_vector_distribution,
 };
-pub(crate) use check_scalar_fields::{ScalarFieldsValidation, check_scalar_fields};
-pub(crate) use check_vector_fields::{
-    VectorFieldsValidation, check_vector_fields, check_vector_fields_for_input,
-    random_subsets,
-};
+pub use check_scalar_fields::{ScalarFieldsValidation, check_scalar_fields};
+pub use check_vector_fields::{VectorFieldsValidation, check_vector_fields};
+pub(crate) use check_vector_fields::{check_vector_fields_for_input, random_subsets};
 pub(crate) use compile_and_validate::{
     compile_and_validate_one_input, extract_task_input, extract_task_input_value,
 };
