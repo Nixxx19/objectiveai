@@ -8,6 +8,6 @@ pub enum BetaRawContentBlockStopEventType {
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaRawContentBlockStopEvent {
-    pub index: f64,
+    pub index: i64,
     pub r#type: BetaRawContentBlockStopEventType,
 }

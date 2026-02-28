@@ -49,7 +49,7 @@ pub enum BashCodeExecutionResultBlockParamType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BashCodeExecutionResultBlockParam {
     pub content: Vec<BashCodeExecutionOutputBlockParam>,
-    pub return_code: f64,
+    pub return_code: i64,
     pub stderr: String,
     pub stdout: String,
     pub r#type: BashCodeExecutionResultBlockParamType,

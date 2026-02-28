@@ -9,10 +9,10 @@ pub enum BetaCitationSearchResultLocationType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaCitationSearchResultLocation {
     pub cited_text: String,
-    pub end_block_index: f64,
-    pub search_result_index: f64,
+    pub end_block_index: i64,
+    pub search_result_index: i64,
     pub source: String,
-    pub start_block_index: f64,
+    pub start_block_index: i64,
     pub title: Option<String>,
     pub r#type: BetaCitationSearchResultLocationType,
 }

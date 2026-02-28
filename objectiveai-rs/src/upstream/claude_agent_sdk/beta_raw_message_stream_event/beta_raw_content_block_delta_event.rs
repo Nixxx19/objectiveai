@@ -9,6 +9,6 @@ pub enum BetaRawContentBlockDeltaEventType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaRawContentBlockDeltaEvent {
     pub delta: super::BetaRawContentBlockDelta,
-    pub index: f64,
+    pub index: i64,
     pub r#type: BetaRawContentBlockDeltaEventType,
 }

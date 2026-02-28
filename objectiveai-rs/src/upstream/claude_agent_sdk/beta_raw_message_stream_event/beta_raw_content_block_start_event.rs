@@ -9,6 +9,6 @@ pub enum BetaRawContentBlockStartEventType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaRawContentBlockStartEvent {
     pub content_block: super::super::beta_content_block::BetaContentBlock,
-    pub index: f64,
+    pub index: i64,
     pub r#type: BetaRawContentBlockStartEventType,
 }

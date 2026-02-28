@@ -12,7 +12,7 @@ pub struct SDKToolProgressMessage {
     pub tool_use_id: String,
     pub tool_name: String,
     pub parent_tool_use_id: Option<String>,
-    pub elapsed_time_seconds: f64,
+    pub elapsed_time_seconds: i64,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub task_id: Option<String>,
     pub uuid: String,

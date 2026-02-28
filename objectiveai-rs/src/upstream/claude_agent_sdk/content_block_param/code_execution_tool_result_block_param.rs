@@ -48,7 +48,7 @@ pub enum CodeExecutionResultBlockParamType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct CodeExecutionResultBlockParam {
     pub content: Vec<CodeExecutionOutputBlockParam>,
-    pub return_code: f64,
+    pub return_code: i64,
     pub stderr: String,
     pub stdout: String,
     pub r#type: CodeExecutionResultBlockParamType,
@@ -64,7 +64,7 @@ pub enum EncryptedCodeExecutionResultBlockParamType {
 pub struct EncryptedCodeExecutionResultBlockParam {
     pub content: Vec<CodeExecutionOutputBlockParam>,
     pub encrypted_stdout: String,
-    pub return_code: f64,
+    pub return_code: i64,
     pub stderr: String,
     pub r#type: EncryptedCodeExecutionResultBlockParamType,
 }

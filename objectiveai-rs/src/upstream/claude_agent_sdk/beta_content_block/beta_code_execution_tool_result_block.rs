@@ -53,7 +53,7 @@ pub enum BetaCodeExecutionResultBlockType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaCodeExecutionResultBlock {
     pub content: Vec<super::BetaCodeExecutionOutputBlock>,
-    pub return_code: f64,
+    pub return_code: i64,
     pub stderr: String,
     pub stdout: String,
     #[serde(rename = "type")]
@@ -70,7 +70,7 @@ pub enum BetaEncryptedCodeExecutionResultBlockType {
 pub struct BetaEncryptedCodeExecutionResultBlock {
     pub content: Vec<super::BetaCodeExecutionOutputBlock>,
     pub encrypted_stdout: String,
-    pub return_code: f64,
+    pub return_code: i64,
     pub stderr: String,
     #[serde(rename = "type")]
     pub r#type: BetaEncryptedCodeExecutionResultBlockType,

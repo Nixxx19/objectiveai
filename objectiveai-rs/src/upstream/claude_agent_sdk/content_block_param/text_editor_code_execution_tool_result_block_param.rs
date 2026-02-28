@@ -50,11 +50,11 @@ pub struct TextEditorCodeExecutionViewResultBlockParam {
     pub file_type: TextEditorCodeExecutionViewResultBlockParamFileType,
     pub r#type: TextEditorCodeExecutionViewResultBlockParamType,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub num_lines: Option<f64>,
+    pub num_lines: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub start_line: Option<f64>,
+    pub start_line: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub total_lines: Option<f64>,
+    pub total_lines: Option<i64>,
 }
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -81,13 +81,13 @@ pub struct TextEditorCodeExecutionStrReplaceResultBlockParam {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub lines: Option<Vec<String>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub new_lines: Option<f64>,
+    pub new_lines: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub new_start: Option<f64>,
+    pub new_start: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub old_lines: Option<f64>,
+    pub old_lines: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub old_start: Option<f64>,
+    pub old_start: Option<i64>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]

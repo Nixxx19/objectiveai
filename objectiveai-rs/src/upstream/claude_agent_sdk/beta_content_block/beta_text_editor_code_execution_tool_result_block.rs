@@ -65,9 +65,9 @@ pub enum BetaTextEditorCodeExecutionViewResultBlockFileType {
 pub struct BetaTextEditorCodeExecutionViewResultBlock {
     pub content: String,
     pub file_type: BetaTextEditorCodeExecutionViewResultBlockFileType,
-    pub num_lines: Option<f64>,
-    pub start_line: Option<f64>,
-    pub total_lines: Option<f64>,
+    pub num_lines: Option<i64>,
+    pub start_line: Option<i64>,
+    pub total_lines: Option<i64>,
     #[serde(rename = "type")]
     pub r#type: BetaTextEditorCodeExecutionViewResultBlockType,
 }
@@ -94,10 +94,10 @@ pub enum BetaTextEditorCodeExecutionStrReplaceResultBlockType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaTextEditorCodeExecutionStrReplaceResultBlock {
     pub lines: Option<Vec<String>>,
-    pub new_lines: Option<f64>,
-    pub new_start: Option<f64>,
-    pub old_lines: Option<f64>,
-    pub old_start: Option<f64>,
+    pub new_lines: Option<i64>,
+    pub new_start: Option<i64>,
+    pub old_lines: Option<i64>,
+    pub old_start: Option<i64>,
     #[serde(rename = "type")]
     pub r#type: BetaTextEditorCodeExecutionStrReplaceResultBlockType,
 }

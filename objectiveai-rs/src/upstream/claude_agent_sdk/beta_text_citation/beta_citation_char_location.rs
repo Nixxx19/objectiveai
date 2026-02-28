@@ -9,10 +9,10 @@ pub enum BetaCitationCharLocationType {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaCitationCharLocation {
     pub cited_text: String,
-    pub document_index: f64,
+    pub document_index: i64,
     pub document_title: Option<String>,
-    pub end_char_index: f64,
+    pub end_char_index: i64,
     pub file_id: Option<String>,
-    pub start_char_index: f64,
+    pub start_char_index: i64,
     pub r#type: BetaCitationCharLocationType,
 }

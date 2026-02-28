@@ -8,8 +8,8 @@ pub enum BetaClearToolUsesEditType {
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaClearToolUses20250919EditResponse {
-    pub cleared_input_tokens: f64,
-    pub cleared_tool_uses: f64,
+    pub cleared_input_tokens: i64,
+    pub cleared_tool_uses: i64,
     pub r#type: BetaClearToolUsesEditType,
 }
 
@@ -21,8 +21,8 @@ pub enum BetaClearThinkingEditType {
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaClearThinking20251015EditResponse {
-    pub cleared_input_tokens: f64,
-    pub cleared_thinking_turns: f64,
+    pub cleared_input_tokens: i64,
+    pub cleared_thinking_turns: i64,
     pub r#type: BetaClearThinkingEditType,
 }
 

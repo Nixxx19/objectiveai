@@ -22,9 +22,9 @@ pub enum TaskNotificationStatus {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct TaskUsage {
-    pub total_tokens: f64,
-    pub tool_uses: f64,
-    pub duration_ms: f64,
+    pub total_tokens: i64,
+    pub tool_uses: i64,
+    pub duration_ms: i64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
