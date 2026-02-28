@@ -68,7 +68,7 @@ pub struct RemoteAutoProfile {
     pub description: String,
     /// The ensemble to use for all vector completion tasks.
     pub ensemble: vector::completions::request::Ensemble,
-    /// Weights for each LLM in the ensemble.
+    /// Weights for each agent in the ensemble.
     pub profile: crate::vector::completions::request::Profile,
 }
 
@@ -93,7 +93,7 @@ pub struct InlineTasksProfile {
 pub struct InlineAutoProfile {
     /// The ensemble to use for all vector completion tasks.
     pub ensemble: vector::completions::request::Ensemble,
-    /// Weights for each LLM in the ensemble.
+    /// Weights for each agent in the ensemble.
     pub profile: crate::vector::completions::request::Profile,
 }
 

@@ -1,14 +1,13 @@
-//! Core Ensemble LLM types and validation logic.
+//! Core Agent types and validation logic.
 
-use crate::agent;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
 
-/// The base configuration for an Ensemble LLM (without computed ID).
+/// The base configuration for an Agent (without computed ID).
 ///
-/// This struct contains all configurable parameters for a single LLM within
-/// an ensemble. Use [`TryFrom`] to convert to [`EnsembleLlm`] which includes
+/// This struct contains all configurable parameters for a single agent within
+/// an ensemble. Use [`TryFrom`] to convert to [`Agent`] which includes
 /// the computed content-addressed ID.
 ///
 /// # Normalization
@@ -18,7 +17,7 @@ use twox_hash::XxHash3_128;
 /// - Empty collections are removed
 /// - Collections are sorted for deterministic ordering
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct EnsembleLlmBase {
+pub struct AgentBase {
     /// The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).
     pub model: String,
 
@@ -47,11 +46,11 @@ pub struct EnsembleLlmBase {
 
     /// Messages prepended to the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub prefix_messages: Option<Vec<agent::completions::request::Message>>,
+    pub prefix_messages: Option<Vec<super::completions::request::Message>>,
 
     /// Messages appended after the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub suffix_messages: Option<Vec<agent::completions::request::Message>>,
+    pub suffix_messages: Option<Vec<super::completions::request::Message>>,
 
     // --- OpenAI-compatible parameters ---
     /// Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).
@@ -103,7 +102,7 @@ pub struct EnsembleLlmBase {
     pub verbosity: Option<super::Verbosity>,
 }
 
-impl Default for EnsembleLlmBase {
+impl Default for AgentBase {
     fn default() -> Self {
         Self {
             model: String::new(),
@@ -131,7 +130,7 @@ impl Default for EnsembleLlmBase {
     }
 }
 
-impl EnsembleLlmBase {
+impl AgentBase {
     /// Normalizes the configuration for deterministic ID computation.
     ///
     /// This method removes default values, empty collections, and sorts
@@ -150,7 +149,7 @@ impl EnsembleLlmBase {
             Some(mut prefix_messages) => {
                 prefix_messages
                     .iter_mut()
-                    .for_each(agent::completions::request::Message::prepare);
+                    .for_each(super::completions::request::Message::prepare);
                 Some(prefix_messages)
             }
             None => None,
@@ -160,7 +159,7 @@ impl EnsembleLlmBase {
             Some(mut suffix_messages) => {
                 suffix_messages
                     .iter_mut()
-                    .for_each(agent::completions::request::Message::prepare);
+                    .for_each(super::completions::request::Message::prepare);
                 Some(suffix_messages)
             }
             None => None,
@@ -351,42 +350,42 @@ impl EnsembleLlmBase {
     }
 }
 
-/// A validated Ensemble LLM with its computed content-addressed ID.
+/// A validated Agent with its computed content-addressed ID.
 ///
-/// Created by converting from [`EnsembleLlmBase`] via [`TryFrom`].
+/// Created by converting from [`AgentBase`] via [`TryFrom`].
 /// The conversion normalizes and validates the configuration, then computes the ID.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct EnsembleLlm {
+pub struct Agent {
     /// The deterministic content-addressed ID (22-character base62 string).
     pub id: String,
     /// The normalized configuration.
     #[serde(flatten)]
-    pub base: EnsembleLlmBase,
+    pub base: AgentBase,
 }
 
-impl TryFrom<EnsembleLlmBase> for EnsembleLlm {
+impl TryFrom<AgentBase> for Agent {
     type Error = String;
-    fn try_from(mut base: EnsembleLlmBase) -> Result<Self, Self::Error> {
+    fn try_from(mut base: AgentBase) -> Result<Self, Self::Error> {
         base.prepare();
         base.validate()?;
         let id = base.id();
-        Ok(EnsembleLlm { id, base })
+        Ok(Agent { id, base })
     }
 }
 
-/// Wrapper that adds fallback LLMs and a count to any LLM type.
+/// Wrapper that adds fallback agents and a count to any agent type.
 ///
-/// Used to specify how many instances of an LLM to include in an ensemble,
-/// along with fallback models to try if the primary fails.
+/// Used to specify how many instances of an agent to include in an ensemble,
+/// along with fallback agents to try if the primary fails.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WithFallbacksAndCount<T> {
-    /// Number of instances of this LLM in the ensemble. Defaults to 1.
+    /// Number of instances of this agent in the ensemble. Defaults to 1.
     #[serde(default = "WithFallbacksAndCount::<T>::default_count")]
     pub count: u64,
-    /// The primary LLM configuration.
+    /// The primary agent configuration.
     #[serde(flatten)]
     pub inner: T,
-    /// Fallback LLMs to try if the primary fails.
+    /// Fallback agents to try if the primary fails.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub fallbacks: Option<Vec<T>>,
 }
@@ -397,15 +396,15 @@ impl<T> WithFallbacksAndCount<T> {
     }
 }
 
-/// An [`EnsembleLlmBase`] with optional fallbacks and count (pre-validation).
-pub type EnsembleLlmBaseWithFallbacksAndCount =
-    WithFallbacksAndCount<EnsembleLlmBase>;
+/// An [`AgentBase`] with optional fallbacks and count (pre-validation).
+pub type AgentBaseWithFallbacksAndCount =
+    WithFallbacksAndCount<AgentBase>;
 
-/// A validated [`EnsembleLlm`] with optional fallbacks and count.
-pub type EnsembleLlmWithFallbacksAndCount = WithFallbacksAndCount<EnsembleLlm>;
+/// A validated [`Agent`] with optional fallbacks and count.
+pub type AgentWithFallbacksAndCount = WithFallbacksAndCount<Agent>;
 
-impl EnsembleLlmWithFallbacksAndCount {
-    /// Returns the concatenated IDs of the primary LLM and all fallbacks.
+impl AgentWithFallbacksAndCount {
+    /// Returns the concatenated IDs of the primary agent and all fallbacks.
     ///
     /// Used by [`Ensemble`](crate::ensemble::Ensemble) to compute its own
     /// content-addressed ID.
@@ -425,7 +424,7 @@ impl EnsembleLlmWithFallbacksAndCount {
         }
     }
 
-    /// Returns an iterator over the IDs of the primary LLM and all fallbacks.
+    /// Returns an iterator over the IDs of the primary agent and all fallbacks.
     pub fn ids(&self) -> impl Iterator<Item = &str> {
         std::iter::once(self.inner.id.as_str()).chain(
             self.fallbacks.as_ref().into_iter().flat_map(|fallbacks| {
@@ -435,16 +434,16 @@ impl EnsembleLlmWithFallbacksAndCount {
     }
 }
 
-impl TryFrom<EnsembleLlmBaseWithFallbacksAndCount>
-    for EnsembleLlmWithFallbacksAndCount
+impl TryFrom<AgentBaseWithFallbacksAndCount>
+    for AgentWithFallbacksAndCount
 {
     type Error = String;
     fn try_from(
-        EnsembleLlmBaseWithFallbacksAndCount {
+        AgentBaseWithFallbacksAndCount {
             count,
             inner: base_inner,
             fallbacks: base_fallbacks,
-        }: EnsembleLlmBaseWithFallbacksAndCount,
+        }: AgentBaseWithFallbacksAndCount,
     ) -> Result<Self, Self::Error> {
         let inner = base_inner.try_into()?;
         let fallbacks = match base_fallbacks {
@@ -457,7 +456,7 @@ impl TryFrom<EnsembleLlmBaseWithFallbacksAndCount>
             }
             _ => None,
         };
-        Ok(EnsembleLlmWithFallbacksAndCount {
+        Ok(AgentWithFallbacksAndCount {
             count,
             inner,
             fallbacks,

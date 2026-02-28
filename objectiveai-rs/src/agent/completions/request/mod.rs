@@ -2,7 +2,7 @@
 //!
 //! - [`AgentCompletionCreateParams`] - The main request structure
 //! - [`Message`] - Agent messages (system, user, assistant, tool, developer)
-//! - [`Model`] - Either an inline Ensemble LLM or the ID of a previously used one
+//! - [`Model`] - Either an inline Agent or the ID of a previously used one
 //! - [`Tool`] - Tool/function definitions for function calling
 //! - [`ToolChoice`] - How the model should use tools
 //! - [`ResponseFormat`] - Output format constraints (text, JSON, JSON schema)

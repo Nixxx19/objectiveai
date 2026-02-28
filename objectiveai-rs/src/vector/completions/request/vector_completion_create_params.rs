@@ -30,11 +30,11 @@ pub struct VectorCompletionCreateParams {
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
-    /// The Ensemble of LLMs to use.
+    /// The Ensemble of agents to use.
     pub ensemble: super::Ensemble,
-    /// The profile weights for each LLM in the ensemble.
+    /// The profile weights for each agent in the ensemble.
     ///
-    /// Must have the same length as the total LLM count in the ensemble.
+    /// Must have the same length as the total agent count in the ensemble.
     /// Can be either:
     /// - A vector of decimals (legacy representation), or
     /// - A vector of objects with `weight` and optional `invert` fields.

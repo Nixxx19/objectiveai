@@ -14,7 +14,7 @@ pub struct AgentCompletion {
     pub choices: Vec<super::Choice>,
     /// Unix timestamp when the completion was created.
     pub created: u64,
-    /// The Ensemble LLM ID used.
+    /// The Agent ID used.
     pub model: String,
     /// The upstream model identifier.
     pub upstream_model: String,

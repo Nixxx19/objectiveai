@@ -31,9 +31,9 @@ pub struct GetEnsemble {
 pub struct UsageEnsemble {
     /// Total number of requests made with this Ensemble.
     pub requests: u64,
-    /// Total completion tokens generated across all LLMs.
+    /// Total completion tokens generated across all agents.
     pub completion_tokens: u64,
-    /// Total prompt tokens processed across all LLMs.
+    /// Total prompt tokens processed across all agents.
     pub prompt_tokens: u64,
     /// Total cost incurred.
     pub total_cost: rust_decimal::Decimal,

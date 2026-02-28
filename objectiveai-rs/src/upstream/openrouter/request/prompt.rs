@@ -1,39 +1,39 @@
 //! Prompt construction for OpenRouter requests.
 //!
-//! Handles merging prefix/suffix messages from Ensemble LLM configurations
+//! Handles merging prefix/suffix messages from Agent configurations
 //! with the request messages, and constructs vector voting prompts.
 
 use crate::vector;
 
 /// Constructs the message array for a agent completion.
 ///
-/// Concatenates the Ensemble LLM's prefix messages, the request messages,
-/// and the Ensemble LLM's suffix messages.
+/// Concatenates the Agent's prefix messages, the request messages,
+/// and the Agent's suffix messages.
 pub fn new_for_agent(
-    ensemble_llm_prefix: Option<&[crate::agent::completions::request::Message]>,
+    agent_prefix: Option<&[crate::agent::completions::request::Message]>,
     request: &[crate::agent::completions::request::Message],
-    ensemble_llm_suffix: Option<&[crate::agent::completions::request::Message]>,
+    agent_suffix: Option<&[crate::agent::completions::request::Message]>,
 ) -> Vec<crate::agent::completions::request::Message> {
-    match (ensemble_llm_prefix, ensemble_llm_suffix) {
-        (Some(ensemble_llm_prefix), Some(ensemble_llm_suffix)) => {
+    match (agent_prefix, agent_suffix) {
+        (Some(agent_prefix), Some(agent_suffix)) => {
             let mut messages = Vec::with_capacity(
-                ensemble_llm_prefix.len() + request.len() + ensemble_llm_suffix.len(),
+                agent_prefix.len() + request.len() + agent_suffix.len(),
             );
-            messages.extend_from_slice(ensemble_llm_prefix);
+            messages.extend_from_slice(agent_prefix);
             messages.extend_from_slice(request);
-            messages.extend_from_slice(ensemble_llm_suffix);
+            messages.extend_from_slice(agent_suffix);
             messages
         }
-        (Some(ensemble_llm_prefix), None) => {
-            let mut messages = Vec::with_capacity(ensemble_llm_prefix.len() + request.len());
-            messages.extend_from_slice(ensemble_llm_prefix);
+        (Some(agent_prefix), None) => {
+            let mut messages = Vec::with_capacity(agent_prefix.len() + request.len());
+            messages.extend_from_slice(agent_prefix);
             messages.extend_from_slice(request);
             messages
         }
-        (None, Some(ensemble_llm_suffix)) => {
-            let mut messages = Vec::with_capacity(request.len() + ensemble_llm_suffix.len());
+        (None, Some(agent_suffix)) => {
+            let mut messages = Vec::with_capacity(request.len() + agent_suffix.len());
             messages.extend_from_slice(request);
-            messages.extend_from_slice(ensemble_llm_suffix);
+            messages.extend_from_slice(agent_suffix);
             messages
         }
         (None, None) => request.to_vec(),
@@ -47,10 +47,10 @@ pub fn new_for_agent(
 pub fn new_for_vector(
     vector_responses: &[crate::agent::completions::request::RichContent],
     vector_pfx_indices: &[(String, usize)],
-    ensemble_llm_output_mode: crate::ensemble_llm::OutputMode,
-    ensemble_llm_prefix: Option<&[crate::agent::completions::request::Message]>,
+    agent_output_mode: crate::agent::OutputMode,
+    agent_prefix: Option<&[crate::agent::completions::request::Message]>,
     request: &[crate::agent::completions::request::Message],
-    ensemble_llm_suffix: Option<&[crate::agent::completions::request::Message]>,
+    agent_suffix: Option<&[crate::agent::completions::request::Message]>,
 ) -> Vec<crate::agent::completions::request::Message> {
     // convert vector responses into rich content parts for prompt
     let vector_responses_for_prompt = vector::completions::vector_responses::into_parts_for_prompt(
@@ -59,7 +59,7 @@ pub fn new_for_vector(
     );
 
     // merge messages
-    let mut messages = new_for_agent(ensemble_llm_prefix, request, ensemble_llm_suffix);
+    let mut messages = new_for_agent(agent_prefix, request, agent_suffix);
 
     // handle user message transform
     // append vector responses to last user message, or create one if none
@@ -119,7 +119,7 @@ pub fn new_for_vector(
 
     // handle system message transform
     // append instruction to last system message, or create one if none
-    if let crate::ensemble_llm::OutputMode::Instruction = ensemble_llm_output_mode {
+    if let crate::agent::OutputMode::Instruction = agent_output_mode {
         let mut system_append_content = None;
         for (i, message) in messages.iter_mut().enumerate().rev() {
             if i <= user_message_i {

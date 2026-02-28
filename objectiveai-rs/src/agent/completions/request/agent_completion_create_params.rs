@@ -13,7 +13,7 @@ pub struct AgentCompletionCreateParams {
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<super::Provider>,
-    /// The model to use (inline Ensemble LLM or stored ID).
+    /// The model to use (inline Agent or stored ID).
     pub model: super::Model,
     /// Alternative models to try if the primary model fails.
     #[serde(skip_serializing_if = "Option::is_none")]

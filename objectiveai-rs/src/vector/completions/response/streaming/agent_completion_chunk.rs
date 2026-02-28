@@ -3,7 +3,7 @@
 use crate::{agent, error};
 use serde::{Deserialize, Serialize};
 
-/// A streaming agent completion chunk from a single LLM within a vector completion.
+/// A streaming agent completion chunk from a single agent within a vector completion.
 ///
 /// The `index` field is used to correlate chunks belonging to the same
 /// underlying completion when accumulating via [`push`](Self::push).

@@ -23,9 +23,9 @@ pub struct Vote {
 
     /// The model that produced this vote (e.g., `"openai/gpt-4o"`).
     pub model: String,
-    /// Index of the LLM configuration within the ensemble.
+    /// Index of the agent configuration within the ensemble.
     pub ensemble_index: u64,
-    /// Flattened index accounting for LLM counts in the ensemble.
+    /// Flattened index accounting for agent counts in the ensemble.
     pub flat_ensemble_index: u64,
     /// Content hash of the request messages (for caching/deduplication).
     pub prompt_id: String,

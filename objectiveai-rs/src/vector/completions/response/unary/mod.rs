@@ -1,7 +1,7 @@
 //! Unary (non-streaming) response types for vector completions.
 //!
 //! - [`VectorCompletion`] - Complete vector completion response
-//! - [`AgentCompletion`] - Individual LLM completion
+//! - [`AgentCompletion`] - Individual agent completion
 //! - [`Object`] - Type marker (`"vector.completion"`)
 
 mod agent_completion;

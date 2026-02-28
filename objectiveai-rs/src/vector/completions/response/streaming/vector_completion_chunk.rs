@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 pub struct VectorCompletionChunk {
     /// Unique identifier for this vector completion.
     pub id: String,
-    /// Incremental agent completion chunks from each LLM.
+    /// Incremental agent completion chunks from each agent.
     pub completions: Vec<super::AgentCompletionChunk>,
     /// Votes received so far. New votes are appended in subsequent chunks.
     pub votes: Vec<response::Vote>,

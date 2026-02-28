@@ -2,13 +2,13 @@
 //!
 //! This crate provides data structures, validation, and client-side compilation
 //! for the ObjectiveAI API - a platform for scoring, ranking, and simulating
-//! preferences using ensembles of LLMs.
+//! preferences using ensembles of agents.
 //!
 //! # Core Concepts
 //!
-//! - **Ensemble LLM**: A configured instance of a single upstream language model
-//! - **Ensemble**: A collection of Ensemble LLMs used together for voting
-//! - **Vector Completion**: Runs multiple LLMs to vote on responses, producing weighted scores
+//! - **Agent**: A configured instance of a single upstream language model
+//! - **Ensemble**: A collection of Agents used together for voting
+//! - **Vector Completion**: Runs multiple agents to vote on responses, producing weighted scores
 //! - **Function**: A composable scoring pipeline built from Vector Completions
 //! - **Profile**: Learned weights for a Function, trained on example data
 //!
@@ -19,9 +19,8 @@
 //! # Modules
 //!
 //! - [`auth`] - API authentication types
-//! - [`agent`] - Agent completion APIs
+//! - [`agent`] - Agent definitions, configuration, and completion APIs
 //! - [`ensemble`] - Ensemble definitions and validation
-//! - [`ensemble_llm`] - Ensemble LLM configurations
 //! - [`error`] - Error types
 //! - [`functions`] - Function definitions, execution, and client-side compilation
 //! - [`prefixed_uuid`] - UUID utilities
@@ -34,7 +33,6 @@
 pub mod auth;
 pub mod agent;
 pub mod ensemble;
-pub mod ensemble_llm;
 pub mod error;
 pub mod functions;
 pub mod prefixed_uuid;

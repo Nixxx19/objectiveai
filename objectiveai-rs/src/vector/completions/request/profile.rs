@@ -1,9 +1,9 @@
 //! Profile weights for vector completion requests.
 //!
-//! A profile specifies how much influence each LLM in the Ensemble has when
+//! A profile specifies how much influence each agent in the Ensemble has when
 //! combining votes into final scores. Profiles can either be a simple vector
 //! of decimal weights or a vector of objects that also include an optional
-//! `invert` flag, which inverts that LLM's vote distribution before it is
+//! `invert` flag, which inverts that agent.s vote distribution before it is
 //! combined.
 //!
 //! The `invert` flag is part of the **profile**, not the Ensemble definition,
@@ -16,9 +16,9 @@ use serde::{Deserialize, Serialize};
 /// An entry in a profile with an explicit weight and optional invert flag.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProfileEntry {
-    /// The weight for this LLM in the ensemble. Must be in [0, 1].
+    /// The weight for this agent in the ensemble. Must be in [0, 1].
     pub weight: Decimal,
-    /// If true, invert this LLM's vote distribution before combining.
+    /// If true, invert this agent's vote distribution before combining.
     ///
     /// When omitted or false, the vote distribution is used as-is.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -27,11 +27,11 @@ pub struct ProfileEntry {
 
 /// Profile weights for a vector completion.
 ///
-/// Previously this was a simple `Vec<Decimal>`. To support per-LLM inversion
+/// Previously this was a simple `Vec<Decimal>`. To support per-agent inversion
 /// while remaining backwards compatible, the field is now an untagged enum:
 ///
 /// - `Weights(Vec<Decimal>)` - legacy representation (no inversion)
-/// - `Entries(Vec<ProfileEntry>)` - weights with optional per-LLM `invert`
+/// - `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Profile {
@@ -70,4 +70,3 @@ impl Profile {
         }
     }
 }
-

@@ -149,7 +149,7 @@ impl<'a> ToStarlarkValue for TaskOutputRef<'a> {
 /// Output from a vector completion task.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VectorCompletionOutput {
-    /// Individual votes from each LLM.
+    /// Individual votes from each agent.
     pub votes: Vec<vector::completions::response::Vote>,
     /// Final weighted scores for each response option.
     pub scores: Vec<rust_decimal::Decimal>,

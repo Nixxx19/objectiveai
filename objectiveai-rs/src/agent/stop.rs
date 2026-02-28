@@ -1,4 +1,4 @@
-//! Stop sequence configuration for Ensemble LLMs.
+//! Stop sequence configuration for Agents.
 
 use serde::{Deserialize, Serialize};
 

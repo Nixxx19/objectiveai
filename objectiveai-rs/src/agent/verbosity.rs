@@ -1,4 +1,4 @@
-//! Verbosity settings for Ensemble LLM output.
+//! Verbosity settings for Agent output.
 
 use serde::{Deserialize, Serialize};
 

@@ -1,7 +1,7 @@
 //! Request types for OpenRouter API calls.
 //!
 //! This module transforms ObjectiveAI request types into the format expected
-//! by the OpenRouter API, applying Ensemble LLM configurations.
+//! by the OpenRouter API, applying Agent configurations.
 
 mod agent_completion_create_params;
 /// Prompt construction for agent and vector completions.

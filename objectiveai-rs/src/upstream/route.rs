@@ -1,14 +1,14 @@
-/// Returns available upstream providers for a given ensemble LLM.
+/// Returns available upstream providers for a given agent.
 ///
 /// - Anthropic models (without `require_parameters`) get `ClaudeAgentSdk` + `OpenRouter`.
 /// - Everything else gets `OpenRouter` only.
 /// - If `requested` is `Some`, results are filtered to only include requested upstreams.
 pub fn route(
-    ensemble_llm: &crate::ensemble_llm::EnsembleLlm,
+    agent: &crate::agent::Agent,
     requested: Option<&[super::Upstream]>,
 ) -> Vec<super::Upstream> {
-    let available = if ensemble_llm.base.model.starts_with("anthropic/")
-        && ensemble_llm
+    let available = if agent.base.model.starts_with("anthropic/")
+        && agent
             .base
             .provider
             .as_ref()

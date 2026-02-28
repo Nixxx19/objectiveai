@@ -9,10 +9,10 @@ use crate::vector;
 /// When there are request tools but output mode is not `ToolCall`, returns
 /// `None` to prevent tool calls from interfering with voting.
 pub fn new_for_vector(
-    ensemble_llm_output_mode: crate::ensemble_llm::OutputMode,
+    agent_output_mode: crate::agent::OutputMode,
     request_tools: Option<&[crate::agent::completions::request::Tool]>,
 ) -> Option<crate::agent::completions::request::ToolChoice> {
-    if let crate::ensemble_llm::OutputMode::ToolCall = ensemble_llm_output_mode {
+    if let crate::agent::OutputMode::ToolCall = agent_output_mode {
         Some(vector::completions::ResponseKey::tool_choice())
     } else if request_tools.is_some_and(|request_tools| !request_tools.is_empty()) {
         Some(crate::agent::completions::request::ToolChoice::None)

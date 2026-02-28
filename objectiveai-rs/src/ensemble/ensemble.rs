@@ -1,6 +1,6 @@
 //! Core Ensemble types and validation logic.
 
-use crate::ensemble_llm;
+use crate::agent;
 use crate::vector::completions::request::{Profile, ProfileEntry};
 use indexmap::IndexMap;
 use rust_decimal::Decimal;
@@ -9,18 +9,18 @@ use twox_hash::XxHash3_128;
 
 /// The base configuration for an Ensemble (without computed ID).
 ///
-/// Contains a list of LLM configurations that will be validated, deduplicated,
+/// Contains a list of agent configurations that will be validated, deduplicated,
 /// and sorted when converting to [`Ensemble`].
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct EnsembleBase {
     /// The LLMs in this ensemble, with optional counts and fallbacks.
-    pub llms: Vec<ensemble_llm::EnsembleLlmBaseWithFallbacksAndCount>,
+    pub agents: Vec<agent::AgentBaseWithFallbacksAndCount>,
 }
 
 /// A validated Ensemble with its computed content-addressed ID.
 ///
 /// Created by converting from [`EnsembleBase`] via [`TryFrom`]. The conversion:
-/// 1. Validates and normalizes each LLM
+/// 1. Validates and normalizes each agent
 /// 2. Merges duplicate LLMs (by full_id) and sums their counts
 /// 3. Sorts LLMs by full_id for deterministic ordering
 /// 4. Computes the ensemble ID from the sorted (full_id, count) pairs
@@ -28,57 +28,57 @@ pub struct EnsembleBase {
 /// # Constraints
 ///
 /// - Individual LLMs with `count: 0` are skipped
-/// - Total LLM count (sum of all counts) must be between 1 and 128
+/// - Total agent count (sum of all counts) must be between 1 and 128
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Ensemble {
     /// The deterministic content-addressed ID (22-character base62 string).
     pub id: String,
     /// The validated and deduplicated LLMs, sorted by full_id.
-    pub llms: Vec<ensemble_llm::EnsembleLlmWithFallbacksAndCount>,
+    pub agents: Vec<agent::AgentWithFallbacksAndCount>,
 }
 
 impl TryFrom<EnsembleBase> for Ensemble {
     type Error = String;
     fn try_from(
-        EnsembleBase { llms: base_llms }: EnsembleBase,
+        EnsembleBase { agents: base_agents }: EnsembleBase,
     ) -> Result<Self, Self::Error> {
         // convert all base LLMs and merge duplicates
-        let mut llms_with_full_id: IndexMap<
+        let mut agents_with_full_id: IndexMap<
             String,
-            ensemble_llm::EnsembleLlmWithFallbacksAndCount,
-        > = IndexMap::with_capacity(base_llms.len());
+            agent::AgentWithFallbacksAndCount,
+        > = IndexMap::with_capacity(base_agents.len());
         let mut count = 0;
-        for base_llm in base_llms {
-            match base_llm.count {
+        for base_agent in base_agents {
+            match base_agent.count {
                 0 => continue,
                 n => count += n,
             }
-            let llm: ensemble_llm::EnsembleLlmWithFallbacksAndCount =
-                base_llm.try_into()?;
+            let agent: agent::AgentWithFallbacksAndCount =
+                base_agent.try_into()?;
             // validate no 2 identical IDs in primary/fallbacks
-            if let Some(fallbacks) = &llm.fallbacks {
-                if fallbacks.iter().any(|fb| fb.id == llm.inner.id) {
+            if let Some(fallbacks) = &agent.fallbacks {
+                if fallbacks.iter().any(|fb| fb.id == agent.inner.id) {
                     return Err(format!(
-                        "Ensemble LLM cannot have identical primary and fallback IDs: {}",
-                        llm.inner.id
+                        "Agent cannot have identical primary and fallback IDs: {}",
+                        agent.inner.id
                     ));
                 }
                 for i in 0..fallbacks.len() {
                     for j in (i + 1)..fallbacks.len() {
                         if fallbacks[i].id == fallbacks[j].id {
                             return Err(format!(
-                                "Ensemble LLM cannot have duplicate fallback IDs: {}",
+                                "Agent cannot have duplicate fallback IDs: {}",
                                 fallbacks[i].id
                             ));
                         }
                     }
                 }
             }
-            let full_id = llm.full_id();
-            match llms_with_full_id.get_mut(&full_id) {
-                Some(existing_llm) => existing_llm.count += llm.count,
+            let full_id = agent.full_id();
+            match agents_with_full_id.get_mut(&full_id) {
+                Some(existing_agent) => existing_agent.count += agent.count,
                 None => {
-                    llms_with_full_id.insert(full_id, llm);
+                    agents_with_full_id.insert(full_id, agent);
                 }
             }
         }
@@ -86,28 +86,28 @@ impl TryFrom<EnsembleBase> for Ensemble {
         // validate count
         if count == 0 || count > 128 {
             return Err(
-                "`ensemble.llms` must contain between 1 and 128 total LLMs"
+                "`ensemble.agents` must contain between 1 and 128 total LLMs"
                     .to_string(),
             );
         }
 
         // sort by full_id to ensure deterministic order
-        llms_with_full_id.sort_unstable_keys();
+        agents_with_full_id.sort_unstable_keys();
 
         // compute ensemble ID
         let mut hasher = XxHash3_128::with_seed(0);
-        for (full_id, llm) in &llms_with_full_id {
+        for (full_id, agent) in &agents_with_full_id {
             hasher.write(full_id.as_bytes());
-            let count_bytes = llm.count.to_le_bytes();
+            let count_bytes = agent.count.to_le_bytes();
             hasher.write(&count_bytes);
         }
         let id = format!("{:0>22}", base62::encode(hasher.finish_128()));
 
         // collect LLMs
-        let llms = llms_with_full_id.into_values().collect::<Vec<_>>();
+        let agents = agents_with_full_id.into_values().collect::<Vec<_>>();
 
         // return ensemble
-        Ok(Ensemble { id, llms })
+        Ok(Ensemble { id, agents })
     }
 }
 
@@ -115,17 +115,17 @@ impl Ensemble {
     /// Converts an EnsembleBase to Ensemble while aligning profile weights.
     ///
     /// Profile weights are filtered (count-0 removed), merged (weighted avg by count),
-    /// and sorted to match the resulting Ensemble's LLM ordering.
+    /// and sorted to match the resulting Ensemble's agent ordering.
     pub fn try_from_with_profile(
-        EnsembleBase { llms: base_llms }: EnsembleBase,
+        EnsembleBase { agents: base_agents }: EnsembleBase,
         profile: Profile,
     ) -> Result<(Self, Profile), String> {
         // validate lengths match
-        if profile.len() != base_llms.len() {
+        if profile.len() != base_agents.len() {
             return Err(format!(
-                "profile length ({}) does not match ensemble LLMs length ({})",
+                "profile length ({}) does not match agents length ({})",
                 profile.len(),
-                base_llms.len()
+                base_agents.len()
             ));
         }
 
@@ -133,63 +133,63 @@ impl Ensemble {
         let profile_pairs = profile.to_weights_and_invert();
 
         // zip base LLMs with profile entries, filter count-0, validate, and merge
-        let mut llms_with_full_id: IndexMap<
+        let mut agents_with_full_id: IndexMap<
             String,
             (
-                ensemble_llm::EnsembleLlmWithFallbacksAndCount,
+                agent::AgentWithFallbacksAndCount,
                 Decimal,  // weighted sum (weight * count)
                 u64,      // total count (for computing weighted average)
                 bool,     // invert
             ),
-        > = IndexMap::with_capacity(base_llms.len());
+        > = IndexMap::with_capacity(base_agents.len());
         let mut count = 0u64;
 
-        for (base_llm, (weight, invert)) in
-            base_llms.into_iter().zip(profile_pairs.into_iter())
+        for (base_agent, (weight, invert)) in
+            base_agents.into_iter().zip(profile_pairs.into_iter())
         {
-            match base_llm.count {
+            match base_agent.count {
                 0 => continue,
                 n => count += n,
             }
-            let llm: ensemble_llm::EnsembleLlmWithFallbacksAndCount =
-                base_llm.try_into()?;
+            let agent: agent::AgentWithFallbacksAndCount =
+                base_agent.try_into()?;
             // validate no 2 identical IDs in primary/fallbacks
-            if let Some(fallbacks) = &llm.fallbacks {
-                if fallbacks.iter().any(|fb| fb.id == llm.inner.id) {
+            if let Some(fallbacks) = &agent.fallbacks {
+                if fallbacks.iter().any(|fb| fb.id == agent.inner.id) {
                     return Err(format!(
-                        "Ensemble LLM cannot have identical primary and fallback IDs: {}",
-                        llm.inner.id
+                        "Agent cannot have identical primary and fallback IDs: {}",
+                        agent.inner.id
                     ));
                 }
                 for i in 0..fallbacks.len() {
                     for j in (i + 1)..fallbacks.len() {
                         if fallbacks[i].id == fallbacks[j].id {
                             return Err(format!(
-                                "Ensemble LLM cannot have duplicate fallback IDs: {}",
+                                "Agent cannot have duplicate fallback IDs: {}",
                                 fallbacks[i].id
                             ));
                         }
                     }
                 }
             }
-            let full_id = llm.full_id();
-            match llms_with_full_id.get_mut(&full_id) {
+            let full_id = agent.full_id();
+            match agents_with_full_id.get_mut(&full_id) {
                 Some((existing, weighted_sum, total_count, existing_invert)) => {
                     if *existing_invert != invert {
                         return Err(format!(
-                            "conflicting invert flags for merged ensemble LLM with full_id: {}",
+                            "conflicting invert flags for merged agent with full_id: {}",
                             full_id
                         ));
                     }
-                    *weighted_sum += weight * Decimal::from(llm.count);
-                    *total_count += llm.count;
-                    existing.count += llm.count;
+                    *weighted_sum += weight * Decimal::from(agent.count);
+                    *total_count += agent.count;
+                    existing.count += agent.count;
                 }
                 None => {
-                    let weighted_sum = weight * Decimal::from(llm.count);
-                    let total_count = llm.count;
-                    llms_with_full_id
-                        .insert(full_id, (llm, weighted_sum, total_count, invert));
+                    let weighted_sum = weight * Decimal::from(agent.count);
+                    let total_count = agent.count;
+                    agents_with_full_id
+                        .insert(full_id, (agent, weighted_sum, total_count, invert));
                 }
             }
         }
@@ -197,29 +197,29 @@ impl Ensemble {
         // validate count
         if count == 0 || count > 128 {
             return Err(
-                "`ensemble.llms` must contain between 1 and 128 total LLMs"
+                "`ensemble.agents` must contain between 1 and 128 total LLMs"
                     .to_string(),
             );
         }
 
         // sort by full_id to ensure deterministic order
-        llms_with_full_id.sort_unstable_keys();
+        agents_with_full_id.sort_unstable_keys();
 
         // compute ensemble ID
         let mut hasher = XxHash3_128::with_seed(0);
-        for (full_id, (llm, _, _, _)) in &llms_with_full_id {
+        for (full_id, (agent, _, _, _)) in &agents_with_full_id {
             hasher.write(full_id.as_bytes());
-            let count_bytes = llm.count.to_le_bytes();
+            let count_bytes = agent.count.to_le_bytes();
             hasher.write(&count_bytes);
         }
         let id = format!("{:0>22}", base62::encode(hasher.finish_128()));
 
         // collect LLMs and aligned profile entries
-        let mut llms = Vec::with_capacity(llms_with_full_id.len());
-        let mut entries = Vec::with_capacity(llms_with_full_id.len());
-        for (_, (llm, weighted_sum, total_count, invert)) in llms_with_full_id
+        let mut agents = Vec::with_capacity(agents_with_full_id.len());
+        let mut entries = Vec::with_capacity(agents_with_full_id.len());
+        for (_, (agent, weighted_sum, total_count, invert)) in agents_with_full_id
         {
-            llms.push(llm);
+            agents.push(agent);
             let merged_weight = weighted_sum / Decimal::from(total_count);
             entries.push(ProfileEntry {
                 weight: merged_weight,
@@ -227,20 +227,20 @@ impl Ensemble {
             });
         }
 
-        Ok((Ensemble { id, llms }, Profile::Entries(entries)))
+        Ok((Ensemble { id, agents }, Profile::Entries(entries)))
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::ensemble_llm::{EnsembleLlmBase, EnsembleLlmBaseWithFallbacksAndCount, OutputMode};
+    use crate::agent::{AgentBase, AgentBaseWithFallbacksAndCount, OutputMode};
     use rust_decimal::dec;
 
-    fn make_llm(model: &str, count: u64) -> EnsembleLlmBaseWithFallbacksAndCount {
-        EnsembleLlmBaseWithFallbacksAndCount {
+    fn make_agent(model: &str, count: u64) -> AgentBaseWithFallbacksAndCount {
+        AgentBaseWithFallbacksAndCount {
             count,
-            inner: EnsembleLlmBase {
+            inner: AgentBase {
                 model: model.to_string(),
                 output_mode: OutputMode::Instruction,
                 ..Default::default()
@@ -252,10 +252,10 @@ mod tests {
     #[test]
     fn filter_removes_count_zero_llms_and_profile_entries() {
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 1),
-                make_llm("openai/gpt-4o-mini", 0), // should be filtered
-                make_llm("anthropic/claude-3.5-sonnet", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 1),
+                make_agent("openai/gpt-4o-mini", 0), // should be filtered
+                make_agent("anthropic/claude-3.5-sonnet", 1),
             ],
         };
         let profile = Profile::Entries(vec![
@@ -265,7 +265,7 @@ mod tests {
         ]);
 
         let (ensemble, aligned) = Ensemble::try_from_with_profile(base, profile).unwrap();
-        assert_eq!(ensemble.llms.len(), 2);
+        assert_eq!(ensemble.agents.len(), 2);
         let pairs = aligned.to_weights_and_invert();
         assert_eq!(pairs.len(), 2);
         // The two remaining weights should be 0.6 and 0.4 (possibly reordered by sort)
@@ -279,9 +279,9 @@ mod tests {
         // Two identical LLMs: count 3 weight 1.0, count 1 weight 0.5
         // Merged weight = (1.0 * 3 + 0.5 * 1) / (3 + 1) = 3.5 / 4 = 0.875
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 3),
-                make_llm("openai/gpt-4o", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 3),
+                make_agent("openai/gpt-4o", 1),
             ],
         };
         let profile = Profile::Entries(vec![
@@ -290,8 +290,8 @@ mod tests {
         ]);
 
         let (ensemble, aligned) = Ensemble::try_from_with_profile(base, profile).unwrap();
-        assert_eq!(ensemble.llms.len(), 1);
-        assert_eq!(ensemble.llms[0].count, 4);
+        assert_eq!(ensemble.agents.len(), 1);
+        assert_eq!(ensemble.agents[0].count, 4);
         let pairs = aligned.to_weights_and_invert();
         assert_eq!(pairs.len(), 1);
         assert_eq!(pairs[0].0, dec!(0.875));
@@ -302,9 +302,9 @@ mod tests {
     fn sort_reorders_profile_entries() {
         // Put two different LLMs in; verify profile entries follow the LLMs after sort
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 1),
-                make_llm("anthropic/claude-3.5-sonnet", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 1),
+                make_agent("anthropic/claude-3.5-sonnet", 1),
             ],
         };
         let profile = Profile::Entries(vec![
@@ -314,17 +314,17 @@ mod tests {
 
         let (ensemble, aligned) = Ensemble::try_from_with_profile(base, profile).unwrap();
         let pairs = aligned.to_weights_and_invert();
-        assert_eq!(ensemble.llms.len(), 2);
+        assert_eq!(ensemble.agents.len(), 2);
 
         // Sorted by full_id (content-addressed hash), not model name.
         // Verify that the profile entry with weight 0.7 follows the openai LLM
         // and the entry with weight 0.3 follows the anthropic LLM.
-        for (i, llm) in ensemble.llms.iter().enumerate() {
-            if llm.inner.base.model == "openai/gpt-4o" {
+        for (i, agent) in ensemble.agents.iter().enumerate() {
+            if agent.inner.base.model == "openai/gpt-4o" {
                 assert_eq!(pairs[i].0, dec!(0.7));
                 assert_eq!(pairs[i].1, false);
             } else {
-                assert_eq!(llm.inner.base.model, "anthropic/claude-3.5-sonnet");
+                assert_eq!(agent.inner.base.model, "anthropic/claude-3.5-sonnet");
                 assert_eq!(pairs[i].0, dec!(0.3));
                 assert_eq!(pairs[i].1, true);
             }
@@ -334,11 +334,11 @@ mod tests {
     #[test]
     fn combined_filter_merge_sort() {
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 2),
-                make_llm("anthropic/claude-3.5-sonnet", 0), // filtered
-                make_llm("openai/gpt-4o", 2),               // merged with first
-                make_llm("google/gemini-2.0-flash", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 2),
+                make_agent("anthropic/claude-3.5-sonnet", 0), // filtered
+                make_agent("openai/gpt-4o", 2),               // merged with first
+                make_agent("google/gemini-2.0-flash", 1),
             ],
         };
         let profile = Profile::Entries(vec![
@@ -349,13 +349,13 @@ mod tests {
         ]);
 
         let (ensemble, aligned) = Ensemble::try_from_with_profile(base, profile).unwrap();
-        assert_eq!(ensemble.llms.len(), 2);
+        assert_eq!(ensemble.agents.len(), 2);
         let pairs = aligned.to_weights_and_invert();
         assert_eq!(pairs.len(), 2);
 
         // google sorts before openai
-        assert!(ensemble.llms[0].inner.base.model.starts_with("google"));
-        assert!(ensemble.llms[1].inner.base.model.starts_with("openai"));
+        assert!(ensemble.agents[0].inner.base.model.starts_with("google"));
+        assert!(ensemble.agents[1].inner.base.model.starts_with("openai"));
         assert_eq!(pairs[0].0, dec!(0.9)); // google weight
         assert_eq!(pairs[1].0, dec!(0.6)); // merged openai weight
     }
@@ -363,9 +363,9 @@ mod tests {
     #[test]
     fn error_on_conflicting_invert_flags() {
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 1),
-                make_llm("openai/gpt-4o", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 1),
+                make_agent("openai/gpt-4o", 1),
             ],
         };
         let profile = Profile::Entries(vec![
@@ -381,9 +381,9 @@ mod tests {
     #[test]
     fn error_on_profile_length_mismatch() {
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 1),
-                make_llm("anthropic/claude-3.5-sonnet", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 1),
+                make_agent("anthropic/claude-3.5-sonnet", 1),
             ],
         };
         let profile = Profile::Entries(vec![
@@ -398,15 +398,15 @@ mod tests {
     #[test]
     fn legacy_weights_format() {
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 1),
-                make_llm("anthropic/claude-3.5-sonnet", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 1),
+                make_agent("anthropic/claude-3.5-sonnet", 1),
             ],
         };
         let profile = Profile::Weights(vec![dec!(0.7), dec!(0.3)]);
 
         let (ensemble, aligned) = Ensemble::try_from_with_profile(base, profile).unwrap();
-        assert_eq!(ensemble.llms.len(), 2);
+        assert_eq!(ensemble.agents.len(), 2);
         let pairs = aligned.to_weights_and_invert();
         assert_eq!(pairs.len(), 2);
         // All inverts should be false for Weights format
@@ -417,10 +417,10 @@ mod tests {
     #[test]
     fn produces_same_ensemble_id_as_try_from() {
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 2),
-                make_llm("anthropic/claude-3.5-sonnet", 1),
-                make_llm("openai/gpt-4o", 1), // duplicate, will be merged
+            agents: vec![
+                make_agent("openai/gpt-4o", 2),
+                make_agent("anthropic/claude-3.5-sonnet", 1),
+                make_agent("openai/gpt-4o", 1), // duplicate, will be merged
             ],
         };
         let profile = Profile::Weights(vec![dec!(0.5), dec!(0.5), dec!(0.5)]);
@@ -430,20 +430,20 @@ mod tests {
             Ensemble::try_from_with_profile(base, profile).unwrap();
 
         assert_eq!(ensemble_from_try.id, ensemble_with_profile.id);
-        assert_eq!(ensemble_from_try.llms.len(), ensemble_with_profile.llms.len());
-        for (a, b) in ensemble_from_try.llms.iter().zip(ensemble_with_profile.llms.iter()) {
+        assert_eq!(ensemble_from_try.agents.len(), ensemble_with_profile.agents.len());
+        for (a, b) in ensemble_from_try.agents.iter().zip(ensemble_with_profile.agents.iter()) {
             assert_eq!(a.count, b.count);
             assert_eq!(a.full_id(), b.full_id());
         }
     }
 
     // ---- Parity tests: TryFrom and try_from_with_profile must always produce
-    //      identical ensembles (same id, same llm order, same counts). ----
+    //      identical ensembles (same id, same agent order, same counts). ----
 
     /// Helper: assert that TryFrom<EnsembleBase> and try_from_with_profile
     /// produce identical ensembles for the given base.
     fn assert_parity(base: EnsembleBase) {
-        let n = base.llms.len();
+        let n = base.agents.len();
         // uniform weights so profile is always valid
         let profile = Profile::Weights(vec![dec!(0.5); n]);
 
@@ -453,9 +453,9 @@ mod tests {
 
         assert_eq!(ensemble_try.id, ensemble_wp.id,
             "IDs differ: try_from={}, with_profile={}", ensemble_try.id, ensemble_wp.id);
-        assert_eq!(ensemble_try.llms.len(), ensemble_wp.llms.len(),
-            "LLM count differs");
-        for (a, b) in ensemble_try.llms.iter().zip(ensemble_wp.llms.iter()) {
+        assert_eq!(ensemble_try.agents.len(), ensemble_wp.agents.len(),
+            "agent count differs");
+        for (a, b) in ensemble_try.agents.iter().zip(ensemble_wp.agents.iter()) {
             assert_eq!(a.count, b.count, "count differs for full_id {}", a.full_id());
             assert_eq!(a.full_id(), b.full_id(), "full_id differs");
             assert_eq!(a.inner.base.model, b.inner.base.model, "model differs");
@@ -465,16 +465,16 @@ mod tests {
     #[test]
     fn parity_single_llm() {
         assert_parity(EnsembleBase {
-            llms: vec![make_llm("openai/gpt-4o", 1)],
+            agents: vec![make_agent("openai/gpt-4o", 1)],
         });
     }
 
     #[test]
     fn parity_two_distinct_llms() {
         assert_parity(EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 1),
-                make_llm("anthropic/claude-3.5-sonnet", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 1),
+                make_agent("anthropic/claude-3.5-sonnet", 1),
             ],
         });
     }
@@ -482,12 +482,12 @@ mod tests {
     #[test]
     fn parity_many_distinct_models() {
         assert_parity(EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 1),
-                make_llm("anthropic/claude-3.5-sonnet", 2),
-                make_llm("google/gemini-2.0-flash", 1),
-                make_llm("meta/llama-3-70b", 3),
-                make_llm("mistral/mixtral-8x7b", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 1),
+                make_agent("anthropic/claude-3.5-sonnet", 2),
+                make_agent("google/gemini-2.0-flash", 1),
+                make_agent("meta/llama-3-70b", 3),
+                make_agent("mistral/mixtral-8x7b", 1),
             ],
         });
     }
@@ -496,11 +496,11 @@ mod tests {
     fn parity_all_same_model_merged() {
         // 4 entries for the same model → merged into 1 with count=10
         assert_parity(EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 3),
-                make_llm("openai/gpt-4o", 2),
-                make_llm("openai/gpt-4o", 4),
-                make_llm("openai/gpt-4o", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 3),
+                make_agent("openai/gpt-4o", 2),
+                make_agent("openai/gpt-4o", 4),
+                make_agent("openai/gpt-4o", 1),
             ],
         });
     }
@@ -508,11 +508,11 @@ mod tests {
     #[test]
     fn parity_with_count_zero_filtered() {
         assert_parity(EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 0),       // filtered
-                make_llm("anthropic/claude-3.5-sonnet", 1),
-                make_llm("google/gemini-2.0-flash", 0), // filtered
-                make_llm("meta/llama-3-70b", 2),
+            agents: vec![
+                make_agent("openai/gpt-4o", 0),       // filtered
+                make_agent("anthropic/claude-3.5-sonnet", 1),
+                make_agent("google/gemini-2.0-flash", 0), // filtered
+                make_agent("meta/llama-3-70b", 2),
             ],
         });
     }
@@ -521,14 +521,14 @@ mod tests {
     fn parity_interleaved_duplicates_and_zeros() {
         // Mix of count-0 filtering and duplicate merging
         assert_parity(EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 2),
-                make_llm("anthropic/claude-3.5-sonnet", 0), // filtered
-                make_llm("openai/gpt-4o", 3),               // merged → count 5
-                make_llm("google/gemini-2.0-flash", 1),
-                make_llm("google/gemini-2.0-flash", 0),     // filtered (count 0)
-                make_llm("meta/llama-3-70b", 1),
-                make_llm("openai/gpt-4o", 1),               // merged → count 6
+            agents: vec![
+                make_agent("openai/gpt-4o", 2),
+                make_agent("anthropic/claude-3.5-sonnet", 0), // filtered
+                make_agent("openai/gpt-4o", 3),               // merged → count 5
+                make_agent("google/gemini-2.0-flash", 1),
+                make_agent("google/gemini-2.0-flash", 0),     // filtered (count 0)
+                make_agent("meta/llama-3-70b", 1),
+                make_agent("openai/gpt-4o", 1),               // merged → count 6
             ],
         });
     }
@@ -537,19 +537,19 @@ mod tests {
     fn parity_different_output_modes_are_distinct() {
         // Same model but different output_mode → different full_id, not merged
         let base = EnsembleBase {
-            llms: vec![
-                EnsembleLlmBaseWithFallbacksAndCount {
+            agents: vec![
+                AgentBaseWithFallbacksAndCount {
                     count: 1,
-                    inner: EnsembleLlmBase {
+                    inner: AgentBase {
                         model: "openai/gpt-4o".to_string(),
                         output_mode: OutputMode::Instruction,
                         ..Default::default()
                     },
                     fallbacks: None,
                 },
-                EnsembleLlmBaseWithFallbacksAndCount {
+                AgentBaseWithFallbacksAndCount {
                     count: 1,
-                    inner: EnsembleLlmBase {
+                    inner: AgentBase {
                         model: "openai/gpt-4o".to_string(),
                         output_mode: OutputMode::JsonSchema,
                         ..Default::default()
@@ -564,19 +564,19 @@ mod tests {
     #[test]
     fn parity_different_temperatures_are_distinct() {
         let base = EnsembleBase {
-            llms: vec![
-                EnsembleLlmBaseWithFallbacksAndCount {
+            agents: vec![
+                AgentBaseWithFallbacksAndCount {
                     count: 1,
-                    inner: EnsembleLlmBase {
+                    inner: AgentBase {
                         model: "openai/gpt-4o".to_string(),
                         temperature: Some(0.0),
                         ..Default::default()
                     },
                     fallbacks: None,
                 },
-                EnsembleLlmBaseWithFallbacksAndCount {
+                AgentBaseWithFallbacksAndCount {
                     count: 1,
-                    inner: EnsembleLlmBase {
+                    inner: AgentBase {
                         model: "openai/gpt-4o".to_string(),
                         temperature: Some(1.5),
                         ..Default::default()
@@ -591,19 +591,19 @@ mod tests {
     #[test]
     fn parity_with_fallbacks() {
         let base = EnsembleBase {
-            llms: vec![
-                EnsembleLlmBaseWithFallbacksAndCount {
+            agents: vec![
+                AgentBaseWithFallbacksAndCount {
                     count: 2,
-                    inner: EnsembleLlmBase {
+                    inner: AgentBase {
                         model: "openai/gpt-4o".to_string(),
                         ..Default::default()
                     },
-                    fallbacks: Some(vec![EnsembleLlmBase {
+                    fallbacks: Some(vec![AgentBase {
                         model: "openai/gpt-4o-mini".to_string(),
                         ..Default::default()
                     }]),
                 },
-                make_llm("anthropic/claude-3.5-sonnet", 1),
+                make_agent("anthropic/claude-3.5-sonnet", 1),
             ],
         };
         assert_parity(base);
@@ -612,19 +612,19 @@ mod tests {
     #[test]
     fn parity_duplicate_llms_with_fallbacks_merged() {
         // Two entries with same primary+fallback config → should merge
-        let make_with_fallback = || EnsembleLlmBaseWithFallbacksAndCount {
+        let make_with_fallback = || AgentBaseWithFallbacksAndCount {
             count: 2,
-            inner: EnsembleLlmBase {
+            inner: AgentBase {
                 model: "openai/gpt-4o".to_string(),
                 ..Default::default()
             },
-            fallbacks: Some(vec![EnsembleLlmBase {
+            fallbacks: Some(vec![AgentBase {
                 model: "openai/gpt-4o-mini".to_string(),
                 ..Default::default()
             }]),
         };
         assert_parity(EnsembleBase {
-            llms: vec![make_with_fallback(), make_with_fallback()],
+            agents: vec![make_with_fallback(), make_with_fallback()],
         });
     }
 
@@ -632,9 +632,9 @@ mod tests {
     fn parity_high_count() {
         // Max total count is 128
         assert_parity(EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 64),
-                make_llm("anthropic/claude-3.5-sonnet", 64),
+            agents: vec![
+                make_agent("openai/gpt-4o", 64),
+                make_agent("anthropic/claude-3.5-sonnet", 64),
             ],
         });
     }
@@ -642,7 +642,7 @@ mod tests {
     #[test]
     fn parity_single_llm_high_count() {
         assert_parity(EnsembleBase {
-            llms: vec![make_llm("openai/gpt-4o", 128)],
+            agents: vec![make_agent("openai/gpt-4o", 128)],
         });
     }
 
@@ -650,7 +650,7 @@ mod tests {
     fn parity_many_duplicates_merged_to_one() {
         // 10 identical entries of count 1 → merged to count 10
         assert_parity(EnsembleBase {
-            llms: (0..10).map(|_| make_llm("openai/gpt-4o", 1)).collect(),
+            agents: (0..10).map(|_| make_agent("openai/gpt-4o", 1)).collect(),
         });
     }
 
@@ -658,17 +658,17 @@ mod tests {
     fn parity_reverse_input_order() {
         // Verify that swapping input order still produces the same ensemble
         let base_a = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 1),
-                make_llm("anthropic/claude-3.5-sonnet", 2),
-                make_llm("google/gemini-2.0-flash", 3),
+            agents: vec![
+                make_agent("openai/gpt-4o", 1),
+                make_agent("anthropic/claude-3.5-sonnet", 2),
+                make_agent("google/gemini-2.0-flash", 3),
             ],
         };
         let base_b = EnsembleBase {
-            llms: vec![
-                make_llm("google/gemini-2.0-flash", 3),
-                make_llm("anthropic/claude-3.5-sonnet", 2),
-                make_llm("openai/gpt-4o", 1),
+            agents: vec![
+                make_agent("google/gemini-2.0-flash", 3),
+                make_agent("anthropic/claude-3.5-sonnet", 2),
+                make_agent("openai/gpt-4o", 1),
             ],
         };
 
@@ -688,10 +688,10 @@ mod tests {
     fn parity_entries_profile_format() {
         // Use Entries format (not Weights) and verify parity
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 2),
-                make_llm("anthropic/claude-3.5-sonnet", 1),
-                make_llm("openai/gpt-4o", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 2),
+                make_agent("anthropic/claude-3.5-sonnet", 1),
+                make_agent("openai/gpt-4o", 1),
             ],
         };
         let profile = Profile::Entries(vec![
@@ -705,8 +705,8 @@ mod tests {
             Ensemble::try_from_with_profile(base, profile).unwrap();
 
         assert_eq!(ensemble_try.id, ensemble_wp.id);
-        assert_eq!(ensemble_try.llms.len(), ensemble_wp.llms.len());
-        for (a, b) in ensemble_try.llms.iter().zip(ensemble_wp.llms.iter()) {
+        assert_eq!(ensemble_try.agents.len(), ensemble_wp.agents.len());
+        for (a, b) in ensemble_try.agents.iter().zip(ensemble_wp.agents.iter()) {
             assert_eq!(a.count, b.count);
             assert_eq!(a.full_id(), b.full_id());
         }
@@ -714,13 +714,13 @@ mod tests {
 
     #[test]
     fn parity_all_but_one_filtered() {
-        // All count-0 except one → should produce single-LLM ensemble
+        // All count-0 except one → should produce single-agent ensemble
         assert_parity(EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 0),
-                make_llm("anthropic/claude-3.5-sonnet", 0),
-                make_llm("google/gemini-2.0-flash", 0),
-                make_llm("meta/llama-3-70b", 1),
+            agents: vec![
+                make_agent("openai/gpt-4o", 0),
+                make_agent("anthropic/claude-3.5-sonnet", 0),
+                make_agent("google/gemini-2.0-flash", 0),
+                make_agent("meta/llama-3-70b", 1),
             ],
         });
     }
@@ -728,9 +728,9 @@ mod tests {
     #[test]
     fn parity_both_error_on_all_zero_counts() {
         let base = EnsembleBase {
-            llms: vec![
-                make_llm("openai/gpt-4o", 0),
-                make_llm("anthropic/claude-3.5-sonnet", 0),
+            agents: vec![
+                make_agent("openai/gpt-4o", 0),
+                make_agent("anthropic/claude-3.5-sonnet", 0),
             ],
         };
         let profile = Profile::Weights(vec![dec!(0.5), dec!(0.5)]);

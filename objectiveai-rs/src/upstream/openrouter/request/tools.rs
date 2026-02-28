@@ -10,17 +10,17 @@ use crate::vector;
 /// Returns None for other output modes.
 pub fn new_for_vector(
     vector_pfx_indices: &[(String, usize)],
-    ensemble_llm_output_mode: crate::ensemble_llm::OutputMode,
-    ensemble_llm_synthetic_reasoning: Option<bool>,
+    agent_output_mode: crate::agent::OutputMode,
+    agent_synthetic_reasoning: Option<bool>,
     request: Option<&[crate::agent::completions::request::Tool]>,
 ) -> Option<Vec<crate::agent::completions::request::Tool>> {
-    if let crate::ensemble_llm::OutputMode::ToolCall = ensemble_llm_output_mode {
+    if let crate::agent::OutputMode::ToolCall = agent_output_mode {
         let tool = vector::completions::ResponseKey::tool(
             vector_pfx_indices
                 .iter()
                 .map(|(key, _)| key.clone())
                 .collect(),
-            ensemble_llm_synthetic_reasoning.unwrap_or(false),
+            agent_synthetic_reasoning.unwrap_or(false),
         );
         Some(match request {
             Some(request) => {

@@ -1,7 +1,7 @@
 //! Streaming response types for vector completions.
 //!
 //! - [`VectorCompletionChunk`] - Top-level streaming chunk
-//! - [`AgentCompletionChunk`] - Individual LLM completion chunk
+//! - [`AgentCompletionChunk`] - Individual agent completion chunk
 //! - [`Object`] - Type marker (`"vector.completion.chunk"`)
 
 mod agent_completion_chunk;

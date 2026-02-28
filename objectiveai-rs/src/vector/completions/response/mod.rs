@@ -2,7 +2,7 @@
 //!
 //! - [`unary`] - Complete (non-streaming) responses
 //! - [`streaming`] - Incremental chunk-based responses
-//! - [`Vote`] - Individual LLM vote data
+//! - [`Vote`] - Individual agent vote data
 //! - [`Usage`] - Aggregated token and cost statistics
 
 pub mod streaming;

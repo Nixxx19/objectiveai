@@ -1,4 +1,4 @@
-//! Provider routing preferences for Ensemble LLMs.
+//! Provider routing preferences for Agents.
 //!
 //! These settings control how requests are routed to upstream model providers
 //! (e.g., via OpenRouter).

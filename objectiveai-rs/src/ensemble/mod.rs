@@ -1,6 +1,6 @@
 //! Ensemble definitions and validation.
 //!
-//! An **Ensemble** is a collection of [`EnsembleLlm`](crate::ensemble_llm::EnsembleLlm)s
+//! An **Ensemble** is a collection of [`Agent`](crate::agent::Agent)s
 //! used together. Ensembles are the foundation of ObjectiveAI's multi-model approach.
 //!
 //! # Key Properties
@@ -8,23 +8,23 @@
 //! - **Immutable**: Any change produces a new Ensemble ID
 //! - **No weights**: Weights are execution-time parameters, not part of the Ensemble
 //! - **Content-addressed**: IDs are deterministically computed from the definition
-//! - **Deduplicated**: Duplicate LLMs are merged with their counts summed
-//! - **Bounded**: Total LLM count must be between 1 and 128 (individual LLMs with
+//! - **Deduplicated**: Duplicate agents are merged with their counts summed
+//! - **Bounded**: Total agent count must be between 1 and 128 (individual agents with
 //!   `count: 0` are skipped, but the sum of all counts must be at least 1)
 //!
 //! # Example
 //!
 //! ```
 //! use objectiveai::ensemble::{EnsembleBase, Ensemble};
-//! use objectiveai::ensemble_llm::{EnsembleLlmBase, EnsembleLlmBaseWithFallbacksAndCount, OutputMode};
+//! use objectiveai::agent::{AgentBase, AgentBaseWithFallbacksAndCount, OutputMode};
 //! use objectiveai::agent::completions::request::{Message, SystemMessage, SimpleContent};
 //!
 //! let ensemble_base = EnsembleBase {
 //!     llms: vec![
 //!         // A simple GPT-4 configuration
-//!         EnsembleLlmBaseWithFallbacksAndCount {
+//!         AgentBaseWithFallbacksAndCount {
 //!             count: 1,
-//!             inner: EnsembleLlmBase {
+//!             inner: AgentBase {
 //!                 model: "openai/gpt-4o".to_string(),
 //!                 output_mode: OutputMode::Instruction,
 //!                 ..Default::default()
@@ -32,9 +32,9 @@
 //!             fallbacks: None,
 //!         },
 //!         // Claude with a system prompt
-//!         EnsembleLlmBaseWithFallbacksAndCount {
+//!         AgentBaseWithFallbacksAndCount {
 //!             count: 1,
-//!             inner: EnsembleLlmBase {
+//!             inner: AgentBase {
 //!                 model: "anthropic/claude-3.5-sonnet".to_string(),
 //!                 output_mode: OutputMode::JsonSchema,
 //!                 prefix_messages: Some(vec![
@@ -48,9 +48,9 @@
 //!             fallbacks: None,
 //!         },
 //!         // Gemini with lower temperature
-//!         EnsembleLlmBaseWithFallbacksAndCount {
+//!         AgentBaseWithFallbacksAndCount {
 //!             count: 2, // Include 2 instances
-//!             inner: EnsembleLlmBase {
+//!             inner: AgentBase {
 //!                 model: "google/gemini-2.0-flash-001".to_string(),
 //!                 output_mode: OutputMode::ToolCall,
 //!                 temperature: Some(0.3),

@@ -11,9 +11,9 @@ use serde::{Deserialize, Serialize};
 pub struct VectorCompletion {
     /// Unique identifier for this vector completion.
     pub id: String,
-    /// The underlying agent completions from each LLM in the ensemble.
+    /// The underlying agent completions from each agent in the ensemble.
     pub completions: Vec<super::AgentCompletion>,
-    /// Individual votes from each LLM, showing their selections.
+    /// Individual votes from each agent, showing their selections.
     pub votes: Vec<response::Vote>,
     /// Final weighted scores for each response option. Sums to 1.
     pub scores: Vec<rust_decimal::Decimal>,

@@ -2,16 +2,16 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Provider preferences merged from request and Ensemble LLM configuration.
+/// Provider preferences merged from request and Agent configuration.
 ///
-/// Some fields come from the Ensemble LLM (allow_fallbacks, require_parameters, etc.)
+/// Some fields come from the Agent (allow_fallbacks, require_parameters, etc.)
 /// while others come from the request (data_collection, zdr, sort, etc.).
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Provider {
-    /// Whether to allow fallback to other providers. From Ensemble LLM.
+    /// Whether to allow fallback to other providers. From Agent.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub allow_fallbacks: Option<bool>,
-    /// Whether to require all parameters. From Ensemble LLM.
+    /// Whether to require all parameters. From Agent.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub require_parameters: Option<bool>,
     /// Data collection preferences. From request.
@@ -20,18 +20,18 @@ pub struct Provider {
     /// Zero Data Retention preference. From request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub zdr: Option<bool>,
-    /// Provider order preference. From Ensemble LLM.
+    /// Provider order preference. From Agent.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub order: Option<Vec<String>>,
-    /// Only use these providers. From Ensemble LLM.
+    /// Only use these providers. From Agent.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub only: Option<Vec<String>>,
-    /// Ignore these providers. From Ensemble LLM.
+    /// Ignore these providers. From Agent.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ignore: Option<Vec<String>>,
-    /// Allowed quantizations. From Ensemble LLM.
+    /// Allowed quantizations. From Agent.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub quantizations: Option<Vec<crate::ensemble_llm::ProviderQuantization>>,
+    pub quantizations: Option<Vec<crate::agent::ProviderQuantization>>,
     /// Provider sort preference. From request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub sort: Option<crate::agent::completions::request::ProviderSort>,
@@ -71,14 +71,14 @@ impl Provider {
             && self.max_latency.is_none()
     }
 
-    /// Creates a new Provider by merging request and Ensemble LLM preferences.
+    /// Creates a new Provider by merging request and Agent preferences.
     ///
     /// Returns None if both inputs are None or if the merged result is empty.
     pub fn new(
         request: Option<crate::agent::completions::request::Provider>,
-        ensemble_llm: Option<&crate::ensemble_llm::Provider>,
+        agent: Option<&crate::agent::Provider>,
     ) -> Option<Self> {
-        let provider = match (request, ensemble_llm) {
+        let provider = match (request, agent) {
             (
                 Some(crate::agent::completions::request::Provider {
                     data_collection,
@@ -90,7 +90,7 @@ impl Provider {
                     min_throughput,
                     max_latency,
                 }),
-                Some(crate::ensemble_llm::Provider {
+                Some(crate::agent::Provider {
                     allow_fallbacks,
                     require_parameters,
                     order,
@@ -144,7 +144,7 @@ impl Provider {
             },
             (
                 None,
-                Some(crate::ensemble_llm::Provider {
+                Some(crate::agent::Provider {
                     allow_fallbacks,
                     require_parameters,
                     order,

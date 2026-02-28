@@ -3,10 +3,10 @@
 use crate::{agent, error, vector::completions::response};
 use serde::{Deserialize, Serialize};
 
-/// A agent completion from a single LLM within a vector completion.
+/// A agent completion from a single agent within a vector completion.
 ///
 /// Wraps the standard agent completion response with an index to identify
-/// which LLM in the ensemble produced it, and an optional error if the
+/// which agent in the ensemble produced it, and an optional error if the
 /// completion failed.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AgentCompletion {

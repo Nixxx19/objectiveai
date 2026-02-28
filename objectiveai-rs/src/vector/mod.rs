@@ -3,7 +3,7 @@
 //! Vector completions produce **numbers** instead of text. Given a prompt and
 //! a set of possible responses, vector completions:
 //!
-//! 1. Run multiple agent completions (one per LLM in the Ensemble)
+//! 1. Run multiple agent completions (one per agent in the Ensemble)
 //! 2. Force each completion to select one of the predefined responses
 //! 3. Combine the selections using explicit weights (the "profile")
 //! 4. Return a vector of scores that sums to 1
