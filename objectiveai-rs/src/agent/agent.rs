@@ -52,6 +52,10 @@ pub struct AgentBase {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub suffix_messages: Option<Vec<super::completions::request::Message>>,
 
+    /// MCP servers the agent can connect to.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mcp_servers: Option<super::McpServers>,
+
     // --- OpenAI-compatible parameters ---
     /// Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -111,6 +115,7 @@ impl Default for AgentBase {
             top_logprobs: None,
             prefix_messages: None,
             suffix_messages: None,
+            mcp_servers: None,
             frequency_penalty: None,
             logit_bias: None,
             max_completion_tokens: None,
@@ -162,6 +167,10 @@ impl AgentBase {
                     .for_each(super::completions::request::Message::prepare);
                 Some(suffix_messages)
             }
+            None => None,
+        };
+        self.mcp_servers = match self.mcp_servers.take() {
+            Some(mcp_servers) => super::mcp::mcp_servers::prepare(mcp_servers),
             None => None,
         };
         self.frequency_penalty = match self.frequency_penalty {
@@ -286,6 +295,9 @@ impl AgentBase {
             && top_logprobs > 20
         {
             return Err("`top_logprobs` must be at most 20".to_string());
+        }
+        if let Some(mcp_servers) = &self.mcp_servers {
+            super::mcp::mcp_servers::validate(mcp_servers)?;
         }
         validate_f64("frequency_penalty", self.frequency_penalty, -2.0, 2.0)?;
         if let Some(logit_bias) = &self.logit_bias {
