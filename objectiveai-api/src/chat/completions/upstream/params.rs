@@ -20,9 +20,7 @@ pub enum Params {
 }
 
 impl Params {
-    pub fn upstreams(
-        &self,
-    ) -> Option<&[objectiveai::chat::completions::Upstream]> {
+    pub fn upstreams(&self) -> Option<&[objectiveai::upstream::Upstream]> {
         match self {
             Params::Chat { request } => request.upstreams.as_deref(),
             Params::Vector { request, .. } => request.upstreams.as_deref(),

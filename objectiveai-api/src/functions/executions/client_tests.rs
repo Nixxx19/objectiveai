@@ -21,7 +21,7 @@ struct MockContextExt;
 impl ctx::ContextExt for MockContextExt {
     async fn get_byok(
         &self,
-        _upstream: objectiveai::chat::completions::Upstream,
+        _upstream: objectiveai::upstream::Upstream,
     ) -> Result<Option<String>, objectiveai::error::ResponseError> {
         Ok(None)
     }

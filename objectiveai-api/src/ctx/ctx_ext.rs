@@ -13,6 +13,6 @@ pub trait ContextExt {
     /// for this upstream, in which case the locally configured key will be used.
     async fn get_byok(
         &self,
-        upstream: objectiveai::chat::completions::Upstream,
+        upstream: objectiveai::upstream::Upstream,
     ) -> Result<Option<String>, objectiveai::error::ResponseError>;
 }

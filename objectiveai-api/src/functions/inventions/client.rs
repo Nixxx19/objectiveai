@@ -6,7 +6,7 @@ use std::{
     time,
 };
 
-type Tool = objectiveai::functions::inventions::Tool;
+type Tool = objectiveai::upstream::Tool;
 type FunctionInventionChunk =
     objectiveai::functions::inventions::response::streaming::FunctionInventionChunk;
 type Object = objectiveai::functions::inventions::response::streaming::Object;

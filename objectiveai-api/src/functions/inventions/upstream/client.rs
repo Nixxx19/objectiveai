@@ -25,7 +25,7 @@ impl Client {
             objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         >,
         _prompt: String,
-        _tools: Vec<objectiveai::functions::inventions::Tool>,
+        _tools: Vec<objectiveai::upstream::Tool>,
         _upstream_state: Option<serde_json::Value>,
     ) -> Result<
         (
@@ -35,7 +35,7 @@ impl Client {
             serde_json::Value,
         ),
         super::Error,
-    > {
+    >{
         Err(super::Error::NoUpstreamAvailable)
     }
 }

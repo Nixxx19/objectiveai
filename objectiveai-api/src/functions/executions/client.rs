@@ -1292,7 +1292,7 @@ where
                                                 confidence_response.reasoning.push(reasoning);
                                             }
                                             if let Some(content) = delta.content.take()
-                                                && let Ok(vector::completions::ResponseKey {
+                                                && let Ok(objectiveai::vector::completions::ResponseKey {
                                                     _think: Some(reasoning),
                                                     ..
                                                 }) = serde_json::from_str(&content)
@@ -1310,7 +1310,7 @@ where
                                                         ),
                                                         ..
                                                     } = tool_call
-                                                        && let Ok(vector::completions::ResponseKey {
+                                                        && let Ok(objectiveai::vector::completions::ResponseKey {
                                                             _think: Some(reasoning),
                                                             ..
                                                         }) = serde_json::from_str(&arguments)
@@ -1516,7 +1516,7 @@ where
                                     confidence_response.reasoning.push(reasoning);
                                 }
                                 if let Some(content) = delta.content.take()
-                                    && let Ok(vector::completions::ResponseKey {
+                                    && let Ok(objectiveai::vector::completions::ResponseKey {
                                         _think: Some(reasoning),
                                         ..
                                     }) = serde_json::from_str(&content)
@@ -1534,7 +1534,7 @@ where
                                             ),
                                             ..
                                         } = tool_call
-                                            && let Ok(vector::completions::ResponseKey {
+                                            && let Ok(objectiveai::vector::completions::ResponseKey {
                                                 _think: Some(reasoning),
                                                 ..
                                             }) = serde_json::from_str(&arguments)

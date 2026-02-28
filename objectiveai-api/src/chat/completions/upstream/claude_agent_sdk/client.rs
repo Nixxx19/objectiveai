@@ -598,7 +598,7 @@ fn make_chunk(
         system_fingerprint: None,
         usage,
         provider: None,
-        upstream: objectiveai::chat::completions::Upstream::ClaudeAgentSdk,
+        upstream: objectiveai::upstream::Upstream::ClaudeAgentSdk,
     }
 }
 
