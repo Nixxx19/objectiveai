@@ -23,6 +23,7 @@ pub struct SDKStatusMessage {
     pub r#type: SDKStatusMessageType,
     pub subtype: SDKStatusMessageSubtype,
     pub status: Option<SDKStatusValue>,
+    #[serde(rename = "permissionMode")]
     #[serde(skip_serializing_if = "Option::is_none")]
     pub permission_mode: Option<super::PermissionMode>,
     pub uuid: String,
