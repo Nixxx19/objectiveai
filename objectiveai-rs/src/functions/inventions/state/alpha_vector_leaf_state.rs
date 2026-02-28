@@ -565,10 +565,12 @@ impl super::InventionState for AlphaVectorLeafState {
     }
 
     fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
-        vec![
+        let mut tools = vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::write_input_schema_tool(this),
-        ]
+        ];
+        tools.extend(crate::functions::inventions::schema_tools(&["AlphaVectorFunctionInputSchema"]));
+        tools
     }
     fn validate_input_schema(this: &Arc<Mutex<Self>>) -> Result<(), String> {
         AlphaVectorLeafState::validate_input_schema(this)
@@ -585,13 +587,15 @@ impl super::InventionState for AlphaVectorLeafState {
     }
 
     fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
-        vec![
+        let mut tools = vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::read_input_schema_tool(this), Self::read_essay_tasks_tool(this),
             Self::append_task_tool(this), Self::delete_task_tool(this),
             Self::read_task_tool(this), Self::read_tasks_length_tool(this),
             Self::check_function_tool(this),
-        ]
+        ];
+        tools.extend(crate::functions::inventions::schema_tools(&["AlphaVectorVectorCompletionTaskExpression", "Messages", "VectorResponses"]));
+        tools
     }
     fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String> {
         AlphaVectorLeafState::validate_function(this)
