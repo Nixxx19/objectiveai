@@ -1,3 +1,4 @@
+pub mod openrouter;
 mod route;
 mod tool;
 mod upstream;

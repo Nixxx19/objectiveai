@@ -71,9 +71,9 @@ impl ResponseKey {
     pub fn response_format(
         vector_response_keys: Vec<String>,
         think: bool,
-    ) -> objectiveai::chat::completions::request::ResponseFormat {
-        objectiveai::chat::completions::request::ResponseFormat::JsonSchema {
-            json_schema: objectiveai::chat::completions::request::JsonSchema {
+    ) -> crate::chat::completions::request::ResponseFormat {
+        crate::chat::completions::request::ResponseFormat::JsonSchema {
+            json_schema: crate::chat::completions::request::JsonSchema {
                 name: "response_key".to_string(),
                 description: None,
                 strict: Some(true),
@@ -91,9 +91,9 @@ impl ResponseKey {
     pub fn tool(
         vector_response_keys: Vec<String>,
         think: bool,
-    ) -> objectiveai::chat::completions::request::Tool {
-        objectiveai::chat::completions::request::Tool::Function {
-            function: objectiveai::chat::completions::request::FunctionTool {
+    ) -> crate::chat::completions::request::Tool {
+        crate::chat::completions::request::Tool::Function {
+            function: crate::chat::completions::request::FunctionTool {
                 name: "response_key".to_string(),
                 description: None,
                 strict: Some(true),
@@ -103,10 +103,10 @@ impl ResponseKey {
     }
 
     /// Creates a tool choice that forces the LLM to call the response_key tool.
-    pub fn tool_choice() -> objectiveai::chat::completions::request::ToolChoice {
-        objectiveai::chat::completions::request::ToolChoice::Function(
-            objectiveai::chat::completions::request::ToolChoiceFunction::Function {
-                function: objectiveai::chat::completions::request::ToolChoiceFunctionFunction {
+    pub fn tool_choice() -> crate::chat::completions::request::ToolChoice {
+        crate::chat::completions::request::ToolChoice::Function(
+            crate::chat::completions::request::ToolChoiceFunction::Function {
+                function: crate::chat::completions::request::ToolChoiceFunctionFunction {
                     name: "response_key".to_string(),
                 },
             },
