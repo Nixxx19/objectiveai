@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+#[derive(Clone)]
 pub struct Tool {
     pub name: &'static str,
     pub description: &'static str,

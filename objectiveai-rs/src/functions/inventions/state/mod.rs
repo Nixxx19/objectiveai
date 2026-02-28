@@ -15,7 +15,34 @@ pub use alpha_vector_leaf_state::*;
 pub use alpha_vector_state::*;
 pub use params::*;
 
+use std::sync::{Arc, Mutex};
+
 use serde::{Deserialize, Serialize};
+
+/// Abstracts over the 4 routed state variants for invention step orchestration.
+pub trait InventionState: Clone + Send + 'static {
+    fn params(this: &Arc<Mutex<Self>>) -> Params;
+    fn is_scalar() -> bool;
+    fn object() -> super::response::streaming::Object;
+    fn into_state(self) -> State;
+
+    fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<super::Tool>;
+    fn validate_essay(this: &Arc<Mutex<Self>>) -> Result<(), String>;
+
+    fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<super::Tool>;
+    fn validate_input_schema(this: &Arc<Mutex<Self>>) -> Result<(), String>;
+
+    fn essay_tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<super::Tool>;
+    fn validate_essay_tasks(this: &Arc<Mutex<Self>>) -> Result<(), String>;
+
+    fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<super::Tool>;
+    fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String>;
+
+    fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<super::Tool>;
+    fn validate_description(this: &Arc<Mutex<Self>>) -> Result<(), String>;
+
+    fn write_readme(this: &Arc<Mutex<Self>>);
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]

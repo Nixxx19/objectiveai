@@ -594,3 +594,70 @@ impl AlphaVectorBranchState {
         ));
     }
 }
+
+impl super::InventionState for AlphaVectorBranchState {
+    fn params(this: &Arc<Mutex<Self>>) -> super::Params {
+        this.lock().unwrap().params.clone()
+    }
+    fn is_scalar() -> bool { false }
+    fn object() -> crate::functions::inventions::response::streaming::Object {
+        crate::functions::inventions::response::streaming::Object::AlphaVectorFunctionInventionChunk
+    }
+    fn into_state(self) -> super::State { super::State::AlphaVectorBranch(self) }
+
+    fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+        vec![Self::read_spec_tool(this), Self::write_essay_tool(this)]
+    }
+    fn validate_essay(this: &Arc<Mutex<Self>>) -> Result<(), String> {
+        AlphaVectorBranchState::validate_essay(this)
+    }
+
+    fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+        vec![
+            Self::read_spec_tool(this), Self::read_essay_tool(this),
+            Self::write_input_schema_tool(this), Self::read_input_schema_tool(this),
+        ]
+    }
+    fn validate_input_schema(this: &Arc<Mutex<Self>>) -> Result<(), String> {
+        AlphaVectorBranchState::validate_input_schema(this)
+    }
+
+    fn essay_tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+        vec![
+            Self::read_spec_tool(this), Self::read_essay_tool(this),
+            Self::read_input_schema_tool(this), Self::write_essay_tasks_tool(this),
+        ]
+    }
+    fn validate_essay_tasks(this: &Arc<Mutex<Self>>) -> Result<(), String> {
+        AlphaVectorBranchState::validate_essay_tasks(this)
+    }
+
+    fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+        vec![
+            Self::read_spec_tool(this), Self::read_essay_tool(this),
+            Self::read_input_schema_tool(this), Self::read_essay_tasks_tool(this),
+            Self::append_task_tool(this), Self::delete_task_tool(this),
+            Self::read_task_tool(this), Self::read_tasks_length_tool(this),
+            Self::check_function_tool(this),
+        ]
+    }
+    fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String> {
+        AlphaVectorBranchState::validate_function(this)
+    }
+
+    fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+        vec![
+            Self::read_spec_tool(this), Self::read_essay_tool(this),
+            Self::read_input_schema_tool(this), Self::read_essay_tasks_tool(this),
+            Self::read_task_tool(this), Self::read_tasks_length_tool(this),
+            Self::write_description_tool(this),
+        ]
+    }
+    fn validate_description(this: &Arc<Mutex<Self>>) -> Result<(), String> {
+        AlphaVectorBranchState::validate_description(this)
+    }
+
+    fn write_readme(this: &Arc<Mutex<Self>>) {
+        AlphaVectorBranchState::write_readme(this)
+    }
+}

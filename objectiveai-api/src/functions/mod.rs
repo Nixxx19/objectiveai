@@ -6,6 +6,8 @@
 mod client;
 /// Function execution client and types.
 pub mod executions;
+/// Function invention client and types.
+pub mod inventions;
 /// GitHub API client for fetching functions and profiles.
 pub mod github;
 mod flat_task_profile;
