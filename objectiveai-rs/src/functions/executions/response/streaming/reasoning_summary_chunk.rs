@@ -1,10 +1,10 @@
-use crate::{chat, error};
+use crate::{agent, error};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ReasoningSummaryChunk {
     #[serde(flatten)]
-    pub inner: chat::completions::response::streaming::ChatCompletionChunk,
+    pub inner: agent::completions::response::streaming::AgentCompletionChunk,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<error::ResponseError>,
 }

@@ -1,4 +1,4 @@
-use crate::{chat, functions, vector};
+use crate::{agent, functions, vector};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -30,7 +30,7 @@ pub struct FunctionRemoteRequestBody {
     pub dataset: Vec<super::DatasetItem>,
     pub ensemble: vector::completions::request::Ensemble,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub provider: Option<chat::completions::request::Provider>,
+    pub provider: Option<agent::completions::request::Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -11,8 +11,8 @@ use serde::{Deserialize, Serialize};
 pub struct VectorCompletionChunk {
     /// Unique identifier for this vector completion.
     pub id: String,
-    /// Incremental chat completion chunks from each LLM.
-    pub completions: Vec<super::ChatCompletionChunk>,
+    /// Incremental agent completion chunks from each LLM.
+    pub completions: Vec<super::AgentCompletionChunk>,
     /// Votes received so far. New votes are appended in subsequent chunks.
     pub votes: Vec<response::Vote>,
     /// Current weighted scores. Updated as new votes arrive.
@@ -86,16 +86,16 @@ impl VectorCompletionChunk {
 
     fn push_completions(
         &mut self,
-        other_completions: &[super::ChatCompletionChunk],
+        other_completions: &[super::AgentCompletionChunk],
     ) {
         fn push_completion(
-            completions: &mut Vec<super::ChatCompletionChunk>,
-            other: &super::ChatCompletionChunk,
+            completions: &mut Vec<super::AgentCompletionChunk>,
+            other: &super::AgentCompletionChunk,
         ) {
             fn find_completion(
-                completions: &mut Vec<super::ChatCompletionChunk>,
+                completions: &mut Vec<super::AgentCompletionChunk>,
                 index: u64,
-            ) -> Option<&mut super::ChatCompletionChunk> {
+            ) -> Option<&mut super::AgentCompletionChunk> {
                 for completion in completions {
                     if completion.index == index {
                         return Some(completion);

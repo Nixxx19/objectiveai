@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use crate::chat::completions::request::{
+use crate::agent::completions::request::{
     ImageUrl, ImageUrlDetail, RichContentPart,
 };
 use crate::functions::expression::{ImageInputSchema, Input};

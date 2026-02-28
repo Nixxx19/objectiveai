@@ -10,12 +10,12 @@ use crate::vector;
 /// `None` to prevent tool calls from interfering with voting.
 pub fn new_for_vector(
     ensemble_llm_output_mode: crate::ensemble_llm::OutputMode,
-    request_tools: Option<&[crate::chat::completions::request::Tool]>,
-) -> Option<crate::chat::completions::request::ToolChoice> {
+    request_tools: Option<&[crate::agent::completions::request::Tool]>,
+) -> Option<crate::agent::completions::request::ToolChoice> {
     if let crate::ensemble_llm::OutputMode::ToolCall = ensemble_llm_output_mode {
         Some(vector::completions::ResponseKey::tool_choice())
     } else if request_tools.is_some_and(|request_tools| !request_tools.is_empty()) {
-        Some(crate::chat::completions::request::ToolChoice::None)
+        Some(crate::agent::completions::request::ToolChoice::None)
     } else {
         None
     }

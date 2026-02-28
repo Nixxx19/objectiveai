@@ -71,9 +71,9 @@ impl ResponseKey {
     pub fn response_format(
         vector_response_keys: Vec<String>,
         think: bool,
-    ) -> crate::chat::completions::request::ResponseFormat {
-        crate::chat::completions::request::ResponseFormat::JsonSchema {
-            json_schema: crate::chat::completions::request::JsonSchema {
+    ) -> crate::agent::completions::request::ResponseFormat {
+        crate::agent::completions::request::ResponseFormat::JsonSchema {
+            json_schema: crate::agent::completions::request::JsonSchema {
                 name: "response_key".to_string(),
                 description: None,
                 strict: Some(true),
@@ -91,9 +91,9 @@ impl ResponseKey {
     pub fn tool(
         vector_response_keys: Vec<String>,
         think: bool,
-    ) -> crate::chat::completions::request::Tool {
-        crate::chat::completions::request::Tool::Function {
-            function: crate::chat::completions::request::FunctionTool {
+    ) -> crate::agent::completions::request::Tool {
+        crate::agent::completions::request::Tool::Function {
+            function: crate::agent::completions::request::FunctionTool {
                 name: "response_key".to_string(),
                 description: None,
                 strict: Some(true),
@@ -103,10 +103,10 @@ impl ResponseKey {
     }
 
     /// Creates a tool choice that forces the LLM to call the response_key tool.
-    pub fn tool_choice() -> crate::chat::completions::request::ToolChoice {
-        crate::chat::completions::request::ToolChoice::Function(
-            crate::chat::completions::request::ToolChoiceFunction::Function {
-                function: crate::chat::completions::request::ToolChoiceFunctionFunction {
+    pub fn tool_choice() -> crate::agent::completions::request::ToolChoice {
+        crate::agent::completions::request::ToolChoice::Function(
+            crate::agent::completions::request::ToolChoiceFunction::Function {
+                function: crate::agent::completions::request::ToolChoiceFunctionFunction {
                     name: "response_key".to_string(),
                 },
             },

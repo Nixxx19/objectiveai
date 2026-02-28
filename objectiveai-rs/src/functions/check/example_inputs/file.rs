@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use crate::chat::completions::request::{File, RichContentPart};
+use crate::agent::completions::request::{File, RichContentPart};
 use crate::functions::expression::{FileInputSchema, Input};
 
 pub const fn permutations(_schema: &FileInputSchema) -> usize {

@@ -2,7 +2,7 @@
 //!
 //! The output mode determines how the LLM is constrained to select from
 //! a set of predefined responses during vector completion. This setting
-//! is **only used for vector completions** and is ignored for chat completions.
+//! is **only used for vector completions** and is ignored for agent completions.
 
 use serde::{Deserialize, Serialize};
 
@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 /// responses. This enum controls *how* that constraint is enforced.
 ///
 /// **Note:** This setting is only relevant for vector completions and is
-/// completely ignored for chat completions.
+/// completely ignored for agent completions.
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum OutputMode {

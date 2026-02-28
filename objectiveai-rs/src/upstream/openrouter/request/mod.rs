@@ -3,8 +3,8 @@
 //! This module transforms ObjectiveAI request types into the format expected
 //! by the OpenRouter API, applying Ensemble LLM configurations.
 
-mod chat_completion_create_params;
-/// Prompt construction for chat and vector completions.
+mod agent_completion_create_params;
+/// Prompt construction for agent and vector completions.
 pub mod prompt;
 mod provider;
 /// Response format construction for vector completions.
@@ -16,7 +16,7 @@ pub mod tool_choice;
 pub mod tools;
 mod usage;
 
-pub use chat_completion_create_params::*;
+pub use agent_completion_create_params::*;
 pub use provider::*;
 pub use stream_options::*;
 pub use usage::*;

@@ -1,4 +1,4 @@
-use crate::chat;
+use crate::agent;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize)]
@@ -19,18 +19,18 @@ impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CacheVoteRequestRef<'a> {
-    pub model: &'a chat::completions::request::Model,
-    pub models: Option<&'a [chat::completions::request::Model]>,
-    pub messages: &'a [chat::completions::request::Message],
-    pub tools: Option<&'a [chat::completions::request::Tool]>,
-    pub responses: &'a [chat::completions::request::RichContent],
+    pub model: &'a agent::completions::request::Model,
+    pub models: Option<&'a [agent::completions::request::Model]>,
+    pub messages: &'a [agent::completions::request::Message],
+    pub tools: Option<&'a [agent::completions::request::Tool]>,
+    pub responses: &'a [agent::completions::request::RichContent],
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CacheVoteRequestOwned {
-    pub model: chat::completions::request::Model,
-    pub models: Option<Vec<chat::completions::request::Model>>,
-    pub messages: Vec<chat::completions::request::Message>,
-    pub tools: Option<Vec<chat::completions::request::Tool>>,
-    pub responses: Vec<chat::completions::request::RichContent>,
+    pub model: agent::completions::request::Model,
+    pub models: Option<Vec<agent::completions::request::Model>>,
+    pub messages: Vec<agent::completions::request::Message>,
+    pub tools: Option<Vec<agent::completions::request::Tool>>,
+    pub responses: Vec<agent::completions::request::RichContent>,
 }

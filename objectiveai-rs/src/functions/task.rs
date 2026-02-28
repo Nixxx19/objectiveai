@@ -25,7 +25,7 @@
 //! using profile weights. If a function has only one task, that task's output becomes
 //! the function's output directly (with weight 1.0).
 
-use crate::chat;
+use crate::agent;
 use serde::{Deserialize, Serialize};
 
 /// A task definition with expressions (pre-compilation).
@@ -402,7 +402,7 @@ pub struct VectorCompletionTaskExpression {
     pub messages: super::expression::WithExpression<
         Vec<
             super::expression::WithExpression<
-                chat::completions::request::MessageExpression,
+                agent::completions::request::MessageExpression,
             >,
         >,
     >,
@@ -414,7 +414,7 @@ pub struct VectorCompletionTaskExpression {
             Option<
                 Vec<
                     super::expression::WithExpression<
-                        chat::completions::request::ToolExpression,
+                        agent::completions::request::ToolExpression,
                     >,
                 >,
             >,
@@ -425,7 +425,7 @@ pub struct VectorCompletionTaskExpression {
     pub responses: super::expression::WithExpression<
         Vec<
             super::expression::WithExpression<
-                chat::completions::request::RichContentExpression,
+                agent::completions::request::RichContentExpression,
             >,
         >,
     >,
@@ -520,12 +520,12 @@ impl VectorCompletionTaskExpression {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VectorCompletionTask {
     /// The resolved conversation messages.
-    pub messages: Vec<chat::completions::request::Message>,
+    pub messages: Vec<agent::completions::request::Message>,
     /// The resolved tools (read-only context for the completion).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<chat::completions::request::Tool>>,
+    pub tools: Option<Vec<agent::completions::request::Tool>>,
     /// The resolved response options the LLMs can vote for.
-    pub responses: Vec<chat::completions::request::RichContent>,
+    pub responses: Vec<agent::completions::request::RichContent>,
     /// Expression to transform the task result into a valid function output.
     ///
     /// Receives `output` as `VectorCompletion(VectorCompletionOutput)` containing

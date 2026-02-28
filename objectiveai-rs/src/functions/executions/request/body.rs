@@ -1,6 +1,6 @@
 //! Request body types for function executions.
 
-use crate::{chat, functions};
+use crate::{agent, functions};
 use serde::{Deserialize, Serialize};
 
 /// Request body for inline Function with inline Profile.
@@ -69,7 +69,7 @@ pub struct FunctionRemoteProfileRemoteRequestBody {
     pub input: functions::expression::Input,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub provider: Option<chat::completions::request::Provider>,
+    pub provider: Option<agent::completions::request::Provider>,
     /// Random seed for deterministic results.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,

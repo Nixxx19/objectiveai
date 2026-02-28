@@ -308,7 +308,7 @@ impl<T: super::special::FromSpecial> FromSpecial
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::chat::completions::request::{
+    use crate::agent::completions::request::{
         AssistantToolCallExpression, AssistantToolCallFunctionExpression, File,
         FunctionToolExpression, ImageUrl, InputAudio, MessageExpression,
         RichContentExpression, RichContentPartExpression,

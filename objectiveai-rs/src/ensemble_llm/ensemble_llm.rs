@@ -1,6 +1,6 @@
 //! Core Ensemble LLM types and validation logic.
 
-use crate::chat;
+use crate::agent;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
@@ -22,13 +22,13 @@ pub struct EnsembleLlmBase {
     /// The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).
     pub model: String,
 
-    /// The output mode for vector completions. Ignored for chat completions.
+    /// The output mode for vector completions. Ignored for agent completions.
     #[serde(default)]
     pub output_mode: super::OutputMode,
 
     /// Enable synthetic reasoning for non-reasoning LLMs.
     ///
-    /// **Vector completions only.** Ignored for chat completions.
+    /// **Vector completions only.** Ignored for agent completions.
     ///
     /// When enabled, forces the LLM to output a `_think` field before voting,
     /// simulating chain-of-thought reasoning. Requires `output_mode` to be
@@ -38,7 +38,7 @@ pub struct EnsembleLlmBase {
 
     /// Number of top log probabilities to return (2-20).
     ///
-    /// **Vector completions only.** Ignored for chat completions.
+    /// **Vector completions only.** Ignored for agent completions.
     ///
     /// When set, vector completion votes use token probabilities instead of
     /// discrete selections (if the upstream model provides logprobs).
@@ -47,11 +47,11 @@ pub struct EnsembleLlmBase {
 
     /// Messages prepended to the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub prefix_messages: Option<Vec<chat::completions::request::Message>>,
+    pub prefix_messages: Option<Vec<agent::completions::request::Message>>,
 
     /// Messages appended after the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub suffix_messages: Option<Vec<chat::completions::request::Message>>,
+    pub suffix_messages: Option<Vec<agent::completions::request::Message>>,
 
     // --- OpenAI-compatible parameters ---
     /// Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).
@@ -150,7 +150,7 @@ impl EnsembleLlmBase {
             Some(mut prefix_messages) => {
                 prefix_messages
                     .iter_mut()
-                    .for_each(chat::completions::request::Message::prepare);
+                    .for_each(agent::completions::request::Message::prepare);
                 Some(prefix_messages)
             }
             None => None,
@@ -160,7 +160,7 @@ impl EnsembleLlmBase {
             Some(mut suffix_messages) => {
                 suffix_messages
                     .iter_mut()
-                    .for_each(chat::completions::request::Message::prepare);
+                    .for_each(agent::completions::request::Message::prepare);
                 Some(suffix_messages)
             }
             None => None,

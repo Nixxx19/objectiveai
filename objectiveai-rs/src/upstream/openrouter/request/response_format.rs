@@ -11,7 +11,7 @@ pub fn new_for_vector(
     vector_pfx_indices: &[(String, usize)],
     ensemble_llm_output_mode: crate::ensemble_llm::OutputMode,
     ensemble_llm_synthetic_reasoning: Option<bool>,
-) -> Option<crate::chat::completions::request::ResponseFormat> {
+) -> Option<crate::agent::completions::request::ResponseFormat> {
     if let crate::ensemble_llm::OutputMode::JsonSchema = ensemble_llm_output_mode {
         Some(vector::completions::ResponseKey::response_format(
             vector_pfx_indices

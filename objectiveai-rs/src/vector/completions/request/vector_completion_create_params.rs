@@ -1,11 +1,11 @@
 //! Vector completion request parameters.
 
-use crate::chat;
+use crate::agent;
 use serde::{Deserialize, Serialize};
 
 /// Parameters for creating a vector completion.
 ///
-/// Vector completions run multiple chat completions (one per LLM in the
+/// Vector completions run multiple agent completions (one per LLM in the
 /// ensemble), force each to vote for one of the predefined responses, and
 /// combine votes using the provided profile weights to produce final scores.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -26,10 +26,10 @@ pub struct VectorCompletionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub upstreams: Option<Vec<crate::upstream::Upstream>>,
     /// The conversation messages (the prompt).
-    pub messages: Vec<chat::completions::request::Message>,
+    pub messages: Vec<agent::completions::request::Message>,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub provider: Option<chat::completions::request::Provider>,
+    pub provider: Option<agent::completions::request::Provider>,
     /// The Ensemble of LLMs to use.
     pub ensemble: super::Ensemble,
     /// The profile weights for each LLM in the ensemble.
@@ -47,9 +47,9 @@ pub struct VectorCompletionCreateParams {
     pub stream: Option<bool>,
     /// Tools available (read-only context, not callable in vector completions).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<chat::completions::request::Tool>>,
+    pub tools: Option<Vec<agent::completions::request::Tool>>,
     /// The possible responses the LLMs can vote for.
-    pub responses: Vec<chat::completions::request::RichContent>,
+    pub responses: Vec<agent::completions::request::RichContent>,
 
     // --- Retry configuration ---
     /// Maximum elapsed time (ms) for exponential backoff retries.

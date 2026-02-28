@@ -19,7 +19,7 @@
 //! # Modules
 //!
 //! - [`auth`] - API authentication types
-//! - [`chat`] - Chat completion APIs
+//! - [`agent`] - Agent completion APIs
 //! - [`ensemble`] - Ensemble definitions and validation
 //! - [`ensemble_llm`] - Ensemble LLM configurations
 //! - [`error`] - Error types
@@ -32,7 +32,7 @@
 //! - [`HttpError`] - HTTP error types
 
 pub mod auth;
-pub mod chat;
+pub mod agent;
 pub mod ensemble;
 pub mod ensemble_llm;
 pub mod error;

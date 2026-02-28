@@ -1,11 +1,11 @@
 //! Usage statistics for vector completions.
 
-use crate::chat;
+use crate::agent;
 use serde::{Deserialize, Serialize};
 
 /// Aggregated token and cost usage for a vector completion.
 ///
-/// Since vector completions run multiple chat completions (one per LLM in the
+/// Since vector completions run multiple agent completions (one per LLM in the
 /// ensemble), this struct aggregates usage across all underlying completions.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct Usage {
@@ -18,16 +18,16 @@ pub struct Usage {
     /// Breakdown of completion tokens (reasoning, audio, etc.) if available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub completion_tokens_details:
-        Option<chat::completions::response::CompletionTokensDetails>,
+        Option<agent::completions::response::CompletionTokensDetails>,
     /// Breakdown of prompt tokens (cached, audio, etc.) if available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prompt_tokens_details:
-        Option<chat::completions::response::PromptTokensDetails>,
+        Option<agent::completions::response::PromptTokensDetails>,
     /// Cost charged by ObjectiveAI for this request.
     pub cost: rust_decimal::Decimal,
     /// Breakdown of upstream and upstream_upstream costs if available.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub cost_details: Option<chat::completions::response::CostDetails>,
+    pub cost_details: Option<agent::completions::response::CostDetails>,
     /// Total cost including upstream provider charges. Only differs from `cost`
     /// when using BYOK (Bring Your Own Key).
     pub total_cost: rust_decimal::Decimal,
@@ -40,14 +40,14 @@ impl Usage {
             || self.prompt_tokens > 0
             || self.total_tokens > 0
             || self.completion_tokens_details.as_ref().is_some_and(
-                chat::completions::response::CompletionTokensDetails::any_usage,
+                agent::completions::response::CompletionTokensDetails::any_usage,
             )
             || self.prompt_tokens_details.as_ref().is_some_and(
-                chat::completions::response::PromptTokensDetails::any_usage,
+                agent::completions::response::PromptTokensDetails::any_usage,
             )
             || self.cost > rust_decimal::Decimal::ZERO
             || self.cost_details.as_ref().is_some_and(
-                chat::completions::response::CostDetails::any_usage,
+                agent::completions::response::CostDetails::any_usage,
             )
             || self.total_cost > rust_decimal::Decimal::ZERO
     }
@@ -94,10 +94,10 @@ impl Usage {
         self.total_cost += other.total_cost;
     }
 
-    /// Appends usage from a chat completion response.
-    pub fn push_chat_completion_usage(
+    /// Appends usage from a agent completion response.
+    pub fn push_agent_completion_usage(
         &mut self,
-        other: &chat::completions::response::Usage,
+        other: &agent::completions::response::Usage,
     ) {
         self.completion_tokens += other.completion_tokens;
         self.prompt_tokens += other.prompt_tokens;

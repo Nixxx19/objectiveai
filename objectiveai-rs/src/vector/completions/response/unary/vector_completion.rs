@@ -6,13 +6,13 @@ use serde::{Deserialize, Serialize};
 /// A complete vector completion response (non-streaming).
 ///
 /// Contains the final scores, all votes from the ensemble, and the underlying
-/// chat completions that produced those votes.
+/// agent completions that produced those votes.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct VectorCompletion {
     /// Unique identifier for this vector completion.
     pub id: String,
-    /// The underlying chat completions from each LLM in the ensemble.
-    pub completions: Vec<super::ChatCompletion>,
+    /// The underlying agent completions from each LLM in the ensemble.
+    pub completions: Vec<super::AgentCompletion>,
     /// Individual votes from each LLM, showing their selections.
     pub votes: Vec<response::Vote>,
     /// Final weighted scores for each response option. Sums to 1.
@@ -75,7 +75,7 @@ impl From<response::streaming::VectorCompletionChunk> for VectorCompletion {
             id,
             completions: completions
                 .into_iter()
-                .map(super::ChatCompletion::from)
+                .map(super::AgentCompletion::from)
                 .collect(),
             votes,
             scores,

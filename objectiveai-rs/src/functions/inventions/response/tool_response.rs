@@ -1,4 +1,4 @@
-use crate::chat;
+use crate::agent;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -6,7 +6,7 @@ pub struct ToolResponse {
     pub role: ToolRole,
     pub index: u64,
     #[serde(flatten)]
-    pub inner: chat::completions::request::ToolMessage,
+    pub inner: agent::completions::request::ToolMessage,
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]

@@ -534,7 +534,7 @@ impl<T: FromStarlarkValue> OneOrMany<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::chat::completions::request::{
+    use crate::agent::completions::request::{
         AssistantMessageExpression, AssistantToolCallExpression,
         AssistantToolCallFunctionExpression, DeveloperMessageExpression, File,
         FunctionToolExpression, ImageUrl, ImageUrlDetail, InputAudio,

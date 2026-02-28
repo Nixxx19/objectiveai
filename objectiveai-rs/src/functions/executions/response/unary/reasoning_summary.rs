@@ -1,11 +1,11 @@
 use crate::functions::executions::response;
-use crate::{chat, error};
+use crate::{agent, error};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct ReasoningSummary {
     #[serde(flatten)]
-    pub inner: chat::completions::response::unary::ChatCompletion,
+    pub inner: agent::completions::response::unary::AgentCompletion,
     pub error: Option<error::ResponseError>,
 }
 

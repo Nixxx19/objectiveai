@@ -3,7 +3,7 @@
 //! Defines the data structures that can be passed as input to Functions,
 //! along with schema types for validation.
 
-use crate::chat;
+use crate::agent;
 use indexmap::IndexMap;
 use serde::de::Error as _;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
@@ -20,7 +20,7 @@ use starlark::values::{Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue
 #[serde(untagged)]
 pub enum Input {
     /// Rich content (image, audio, video, file).
-    RichContentPart(chat::completions::request::RichContentPart),
+    RichContentPart(agent::completions::request::RichContentPart),
     /// An object with string keys.
     Object(IndexMap<String, Input>),
     /// An array of values.
@@ -83,7 +83,7 @@ impl super::FromStarlarkValue for Input {
                 }
             }
             if matches!(type_value, Some("text" | "image_url" | "input_audio" | "input_video" | "video_url" | "file")) {
-                if let Ok(part) = chat::completions::request::RichContentPart::from_starlark_value(value) {
+                if let Ok(part) = agent::completions::request::RichContentPart::from_starlark_value(value) {
                     return Ok(Input::RichContentPart(part));
                 }
             }
@@ -152,7 +152,7 @@ impl Input {
     pub fn to_rich_content_parts(
         self,
         depth: usize,
-    ) -> impl Iterator<Item = chat::completions::request::RichContentPart> {
+    ) -> impl Iterator<Item = agent::completions::request::RichContentPart> {
         enum Iter {
             RichContentPart(RichContentPartIter),
             Object(Box<ObjectIter>),
@@ -200,7 +200,7 @@ impl Input {
             }
         }
         impl Iterator for Iter {
-            type Item = chat::completions::request::RichContentPart;
+            type Item = agent::completions::request::RichContentPart;
             fn next(&mut self) -> Option<Self::Item> {
                 match self {
                     Iter::RichContentPart(rich_content_part_iter) => {
@@ -210,7 +210,7 @@ impl Input {
                     Iter::Array(array_iter) => array_iter.next(),
                     Iter::Primitive(primitive_option) => {
                         primitive_option.take().map(|text| {
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text,
                             }
                         })
@@ -220,22 +220,22 @@ impl Input {
         }
         struct RichContentPartIter {
             first: bool,
-            part: Option<chat::completions::request::RichContentPart>,
+            part: Option<agent::completions::request::RichContentPart>,
             last: bool,
         }
         impl Iterator for RichContentPartIter {
-            type Item = chat::completions::request::RichContentPart;
+            type Item = agent::completions::request::RichContentPart;
             fn next(&mut self) -> Option<Self::Item> {
                 if self.first {
                     self.first = false;
-                    Some(chat::completions::request::RichContentPart::Text {
+                    Some(agent::completions::request::RichContentPart::Text {
                         text: '"'.to_string(),
                     })
                 } else if let Some(part) = self.part.take() {
                     Some(part)
                 } else if self.last {
                     self.last = false;
-                    Some(chat::completions::request::RichContentPart::Text {
+                    Some(agent::completions::request::RichContentPart::Text {
                         text: '"'.to_string(),
                     })
                 } else {
@@ -250,14 +250,14 @@ impl Input {
             depth: usize,
         }
         impl Iterator for ObjectIter {
-            type Item = chat::completions::request::RichContentPart;
+            type Item = agent::completions::request::RichContentPart;
             fn next(&mut self) -> Option<Self::Item> {
                 if self.first {
                     self.first = false;
                     if let Some((key, input)) = self.object.next() {
                         self.child = Some(Iter::new(input, self.depth + 1));
                         Some(
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text: format!(
                                     "{{\n{}\"{}\": ",
                                     "    ".repeat(self.depth + 1),
@@ -267,7 +267,7 @@ impl Input {
                         )
                     } else {
                         Some(
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text: format!("{{}}"),
                             },
                         )
@@ -278,7 +278,7 @@ impl Input {
                     } else if let Some((key, input)) = self.object.next() {
                         self.child = Some(Iter::new(input, self.depth + 1));
                         Some(
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text: format!(
                                     ",\n{}\"{}\": ",
                                     "    ".repeat(self.depth + 1),
@@ -289,7 +289,7 @@ impl Input {
                     } else {
                         self.child = None;
                         Some(
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text: format!(
                                     "\n{}}}",
                                     "    ".repeat(self.depth)
@@ -309,14 +309,14 @@ impl Input {
             depth: usize,
         }
         impl Iterator for ArrayIter {
-            type Item = chat::completions::request::RichContentPart;
+            type Item = agent::completions::request::RichContentPart;
             fn next(&mut self) -> Option<Self::Item> {
                 if self.first {
                     self.first = false;
                     if let Some(input) = self.array.next() {
                         self.child = Some(Iter::new(input, self.depth + 1));
                         Some(
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text: format!(
                                     "[\n{}",
                                     "    ".repeat(self.depth + 1)
@@ -325,7 +325,7 @@ impl Input {
                         )
                     } else {
                         Some(
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text: format!("[]"),
                             },
                         )
@@ -336,7 +336,7 @@ impl Input {
                     } else if let Some(input) = self.array.next() {
                         self.child = Some(Iter::new(input, self.depth + 1));
                         Some(
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text: format!(
                                     ",\n{}",
                                     "    ".repeat(self.depth + 1),
@@ -346,7 +346,7 @@ impl Input {
                     } else {
                         self.child = None;
                         Some(
-                            chat::completions::request::RichContentPart::Text {
+                            agent::completions::request::RichContentPart::Text {
                                 text: format!(
                                     "\n{}]",
                                     "    ".repeat(self.depth)
@@ -371,7 +371,7 @@ impl Input {
 #[serde(untagged)]
 pub enum InputExpression {
     /// Rich content (image, audio, video, file).
-    RichContentPart(chat::completions::request::RichContentPart),
+    RichContentPart(agent::completions::request::RichContentPart),
     /// An object with values that may be expressions.
     Object(IndexMap<String, super::WithExpression<InputExpression>>),
     /// An array with elements that may be expressions.
@@ -464,7 +464,7 @@ impl super::FromStarlarkValue for InputExpression {
                 }
             }
             if matches!(type_value, Some("text" | "image_url" | "input_audio" | "input_video" | "video_url" | "file")) {
-                if let Ok(part) = chat::completions::request::RichContentPart::from_starlark_value(value) {
+                if let Ok(part) = agent::completions::request::RichContentPart::from_starlark_value(value) {
                     return Ok(InputExpression::RichContentPart(part));
                 }
             }
@@ -992,7 +992,7 @@ impl ImageInputSchema {
     pub fn validate_input(&self, input: &Input) -> bool {
         match input {
             Input::RichContentPart(
-                chat::completions::request::RichContentPart::ImageUrl {
+                agent::completions::request::RichContentPart::ImageUrl {
                     ..
                 },
             ) => true,
@@ -1015,7 +1015,7 @@ impl AudioInputSchema {
     pub fn validate_input(&self, input: &Input) -> bool {
         match input {
             Input::RichContentPart(
-                chat::completions::request::RichContentPart::InputAudio {
+                agent::completions::request::RichContentPart::InputAudio {
                     ..
                 },
             ) => true,
@@ -1038,12 +1038,12 @@ impl VideoInputSchema {
     pub fn validate_input(&self, input: &Input) -> bool {
         match input {
             Input::RichContentPart(
-                chat::completions::request::RichContentPart::InputVideo {
+                agent::completions::request::RichContentPart::InputVideo {
                     ..
                 },
             ) => true,
             Input::RichContentPart(
-                chat::completions::request::RichContentPart::VideoUrl {
+                agent::completions::request::RichContentPart::VideoUrl {
                     ..
                 },
             ) => true,
@@ -1066,7 +1066,7 @@ impl FileInputSchema {
     pub fn validate_input(&self, input: &Input) -> bool {
         match input {
             Input::RichContentPart(
-                chat::completions::request::RichContentPart::File { .. },
+                agent::completions::request::RichContentPart::File { .. },
             ) => true,
             _ => false,
         }

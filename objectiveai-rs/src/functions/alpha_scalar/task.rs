@@ -1,4 +1,4 @@
-use crate::{chat, functions};
+use crate::{agent, functions};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -196,7 +196,7 @@ pub struct VectorCompletionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
     pub messages: functions::expression::Expression,
-    pub responses: Vec<chat::completions::request::RichContent>,
+    pub responses: Vec<agent::completions::request::RichContent>,
 }
 
 impl VectorCompletionTaskExpression {
@@ -211,7 +211,7 @@ impl VectorCompletionTaskExpression {
             responses: functions::expression::WithExpression::Value(
                 self.responses
                     .into_iter()
-                    .map(chat::completions::request::RichContentExpression::from)
+                    .map(agent::completions::request::RichContentExpression::from)
                     .map(functions::expression::WithExpression::Value)
                     .collect(),
             ),

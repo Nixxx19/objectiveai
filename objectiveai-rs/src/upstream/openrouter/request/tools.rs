@@ -12,8 +12,8 @@ pub fn new_for_vector(
     vector_pfx_indices: &[(String, usize)],
     ensemble_llm_output_mode: crate::ensemble_llm::OutputMode,
     ensemble_llm_synthetic_reasoning: Option<bool>,
-    request: Option<&[crate::chat::completions::request::Tool]>,
-) -> Option<Vec<crate::chat::completions::request::Tool>> {
+    request: Option<&[crate::agent::completions::request::Tool]>,
+) -> Option<Vec<crate::agent::completions::request::Tool>> {
     if let crate::ensemble_llm::OutputMode::ToolCall = ensemble_llm_output_mode {
         let tool = vector::completions::ResponseKey::tool(
             vector_pfx_indices

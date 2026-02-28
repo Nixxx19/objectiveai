@@ -16,7 +16,7 @@ pub struct Provider {
     pub require_parameters: Option<bool>,
     /// Data collection preferences. From request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub data_collection: Option<crate::chat::completions::request::ProviderDataCollection>,
+    pub data_collection: Option<crate::agent::completions::request::ProviderDataCollection>,
     /// Zero Data Retention preference. From request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub zdr: Option<bool>,
@@ -34,10 +34,10 @@ pub struct Provider {
     pub quantizations: Option<Vec<crate::ensemble_llm::ProviderQuantization>>,
     /// Provider sort preference. From request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub sort: Option<crate::chat::completions::request::ProviderSort>,
+    pub sort: Option<crate::agent::completions::request::ProviderSort>,
     /// Maximum price constraints. From request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub max_price: Option<crate::chat::completions::request::ProviderMaxPrice>,
+    pub max_price: Option<crate::agent::completions::request::ProviderMaxPrice>,
     /// Preferred minimum throughput. From request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preferred_min_throughput: Option<f64>,
@@ -75,12 +75,12 @@ impl Provider {
     ///
     /// Returns None if both inputs are None or if the merged result is empty.
     pub fn new(
-        request: Option<crate::chat::completions::request::Provider>,
+        request: Option<crate::agent::completions::request::Provider>,
         ensemble_llm: Option<&crate::ensemble_llm::Provider>,
     ) -> Option<Self> {
         let provider = match (request, ensemble_llm) {
             (
-                Some(crate::chat::completions::request::Provider {
+                Some(crate::agent::completions::request::Provider {
                     data_collection,
                     zdr,
                     sort,
@@ -115,7 +115,7 @@ impl Provider {
                 max_latency,
             },
             (
-                Some(crate::chat::completions::request::Provider {
+                Some(crate::agent::completions::request::Provider {
                     data_collection,
                     zdr,
                     sort,
