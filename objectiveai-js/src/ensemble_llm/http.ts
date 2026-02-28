@@ -1,19 +1,19 @@
 import z from "zod";
 import { ObjectiveAI, RequestOptions } from "../client";
 import { EnsembleLlmSchema } from "./ensemble_llm";
-import { convert, type JSONSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../json_schema";
 
 export const ListItemSchema = z.object({
   id: z.string().describe("The unique identifier for the Ensemble LLM."),
 });
 export type ListItem = z.infer<typeof ListItemSchema>;
-export const ListItemJsonSchema: JSONSchema = convert(ListItemSchema);
+export const ListItemJsonSchema: JsonSchema = convert(ListItemSchema);
 
 export const ListSchema = z.object({
   data: z.array(ListItemSchema).describe("A list of Ensemble LLMs."),
 });
 export type List = z.infer<typeof ListSchema>;
-export const ListJsonSchema: JSONSchema = convert(ListSchema);
+export const ListJsonSchema: JsonSchema = convert(ListSchema);
 
 export function list(
   client: ObjectiveAI,
@@ -30,7 +30,7 @@ export const RetrieveSchema = EnsembleLlmSchema.extend({
     ),
 });
 export type Retrieve = z.infer<typeof RetrieveSchema>;
-export const RetrieveJsonSchema: JSONSchema = convert(RetrieveSchema);
+export const RetrieveJsonSchema: JsonSchema = convert(RetrieveSchema);
 
 export function retrieve(
   client: ObjectiveAI,
@@ -57,7 +57,7 @@ export const HistoricalUsageSchema = z.object({
     .describe("The total cost incurred by using this Ensemble LLM."),
 });
 export type HistoricalUsage = z.infer<typeof HistoricalUsageSchema>;
-export const HistoricalUsageJsonSchema: JSONSchema = convert(HistoricalUsageSchema);
+export const HistoricalUsageJsonSchema: JsonSchema = convert(HistoricalUsageSchema);
 
 export function retrieveUsage(
   client: ObjectiveAI,

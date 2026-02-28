@@ -4,7 +4,7 @@ import {
   AlphaScalarBranchTaskExpressionsSchema,
   AlphaScalarLeafTaskExpressionsSchema,
 } from "./task.js";
-import { convert, type JSONSchema } from "../../json_schema.js";
+import { convert, type JsonSchema } from "../../json_schema.js";
 
 export const AlphaScalarBranchRemoteFunctionSchema = z
   .object({
@@ -20,7 +20,7 @@ export const AlphaScalarBranchRemoteFunctionSchema = z
   .describe('An alpha scalar branch remote function. "function.json"')
   .meta({ title: "AlphaScalarBranchRemoteFunction" });
 export type AlphaScalarBranchRemoteFunction = z.infer<typeof AlphaScalarBranchRemoteFunctionSchema>;
-export const AlphaScalarBranchRemoteFunctionJsonSchema: JSONSchema = convert(AlphaScalarBranchRemoteFunctionSchema);
+export const AlphaScalarBranchRemoteFunctionJsonSchema: JsonSchema = convert(AlphaScalarBranchRemoteFunctionSchema);
 
 export const AlphaScalarLeafRemoteFunctionSchema = z
   .object({
@@ -36,7 +36,7 @@ export const AlphaScalarLeafRemoteFunctionSchema = z
   .describe('An alpha scalar leaf remote function. "function.json"')
   .meta({ title: "AlphaScalarLeafRemoteFunction" });
 export type AlphaScalarLeafRemoteFunction = z.infer<typeof AlphaScalarLeafRemoteFunctionSchema>;
-export const AlphaScalarLeafRemoteFunctionJsonSchema: JSONSchema = convert(AlphaScalarLeafRemoteFunctionSchema);
+export const AlphaScalarLeafRemoteFunctionJsonSchema: JsonSchema = convert(AlphaScalarLeafRemoteFunctionSchema);
 
 export const AlphaScalarRemoteFunctionSchema = z
   .discriminatedUnion("type", [
@@ -46,4 +46,4 @@ export const AlphaScalarRemoteFunctionSchema = z
   .describe('An alpha scalar remote function. "function.json"')
   .meta({ title: "AlphaScalarRemoteFunction" });
 export type AlphaScalarRemoteFunction = z.infer<typeof AlphaScalarRemoteFunctionSchema>;
-export const AlphaScalarRemoteFunctionJsonSchema: JSONSchema = convert(AlphaScalarRemoteFunctionSchema);
+export const AlphaScalarRemoteFunctionJsonSchema: JsonSchema = convert(AlphaScalarRemoteFunctionSchema);

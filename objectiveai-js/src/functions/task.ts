@@ -17,7 +17,7 @@ import {
   VectorResponsesExpressionSchema,
   VectorResponsesSchema,
 } from "src/vector/completions/request/vector_response";
-import { convert, type JSONSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../json_schema";
 import { RemoteSchema } from "./remote";
 
 // Task Expression
@@ -26,7 +26,7 @@ export const TaskExpressionSkipSchema = ExpressionSchema.describe(
   "An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`.",
 ).meta({ title: "Expression", wrapper: true });
 export type TaskExpressionSkip = z.infer<typeof TaskExpressionSkipSchema>;
-export const TaskExpressionSkipJsonSchema: JSONSchema = convert(
+export const TaskExpressionSkipJsonSchema: JsonSchema = convert(
   TaskExpressionSkipSchema,
 );
 
@@ -35,7 +35,7 @@ export const TaskExpressionMapSchema = ExpressionSchema.describe(
     "Each instance receives `map` as an integer index (0-based).",
 ).meta({ title: "Expression", wrapper: true });
 export type TaskExpressionMap = z.infer<typeof TaskExpressionMapSchema>;
-export const TaskExpressionMapJsonSchema: JSONSchema = convert(
+export const TaskExpressionMapJsonSchema: JsonSchema = convert(
   TaskExpressionMapSchema,
 );
 
@@ -50,7 +50,7 @@ export const TaskOutputExpressionSchema = ExpressionSchema.describe(
     "Receives: `input`, `output`.",
 ).meta({ title: "Expression", wrapper: true });
 export type TaskOutputExpression = z.infer<typeof TaskOutputExpressionSchema>;
-export const TaskOutputExpressionJsonSchema: JSONSchema = convert(
+export const TaskOutputExpressionJsonSchema: JsonSchema = convert(
   TaskOutputExpressionSchema,
 );
 
@@ -79,7 +79,7 @@ export const ScalarFunctionTaskExpressionSchema = z
 export type ScalarFunctionTaskExpression = z.infer<
   typeof ScalarFunctionTaskExpressionSchema
 >;
-export const ScalarFunctionTaskExpressionJsonSchema: JSONSchema = convert(
+export const ScalarFunctionTaskExpressionJsonSchema: JsonSchema = convert(
   ScalarFunctionTaskExpressionSchema,
 );
 
@@ -108,7 +108,7 @@ export const VectorFunctionTaskExpressionSchema = z
 export type VectorFunctionTaskExpression = z.infer<
   typeof VectorFunctionTaskExpressionSchema
 >;
-export const VectorFunctionTaskExpressionJsonSchema: JSONSchema = convert(
+export const VectorFunctionTaskExpressionJsonSchema: JsonSchema = convert(
   VectorFunctionTaskExpressionSchema,
 );
 
@@ -131,7 +131,7 @@ export const VectorCompletionTaskExpressionSchema = z
 export type VectorCompletion = z.infer<
   typeof VectorCompletionTaskExpressionSchema
 >;
-export const VectorCompletionTaskExpressionJsonSchema: JSONSchema = convert(
+export const VectorCompletionTaskExpressionJsonSchema: JsonSchema = convert(
   VectorCompletionTaskExpressionSchema,
 );
 
@@ -151,7 +151,7 @@ export const PlaceholderScalarFunctionTaskExpressionSchema = z
 export type PlaceholderScalarFunctionTaskExpression = z.infer<
   typeof PlaceholderScalarFunctionTaskExpressionSchema
 >;
-export const PlaceholderScalarFunctionTaskExpressionJsonSchema: JSONSchema =
+export const PlaceholderScalarFunctionTaskExpressionJsonSchema: JsonSchema =
   convert(PlaceholderScalarFunctionTaskExpressionSchema);
 
 export const PlaceholderVectorFunctionTaskExpressionSchema = z
@@ -179,7 +179,7 @@ export const PlaceholderVectorFunctionTaskExpressionSchema = z
 export type PlaceholderVectorFunctionTaskExpression = z.infer<
   typeof PlaceholderVectorFunctionTaskExpressionSchema
 >;
-export const PlaceholderVectorFunctionTaskExpressionJsonSchema: JSONSchema =
+export const PlaceholderVectorFunctionTaskExpressionJsonSchema: JsonSchema =
   convert(PlaceholderVectorFunctionTaskExpressionSchema);
 
 export const TaskExpressionSchema = z
@@ -195,7 +195,7 @@ export const TaskExpressionSchema = z
   )
   .meta({ title: "TaskExpression" });
 export type TaskExpression = z.infer<typeof TaskExpressionSchema>;
-export const TaskExpressionJsonSchema: JSONSchema =
+export const TaskExpressionJsonSchema: JsonSchema =
   convert(TaskExpressionSchema);
 
 export const TaskExpressionsSchema = z
@@ -205,7 +205,7 @@ export const TaskExpressionsSchema = z
   )
   .meta({ title: "TaskExpressions" });
 export type TaskExpressions = z.infer<typeof TaskExpressionsSchema>;
-export const TaskExpressionsJsonSchema: JSONSchema = convert(
+export const TaskExpressionsJsonSchema: JsonSchema = convert(
   TaskExpressionsSchema,
 );
 
@@ -234,7 +234,7 @@ export const ScalarFunctionTaskSchema = z
   .describe("A scalar function task.")
   .meta({ title: "ScalarFunctionTask" });
 export type ScalarFunctionTask = z.infer<typeof ScalarFunctionTaskSchema>;
-export const ScalarFunctionTaskJsonSchema: JSONSchema = convert(
+export const ScalarFunctionTaskJsonSchema: JsonSchema = convert(
   ScalarFunctionTaskSchema,
 );
 
@@ -261,7 +261,7 @@ export const VectorFunctionTaskSchema = z
   .describe("A vector function task.")
   .meta({ title: "VectorFunctionTask" });
 export type VectorFunctionTask = z.infer<typeof VectorFunctionTaskSchema>;
-export const VectorFunctionTaskJsonSchema: JSONSchema = convert(
+export const VectorFunctionTaskJsonSchema: JsonSchema = convert(
   VectorFunctionTaskSchema,
 );
 
@@ -278,7 +278,7 @@ export const VectorCompletionTaskSchema = z
   .describe("A vector completion task.")
   .meta({ title: "VectorCompletionTask" });
 export type VectorCompletionTask = z.infer<typeof VectorCompletionTaskSchema>;
-export const VectorCompletionTaskJsonSchema: JSONSchema = convert(
+export const VectorCompletionTaskJsonSchema: JsonSchema = convert(
   VectorCompletionTaskSchema,
 );
 
@@ -296,7 +296,7 @@ export const PlaceholderScalarFunctionTaskSchema = z
 export type PlaceholderScalarFunctionTask = z.infer<
   typeof PlaceholderScalarFunctionTaskSchema
 >;
-export const PlaceholderScalarFunctionTaskJsonSchema: JSONSchema = convert(
+export const PlaceholderScalarFunctionTaskJsonSchema: JsonSchema = convert(
   PlaceholderScalarFunctionTaskSchema,
 );
 
@@ -325,7 +325,7 @@ export const PlaceholderVectorFunctionTaskSchema = z
 export type PlaceholderVectorFunctionTask = z.infer<
   typeof PlaceholderVectorFunctionTaskSchema
 >;
-export const PlaceholderVectorFunctionTaskJsonSchema: JSONSchema = convert(
+export const PlaceholderVectorFunctionTaskJsonSchema: JsonSchema = convert(
   PlaceholderVectorFunctionTaskSchema,
 );
 
@@ -339,7 +339,7 @@ export const TaskSchema = z
   ])
   .describe("A task to be executed as part of the function.");
 export type Task = z.infer<typeof TaskSchema>;
-export const TaskJsonSchema: JSONSchema = convert(TaskSchema);
+export const TaskJsonSchema: JsonSchema = convert(TaskSchema);
 
 export const CompiledTaskSchema = z
   .union([
@@ -351,7 +351,7 @@ export const CompiledTaskSchema = z
   ])
   .describe("A compiled task, which may be un-mapped, mapped, or skipped.");
 export type CompiledTask = z.infer<typeof CompiledTaskSchema>;
-export const CompiledTaskJsonSchema: JSONSchema = convert(CompiledTaskSchema);
+export const CompiledTaskJsonSchema: JsonSchema = convert(CompiledTaskSchema);
 
 export const CompiledTasksSchema = z
   .array(CompiledTaskSchema)
@@ -359,4 +359,4 @@ export const CompiledTasksSchema = z
     "The compiled list of tasks to be executed as part of the function.",
   );
 export type CompiledTasks = z.infer<typeof CompiledTasksSchema>;
-export const CompiledTasksJsonSchema: JSONSchema = convert(CompiledTasksSchema);
+export const CompiledTasksJsonSchema: JsonSchema = convert(CompiledTasksSchema);

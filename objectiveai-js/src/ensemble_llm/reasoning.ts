@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../json_schema";
 
 export const ReasoningEffortSchema = z
   .enum(["none", "minimal", "low", "medium", "high", "xhigh"])
@@ -8,7 +8,7 @@ export const ReasoningEffortSchema = z
   )
   .meta({ title: "ReasoningEffort" });
 export type ReasoningEffort = z.infer<typeof ReasoningEffortSchema>;
-export const ReasoningEffortJsonSchema: JSONSchema = convert(
+export const ReasoningEffortJsonSchema: JsonSchema = convert(
   ReasoningEffortSchema,
 );
 
@@ -21,7 +21,7 @@ export const ReasoningSummaryVerbositySchema = z
 export type ReasoningSummaryVerbosity = z.infer<
   typeof ReasoningSummaryVerbositySchema
 >;
-export const ReasoningSummaryVerbosityJsonSchema: JSONSchema = convert(
+export const ReasoningSummaryVerbosityJsonSchema: JsonSchema = convert(
   ReasoningSummaryVerbositySchema,
 );
 
@@ -47,4 +47,4 @@ export const ReasoningSchema = z
   .describe("Options for controlling reasoning behavior of the model.")
   .meta({ title: "EnsembleLlmReasoning" });
 export type Reasoning = z.infer<typeof ReasoningSchema>;
-export const ReasoningJsonSchema: JSONSchema = convert(ReasoningSchema);
+export const ReasoningJsonSchema: JsonSchema = convert(ReasoningSchema);

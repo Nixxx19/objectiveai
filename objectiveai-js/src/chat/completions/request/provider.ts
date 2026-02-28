@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 
 export const ProviderDataCollectionSchema = z
   .enum(["allow", "deny"])
@@ -7,7 +7,7 @@ export const ProviderDataCollectionSchema = z
 export type ProviderDataCollection = z.infer<
   typeof ProviderDataCollectionSchema
 >;
-export const ProviderDataCollectionJsonSchema: JSONSchema = convert(
+export const ProviderDataCollectionJsonSchema: JsonSchema = convert(
   ProviderDataCollectionSchema,
 );
 
@@ -15,7 +15,7 @@ export const ProviderSortSchema = z
   .enum(["price", "throughput", "latency"])
   .describe("Specifies the sorting strategy for provider selection.");
 export type ProviderSort = z.infer<typeof ProviderSortSchema>;
-export const ProviderSortJsonSchema: JSONSchema = convert(ProviderSortSchema);
+export const ProviderSortJsonSchema: JsonSchema = convert(ProviderSortSchema);
 
 export const ProviderMaxPriceSchema = z.object({
   prompt: z
@@ -45,7 +45,7 @@ export const ProviderMaxPriceSchema = z.object({
     .describe("Maximum price per request."),
 });
 export type ProviderMaxPrice = z.infer<typeof ProviderMaxPriceSchema>;
-export const ProviderMaxPriceJsonSchema: JSONSchema = convert(
+export const ProviderMaxPriceJsonSchema: JsonSchema = convert(
   ProviderMaxPriceSchema,
 );
 
@@ -85,4 +85,4 @@ export const ProviderSchema = z
   .describe("Options for selecting the upstream provider of this completion.")
   .meta({ title: "CompletionProvider" });
 export type Provider = z.infer<typeof ProviderSchema>;
-export const ProviderJsonSchema: JSONSchema = convert(ProviderSchema);
+export const ProviderJsonSchema: JsonSchema = convert(ProviderSchema);

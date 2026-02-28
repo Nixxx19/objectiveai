@@ -4,7 +4,7 @@ import { UpstreamSchema } from "../../upstream";
 import { UsageSchema } from "../usage";
 import { ResponseObjectSchema } from "./response_object";
 import { merge } from "src/merge";
-import { convert, type JSONSchema } from "../../../../json_schema";
+import { convert, type JsonSchema } from "../../../../json_schema";
 
 export const ChatCompletionChunkSchema = z
   .object({
@@ -40,7 +40,7 @@ export const ChatCompletionChunkSchema = z
   })
   .describe("A chunk in a streaming chat completion response.");
 export type ChatCompletionChunk = z.infer<typeof ChatCompletionChunkSchema>;
-export const ChatCompletionChunkJsonSchema: JSONSchema = convert(ChatCompletionChunkSchema);
+export const ChatCompletionChunkJsonSchema: JsonSchema = convert(ChatCompletionChunkSchema);
 
 export namespace ChatCompletionChunk {
   export function merged(

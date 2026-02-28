@@ -1,7 +1,7 @@
 import { EnsembleSchema } from "src/vector/completions/request/ensemble";
 import { ProfileSchema as VectorProfileSchema } from "src/vector/completions/request/profile";
 import z from "zod";
-import { convert, type JSONSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../json_schema";
 import { RemoteSchema } from "./remote";
 
 // Inline/Remote Auto Profiles (single ensemble+weights for all tasks)
@@ -231,14 +231,14 @@ export namespace ProfileExt {
 
 // JSON Schema conversions (deferred to end of file so all schemas are initialized)
 
-export const InlineAutoProfileJsonSchema: JSONSchema = convert(InlineAutoProfileSchema);
-export const RemoteAutoProfileJsonSchema: JSONSchema = convert(RemoteAutoProfileSchema);
-export const RemoteTaskProfileJsonSchema: JSONSchema = convert(RemoteTaskProfileSchema);
-export const PlaceholderTaskProfileJsonSchema: JSONSchema = convert(PlaceholderTaskProfileSchema);
-export const TaskProfileJsonSchema: JSONSchema = convert(TaskProfileSchema);
-export const TaskProfilesJsonSchema: JSONSchema = convert(TaskProfilesSchema);
-export const InlineTasksProfileJsonSchema: JSONSchema = convert(InlineTasksProfileSchema);
-export const RemoteTasksProfileJsonSchema: JSONSchema = convert(RemoteTasksProfileSchema);
-export const InlineProfileJsonSchema: JSONSchema = convert(InlineProfileSchema);
-export const RemoteProfileJsonSchema: JSONSchema = convert(RemoteProfileSchema);
-export const ProfileJsonSchema: JSONSchema = convert(ProfileSchema);
+export const InlineAutoProfileJsonSchema: JsonSchema = convert(InlineAutoProfileSchema);
+export const RemoteAutoProfileJsonSchema: JsonSchema = convert(RemoteAutoProfileSchema);
+export const RemoteTaskProfileJsonSchema: JsonSchema = convert(RemoteTaskProfileSchema);
+export const PlaceholderTaskProfileJsonSchema: JsonSchema = convert(PlaceholderTaskProfileSchema);
+export const TaskProfileJsonSchema: JsonSchema = convert(TaskProfileSchema);
+export const TaskProfilesJsonSchema: JsonSchema = convert(TaskProfilesSchema);
+export const InlineTasksProfileJsonSchema: JsonSchema = convert(InlineTasksProfileSchema);
+export const RemoteTasksProfileJsonSchema: JsonSchema = convert(RemoteTasksProfileSchema);
+export const InlineProfileJsonSchema: JsonSchema = convert(InlineProfileSchema);
+export const RemoteProfileJsonSchema: JsonSchema = convert(RemoteProfileSchema);
+export const ProfileJsonSchema: JsonSchema = convert(ProfileSchema);

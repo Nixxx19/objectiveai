@@ -3,7 +3,7 @@ import { RoleSchema } from "../role";
 import { ToolCall, ToolCallSchema } from "./tool_call";
 import { ResponseImageSchema, ResponseImage } from "../response_image";
 import { merge, mergedString } from "src/merge";
-import { convert, type JSONSchema } from "../../../../json_schema";
+import { convert, type JsonSchema } from "../../../../json_schema";
 
 export const DeltaSchema = z
   .object({
@@ -28,7 +28,7 @@ export const DeltaSchema = z
   })
   .describe("A delta in a streaming chat completion response.");
 export type Delta = z.infer<typeof DeltaSchema>;
-export const DeltaJsonSchema: JSONSchema = convert(DeltaSchema);
+export const DeltaJsonSchema: JsonSchema = convert(DeltaSchema);
 
 export namespace Delta {
   export function merged(a: Delta, b: Delta): [Delta, boolean] {

@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "./json_schema";
+import { convert, type JsonSchema } from "./json_schema";
 import { JsonValueSchema, type JsonValue } from "./json";
 
 export const ObjectiveAIErrorSchema = z
@@ -10,7 +10,7 @@ export const ObjectiveAIErrorSchema = z
   .describe("An error returned by the ObjectiveAI API.")
   .meta({ title: "ObjectiveAIError" });
 export type ObjectiveAIError = z.infer<typeof ObjectiveAIErrorSchema>;
-export const ObjectiveAIErrorJsonSchema: JSONSchema = convert(ObjectiveAIErrorSchema);
+export const ObjectiveAIErrorJsonSchema: JsonSchema = convert(ObjectiveAIErrorSchema);
 
 /**
  * Error thrown when an API request fails.

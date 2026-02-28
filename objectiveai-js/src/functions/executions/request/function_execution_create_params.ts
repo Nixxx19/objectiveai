@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 import { ReasoningSchema } from "./reasoning";
 import { StrategySchema } from "./strategy";
 import { InputValueSchema } from "src/functions/expression/input";
@@ -65,7 +65,7 @@ export type FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBase =
   z.infer<
     typeof FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseSchema
   >;
-export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseSchema);
 
 export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingSchema =
@@ -83,7 +83,7 @@ export type FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreaming =
   z.infer<
     typeof FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingSchema
   >;
-export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingSchema);
 
 export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingSchema =
@@ -101,7 +101,7 @@ export type FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreaming
   z.infer<
     typeof FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingSchema
   >;
-export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingSchema);
 
 export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema =
@@ -117,7 +117,7 @@ export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema =
 export type FunctionExecutionCreateParamsRemoteFunctionRemoteProfile = z.infer<
   typeof FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema
 >;
-export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema);
 
 // Remote Function Inline Profile
@@ -132,7 +132,7 @@ export type FunctionExecutionCreateParamsRemoteFunctionInlineProfileBase =
   z.infer<
     typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema
   >;
-export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema);
 
 export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingSchema =
@@ -150,7 +150,7 @@ export type FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreaming =
   z.infer<
     typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingSchema
   >;
-export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingSchema);
 
 export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingSchema =
@@ -168,7 +168,7 @@ export type FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreaming
   z.infer<
     typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingSchema
   >;
-export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingSchema);
 
 export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema =
@@ -184,7 +184,7 @@ export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema =
 export type FunctionExecutionCreateParamsRemoteFunctionInlineProfile = z.infer<
   typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema
 >;
-export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsRemoteFunctionInlineProfileJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema);
 
 // Inline Function Remote Profile
@@ -199,7 +199,7 @@ export type FunctionExecutionCreateParamsInlineFunctionRemoteProfileBase =
   z.infer<
     typeof FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
   >;
-export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema);
 
 export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingSchema =
@@ -217,7 +217,7 @@ export type FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreaming =
   z.infer<
     typeof FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingSchema
   >;
-export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingSchema);
 
 export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingSchema =
@@ -235,7 +235,7 @@ export type FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreaming
   z.infer<
     typeof FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingSchema
   >;
-export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingSchema);
 
 export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema =
@@ -251,7 +251,7 @@ export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema =
 export type FunctionExecutionCreateParamsInlineFunctionRemoteProfile = z.infer<
   typeof FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema
 >;
-export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsInlineFunctionRemoteProfileJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema);
 
 // Inline Function Inline Profile
@@ -267,7 +267,7 @@ export type FunctionExecutionCreateParamsInlineFunctionInlineProfileBase =
   z.infer<
     typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
   >;
-export const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema);
 
 export const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingSchema =
@@ -285,7 +285,7 @@ export type FunctionExecutionCreateParamsInlineFunctionInlineProfileStreaming =
   z.infer<
     typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingSchema
   >;
-export const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingSchema);
 
 export const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingSchema =
@@ -303,7 +303,7 @@ export type FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreaming
   z.infer<
     typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingSchema
   >;
-export const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingSchema);
 
 export const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema =
@@ -319,5 +319,5 @@ export const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema =
 export type FunctionExecutionCreateParamsInlineFunctionInlineProfile = z.infer<
   typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema
 >;
-export const FunctionExecutionCreateParamsInlineFunctionInlineProfileJsonSchema: JSONSchema =
+export const FunctionExecutionCreateParamsInlineFunctionInlineProfileJsonSchema: JsonSchema =
   convert(FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema);

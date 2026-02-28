@@ -1,6 +1,6 @@
 import { ExpressionSchema } from "src/functions/expression/expression";
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 
 // Simple Content
 
@@ -9,7 +9,7 @@ export const SimpleContentTextSchema = z
   .describe("Plain text content.")
   .meta({ title: "SimpleContentText" });
 export type SimpleContentText = z.infer<typeof SimpleContentTextSchema>;
-export const SimpleContentTextJsonSchema: JSONSchema = convert(
+export const SimpleContentTextJsonSchema: JsonSchema = convert(
   SimpleContentTextSchema,
 );
 
@@ -21,7 +21,7 @@ export const SimpleContentPartSchema = z
   .describe("A simple content part.")
   .meta({ title: "SimpleContentPart" });
 export type SimpleContentPart = z.infer<typeof SimpleContentPartSchema>;
-export const SimpleContentPartJsonSchema: JSONSchema = convert(
+export const SimpleContentPartJsonSchema: JsonSchema = convert(
   SimpleContentPartSchema,
 );
 
@@ -45,7 +45,7 @@ export const SimpleContentPartExpressionSchema = z
 export type SimpleContentPartExpression = z.infer<
   typeof SimpleContentPartExpressionSchema
 >;
-export const SimpleContentPartExpressionJsonSchema: JSONSchema = convert(
+export const SimpleContentPartExpressionJsonSchema: JsonSchema = convert(
   SimpleContentPartExpressionSchema,
 );
 
@@ -54,7 +54,7 @@ export const SimpleContentPartsSchema = z
   .describe("An array of simple content parts.")
   .meta({ title: "SimpleContentParts" });
 export type SimpleContentParts = z.infer<typeof SimpleContentPartsSchema>;
-export const SimpleContentPartsJsonSchema: JSONSchema = convert(
+export const SimpleContentPartsJsonSchema: JsonSchema = convert(
   SimpleContentPartsSchema,
 );
 
@@ -65,7 +65,7 @@ export const SimpleContentPartExpressionsSchema = z
 export type SimpleContentPartExpressions = z.infer<
   typeof SimpleContentPartExpressionsSchema
 >;
-export const SimpleContentPartExpressionsJsonSchema: JSONSchema = convert(
+export const SimpleContentPartExpressionsJsonSchema: JsonSchema = convert(
   SimpleContentPartExpressionsSchema,
 );
 
@@ -74,7 +74,7 @@ export const SimpleContentSchema = z
   .describe("Simple content.")
   .meta({ title: "SimpleContent" });
 export type SimpleContent = z.infer<typeof SimpleContentSchema>;
-export const SimpleContentJsonSchema: JSONSchema = convert(SimpleContentSchema);
+export const SimpleContentJsonSchema: JsonSchema = convert(SimpleContentSchema);
 
 export const SimpleContentExpressionSchema = z
   .union([
@@ -89,7 +89,7 @@ export const SimpleContentExpressionSchema = z
 export type SimpleContentExpression = z.infer<
   typeof SimpleContentExpressionSchema
 >;
-export const SimpleContentExpressionJsonSchema: JSONSchema = convert(
+export const SimpleContentExpressionJsonSchema: JsonSchema = convert(
   SimpleContentExpressionSchema,
 );
 
@@ -101,7 +101,7 @@ export const TextRichContentPartTextSchema = z
 export type TextRichContentPartText = z.infer<
   typeof TextRichContentPartTextSchema
 >;
-export const TextRichContentPartTextJsonSchema: JSONSchema = convert(
+export const TextRichContentPartTextJsonSchema: JsonSchema = convert(
   TextRichContentPartTextSchema,
 );
 
@@ -117,7 +117,7 @@ export const TextRichContentPartTextExpressionSchema = z
 export type TextRichContentPartTextExpression = z.infer<
   typeof TextRichContentPartTextExpressionSchema
 >;
-export const TextRichContentPartTextExpressionJsonSchema: JSONSchema = convert(
+export const TextRichContentPartTextExpressionJsonSchema: JsonSchema = convert(
   TextRichContentPartTextExpressionSchema,
 );
 
@@ -129,7 +129,7 @@ export const TextRichContentPartSchema = z
   .describe("A text rich content part.")
   .meta({ title: "TextRichContentPart" });
 export type TextRichContentPart = z.infer<typeof TextRichContentPartSchema>;
-export const TextRichContentPartJsonSchema: JSONSchema = convert(
+export const TextRichContentPartJsonSchema: JsonSchema = convert(
   TextRichContentPartSchema,
 );
 
@@ -143,7 +143,7 @@ export const TextRichContentPartExpressionSchema = z
 export type TextRichContentPartExpression = z.infer<
   typeof TextRichContentPartExpressionSchema
 >;
-export const TextRichContentPartExpressionJsonSchema: JSONSchema = convert(
+export const TextRichContentPartExpressionJsonSchema: JsonSchema = convert(
   TextRichContentPartExpressionSchema,
 );
 
@@ -155,14 +155,14 @@ export const ImageRichContentPartDefinitionDetailSchema = z
 export type ImageRichContentPartDefinitionDetail = z.infer<
   typeof ImageRichContentPartDefinitionDetailSchema
 >;
-export const ImageRichContentPartDefinitionDetailJsonSchema: JSONSchema =
+export const ImageRichContentPartDefinitionDetailJsonSchema: JsonSchema =
   convert(ImageRichContentPartDefinitionDetailSchema);
 
 export const ImageRichContentPartDefinitionUrlSchema = z
   .string()
   .describe("Either a URL of the image or the base64 encoded image data.");
 export type Url = z.infer<typeof ImageRichContentPartDefinitionUrlSchema>;
-export const ImageRichContentPartDefinitionUrlJsonSchema: JSONSchema = convert(
+export const ImageRichContentPartDefinitionUrlJsonSchema: JsonSchema = convert(
   ImageRichContentPartDefinitionUrlSchema,
 );
 
@@ -175,7 +175,7 @@ export const ImageRichContentPartDefinitionSchema = z
 export type ImageRichContentPartDefinition = z.infer<
   typeof ImageRichContentPartDefinitionSchema
 >;
-export const ImageRichContentPartDefinitionJsonSchema: JSONSchema = convert(
+export const ImageRichContentPartDefinitionJsonSchema: JsonSchema = convert(
   ImageRichContentPartDefinitionSchema,
 );
 
@@ -191,7 +191,7 @@ export const ImageRichContentPartDefinitionExpressionSchema = z
 export type ImageRichContentPartDefinitionExpression = z.infer<
   typeof ImageRichContentPartDefinitionExpressionSchema
 >;
-export const ImageRichContentPartDefinitionExpressionJsonSchema: JSONSchema =
+export const ImageRichContentPartDefinitionExpressionJsonSchema: JsonSchema =
   convert(ImageRichContentPartDefinitionExpressionSchema);
 
 export const ImageRichContentPartSchema = z
@@ -202,7 +202,7 @@ export const ImageRichContentPartSchema = z
   .describe("An image rich content part.")
   .meta({ title: "ImageRichContentPart" });
 export type ImageRichContentPart = z.infer<typeof ImageRichContentPartSchema>;
-export const ImageRichContentPartJsonSchema: JSONSchema = convert(
+export const ImageRichContentPartJsonSchema: JsonSchema = convert(
   ImageRichContentPartSchema,
 );
 
@@ -216,7 +216,7 @@ export const ImageRichContentPartExpressionSchema = z
 export type ImageRichContentPartExpression = z.infer<
   typeof ImageRichContentPartExpressionSchema
 >;
-export const ImageRichContentPartExpressionJsonSchema: JSONSchema = convert(
+export const ImageRichContentPartExpressionJsonSchema: JsonSchema = convert(
   ImageRichContentPartExpressionSchema,
 );
 
@@ -228,7 +228,7 @@ export const AudioRichContentPartDefinitionFormatSchema = z
 export type AudioRichContentPartDefinitionFormat = z.infer<
   typeof AudioRichContentPartDefinitionFormatSchema
 >;
-export const AudioRichContentPartDefinitionFormatJsonSchema: JSONSchema =
+export const AudioRichContentPartDefinitionFormatJsonSchema: JsonSchema =
   convert(AudioRichContentPartDefinitionFormatSchema);
 
 export const AudioRichContentPartDefinitionDataSchema = z
@@ -237,7 +237,7 @@ export const AudioRichContentPartDefinitionDataSchema = z
 export type AudioRichContentPartDefinitionData = z.infer<
   typeof AudioRichContentPartDefinitionDataSchema
 >;
-export const AudioRichContentPartDefinitionDataJsonSchema: JSONSchema = convert(
+export const AudioRichContentPartDefinitionDataJsonSchema: JsonSchema = convert(
   AudioRichContentPartDefinitionDataSchema,
 );
 
@@ -250,7 +250,7 @@ export const AudioRichContentPartDefinitionSchema = z
 export type AudioRichContentPartDefinition = z.infer<
   typeof AudioRichContentPartDefinitionSchema
 >;
-export const AudioRichContentPartDefinitionJsonSchema: JSONSchema = convert(
+export const AudioRichContentPartDefinitionJsonSchema: JsonSchema = convert(
   AudioRichContentPartDefinitionSchema,
 );
 
@@ -266,7 +266,7 @@ export const AudioRichContentPartDefinitionExpressionSchema = z
 export type AudioRichContentPartDefinitionExpression = z.infer<
   typeof AudioRichContentPartDefinitionExpressionSchema
 >;
-export const AudioRichContentPartDefinitionExpressionJsonSchema: JSONSchema =
+export const AudioRichContentPartDefinitionExpressionJsonSchema: JsonSchema =
   convert(AudioRichContentPartDefinitionExpressionSchema);
 
 export const AudioRichContentPartSchema = z
@@ -277,7 +277,7 @@ export const AudioRichContentPartSchema = z
   .describe("An audio rich content part.")
   .meta({ title: "AudioRichContentPart" });
 export type AudioRichContentPart = z.infer<typeof AudioRichContentPartSchema>;
-export const AudioRichContentPartJsonSchema: JSONSchema = convert(
+export const AudioRichContentPartJsonSchema: JsonSchema = convert(
   AudioRichContentPartSchema,
 );
 
@@ -291,7 +291,7 @@ export const AudioRichContentPartExpressionSchema = z
 export type AudioRichContentPartExpression = z.infer<
   typeof AudioRichContentPartExpressionSchema
 >;
-export const AudioRichContentPartExpressionJsonSchema: JSONSchema = convert(
+export const AudioRichContentPartExpressionJsonSchema: JsonSchema = convert(
   AudioRichContentPartExpressionSchema,
 );
 
@@ -303,7 +303,7 @@ export const VideoRichContentPartDefinitionUrlSchema = z
 export type VideoRichContentPartDefinitionUrl = z.infer<
   typeof VideoRichContentPartDefinitionUrlSchema
 >;
-export const VideoRichContentPartDefinitionUrlJsonSchema: JSONSchema = convert(
+export const VideoRichContentPartDefinitionUrlJsonSchema: JsonSchema = convert(
   VideoRichContentPartDefinitionUrlSchema,
 );
 
@@ -313,7 +313,7 @@ export const VideoRichContentPartDefinitionSchema = z.object({
 export type VideoRichContentPartDefinition = z.infer<
   typeof VideoRichContentPartDefinitionSchema
 >;
-export const VideoRichContentPartDefinitionJsonSchema: JSONSchema = convert(
+export const VideoRichContentPartDefinitionJsonSchema: JsonSchema = convert(
   VideoRichContentPartDefinitionSchema,
 );
 
@@ -329,7 +329,7 @@ export const VideoRichContentPartDefinitionExpressionSchema = z
 export type VideoRichContentPartDefinitionExpression = z.infer<
   typeof VideoRichContentPartDefinitionExpressionSchema
 >;
-export const VideoRichContentPartDefinitionExpressionJsonSchema: JSONSchema =
+export const VideoRichContentPartDefinitionExpressionJsonSchema: JsonSchema =
   convert(VideoRichContentPartDefinitionExpressionSchema);
 
 export const VideoRichContentPartSchema = z
@@ -340,7 +340,7 @@ export const VideoRichContentPartSchema = z
   .describe("A video rich content part.")
   .meta({ title: "VideoRichContentPart" });
 export type VideoRichContentPart = z.infer<typeof VideoRichContentPartSchema>;
-export const VideoRichContentPartJsonSchema: JSONSchema = convert(
+export const VideoRichContentPartJsonSchema: JsonSchema = convert(
   VideoRichContentPartSchema,
 );
 
@@ -354,7 +354,7 @@ export const VideoRichContentPartExpressionSchema = z
 export type VideoRichContentPartExpression = z.infer<
   typeof VideoRichContentPartExpressionSchema
 >;
-export const VideoRichContentPartExpressionJsonSchema: JSONSchema = convert(
+export const VideoRichContentPartExpressionJsonSchema: JsonSchema = convert(
   VideoRichContentPartExpressionSchema,
 );
 
@@ -368,7 +368,7 @@ export const FileRichContentPartDefinitionFileDataSchema = z
 export type FileRichContentPartDefinitionFileData = z.infer<
   typeof FileRichContentPartDefinitionFileDataSchema
 >;
-export const FileRichContentPartDefinitionFileDataJsonSchema: JSONSchema =
+export const FileRichContentPartDefinitionFileDataJsonSchema: JsonSchema =
   convert(FileRichContentPartDefinitionFileDataSchema);
 
 export const FileRichContentPartDefinitionFileIdSchema = z
@@ -377,7 +377,7 @@ export const FileRichContentPartDefinitionFileIdSchema = z
 export type FileRichContentPartDefinitionFileId = z.infer<
   typeof FileRichContentPartDefinitionFileIdSchema
 >;
-export const FileRichContentPartDefinitionFileIdJsonSchema: JSONSchema =
+export const FileRichContentPartDefinitionFileIdJsonSchema: JsonSchema =
   convert(FileRichContentPartDefinitionFileIdSchema);
 
 export const FileRichContentPartDefinitionFilenameSchema = z
@@ -388,7 +388,7 @@ export const FileRichContentPartDefinitionFilenameSchema = z
 export type FileRichContentPartDefinitionFilename = z.infer<
   typeof FileRichContentPartDefinitionFilenameSchema
 >;
-export const FileRichContentPartDefinitionFilenameJsonSchema: JSONSchema =
+export const FileRichContentPartDefinitionFilenameJsonSchema: JsonSchema =
   convert(FileRichContentPartDefinitionFilenameSchema);
 
 export const FileRichContentPartDefinitionFileUrlSchema = z
@@ -399,7 +399,7 @@ export const FileRichContentPartDefinitionFileUrlSchema = z
 export type FileRichContentPartDefinitionFileUrl = z.infer<
   typeof FileRichContentPartDefinitionFileUrlSchema
 >;
-export const FileRichContentPartDefinitionFileUrlJsonSchema: JSONSchema =
+export const FileRichContentPartDefinitionFileUrlJsonSchema: JsonSchema =
   convert(FileRichContentPartDefinitionFileUrlSchema);
 
 export const FileRichContentPartDefinitionSchema = z
@@ -416,7 +416,7 @@ export const FileRichContentPartDefinitionSchema = z
 export type FileRichContentPartDefinition = z.infer<
   typeof FileRichContentPartDefinitionSchema
 >;
-export const FileRichContentPartDefinitionJsonSchema: JSONSchema = convert(
+export const FileRichContentPartDefinitionJsonSchema: JsonSchema = convert(
   FileRichContentPartDefinitionSchema,
 );
 
@@ -432,7 +432,7 @@ export const FileRichContentPartDefinitionExpressionSchema = z
 export type FileRichContentPartDefinitionExpression = z.infer<
   typeof FileRichContentPartDefinitionExpressionSchema
 >;
-export const FileRichContentPartDefinitionExpressionJsonSchema: JSONSchema =
+export const FileRichContentPartDefinitionExpressionJsonSchema: JsonSchema =
   convert(FileRichContentPartDefinitionExpressionSchema);
 
 export const FileRichContentPartSchema = z
@@ -443,7 +443,7 @@ export const FileRichContentPartSchema = z
   .describe("A file rich content part.")
   .meta({ title: "FileRichContentPart" });
 export type FileRichContentPart = z.infer<typeof FileRichContentPartSchema>;
-export const FileRichContentPartJsonSchema: JSONSchema = convert(
+export const FileRichContentPartJsonSchema: JsonSchema = convert(
   FileRichContentPartSchema,
 );
 
@@ -457,7 +457,7 @@ export const FileRichContentPartExpressionSchema = z
 export type FileRichContentPartExpression = z.infer<
   typeof FileRichContentPartExpressionSchema
 >;
-export const FileRichContentPartExpressionJsonSchema: JSONSchema = convert(
+export const FileRichContentPartExpressionJsonSchema: JsonSchema = convert(
   FileRichContentPartExpressionSchema,
 );
 
@@ -468,7 +468,7 @@ export const RichContentTextSchema = z
   .describe("Plain text content.")
   .meta({ title: "RichContentText" });
 export type RichContentText = z.infer<typeof RichContentTextSchema>;
-export const RichContentTextJsonSchema: JSONSchema = convert(
+export const RichContentTextJsonSchema: JsonSchema = convert(
   RichContentTextSchema,
 );
 
@@ -483,7 +483,7 @@ export const RichContentPartSchema = z
   .describe("A rich content part.")
   .meta({ title: "RichContentPart" });
 export type RichContentPart = z.infer<typeof RichContentPartSchema>;
-export const RichContentPartJsonSchema: JSONSchema = convert(
+export const RichContentPartJsonSchema: JsonSchema = convert(
   RichContentPartSchema,
 );
 
@@ -507,7 +507,7 @@ export const RichContentPartExpressionSchema = z
 export type RichContentPartExpression = z.infer<
   typeof RichContentPartExpressionSchema
 >;
-export const RichContentPartExpressionJsonSchema: JSONSchema = convert(
+export const RichContentPartExpressionJsonSchema: JsonSchema = convert(
   RichContentPartExpressionSchema,
 );
 
@@ -516,7 +516,7 @@ export const RichContentPartsSchema = z
   .describe("An array of rich content parts.")
   .meta({ title: "RichContentParts" });
 export type RichContentParts = z.infer<typeof RichContentPartsSchema>;
-export const RichContentPartsJsonSchema: JSONSchema = convert(
+export const RichContentPartsJsonSchema: JsonSchema = convert(
   RichContentPartsSchema,
 );
 
@@ -527,7 +527,7 @@ export const RichContentPartExpressionsSchema = z
 export type RichContentPartExpressions = z.infer<
   typeof RichContentPartExpressionsSchema
 >;
-export const RichContentPartExpressionsJsonSchema: JSONSchema = convert(
+export const RichContentPartExpressionsJsonSchema: JsonSchema = convert(
   RichContentPartExpressionsSchema,
 );
 
@@ -536,7 +536,7 @@ export const RichContentSchema = z
   .describe("Rich content.")
   .meta({ title: "RichContent" });
 export type RichContent = z.infer<typeof RichContentSchema>;
-export const RichContentJsonSchema: JSONSchema = convert(RichContentSchema);
+export const RichContentJsonSchema: JsonSchema = convert(RichContentSchema);
 
 export const RichContentExpressionSchema = z
   .union([
@@ -549,7 +549,7 @@ export const RichContentExpressionSchema = z
   .describe(RichContentSchema.description!)
   .meta({ title: "RichContentExpression" });
 export type RichContentExpression = z.infer<typeof RichContentExpressionSchema>;
-export const RichContentExpressionJsonSchema: JSONSchema = convert(
+export const RichContentExpressionJsonSchema: JsonSchema = convert(
   RichContentExpressionSchema,
 );
 
@@ -562,7 +562,7 @@ export const MessageNameSchema = z
   )
   .meta({ title: "MessageName" });
 export type MessageName = z.infer<typeof MessageNameSchema>;
-export const MessageNameJsonSchema: JSONSchema = convert(MessageNameSchema);
+export const MessageNameJsonSchema: JsonSchema = convert(MessageNameSchema);
 
 export const MessageNameExpressionSchema = z
   .union([
@@ -574,7 +574,7 @@ export const MessageNameExpressionSchema = z
   .describe(MessageNameSchema.description!)
   .meta({ title: "MessageNameExpression" });
 export type MessageNameExpression = z.infer<typeof MessageNameExpressionSchema>;
-export const MessageNameExpressionJsonSchema: JSONSchema = convert(
+export const MessageNameExpressionJsonSchema: JsonSchema = convert(
   MessageNameExpressionSchema,
 );
 
@@ -591,7 +591,7 @@ export const DeveloperMessageSchema = z
   )
   .meta({ title: "DeveloperMessage" });
 export type DeveloperMessage = z.infer<typeof DeveloperMessageSchema>;
-export const DeveloperMessageJsonSchema: JSONSchema = convert(
+export const DeveloperMessageJsonSchema: JsonSchema = convert(
   DeveloperMessageSchema,
 );
 
@@ -606,7 +606,7 @@ export const DeveloperMessageExpressionSchema = z
 export type DeveloperMessageExpression = z.infer<
   typeof DeveloperMessageExpressionSchema
 >;
-export const DeveloperMessageExpressionJsonSchema: JSONSchema = convert(
+export const DeveloperMessageExpressionJsonSchema: JsonSchema = convert(
   DeveloperMessageExpressionSchema,
 );
 
@@ -623,7 +623,7 @@ export const SystemMessageSchema = z
   )
   .meta({ title: "SystemMessage" });
 export type SystemMessage = z.infer<typeof SystemMessageSchema>;
-export const SystemMessageJsonSchema: JSONSchema = convert(SystemMessageSchema);
+export const SystemMessageJsonSchema: JsonSchema = convert(SystemMessageSchema);
 
 export const SystemMessageExpressionSchema = z
   .object({
@@ -636,7 +636,7 @@ export const SystemMessageExpressionSchema = z
 export type SystemMessageExpression = z.infer<
   typeof SystemMessageExpressionSchema
 >;
-export const SystemMessageExpressionJsonSchema: JSONSchema = convert(
+export const SystemMessageExpressionJsonSchema: JsonSchema = convert(
   SystemMessageExpressionSchema,
 );
 
@@ -653,7 +653,7 @@ export const UserMessageSchema = z
   )
   .meta({ title: "UserMessage" });
 export type UserMessage = z.infer<typeof UserMessageSchema>;
-export const UserMessageJsonSchema: JSONSchema = convert(UserMessageSchema);
+export const UserMessageJsonSchema: JsonSchema = convert(UserMessageSchema);
 
 export const UserMessageExpressionSchema = z
   .object({
@@ -664,7 +664,7 @@ export const UserMessageExpressionSchema = z
   .describe(UserMessageSchema.description!)
   .meta({ title: "UserMessageExpression" });
 export type UserMessageExpression = z.infer<typeof UserMessageExpressionSchema>;
-export const UserMessageExpressionJsonSchema: JSONSchema = convert(
+export const UserMessageExpressionJsonSchema: JsonSchema = convert(
   UserMessageExpressionSchema,
 );
 
@@ -675,7 +675,7 @@ export const ToolMessageToolCallIdSchema = z
   .describe("The ID of the tool call that this message is responding to.")
   .meta({ title: "ToolMessageToolCallId" });
 export type ToolMessageToolCallId = z.infer<typeof ToolMessageToolCallIdSchema>;
-export const ToolMessageToolCallIdJsonSchema: JSONSchema = convert(
+export const ToolMessageToolCallIdJsonSchema: JsonSchema = convert(
   ToolMessageToolCallIdSchema,
 );
 
@@ -691,7 +691,7 @@ export const ToolMessageToolCallIdExpressionSchema = z
 export type ToolMessageToolCallIdExpression = z.infer<
   typeof ToolMessageToolCallIdExpressionSchema
 >;
-export const ToolMessageToolCallIdExpressionJsonSchema: JSONSchema = convert(
+export const ToolMessageToolCallIdExpressionJsonSchema: JsonSchema = convert(
   ToolMessageToolCallIdExpressionSchema,
 );
 
@@ -706,7 +706,7 @@ export const ToolMessageSchema = z
   )
   .meta({ title: "ToolMessage" });
 export type ToolMessage = z.infer<typeof ToolMessageSchema>;
-export const ToolMessageJsonSchema: JSONSchema = convert(ToolMessageSchema);
+export const ToolMessageJsonSchema: JsonSchema = convert(ToolMessageSchema);
 
 export const ToolMessageExpressionSchema = z
   .object({
@@ -717,7 +717,7 @@ export const ToolMessageExpressionSchema = z
   .describe(ToolMessageSchema.description!)
   .meta({ title: "ToolMessageExpression" });
 export type ToolMessageExpression = z.infer<typeof ToolMessageExpressionSchema>;
-export const ToolMessageExpressionJsonSchema: JSONSchema = convert(
+export const ToolMessageExpressionJsonSchema: JsonSchema = convert(
   ToolMessageExpressionSchema,
 );
 
@@ -730,7 +730,7 @@ export const AssistantMessageRefusalSchema = z
 export type AssistantMessageRefusal = z.infer<
   typeof AssistantMessageRefusalSchema
 >;
-export const AssistantMessageRefusalJsonSchema: JSONSchema = convert(
+export const AssistantMessageRefusalJsonSchema: JsonSchema = convert(
   AssistantMessageRefusalSchema,
 );
 
@@ -746,7 +746,7 @@ export const AssistantMessageRefusalExpressionSchema = z
 export type AssistantMessageRefusalExpression = z.infer<
   typeof AssistantMessageRefusalExpressionSchema
 >;
-export const AssistantMessageRefusalExpressionJsonSchema: JSONSchema = convert(
+export const AssistantMessageRefusalExpressionJsonSchema: JsonSchema = convert(
   AssistantMessageRefusalExpressionSchema,
 );
 
@@ -757,7 +757,7 @@ export const AssistantMessageReasoningSchema = z
 export type AssistantMessageReasoning = z.infer<
   typeof AssistantMessageReasoningSchema
 >;
-export const AssistantMessageReasoningJsonSchema: JSONSchema = convert(
+export const AssistantMessageReasoningJsonSchema: JsonSchema = convert(
   AssistantMessageReasoningSchema,
 );
 
@@ -773,7 +773,7 @@ export const AssistantMessageReasoningExpressionSchema = z
 export type AssistantMessageReasoningExpression = z.infer<
   typeof AssistantMessageReasoningExpressionSchema
 >;
-export const AssistantMessageReasoningExpressionJsonSchema: JSONSchema =
+export const AssistantMessageReasoningExpressionJsonSchema: JsonSchema =
   convert(AssistantMessageReasoningExpressionSchema);
 
 export const AssistantMessageToolCallIdSchema = z
@@ -783,7 +783,7 @@ export const AssistantMessageToolCallIdSchema = z
 export type AssistantMessageToolCallId = z.infer<
   typeof AssistantMessageToolCallIdSchema
 >;
-export const AssistantMessageToolCallIdJsonSchema: JSONSchema = convert(
+export const AssistantMessageToolCallIdJsonSchema: JsonSchema = convert(
   AssistantMessageToolCallIdSchema,
 );
 
@@ -799,7 +799,7 @@ export const AssistantMessageToolCallIdExpressionSchema = z
 export type AssistantMessageToolCallIdExpression = z.infer<
   typeof AssistantMessageToolCallIdExpressionSchema
 >;
-export const AssistantMessageToolCallIdExpressionJsonSchema: JSONSchema =
+export const AssistantMessageToolCallIdExpressionJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallIdExpressionSchema);
 
 export const AssistantMessageToolCallFunctionNameSchema = z
@@ -809,7 +809,7 @@ export const AssistantMessageToolCallFunctionNameSchema = z
 export type AssistantMessageToolCallFunctionName = z.infer<
   typeof AssistantMessageToolCallFunctionNameSchema
 >;
-export const AssistantMessageToolCallFunctionNameJsonSchema: JSONSchema =
+export const AssistantMessageToolCallFunctionNameJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallFunctionNameSchema);
 
 export const AssistantMessageToolCallFunctionNameExpressionSchema = z
@@ -824,7 +824,7 @@ export const AssistantMessageToolCallFunctionNameExpressionSchema = z
 export type AssistantMessageToolCallFunctionNameExpression = z.infer<
   typeof AssistantMessageToolCallFunctionNameExpressionSchema
 >;
-export const AssistantMessageToolCallFunctionNameExpressionJsonSchema: JSONSchema =
+export const AssistantMessageToolCallFunctionNameExpressionJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallFunctionNameExpressionSchema);
 
 export const AssistantMessageToolCallFunctionArgumentsSchema = z
@@ -834,7 +834,7 @@ export const AssistantMessageToolCallFunctionArgumentsSchema = z
 export type AssistantMessageToolCallFunctionArguments = z.infer<
   typeof AssistantMessageToolCallFunctionArgumentsSchema
 >;
-export const AssistantMessageToolCallFunctionArgumentsJsonSchema: JSONSchema =
+export const AssistantMessageToolCallFunctionArgumentsJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallFunctionArgumentsSchema);
 
 export const AssistantMessageToolCallFunctionArgumentsExpressionSchema = z
@@ -851,7 +851,7 @@ export const AssistantMessageToolCallFunctionArgumentsExpressionSchema = z
 export type AssistantMessageToolCallFunctionArgumentsExpression = z.infer<
   typeof AssistantMessageToolCallFunctionArgumentsExpressionSchema
 >;
-export const AssistantMessageToolCallFunctionArgumentsExpressionJsonSchema: JSONSchema =
+export const AssistantMessageToolCallFunctionArgumentsExpressionJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallFunctionArgumentsExpressionSchema);
 
 export const AssistantMessageToolCallFunctionDefinitionSchema = z
@@ -864,7 +864,7 @@ export const AssistantMessageToolCallFunctionDefinitionSchema = z
 export type AssistantMessageToolCallFunctionDefinition = z.infer<
   typeof AssistantMessageToolCallFunctionDefinitionSchema
 >;
-export const AssistantMessageToolCallFunctionDefinitionJsonSchema: JSONSchema =
+export const AssistantMessageToolCallFunctionDefinitionJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallFunctionDefinitionSchema);
 
 export const AssistantMessageToolCallFunctionDefinitionExpressionSchema = z
@@ -879,7 +879,7 @@ export const AssistantMessageToolCallFunctionDefinitionExpressionSchema = z
 export type AssistantMessageToolCallFunctionDefinitionExpression = z.infer<
   typeof AssistantMessageToolCallFunctionDefinitionExpressionSchema
 >;
-export const AssistantMessageToolCallFunctionDefinitionExpressionJsonSchema: JSONSchema =
+export const AssistantMessageToolCallFunctionDefinitionExpressionJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallFunctionDefinitionExpressionSchema);
 
 export const AssistantMessageToolCallFunctionSchema = z
@@ -893,7 +893,7 @@ export const AssistantMessageToolCallFunctionSchema = z
 export type AssistantMessageToolCallFunction = z.infer<
   typeof AssistantMessageToolCallFunctionSchema
 >;
-export const AssistantMessageToolCallFunctionJsonSchema: JSONSchema = convert(
+export const AssistantMessageToolCallFunctionJsonSchema: JsonSchema = convert(
   AssistantMessageToolCallFunctionSchema,
 );
 
@@ -908,7 +908,7 @@ export const AssistantMessageToolCallFunctionExpressionSchema = z
 export type AssistantMessageToolCallFunctionExpression = z.infer<
   typeof AssistantMessageToolCallFunctionExpressionSchema
 >;
-export const AssistantMessageToolCallFunctionExpressionJsonSchema: JSONSchema =
+export const AssistantMessageToolCallFunctionExpressionJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallFunctionExpressionSchema);
 
 export const AssistantMessageToolCallSchema = z
@@ -918,7 +918,7 @@ export const AssistantMessageToolCallSchema = z
 export type AssistantMessageToolCall = z.infer<
   typeof AssistantMessageToolCallSchema
 >;
-export const AssistantMessageToolCallJsonSchema: JSONSchema = convert(
+export const AssistantMessageToolCallJsonSchema: JsonSchema = convert(
   AssistantMessageToolCallSchema,
 );
 
@@ -934,7 +934,7 @@ export const AssistantMessageToolCallExpressionSchema = z
 export type AssistantMessageToolCallExpression = z.infer<
   typeof AssistantMessageToolCallExpressionSchema
 >;
-export const AssistantMessageToolCallExpressionJsonSchema: JSONSchema = convert(
+export const AssistantMessageToolCallExpressionJsonSchema: JsonSchema = convert(
   AssistantMessageToolCallExpressionSchema,
 );
 
@@ -945,7 +945,7 @@ export const AssistantMessageToolCallsSchema = z
 export type AssistantMessageToolCalls = z.infer<
   typeof AssistantMessageToolCallsSchema
 >;
-export const AssistantMessageToolCallsJsonSchema: JSONSchema = convert(
+export const AssistantMessageToolCallsJsonSchema: JsonSchema = convert(
   AssistantMessageToolCallsSchema,
 );
 
@@ -963,7 +963,7 @@ export const AssistantMessageToolCallsExpressionSchema = z
 export type AssistantMessageToolCallsExpression = z.infer<
   typeof AssistantMessageToolCallsExpressionSchema
 >;
-export const AssistantMessageToolCallsExpressionJsonSchema: JSONSchema =
+export const AssistantMessageToolCallsExpressionJsonSchema: JsonSchema =
   convert(AssistantMessageToolCallsExpressionSchema);
 
 export const AssistantMessageSchema = z
@@ -978,7 +978,7 @@ export const AssistantMessageSchema = z
   .describe("Messages sent by the model in response to user messages.")
   .meta({ title: "AssistantMessage" });
 export type AssistantMessage = z.infer<typeof AssistantMessageSchema>;
-export const AssistantMessageJsonSchema: JSONSchema = convert(
+export const AssistantMessageJsonSchema: JsonSchema = convert(
   AssistantMessageSchema,
 );
 
@@ -996,7 +996,7 @@ export const AssistantMessageExpressionSchema = z
 export type AssistantMessageExpression = z.infer<
   typeof AssistantMessageExpressionSchema
 >;
-export const AssistantMessageExpressionJsonSchema: JSONSchema = convert(
+export const AssistantMessageExpressionJsonSchema: JsonSchema = convert(
   AssistantMessageExpressionSchema,
 );
 
@@ -1013,7 +1013,7 @@ export const MessageSchema = z
   .describe("A message exchanged in a chat conversation.")
   .meta({ title: "Message" });
 export type Message = z.infer<typeof MessageSchema>;
-export const MessageJsonSchema: JSONSchema = convert(MessageSchema);
+export const MessageJsonSchema: JsonSchema = convert(MessageSchema);
 
 export const MessageExpressionSchema = z
   .union([
@@ -1033,7 +1033,7 @@ export const MessageExpressionSchema = z
   .describe(MessageSchema.description!)
   .meta({ title: "MessageExpression" });
 export type MessageExpression = z.infer<typeof MessageExpressionSchema>;
-export const MessageExpressionJsonSchema: JSONSchema = convert(
+export const MessageExpressionJsonSchema: JsonSchema = convert(
   MessageExpressionSchema,
 );
 
@@ -1042,7 +1042,7 @@ export const MessagesSchema = z
   .describe("A list of messages exchanged in a chat conversation.")
   .meta({ title: "Messages" });
 export type Messages = z.infer<typeof MessagesSchema>;
-export const MessagesJsonSchema: JSONSchema = convert(MessagesSchema);
+export const MessagesJsonSchema: JsonSchema = convert(MessagesSchema);
 
 export const MessagesExpressionSchema = z
   .union([
@@ -1057,6 +1057,6 @@ export const MessagesExpressionSchema = z
   .describe(MessagesSchema.description!)
   .meta({ title: "MessagesExpression" });
 export type MessagesExpression = z.infer<typeof MessagesExpressionSchema>;
-export const MessagesExpressionJsonSchema: JSONSchema = convert(
+export const MessagesExpressionJsonSchema: JsonSchema = convert(
   MessagesExpressionSchema,
 );

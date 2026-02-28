@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 
 export const ProfileEntrySchema = z
   .object({
@@ -21,7 +21,7 @@ export const ProfileEntrySchema = z
   )
   .meta({ title: "VectorCompletionProfileEntry" });
 export type ProfileEntry = z.infer<typeof ProfileEntrySchema>;
-export const ProfileEntryJsonSchema: JSONSchema = convert(ProfileEntrySchema);
+export const ProfileEntryJsonSchema: JsonSchema = convert(ProfileEntrySchema);
 
 export const ProfileSchema = z
   .union([
@@ -41,4 +41,4 @@ export const ProfileSchema = z
   )
   .meta({ title: "VectorCompletionProfile" });
 export type Profile = z.infer<typeof ProfileSchema>;
-export const ProfileJsonSchema: JSONSchema = convert(ProfileSchema);
+export const ProfileJsonSchema: JsonSchema = convert(ProfileSchema);

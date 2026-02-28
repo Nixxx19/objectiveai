@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "./json_schema";
+import { convert, type JsonSchema } from "./json_schema";
 
 // --- Internal collection ---
 
@@ -55,7 +55,7 @@ function collectSchemas(
 // --- Lazy singleton (populated by require("./index") in bundled builds) ---
 
 let zodMap: Map<string, z.ZodType> | undefined;
-const jsonSchemaCache = new Map<string, JSONSchema>();
+const jsonSchemaCache = new Map<string, JsonSchema>();
 
 function getZodMap(): Map<string, z.ZodType> {
   if (!zodMap) {
@@ -95,7 +95,7 @@ export function getZodSchema(title: string): z.ZodType | undefined {
  * meta title, or `undefined` if no schema has that title.
  * Results are cached after the first conversion for each title.
  */
-export function getJsonSchema(title: string): JSONSchema | undefined {
+export function getJsonSchema(title: string): JsonSchema | undefined {
   const cached = jsonSchemaCache.get(title);
   if (cached) return cached;
 
@@ -118,10 +118,10 @@ export function listTitles(): string[] {
  * Recursively collects all deduplicated `$ref` values reachable from a
  * JSON Schema, resolving each ref via the registry.
  */
-export function listRefDependencies(schema: JSONSchema): string[] {
+export function listRefDependencies(schema: JsonSchema): string[] {
   const seen = new Set<string>();
 
-  const walk = (node: JSONSchema): void => {
+  const walk = (node: JsonSchema): void => {
     if (node.$ref) {
       if (seen.has(node.$ref)) return;
       seen.add(node.$ref);

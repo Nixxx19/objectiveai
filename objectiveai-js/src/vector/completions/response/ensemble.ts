@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 
 export const EnsembleSchema = z
   .string()
@@ -7,4 +7,4 @@ export const EnsembleSchema = z
     "The unique identifier of the Ensemble used for this vector completion."
   );
 export type Ensemble = z.infer<typeof EnsembleSchema>;
-export const EnsembleJsonSchema: JSONSchema = convert(EnsembleSchema);
+export const EnsembleJsonSchema: JsonSchema = convert(EnsembleSchema);

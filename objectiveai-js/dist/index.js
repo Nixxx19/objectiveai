@@ -3345,8 +3345,8 @@ var init_input2 = __esm({
   "src/functions/alpha_scalar/expression/input.ts"() {
     init_input();
     init_expression();
-    AlphaScalarFunctionInputSchemaSchema = ObjectInputSchemaSchema;
-    AlphaScalarFunctionInputExpressionSchema = ExpressionSchema;
+    AlphaScalarFunctionInputSchemaSchema = ObjectInputSchemaSchema.meta({ title: "ObjectInputSchema", wrapper: true });
+    AlphaScalarFunctionInputExpressionSchema = ExpressionSchema.meta({ title: "Expression", wrapper: true });
   }
 });
 var RemoteSchema, RemoteJsonSchema;
@@ -7342,10 +7342,10 @@ function unwrap(schema) {
   }
   return { inner: current, optional, nullable, description };
 }
-var JSONSchemaSchema, lazyRefs, schemaRefs, propertyRefsBySchema, JSONSchemaJsonSchema;
+var JsonSchemaSchema, lazyRefs, schemaRefs, propertyRefsBySchema, JsonSchemaJsonSchema;
 var init_json_schema = __esm({
   "src/json_schema.ts"() {
-    JSONSchemaSchema = z6.lazy(
+    JsonSchemaSchema = z6.lazy(
       () => z6.object({
         $ref: z6.string().optional(),
         type: z6.enum([
@@ -7361,15 +7361,15 @@ var init_json_schema = __esm({
         format: z6.string().optional(),
         enum: z6.array(z6.unknown()).optional(),
         const: z6.unknown().optional(),
-        properties: z6.record(z6.string(), JSONSchemaSchema).optional(),
+        properties: z6.record(z6.string(), JsonSchemaSchema).optional(),
         required: z6.array(z6.string()).optional(),
-        items: JSONSchemaSchema.optional(),
-        prefixItems: z6.array(JSONSchemaSchema).optional(),
-        additionalProperties: JSONSchemaSchema.optional(),
-        anyOf: z6.array(JSONSchemaSchema).optional(),
-        allOf: z6.array(JSONSchemaSchema).optional()
+        items: JsonSchemaSchema.optional(),
+        prefixItems: z6.array(JsonSchemaSchema).optional(),
+        additionalProperties: JsonSchemaSchema.optional(),
+        anyOf: z6.array(JsonSchemaSchema).optional(),
+        allOf: z6.array(JsonSchemaSchema).optional()
       }).passthrough()
-    ).meta({ title: "JSONSchema" });
+    ).meta({ title: "JsonSchema" });
     lazyRefs = [
       "JsonValue",
       "JsonValueExpression",
@@ -7377,7 +7377,7 @@ var init_json_schema = __esm({
       "InputValueExpression",
       "InputSchema",
       "TaskProfile",
-      "JSONSchema"
+      "JsonSchema"
     ];
     schemaRefs = [
       "JsonValue",
@@ -7386,7 +7386,7 @@ var init_json_schema = __esm({
       "InputValueExpression",
       "InputSchema",
       "TaskProfile",
-      "JSONSchema",
+      "JsonSchema",
       "Message",
       "MessageExpression",
       "DeveloperMessage",
@@ -7446,7 +7446,7 @@ var init_json_schema = __esm({
       "Upstream"
     ];
     propertyRefsBySchema = /* @__PURE__ */ new WeakMap();
-    JSONSchemaJsonSchema = { "$ref": "JSONSchema" };
+    JsonSchemaJsonSchema = { "$ref": "JsonSchema" };
   }
 });
 function isZodSchema(value) {
@@ -7552,8 +7552,8 @@ __export(index_exports, {
   Ensemble: () => ensemble_exports,
   EnsembleLlm: () => ensemble_llm_exports,
   Functions: () => functions_exports,
-  JSONSchemaJsonSchema: () => JSONSchemaJsonSchema,
-  JSONSchemaSchema: () => JSONSchemaSchema,
+  JsonSchemaJsonSchema: () => JsonSchemaJsonSchema,
+  JsonSchemaSchema: () => JsonSchemaSchema,
   JsonValueExpressionJsonSchema: () => JsonValueExpressionJsonSchema,
   JsonValueExpressionSchema: () => JsonValueExpressionSchema,
   JsonValueJsonSchema: () => JsonValueJsonSchema,
@@ -7594,4 +7594,4 @@ var init_index = __esm({
 });
 init_index();
 
-export { auth_exports as Auth, chat_exports as Chat, ensemble_exports as Ensemble, ensemble_llm_exports as EnsembleLlm, functions_exports as Functions, JSONSchemaJsonSchema, JSONSchemaSchema, JsonValueExpressionJsonSchema, JsonValueExpressionSchema, JsonValueJsonSchema, JsonValueSchema, ObjectiveAI, ObjectiveAIErrorJsonSchema, ObjectiveAIErrorSchema, ObjectiveAIFetchError, ObjectiveAIOptionsJsonSchema, ObjectiveAIOptionsSchema, RequestOptionsJsonSchema, RequestOptionsSchema, Stream, vector_exports as Vector, convert, createSchemaRegistry, getJsonSchema, getZodSchema, isObjectiveAIError, listRefDependencies, listTitles };
+export { auth_exports as Auth, chat_exports as Chat, ensemble_exports as Ensemble, ensemble_llm_exports as EnsembleLlm, functions_exports as Functions, JsonSchemaJsonSchema, JsonSchemaSchema, JsonValueExpressionJsonSchema, JsonValueExpressionSchema, JsonValueJsonSchema, JsonValueSchema, ObjectiveAI, ObjectiveAIErrorJsonSchema, ObjectiveAIErrorSchema, ObjectiveAIFetchError, ObjectiveAIOptionsJsonSchema, ObjectiveAIOptionsSchema, RequestOptionsJsonSchema, RequestOptionsSchema, Stream, vector_exports as Vector, convert, createSchemaRegistry, getJsonSchema, getZodSchema, isObjectiveAIError, listRefDependencies, listTitles };

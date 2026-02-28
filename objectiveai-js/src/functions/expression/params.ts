@@ -5,7 +5,7 @@ import { VectorCompletion } from "src/vector/completions/response/unary";
 import { VotesSchema } from "src/vector/completions/response/vote";
 import { WeightsSchema } from "src/vector/completions/response/weights";
 import z from "zod";
-import { convert, type JSONSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../json_schema";
 
 export const VectorCompletionOutputSchema = z
   .object({
@@ -18,7 +18,7 @@ export const VectorCompletionOutputSchema = z
 export type VectorCompletionOutput = z.infer<
   typeof VectorCompletionOutputSchema
 >;
-export const VectorCompletionOutputJsonSchema: JSONSchema = convert(
+export const VectorCompletionOutputJsonSchema: JsonSchema = convert(
   VectorCompletionOutputSchema,
 );
 
@@ -29,7 +29,7 @@ export const MapVectorCompletionOutputSchema = z
 export type MapVectorCompletionOutput = z.infer<
   typeof MapVectorCompletionOutputSchema
 >;
-export const MapVectorCompletionOutputJsonSchema: JSONSchema = convert(
+export const MapVectorCompletionOutputJsonSchema: JsonSchema = convert(
   MapVectorCompletionOutputSchema,
 );
 
@@ -47,7 +47,7 @@ export const ErrorFunctionOutputSchema = JsonValueSchema.describe(
   "The erroneous output of a function execution, containing the invalid output which failed validation.",
 ).meta({ title: "JsonValue", wrapper: true });
 export type ErrorFunctionOutput = z.infer<typeof ErrorFunctionOutputSchema>;
-export const ErrorFunctionOutputJsonSchema: JSONSchema = convert(
+export const ErrorFunctionOutputJsonSchema: JsonSchema = convert(
   ErrorFunctionOutputSchema,
 );
 
@@ -60,7 +60,7 @@ export const ValidScalarFunctionOutputSchema = z
 export type ValidScalarFunctionOutput = z.infer<
   typeof ValidScalarFunctionOutputSchema
 >;
-export const ValidScalarFunctionOutputJsonSchema: JSONSchema = convert(
+export const ValidScalarFunctionOutputJsonSchema: JsonSchema = convert(
   ValidScalarFunctionOutputSchema,
 );
 
@@ -71,7 +71,7 @@ export const ScalarFunctionOutputSchema = z
   )
   .meta({ title: "ScalarFunctionOutput" });
 export type ScalarFunctionOutput = z.infer<typeof ScalarFunctionOutputSchema>;
-export const ScalarFunctionOutputJsonSchema: JSONSchema = convert(
+export const ScalarFunctionOutputJsonSchema: JsonSchema = convert(
   ScalarFunctionOutputSchema,
 );
 
@@ -84,7 +84,7 @@ export const MapScalarFunctionOutputSchema = z
 export type MapScalarFunctionOutput = z.infer<
   typeof MapScalarFunctionOutputSchema
 >;
-export const MapScalarFunctionOutputJsonSchema: JSONSchema = convert(
+export const MapScalarFunctionOutputJsonSchema: JsonSchema = convert(
   MapScalarFunctionOutputSchema,
 );
 
@@ -97,7 +97,7 @@ export const ValidVectorFunctionOutputSchema = z
 export type ValidVectorFunctionOutput = z.infer<
   typeof ValidVectorFunctionOutputSchema
 >;
-export const ValidVectorFunctionOutputJsonSchema: JSONSchema = convert(
+export const ValidVectorFunctionOutputJsonSchema: JsonSchema = convert(
   ValidVectorFunctionOutputSchema,
 );
 
@@ -108,7 +108,7 @@ export const VectorFunctionOutputSchema = z
   )
   .meta({ title: "VectorFunctionOutput" });
 export type VectorFunctionOutput = z.infer<typeof VectorFunctionOutputSchema>;
-export const VectorFunctionOutputJsonSchema: JSONSchema = convert(
+export const VectorFunctionOutputJsonSchema: JsonSchema = convert(
   VectorFunctionOutputSchema,
 );
 
@@ -121,7 +121,7 @@ export const MapVectorFunctionOutputSchema = z
 export type MapVectorFunctionOutput = z.infer<
   typeof MapVectorFunctionOutputSchema
 >;
-export const MapVectorFunctionOutputJsonSchema: JSONSchema = convert(
+export const MapVectorFunctionOutputJsonSchema: JsonSchema = convert(
   MapVectorFunctionOutputSchema,
 );
 
@@ -132,7 +132,7 @@ export const ValidFunctionOutputSchema = z
   )
   .meta({ title: "ValidFunctionOutput" });
 export type ValidFunctionOutput = z.infer<typeof ValidFunctionOutputSchema>;
-export const ValidFunctionOutputJsonSchema: JSONSchema = convert(
+export const ValidFunctionOutputJsonSchema: JsonSchema = convert(
   ValidFunctionOutputSchema,
 );
 
@@ -140,7 +140,7 @@ export const FunctionOutputSchema = z
   .union([ValidFunctionOutputSchema, ErrorFunctionOutputSchema])
   .describe("The output of a function execution / function execution task.");
 export type FunctionOutput = z.infer<typeof FunctionOutputSchema>;
-export const FunctionOutputJsonSchema: JSONSchema =
+export const FunctionOutputJsonSchema: JsonSchema =
   convert(FunctionOutputSchema);
 
 export const MapFunctionOutputSchema = z
@@ -150,7 +150,7 @@ export const MapFunctionOutputSchema = z
   )
   .meta({ title: "MapFunctionOutput" });
 export type MapFunctionOutput = z.infer<typeof MapFunctionOutputSchema>;
-export const MapFunctionOutputJsonSchema: JSONSchema = convert(
+export const MapFunctionOutputJsonSchema: JsonSchema = convert(
   MapFunctionOutputSchema,
 );
 
@@ -175,10 +175,10 @@ export const TaskOutputSchema = z
   .describe("The output of a task.")
   .meta({ title: "TaskOutput" });
 export type TaskOutput = z.infer<typeof TaskOutputSchema>;
-export const TaskOutputJsonSchema: JSONSchema = convert(TaskOutputSchema);
+export const TaskOutputJsonSchema: JsonSchema = convert(TaskOutputSchema);
 
 export const TaskOutputsSchema = z
   .array(TaskOutputSchema)
   .describe("The outputs of all tasks in a function.");
 export type TaskOutputs = z.infer<typeof TaskOutputsSchema>;
-export const TaskOutputsJsonSchema: JSONSchema = convert(TaskOutputsSchema);
+export const TaskOutputsJsonSchema: JsonSchema = convert(TaskOutputsSchema);

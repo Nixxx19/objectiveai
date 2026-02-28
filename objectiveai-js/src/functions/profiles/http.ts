@@ -1,7 +1,7 @@
 import z from "zod";
 import { ObjectiveAI, RequestOptions } from "../../client";
 import { RemoteTasksProfileSchema, RemoteAutoProfileSchema } from "../profile";
-import { convert, type JSONSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../json_schema";
 import { RemoteSchema, type Remote } from "../remote";
 
 export const ListItemSchema = z.object({
@@ -19,13 +19,13 @@ export const ListItemSchema = z.object({
     ),
 });
 export type ListItem = z.infer<typeof ListItemSchema>;
-export const ListItemJsonSchema: JSONSchema = convert(ListItemSchema);
+export const ListItemJsonSchema: JsonSchema = convert(ListItemSchema);
 
 export const ListSchema = z.object({
   data: z.array(ListItemSchema).describe("A list of Functions."),
 });
 export type List = z.infer<typeof ListSchema>;
-export const ListJsonSchema: JSONSchema = convert(ListSchema);
+export const ListJsonSchema: JsonSchema = convert(ListSchema);
 
 export function list(
   client: ObjectiveAI,
@@ -55,7 +55,7 @@ export const HistoricalUsageSchema = z.object({
     .describe("The total cost incurred by using this Profile."),
 });
 export type HistoricalUsage = z.infer<typeof HistoricalUsageSchema>;
-export const HistoricalUsageJsonSchema: JSONSchema = convert(HistoricalUsageSchema);
+export const HistoricalUsageJsonSchema: JsonSchema = convert(HistoricalUsageSchema);
 
 export function retrieveUsage(
   client: ObjectiveAI,
@@ -77,7 +77,7 @@ export const RetrieveSchema = z.union([
   ListItemSchema.merge(RemoteAutoProfileSchema),
 ]);
 export type Retrieve = z.infer<typeof RetrieveSchema>;
-export const RetrieveJsonSchema: JSONSchema = convert(RetrieveSchema);
+export const RetrieveJsonSchema: JsonSchema = convert(RetrieveSchema);
 
 export function retrieve(
   client: ObjectiveAI,

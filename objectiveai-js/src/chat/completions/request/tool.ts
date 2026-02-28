@@ -1,14 +1,14 @@
 import { ExpressionSchema } from "src/functions/expression/expression";
 import { JsonValueExpressionSchema, JsonValueSchema } from "src/json";
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 
 export const FunctionToolNameSchema = z
   .string()
   .describe("The name of the function.")
   .meta({ title: "FunctionToolName" });
 export type FunctionToolName = z.infer<typeof FunctionToolNameSchema>;
-export const FunctionToolNameJsonSchema: JSONSchema = convert(FunctionToolNameSchema);
+export const FunctionToolNameJsonSchema: JsonSchema = convert(FunctionToolNameSchema);
 
 export const FunctionToolNameExpressionSchema = z
   .union([
@@ -20,7 +20,7 @@ export const FunctionToolNameExpressionSchema = z
 export type FunctionToolNameExpression = z.infer<
   typeof FunctionToolNameExpressionSchema
 >;
-export const FunctionToolNameExpressionJsonSchema: JSONSchema = convert(
+export const FunctionToolNameExpressionJsonSchema: JsonSchema = convert(
   FunctionToolNameExpressionSchema,
 );
 
@@ -31,7 +31,7 @@ export const FunctionToolDescriptionSchema = z
 export type FunctionToolDescription = z.infer<
   typeof FunctionToolDescriptionSchema
 >;
-export const FunctionToolDescriptionJsonSchema: JSONSchema = convert(
+export const FunctionToolDescriptionJsonSchema: JsonSchema = convert(
   FunctionToolDescriptionSchema,
 );
 
@@ -45,7 +45,7 @@ export const FunctionToolDescriptionExpressionSchema = z
 export type FunctionToolDescriptionExpression = z.infer<
   typeof FunctionToolDescriptionExpressionSchema
 >;
-export const FunctionToolDescriptionExpressionJsonSchema: JSONSchema = convert(
+export const FunctionToolDescriptionExpressionJsonSchema: JsonSchema = convert(
   FunctionToolDescriptionExpressionSchema,
 );
 
@@ -56,7 +56,7 @@ export const FunctionToolParametersSchema = z
 export type FunctionToolParameters = z.infer<
   typeof FunctionToolParametersSchema
 >;
-export const FunctionToolParametersJsonSchema: JSONSchema = convert(
+export const FunctionToolParametersJsonSchema: JsonSchema = convert(
   FunctionToolParametersSchema,
 );
 
@@ -72,7 +72,7 @@ export const FunctionToolParametersExpressionSchema = z
 export type FunctionToolParametersExpression = z.infer<
   typeof FunctionToolParametersExpressionSchema
 >;
-export const FunctionToolParametersExpressionJsonSchema: JSONSchema = convert(
+export const FunctionToolParametersExpressionJsonSchema: JsonSchema = convert(
   FunctionToolParametersExpressionSchema,
 );
 
@@ -81,7 +81,7 @@ export const FunctionToolStrictSchema = z
   .describe("Whether to enforce strict adherence to the parameter schema.")
   .meta({ title: "FunctionToolStrict" });
 export type FunctionToolStrict = z.infer<typeof FunctionToolStrictSchema>;
-export const FunctionToolStrictJsonSchema: JSONSchema = convert(
+export const FunctionToolStrictJsonSchema: JsonSchema = convert(
   FunctionToolStrictSchema,
 );
 
@@ -95,7 +95,7 @@ export const FunctionToolStrictExpressionSchema = z
 export type FunctionToolStrictExpression = z.infer<
   typeof FunctionToolStrictExpressionSchema
 >;
-export const FunctionToolStrictExpressionJsonSchema: JSONSchema = convert(
+export const FunctionToolStrictExpressionJsonSchema: JsonSchema = convert(
   FunctionToolStrictExpressionSchema,
 );
 
@@ -111,7 +111,7 @@ export const FunctionToolDefinitionSchema = z
 export type FunctionToolDefinition = z.infer<
   typeof FunctionToolDefinitionSchema
 >;
-export const FunctionToolDefinitionJsonSchema: JSONSchema = convert(
+export const FunctionToolDefinitionJsonSchema: JsonSchema = convert(
   FunctionToolDefinitionSchema,
 );
 
@@ -127,7 +127,7 @@ export const FunctionToolDefinitionExpressionSchema = z
 export type FunctionToolDefinitionExpression = z.infer<
   typeof FunctionToolDefinitionExpressionSchema
 >;
-export const FunctionToolDefinitionExpressionJsonSchema: JSONSchema = convert(
+export const FunctionToolDefinitionExpressionJsonSchema: JsonSchema = convert(
   FunctionToolDefinitionExpressionSchema,
 );
 
@@ -139,7 +139,7 @@ export const FunctionToolSchema = z
   .describe("A function tool that the assistant can call.")
   .meta({ title: "FunctionTool" });
 export type FunctionTool = z.infer<typeof FunctionToolSchema>;
-export const FunctionToolJsonSchema: JSONSchema = convert(FunctionToolSchema);
+export const FunctionToolJsonSchema: JsonSchema = convert(FunctionToolSchema);
 
 export const FunctionToolExpressionSchema = z
   .object({
@@ -151,7 +151,7 @@ export const FunctionToolExpressionSchema = z
 export type FunctionToolExpression = z.infer<
   typeof FunctionToolExpressionSchema
 >;
-export const FunctionToolExpressionJsonSchema: JSONSchema = convert(
+export const FunctionToolExpressionJsonSchema: JsonSchema = convert(
   FunctionToolExpressionSchema,
 );
 
@@ -160,7 +160,7 @@ export const ToolSchema = z
   .describe("A tool that the assistant can call.")
   .meta({ title: "Tool" });
 export type Tool = z.infer<typeof ToolSchema>;
-export const ToolJsonSchema: JSONSchema = convert(ToolSchema);
+export const ToolJsonSchema: JsonSchema = convert(ToolSchema);
 
 export const ToolExpressionSchema = z
   .union([
@@ -170,14 +170,14 @@ export const ToolExpressionSchema = z
   .describe(ToolSchema.description!)
   .meta({ title: "ToolExpression" });
 export type ToolExpression = z.infer<typeof ToolExpressionSchema>;
-export const ToolExpressionJsonSchema: JSONSchema = convert(ToolExpressionSchema);
+export const ToolExpressionJsonSchema: JsonSchema = convert(ToolExpressionSchema);
 
 export const ToolsSchema = z
   .array(ToolSchema)
   .describe("A list of tools that the assistant can call.")
   .meta({ title: "Tools" });
 export type Tools = z.infer<typeof ToolsSchema>;
-export const ToolsJsonSchema: JSONSchema = convert(ToolsSchema);
+export const ToolsJsonSchema: JsonSchema = convert(ToolsSchema);
 
 export const ToolsExpressionSchema = z
   .union([
@@ -192,4 +192,4 @@ export const ToolsExpressionSchema = z
   .describe(ToolsSchema.description!)
   .meta({ title: "ToolsExpression" });
 export type ToolsExpression = z.infer<typeof ToolsExpressionSchema>;
-export const ToolsExpressionJsonSchema: JSONSchema = convert(ToolsExpressionSchema);
+export const ToolsExpressionJsonSchema: JsonSchema = convert(ToolsExpressionSchema);

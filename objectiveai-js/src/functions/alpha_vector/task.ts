@@ -6,7 +6,7 @@ import {
   AlphaVectorFunctionInputExpressionSchema,
   AlphaVectorFunctionInputSchemaSchema,
 } from "./expression/input.js";
-import { convert, type JSONSchema } from "../../json_schema.js";
+import { convert, type JsonSchema } from "../../json_schema.js";
 
 // Branch Tasks
 
@@ -35,7 +35,7 @@ export const AlphaVectorScalarFunctionTaskExpressionSchema = z
   .describe("An alpha scalar function task expression within a vector function.")
   .meta({ title: "AlphaVectorScalarFunctionTaskExpression" });
 export type AlphaVectorScalarFunctionTaskExpression = z.infer<typeof AlphaVectorScalarFunctionTaskExpressionSchema>;
-export const AlphaVectorScalarFunctionTaskExpressionJsonSchema: JSONSchema = convert(AlphaVectorScalarFunctionTaskExpressionSchema);
+export const AlphaVectorScalarFunctionTaskExpressionJsonSchema: JsonSchema = convert(AlphaVectorScalarFunctionTaskExpressionSchema);
 
 export const AlphaVectorFunctionTaskExpressionSchema = z
   .object({
@@ -62,7 +62,7 @@ export const AlphaVectorFunctionTaskExpressionSchema = z
   .describe("An alpha vector function task expression.")
   .meta({ title: "AlphaVectorFunctionTaskExpression" });
 export type AlphaVectorFunctionTaskExpression = z.infer<typeof AlphaVectorFunctionTaskExpressionSchema>;
-export const AlphaVectorFunctionTaskExpressionJsonSchema: JSONSchema = convert(AlphaVectorFunctionTaskExpressionSchema);
+export const AlphaVectorFunctionTaskExpressionJsonSchema: JsonSchema = convert(AlphaVectorFunctionTaskExpressionSchema);
 
 export const PlaceholderAlphaVectorScalarFunctionTaskExpressionSchema = z
   .object({
@@ -84,7 +84,7 @@ export const PlaceholderAlphaVectorScalarFunctionTaskExpressionSchema = z
   )
   .meta({ title: "PlaceholderAlphaVectorScalarFunctionTaskExpression" });
 export type PlaceholderAlphaVectorScalarFunctionTaskExpression = z.infer<typeof PlaceholderAlphaVectorScalarFunctionTaskExpressionSchema>;
-export const PlaceholderAlphaVectorScalarFunctionTaskExpressionJsonSchema: JSONSchema = convert(PlaceholderAlphaVectorScalarFunctionTaskExpressionSchema);
+export const PlaceholderAlphaVectorScalarFunctionTaskExpressionJsonSchema: JsonSchema = convert(PlaceholderAlphaVectorScalarFunctionTaskExpressionSchema);
 
 export const PlaceholderAlphaVectorFunctionTaskExpressionSchema = z
   .object({
@@ -106,7 +106,7 @@ export const PlaceholderAlphaVectorFunctionTaskExpressionSchema = z
   )
   .meta({ title: "PlaceholderAlphaVectorFunctionTaskExpression" });
 export type PlaceholderAlphaVectorFunctionTaskExpression = z.infer<typeof PlaceholderAlphaVectorFunctionTaskExpressionSchema>;
-export const PlaceholderAlphaVectorFunctionTaskExpressionJsonSchema: JSONSchema = convert(PlaceholderAlphaVectorFunctionTaskExpressionSchema);
+export const PlaceholderAlphaVectorFunctionTaskExpressionJsonSchema: JsonSchema = convert(PlaceholderAlphaVectorFunctionTaskExpressionSchema);
 
 export const AlphaVectorBranchTaskExpressionSchema = z
   .discriminatedUnion("type", [
@@ -118,7 +118,7 @@ export const AlphaVectorBranchTaskExpressionSchema = z
   .describe("A branch task expression for an alpha vector function.")
   .meta({ title: "AlphaVectorBranchTaskExpression" });
 export type AlphaVectorBranchTaskExpression = z.infer<typeof AlphaVectorBranchTaskExpressionSchema>;
-export const AlphaVectorBranchTaskExpressionJsonSchema: JSONSchema = convert(AlphaVectorBranchTaskExpressionSchema);
+export const AlphaVectorBranchTaskExpressionJsonSchema: JsonSchema = convert(AlphaVectorBranchTaskExpressionSchema);
 
 export const AlphaVectorBranchTaskExpressionsSchema = z
   .array(AlphaVectorBranchTaskExpressionSchema)
@@ -127,7 +127,7 @@ export const AlphaVectorBranchTaskExpressionsSchema = z
   )
   .meta({ title: "AlphaVectorBranchTaskExpressions" });
 export type AlphaVectorBranchTaskExpressions = z.infer<typeof AlphaVectorBranchTaskExpressionsSchema>;
-export const AlphaVectorBranchTaskExpressionsJsonSchema: JSONSchema = convert(AlphaVectorBranchTaskExpressionsSchema);
+export const AlphaVectorBranchTaskExpressionsJsonSchema: JsonSchema = convert(AlphaVectorBranchTaskExpressionsSchema);
 
 // Leaf Tasks
 
@@ -147,7 +147,7 @@ export const AlphaVectorVectorCompletionTaskExpressionSchema = z
   .describe("A vector completion task expression for an alpha vector leaf function.")
   .meta({ title: "AlphaVectorVectorCompletionTaskExpression" });
 export type AlphaVectorVectorCompletionTaskExpression = z.infer<typeof AlphaVectorVectorCompletionTaskExpressionSchema>;
-export const AlphaVectorVectorCompletionTaskExpressionJsonSchema: JSONSchema = convert(AlphaVectorVectorCompletionTaskExpressionSchema);
+export const AlphaVectorVectorCompletionTaskExpressionJsonSchema: JsonSchema = convert(AlphaVectorVectorCompletionTaskExpressionSchema);
 
 export const AlphaVectorLeafTaskExpressionSchema = z
   .discriminatedUnion("type", [
@@ -156,7 +156,7 @@ export const AlphaVectorLeafTaskExpressionSchema = z
   .describe("A leaf task expression for an alpha vector function.")
   .meta({ title: "AlphaVectorLeafTaskExpression" });
 export type AlphaVectorLeafTaskExpression = z.infer<typeof AlphaVectorLeafTaskExpressionSchema>;
-export const AlphaVectorLeafTaskExpressionJsonSchema: JSONSchema = convert(AlphaVectorLeafTaskExpressionSchema);
+export const AlphaVectorLeafTaskExpressionJsonSchema: JsonSchema = convert(AlphaVectorLeafTaskExpressionSchema);
 
 export const AlphaVectorLeafTaskExpressionsSchema = z
   .array(AlphaVectorLeafTaskExpressionSchema)
@@ -165,4 +165,4 @@ export const AlphaVectorLeafTaskExpressionsSchema = z
   )
   .meta({ title: "AlphaVectorLeafTaskExpressions" });
 export type AlphaVectorLeafTaskExpressions = z.infer<typeof AlphaVectorLeafTaskExpressionsSchema>;
-export const AlphaVectorLeafTaskExpressionsJsonSchema: JSONSchema = convert(AlphaVectorLeafTaskExpressionsSchema);
+export const AlphaVectorLeafTaskExpressionsJsonSchema: JsonSchema = convert(AlphaVectorLeafTaskExpressionsSchema);

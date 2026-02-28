@@ -1,6 +1,6 @@
 import { merge, mergedString } from "src/merge";
 import z from "zod";
-import { convert, type JSONSchema } from "../../../../json_schema";
+import { convert, type JsonSchema } from "../../../../json_schema";
 
 export const FunctionToolCallDefinitionSchema = z.object({
   name: z.string().optional().describe("The name of the function."),
@@ -12,7 +12,7 @@ export const FunctionToolCallDefinitionSchema = z.object({
 export type FunctionToolCallDefinition = z.infer<
   typeof FunctionToolCallDefinitionSchema
 >;
-export const FunctionToolCallDefinitionJsonSchema: JSONSchema = convert(
+export const FunctionToolCallDefinitionJsonSchema: JsonSchema = convert(
   FunctionToolCallDefinitionSchema,
 );
 
@@ -55,7 +55,7 @@ export const FunctionToolCallSchema = z
   })
   .describe("A function tool call made by the assistant.");
 export type FunctionToolCall = z.infer<typeof FunctionToolCallSchema>;
-export const FunctionToolCallJsonSchema: JSONSchema = convert(
+export const FunctionToolCallJsonSchema: JsonSchema = convert(
   FunctionToolCallSchema,
 );
 
@@ -92,7 +92,7 @@ export const ToolCallSchema = z
   .union([FunctionToolCallSchema])
   .describe("A tool call made by the assistant.");
 export type ToolCall = z.infer<typeof ToolCallSchema>;
-export const ToolCallJsonSchema: JSONSchema = convert(ToolCallSchema);
+export const ToolCallJsonSchema: JsonSchema = convert(ToolCallSchema);
 
 export namespace ToolCall {
   export function merged(a: ToolCall, b: ToolCall): [ToolCall, boolean] {

@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../json_schema";
 
 export const JMESPathExpressionSchema = z
   .object({
@@ -9,7 +9,7 @@ export const JMESPathExpressionSchema = z
   .describe("A JMESPath expression which evaluates to a value.")
   .meta({ title: "JMESPathExpression" });
 export type JMESPathExpression = z.infer<typeof JMESPathExpressionSchema>;
-export const JMESPathExpressionJsonSchema: JSONSchema = convert(JMESPathExpressionSchema);
+export const JMESPathExpressionJsonSchema: JsonSchema = convert(JMESPathExpressionSchema);
 
 export const StarlarkExpressionSchema = z
   .object({
@@ -19,7 +19,7 @@ export const StarlarkExpressionSchema = z
   .describe("A Starlark expression which evaluates to a value.")
   .meta({ title: "StarlarkExpression" });
 export type StarlarkExpression = z.infer<typeof StarlarkExpressionSchema>;
-export const StarlarkExpressionJsonSchema: JSONSchema = convert(StarlarkExpressionSchema);
+export const StarlarkExpressionJsonSchema: JsonSchema = convert(StarlarkExpressionSchema);
 
 export const SpecialExpressionSchema = z
   .object({
@@ -40,11 +40,11 @@ export const SpecialExpressionSchema = z
   .describe("A special predefined expression.")
   .meta({ title: "SpecialExpression" });
 export type SpecialExpression = z.infer<typeof SpecialExpressionSchema>;
-export const SpecialExpressionJsonSchema: JSONSchema = convert(SpecialExpressionSchema);
+export const SpecialExpressionJsonSchema: JsonSchema = convert(SpecialExpressionSchema);
 
 export const ExpressionSchema = z
   .union([JMESPathExpressionSchema, StarlarkExpressionSchema, SpecialExpressionSchema])
   .describe("An expression (JMESPath, Starlark, or Special) which evaluates to a value.")
   .meta({ title: "Expression" });
 export type Expression = z.infer<typeof ExpressionSchema>;
-export const ExpressionJsonSchema: JSONSchema = convert(ExpressionSchema);
+export const ExpressionJsonSchema: JsonSchema = convert(ExpressionSchema);

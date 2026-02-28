@@ -3,7 +3,7 @@ import { Delta, DeltaSchema } from "./delta";
 import { FinishReasonSchema } from "../finish_reason";
 import { Logprobs, LogprobsSchema } from "../logprobs";
 import { merge } from "src/merge";
-import { convert, type JSONSchema } from "../../../../json_schema";
+import { convert, type JsonSchema } from "../../../../json_schema";
 
 export const ChoiceSchema = z
   .object({
@@ -16,7 +16,7 @@ export const ChoiceSchema = z
   })
   .describe("A choice in a streaming chat completion response.");
 export type Choice = z.infer<typeof ChoiceSchema>;
-export const ChoiceJsonSchema: JSONSchema = convert(ChoiceSchema);
+export const ChoiceJsonSchema: JsonSchema = convert(ChoiceSchema);
 
 export namespace Choice {
   export function merged(a: Choice, b: Choice): [Choice, boolean] {

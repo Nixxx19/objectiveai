@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../json_schema";
 
 export const ProviderQuantizationSchema = z
   .enum([
@@ -16,7 +16,7 @@ export const ProviderQuantizationSchema = z
   .describe("An LLM quantization.")
   .meta({ title: "ProviderQuantization" });
 export type ProviderQuantization = z.infer<typeof ProviderQuantizationSchema>;
-export const ProviderQuantizationJsonSchema: JSONSchema = convert(
+export const ProviderQuantizationJsonSchema: JsonSchema = convert(
   ProviderQuantizationSchema,
 );
 
@@ -68,4 +68,4 @@ export const ProviderSchema = z
   .describe("Options for selecting the upstream provider of this model.")
   .meta({ title: "EnsembleLlmProvider" });
 export type Provider = z.infer<typeof ProviderSchema>;
-export const ProviderJsonSchema: JSONSchema = convert(ProviderSchema);
+export const ProviderJsonSchema: JsonSchema = convert(ProviderSchema);

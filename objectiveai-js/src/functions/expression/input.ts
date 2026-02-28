@@ -10,7 +10,7 @@ import {
 } from "src/chat/completions/request/message";
 import z from "zod";
 import { Expression, ExpressionSchema } from "./expression";
-import { convert, type JSONSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../json_schema";
 
 // Input Schema
 
@@ -47,7 +47,7 @@ export const ObjectInputSchemaSchema: z.ZodType<ObjectInputSchema> = z
   })
   .describe("An object input schema.")
   .meta({ title: "ObjectInputSchema" });
-export const ObjectInputSchemaJsonSchema: JSONSchema = convert(
+export const ObjectInputSchemaJsonSchema: JsonSchema = convert(
   ObjectInputSchemaSchema,
 );
 export type ObjectInputSchemaToZodSchema = z.ZodObject<
@@ -110,7 +110,7 @@ export const ArrayInputSchemaSchema: z.ZodType<ArrayInputSchema> = z
   })
   .describe("An array input schema.")
   .meta({ title: "ArrayInputSchema" });
-export const ArrayInputSchemaJsonSchema: JSONSchema = convert(
+export const ArrayInputSchemaJsonSchema: JsonSchema = convert(
   ArrayInputSchemaSchema,
 );
 export type ArrayInputSchemaToZodSchema = z.ZodArray<z.ZodType<InputValue>>;
@@ -150,7 +150,7 @@ export const StringInputSchemaSchema = z
   .describe("A string input schema.")
   .meta({ title: "StringInputSchema" });
 export type StringInputSchema = z.infer<typeof StringInputSchemaSchema>;
-export const StringInputSchemaJsonSchema: JSONSchema = convert(
+export const StringInputSchemaJsonSchema: JsonSchema = convert(
   StringInputSchemaSchema,
 );
 export type StringInputSchemaToZodSchema =
@@ -193,7 +193,7 @@ export const NumberInputSchemaSchema = z
   .describe("A number input schema.")
   .meta({ title: "NumberInputSchema" });
 export type NumberInputSchema = z.infer<typeof NumberInputSchemaSchema>;
-export const NumberInputSchemaJsonSchema: JSONSchema = convert(
+export const NumberInputSchemaJsonSchema: JsonSchema = convert(
   NumberInputSchemaSchema,
 );
 export type NumberInputSchemaToZodSchema = z.ZodNumber;
@@ -238,7 +238,7 @@ export const IntegerInputSchemaSchema = z
   .describe("An integer input schema.")
   .meta({ title: "IntegerInputSchema" });
 export type IntegerInputSchema = z.infer<typeof IntegerInputSchemaSchema>;
-export const IntegerInputSchemaJsonSchema: JSONSchema = convert(
+export const IntegerInputSchemaJsonSchema: JsonSchema = convert(
   IntegerInputSchemaSchema,
 );
 export type IntegerInputSchemaToZodSchema = z.ZodInt;
@@ -273,7 +273,7 @@ export const BooleanInputSchemaSchema = z
   .describe("A boolean input schema.")
   .meta({ title: "BooleanInputSchema" });
 export type BooleanInputSchema = z.infer<typeof BooleanInputSchemaSchema>;
-export const BooleanInputSchemaJsonSchema: JSONSchema = convert(
+export const BooleanInputSchemaJsonSchema: JsonSchema = convert(
   BooleanInputSchemaSchema,
 );
 export type BooleanInputSchemaToZodSchema = z.ZodBoolean;
@@ -302,7 +302,7 @@ export const ImageInputSchemaSchema = z
   .describe("An image input schema.")
   .meta({ title: "ImageInputSchema" });
 export type ImageInputSchema = z.infer<typeof ImageInputSchemaSchema>;
-export const ImageInputSchemaJsonSchema: JSONSchema = convert(
+export const ImageInputSchemaJsonSchema: JsonSchema = convert(
   ImageInputSchemaSchema,
 );
 export type ImageInputSchemaToZodSchema = typeof ImageRichContentPartSchema;
@@ -331,7 +331,7 @@ export const AudioInputSchemaSchema = z
   .describe("An audio input schema.")
   .meta({ title: "AudioInputSchema" });
 export type AudioInputSchema = z.infer<typeof AudioInputSchemaSchema>;
-export const AudioInputSchemaJsonSchema: JSONSchema = convert(
+export const AudioInputSchemaJsonSchema: JsonSchema = convert(
   AudioInputSchemaSchema,
 );
 export type AudioInputSchemaToZodSchema = typeof AudioRichContentPartSchema;
@@ -360,7 +360,7 @@ export const VideoInputSchemaSchema = z
   .describe("A video input schema.")
   .meta({ title: "VideoInputSchema" });
 export type VideoInputSchema = z.infer<typeof VideoInputSchemaSchema>;
-export const VideoInputSchemaJsonSchema: JSONSchema = convert(
+export const VideoInputSchemaJsonSchema: JsonSchema = convert(
   VideoInputSchemaSchema,
 );
 export type VideoInputSchemaToZodSchema = typeof VideoRichContentPartSchema;
@@ -389,7 +389,7 @@ export const FileInputSchemaSchema = z
   .describe("A file input schema.")
   .meta({ title: "FileInputSchema" });
 export type FileInputSchema = z.infer<typeof FileInputSchemaSchema>;
-export const FileInputSchemaJsonSchema: JSONSchema = convert(
+export const FileInputSchemaJsonSchema: JsonSchema = convert(
   FileInputSchemaSchema,
 );
 export type FileInputSchemaToZodSchema = typeof FileRichContentPartSchema;
@@ -424,7 +424,7 @@ export const AnyOfInputSchemaSchema: z.ZodType<AnyOfInputSchema> = z
   })
   .describe("A union of schemas - input must match at least one.")
   .meta({ title: "AnyOfInputSchema" });
-export const AnyOfInputSchemaJsonSchema: JSONSchema = convert(
+export const AnyOfInputSchemaJsonSchema: JsonSchema = convert(
   AnyOfInputSchemaSchema,
 );
 export type AnyOfInputSchemaToZodSchema = z.ZodUnion<z.ZodType<InputValue>[]>;
@@ -456,7 +456,7 @@ export const InputSchemaSchema = z
   .describe("An input schema defining the structure of function inputs.")
   .meta({ title: "InputSchema" });
 export type InputSchema = z.infer<typeof InputSchemaSchema>;
-export const InputSchemaJsonSchema: JSONSchema = convert(InputSchemaSchema);
+export const InputSchemaJsonSchema: JsonSchema = convert(InputSchemaSchema);
 
 export type InputSchemaToZodSchema =
   | ObjectInputSchemaToZodSchema
@@ -543,7 +543,7 @@ export const InputValueSchema: z.ZodType<InputValue> = z
   ])
   .describe("A value provided as input to a function.")
   .meta({ title: "InputValue" });
-export const InputValueJsonSchema: JSONSchema = convert(InputValueSchema);
+export const InputValueJsonSchema: JsonSchema = convert(InputValueSchema);
 
 export type InputValueExpression =
   | ImageRichContentPart
@@ -588,7 +588,7 @@ export const InputValueExpressionSchema: z.ZodType<InputValueExpression> = z
   ])
   .describe(InputValueSchema.description!)
   .meta({ title: "InputValueExpression" });
-export const InputValueExpressionJsonSchema: JSONSchema = convert(
+export const InputValueExpressionJsonSchema: JsonSchema = convert(
   InputValueExpressionSchema,
 );
 

@@ -2,7 +2,7 @@ import z from "zod";
 import { InputSchemaSchema } from "./expression/input";
 import { TaskExpressionsSchema } from "./task";
 import { ExpressionSchema } from "./expression/expression";
-import { convert, type JSONSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../json_schema";
 
 // Inline Function
 
@@ -16,7 +16,7 @@ export const InlineScalarFunctionSchema = z
   )
   .meta({ title: "InlineScalarFunction" });
 export type InlineScalarFunction = z.infer<typeof InlineScalarFunctionSchema>;
-export const InlineScalarFunctionJsonSchema: JSONSchema = convert(
+export const InlineScalarFunctionJsonSchema: JsonSchema = convert(
   InlineScalarFunctionSchema,
 );
 
@@ -48,7 +48,7 @@ export const InlineVectorFunctionSchema = z
   )
   .meta({ title: "InlineVectorFunction" });
 export type InlineVectorFunction = z.infer<typeof InlineVectorFunctionSchema>;
-export const InlineVectorFunctionJsonSchema: JSONSchema = convert(
+export const InlineVectorFunctionJsonSchema: JsonSchema = convert(
   InlineVectorFunctionSchema,
 );
 
@@ -60,7 +60,7 @@ export const InlineFunctionSchema = z
   .describe("A function defined inline.")
   .meta({ title: "InlineFunction" });
 export type InlineFunction = z.infer<typeof InlineFunctionSchema>;
-export const InlineFunctionJsonSchema: JSONSchema =
+export const InlineFunctionJsonSchema: JsonSchema =
   convert(InlineFunctionSchema);
 
 // Remote Function
@@ -72,7 +72,7 @@ export const RemoteScalarFunctionSchema = InlineScalarFunctionSchema.extend({
   .describe('A remote scalar function. "function.json"')
   .meta({ title: "RemoteScalarFunction" });
 export type RemoteScalarFunction = z.infer<typeof RemoteScalarFunctionSchema>;
-export const RemoteScalarFunctionJsonSchema: JSONSchema = convert(
+export const RemoteScalarFunctionJsonSchema: JsonSchema = convert(
   RemoteScalarFunctionSchema,
 );
 
@@ -98,7 +98,7 @@ export const RemoteVectorFunctionSchema = InlineVectorFunctionSchema.extend({
   .describe('A remote vector function. "function.json"')
   .meta({ title: "RemoteVectorFunction" });
 export type RemoteVectorFunction = z.infer<typeof RemoteVectorFunctionSchema>;
-export const RemoteVectorFunctionJsonSchema: JSONSchema = convert(
+export const RemoteVectorFunctionJsonSchema: JsonSchema = convert(
   RemoteVectorFunctionSchema,
 );
 
@@ -110,7 +110,7 @@ export const RemoteFunctionSchema = z
   .describe('A remote function. "function.json"')
   .meta({ title: "RemoteFunction" });
 export type RemoteFunction = z.infer<typeof RemoteFunctionSchema>;
-export const RemoteFunctionJsonSchema: JSONSchema =
+export const RemoteFunctionJsonSchema: JsonSchema =
   convert(RemoteFunctionSchema);
 
 // Function
@@ -120,4 +120,4 @@ export const FunctionSchema = z
   .describe("A function.")
   .meta({ title: "Function" });
 export type Function = z.infer<typeof FunctionSchema>;
-export const FunctionJsonSchema: JSONSchema = convert(FunctionSchema);
+export const FunctionJsonSchema: JsonSchema = convert(FunctionSchema);

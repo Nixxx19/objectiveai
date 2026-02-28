@@ -6,7 +6,7 @@ import z from "zod";
  * Zod schema describing the JSON Schema objects returned by {@link convert}.
  * Recursive (a JSON Schema can contain nested JSON Schemas).
  */
-export const JSONSchemaSchema: z.ZodType<JSONSchema> = z
+export const JsonSchemaSchema: z.ZodType<JsonSchema> = z
   .lazy(() =>
     z
       .object({
@@ -26,19 +26,19 @@ export const JSONSchemaSchema: z.ZodType<JSONSchema> = z
         format: z.string().optional(),
         enum: z.array(z.unknown()).optional(),
         const: z.unknown().optional(),
-        properties: z.record(z.string(), JSONSchemaSchema).optional(),
+        properties: z.record(z.string(), JsonSchemaSchema).optional(),
         required: z.array(z.string()).optional(),
-        items: JSONSchemaSchema.optional(),
-        prefixItems: z.array(JSONSchemaSchema).optional(),
-        additionalProperties: JSONSchemaSchema.optional(),
-        anyOf: z.array(JSONSchemaSchema).optional(),
-        allOf: z.array(JSONSchemaSchema).optional(),
+        items: JsonSchemaSchema.optional(),
+        prefixItems: z.array(JsonSchemaSchema).optional(),
+        additionalProperties: JsonSchemaSchema.optional(),
+        anyOf: z.array(JsonSchemaSchema).optional(),
+        allOf: z.array(JsonSchemaSchema).optional(),
       })
       .passthrough(),
   )
-  .meta({ title: "JSONSchema" });
+  .meta({ title: "JsonSchema" });
 
-export type JSONSchema = {
+export type JsonSchema = {
   $ref?: string;
   type?:
     | "string"
@@ -52,13 +52,13 @@ export type JSONSchema = {
   format?: string;
   enum?: unknown[];
   const?: unknown;
-  properties?: Record<string, JSONSchema>;
+  properties?: Record<string, JsonSchema>;
   required?: string[];
-  items?: JSONSchema;
-  prefixItems?: JSONSchema[];
-  additionalProperties?: JSONSchema;
-  anyOf?: JSONSchema[];
-  allOf?: JSONSchema[];
+  items?: JsonSchema;
+  prefixItems?: JsonSchema[];
+  additionalProperties?: JsonSchema;
+  anyOf?: JsonSchema[];
+  allOf?: JsonSchema[];
   [key: string]: unknown;
 };
 
@@ -74,7 +74,7 @@ const lazyRefs: string[] = [
   "InputValueExpression",
   "InputSchema",
   "TaskProfile",
-  "JSONSchema",
+  "JsonSchema",
 ];
 
 /**
@@ -87,7 +87,7 @@ const schemaRefs: string[] = [
   "InputValueExpression",
   "InputSchema",
   "TaskProfile",
-  "JSONSchema",
+  "JsonSchema",
   "Message",
   "MessageExpression",
   "DeveloperMessage",
@@ -154,7 +154,7 @@ const propertyRefsBySchema = new WeakMap<z.ZodType, Record<string, string>>();
 /**
  * Converts a Zod schema to a JSON Schema object.
  *
- * Cannot use z.toJSONSchema() because some schemas (e.g. JsonValueSchema)
+ * Cannot use z.toJsonSchema() because some schemas (e.g. JsonValueSchema)
  * use z.lazy() with getters that create new instances on each call, causing
  * infinite recursion in Zod's built-in converter.
  *
@@ -166,11 +166,11 @@ export function convert(
   schema: z.ZodType,
   lazyDepth = 1,
   skipDirectRef = true,
-): JSONSchema {
+): JsonSchema {
   if (!skipDirectRef) {
     const title = schema.meta?.()?.title as string | undefined;
     if (title && schemaRefs.includes(title)) {
-      const result: JSONSchema = { $ref: title };
+      const result: JsonSchema = { $ref: title };
       const d = safeDesc(schema);
       if (d) result.description = d;
       return result;
@@ -239,7 +239,7 @@ export function convert(
     case "object": {
       const shape = def.shape as Record<string, z.ZodType>;
       const propRefs = propertyRefsBySchema.get(schema);
-      const properties: Record<string, JSONSchema> = {};
+      const properties: Record<string, JsonSchema> = {};
       const required: string[] = [];
       for (const [key, prop] of Object.entries(shape)) {
         const u = unwrap(prop);
@@ -253,7 +253,7 @@ export function convert(
         }
         if (!u.optional) required.push(key);
       }
-      const result: JSONSchema = { type: "object", properties };
+      const result: JsonSchema = { type: "object", properties };
       if (required.length > 0) result.required = required;
       return withDesc(result, schema);
     }
@@ -304,7 +304,7 @@ export function convert(
       if (lazyDepth > 0) {
         const inner = def.getter();
         return withDesc(
-          convert(inner, lazyDepth - 1, false) as JSONSchema,
+          convert(inner, lazyDepth - 1, false) as JsonSchema,
           schema,
         );
       }
@@ -328,7 +328,7 @@ function lazyToolRef(schema: z.ZodType): { $ref: string } | undefined {
   return undefined;
 }
 
-function withDesc(obj: JSONSchema, schema: z.ZodType): JSONSchema {
+function withDesc(obj: JsonSchema, schema: z.ZodType): JsonSchema {
   const d = safeDesc(schema);
   if (d) obj.description = d;
   return obj;
@@ -386,4 +386,4 @@ function unwrap(schema: z.ZodType): {
 
 // --- Self-referential JsonSchema export ---
 
-export const JSONSchemaJsonSchema: JSONSchema = convert(JSONSchemaSchema);
+export const JsonSchemaJsonSchema: JsonSchema = convert(JsonSchemaSchema);

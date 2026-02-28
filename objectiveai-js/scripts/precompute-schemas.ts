@@ -22,7 +22,7 @@ async function main() {
   const convertFiles = files.filter((f) => {
     const content = fs.readFileSync(f, "utf8");
     return (
-      /JsonSchema: JSONSchema =\s*convert\(/.test(content) &&
+      /JsonSchema: JsonSchema =\s*convert\(/.test(content) &&
       !content.includes(".test.ts")
     );
   });
@@ -31,7 +31,7 @@ async function main() {
 
   // Extract schema name -> convert call patterns
   const pattern =
-    /export const (\w+JsonSchema): JSONSchema =\s*convert\(\s*(\w+)\s*,?\s*\);/gs;
+    /export const (\w+JsonSchema): JsonSchema =\s*convert\(\s*(\w+)\s*,?\s*\);/gs;
   const schemas: Record<string, { file: string; schemaVar: string }> = {};
 
   for (const file of convertFiles) {

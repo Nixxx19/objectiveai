@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 import { JsonValueSchema } from "src/json";
 
 export const TextResponseFormatSchema = z
@@ -9,7 +9,7 @@ export const TextResponseFormatSchema = z
   .describe("The response will be arbitrary text.")
   .meta({ title: "TextResponseFormat" });
 export type TextResponseFormat = z.infer<typeof TextResponseFormatSchema>;
-export const TextResponseFormatJsonSchema: JSONSchema = convert(
+export const TextResponseFormatJsonSchema: JsonSchema = convert(
   TextResponseFormatSchema,
 );
 
@@ -22,7 +22,7 @@ export const JsonObjectResponseFormatSchema = z
 export type JsonObjectResponseFormat = z.infer<
   typeof JsonObjectResponseFormatSchema
 >;
-export const JsonObjectResponseFormatJsonSchema: JSONSchema = convert(
+export const JsonObjectResponseFormatJsonSchema: JsonSchema = convert(
   JsonObjectResponseFormatSchema,
 );
 
@@ -46,7 +46,7 @@ export const JsonSchemaResponseFormatJsonSchemaSchema = z
 export type JsonSchemaResponseFormatJsonSchema = z.infer<
   typeof JsonSchemaResponseFormatJsonSchemaSchema
 >;
-export const JsonSchemaResponseFormatJsonSchemaJsonSchema: JSONSchema = convert(
+export const JsonSchemaResponseFormatJsonSchemaJsonSchema: JsonSchema = convert(
   JsonSchemaResponseFormatJsonSchemaSchema,
 );
 
@@ -60,7 +60,7 @@ export const JsonSchemaResponseFormatSchema = z
 export type JsonSchemaResponseFormat = z.infer<
   typeof JsonSchemaResponseFormatSchema
 >;
-export const JsonSchemaResponseFormatJsonSchema: JSONSchema = convert(
+export const JsonSchemaResponseFormatJsonSchema: JsonSchema = convert(
   JsonSchemaResponseFormatSchema,
 );
 
@@ -74,7 +74,7 @@ export const GrammarResponseFormatSchema = z
   .describe("The response will conform to the provided grammar definition.")
   .meta({ title: "GrammarResponseFormat" });
 export type GrammarResponseFormat = z.infer<typeof GrammarResponseFormatSchema>;
-export const GrammarResponseFormatJsonSchema: JSONSchema = convert(
+export const GrammarResponseFormatJsonSchema: JsonSchema = convert(
   GrammarResponseFormatSchema,
 );
 
@@ -85,7 +85,7 @@ export const PythonResponseFormatSchema = z
   .describe("The response will be Python code.")
   .meta({ title: "PythonResponseFormat" });
 export type PythonResponseFormat = z.infer<typeof PythonResponseFormatSchema>;
-export const PythonResponseFormatJsonSchema: JSONSchema = convert(
+export const PythonResponseFormatJsonSchema: JsonSchema = convert(
   PythonResponseFormatSchema,
 );
 
@@ -100,5 +100,5 @@ export const ResponseFormatSchema = z
   .describe("The desired format of the model's response.")
   .meta({ title: "ResponseFormat" });
 export type ResponseFormat = z.infer<typeof ResponseFormatSchema>;
-export const ResponseFormatJsonSchema: JSONSchema =
+export const ResponseFormatJsonSchema: JsonSchema =
   convert(ResponseFormatSchema);

@@ -8,7 +8,7 @@ import {
   ListItemSchema as ProfileListItemSchema,
   RetrieveSchema as ProfileRetrieveSchema,
 } from "./profiles/http";
-import { convert, type JSONSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../json_schema";
 import { RemoteSchema, type Remote } from "./remote";
 
 export const ListItemSchema = z.object({
@@ -26,13 +26,13 @@ export const ListItemSchema = z.object({
     ),
 });
 export type ListItem = z.infer<typeof ListItemSchema>;
-export const ListItemJsonSchema: JSONSchema = convert(ListItemSchema);
+export const ListItemJsonSchema: JsonSchema = convert(ListItemSchema);
 
 export const ListSchema = z.object({
   data: z.array(ListItemSchema).describe("A list of Functions."),
 });
 export type List = z.infer<typeof ListSchema>;
-export const ListJsonSchema: JSONSchema = convert(ListSchema);
+export const ListJsonSchema: JsonSchema = convert(ListSchema);
 
 export function list(
   client: ObjectiveAI,
@@ -58,7 +58,7 @@ export const HistoricalUsageSchema = z.object({
     .describe("The total cost incurred by using this Function."),
 });
 export type HistoricalUsage = z.infer<typeof HistoricalUsageSchema>;
-export const HistoricalUsageJsonSchema: JSONSchema = convert(HistoricalUsageSchema);
+export const HistoricalUsageJsonSchema: JsonSchema = convert(HistoricalUsageSchema);
 
 export function retrieveUsage(
   client: ObjectiveAI,
@@ -80,7 +80,7 @@ export const RetrieveSchema = z.discriminatedUnion("type", [
   RemoteVectorFunctionSchema.extend(ListItemSchema.shape),
 ]);
 export type Retrieve = z.infer<typeof RetrieveSchema>;
-export const RetrieveJsonSchema: JSONSchema = convert(RetrieveSchema);
+export const RetrieveJsonSchema: JsonSchema = convert(RetrieveSchema);
 
 export function retrieve(
   client: ObjectiveAI,
@@ -104,7 +104,7 @@ export const ListPairItemSchema = z.object({
   profile: ProfileListItemSchema.describe("The profile."),
 });
 export type ListPairItem = z.infer<typeof ListPairItemSchema>;
-export const ListPairItemJsonSchema: JSONSchema = convert(ListPairItemSchema);
+export const ListPairItemJsonSchema: JsonSchema = convert(ListPairItemSchema);
 
 export const ListPairsSchema = z.object({
   data: z
@@ -112,7 +112,7 @@ export const ListPairsSchema = z.object({
     .describe("A list of Function-Profile pairs."),
 });
 export type ListPairs = z.infer<typeof ListPairsSchema>;
-export const ListPairsJsonSchema: JSONSchema = convert(ListPairsSchema);
+export const ListPairsJsonSchema: JsonSchema = convert(ListPairsSchema);
 
 export function listPairs(
   client: ObjectiveAI,
@@ -130,7 +130,7 @@ export const RetrievePairSchema = z.object({
   profile: ProfileRetrieveSchema.describe("The profile."),
 });
 export type RetrievePair = z.infer<typeof RetrievePairSchema>;
-export const RetrievePairJsonSchema: JSONSchema = convert(RetrievePairSchema);
+export const RetrievePairJsonSchema: JsonSchema = convert(RetrievePairSchema);
 
 export function retrievePair(
   client: ObjectiveAI,

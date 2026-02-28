@@ -5,7 +5,7 @@ import { StopSchema } from "./stop";
 import { ProviderSchema } from "./provider";
 import { ReasoningSchema } from "./reasoning";
 import { VerbositySchema } from "./verbosity";
-import { convert, type JSONSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../json_schema";
 
 export const EnsembleLlmBaseSchema = z
   .object({
@@ -144,7 +144,7 @@ export const EnsembleLlmBaseSchema = z
   )
   .meta({ title: "EnsembleLlmBase" });
 export type EnsembleLlmBase = z.infer<typeof EnsembleLlmBaseSchema>;
-export const EnsembleLlmBaseJsonSchema: JSONSchema = convert(EnsembleLlmBaseSchema);
+export const EnsembleLlmBaseJsonSchema: JsonSchema = convert(EnsembleLlmBaseSchema);
 
 export const EnsembleLlmBaseWithFallbacksAndCountSchema =
   EnsembleLlmBaseSchema.extend({
@@ -169,7 +169,7 @@ export const EnsembleLlmBaseWithFallbacksAndCountSchema =
 export type EnsembleLlmBaseWithFallbacksAndCount = z.infer<
   typeof EnsembleLlmBaseWithFallbacksAndCountSchema
 >;
-export const EnsembleLlmBaseWithFallbacksAndCountJsonSchema: JSONSchema = convert(EnsembleLlmBaseWithFallbacksAndCountSchema);
+export const EnsembleLlmBaseWithFallbacksAndCountJsonSchema: JsonSchema = convert(EnsembleLlmBaseWithFallbacksAndCountSchema);
 
 export const EnsembleLlmSchema = EnsembleLlmBaseSchema.extend({
   id: z.string().describe("The unique identifier for the Ensemble LLM."),
@@ -179,7 +179,7 @@ export const EnsembleLlmSchema = EnsembleLlmBaseSchema.extend({
   )
   .meta({ title: "EnsembleLlm" });
 export type EnsembleLlm = z.infer<typeof EnsembleLlmSchema>;
-export const EnsembleLlmJsonSchema: JSONSchema = convert(EnsembleLlmSchema);
+export const EnsembleLlmJsonSchema: JsonSchema = convert(EnsembleLlmSchema);
 
 export const EnsembleLlmWithFallbacksAndCountSchema = EnsembleLlmSchema.extend({
   count: EnsembleLlmBaseWithFallbacksAndCountSchema.shape.count,
@@ -198,4 +198,4 @@ export const EnsembleLlmWithFallbacksAndCountSchema = EnsembleLlmSchema.extend({
 export type EnsembleLlmWithFallbacksAndCount = z.infer<
   typeof EnsembleLlmWithFallbacksAndCountSchema
 >;
-export const EnsembleLlmWithFallbacksAndCountJsonSchema: JSONSchema = convert(EnsembleLlmWithFallbacksAndCountSchema);
+export const EnsembleLlmWithFallbacksAndCountJsonSchema: JsonSchema = convert(EnsembleLlmWithFallbacksAndCountSchema);

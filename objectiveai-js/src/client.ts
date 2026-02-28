@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "./json_schema";
+import { convert, type JsonSchema } from "./json_schema";
 import { Stream } from "./stream";
 import { ObjectiveAIFetchError } from "./error";
 
@@ -46,7 +46,7 @@ export const ObjectiveAIOptionsSchema = z
   })
   .describe("Options for the ObjectiveAI client.");
 export type ObjectiveAIOptions = z.infer<typeof ObjectiveAIOptionsSchema>;
-export const ObjectiveAIOptionsJsonSchema: JSONSchema = convert(ObjectiveAIOptionsSchema);
+export const ObjectiveAIOptionsJsonSchema: JsonSchema = convert(ObjectiveAIOptionsSchema);
 
 /**
  * Schema for request options.
@@ -68,7 +68,7 @@ export const RequestOptionsSchema = z
   })
   .describe("Options for individual requests.");
 export type RequestOptions = z.infer<typeof RequestOptionsSchema>;
-export const RequestOptionsJsonSchema: JSONSchema = convert(RequestOptionsSchema);
+export const RequestOptionsJsonSchema: JsonSchema = convert(RequestOptionsSchema);
 
 /**
  * ObjectiveAI API client.

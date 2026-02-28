@@ -1,13 +1,13 @@
 import { RichContentSchema } from "src/chat/completions/request/message";
 import { ExpressionSchema } from "src/functions/expression/expression";
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 
 export const VectorResponseSchema = RichContentSchema.describe(
   "A possible assistant response. The LLMs in the Ensemble may vote for this option.",
 ).meta({ title: "VectorResponse" });
 export type VectorResponse = z.infer<typeof VectorResponseSchema>;
-export const VectorResponseJsonSchema: JSONSchema = convert(VectorResponseSchema);
+export const VectorResponseJsonSchema: JsonSchema = convert(VectorResponseSchema);
 
 export const VectorResponseExpressionSchema = z
   .union([
@@ -21,7 +21,7 @@ export const VectorResponseExpressionSchema = z
 export type VectorResponseExpression = z.infer<
   typeof VectorResponseExpressionSchema
 >;
-export const VectorResponseExpressionJsonSchema: JSONSchema = convert(VectorResponseExpressionSchema);
+export const VectorResponseExpressionJsonSchema: JsonSchema = convert(VectorResponseExpressionSchema);
 
 export const VectorResponsesSchema = z
   .array(VectorResponseSchema)
@@ -30,7 +30,7 @@ export const VectorResponsesSchema = z
   )
   .meta({ title: "VectorResponses" });
 export type VectorResponses = z.infer<typeof VectorResponsesSchema>;
-export const VectorResponsesJsonSchema: JSONSchema = convert(VectorResponsesSchema);
+export const VectorResponsesJsonSchema: JsonSchema = convert(VectorResponsesSchema);
 
 export const VectorResponsesExpressionSchema = z
   .union([
@@ -47,4 +47,4 @@ export const VectorResponsesExpressionSchema = z
 export type VectorResponsesExpression = z.infer<
   typeof VectorResponsesExpressionSchema
 >;
-export const VectorResponsesExpressionJsonSchema: JSONSchema = convert(VectorResponsesExpressionSchema);
+export const VectorResponsesExpressionJsonSchema: JsonSchema = convert(VectorResponsesExpressionSchema);

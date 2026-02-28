@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../../../json_schema";
+import { convert, type JsonSchema } from "../../../../json_schema";
 
 export const FunctionToolCallDefinitionSchema = z.object({
   name: z.string().describe("The name of the function."),
@@ -8,7 +8,7 @@ export const FunctionToolCallDefinitionSchema = z.object({
 export type FunctionToolCallDefinition = z.infer<
   typeof FunctionToolCallDefinitionSchema
 >;
-export const FunctionToolCallDefinitionJsonSchema: JSONSchema = convert(FunctionToolCallDefinitionSchema);
+export const FunctionToolCallDefinitionJsonSchema: JsonSchema = convert(FunctionToolCallDefinitionSchema);
 
 export const FunctionToolCallSchema = z
   .object({
@@ -18,10 +18,10 @@ export const FunctionToolCallSchema = z
   })
   .describe("A function tool call made by the assistant.");
 export type FunctionToolCall = z.infer<typeof FunctionToolCallSchema>;
-export const FunctionToolCallJsonSchema: JSONSchema = convert(FunctionToolCallSchema);
+export const FunctionToolCallJsonSchema: JsonSchema = convert(FunctionToolCallSchema);
 
 export const ToolCallSchema = z
   .union([FunctionToolCallSchema])
   .describe("A tool call made by the assistant.");
 export type ToolCall = z.infer<typeof ToolCallSchema>;
-export const ToolCallJsonSchema: JSONSchema = convert(ToolCallSchema);
+export const ToolCallJsonSchema: JsonSchema = convert(ToolCallSchema);

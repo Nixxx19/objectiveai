@@ -1,6 +1,6 @@
 import z from "zod";
 import { InputSchemaSchema } from "../expression/input.js";
-import { convert, type JSONSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../json_schema";
 
 /**
  * Zod schema for the fields needed to validate a scalar function's input
@@ -17,4 +17,4 @@ export const ScalarFieldsValidationSchema = z
   );
 
 export type ScalarFieldsValidation = z.infer<typeof ScalarFieldsValidationSchema>;
-export const ScalarFieldsValidationJsonSchema: JSONSchema = convert(ScalarFieldsValidationSchema);
+export const ScalarFieldsValidationJsonSchema: JsonSchema = convert(ScalarFieldsValidationSchema);

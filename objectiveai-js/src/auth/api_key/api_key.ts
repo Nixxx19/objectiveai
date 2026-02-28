@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JSONSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../json_schema";
 
 export const ApiKeySchema = z
   .string()
@@ -7,7 +7,7 @@ export const ApiKeySchema = z
     "An ObjectiveAI API Key. The format is always `apk` followed by 32 hexadecimal characters.",
   );
 export type ApiKey = z.infer<typeof ApiKeySchema>;
-export const ApiKeyJsonSchema: JSONSchema = convert(ApiKeySchema);
+export const ApiKeyJsonSchema: JsonSchema = convert(ApiKeySchema);
 
 export const ApiKeyWithMetadataSchema = z
   .object({
@@ -37,6 +37,6 @@ export const ApiKeyWithMetadataSchema = z
   })
   .describe("An ObjectiveAI API Key with metadata.");
 export type ApiKeyWithMetadata = z.infer<typeof ApiKeyWithMetadataSchema>;
-export const ApiKeyWithMetadataJsonSchema: JSONSchema = convert(
+export const ApiKeyWithMetadataJsonSchema: JsonSchema = convert(
   ApiKeyWithMetadataSchema,
 );

@@ -3,7 +3,7 @@ import {
   ModelSchema,
 } from "src/chat/completions/request/model";
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 
 export const ReasoningSchema = z
   .object({
@@ -15,4 +15,4 @@ export const ReasoningSchema = z
   )
   .meta({ title: "FunctionExecutionReasoning" });
 export type Reasoning = z.infer<typeof ReasoningSchema>;
-export const ReasoningJsonSchema: JSONSchema = convert(ReasoningSchema);
+export const ReasoningJsonSchema: JsonSchema = convert(ReasoningSchema);

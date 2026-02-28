@@ -1,6 +1,6 @@
 import { numberIsEmpty } from "src/isEmpty";
 import z from "zod";
-import { convert, type JSONSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../json_schema";
 
 export const UsageCompletionTokensDetailsSchema = z
   .object({
@@ -25,7 +25,7 @@ export const UsageCompletionTokensDetailsSchema = z
 export type UsageCompletionTokensDetails = z.infer<
   typeof UsageCompletionTokensDetailsSchema
 >;
-export const UsageCompletionTokensDetailsJsonSchema: JSONSchema = convert(
+export const UsageCompletionTokensDetailsJsonSchema: JsonSchema = convert(
   UsageCompletionTokensDetailsSchema,
 );
 
@@ -68,7 +68,7 @@ export const UsagePromptTokensDetailsSchema = z
 export type UsagePromptTokensDetails = z.infer<
   typeof UsagePromptTokensDetailsSchema
 >;
-export const UsagePromptTokensDetailsJsonSchema: JSONSchema = convert(
+export const UsagePromptTokensDetailsJsonSchema: JsonSchema = convert(
   UsagePromptTokensDetailsSchema,
 );
 
@@ -101,7 +101,7 @@ export const UsageCostDetailsSchema = z
   })
   .describe("Detailed breakdown of upstream costs incurred.");
 export type UsageCostDetails = z.infer<typeof UsageCostDetailsSchema>;
-export const UsageCostDetailsJsonSchema: JSONSchema = convert(
+export const UsageCostDetailsJsonSchema: JsonSchema = convert(
   UsageCostDetailsSchema,
 );
 
@@ -150,7 +150,7 @@ export const UsageSchema = z
   })
   .describe("Token and cost usage statistics for the completion.");
 export type Usage = z.infer<typeof UsageSchema>;
-export const UsageJsonSchema: JSONSchema = convert(UsageSchema);
+export const UsageJsonSchema: JsonSchema = convert(UsageSchema);
 
 export namespace Usage {
   export function isEmpty({

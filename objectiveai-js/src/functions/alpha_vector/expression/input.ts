@@ -2,7 +2,7 @@ import z from "zod";
 import { ObjectInputSchemaSchema } from "../../expression/input.js";
 import { InputSchemaSchema } from "../../expression/input.js";
 import { ExpressionSchema } from "../../expression/expression.js";
-import { convert, type JSONSchema } from "../../../json_schema.js";
+import { convert, type JsonSchema } from "../../../json_schema.js";
 
 export const AlphaVectorFunctionInputSchemaSchema = z
   .object({
@@ -14,7 +14,7 @@ export const AlphaVectorFunctionInputSchemaSchema = z
   .describe("The input schema for an alpha vector function.")
   .meta({ title: "AlphaVectorFunctionInputSchema" });
 export type AlphaVectorFunctionInputSchema = z.infer<typeof AlphaVectorFunctionInputSchemaSchema>;
-export const AlphaVectorFunctionInputSchemaJsonSchema: JSONSchema = convert(AlphaVectorFunctionInputSchemaSchema);
+export const AlphaVectorFunctionInputSchemaJsonSchema: JsonSchema = convert(AlphaVectorFunctionInputSchemaSchema);
 
 export const AlphaVectorFunctionInputExpressionSchema = z
   .object({
@@ -28,4 +28,4 @@ export const AlphaVectorFunctionInputExpressionSchema = z
   .describe("The input expression for an alpha vector function.")
   .meta({ title: "AlphaVectorFunctionInputExpression" });
 export type AlphaVectorFunctionInputExpression = z.infer<typeof AlphaVectorFunctionInputExpressionSchema>;
-export const AlphaVectorFunctionInputExpressionJsonSchema: JSONSchema = convert(AlphaVectorFunctionInputExpressionSchema);
+export const AlphaVectorFunctionInputExpressionJsonSchema: JsonSchema = convert(AlphaVectorFunctionInputExpressionSchema);

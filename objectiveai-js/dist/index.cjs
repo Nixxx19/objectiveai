@@ -3351,8 +3351,8 @@ var init_input2 = __esm({
   "src/functions/alpha_scalar/expression/input.ts"() {
     init_input();
     init_expression();
-    AlphaScalarFunctionInputSchemaSchema = ObjectInputSchemaSchema;
-    AlphaScalarFunctionInputExpressionSchema = ExpressionSchema;
+    AlphaScalarFunctionInputSchemaSchema = ObjectInputSchemaSchema.meta({ title: "ObjectInputSchema", wrapper: true });
+    AlphaScalarFunctionInputExpressionSchema = ExpressionSchema.meta({ title: "Expression", wrapper: true });
   }
 });
 var RemoteSchema, RemoteJsonSchema;
@@ -7348,10 +7348,10 @@ function unwrap(schema) {
   }
   return { inner: current, optional, nullable, description };
 }
-exports.JSONSchemaSchema = void 0; var lazyRefs, schemaRefs, propertyRefsBySchema; exports.JSONSchemaJsonSchema = void 0;
+exports.JsonSchemaSchema = void 0; var lazyRefs, schemaRefs, propertyRefsBySchema; exports.JsonSchemaJsonSchema = void 0;
 var init_json_schema = __esm({
   "src/json_schema.ts"() {
-    exports.JSONSchemaSchema = z6__default.default.lazy(
+    exports.JsonSchemaSchema = z6__default.default.lazy(
       () => z6__default.default.object({
         $ref: z6__default.default.string().optional(),
         type: z6__default.default.enum([
@@ -7367,15 +7367,15 @@ var init_json_schema = __esm({
         format: z6__default.default.string().optional(),
         enum: z6__default.default.array(z6__default.default.unknown()).optional(),
         const: z6__default.default.unknown().optional(),
-        properties: z6__default.default.record(z6__default.default.string(), exports.JSONSchemaSchema).optional(),
+        properties: z6__default.default.record(z6__default.default.string(), exports.JsonSchemaSchema).optional(),
         required: z6__default.default.array(z6__default.default.string()).optional(),
-        items: exports.JSONSchemaSchema.optional(),
-        prefixItems: z6__default.default.array(exports.JSONSchemaSchema).optional(),
-        additionalProperties: exports.JSONSchemaSchema.optional(),
-        anyOf: z6__default.default.array(exports.JSONSchemaSchema).optional(),
-        allOf: z6__default.default.array(exports.JSONSchemaSchema).optional()
+        items: exports.JsonSchemaSchema.optional(),
+        prefixItems: z6__default.default.array(exports.JsonSchemaSchema).optional(),
+        additionalProperties: exports.JsonSchemaSchema.optional(),
+        anyOf: z6__default.default.array(exports.JsonSchemaSchema).optional(),
+        allOf: z6__default.default.array(exports.JsonSchemaSchema).optional()
       }).passthrough()
-    ).meta({ title: "JSONSchema" });
+    ).meta({ title: "JsonSchema" });
     lazyRefs = [
       "JsonValue",
       "JsonValueExpression",
@@ -7383,7 +7383,7 @@ var init_json_schema = __esm({
       "InputValueExpression",
       "InputSchema",
       "TaskProfile",
-      "JSONSchema"
+      "JsonSchema"
     ];
     schemaRefs = [
       "JsonValue",
@@ -7392,7 +7392,7 @@ var init_json_schema = __esm({
       "InputValueExpression",
       "InputSchema",
       "TaskProfile",
-      "JSONSchema",
+      "JsonSchema",
       "Message",
       "MessageExpression",
       "DeveloperMessage",
@@ -7452,7 +7452,7 @@ var init_json_schema = __esm({
       "Upstream"
     ];
     propertyRefsBySchema = /* @__PURE__ */ new WeakMap();
-    exports.JSONSchemaJsonSchema = { "$ref": "JSONSchema" };
+    exports.JsonSchemaJsonSchema = { "$ref": "JsonSchema" };
   }
 });
 function isZodSchema(value) {
@@ -7558,8 +7558,8 @@ __export(index_exports, {
   Ensemble: () => ensemble_exports,
   EnsembleLlm: () => ensemble_llm_exports,
   Functions: () => functions_exports,
-  JSONSchemaJsonSchema: () => exports.JSONSchemaJsonSchema,
-  JSONSchemaSchema: () => exports.JSONSchemaSchema,
+  JsonSchemaJsonSchema: () => exports.JsonSchemaJsonSchema,
+  JsonSchemaSchema: () => exports.JsonSchemaSchema,
   JsonValueExpressionJsonSchema: () => exports.JsonValueExpressionJsonSchema,
   JsonValueExpressionSchema: () => exports.JsonValueExpressionSchema,
   JsonValueJsonSchema: () => exports.JsonValueJsonSchema,

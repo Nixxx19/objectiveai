@@ -6,27 +6,27 @@ import * as zod_v4_core from 'zod/v4/core';
  * Zod schema describing the JSON Schema objects returned by {@link convert}.
  * Recursive (a JSON Schema can contain nested JSON Schemas).
  */
-declare const JSONSchemaSchema: z__default.ZodType<JSONSchema>;
-type JSONSchema = {
+declare const JsonSchemaSchema: z__default.ZodType<JsonSchema>;
+type JsonSchema = {
     $ref?: string;
     type?: "string" | "number" | "integer" | "boolean" | "null" | "object" | "array";
     description?: string;
     format?: string;
     enum?: unknown[];
     const?: unknown;
-    properties?: Record<string, JSONSchema>;
+    properties?: Record<string, JsonSchema>;
     required?: string[];
-    items?: JSONSchema;
-    prefixItems?: JSONSchema[];
-    additionalProperties?: JSONSchema;
-    anyOf?: JSONSchema[];
-    allOf?: JSONSchema[];
+    items?: JsonSchema;
+    prefixItems?: JsonSchema[];
+    additionalProperties?: JsonSchema;
+    anyOf?: JsonSchema[];
+    allOf?: JsonSchema[];
     [key: string]: unknown;
 };
 /**
  * Converts a Zod schema to a JSON Schema object.
  *
- * Cannot use z.toJSONSchema() because some schemas (e.g. JsonValueSchema)
+ * Cannot use z.toJsonSchema() because some schemas (e.g. JsonValueSchema)
  * use z.lazy() with getters that create new instances on each call, causing
  * infinite recursion in Zod's built-in converter.
  *
@@ -34,12 +34,12 @@ type JSONSchema = {
  * emitted as $ref to the corresponding tool name (if registered in
  * {@link lazyRefs}) or as an empty schema.
  */
-declare function convert(schema: z__default.ZodType, lazyDepth?: number, skipDirectRef?: boolean): JSONSchema;
-declare const JSONSchemaJsonSchema: JSONSchema;
+declare function convert(schema: z__default.ZodType, lazyDepth?: number, skipDirectRef?: boolean): JsonSchema;
+declare const JsonSchemaJsonSchema: JsonSchema;
 
 declare const ApiKeySchema: z__default.ZodString;
 type ApiKey = z__default.infer<typeof ApiKeySchema>;
-declare const ApiKeyJsonSchema: JSONSchema;
+declare const ApiKeyJsonSchema: JsonSchema;
 declare const ApiKeyWithMetadataSchema: z__default.ZodObject<{
     api_key: z__default.ZodString;
     created: z__default.ZodString;
@@ -49,7 +49,7 @@ declare const ApiKeyWithMetadataSchema: z__default.ZodObject<{
     description: z__default.ZodNullable<z__default.ZodString>;
 }, z__default.core.$strip>;
 type ApiKeyWithMetadata = z__default.infer<typeof ApiKeyWithMetadataSchema>;
-declare const ApiKeyWithMetadataJsonSchema: JSONSchema;
+declare const ApiKeyWithMetadataJsonSchema: JsonSchema;
 
 /**
  * A readable stream wrapper for Server-Sent Events (SSE).
@@ -96,7 +96,7 @@ declare const ObjectiveAIOptionsSchema: z__default.ZodObject<{
     httpReferer: z__default.ZodOptional<z__default.ZodNullable<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type ObjectiveAIOptions = z__default.infer<typeof ObjectiveAIOptionsSchema>;
-declare const ObjectiveAIOptionsJsonSchema: JSONSchema;
+declare const ObjectiveAIOptionsJsonSchema: JsonSchema;
 /**
  * Schema for request options.
  */
@@ -105,7 +105,7 @@ declare const RequestOptionsSchema: z__default.ZodObject<{
     signal: z__default.ZodOptional<z__default.ZodNullable<z__default.ZodCustom<AbortSignal, AbortSignal>>>;
 }, z__default.core.$strip>;
 type RequestOptions = z__default.infer<typeof RequestOptionsSchema>;
-declare const RequestOptionsJsonSchema: JSONSchema;
+declare const RequestOptionsJsonSchema: JsonSchema;
 /**
  * ObjectiveAI API client.
  */
@@ -164,7 +164,7 @@ declare const ListItemSchema$4: z__default.ZodObject<{
     cost: z__default.ZodNumber;
 }, z__default.core.$strip>;
 type ListItem$4 = z__default.infer<typeof ListItemSchema$4>;
-declare const ListItemJsonSchema$4: JSONSchema;
+declare const ListItemJsonSchema$4: JsonSchema;
 declare const ListSchema$4: z__default.ZodObject<{
     data: z__default.ZodArray<z__default.ZodObject<{
         api_key: z__default.ZodString;
@@ -177,7 +177,7 @@ declare const ListSchema$4: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type List$4 = z__default.infer<typeof ListSchema$4>;
-declare const ListJsonSchema$4: JSONSchema;
+declare const ListJsonSchema$4: JsonSchema;
 declare function list$4(client: ObjectiveAI, options?: RequestOptions): Promise<List$4>;
 declare function create$5(client: ObjectiveAI, name: string, expires?: Date | null, description?: string | null, options?: RequestOptions): Promise<ApiKeyWithMetadata>;
 declare function disable(client: ObjectiveAI, key: string, options?: RequestOptions): Promise<ApiKeyWithMetadata>;
@@ -186,7 +186,7 @@ declare const OpenRouterByokApiKeySchema: z__default.ZodObject<{
     api_key: z__default.ZodString;
 }, z__default.core.$strip>;
 type OpenRouterByokApiKey = z__default.infer<typeof OpenRouterByokApiKeySchema>;
-declare const OpenRouterByokApiKeyJsonSchema: JSONSchema;
+declare const OpenRouterByokApiKeyJsonSchema: JsonSchema;
 
 declare function retrieve$7(client: ObjectiveAI, options?: RequestOptions): Promise<OpenRouterByokApiKey>;
 declare function create$4(client: ObjectiveAI, apiKey: string, options?: RequestOptions): Promise<OpenRouterByokApiKey>;
@@ -217,7 +217,7 @@ declare const CreditsSchema: z__default.ZodObject<{
     total_credits_used: z__default.ZodNumber;
 }, z__default.core.$strip>;
 type Credits = z__default.infer<typeof CreditsSchema>;
-declare const CreditsJsonSchema: JSONSchema;
+declare const CreditsJsonSchema: JsonSchema;
 
 declare function retrieve$6(client: ObjectiveAI, options?: RequestOptions): Promise<Credits>;
 
@@ -328,20 +328,20 @@ declare const ChatCompletionSchema$1: z__default.ZodObject<{
     provider: z__default.ZodOptional<z__default.ZodString>;
 }, z__default.core.$strip>;
 type ChatCompletion$1 = z__default.infer<typeof ChatCompletionSchema$1>;
-declare const ChatCompletionJsonSchema$1: JSONSchema;
+declare const ChatCompletionJsonSchema$1: JsonSchema;
 
 declare const SeedSchema: z__default.ZodBigInt;
 type Seed = z__default.infer<typeof SeedSchema>;
-declare const SeedJsonSchema: JSONSchema;
+declare const SeedJsonSchema: JsonSchema;
 declare const BackoffMaxElapsedTimeSchema: z__default.ZodUInt32;
 type BackoffMaxElapsedTime = z__default.infer<typeof BackoffMaxElapsedTimeSchema>;
-declare const BackoffMaxElapsedTimeJsonSchema: JSONSchema;
+declare const BackoffMaxElapsedTimeJsonSchema: JsonSchema;
 declare const FirstChunkTimeoutSchema: z__default.ZodUInt32;
 type FirstChunkTimeout = z__default.infer<typeof FirstChunkTimeoutSchema>;
-declare const FirstChunkTimeoutJsonSchema: JSONSchema;
+declare const FirstChunkTimeoutJsonSchema: JsonSchema;
 declare const OtherChunkTimeoutSchema: z__default.ZodUInt32;
 type OtherChunkTimeout = z__default.infer<typeof OtherChunkTimeoutSchema>;
-declare const OtherChunkTimeoutJsonSchema: JSONSchema;
+declare const OtherChunkTimeoutJsonSchema: JsonSchema;
 declare const ChatCompletionCreateParamsBaseSchema: z__default.ZodObject<{
     upstreams: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodArray<z__default.ZodEnum<{
         unknown: "unknown";
@@ -1300,10 +1300,10 @@ declare const ChatCompletionCreateParamsBaseSchema: z__default.ZodObject<{
     other_chunk_timeout: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodUInt32>>;
 }, z__default.core.$strip>;
 type ChatCompletionCreateParamsBase = z__default.infer<typeof ChatCompletionCreateParamsBaseSchema>;
-declare const ChatCompletionCreateParamsBaseJsonSchema: JSONSchema;
+declare const ChatCompletionCreateParamsBaseJsonSchema: JsonSchema;
 declare const StreamTrueSchema: z__default.ZodLiteral<true>;
 type StreamTrue = z__default.infer<typeof StreamTrueSchema>;
-declare const StreamTrueJsonSchema: JSONSchema;
+declare const StreamTrueJsonSchema: JsonSchema;
 declare const ChatCompletionCreateParamsStreamingSchema: z__default.ZodObject<{
     upstreams: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodArray<z__default.ZodEnum<{
         unknown: "unknown";
@@ -2263,10 +2263,10 @@ declare const ChatCompletionCreateParamsStreamingSchema: z__default.ZodObject<{
     stream: z__default.ZodLiteral<true>;
 }, z__default.core.$strip>;
 type ChatCompletionCreateParamsStreaming = z__default.infer<typeof ChatCompletionCreateParamsStreamingSchema>;
-declare const ChatCompletionCreateParamsStreamingJsonSchema: JSONSchema;
+declare const ChatCompletionCreateParamsStreamingJsonSchema: JsonSchema;
 declare const StreamFalseSchema: z__default.ZodLiteral<false>;
 type StreamFalse = z__default.infer<typeof StreamFalseSchema>;
-declare const StreamFalseJsonSchema: JSONSchema;
+declare const StreamFalseJsonSchema: JsonSchema;
 declare const ChatCompletionCreateParamsNonStreamingSchema: z__default.ZodObject<{
     upstreams: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodArray<z__default.ZodEnum<{
         unknown: "unknown";
@@ -3226,10 +3226,10 @@ declare const ChatCompletionCreateParamsNonStreamingSchema: z__default.ZodObject
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodLiteral<false>>>;
 }, z__default.core.$strip>;
 type ChatCompletionCreateParamsNonStreaming = z__default.infer<typeof ChatCompletionCreateParamsNonStreamingSchema>;
-declare const ChatCompletionCreateParamsNonStreamingJsonSchema: JSONSchema;
+declare const ChatCompletionCreateParamsNonStreamingJsonSchema: JsonSchema;
 declare const StreamSchema: z__default.ZodBoolean;
 type Stream = z__default.infer<typeof StreamSchema>;
-declare const StreamJsonSchema: JSONSchema;
+declare const StreamJsonSchema: JsonSchema;
 declare const ChatCompletionCreateParamsSchema: z__default.ZodObject<{
     upstreams: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodArray<z__default.ZodEnum<{
         unknown: "unknown";
@@ -4189,7 +4189,7 @@ declare const ChatCompletionCreateParamsSchema: z__default.ZodObject<{
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
 type ChatCompletionCreateParams = z__default.infer<typeof ChatCompletionCreateParamsSchema>;
-declare const ChatCompletionCreateParamsJsonSchema: JSONSchema;
+declare const ChatCompletionCreateParamsJsonSchema: JsonSchema;
 
 declare const ChatCompletionChunkSchema$1: z__default.ZodObject<{
     id: z__default.ZodString;
@@ -4287,7 +4287,7 @@ declare const ChatCompletionChunkSchema$1: z__default.ZodObject<{
     }>;
     provider: z__default.ZodOptional<z__default.ZodString>;
 }, z__default.core.$strip>;
-declare const ChatCompletionChunkJsonSchema$1: JSONSchema;
+declare const ChatCompletionChunkJsonSchema$1: JsonSchema;
 type ChatCompletionChunk$1 = z__default.infer<typeof ChatCompletionChunkSchema$1>;
 declare namespace ChatCompletionChunk$1 {
     function merged(a: ChatCompletionChunk$1, b: ChatCompletionChunk$1): [ChatCompletionChunk$1, boolean];
@@ -4298,13 +4298,13 @@ declare function create$3(client: ObjectiveAI, body: ChatCompletionCreateParamsN
 
 declare const SimpleContentTextSchema: z__default.ZodString;
 type SimpleContentText = z__default.infer<typeof SimpleContentTextSchema>;
-declare const SimpleContentTextJsonSchema: JSONSchema;
+declare const SimpleContentTextJsonSchema: JsonSchema;
 declare const SimpleContentPartSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
 }, z__default.core.$strip>;
 type SimpleContentPart = z__default.infer<typeof SimpleContentPartSchema>;
-declare const SimpleContentPartJsonSchema: JSONSchema;
+declare const SimpleContentPartJsonSchema: JsonSchema;
 declare const SimpleContentPartExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4340,13 +4340,13 @@ declare const SimpleContentPartExpressionSchema: z__default.ZodUnion<readonly [z
     }>;
 }, z__default.core.$strict>]>]>;
 type SimpleContentPartExpression = z__default.infer<typeof SimpleContentPartExpressionSchema>;
-declare const SimpleContentPartExpressionJsonSchema: JSONSchema;
+declare const SimpleContentPartExpressionJsonSchema: JsonSchema;
 declare const SimpleContentPartsSchema: z__default.ZodArray<z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
 }, z__default.core.$strip>>;
 type SimpleContentParts = z__default.infer<typeof SimpleContentPartsSchema>;
-declare const SimpleContentPartsJsonSchema: JSONSchema;
+declare const SimpleContentPartsJsonSchema: JsonSchema;
 declare const SimpleContentPartExpressionsSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4382,13 +4382,13 @@ declare const SimpleContentPartExpressionsSchema: z__default.ZodArray<z__default
     }>;
 }, z__default.core.$strict>]>]>>;
 type SimpleContentPartExpressions = z__default.infer<typeof SimpleContentPartExpressionsSchema>;
-declare const SimpleContentPartExpressionsJsonSchema: JSONSchema;
+declare const SimpleContentPartExpressionsJsonSchema: JsonSchema;
 declare const SimpleContentSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
 }, z__default.core.$strip>>]>;
 type SimpleContent = z__default.infer<typeof SimpleContentSchema>;
-declare const SimpleContentJsonSchema: JSONSchema;
+declare const SimpleContentJsonSchema: JsonSchema;
 declare const SimpleContentExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4439,10 +4439,10 @@ declare const SimpleContentExpressionSchema: z__default.ZodUnion<readonly [z__de
     }>;
 }, z__default.core.$strict>]>]>;
 type SimpleContentExpression = z__default.infer<typeof SimpleContentExpressionSchema>;
-declare const SimpleContentExpressionJsonSchema: JSONSchema;
+declare const SimpleContentExpressionJsonSchema: JsonSchema;
 declare const TextRichContentPartTextSchema: z__default.ZodString;
 type TextRichContentPartText = z__default.infer<typeof TextRichContentPartTextSchema>;
-declare const TextRichContentPartTextJsonSchema: JSONSchema;
+declare const TextRichContentPartTextJsonSchema: JsonSchema;
 declare const TextRichContentPartTextExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -4460,13 +4460,13 @@ declare const TextRichContentPartTextExpressionSchema: z__default.ZodUnion<reado
     }>;
 }, z__default.core.$strict>]>]>;
 type TextRichContentPartTextExpression = z__default.infer<typeof TextRichContentPartTextExpressionSchema>;
-declare const TextRichContentPartTextExpressionJsonSchema: JSONSchema;
+declare const TextRichContentPartTextExpressionJsonSchema: JsonSchema;
 declare const TextRichContentPartSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
 }, z__default.core.$strip>;
 type TextRichContentPart = z__default.infer<typeof TextRichContentPartSchema>;
-declare const TextRichContentPartJsonSchema: JSONSchema;
+declare const TextRichContentPartJsonSchema: JsonSchema;
 declare const TextRichContentPartExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4487,17 +4487,17 @@ declare const TextRichContentPartExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>;
 }, z__default.core.$strip>;
 type TextRichContentPartExpression = z__default.infer<typeof TextRichContentPartExpressionSchema>;
-declare const TextRichContentPartExpressionJsonSchema: JSONSchema;
+declare const TextRichContentPartExpressionJsonSchema: JsonSchema;
 declare const ImageRichContentPartDefinitionDetailSchema: z__default.ZodEnum<{
     auto: "auto";
     low: "low";
     high: "high";
 }>;
 type ImageRichContentPartDefinitionDetail = z__default.infer<typeof ImageRichContentPartDefinitionDetailSchema>;
-declare const ImageRichContentPartDefinitionDetailJsonSchema: JSONSchema;
+declare const ImageRichContentPartDefinitionDetailJsonSchema: JsonSchema;
 declare const ImageRichContentPartDefinitionUrlSchema: z__default.ZodString;
 type Url = z__default.infer<typeof ImageRichContentPartDefinitionUrlSchema>;
-declare const ImageRichContentPartDefinitionUrlJsonSchema: JSONSchema;
+declare const ImageRichContentPartDefinitionUrlJsonSchema: JsonSchema;
 declare const ImageRichContentPartDefinitionSchema: z__default.ZodObject<{
     url: z__default.ZodString;
     detail: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodEnum<{
@@ -4507,7 +4507,7 @@ declare const ImageRichContentPartDefinitionSchema: z__default.ZodObject<{
     }>>>;
 }, z__default.core.$strip>;
 type ImageRichContentPartDefinition = z__default.infer<typeof ImageRichContentPartDefinitionSchema>;
-declare const ImageRichContentPartDefinitionJsonSchema: JSONSchema;
+declare const ImageRichContentPartDefinitionJsonSchema: JsonSchema;
 declare const ImageRichContentPartDefinitionExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     url: z__default.ZodString;
     detail: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodEnum<{
@@ -4532,7 +4532,7 @@ declare const ImageRichContentPartDefinitionExpressionSchema: z__default.ZodUnio
     }>;
 }, z__default.core.$strict>]>]>;
 type ImageRichContentPartDefinitionExpression = z__default.infer<typeof ImageRichContentPartDefinitionExpressionSchema>;
-declare const ImageRichContentPartDefinitionExpressionJsonSchema: JSONSchema;
+declare const ImageRichContentPartDefinitionExpressionJsonSchema: JsonSchema;
 declare const ImageRichContentPartSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"image_url">;
     image_url: z__default.ZodObject<{
@@ -4545,7 +4545,7 @@ declare const ImageRichContentPartSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type ImageRichContentPart = z__default.infer<typeof ImageRichContentPartSchema>;
-declare const ImageRichContentPartJsonSchema: JSONSchema;
+declare const ImageRichContentPartJsonSchema: JsonSchema;
 declare const ImageRichContentPartExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"image_url">;
     image_url: z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4573,16 +4573,16 @@ declare const ImageRichContentPartExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>;
 }, z__default.core.$strip>;
 type ImageRichContentPartExpression = z__default.infer<typeof ImageRichContentPartExpressionSchema>;
-declare const ImageRichContentPartExpressionJsonSchema: JSONSchema;
+declare const ImageRichContentPartExpressionJsonSchema: JsonSchema;
 declare const AudioRichContentPartDefinitionFormatSchema: z__default.ZodEnum<{
     wav: "wav";
     mp3: "mp3";
 }>;
 type AudioRichContentPartDefinitionFormat = z__default.infer<typeof AudioRichContentPartDefinitionFormatSchema>;
-declare const AudioRichContentPartDefinitionFormatJsonSchema: JSONSchema;
+declare const AudioRichContentPartDefinitionFormatJsonSchema: JsonSchema;
 declare const AudioRichContentPartDefinitionDataSchema: z__default.ZodString;
 type AudioRichContentPartDefinitionData = z__default.infer<typeof AudioRichContentPartDefinitionDataSchema>;
-declare const AudioRichContentPartDefinitionDataJsonSchema: JSONSchema;
+declare const AudioRichContentPartDefinitionDataJsonSchema: JsonSchema;
 declare const AudioRichContentPartDefinitionSchema: z__default.ZodObject<{
     data: z__default.ZodString;
     format: z__default.ZodEnum<{
@@ -4591,7 +4591,7 @@ declare const AudioRichContentPartDefinitionSchema: z__default.ZodObject<{
     }>;
 }, z__default.core.$strip>;
 type AudioRichContentPartDefinition = z__default.infer<typeof AudioRichContentPartDefinitionSchema>;
-declare const AudioRichContentPartDefinitionJsonSchema: JSONSchema;
+declare const AudioRichContentPartDefinitionJsonSchema: JsonSchema;
 declare const AudioRichContentPartDefinitionExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     data: z__default.ZodString;
     format: z__default.ZodEnum<{
@@ -4615,7 +4615,7 @@ declare const AudioRichContentPartDefinitionExpressionSchema: z__default.ZodUnio
     }>;
 }, z__default.core.$strict>]>]>;
 type AudioRichContentPartDefinitionExpression = z__default.infer<typeof AudioRichContentPartDefinitionExpressionSchema>;
-declare const AudioRichContentPartDefinitionExpressionJsonSchema: JSONSchema;
+declare const AudioRichContentPartDefinitionExpressionJsonSchema: JsonSchema;
 declare const AudioRichContentPartSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"input_audio">;
     input_audio: z__default.ZodObject<{
@@ -4627,7 +4627,7 @@ declare const AudioRichContentPartSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type AudioRichContentPart = z__default.infer<typeof AudioRichContentPartSchema>;
-declare const AudioRichContentPartJsonSchema: JSONSchema;
+declare const AudioRichContentPartJsonSchema: JsonSchema;
 declare const AudioRichContentPartExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"input_audio">;
     input_audio: z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4654,15 +4654,15 @@ declare const AudioRichContentPartExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>;
 }, z__default.core.$strip>;
 type AudioRichContentPartExpression = z__default.infer<typeof AudioRichContentPartExpressionSchema>;
-declare const AudioRichContentPartExpressionJsonSchema: JSONSchema;
+declare const AudioRichContentPartExpressionJsonSchema: JsonSchema;
 declare const VideoRichContentPartDefinitionUrlSchema: z__default.ZodString;
 type VideoRichContentPartDefinitionUrl = z__default.infer<typeof VideoRichContentPartDefinitionUrlSchema>;
-declare const VideoRichContentPartDefinitionUrlJsonSchema: JSONSchema;
+declare const VideoRichContentPartDefinitionUrlJsonSchema: JsonSchema;
 declare const VideoRichContentPartDefinitionSchema: z__default.ZodObject<{
     url: z__default.ZodString;
 }, z__default.core.$strip>;
 type VideoRichContentPartDefinition = z__default.infer<typeof VideoRichContentPartDefinitionSchema>;
-declare const VideoRichContentPartDefinitionJsonSchema: JSONSchema;
+declare const VideoRichContentPartDefinitionJsonSchema: JsonSchema;
 declare const VideoRichContentPartDefinitionExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     url: z__default.ZodString;
 }, z__default.core.$strip>, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4682,7 +4682,7 @@ declare const VideoRichContentPartDefinitionExpressionSchema: z__default.ZodUnio
     }>;
 }, z__default.core.$strict>]>]>;
 type VideoRichContentPartDefinitionExpression = z__default.infer<typeof VideoRichContentPartDefinitionExpressionSchema>;
-declare const VideoRichContentPartDefinitionExpressionJsonSchema: JSONSchema;
+declare const VideoRichContentPartDefinitionExpressionJsonSchema: JsonSchema;
 declare const VideoRichContentPartSchema: z__default.ZodObject<{
     type: z__default.ZodEnum<{
         video_url: "video_url";
@@ -4693,7 +4693,7 @@ declare const VideoRichContentPartSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type VideoRichContentPart = z__default.infer<typeof VideoRichContentPartSchema>;
-declare const VideoRichContentPartJsonSchema: JSONSchema;
+declare const VideoRichContentPartJsonSchema: JsonSchema;
 declare const VideoRichContentPartExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodEnum<{
         video_url: "video_url";
@@ -4719,19 +4719,19 @@ declare const VideoRichContentPartExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>;
 }, z__default.core.$strip>;
 type VideoRichContentPartExpression = z__default.infer<typeof VideoRichContentPartExpressionSchema>;
-declare const VideoRichContentPartExpressionJsonSchema: JSONSchema;
+declare const VideoRichContentPartExpressionJsonSchema: JsonSchema;
 declare const FileRichContentPartDefinitionFileDataSchema: z__default.ZodString;
 type FileRichContentPartDefinitionFileData = z__default.infer<typeof FileRichContentPartDefinitionFileDataSchema>;
-declare const FileRichContentPartDefinitionFileDataJsonSchema: JSONSchema;
+declare const FileRichContentPartDefinitionFileDataJsonSchema: JsonSchema;
 declare const FileRichContentPartDefinitionFileIdSchema: z__default.ZodString;
 type FileRichContentPartDefinitionFileId = z__default.infer<typeof FileRichContentPartDefinitionFileIdSchema>;
-declare const FileRichContentPartDefinitionFileIdJsonSchema: JSONSchema;
+declare const FileRichContentPartDefinitionFileIdJsonSchema: JsonSchema;
 declare const FileRichContentPartDefinitionFilenameSchema: z__default.ZodString;
 type FileRichContentPartDefinitionFilename = z__default.infer<typeof FileRichContentPartDefinitionFilenameSchema>;
-declare const FileRichContentPartDefinitionFilenameJsonSchema: JSONSchema;
+declare const FileRichContentPartDefinitionFilenameJsonSchema: JsonSchema;
 declare const FileRichContentPartDefinitionFileUrlSchema: z__default.ZodString;
 type FileRichContentPartDefinitionFileUrl = z__default.infer<typeof FileRichContentPartDefinitionFileUrlSchema>;
-declare const FileRichContentPartDefinitionFileUrlJsonSchema: JSONSchema;
+declare const FileRichContentPartDefinitionFileUrlJsonSchema: JsonSchema;
 declare const FileRichContentPartDefinitionSchema: z__default.ZodObject<{
     file_data: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     file_id: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
@@ -4739,7 +4739,7 @@ declare const FileRichContentPartDefinitionSchema: z__default.ZodObject<{
     file_url: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type FileRichContentPartDefinition = z__default.infer<typeof FileRichContentPartDefinitionSchema>;
-declare const FileRichContentPartDefinitionJsonSchema: JSONSchema;
+declare const FileRichContentPartDefinitionJsonSchema: JsonSchema;
 declare const FileRichContentPartDefinitionExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     file_data: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     file_id: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
@@ -4762,7 +4762,7 @@ declare const FileRichContentPartDefinitionExpressionSchema: z__default.ZodUnion
     }>;
 }, z__default.core.$strict>]>]>;
 type FileRichContentPartDefinitionExpression = z__default.infer<typeof FileRichContentPartDefinitionExpressionSchema>;
-declare const FileRichContentPartDefinitionExpressionJsonSchema: JSONSchema;
+declare const FileRichContentPartDefinitionExpressionJsonSchema: JsonSchema;
 declare const FileRichContentPartSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"file">;
     file: z__default.ZodObject<{
@@ -4773,7 +4773,7 @@ declare const FileRichContentPartSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type FileRichContentPart = z__default.infer<typeof FileRichContentPartSchema>;
-declare const FileRichContentPartJsonSchema: JSONSchema;
+declare const FileRichContentPartJsonSchema: JsonSchema;
 declare const FileRichContentPartExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"file">;
     file: z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4799,10 +4799,10 @@ declare const FileRichContentPartExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>;
 }, z__default.core.$strip>;
 type FileRichContentPartExpression = z__default.infer<typeof FileRichContentPartExpressionSchema>;
-declare const FileRichContentPartExpressionJsonSchema: JSONSchema;
+declare const FileRichContentPartExpressionJsonSchema: JsonSchema;
 declare const RichContentTextSchema: z__default.ZodString;
 type RichContentText = z__default.infer<typeof RichContentTextSchema>;
-declare const RichContentTextJsonSchema: JSONSchema;
+declare const RichContentTextJsonSchema: JsonSchema;
 declare const RichContentPartSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
@@ -4843,7 +4843,7 @@ declare const RichContentPartSchema: z__default.ZodDiscriminatedUnion<[z__defaul
     }, z__default.core.$strip>;
 }, z__default.core.$strip>], "type">;
 type RichContentPart = z__default.infer<typeof RichContentPartSchema>;
-declare const RichContentPartJsonSchema: JSONSchema;
+declare const RichContentPartJsonSchema: JsonSchema;
 declare const RichContentPartExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -4974,7 +4974,7 @@ declare const RichContentPartExpressionSchema: z__default.ZodUnion<readonly [z__
     }>;
 }, z__default.core.$strict>]>]>;
 type RichContentPartExpression = z__default.infer<typeof RichContentPartExpressionSchema>;
-declare const RichContentPartExpressionJsonSchema: JSONSchema;
+declare const RichContentPartExpressionJsonSchema: JsonSchema;
 declare const RichContentPartsSchema: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
@@ -5015,7 +5015,7 @@ declare const RichContentPartsSchema: z__default.ZodArray<z__default.ZodDiscrimi
     }, z__default.core.$strip>;
 }, z__default.core.$strip>], "type">>;
 type RichContentParts = z__default.infer<typeof RichContentPartsSchema>;
-declare const RichContentPartsJsonSchema: JSONSchema;
+declare const RichContentPartsJsonSchema: JsonSchema;
 declare const RichContentPartExpressionsSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -5146,7 +5146,7 @@ declare const RichContentPartExpressionsSchema: z__default.ZodArray<z__default.Z
     }>;
 }, z__default.core.$strict>]>]>>;
 type RichContentPartExpressions = z__default.infer<typeof RichContentPartExpressionsSchema>;
-declare const RichContentPartExpressionsJsonSchema: JSONSchema;
+declare const RichContentPartExpressionsJsonSchema: JsonSchema;
 declare const RichContentSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
@@ -5187,7 +5187,7 @@ declare const RichContentSchema: z__default.ZodUnion<readonly [z__default.ZodStr
     }, z__default.core.$strip>;
 }, z__default.core.$strip>], "type">>]>;
 type RichContent = z__default.infer<typeof RichContentSchema>;
-declare const RichContentJsonSchema: JSONSchema;
+declare const RichContentJsonSchema: JsonSchema;
 declare const RichContentExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -5333,10 +5333,10 @@ declare const RichContentExpressionSchema: z__default.ZodUnion<readonly [z__defa
     }>;
 }, z__default.core.$strict>]>]>;
 type RichContentExpression = z__default.infer<typeof RichContentExpressionSchema>;
-declare const RichContentExpressionJsonSchema: JSONSchema;
+declare const RichContentExpressionJsonSchema: JsonSchema;
 declare const MessageNameSchema: z__default.ZodString;
 type MessageName = z__default.infer<typeof MessageNameSchema>;
-declare const MessageNameJsonSchema: JSONSchema;
+declare const MessageNameJsonSchema: JsonSchema;
 declare const MessageNameExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -5354,7 +5354,7 @@ declare const MessageNameExpressionSchema: z__default.ZodUnion<readonly [z__defa
     }>;
 }, z__default.core.$strict>]>]>;
 type MessageNameExpression = z__default.infer<typeof MessageNameExpressionSchema>;
-declare const MessageNameExpressionJsonSchema: JSONSchema;
+declare const MessageNameExpressionJsonSchema: JsonSchema;
 declare const DeveloperMessageSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"developer">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodObject<{
@@ -5364,7 +5364,7 @@ declare const DeveloperMessageSchema: z__default.ZodObject<{
     name: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type DeveloperMessage = z__default.infer<typeof DeveloperMessageSchema>;
-declare const DeveloperMessageJsonSchema: JSONSchema;
+declare const DeveloperMessageJsonSchema: JsonSchema;
 declare const DeveloperMessageExpressionSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"developer">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -5434,7 +5434,7 @@ declare const DeveloperMessageExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>>>;
 }, z__default.core.$strip>;
 type DeveloperMessageExpression = z__default.infer<typeof DeveloperMessageExpressionSchema>;
-declare const DeveloperMessageExpressionJsonSchema: JSONSchema;
+declare const DeveloperMessageExpressionJsonSchema: JsonSchema;
 declare const SystemMessageSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"system">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodObject<{
@@ -5444,7 +5444,7 @@ declare const SystemMessageSchema: z__default.ZodObject<{
     name: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type SystemMessage = z__default.infer<typeof SystemMessageSchema>;
-declare const SystemMessageJsonSchema: JSONSchema;
+declare const SystemMessageJsonSchema: JsonSchema;
 declare const SystemMessageExpressionSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"system">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -5514,7 +5514,7 @@ declare const SystemMessageExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>>>;
 }, z__default.core.$strip>;
 type SystemMessageExpression = z__default.infer<typeof SystemMessageExpressionSchema>;
-declare const SystemMessageExpressionJsonSchema: JSONSchema;
+declare const SystemMessageExpressionJsonSchema: JsonSchema;
 declare const UserMessageSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"user">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -5559,7 +5559,7 @@ declare const UserMessageSchema: z__default.ZodObject<{
     name: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type UserMessage = z__default.infer<typeof UserMessageSchema>;
-declare const UserMessageJsonSchema: JSONSchema;
+declare const UserMessageJsonSchema: JsonSchema;
 declare const UserMessageExpressionSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"user">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -5724,10 +5724,10 @@ declare const UserMessageExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>>>;
 }, z__default.core.$strip>;
 type UserMessageExpression = z__default.infer<typeof UserMessageExpressionSchema>;
-declare const UserMessageExpressionJsonSchema: JSONSchema;
+declare const UserMessageExpressionJsonSchema: JsonSchema;
 declare const ToolMessageToolCallIdSchema: z__default.ZodString;
 type ToolMessageToolCallId = z__default.infer<typeof ToolMessageToolCallIdSchema>;
-declare const ToolMessageToolCallIdJsonSchema: JSONSchema;
+declare const ToolMessageToolCallIdJsonSchema: JsonSchema;
 declare const ToolMessageToolCallIdExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -5745,7 +5745,7 @@ declare const ToolMessageToolCallIdExpressionSchema: z__default.ZodUnion<readonl
     }>;
 }, z__default.core.$strict>]>]>;
 type ToolMessageToolCallIdExpression = z__default.infer<typeof ToolMessageToolCallIdExpressionSchema>;
-declare const ToolMessageToolCallIdExpressionJsonSchema: JSONSchema;
+declare const ToolMessageToolCallIdExpressionJsonSchema: JsonSchema;
 declare const ToolMessageSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"tool">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -5790,7 +5790,7 @@ declare const ToolMessageSchema: z__default.ZodObject<{
     tool_call_id: z__default.ZodString;
 }, z__default.core.$strip>;
 type ToolMessage = z__default.infer<typeof ToolMessageSchema>;
-declare const ToolMessageJsonSchema: JSONSchema;
+declare const ToolMessageJsonSchema: JsonSchema;
 declare const ToolMessageExpressionSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"tool">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -5955,10 +5955,10 @@ declare const ToolMessageExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>;
 }, z__default.core.$strip>;
 type ToolMessageExpression = z__default.infer<typeof ToolMessageExpressionSchema>;
-declare const ToolMessageExpressionJsonSchema: JSONSchema;
+declare const ToolMessageExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageRefusalSchema: z__default.ZodString;
 type AssistantMessageRefusal = z__default.infer<typeof AssistantMessageRefusalSchema>;
-declare const AssistantMessageRefusalJsonSchema: JSONSchema;
+declare const AssistantMessageRefusalJsonSchema: JsonSchema;
 declare const AssistantMessageRefusalExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -5976,10 +5976,10 @@ declare const AssistantMessageRefusalExpressionSchema: z__default.ZodUnion<reado
     }>;
 }, z__default.core.$strict>]>]>;
 type AssistantMessageRefusalExpression = z__default.infer<typeof AssistantMessageRefusalExpressionSchema>;
-declare const AssistantMessageRefusalExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageRefusalExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageReasoningSchema: z__default.ZodString;
 type AssistantMessageReasoning = z__default.infer<typeof AssistantMessageReasoningSchema>;
-declare const AssistantMessageReasoningJsonSchema: JSONSchema;
+declare const AssistantMessageReasoningJsonSchema: JsonSchema;
 declare const AssistantMessageReasoningExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -5997,10 +5997,10 @@ declare const AssistantMessageReasoningExpressionSchema: z__default.ZodUnion<rea
     }>;
 }, z__default.core.$strict>]>]>;
 type AssistantMessageReasoningExpression = z__default.infer<typeof AssistantMessageReasoningExpressionSchema>;
-declare const AssistantMessageReasoningExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageReasoningExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallIdSchema: z__default.ZodString;
 type AssistantMessageToolCallId = z__default.infer<typeof AssistantMessageToolCallIdSchema>;
-declare const AssistantMessageToolCallIdJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallIdJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallIdExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -6018,10 +6018,10 @@ declare const AssistantMessageToolCallIdExpressionSchema: z__default.ZodUnion<re
     }>;
 }, z__default.core.$strict>]>]>;
 type AssistantMessageToolCallIdExpression = z__default.infer<typeof AssistantMessageToolCallIdExpressionSchema>;
-declare const AssistantMessageToolCallIdExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallIdExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallFunctionNameSchema: z__default.ZodString;
 type AssistantMessageToolCallFunctionName = z__default.infer<typeof AssistantMessageToolCallFunctionNameSchema>;
-declare const AssistantMessageToolCallFunctionNameJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallFunctionNameJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallFunctionNameExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -6039,10 +6039,10 @@ declare const AssistantMessageToolCallFunctionNameExpressionSchema: z__default.Z
     }>;
 }, z__default.core.$strict>]>]>;
 type AssistantMessageToolCallFunctionNameExpression = z__default.infer<typeof AssistantMessageToolCallFunctionNameExpressionSchema>;
-declare const AssistantMessageToolCallFunctionNameExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallFunctionNameExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallFunctionArgumentsSchema: z__default.ZodString;
 type AssistantMessageToolCallFunctionArguments = z__default.infer<typeof AssistantMessageToolCallFunctionArgumentsSchema>;
-declare const AssistantMessageToolCallFunctionArgumentsJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallFunctionArgumentsJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallFunctionArgumentsExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -6060,13 +6060,13 @@ declare const AssistantMessageToolCallFunctionArgumentsExpressionSchema: z__defa
     }>;
 }, z__default.core.$strict>]>]>;
 type AssistantMessageToolCallFunctionArgumentsExpression = z__default.infer<typeof AssistantMessageToolCallFunctionArgumentsExpressionSchema>;
-declare const AssistantMessageToolCallFunctionArgumentsExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallFunctionArgumentsExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallFunctionDefinitionSchema: z__default.ZodObject<{
     name: z__default.ZodString;
     arguments: z__default.ZodString;
 }, z__default.core.$strip>;
 type AssistantMessageToolCallFunctionDefinition = z__default.infer<typeof AssistantMessageToolCallFunctionDefinitionSchema>;
-declare const AssistantMessageToolCallFunctionDefinitionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallFunctionDefinitionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallFunctionDefinitionExpressionSchema: z__default.ZodObject<{
     name: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
         $jmespath: z__default.ZodString;
@@ -6102,7 +6102,7 @@ declare const AssistantMessageToolCallFunctionDefinitionExpressionSchema: z__def
     }, z__default.core.$strict>]>]>;
 }, z__default.core.$strip>;
 type AssistantMessageToolCallFunctionDefinitionExpression = z__default.infer<typeof AssistantMessageToolCallFunctionDefinitionExpressionSchema>;
-declare const AssistantMessageToolCallFunctionDefinitionExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallFunctionDefinitionExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     id: z__default.ZodString;
@@ -6112,7 +6112,7 @@ declare const AssistantMessageToolCallFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type AssistantMessageToolCallFunction = z__default.infer<typeof AssistantMessageToolCallFunctionSchema>;
-declare const AssistantMessageToolCallFunctionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallFunctionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallFunctionExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     id: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -6167,7 +6167,7 @@ declare const AssistantMessageToolCallFunctionExpressionSchema: z__default.ZodOb
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type AssistantMessageToolCallFunctionExpression = z__default.infer<typeof AssistantMessageToolCallFunctionExpressionSchema>;
-declare const AssistantMessageToolCallFunctionExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallFunctionExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     id: z__default.ZodString;
@@ -6177,7 +6177,7 @@ declare const AssistantMessageToolCallSchema: z__default.ZodUnion<readonly [z__d
     }, z__default.core.$strip>;
 }, z__default.core.$strip>]>;
 type AssistantMessageToolCall = z__default.infer<typeof AssistantMessageToolCallSchema>;
-declare const AssistantMessageToolCallJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     id: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -6247,7 +6247,7 @@ declare const AssistantMessageToolCallExpressionSchema: z__default.ZodUnion<read
     }>;
 }, z__default.core.$strict>]>]>;
 type AssistantMessageToolCallExpression = z__default.infer<typeof AssistantMessageToolCallExpressionSchema>;
-declare const AssistantMessageToolCallExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallsSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     id: z__default.ZodString;
@@ -6257,7 +6257,7 @@ declare const AssistantMessageToolCallsSchema: z__default.ZodArray<z__default.Zo
     }, z__default.core.$strip>;
 }, z__default.core.$strip>]>>;
 type AssistantMessageToolCalls = z__default.infer<typeof AssistantMessageToolCallsSchema>;
-declare const AssistantMessageToolCallsJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallsJsonSchema: JsonSchema;
 declare const AssistantMessageToolCallsExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     id: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -6342,7 +6342,7 @@ declare const AssistantMessageToolCallsExpressionSchema: z__default.ZodUnion<rea
     }>;
 }, z__default.core.$strict>]>]>;
 type AssistantMessageToolCallsExpression = z__default.infer<typeof AssistantMessageToolCallsExpressionSchema>;
-declare const AssistantMessageToolCallsExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageToolCallsExpressionJsonSchema: JsonSchema;
 declare const AssistantMessageSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"assistant">;
     content: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -6397,7 +6397,7 @@ declare const AssistantMessageSchema: z__default.ZodObject<{
     reasoning: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type AssistantMessage = z__default.infer<typeof AssistantMessageSchema>;
-declare const AssistantMessageJsonSchema: JSONSchema;
+declare const AssistantMessageJsonSchema: JsonSchema;
 declare const AssistantMessageExpressionSchema: z__default.ZodObject<{
     role: z__default.ZodLiteral<"assistant">;
     content: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -6677,7 +6677,7 @@ declare const AssistantMessageExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>>>;
 }, z__default.core.$strip>;
 type AssistantMessageExpression = z__default.infer<typeof AssistantMessageExpressionSchema>;
-declare const AssistantMessageExpressionJsonSchema: JSONSchema;
+declare const AssistantMessageExpressionJsonSchema: JsonSchema;
 declare const MessageSchema$1: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     role: z__default.ZodLiteral<"developer">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodObject<{
@@ -6830,7 +6830,7 @@ declare const MessageSchema$1: z__default.ZodDiscriminatedUnion<[z__default.ZodO
     reasoning: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>], "role">;
 type Message$1 = z__default.infer<typeof MessageSchema$1>;
-declare const MessageJsonSchema$1: JSONSchema;
+declare const MessageJsonSchema$1: JsonSchema;
 declare const MessageExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     role: z__default.ZodLiteral<"developer">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -7583,7 +7583,7 @@ declare const MessageExpressionSchema: z__default.ZodUnion<readonly [z__default.
     }>;
 }, z__default.core.$strict>]>]>;
 type MessageExpression = z__default.infer<typeof MessageExpressionSchema>;
-declare const MessageExpressionJsonSchema: JSONSchema;
+declare const MessageExpressionJsonSchema: JsonSchema;
 declare const MessagesSchema: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     role: z__default.ZodLiteral<"developer">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodObject<{
@@ -7736,7 +7736,7 @@ declare const MessagesSchema: z__default.ZodArray<z__default.ZodDiscriminatedUni
     reasoning: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>], "role">>;
 type Messages = z__default.infer<typeof MessagesSchema>;
-declare const MessagesJsonSchema: JSONSchema;
+declare const MessagesJsonSchema: JsonSchema;
 declare const MessagesExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     role: z__default.ZodLiteral<"developer">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -8504,7 +8504,7 @@ declare const MessagesExpressionSchema: z__default.ZodUnion<readonly [z__default
     }>;
 }, z__default.core.$strict>]>]>;
 type MessagesExpression = z__default.infer<typeof MessagesExpressionSchema>;
-declare const MessagesExpressionJsonSchema: JSONSchema;
+declare const MessagesExpressionJsonSchema: JsonSchema;
 
 declare const ModelSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodObject<{
     model: z__default.ZodString;
@@ -8872,7 +8872,7 @@ declare const ModelSchema: z__default.ZodUnion<readonly [z__default.ZodString, z
     }>>>;
 }, z__default.core.$strip>]>;
 type Model = z__default.infer<typeof ModelSchema>;
-declare const ModelJsonSchema: JSONSchema;
+declare const ModelJsonSchema: JsonSchema;
 declare const FallbackModelsSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodObject<{
     model: z__default.ZodString;
     output_mode: z__default.ZodEnum<{
@@ -9239,20 +9239,20 @@ declare const FallbackModelsSchema: z__default.ZodArray<z__default.ZodUnion<read
     }>>>;
 }, z__default.core.$strip>]>>;
 type FallbackModels = z__default.infer<typeof FallbackModelsSchema>;
-declare const FallbackModelsJsonSchema: JSONSchema;
+declare const FallbackModelsJsonSchema: JsonSchema;
 
 declare const PredictionContentPartSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
 }, z__default.core.$strip>;
 type PredictionContentPart = z__default.infer<typeof PredictionContentPartSchema>;
-declare const PredictionContentPartJsonSchema: JSONSchema;
+declare const PredictionContentPartJsonSchema: JsonSchema;
 declare const PredictionContentSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
 }, z__default.core.$strip>>]>;
 type PredictionContent = z__default.infer<typeof PredictionContentSchema>;
-declare const PredictionContentJsonSchema: JSONSchema;
+declare const PredictionContentJsonSchema: JsonSchema;
 declare const PredictionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"content">;
     content: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodObject<{
@@ -9261,21 +9261,21 @@ declare const PredictionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>]>;
 }, z__default.core.$strip>;
 type Prediction = z__default.infer<typeof PredictionSchema>;
-declare const PredictionJsonSchema: JSONSchema;
+declare const PredictionJsonSchema: JsonSchema;
 
 declare const ProviderDataCollectionSchema: z__default.ZodEnum<{
     allow: "allow";
     deny: "deny";
 }>;
 type ProviderDataCollection = z__default.infer<typeof ProviderDataCollectionSchema>;
-declare const ProviderDataCollectionJsonSchema: JSONSchema;
+declare const ProviderDataCollectionJsonSchema: JsonSchema;
 declare const ProviderSortSchema: z__default.ZodEnum<{
     price: "price";
     throughput: "throughput";
     latency: "latency";
 }>;
 type ProviderSort = z__default.infer<typeof ProviderSortSchema>;
-declare const ProviderSortJsonSchema: JSONSchema;
+declare const ProviderSortJsonSchema: JsonSchema;
 declare const ProviderMaxPriceSchema: z__default.ZodObject<{
     prompt: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
     completion: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
@@ -9284,7 +9284,7 @@ declare const ProviderMaxPriceSchema: z__default.ZodObject<{
     request: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
 }, z__default.core.$strip>;
 type ProviderMaxPrice = z__default.infer<typeof ProviderMaxPriceSchema>;
-declare const ProviderMaxPriceJsonSchema: JSONSchema;
+declare const ProviderMaxPriceJsonSchema: JsonSchema;
 declare const ProviderSchema$1: z__default.ZodObject<{
     data_collection: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodEnum<{
         allow: "allow";
@@ -9309,18 +9309,18 @@ declare const ProviderSchema$1: z__default.ZodObject<{
     max_latency: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
 }, z__default.core.$strip>;
 type Provider$1 = z__default.infer<typeof ProviderSchema$1>;
-declare const ProviderJsonSchema$1: JSONSchema;
+declare const ProviderJsonSchema$1: JsonSchema;
 
 declare const JMESPathExpressionSchema: z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>;
 type JMESPathExpression = z__default.infer<typeof JMESPathExpressionSchema>;
-declare const JMESPathExpressionJsonSchema: JSONSchema;
+declare const JMESPathExpressionJsonSchema: JsonSchema;
 declare const StarlarkExpressionSchema: z__default.ZodObject<{
     $starlark: z__default.ZodString;
 }, z__default.core.$strict>;
 type StarlarkExpression = z__default.infer<typeof StarlarkExpressionSchema>;
-declare const StarlarkExpressionJsonSchema: JSONSchema;
+declare const StarlarkExpressionJsonSchema: JsonSchema;
 declare const SpecialExpressionSchema: z__default.ZodObject<{
     $special: z__default.ZodEnum<{
         input: "input";
@@ -9334,7 +9334,7 @@ declare const SpecialExpressionSchema: z__default.ZodObject<{
     }>;
 }, z__default.core.$strict>;
 type SpecialExpression = z__default.infer<typeof SpecialExpressionSchema>;
-declare const SpecialExpressionJsonSchema: JSONSchema;
+declare const SpecialExpressionJsonSchema: JsonSchema;
 declare const ExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -9352,36 +9352,36 @@ declare const ExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObje
     }>;
 }, z__default.core.$strict>]>;
 type Expression = z__default.infer<typeof ExpressionSchema>;
-declare const ExpressionJsonSchema: JSONSchema;
+declare const ExpressionJsonSchema: JsonSchema;
 
 type JsonValue = null | boolean | number | string | JsonValue[] | {
     [key: string]: JsonValue;
 };
 declare const JsonValueSchema: z__default.ZodType<JsonValue>;
-declare const JsonValueJsonSchema: JSONSchema;
+declare const JsonValueJsonSchema: JsonSchema;
 type JsonValueExpression = null | boolean | number | string | (Expression | JsonValueExpression)[] | {
     [key: string]: Expression | JsonValueExpression;
 } | Expression;
 declare const JsonValueExpressionSchema: z__default.ZodType<JsonValueExpression>;
-declare const JsonValueExpressionJsonSchema: JSONSchema;
+declare const JsonValueExpressionJsonSchema: JsonSchema;
 
 declare const TextResponseFormatSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
 }, z__default.core.$strip>;
 type TextResponseFormat = z__default.infer<typeof TextResponseFormatSchema>;
-declare const TextResponseFormatJsonSchema: JSONSchema;
+declare const TextResponseFormatJsonSchema: JsonSchema;
 declare const JsonObjectResponseFormatSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"json_object">;
 }, z__default.core.$strip>;
 type JsonObjectResponseFormat = z__default.infer<typeof JsonObjectResponseFormatSchema>;
-declare const JsonObjectResponseFormatJsonSchema: JSONSchema;
+declare const JsonObjectResponseFormatJsonSchema: JsonSchema;
 declare const JsonSchemaResponseFormatJsonSchemaSchema: z__default.ZodObject<{
     name: z__default.ZodString;
     description: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     schema: z__default.ZodOptional<z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>>;
     strict: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
-declare const JsonSchemaResponseFormatJsonSchemaJsonSchema: JSONSchema;
+declare const JsonSchemaResponseFormatJsonSchemaJsonSchema: JsonSchema;
 declare const JsonSchemaResponseFormatSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"json_schema">;
     json_schema: z__default.ZodObject<{
@@ -9393,18 +9393,18 @@ declare const JsonSchemaResponseFormatSchema: z__default.ZodObject<{
 }, z__default.core.$strip>;
 type JsonSchemaResponseFormat = z__default.infer<typeof JsonSchemaResponseFormatSchema>;
 type JsonSchemaResponseFormatJsonSchema = z__default.infer<typeof JsonSchemaResponseFormatJsonSchemaSchema>;
-declare const JsonSchemaResponseFormatJsonSchema: JSONSchema;
+declare const JsonSchemaResponseFormatJsonSchema: JsonSchema;
 declare const GrammarResponseFormatSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"grammar">;
     grammar: z__default.ZodString;
 }, z__default.core.$strip>;
 type GrammarResponseFormat = z__default.infer<typeof GrammarResponseFormatSchema>;
-declare const GrammarResponseFormatJsonSchema: JSONSchema;
+declare const GrammarResponseFormatJsonSchema: JsonSchema;
 declare const PythonResponseFormatSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"python">;
 }, z__default.core.$strip>;
 type PythonResponseFormat = z__default.infer<typeof PythonResponseFormatSchema>;
-declare const PythonResponseFormatJsonSchema: JSONSchema;
+declare const PythonResponseFormatJsonSchema: JsonSchema;
 declare const ResponseFormatSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
 }, z__default.core.$strip>, z__default.ZodObject<{
@@ -9424,11 +9424,11 @@ declare const ResponseFormatSchema: z__default.ZodUnion<readonly [z__default.Zod
     type: z__default.ZodLiteral<"python">;
 }, z__default.core.$strip>]>;
 type ResponseFormat = z__default.infer<typeof ResponseFormatSchema>;
-declare const ResponseFormatJsonSchema: JSONSchema;
+declare const ResponseFormatJsonSchema: JsonSchema;
 
 declare const FunctionToolNameSchema: z__default.ZodString;
 type FunctionToolName = z__default.infer<typeof FunctionToolNameSchema>;
-declare const FunctionToolNameJsonSchema: JSONSchema;
+declare const FunctionToolNameJsonSchema: JsonSchema;
 declare const FunctionToolNameExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -9446,10 +9446,10 @@ declare const FunctionToolNameExpressionSchema: z__default.ZodUnion<readonly [z_
     }>;
 }, z__default.core.$strict>]>]>;
 type FunctionToolNameExpression = z__default.infer<typeof FunctionToolNameExpressionSchema>;
-declare const FunctionToolNameExpressionJsonSchema: JSONSchema;
+declare const FunctionToolNameExpressionJsonSchema: JsonSchema;
 declare const FunctionToolDescriptionSchema: z__default.ZodString;
 type FunctionToolDescription = z__default.infer<typeof FunctionToolDescriptionSchema>;
-declare const FunctionToolDescriptionJsonSchema: JSONSchema;
+declare const FunctionToolDescriptionJsonSchema: JsonSchema;
 declare const FunctionToolDescriptionExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -9467,10 +9467,10 @@ declare const FunctionToolDescriptionExpressionSchema: z__default.ZodUnion<reado
     }>;
 }, z__default.core.$strict>]>]>;
 type FunctionToolDescriptionExpression = z__default.infer<typeof FunctionToolDescriptionExpressionSchema>;
-declare const FunctionToolDescriptionExpressionJsonSchema: JSONSchema;
+declare const FunctionToolDescriptionExpressionJsonSchema: JsonSchema;
 declare const FunctionToolParametersSchema: z__default.ZodRecord<z__default.ZodString, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>>;
 type FunctionToolParameters = z__default.infer<typeof FunctionToolParametersSchema>;
-declare const FunctionToolParametersJsonSchema: JSONSchema;
+declare const FunctionToolParametersJsonSchema: JsonSchema;
 declare const FunctionToolParametersExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodRecord<z__default.ZodString, z__default.ZodType<JsonValueExpression, unknown, z__default.core.$ZodTypeInternals<JsonValueExpression, unknown>>>, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -9488,10 +9488,10 @@ declare const FunctionToolParametersExpressionSchema: z__default.ZodUnion<readon
     }>;
 }, z__default.core.$strict>]>]>;
 type FunctionToolParametersExpression = z__default.infer<typeof FunctionToolParametersExpressionSchema>;
-declare const FunctionToolParametersExpressionJsonSchema: JSONSchema;
+declare const FunctionToolParametersExpressionJsonSchema: JsonSchema;
 declare const FunctionToolStrictSchema: z__default.ZodBoolean;
 type FunctionToolStrict = z__default.infer<typeof FunctionToolStrictSchema>;
-declare const FunctionToolStrictJsonSchema: JSONSchema;
+declare const FunctionToolStrictJsonSchema: JsonSchema;
 declare const FunctionToolStrictExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodBoolean, z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -9509,7 +9509,7 @@ declare const FunctionToolStrictExpressionSchema: z__default.ZodUnion<readonly [
     }>;
 }, z__default.core.$strict>]>]>;
 type FunctionToolStrictExpression = z__default.infer<typeof FunctionToolStrictExpressionSchema>;
-declare const FunctionToolStrictExpressionJsonSchema: JSONSchema;
+declare const FunctionToolStrictExpressionJsonSchema: JsonSchema;
 declare const FunctionToolDefinitionSchema: z__default.ZodObject<{
     name: z__default.ZodString;
     description: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
@@ -9517,7 +9517,7 @@ declare const FunctionToolDefinitionSchema: z__default.ZodObject<{
     strict: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
 type FunctionToolDefinition = z__default.infer<typeof FunctionToolDefinitionSchema>;
-declare const FunctionToolDefinitionJsonSchema: JSONSchema;
+declare const FunctionToolDefinitionJsonSchema: JsonSchema;
 declare const FunctionToolDefinitionExpressionSchema: z__default.ZodObject<{
     name: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodUnion<readonly [z__default.ZodObject<{
         $jmespath: z__default.ZodString;
@@ -9585,7 +9585,7 @@ declare const FunctionToolDefinitionExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>]>>>;
 }, z__default.core.$strip>;
 type FunctionToolDefinitionExpression = z__default.infer<typeof FunctionToolDefinitionExpressionSchema>;
-declare const FunctionToolDefinitionExpressionJsonSchema: JSONSchema;
+declare const FunctionToolDefinitionExpressionJsonSchema: JsonSchema;
 declare const FunctionToolSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     function: z__default.ZodObject<{
@@ -9596,7 +9596,7 @@ declare const FunctionToolSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type FunctionTool = z__default.infer<typeof FunctionToolSchema>;
-declare const FunctionToolJsonSchema: JSONSchema;
+declare const FunctionToolJsonSchema: JsonSchema;
 declare const FunctionToolExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     function: z__default.ZodObject<{
@@ -9667,7 +9667,7 @@ declare const FunctionToolExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type FunctionToolExpression = z__default.infer<typeof FunctionToolExpressionSchema>;
-declare const FunctionToolExpressionJsonSchema: JSONSchema;
+declare const FunctionToolExpressionJsonSchema: JsonSchema;
 declare const ToolSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     function: z__default.ZodObject<{
@@ -9678,7 +9678,7 @@ declare const ToolSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>]>;
 type Tool = z__default.infer<typeof ToolSchema>;
-declare const ToolJsonSchema: JSONSchema;
+declare const ToolJsonSchema: JsonSchema;
 declare const ToolExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     function: z__default.ZodObject<{
@@ -9764,7 +9764,7 @@ declare const ToolExpressionSchema: z__default.ZodUnion<readonly [z__default.Zod
     }>;
 }, z__default.core.$strict>]>]>;
 type ToolExpression = z__default.infer<typeof ToolExpressionSchema>;
-declare const ToolExpressionJsonSchema: JSONSchema;
+declare const ToolExpressionJsonSchema: JsonSchema;
 declare const ToolsSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     function: z__default.ZodObject<{
@@ -9775,7 +9775,7 @@ declare const ToolsSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__
     }, z__default.core.$strip>;
 }, z__default.core.$strip>]>>;
 type Tools = z__default.infer<typeof ToolsSchema>;
-declare const ToolsJsonSchema: JSONSchema;
+declare const ToolsJsonSchema: JsonSchema;
 declare const ToolsExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     function: z__default.ZodObject<{
@@ -9876,13 +9876,13 @@ declare const ToolsExpressionSchema: z__default.ZodUnion<readonly [z__default.Zo
     }>;
 }, z__default.core.$strict>]>]>;
 type ToolsExpression = z__default.infer<typeof ToolsExpressionSchema>;
-declare const ToolsExpressionJsonSchema: JSONSchema;
+declare const ToolsExpressionJsonSchema: JsonSchema;
 
 declare const FunctionToolChoiceFunctionSchema: z__default.ZodObject<{
     name: z__default.ZodString;
 }, z__default.core.$strip>;
 type FunctionToolChoiceFunction = z__default.infer<typeof FunctionToolChoiceFunctionSchema>;
-declare const FunctionToolChoiceFunctionJsonSchema: JSONSchema;
+declare const FunctionToolChoiceFunctionJsonSchema: JsonSchema;
 declare const FunctionToolChoiceSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     function: z__default.ZodObject<{
@@ -9890,7 +9890,7 @@ declare const FunctionToolChoiceSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type FunctionToolChoice = z__default.infer<typeof FunctionToolChoiceSchema>;
-declare const FunctionToolChoiceJsonSchema: JSONSchema;
+declare const FunctionToolChoiceJsonSchema: JsonSchema;
 declare const ToolChoiceSchema: z__default.ZodUnion<readonly [z__default.ZodLiteral<"none">, z__default.ZodLiteral<"auto">, z__default.ZodLiteral<"required">, z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     function: z__default.ZodObject<{
@@ -9898,7 +9898,7 @@ declare const ToolChoiceSchema: z__default.ZodUnion<readonly [z__default.ZodLite
     }, z__default.core.$strip>;
 }, z__default.core.$strip>]>;
 type ToolChoice = z__default.infer<typeof ToolChoiceSchema>;
-declare const ToolChoiceJsonSchema: JSONSchema;
+declare const ToolChoiceJsonSchema: JsonSchema;
 
 type index$w_AssistantMessage = AssistantMessage;
 type index$w_AssistantMessageExpression = AssistantMessageExpression;
@@ -10280,7 +10280,7 @@ declare const FinishReasonSchema: z__default.ZodEnum<{
     content_filter: "content_filter";
 }>;
 type FinishReason = z__default.infer<typeof FinishReasonSchema>;
-declare const FinishReasonJsonSchema: JSONSchema;
+declare const FinishReasonJsonSchema: JsonSchema;
 
 declare const TopLogprobSchema: z__default.ZodObject<{
     token: z__default.ZodString;
@@ -10288,7 +10288,7 @@ declare const TopLogprobSchema: z__default.ZodObject<{
     logprob: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
 }, z__default.core.$strip>;
 type TopLogprob = z__default.infer<typeof TopLogprobSchema>;
-declare const TopLogprobJsonSchema: JSONSchema;
+declare const TopLogprobJsonSchema: JsonSchema;
 declare const LogprobSchema: z__default.ZodObject<{
     token: z__default.ZodString;
     bytes: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodArray<z__default.ZodUInt32>>>;
@@ -10299,7 +10299,7 @@ declare const LogprobSchema: z__default.ZodObject<{
         logprob: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
-declare const LogprobJsonSchema: JSONSchema;
+declare const LogprobJsonSchema: JsonSchema;
 type Logprob = z__default.infer<typeof LogprobSchema>;
 declare namespace Logprob {
     function mergedList(a: Logprob[], b: Logprob[]): [Logprob[], boolean];
@@ -10326,7 +10326,7 @@ declare const LogprobsSchema: z__default.ZodObject<{
         }, z__default.core.$strip>>;
     }, z__default.core.$strip>>>>;
 }, z__default.core.$strip>;
-declare const LogprobsJsonSchema: JSONSchema;
+declare const LogprobsJsonSchema: JsonSchema;
 type Logprobs = z__default.infer<typeof LogprobsSchema>;
 declare namespace Logprobs {
     function merged(a: Logprobs, b: Logprobs): [Logprobs, boolean];
@@ -10339,14 +10339,14 @@ declare const ResponseImageImageUrlSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type ResponseImageImageUrl = z__default.infer<typeof ResponseImageImageUrlSchema>;
-declare const ResponseImageImageUrlJsonSchema: JSONSchema;
+declare const ResponseImageImageUrlJsonSchema: JsonSchema;
 declare const ResponseImageSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"image_url">;
     image_url: z__default.ZodObject<{
         url: z__default.ZodString;
     }, z__default.core.$strip>;
 }, z__default.core.$strip>]>;
-declare const ResponseImageJsonSchema: JSONSchema;
+declare const ResponseImageJsonSchema: JsonSchema;
 type ResponseImage = z__default.infer<typeof ResponseImageSchema>;
 declare namespace ResponseImage {
     function mergedList(a: ResponseImage[], b: ResponseImage[]): [ResponseImage[], boolean];
@@ -10356,7 +10356,7 @@ declare const RoleSchema: z__default.ZodEnum<{
     assistant: "assistant";
 }>;
 type Role = z__default.infer<typeof RoleSchema>;
-declare const RoleJsonSchema: JSONSchema;
+declare const RoleJsonSchema: JsonSchema;
 
 declare const ChoiceSchema$1: z__default.ZodObject<{
     delta: z__default.ZodObject<{
@@ -10413,7 +10413,7 @@ declare const ChoiceSchema$1: z__default.ZodObject<{
         }, z__default.core.$strip>>>>;
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
-declare const ChoiceJsonSchema$1: JSONSchema;
+declare const ChoiceJsonSchema$1: JsonSchema;
 type Choice$1 = z__default.infer<typeof ChoiceSchema$1>;
 declare namespace Choice$1 {
     function merged(a: Choice$1, b: Choice$1): [Choice$1, boolean];
@@ -10443,7 +10443,7 @@ declare const DeltaSchema: z__default.ZodObject<{
         }, z__default.core.$strip>;
     }, z__default.core.$strip>]>>>;
 }, z__default.core.$strip>;
-declare const DeltaJsonSchema: JSONSchema;
+declare const DeltaJsonSchema: JsonSchema;
 type Delta = z__default.infer<typeof DeltaSchema>;
 declare namespace Delta {
     function merged(a: Delta, b: Delta): [Delta, boolean];
@@ -10451,13 +10451,13 @@ declare namespace Delta {
 
 declare const ResponseObjectSchema$7: z__default.ZodLiteral<"chat.completion.chunk">;
 type ResponseObject$7 = z__default.infer<typeof ResponseObjectSchema$7>;
-declare const ResponseObjectJsonSchema$3: JSONSchema;
+declare const ResponseObjectJsonSchema$3: JsonSchema;
 
 declare const FunctionToolCallDefinitionSchema$1: z__default.ZodObject<{
     name: z__default.ZodOptional<z__default.ZodString>;
     arguments: z__default.ZodOptional<z__default.ZodString>;
 }, z__default.core.$strip>;
-declare const FunctionToolCallDefinitionJsonSchema$1: JSONSchema;
+declare const FunctionToolCallDefinitionJsonSchema$1: JsonSchema;
 type FunctionToolCallDefinition$1 = z__default.infer<typeof FunctionToolCallDefinitionSchema$1>;
 declare namespace FunctionToolCallDefinition$1 {
     function merged(a: FunctionToolCallDefinition$1, b: FunctionToolCallDefinition$1): [FunctionToolCallDefinition$1, boolean];
@@ -10471,7 +10471,7 @@ declare const FunctionToolCallSchema$1: z__default.ZodObject<{
         arguments: z__default.ZodOptional<z__default.ZodString>;
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
-declare const FunctionToolCallJsonSchema$1: JSONSchema;
+declare const FunctionToolCallJsonSchema$1: JsonSchema;
 type FunctionToolCall$1 = z__default.infer<typeof FunctionToolCallSchema$1>;
 declare namespace FunctionToolCall$1 {
     function merged(a: FunctionToolCall$1, b: FunctionToolCall$1): [FunctionToolCall$1, boolean];
@@ -10485,7 +10485,7 @@ declare const ToolCallSchema$1: z__default.ZodUnion<readonly [z__default.ZodObje
         arguments: z__default.ZodOptional<z__default.ZodString>;
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>]>;
-declare const ToolCallJsonSchema$1: JSONSchema;
+declare const ToolCallJsonSchema$1: JsonSchema;
 type ToolCall$1 = z__default.infer<typeof ToolCallSchema$1>;
 declare namespace ToolCall$1 {
     function merged(a: ToolCall$1, b: ToolCall$1): [ToolCall$1, boolean];
@@ -10554,7 +10554,7 @@ declare const ChoiceSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type Choice = z__default.infer<typeof ChoiceSchema>;
-declare const ChoiceJsonSchema: JSONSchema;
+declare const ChoiceJsonSchema: JsonSchema;
 
 declare const MessageSchema: z__default.ZodObject<{
     content: z__default.ZodNullable<z__default.ZodString>;
@@ -10579,18 +10579,18 @@ declare const MessageSchema: z__default.ZodObject<{
     }, z__default.core.$strip>]>>>;
 }, z__default.core.$strip>;
 type Message = z__default.infer<typeof MessageSchema>;
-declare const MessageJsonSchema: JSONSchema;
+declare const MessageJsonSchema: JsonSchema;
 
 declare const ResponseObjectSchema$6: z__default.ZodLiteral<"chat.completion">;
 type ResponseObject$6 = z__default.infer<typeof ResponseObjectSchema$6>;
-declare const ResponseObjectJsonSchema$2: JSONSchema;
+declare const ResponseObjectJsonSchema$2: JsonSchema;
 
 declare const FunctionToolCallDefinitionSchema: z__default.ZodObject<{
     name: z__default.ZodString;
     arguments: z__default.ZodString;
 }, z__default.core.$strip>;
 type FunctionToolCallDefinition = z__default.infer<typeof FunctionToolCallDefinitionSchema>;
-declare const FunctionToolCallDefinitionJsonSchema: JSONSchema;
+declare const FunctionToolCallDefinitionJsonSchema: JsonSchema;
 declare const FunctionToolCallSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     id: z__default.ZodString;
@@ -10600,7 +10600,7 @@ declare const FunctionToolCallSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type FunctionToolCall = z__default.infer<typeof FunctionToolCallSchema>;
-declare const FunctionToolCallJsonSchema: JSONSchema;
+declare const FunctionToolCallJsonSchema: JsonSchema;
 declare const ToolCallSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     type: z__default.ZodLiteral<"function">;
     id: z__default.ZodString;
@@ -10610,7 +10610,7 @@ declare const ToolCallSchema: z__default.ZodUnion<readonly [z__default.ZodObject
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>]>;
 type ToolCall = z__default.infer<typeof ToolCallSchema>;
-declare const ToolCallJsonSchema: JSONSchema;
+declare const ToolCallJsonSchema: JsonSchema;
 
 type index$u_Choice = Choice;
 declare const index$u_ChoiceJsonSchema: typeof ChoiceJsonSchema;
@@ -10637,7 +10637,7 @@ declare const UsageCompletionTokensDetailsSchema: z__default.ZodObject<{
     reasoning_tokens: z__default.ZodOptional<z__default.ZodUInt32>;
     rejected_prediction_tokens: z__default.ZodOptional<z__default.ZodUInt32>;
 }, z__default.core.$strip>;
-declare const UsageCompletionTokensDetailsJsonSchema: JSONSchema;
+declare const UsageCompletionTokensDetailsJsonSchema: JsonSchema;
 type UsageCompletionTokensDetails = z__default.infer<typeof UsageCompletionTokensDetailsSchema>;
 declare namespace UsageCompletionTokensDetails {
     function isEmpty({ accepted_prediction_tokens, audio_tokens, reasoning_tokens, rejected_prediction_tokens, }: UsageCompletionTokensDetails): boolean;
@@ -10648,7 +10648,7 @@ declare const UsagePromptTokensDetailsSchema: z__default.ZodObject<{
     cache_write_tokens: z__default.ZodOptional<z__default.ZodUInt32>;
     video_tokens: z__default.ZodOptional<z__default.ZodUInt32>;
 }, z__default.core.$strip>;
-declare const UsagePromptTokensDetailsJsonSchema: JSONSchema;
+declare const UsagePromptTokensDetailsJsonSchema: JsonSchema;
 type UsagePromptTokensDetails = z__default.infer<typeof UsagePromptTokensDetailsSchema>;
 declare namespace UsagePromptTokensDetails {
     function isEmpty({ audio_tokens, cached_tokens, cache_write_tokens, video_tokens, }: UsagePromptTokensDetails): boolean;
@@ -10657,7 +10657,7 @@ declare const UsageCostDetailsSchema: z__default.ZodObject<{
     upstream_inference_cost: z__default.ZodOptional<z__default.ZodNumber>;
     upstream_upstream_inference_cost: z__default.ZodOptional<z__default.ZodNumber>;
 }, z__default.core.$strip>;
-declare const UsageCostDetailsJsonSchema: JSONSchema;
+declare const UsageCostDetailsJsonSchema: JsonSchema;
 type UsageCostDetails = z__default.infer<typeof UsageCostDetailsSchema>;
 declare namespace UsageCostDetails {
     function isEmpty({ upstream_inference_cost, upstream_upstream_inference_cost, }: UsageCostDetails): boolean;
@@ -10687,7 +10687,7 @@ declare const UsageSchema$1: z__default.ZodObject<{
     cost_multiplier: z__default.ZodNumber;
     is_byok: z__default.ZodBoolean;
 }, z__default.core.$strip>;
-declare const UsageJsonSchema$1: JSONSchema;
+declare const UsageJsonSchema$1: JsonSchema;
 type Usage$1 = z__default.infer<typeof UsageSchema$1>;
 declare namespace Usage$1 {
     function isEmpty({ completion_tokens, prompt_tokens, total_tokens, completion_tokens_details, prompt_tokens_details, cost, cost_details, total_cost, }: Usage$1): boolean;
@@ -10733,14 +10733,14 @@ declare const UpstreamSchema: z__default.ZodEnum<{
     claude_agent_sdk: "claude_agent_sdk";
 }>;
 type Upstream = z__default.infer<typeof UpstreamSchema>;
-declare const UpstreamJsonSchema: JSONSchema;
+declare const UpstreamJsonSchema: JsonSchema;
 declare const UpstreamsSchema: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodArray<z__default.ZodEnum<{
     unknown: "unknown";
     open_router: "open_router";
     claude_agent_sdk: "claude_agent_sdk";
 }>>>>;
 type Upstreams = z__default.infer<typeof UpstreamsSchema>;
-declare const UpstreamsJsonSchema: JSONSchema;
+declare const UpstreamsJsonSchema: JsonSchema;
 
 type index$s_Upstream = Upstream;
 declare const index$s_UpstreamJsonSchema: typeof UpstreamJsonSchema;
@@ -11490,7 +11490,7 @@ declare const EnsembleBaseSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type EnsembleBase = z__default.infer<typeof EnsembleBaseSchema>;
-declare const EnsembleBaseJsonSchema: JSONSchema;
+declare const EnsembleBaseJsonSchema: JsonSchema;
 declare const EnsembleSchema$2: z__default.ZodObject<{
     id: z__default.ZodString;
     llms: z__default.ZodArray<z__default.ZodObject<{
@@ -12228,20 +12228,20 @@ declare const EnsembleSchema$2: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type Ensemble$2 = z__default.infer<typeof EnsembleSchema$2>;
-declare const EnsembleJsonSchema$2: JSONSchema;
+declare const EnsembleJsonSchema$2: JsonSchema;
 
 declare const ListItemSchema$3: z__default.ZodObject<{
     id: z__default.ZodString;
 }, z__default.core.$strip>;
 type ListItem$3 = z__default.infer<typeof ListItemSchema$3>;
-declare const ListItemJsonSchema$3: JSONSchema;
+declare const ListItemJsonSchema$3: JsonSchema;
 declare const ListSchema$3: z__default.ZodObject<{
     data: z__default.ZodArray<z__default.ZodObject<{
         id: z__default.ZodString;
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type List$3 = z__default.infer<typeof ListSchema$3>;
-declare const ListJsonSchema$3: JSONSchema;
+declare const ListJsonSchema$3: JsonSchema;
 declare function list$3(client: ObjectiveAI, options?: RequestOptions): Promise<List$3>;
 declare const RetrieveSchema$4: z__default.ZodObject<{
     id: z__default.ZodString;
@@ -12981,7 +12981,7 @@ declare const RetrieveSchema$4: z__default.ZodObject<{
     created: z__default.ZodUInt32;
 }, z__default.core.$strip>;
 type Retrieve$4 = z__default.infer<typeof RetrieveSchema$4>;
-declare const RetrieveJsonSchema$4: JSONSchema;
+declare const RetrieveJsonSchema$4: JsonSchema;
 declare function retrieve$5(client: ObjectiveAI, id: string, options?: RequestOptions): Promise<Retrieve$4>;
 declare const HistoricalUsageSchema$3: z__default.ZodObject<{
     requests: z__default.ZodUInt32;
@@ -12990,7 +12990,7 @@ declare const HistoricalUsageSchema$3: z__default.ZodObject<{
     total_cost: z__default.ZodNumber;
 }, z__default.core.$strip>;
 type HistoricalUsage$3 = z__default.infer<typeof HistoricalUsageSchema$3>;
-declare const HistoricalUsageJsonSchema$3: JSONSchema;
+declare const HistoricalUsageJsonSchema$3: JsonSchema;
 declare function retrieveUsage$3(client: ObjectiveAI, id: string, options?: RequestOptions): Promise<HistoricalUsage$3>;
 
 declare function validate$1(ensemble: EnsembleBase): Ensemble$2;
@@ -13368,7 +13368,7 @@ declare const EnsembleLlmBaseSchema: z__default.ZodObject<{
     }>>>;
 }, z__default.core.$strip>;
 type EnsembleLlmBase = z__default.infer<typeof EnsembleLlmBaseSchema>;
-declare const EnsembleLlmBaseJsonSchema: JSONSchema;
+declare const EnsembleLlmBaseJsonSchema: JsonSchema;
 declare const EnsembleLlmBaseWithFallbacksAndCountSchema: z__default.ZodObject<{
     model: z__default.ZodString;
     output_mode: z__default.ZodEnum<{
@@ -14101,7 +14101,7 @@ declare const EnsembleLlmBaseWithFallbacksAndCountSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>>>;
 }, z__default.core.$strip>;
 type EnsembleLlmBaseWithFallbacksAndCount = z__default.infer<typeof EnsembleLlmBaseWithFallbacksAndCountSchema>;
-declare const EnsembleLlmBaseWithFallbacksAndCountJsonSchema: JSONSchema;
+declare const EnsembleLlmBaseWithFallbacksAndCountJsonSchema: JsonSchema;
 declare const EnsembleLlmSchema: z__default.ZodObject<{
     model: z__default.ZodString;
     output_mode: z__default.ZodEnum<{
@@ -14469,7 +14469,7 @@ declare const EnsembleLlmSchema: z__default.ZodObject<{
     id: z__default.ZodString;
 }, z__default.core.$strip>;
 type EnsembleLlm = z__default.infer<typeof EnsembleLlmSchema>;
-declare const EnsembleLlmJsonSchema: JSONSchema;
+declare const EnsembleLlmJsonSchema: JsonSchema;
 declare const EnsembleLlmWithFallbacksAndCountSchema: z__default.ZodObject<{
     model: z__default.ZodString;
     output_mode: z__default.ZodEnum<{
@@ -15204,20 +15204,20 @@ declare const EnsembleLlmWithFallbacksAndCountSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>>>;
 }, z__default.core.$strip>;
 type EnsembleLlmWithFallbacksAndCount = z__default.infer<typeof EnsembleLlmWithFallbacksAndCountSchema>;
-declare const EnsembleLlmWithFallbacksAndCountJsonSchema: JSONSchema;
+declare const EnsembleLlmWithFallbacksAndCountJsonSchema: JsonSchema;
 
 declare const ListItemSchema$2: z__default.ZodObject<{
     id: z__default.ZodString;
 }, z__default.core.$strip>;
 type ListItem$2 = z__default.infer<typeof ListItemSchema$2>;
-declare const ListItemJsonSchema$2: JSONSchema;
+declare const ListItemJsonSchema$2: JsonSchema;
 declare const ListSchema$2: z__default.ZodObject<{
     data: z__default.ZodArray<z__default.ZodObject<{
         id: z__default.ZodString;
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type List$2 = z__default.infer<typeof ListSchema$2>;
-declare const ListJsonSchema$2: JSONSchema;
+declare const ListJsonSchema$2: JsonSchema;
 declare function list$2(client: ObjectiveAI, options?: RequestOptions): Promise<List$2>;
 declare const RetrieveSchema$3: z__default.ZodObject<{
     model: z__default.ZodString;
@@ -15587,7 +15587,7 @@ declare const RetrieveSchema$3: z__default.ZodObject<{
     created: z__default.ZodUInt32;
 }, z__default.core.$strip>;
 type Retrieve$3 = z__default.infer<typeof RetrieveSchema$3>;
-declare const RetrieveJsonSchema$3: JSONSchema;
+declare const RetrieveJsonSchema$3: JsonSchema;
 declare function retrieve$4(client: ObjectiveAI, id: string, options?: RequestOptions): Promise<Retrieve$3>;
 declare const HistoricalUsageSchema$2: z__default.ZodObject<{
     requests: z__default.ZodUInt32;
@@ -15596,7 +15596,7 @@ declare const HistoricalUsageSchema$2: z__default.ZodObject<{
     total_cost: z__default.ZodNumber;
 }, z__default.core.$strip>;
 type HistoricalUsage$2 = z__default.infer<typeof HistoricalUsageSchema$2>;
-declare const HistoricalUsageJsonSchema$2: JSONSchema;
+declare const HistoricalUsageJsonSchema$2: JsonSchema;
 declare function retrieveUsage$2(client: ObjectiveAI, id: string, options?: RequestOptions): Promise<HistoricalUsage$2>;
 
 declare const OutputModeSchema: z__default.ZodEnum<{
@@ -15605,7 +15605,7 @@ declare const OutputModeSchema: z__default.ZodEnum<{
     tool_call: "tool_call";
 }>;
 type OutputMode = z__default.infer<typeof OutputModeSchema>;
-declare const OutputModeJsonSchema: JSONSchema;
+declare const OutputModeJsonSchema: JsonSchema;
 
 declare const ProviderQuantizationSchema: z__default.ZodEnum<{
     unknown: "unknown";
@@ -15619,7 +15619,7 @@ declare const ProviderQuantizationSchema: z__default.ZodEnum<{
     fp32: "fp32";
 }>;
 type ProviderQuantization = z__default.infer<typeof ProviderQuantizationSchema>;
-declare const ProviderQuantizationJsonSchema: JSONSchema;
+declare const ProviderQuantizationJsonSchema: JsonSchema;
 declare const ProviderSchema: z__default.ZodObject<{
     allow_fallbacks: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
     require_parameters: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -15639,7 +15639,7 @@ declare const ProviderSchema: z__default.ZodObject<{
     }>>>>;
 }, z__default.core.$strip>;
 type Provider = z__default.infer<typeof ProviderSchema>;
-declare const ProviderJsonSchema: JSONSchema;
+declare const ProviderJsonSchema: JsonSchema;
 
 declare const ReasoningEffortSchema: z__default.ZodEnum<{
     low: "low";
@@ -15650,14 +15650,14 @@ declare const ReasoningEffortSchema: z__default.ZodEnum<{
     xhigh: "xhigh";
 }>;
 type ReasoningEffort = z__default.infer<typeof ReasoningEffortSchema>;
-declare const ReasoningEffortJsonSchema: JSONSchema;
+declare const ReasoningEffortJsonSchema: JsonSchema;
 declare const ReasoningSummaryVerbositySchema: z__default.ZodEnum<{
     auto: "auto";
     concise: "concise";
     detailed: "detailed";
 }>;
 type ReasoningSummaryVerbosity = z__default.infer<typeof ReasoningSummaryVerbositySchema>;
-declare const ReasoningSummaryVerbosityJsonSchema: JSONSchema;
+declare const ReasoningSummaryVerbosityJsonSchema: JsonSchema;
 declare const ReasoningSchema$1: z__default.ZodObject<{
     enabled: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
     max_tokens: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodInt>>;
@@ -15676,11 +15676,11 @@ declare const ReasoningSchema$1: z__default.ZodObject<{
     }>>>;
 }, z__default.core.$strip>;
 type Reasoning$1 = z__default.infer<typeof ReasoningSchema$1>;
-declare const ReasoningJsonSchema$1: JSONSchema;
+declare const ReasoningJsonSchema$1: JsonSchema;
 
 declare const StopSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodString>]>;
 type Stop = z__default.infer<typeof StopSchema>;
-declare const StopJsonSchema: JSONSchema;
+declare const StopJsonSchema: JsonSchema;
 
 declare const VerbositySchema: z__default.ZodEnum<{
     low: "low";
@@ -15689,7 +15689,7 @@ declare const VerbositySchema: z__default.ZodEnum<{
     max: "max";
 }>;
 type Verbosity = z__default.infer<typeof VerbositySchema>;
-declare const VerbosityJsonSchema: JSONSchema;
+declare const VerbosityJsonSchema: JsonSchema;
 
 declare function validate(ensemble: EnsembleLlmBase): EnsembleLlm;
 
@@ -15738,7 +15738,7 @@ interface ObjectInputSchema {
     required?: string[] | null;
 }
 declare const ObjectInputSchemaSchema: z__default.ZodType<ObjectInputSchema>;
-declare const ObjectInputSchemaJsonSchema: JSONSchema;
+declare const ObjectInputSchemaJsonSchema: JsonSchema;
 type ObjectInputSchemaToZodSchema = z__default.ZodObject<Record<string, z__default.ZodOptional<z__default.ZodType<InputValue>> | z__default.ZodType<InputValue>>>;
 declare namespace ObjectInputSchemaExt {
     function toZodSchema(self: ObjectInputSchema): ObjectInputSchemaToZodSchema;
@@ -15751,7 +15751,7 @@ interface ArrayInputSchema {
     items: InputSchema;
 }
 declare const ArrayInputSchemaSchema: z__default.ZodType<ArrayInputSchema>;
-declare const ArrayInputSchemaJsonSchema: JSONSchema;
+declare const ArrayInputSchemaJsonSchema: JsonSchema;
 type ArrayInputSchemaToZodSchema = z__default.ZodArray<z__default.ZodType<InputValue>>;
 declare namespace ArrayInputSchemaExt {
     function toZodSchema(self: ArrayInputSchema): ArrayInputSchemaToZodSchema;
@@ -15762,7 +15762,7 @@ declare const StringInputSchemaSchema: z__default.ZodObject<{
     enum: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodArray<z__default.ZodString>>>;
 }, z__default.core.$strip>;
 type StringInputSchema = z__default.infer<typeof StringInputSchemaSchema>;
-declare const StringInputSchemaJsonSchema: JSONSchema;
+declare const StringInputSchemaJsonSchema: JsonSchema;
 type StringInputSchemaToZodSchema = z__default.ZodString | z__default.ZodEnum<{
     [x: string]: string;
 }>;
@@ -15776,7 +15776,7 @@ declare const NumberInputSchemaSchema: z__default.ZodObject<{
     maximum: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
 }, z__default.core.$strip>;
 type NumberInputSchema = z__default.infer<typeof NumberInputSchemaSchema>;
-declare const NumberInputSchemaJsonSchema: JSONSchema;
+declare const NumberInputSchemaJsonSchema: JsonSchema;
 type NumberInputSchemaToZodSchema = z__default.ZodNumber;
 declare namespace NumberInputSchemaExt {
     function toZodSchema(self: NumberInputSchema): NumberInputSchemaToZodSchema;
@@ -15788,7 +15788,7 @@ declare const IntegerInputSchemaSchema: z__default.ZodObject<{
     maximum: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodUInt32>>;
 }, z__default.core.$strip>;
 type IntegerInputSchema = z__default.infer<typeof IntegerInputSchemaSchema>;
-declare const IntegerInputSchemaJsonSchema: JSONSchema;
+declare const IntegerInputSchemaJsonSchema: JsonSchema;
 type IntegerInputSchemaToZodSchema = z__default.ZodInt;
 declare namespace IntegerInputSchemaExt {
     function toZodSchema(self: IntegerInputSchema): IntegerInputSchemaToZodSchema;
@@ -15798,7 +15798,7 @@ declare const BooleanInputSchemaSchema: z__default.ZodObject<{
     description: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type BooleanInputSchema = z__default.infer<typeof BooleanInputSchemaSchema>;
-declare const BooleanInputSchemaJsonSchema: JSONSchema;
+declare const BooleanInputSchemaJsonSchema: JsonSchema;
 type BooleanInputSchemaToZodSchema = z__default.ZodBoolean;
 declare namespace BooleanInputSchemaExt {
     function toZodSchema(self: BooleanInputSchema): BooleanInputSchemaToZodSchema;
@@ -15808,7 +15808,7 @@ declare const ImageInputSchemaSchema: z__default.ZodObject<{
     description: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type ImageInputSchema = z__default.infer<typeof ImageInputSchemaSchema>;
-declare const ImageInputSchemaJsonSchema: JSONSchema;
+declare const ImageInputSchemaJsonSchema: JsonSchema;
 type ImageInputSchemaToZodSchema = typeof ImageRichContentPartSchema;
 declare namespace ImageInputSchemaExt {
     function toZodSchema(self: ImageInputSchema): ImageInputSchemaToZodSchema;
@@ -15818,7 +15818,7 @@ declare const AudioInputSchemaSchema: z__default.ZodObject<{
     description: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type AudioInputSchema = z__default.infer<typeof AudioInputSchemaSchema>;
-declare const AudioInputSchemaJsonSchema: JSONSchema;
+declare const AudioInputSchemaJsonSchema: JsonSchema;
 type AudioInputSchemaToZodSchema = typeof AudioRichContentPartSchema;
 declare namespace AudioInputSchemaExt {
     function toZodSchema(self: AudioInputSchema): AudioInputSchemaToZodSchema;
@@ -15828,7 +15828,7 @@ declare const VideoInputSchemaSchema: z__default.ZodObject<{
     description: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type VideoInputSchema = z__default.infer<typeof VideoInputSchemaSchema>;
-declare const VideoInputSchemaJsonSchema: JSONSchema;
+declare const VideoInputSchemaJsonSchema: JsonSchema;
 type VideoInputSchemaToZodSchema = typeof VideoRichContentPartSchema;
 declare namespace VideoInputSchemaExt {
     function toZodSchema(self: VideoInputSchema): VideoInputSchemaToZodSchema;
@@ -15838,7 +15838,7 @@ declare const FileInputSchemaSchema: z__default.ZodObject<{
     description: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>;
 type FileInputSchema = z__default.infer<typeof FileInputSchemaSchema>;
-declare const FileInputSchemaJsonSchema: JSONSchema;
+declare const FileInputSchemaJsonSchema: JsonSchema;
 type FileInputSchemaToZodSchema = typeof FileRichContentPartSchema;
 declare namespace FileInputSchemaExt {
     function toZodSchema(self: FileInputSchema): FileInputSchemaToZodSchema;
@@ -15847,7 +15847,7 @@ interface AnyOfInputSchema {
     anyOf: InputSchema[];
 }
 declare const AnyOfInputSchemaSchema: z__default.ZodType<AnyOfInputSchema>;
-declare const AnyOfInputSchemaJsonSchema: JSONSchema;
+declare const AnyOfInputSchemaJsonSchema: JsonSchema;
 type AnyOfInputSchemaToZodSchema = z__default.ZodUnion<z__default.ZodType<InputValue>[]>;
 declare namespace AnyOfInputSchemaExt {
     function toZodSchema(self: AnyOfInputSchema): AnyOfInputSchemaToZodSchema;
@@ -15883,7 +15883,7 @@ declare const InputSchemaSchema: z__default.ZodUnion<readonly [z__default.ZodTyp
     description: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
 }, z__default.core.$strip>, z__default.ZodType<AnyOfInputSchema, unknown, z__default.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
 type InputSchema = z__default.infer<typeof InputSchemaSchema>;
-declare const InputSchemaJsonSchema: JSONSchema;
+declare const InputSchemaJsonSchema: JsonSchema;
 type InputSchemaToZodSchema = ObjectInputSchemaToZodSchema | ArrayInputSchemaToZodSchema | StringInputSchemaToZodSchema | NumberInputSchemaToZodSchema | IntegerInputSchemaToZodSchema | BooleanInputSchemaToZodSchema | ImageInputSchemaToZodSchema | AudioInputSchemaToZodSchema | VideoInputSchemaToZodSchema | FileInputSchemaToZodSchema | AnyOfInputSchemaToZodSchema;
 declare namespace InputSchemaExt {
     function toZodSchema(self: InputSchema): InputSchemaToZodSchema;
@@ -15892,12 +15892,12 @@ type InputValue = ImageRichContentPart | AudioRichContentPart | VideoRichContent
     [key: string]: InputValue | undefined;
 } | InputValue[] | string | number | boolean;
 declare const InputValueSchema: z__default.ZodType<InputValue>;
-declare const InputValueJsonSchema: JSONSchema;
+declare const InputValueJsonSchema: JsonSchema;
 type InputValueExpression = ImageRichContentPart | AudioRichContentPart | VideoRichContentPart | FileRichContentPart | {
     [key: string]: InputValueExpression;
 } | InputValueExpression[] | string | number | boolean | Expression;
 declare const InputValueExpressionSchema: z__default.ZodType<InputValueExpression>;
-declare const InputValueExpressionJsonSchema: JSONSchema;
+declare const InputValueExpressionJsonSchema: JsonSchema;
 
 declare const AlphaScalarFunctionInputSchemaSchema: z.ZodType<ObjectInputSchema, unknown, zod_v4_core.$ZodTypeInternals<ObjectInputSchema, unknown>>;
 type AlphaScalarFunctionInputSchema = typeof ObjectInputSchemaSchema;
@@ -15962,7 +15962,7 @@ declare const AlphaScalarFunctionTaskExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type AlphaScalarFunctionTaskExpression = z__default.infer<typeof AlphaScalarFunctionTaskExpressionSchema>;
-declare const AlphaScalarFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaScalarFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const PlaceholderAlphaScalarFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"placeholder.alpha.scalar.function">;
     name: z__default.ZodString;
@@ -16002,7 +16002,7 @@ declare const PlaceholderAlphaScalarFunctionTaskExpressionSchema: z__default.Zod
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type PlaceholderAlphaScalarFunctionTaskExpression = z__default.infer<typeof PlaceholderAlphaScalarFunctionTaskExpressionSchema>;
-declare const PlaceholderAlphaScalarFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const PlaceholderAlphaScalarFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaScalarBranchTaskExpressionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.scalar.function">;
     remote: z__default.ZodEnum<{
@@ -16083,7 +16083,7 @@ declare const AlphaScalarBranchTaskExpressionSchema: z__default.ZodDiscriminated
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">;
 type AlphaScalarBranchTaskExpression = z__default.infer<typeof AlphaScalarBranchTaskExpressionSchema>;
-declare const AlphaScalarBranchTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaScalarBranchTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaScalarBranchTaskExpressionsSchema: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.scalar.function">;
     remote: z__default.ZodEnum<{
@@ -16164,7 +16164,7 @@ declare const AlphaScalarBranchTaskExpressionsSchema: z__default.ZodArray<z__def
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">>;
 type AlphaScalarBranchTaskExpressions = z__default.infer<typeof AlphaScalarBranchTaskExpressionsSchema>;
-declare const AlphaScalarBranchTaskExpressionsJsonSchema: JSONSchema;
+declare const AlphaScalarBranchTaskExpressionsJsonSchema: JsonSchema;
 declare const AlphaScalarVectorCompletionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.completion">;
     skip: z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -16240,7 +16240,7 @@ declare const AlphaScalarVectorCompletionTaskExpressionSchema: z__default.ZodObj
     }, z__default.core.$strip>], "type">>]>>;
 }, z__default.core.$strip>;
 type AlphaScalarVectorCompletionTaskExpression = z__default.infer<typeof AlphaScalarVectorCompletionTaskExpressionSchema>;
-declare const AlphaScalarVectorCompletionTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaScalarVectorCompletionTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaScalarLeafTaskExpressionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.completion">;
     skip: z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -16316,7 +16316,7 @@ declare const AlphaScalarLeafTaskExpressionSchema: z__default.ZodDiscriminatedUn
     }, z__default.core.$strip>], "type">>]>>;
 }, z__default.core.$strip>], "type">;
 type AlphaScalarLeafTaskExpression = z__default.infer<typeof AlphaScalarLeafTaskExpressionSchema>;
-declare const AlphaScalarLeafTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaScalarLeafTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaScalarLeafTaskExpressionsSchema: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.completion">;
     skip: z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -16392,7 +16392,7 @@ declare const AlphaScalarLeafTaskExpressionsSchema: z__default.ZodArray<z__defau
     }, z__default.core.$strip>], "type">>]>>;
 }, z__default.core.$strip>], "type">>;
 type AlphaScalarLeafTaskExpressions = z__default.infer<typeof AlphaScalarLeafTaskExpressionsSchema>;
-declare const AlphaScalarLeafTaskExpressionsJsonSchema: JSONSchema;
+declare const AlphaScalarLeafTaskExpressionsJsonSchema: JsonSchema;
 
 declare const AlphaScalarBranchRemoteFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.scalar.branch.function">;
@@ -16479,7 +16479,7 @@ declare const AlphaScalarBranchRemoteFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>], "type">>;
 }, z__default.core.$strip>;
 type AlphaScalarBranchRemoteFunction = z__default.infer<typeof AlphaScalarBranchRemoteFunctionSchema>;
-declare const AlphaScalarBranchRemoteFunctionJsonSchema: JSONSchema;
+declare const AlphaScalarBranchRemoteFunctionJsonSchema: JsonSchema;
 declare const AlphaScalarLeafRemoteFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.scalar.leaf.function">;
     description: z__default.ZodString;
@@ -16560,7 +16560,7 @@ declare const AlphaScalarLeafRemoteFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>], "type">>;
 }, z__default.core.$strip>;
 type AlphaScalarLeafRemoteFunction = z__default.infer<typeof AlphaScalarLeafRemoteFunctionSchema>;
-declare const AlphaScalarLeafRemoteFunctionJsonSchema: JSONSchema;
+declare const AlphaScalarLeafRemoteFunctionJsonSchema: JsonSchema;
 declare const AlphaScalarRemoteFunctionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.scalar.branch.function">;
     description: z__default.ZodString;
@@ -16724,7 +16724,7 @@ declare const AlphaScalarRemoteFunctionSchema: z__default.ZodDiscriminatedUnion<
     }, z__default.core.$strip>], "type">>;
 }, z__default.core.$strip>], "type">;
 type AlphaScalarRemoteFunction = z__default.infer<typeof AlphaScalarRemoteFunctionSchema>;
-declare const AlphaScalarRemoteFunctionJsonSchema: JSONSchema;
+declare const AlphaScalarRemoteFunctionJsonSchema: JsonSchema;
 
 declare const InlineScalarFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
@@ -18041,7 +18041,7 @@ declare const InlineScalarFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>], "type">>;
 }, z__default.core.$strip>;
 type InlineScalarFunction = z__default.infer<typeof InlineScalarFunctionSchema>;
-declare const InlineScalarFunctionJsonSchema: JSONSchema;
+declare const InlineScalarFunctionJsonSchema: JsonSchema;
 declare const InlineVectorFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.function">;
     tasks: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -19389,7 +19389,7 @@ declare const InlineVectorFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>>>;
 }, z__default.core.$strip>;
 type InlineVectorFunction = z__default.infer<typeof InlineVectorFunctionSchema>;
-declare const InlineVectorFunctionJsonSchema: JSONSchema;
+declare const InlineVectorFunctionJsonSchema: JsonSchema;
 declare const InlineFunctionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     tasks: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -22050,7 +22050,7 @@ declare const InlineFunctionSchema: z__default.ZodDiscriminatedUnion<[z__default
     }, z__default.core.$strict>]>>>;
 }, z__default.core.$strip>], "type">;
 type InlineFunction = z__default.infer<typeof InlineFunctionSchema>;
-declare const InlineFunctionJsonSchema: JSONSchema;
+declare const InlineFunctionJsonSchema: JsonSchema;
 declare const RemoteScalarFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     tasks: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -23397,7 +23397,7 @@ declare const RemoteScalarFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>, z__default.ZodType<AnyOfInputSchema, unknown, z__default.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
 }, z__default.core.$strip>;
 type RemoteScalarFunction = z__default.infer<typeof RemoteScalarFunctionSchema>;
-declare const RemoteScalarFunctionJsonSchema: JSONSchema;
+declare const RemoteScalarFunctionJsonSchema: JsonSchema;
 declare const RemoteVectorFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.function">;
     tasks: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -24792,7 +24792,7 @@ declare const RemoteVectorFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type RemoteVectorFunction = z__default.infer<typeof RemoteVectorFunctionSchema>;
-declare const RemoteVectorFunctionJsonSchema: JSONSchema;
+declare const RemoteVectorFunctionJsonSchema: JsonSchema;
 declare const RemoteFunctionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     tasks: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -27531,7 +27531,7 @@ declare const RemoteFunctionSchema: z__default.ZodDiscriminatedUnion<[z__default
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">;
 type RemoteFunction = z__default.infer<typeof RemoteFunctionSchema>;
-declare const RemoteFunctionJsonSchema: JSONSchema;
+declare const RemoteFunctionJsonSchema: JsonSchema;
 declare const FunctionSchema: z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     tasks: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -32928,7 +32928,7 @@ declare const FunctionSchema: z__default.ZodUnion<readonly [z__default.ZodDiscri
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">]>;
 type Function = z__default.infer<typeof FunctionSchema>;
-declare const FunctionJsonSchema: JSONSchema;
+declare const FunctionJsonSchema: JsonSchema;
 
 /**
  * Alpha check for a leaf scalar function (depth 0, scalar output).
@@ -33024,7 +33024,7 @@ declare const AlphaVectorFunctionInputSchemaSchema: z__default.ZodObject<{
     }, z__default.core.$strip>, z__default.ZodType<AnyOfInputSchema, unknown, z__default.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
 }, z__default.core.$strip>;
 type AlphaVectorFunctionInputSchema = z__default.infer<typeof AlphaVectorFunctionInputSchemaSchema>;
-declare const AlphaVectorFunctionInputSchemaJsonSchema: JSONSchema;
+declare const AlphaVectorFunctionInputSchemaJsonSchema: JsonSchema;
 declare const AlphaVectorFunctionInputExpressionSchema: z__default.ZodObject<{
     context: z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodObject<{
         $jmespath: z__default.ZodString;
@@ -33060,7 +33060,7 @@ declare const AlphaVectorFunctionInputExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type AlphaVectorFunctionInputExpression = z__default.infer<typeof AlphaVectorFunctionInputExpressionSchema>;
-declare const AlphaVectorFunctionInputExpressionJsonSchema: JSONSchema;
+declare const AlphaVectorFunctionInputExpressionJsonSchema: JsonSchema;
 
 declare const AlphaVectorScalarFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.scalar.function">;
@@ -33105,7 +33105,7 @@ declare const AlphaVectorScalarFunctionTaskExpressionSchema: z__default.ZodObjec
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type AlphaVectorScalarFunctionTaskExpression = z__default.infer<typeof AlphaVectorScalarFunctionTaskExpressionSchema>;
-declare const AlphaVectorScalarFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaVectorScalarFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaVectorFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.vector.function">;
     remote: z__default.ZodEnum<{
@@ -33167,7 +33167,7 @@ declare const AlphaVectorFunctionTaskExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type AlphaVectorFunctionTaskExpression = z__default.infer<typeof AlphaVectorFunctionTaskExpressionSchema>;
-declare const AlphaVectorFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaVectorFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const PlaceholderAlphaVectorScalarFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"placeholder.alpha.scalar.function">;
     name: z__default.ZodString;
@@ -33207,7 +33207,7 @@ declare const PlaceholderAlphaVectorScalarFunctionTaskExpressionSchema: z__defau
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type PlaceholderAlphaVectorScalarFunctionTaskExpression = z__default.infer<typeof PlaceholderAlphaVectorScalarFunctionTaskExpressionSchema>;
-declare const PlaceholderAlphaVectorScalarFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const PlaceholderAlphaVectorScalarFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const PlaceholderAlphaVectorFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"placeholder.alpha.vector.function">;
     name: z__default.ZodString;
@@ -33297,7 +33297,7 @@ declare const PlaceholderAlphaVectorFunctionTaskExpressionSchema: z__default.Zod
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type PlaceholderAlphaVectorFunctionTaskExpression = z__default.infer<typeof PlaceholderAlphaVectorFunctionTaskExpressionSchema>;
-declare const PlaceholderAlphaVectorFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const PlaceholderAlphaVectorFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaVectorBranchTaskExpressionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.scalar.function">;
     remote: z__default.ZodEnum<{
@@ -33524,7 +33524,7 @@ declare const AlphaVectorBranchTaskExpressionSchema: z__default.ZodDiscriminated
     }, z__default.core.$strip>;
 }, z__default.core.$strip>], "type">;
 type AlphaVectorBranchTaskExpression = z__default.infer<typeof AlphaVectorBranchTaskExpressionSchema>;
-declare const AlphaVectorBranchTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaVectorBranchTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaVectorBranchTaskExpressionsSchema: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.scalar.function">;
     remote: z__default.ZodEnum<{
@@ -33751,7 +33751,7 @@ declare const AlphaVectorBranchTaskExpressionsSchema: z__default.ZodArray<z__def
     }, z__default.core.$strip>;
 }, z__default.core.$strip>], "type">>;
 type AlphaVectorBranchTaskExpressions = z__default.infer<typeof AlphaVectorBranchTaskExpressionsSchema>;
-declare const AlphaVectorBranchTaskExpressionsJsonSchema: JSONSchema;
+declare const AlphaVectorBranchTaskExpressionsJsonSchema: JsonSchema;
 declare const AlphaVectorVectorCompletionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.completion">;
     skip: z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -33804,7 +33804,7 @@ declare const AlphaVectorVectorCompletionTaskExpressionSchema: z__default.ZodObj
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type AlphaVectorVectorCompletionTaskExpression = z__default.infer<typeof AlphaVectorVectorCompletionTaskExpressionSchema>;
-declare const AlphaVectorVectorCompletionTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaVectorVectorCompletionTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaVectorLeafTaskExpressionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.completion">;
     skip: z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -33857,7 +33857,7 @@ declare const AlphaVectorLeafTaskExpressionSchema: z__default.ZodDiscriminatedUn
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">;
 type AlphaVectorLeafTaskExpression = z__default.infer<typeof AlphaVectorLeafTaskExpressionSchema>;
-declare const AlphaVectorLeafTaskExpressionJsonSchema: JSONSchema;
+declare const AlphaVectorLeafTaskExpressionJsonSchema: JsonSchema;
 declare const AlphaVectorLeafTaskExpressionsSchema: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.completion">;
     skip: z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -33910,7 +33910,7 @@ declare const AlphaVectorLeafTaskExpressionsSchema: z__default.ZodArray<z__defau
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">>;
 type AlphaVectorLeafTaskExpressions = z__default.infer<typeof AlphaVectorLeafTaskExpressionsSchema>;
-declare const AlphaVectorLeafTaskExpressionsJsonSchema: JSONSchema;
+declare const AlphaVectorLeafTaskExpressionsJsonSchema: JsonSchema;
 
 declare const AlphaVectorBranchRemoteFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.vector.branch.function">;
@@ -34175,7 +34175,7 @@ declare const AlphaVectorBranchRemoteFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>], "type">>;
 }, z__default.core.$strip>;
 type AlphaVectorBranchRemoteFunction = z__default.infer<typeof AlphaVectorBranchRemoteFunctionSchema>;
-declare const AlphaVectorBranchRemoteFunctionJsonSchema: JSONSchema;
+declare const AlphaVectorBranchRemoteFunctionJsonSchema: JsonSchema;
 declare const AlphaVectorLeafRemoteFunctionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.vector.leaf.function">;
     description: z__default.ZodString;
@@ -34265,7 +34265,7 @@ declare const AlphaVectorLeafRemoteFunctionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>], "type">>;
 }, z__default.core.$strip>;
 type AlphaVectorLeafRemoteFunction = z__default.infer<typeof AlphaVectorLeafRemoteFunctionSchema>;
-declare const AlphaVectorLeafRemoteFunctionJsonSchema: JSONSchema;
+declare const AlphaVectorLeafRemoteFunctionJsonSchema: JsonSchema;
 declare const AlphaVectorRemoteFunctionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"alpha.vector.branch.function">;
     description: z__default.ZodString;
@@ -34616,7 +34616,7 @@ declare const AlphaVectorRemoteFunctionSchema: z__default.ZodDiscriminatedUnion<
     }, z__default.core.$strip>], "type">>;
 }, z__default.core.$strip>], "type">;
 type AlphaVectorRemoteFunction = z__default.infer<typeof AlphaVectorRemoteFunctionSchema>;
-declare const AlphaVectorRemoteFunctionJsonSchema: JSONSchema;
+declare const AlphaVectorRemoteFunctionJsonSchema: JsonSchema;
 
 /**
  * Alpha check for a leaf vector function (depth 0, vector output).
@@ -35295,20 +35295,20 @@ declare const RemoteSchema: z__default.ZodEnum<{
     filesystem: "filesystem";
 }>;
 type Remote = z__default.infer<typeof RemoteSchema>;
-declare const RemoteJsonSchema: JSONSchema;
+declare const RemoteJsonSchema: JsonSchema;
 
 declare const ProfileEntrySchema: z__default.ZodObject<{
     weight: z__default.ZodNumber;
     invert: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
 type ProfileEntry = z__default.infer<typeof ProfileEntrySchema>;
-declare const ProfileEntryJsonSchema: JSONSchema;
+declare const ProfileEntryJsonSchema: JsonSchema;
 declare const ProfileSchema$1: z__default.ZodUnion<readonly [z__default.ZodArray<z__default.ZodNumber>, z__default.ZodArray<z__default.ZodObject<{
     weight: z__default.ZodNumber;
     invert: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>>]>;
 type Profile$1 = z__default.infer<typeof ProfileSchema$1>;
-declare const ProfileJsonSchema$1: JSONSchema;
+declare const ProfileJsonSchema$1: JsonSchema;
 
 declare const InlineAutoProfileSchema: z__default.ZodObject<{
     ensemble: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodObject<{
@@ -39837,17 +39837,17 @@ type Profile = z__default.infer<typeof ProfileSchema>;
 declare namespace ProfileExt {
     function validate(self: Profile): void;
 }
-declare const InlineAutoProfileJsonSchema: JSONSchema;
-declare const RemoteAutoProfileJsonSchema: JSONSchema;
-declare const RemoteTaskProfileJsonSchema: JSONSchema;
-declare const PlaceholderTaskProfileJsonSchema: JSONSchema;
-declare const TaskProfileJsonSchema: JSONSchema;
-declare const TaskProfilesJsonSchema: JSONSchema;
-declare const InlineTasksProfileJsonSchema: JSONSchema;
-declare const RemoteTasksProfileJsonSchema: JSONSchema;
-declare const InlineProfileJsonSchema: JSONSchema;
-declare const RemoteProfileJsonSchema: JSONSchema;
-declare const ProfileJsonSchema: JSONSchema;
+declare const InlineAutoProfileJsonSchema: JsonSchema;
+declare const RemoteAutoProfileJsonSchema: JsonSchema;
+declare const RemoteTaskProfileJsonSchema: JsonSchema;
+declare const PlaceholderTaskProfileJsonSchema: JsonSchema;
+declare const TaskProfileJsonSchema: JsonSchema;
+declare const TaskProfilesJsonSchema: JsonSchema;
+declare const InlineTasksProfileJsonSchema: JsonSchema;
+declare const RemoteTasksProfileJsonSchema: JsonSchema;
+declare const InlineProfileJsonSchema: JsonSchema;
+declare const RemoteProfileJsonSchema: JsonSchema;
+declare const ProfileJsonSchema: JsonSchema;
 
 declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
@@ -40627,7 +40627,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseSchema
     other_chunk_timeout: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodUInt32>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBase = z__default.infer<typeof FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseSchema>;
-declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -41407,7 +41407,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingS
     stream: z__default.ZodLiteral<true>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreaming = z__default.infer<typeof FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingSchema>;
-declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -42187,7 +42187,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreami
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodLiteral<false>>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreaming = z__default.infer<typeof FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingSchema>;
-declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -42967,7 +42967,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema: z_
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionRemoteProfile = z__default.infer<typeof FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema>;
-declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -44491,7 +44491,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema
     }, z__default.core.$strip>]>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionInlineProfileBase = z__default.infer<typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema>;
-declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -46016,7 +46016,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingS
     stream: z__default.ZodLiteral<true>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreaming = z__default.infer<typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingSchema>;
-declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -47541,7 +47541,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreami
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodLiteral<false>>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreaming = z__default.infer<typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingSchema>;
-declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -49066,7 +49066,7 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema: z_
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsRemoteFunctionInlineProfile = z__default.infer<typeof FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema>;
-declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -52504,7 +52504,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
     }, z__default.core.$strip>], "type">;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionRemoteProfileBase = z__default.infer<typeof FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema>;
-declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -55943,7 +55943,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
     stream: z__default.ZodLiteral<true>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreaming = z__default.infer<typeof FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingSchema>;
-declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -59382,7 +59382,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodLiteral<false>>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreaming = z__default.infer<typeof FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingSchema>;
-declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -62821,7 +62821,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z_
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionRemoteProfile = z__default.infer<typeof FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema>;
-declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -67004,7 +67004,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
     }, z__default.core.$strip>]>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionInlineProfileBase = z__default.infer<typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema>;
-declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -71188,7 +71188,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
     stream: z__default.ZodLiteral<true>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionInlineProfileStreaming = z__default.infer<typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingSchema>;
-declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -75372,7 +75372,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodLiteral<false>>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreaming = z__default.infer<typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingSchema>;
-declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingJsonSchema: JsonSchema;
 declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z__default.ZodObject<{
     retry_token: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -79556,7 +79556,7 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z_
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
 type FunctionExecutionCreateParamsInlineFunctionInlineProfile = z__default.infer<typeof FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema>;
-declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileJsonSchema: JSONSchema;
+declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileJsonSchema: JsonSchema;
 
 declare function inlineFunctionInlineProfileCreate(client: ObjectiveAI, body: FunctionExecutionCreateParamsInlineFunctionInlineProfileStreaming, options?: RequestOptions): Promise<Stream$1<FunctionExecutionChunk$1>>;
 declare function inlineFunctionInlineProfileCreate(client: ObjectiveAI, body: FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreaming, options?: RequestOptions): Promise<FunctionExecution$1>;
@@ -80322,20 +80322,20 @@ declare const ReasoningSchema: z__default.ZodObject<{
     }, z__default.core.$strip>]>>>>;
 }, z__default.core.$strip>;
 type Reasoning = z__default.infer<typeof ReasoningSchema>;
-declare const ReasoningJsonSchema: JSONSchema;
+declare const ReasoningJsonSchema: JsonSchema;
 
 declare const StrategyDefaultSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"default">;
 }, z__default.core.$strip>;
 type StrategyDefault = z__default.infer<typeof StrategyDefaultSchema>;
-declare const StrategyDefaultJsonSchema: JSONSchema;
+declare const StrategyDefaultJsonSchema: JsonSchema;
 declare const StrategySwissSystemSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"swiss_system">;
     pool: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
     rounds: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
 }, z__default.core.$strip>;
 type StrategySwissSystem = z__default.infer<typeof StrategySwissSystemSchema>;
-declare const StrategySwissSystemJsonSchema: JSONSchema;
+declare const StrategySwissSystemJsonSchema: JsonSchema;
 declare const StrategySchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"default">;
 }, z__default.core.$strip>, z__default.ZodObject<{
@@ -80344,7 +80344,7 @@ declare const StrategySchema: z__default.ZodDiscriminatedUnion<[z__default.ZodOb
     rounds: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodNumber>>;
 }, z__default.core.$strip>], "type">;
 type Strategy = z__default.infer<typeof StrategySchema>;
-declare const StrategyJsonSchema: JSONSchema;
+declare const StrategyJsonSchema: JsonSchema;
 
 type index$k_FunctionExecutionCreateParamsInlineFunctionInlineProfile = FunctionExecutionCreateParamsInlineFunctionInlineProfile;
 type index$k_FunctionExecutionCreateParamsInlineFunctionInlineProfileBase = FunctionExecutionCreateParamsInlineFunctionInlineProfileBase;
@@ -80844,19 +80844,19 @@ declare namespace index$j {
 
 declare const TaskIndexSchema: z__default.ZodUInt32;
 type TaskIndex = z__default.infer<typeof TaskIndexSchema>;
-declare const TaskIndexJsonSchema: JSONSchema;
+declare const TaskIndexJsonSchema: JsonSchema;
 declare const TaskTaskIndexSchema: z__default.ZodUInt32;
 type TaskTaskIndex = z__default.infer<typeof TaskTaskIndexSchema>;
-declare const TaskTaskIndexJsonSchema: JSONSchema;
+declare const TaskTaskIndexJsonSchema: JsonSchema;
 declare const TaskTaskPathSchema: z__default.ZodArray<z__default.ZodUInt32>;
 type TaskTaskPath = z__default.infer<typeof TaskTaskPathSchema>;
-declare const TaskTaskPathJsonSchema: JSONSchema;
+declare const TaskTaskPathJsonSchema: JsonSchema;
 declare const TaskSwissRoundSchema: z__default.ZodNumber;
 type TaskSwissRound = z__default.infer<typeof TaskSwissRoundSchema>;
-declare const TaskSwissRoundJsonSchema: JSONSchema;
+declare const TaskSwissRoundJsonSchema: JsonSchema;
 declare const TaskSwissPoolIndexSchema: z__default.ZodNumber;
 type TaskSwissPoolIndex = z__default.infer<typeof TaskSwissPoolIndexSchema>;
-declare const TaskSwissPoolIndexJsonSchema: JSONSchema;
+declare const TaskSwissPoolIndexJsonSchema: JsonSchema;
 
 declare const ReasoningSummarySchema: z__default.ZodObject<{
     id: z__default.ZodString;
@@ -81401,7 +81401,7 @@ declare const ChatCompletionChunkSchema: z__default.ZodObject<{
         message: z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>;
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
-declare const ChatCompletionChunkJsonSchema: JSONSchema;
+declare const ChatCompletionChunkJsonSchema: JsonSchema;
 type ChatCompletionChunk = z__default.infer<typeof ChatCompletionChunkSchema>;
 declare namespace ChatCompletionChunk {
     function merged(a: ChatCompletionChunk, b: ChatCompletionChunk): [ChatCompletionChunk, boolean];
@@ -81410,7 +81410,7 @@ declare namespace ChatCompletionChunk {
 
 declare const ResponseObjectSchema$3: z__default.ZodLiteral<"vector.completion.chunk">;
 type ResponseObject$3 = z__default.infer<typeof ResponseObjectSchema$3>;
-declare const ResponseObjectJsonSchema$1: JSONSchema;
+declare const ResponseObjectJsonSchema$1: JsonSchema;
 
 declare const VectorCompletionChunkSchema: z__default.ZodObject<{
     id: z__default.ZodString;
@@ -81554,7 +81554,7 @@ declare const VectorCompletionChunkSchema: z__default.ZodObject<{
         total_cost: z__default.ZodNumber;
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
-declare const VectorCompletionChunkJsonSchema: JSONSchema;
+declare const VectorCompletionChunkJsonSchema: JsonSchema;
 type VectorCompletionChunk = z__default.infer<typeof VectorCompletionChunkSchema>;
 declare namespace VectorCompletionChunk {
     function merged(a: VectorCompletionChunk, b: VectorCompletionChunk): [VectorCompletionChunk, boolean];
@@ -81671,11 +81671,11 @@ declare const ChatCompletionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type ChatCompletion = z__default.infer<typeof ChatCompletionSchema>;
-declare const ChatCompletionJsonSchema: JSONSchema;
+declare const ChatCompletionJsonSchema: JsonSchema;
 
 declare const ResponseObjectSchema$2: z__default.ZodLiteral<"vector.completion">;
 type ResponseObject$2 = z__default.infer<typeof ResponseObjectSchema$2>;
-declare const ResponseObjectJsonSchema: JSONSchema;
+declare const ResponseObjectJsonSchema: JsonSchema;
 
 declare const VectorCompletionSchema: z__default.ZodObject<{
     id: z__default.ZodString;
@@ -81819,7 +81819,7 @@ declare const VectorCompletionSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type VectorCompletion$1 = z__default.infer<typeof VectorCompletionSchema>;
-declare const VectorCompletionJsonSchema: JSONSchema;
+declare const VectorCompletionJsonSchema: JsonSchema;
 
 type index$e_ChatCompletion = ChatCompletion;
 declare const index$e_ChatCompletionJsonSchema: typeof ChatCompletionJsonSchema;
@@ -81846,7 +81846,7 @@ declare const VectorCompletionOutputSchema: z__default.ZodObject<{
     weights: z__default.ZodArray<z__default.ZodNumber>;
 }, z__default.core.$strip>;
 type VectorCompletionOutput = z__default.infer<typeof VectorCompletionOutputSchema>;
-declare const VectorCompletionOutputJsonSchema: JSONSchema;
+declare const VectorCompletionOutputJsonSchema: JsonSchema;
 declare const MapVectorCompletionOutputSchema: z__default.ZodArray<z__default.ZodObject<{
     votes: z__default.ZodArray<z__default.ZodObject<{
         model: z__default.ZodString;
@@ -81862,38 +81862,38 @@ declare const MapVectorCompletionOutputSchema: z__default.ZodArray<z__default.Zo
     weights: z__default.ZodArray<z__default.ZodNumber>;
 }, z__default.core.$strip>>;
 type MapVectorCompletionOutput = z__default.infer<typeof MapVectorCompletionOutputSchema>;
-declare const MapVectorCompletionOutputJsonSchema: JSONSchema;
+declare const MapVectorCompletionOutputJsonSchema: JsonSchema;
 declare function compileVectorCompletionOutput(completion: VectorCompletion$1 | VectorCompletionChunk): VectorCompletionOutput;
 declare const ErrorFunctionOutputSchema: z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>;
 type ErrorFunctionOutput = z__default.infer<typeof ErrorFunctionOutputSchema>;
-declare const ErrorFunctionOutputJsonSchema: JSONSchema;
+declare const ErrorFunctionOutputJsonSchema: JsonSchema;
 declare const ValidScalarFunctionOutputSchema: z__default.ZodNumber;
 type ValidScalarFunctionOutput = z__default.infer<typeof ValidScalarFunctionOutputSchema>;
-declare const ValidScalarFunctionOutputJsonSchema: JSONSchema;
+declare const ValidScalarFunctionOutputJsonSchema: JsonSchema;
 declare const ScalarFunctionOutputSchema: z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>;
 type ScalarFunctionOutput = z__default.infer<typeof ScalarFunctionOutputSchema>;
-declare const ScalarFunctionOutputJsonSchema: JSONSchema;
+declare const ScalarFunctionOutputJsonSchema: JsonSchema;
 declare const MapScalarFunctionOutputSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>>;
 type MapScalarFunctionOutput = z__default.infer<typeof MapScalarFunctionOutputSchema>;
-declare const MapScalarFunctionOutputJsonSchema: JSONSchema;
+declare const MapScalarFunctionOutputJsonSchema: JsonSchema;
 declare const ValidVectorFunctionOutputSchema: z__default.ZodArray<z__default.ZodNumber>;
 type ValidVectorFunctionOutput = z__default.infer<typeof ValidVectorFunctionOutputSchema>;
-declare const ValidVectorFunctionOutputJsonSchema: JSONSchema;
+declare const ValidVectorFunctionOutputJsonSchema: JsonSchema;
 declare const VectorFunctionOutputSchema: z__default.ZodUnion<readonly [z__default.ZodArray<z__default.ZodNumber>, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>;
 type VectorFunctionOutput = z__default.infer<typeof VectorFunctionOutputSchema>;
-declare const VectorFunctionOutputJsonSchema: JSONSchema;
+declare const VectorFunctionOutputJsonSchema: JsonSchema;
 declare const MapVectorFunctionOutputSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodArray<z__default.ZodNumber>, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>>;
 type MapVectorFunctionOutput = z__default.infer<typeof MapVectorFunctionOutputSchema>;
-declare const MapVectorFunctionOutputJsonSchema: JSONSchema;
+declare const MapVectorFunctionOutputJsonSchema: JsonSchema;
 declare const ValidFunctionOutputSchema: z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodArray<z__default.ZodNumber>]>;
 type ValidFunctionOutput = z__default.infer<typeof ValidFunctionOutputSchema>;
-declare const ValidFunctionOutputJsonSchema: JSONSchema;
+declare const ValidFunctionOutputJsonSchema: JsonSchema;
 declare const FunctionOutputSchema: z__default.ZodUnion<readonly [z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodArray<z__default.ZodNumber>]>, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>;
 type FunctionOutput = z__default.infer<typeof FunctionOutputSchema>;
-declare const FunctionOutputJsonSchema: JSONSchema;
+declare const FunctionOutputJsonSchema: JsonSchema;
 declare const MapFunctionOutputSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodArray<z__default.ZodNumber>]>, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>>;
 type MapFunctionOutput = z__default.infer<typeof MapFunctionOutputSchema>;
-declare const MapFunctionOutputJsonSchema: JSONSchema;
+declare const MapFunctionOutputJsonSchema: JsonSchema;
 declare const TaskOutputSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     votes: z__default.ZodArray<z__default.ZodObject<{
         model: z__default.ZodString;
@@ -81922,7 +81922,7 @@ declare const TaskOutputSchema: z__default.ZodUnion<readonly [z__default.ZodObje
     weights: z__default.ZodArray<z__default.ZodNumber>;
 }, z__default.core.$strip>>, z__default.ZodUnion<readonly [z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodArray<z__default.ZodNumber>]>, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodArray<z__default.ZodNumber>]>, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>>, z__default.ZodNull]>;
 type TaskOutput = z__default.infer<typeof TaskOutputSchema>;
-declare const TaskOutputJsonSchema: JSONSchema;
+declare const TaskOutputJsonSchema: JsonSchema;
 declare const TaskOutputsSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodObject<{
     votes: z__default.ZodArray<z__default.ZodObject<{
         model: z__default.ZodString;
@@ -81951,7 +81951,7 @@ declare const TaskOutputsSchema: z__default.ZodArray<z__default.ZodUnion<readonl
     weights: z__default.ZodArray<z__default.ZodNumber>;
 }, z__default.core.$strip>>, z__default.ZodUnion<readonly [z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodArray<z__default.ZodNumber>]>, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>, z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodUnion<readonly [z__default.ZodNumber, z__default.ZodArray<z__default.ZodNumber>]>, z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>]>>, z__default.ZodNull]>>;
 type TaskOutputs = z__default.infer<typeof TaskOutputsSchema>;
-declare const TaskOutputsJsonSchema: JSONSchema;
+declare const TaskOutputsJsonSchema: JsonSchema;
 
 type index$d_AnyOfInputSchema = AnyOfInputSchema;
 declare const index$d_AnyOfInputSchemaExt: typeof AnyOfInputSchemaExt;
@@ -82088,7 +82088,7 @@ declare const ListItemSchema$1: z__default.ZodObject<{
     commit: z__default.ZodString;
 }, z__default.core.$strip>;
 type ListItem$1 = z__default.infer<typeof ListItemSchema$1>;
-declare const ListItemJsonSchema$1: JSONSchema;
+declare const ListItemJsonSchema$1: JsonSchema;
 declare const ListSchema$1: z__default.ZodObject<{
     data: z__default.ZodArray<z__default.ZodObject<{
         remote: z__default.ZodEnum<{
@@ -82101,7 +82101,7 @@ declare const ListSchema$1: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type List$1 = z__default.infer<typeof ListSchema$1>;
-declare const ListJsonSchema$1: JSONSchema;
+declare const ListJsonSchema$1: JsonSchema;
 declare function list$1(client: ObjectiveAI, options?: RequestOptions): Promise<List$1>;
 declare const HistoricalUsageSchema$1: z__default.ZodObject<{
     requests: z__default.ZodUInt32;
@@ -82110,7 +82110,7 @@ declare const HistoricalUsageSchema$1: z__default.ZodObject<{
     total_cost: z__default.ZodNumber;
 }, z__default.core.$strip>;
 type HistoricalUsage$1 = z__default.infer<typeof HistoricalUsageSchema$1>;
-declare const HistoricalUsageJsonSchema$1: JSONSchema;
+declare const HistoricalUsageJsonSchema$1: JsonSchema;
 declare function retrieveUsage$1(client: ObjectiveAI, fremote: Remote, fowner: string, frepository: string, fcommit: string | null | undefined, options?: RequestOptions): Promise<HistoricalUsage$1>;
 declare const RetrieveSchema$2: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
@@ -84864,7 +84864,7 @@ declare const RetrieveSchema$2: z__default.ZodDiscriminatedUnion<[z__default.Zod
     commit: z__default.ZodString;
 }, z__default.core.$strip>], "type">;
 type Retrieve$2 = z__default.infer<typeof RetrieveSchema$2>;
-declare const RetrieveJsonSchema$2: JSONSchema;
+declare const RetrieveJsonSchema$2: JsonSchema;
 declare function retrieve$3(client: ObjectiveAI, fremote: Remote, fowner: string, frepository: string, fcommit: string | null | undefined, options?: RequestOptions): Promise<Retrieve$2>;
 declare const ListPairItemSchema: z__default.ZodObject<{
     function: z__default.ZodObject<{
@@ -84887,7 +84887,7 @@ declare const ListPairItemSchema: z__default.ZodObject<{
     }, z__default.core.$strip>;
 }, z__default.core.$strip>;
 type ListPairItem = z__default.infer<typeof ListPairItemSchema>;
-declare const ListPairItemJsonSchema: JSONSchema;
+declare const ListPairItemJsonSchema: JsonSchema;
 declare const ListPairsSchema: z__default.ZodObject<{
     data: z__default.ZodArray<z__default.ZodObject<{
         function: z__default.ZodObject<{
@@ -84911,7 +84911,7 @@ declare const ListPairsSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type ListPairs = z__default.infer<typeof ListPairsSchema>;
-declare const ListPairsJsonSchema: JSONSchema;
+declare const ListPairsJsonSchema: JsonSchema;
 declare function listPairs(client: ObjectiveAI, options?: RequestOptions): Promise<ListPairs>;
 declare const RetrievePairSchema: z__default.ZodObject<{
     function: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -88428,7 +88428,7 @@ declare const RetrievePairSchema: z__default.ZodObject<{
     }, z__default.core.$strip>]>;
 }, z__default.core.$strip>;
 type RetrievePair = z__default.infer<typeof RetrievePairSchema>;
-declare const RetrievePairJsonSchema: JSONSchema;
+declare const RetrievePairJsonSchema: JsonSchema;
 declare function retrievePair(client: ObjectiveAI, fremote: Remote, fowner: string, frepository: string, fcommit: string | null | undefined, premote: Remote, powner: string, prepository: string, pcommit: string | null | undefined, options?: RequestOptions): Promise<RetrievePair>;
 declare function retrievePairUsage(client: ObjectiveAI, fremote: Remote, fowner: string, frepository: string, fcommit: string | null | undefined, premote: Remote, powner: string, prepository: string, pcommit: string | null | undefined, options?: RequestOptions): Promise<HistoricalUsage$1>;
 
@@ -108271,7 +108271,7 @@ declare const ListItemSchema: z__default.ZodObject<{
     commit: z__default.ZodString;
 }, z__default.core.$strip>;
 type ListItem = z__default.infer<typeof ListItemSchema>;
-declare const ListItemJsonSchema: JSONSchema;
+declare const ListItemJsonSchema: JsonSchema;
 declare const ListSchema: z__default.ZodObject<{
     data: z__default.ZodArray<z__default.ZodObject<{
         remote: z__default.ZodEnum<{
@@ -108284,7 +108284,7 @@ declare const ListSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>;
 type List = z__default.infer<typeof ListSchema>;
-declare const ListJsonSchema: JSONSchema;
+declare const ListJsonSchema: JsonSchema;
 declare function list(client: ObjectiveAI, options?: RequestOptions): Promise<List>;
 declare const HistoricalUsageSchema: z__default.ZodObject<{
     requests: z__default.ZodUInt32;
@@ -108293,7 +108293,7 @@ declare const HistoricalUsageSchema: z__default.ZodObject<{
     total_cost: z__default.ZodNumber;
 }, z__default.core.$strip>;
 type HistoricalUsage = z__default.infer<typeof HistoricalUsageSchema>;
-declare const HistoricalUsageJsonSchema: JSONSchema;
+declare const HistoricalUsageJsonSchema: JsonSchema;
 declare function retrieveUsage(client: ObjectiveAI, premote: Remote, powner: string, prepository: string, pcommit: string | null | undefined, options?: RequestOptions): Promise<HistoricalUsage>;
 declare const RetrieveSchema$1: z__default.ZodUnion<readonly [z__default.ZodObject<{
     remote: z__default.ZodEnum<{
@@ -109057,7 +109057,7 @@ declare const RetrieveSchema$1: z__default.ZodUnion<readonly [z__default.ZodObje
     description: z__default.ZodString;
 }, z__default.core.$strip>]>;
 type Retrieve$1 = z__default.infer<typeof RetrieveSchema$1>;
-declare const RetrieveJsonSchema$1: JSONSchema;
+declare const RetrieveJsonSchema$1: JsonSchema;
 declare function retrieve$2(client: ObjectiveAI, premote: Remote, powner: string, prepository: string, pcommit: string | null | undefined, options?: RequestOptions): Promise<Retrieve$1>;
 
 type index$7_HistoricalUsage = HistoricalUsage;
@@ -109112,7 +109112,7 @@ declare const ScalarFieldsValidationSchema: z__default.ZodObject<{
     }, z__default.core.$strip>, z__default.ZodType<AnyOfInputSchema, unknown, z__default.core.$ZodTypeInternals<AnyOfInputSchema, unknown>>]>;
 }, z__default.core.$strip>;
 type ScalarFieldsValidation = z__default.infer<typeof ScalarFieldsValidationSchema>;
-declare const ScalarFieldsValidationJsonSchema: JSONSchema;
+declare const ScalarFieldsValidationJsonSchema: JsonSchema;
 
 /**
  * Zod schema for the 4 fields needed to validate a vector function's
@@ -109199,7 +109199,7 @@ declare const VectorFieldsValidationSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type VectorFieldsValidation = z__default.infer<typeof VectorFieldsValidationSchema>;
-declare const VectorFieldsValidationJsonSchema: JSONSchema;
+declare const VectorFieldsValidationJsonSchema: JsonSchema;
 
 /**
  * Validates that a scalar function's input_schema produces enough diverse
@@ -109247,7 +109247,7 @@ declare const TaskExpressionSkipSchema: z__default.ZodUnion<readonly [z__default
     }>;
 }, z__default.core.$strict>]>;
 type TaskExpressionSkip = z__default.infer<typeof TaskExpressionSkipSchema>;
-declare const TaskExpressionSkipJsonSchema: JSONSchema;
+declare const TaskExpressionSkipJsonSchema: JsonSchema;
 declare const TaskExpressionMapSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -109265,7 +109265,7 @@ declare const TaskExpressionMapSchema: z__default.ZodUnion<readonly [z__default.
     }>;
 }, z__default.core.$strict>]>;
 type TaskExpressionMap = z__default.infer<typeof TaskExpressionMapSchema>;
-declare const TaskExpressionMapJsonSchema: JSONSchema;
+declare const TaskExpressionMapJsonSchema: JsonSchema;
 declare const TaskOutputExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodObject<{
     $jmespath: z__default.ZodString;
 }, z__default.core.$strict>, z__default.ZodObject<{
@@ -109283,7 +109283,7 @@ declare const TaskOutputExpressionSchema: z__default.ZodUnion<readonly [z__defau
     }>;
 }, z__default.core.$strict>]>;
 type TaskOutputExpression = z__default.infer<typeof TaskOutputExpressionSchema>;
-declare const TaskOutputExpressionJsonSchema: JSONSchema;
+declare const TaskOutputExpressionJsonSchema: JsonSchema;
 declare const ScalarFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     remote: z__default.ZodEnum<{
@@ -109344,7 +109344,7 @@ declare const ScalarFunctionTaskExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type ScalarFunctionTaskExpression = z__default.infer<typeof ScalarFunctionTaskExpressionSchema>;
-declare const ScalarFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const ScalarFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const VectorFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.function">;
     remote: z__default.ZodEnum<{
@@ -109405,7 +109405,7 @@ declare const VectorFunctionTaskExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type VectorFunctionTaskExpression = z__default.infer<typeof VectorFunctionTaskExpressionSchema>;
-declare const VectorFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const VectorFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const VectorCompletionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.completion">;
     skip: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodUnion<readonly [z__default.ZodObject<{
@@ -110392,7 +110392,7 @@ declare const VectorCompletionTaskExpressionSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type VectorCompletion = z__default.infer<typeof VectorCompletionTaskExpressionSchema>;
-declare const VectorCompletionTaskExpressionJsonSchema: JSONSchema;
+declare const VectorCompletionTaskExpressionJsonSchema: JsonSchema;
 declare const PlaceholderScalarFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"placeholder.scalar.function">;
     input_schema: z__default.ZodUnion<readonly [z__default.ZodType<ObjectInputSchema, unknown, z__default.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z__default.ZodType<ArrayInputSchema, unknown, z__default.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z__default.ZodObject<{
@@ -110476,7 +110476,7 @@ declare const PlaceholderScalarFunctionTaskExpressionSchema: z__default.ZodObjec
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type PlaceholderScalarFunctionTaskExpression = z__default.infer<typeof PlaceholderScalarFunctionTaskExpressionSchema>;
-declare const PlaceholderScalarFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const PlaceholderScalarFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const PlaceholderVectorFunctionTaskExpressionSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"placeholder.vector.function">;
     input_schema: z__default.ZodUnion<readonly [z__default.ZodType<ObjectInputSchema, unknown, z__default.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z__default.ZodType<ArrayInputSchema, unknown, z__default.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z__default.ZodObject<{
@@ -110608,7 +110608,7 @@ declare const PlaceholderVectorFunctionTaskExpressionSchema: z__default.ZodObjec
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type PlaceholderVectorFunctionTaskExpression = z__default.infer<typeof PlaceholderVectorFunctionTaskExpressionSchema>;
-declare const PlaceholderVectorFunctionTaskExpressionJsonSchema: JSONSchema;
+declare const PlaceholderVectorFunctionTaskExpressionJsonSchema: JsonSchema;
 declare const TaskExpressionSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     remote: z__default.ZodEnum<{
@@ -111921,7 +111921,7 @@ declare const TaskExpressionSchema: z__default.ZodDiscriminatedUnion<[z__default
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">;
 type TaskExpression = z__default.infer<typeof TaskExpressionSchema>;
-declare const TaskExpressionJsonSchema: JSONSchema;
+declare const TaskExpressionJsonSchema: JsonSchema;
 declare const TaskExpressionsSchema: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     remote: z__default.ZodEnum<{
@@ -113234,7 +113234,7 @@ declare const TaskExpressionsSchema: z__default.ZodArray<z__default.ZodDiscrimin
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">>;
 type TaskExpressions = z__default.infer<typeof TaskExpressionsSchema>;
-declare const TaskExpressionsJsonSchema: JSONSchema;
+declare const TaskExpressionsJsonSchema: JsonSchema;
 declare const ScalarFunctionTaskSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     remote: z__default.ZodEnum<{
@@ -113263,7 +113263,7 @@ declare const ScalarFunctionTaskSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type ScalarFunctionTask = z__default.infer<typeof ScalarFunctionTaskSchema>;
-declare const ScalarFunctionTaskJsonSchema: JSONSchema;
+declare const ScalarFunctionTaskJsonSchema: JsonSchema;
 declare const VectorFunctionTaskSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.function">;
     remote: z__default.ZodEnum<{
@@ -113292,7 +113292,7 @@ declare const VectorFunctionTaskSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type VectorFunctionTask = z__default.infer<typeof VectorFunctionTaskSchema>;
-declare const VectorFunctionTaskJsonSchema: JSONSchema;
+declare const VectorFunctionTaskJsonSchema: JsonSchema;
 declare const VectorCompletionTaskSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"vector.completion">;
     messages: z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
@@ -113512,7 +113512,7 @@ declare const VectorCompletionTaskSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type VectorCompletionTask = z__default.infer<typeof VectorCompletionTaskSchema>;
-declare const VectorCompletionTaskJsonSchema: JSONSchema;
+declare const VectorCompletionTaskJsonSchema: JsonSchema;
 declare const PlaceholderScalarFunctionTaskSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"placeholder.scalar.function">;
     input_schema: z__default.ZodUnion<readonly [z__default.ZodType<ObjectInputSchema, unknown, z__default.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z__default.ZodType<ArrayInputSchema, unknown, z__default.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z__default.ZodObject<{
@@ -113564,7 +113564,7 @@ declare const PlaceholderScalarFunctionTaskSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type PlaceholderScalarFunctionTask = z__default.infer<typeof PlaceholderScalarFunctionTaskSchema>;
-declare const PlaceholderScalarFunctionTaskJsonSchema: JSONSchema;
+declare const PlaceholderScalarFunctionTaskJsonSchema: JsonSchema;
 declare const PlaceholderVectorFunctionTaskSchema: z__default.ZodObject<{
     type: z__default.ZodLiteral<"placeholder.vector.function">;
     input_schema: z__default.ZodUnion<readonly [z__default.ZodType<ObjectInputSchema, unknown, z__default.core.$ZodTypeInternals<ObjectInputSchema, unknown>>, z__default.ZodType<ArrayInputSchema, unknown, z__default.core.$ZodTypeInternals<ArrayInputSchema, unknown>>, z__default.ZodObject<{
@@ -113664,7 +113664,7 @@ declare const PlaceholderVectorFunctionTaskSchema: z__default.ZodObject<{
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>;
 type PlaceholderVectorFunctionTask = z__default.infer<typeof PlaceholderVectorFunctionTaskSchema>;
-declare const PlaceholderVectorFunctionTaskJsonSchema: JSONSchema;
+declare const PlaceholderVectorFunctionTaskJsonSchema: JsonSchema;
 declare const TaskSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     remote: z__default.ZodEnum<{
@@ -114082,7 +114082,7 @@ declare const TaskSchema: z__default.ZodDiscriminatedUnion<[z__default.ZodObject
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">;
 type Task = z__default.infer<typeof TaskSchema>;
-declare const TaskJsonSchema: JSONSchema;
+declare const TaskJsonSchema: JsonSchema;
 declare const CompiledTaskSchema: z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     remote: z__default.ZodEnum<{
@@ -114915,7 +114915,7 @@ declare const CompiledTaskSchema: z__default.ZodUnion<readonly [z__default.ZodDi
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">>, z__default.ZodNull]>;
 type CompiledTask = z__default.infer<typeof CompiledTaskSchema>;
-declare const CompiledTaskJsonSchema: JSONSchema;
+declare const CompiledTaskJsonSchema: JsonSchema;
 declare const CompiledTasksSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"scalar.function">;
     remote: z__default.ZodEnum<{
@@ -115748,7 +115748,7 @@ declare const CompiledTasksSchema: z__default.ZodArray<z__default.ZodUnion<reado
     }, z__default.core.$strict>]>;
 }, z__default.core.$strip>], "type">>, z__default.ZodNull]>>;
 type CompiledTasks = z__default.infer<typeof CompiledTasksSchema>;
-declare const CompiledTasksJsonSchema: JSONSchema;
+declare const CompiledTasksJsonSchema: JsonSchema;
 
 declare function validateFunctionInput(function_: Function, input: InputValue): boolean | null;
 declare function compileFunctionTasks(function_: Function, input: InputValue): CompiledTasks;
@@ -116870,7 +116870,7 @@ declare const VectorCompletionCreateParamsBaseSchema: z__default.ZodObject<{
     other_chunk_timeout: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodUInt32>>;
 }, z__default.core.$strip>;
 type VectorCompletionCreateParamsBase = z__default.infer<typeof VectorCompletionCreateParamsBaseSchema>;
-declare const VectorCompletionCreateParamsBaseJsonSchema: JSONSchema;
+declare const VectorCompletionCreateParamsBaseJsonSchema: JsonSchema;
 declare const VectorCompletionCreateParamsStreamingSchema: z__default.ZodObject<{
     retry: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -117846,7 +117846,7 @@ declare const VectorCompletionCreateParamsStreamingSchema: z__default.ZodObject<
     stream: z__default.ZodLiteral<true>;
 }, z__default.core.$strip>;
 type VectorCompletionCreateParamsStreaming = z__default.infer<typeof VectorCompletionCreateParamsStreamingSchema>;
-declare const VectorCompletionCreateParamsStreamingJsonSchema: JSONSchema;
+declare const VectorCompletionCreateParamsStreamingJsonSchema: JsonSchema;
 declare const VectorCompletionCreateParamsNonStreamingSchema: z__default.ZodObject<{
     retry: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -118822,7 +118822,7 @@ declare const VectorCompletionCreateParamsNonStreamingSchema: z__default.ZodObje
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodLiteral<false>>>;
 }, z__default.core.$strip>;
 type VectorCompletionCreateParamsNonStreaming = z__default.infer<typeof VectorCompletionCreateParamsNonStreamingSchema>;
-declare const VectorCompletionCreateParamsNonStreamingJsonSchema: JSONSchema;
+declare const VectorCompletionCreateParamsNonStreamingJsonSchema: JsonSchema;
 declare const VectorCompletionCreateParamsSchema: z__default.ZodObject<{
     retry: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodString>>;
     from_cache: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
@@ -119798,7 +119798,7 @@ declare const VectorCompletionCreateParamsSchema: z__default.ZodObject<{
     stream: z__default.ZodNullable<z__default.ZodOptional<z__default.ZodBoolean>>;
 }, z__default.core.$strip>;
 type VectorCompletionCreateParams = z__default.infer<typeof VectorCompletionCreateParamsSchema>;
-declare const VectorCompletionCreateParamsJsonSchema: JSONSchema;
+declare const VectorCompletionCreateParamsJsonSchema: JsonSchema;
 
 declare function create(client: ObjectiveAI, body: VectorCompletionCreateParamsStreaming, options?: RequestOptions): Promise<Stream$1<VectorCompletionChunk>>;
 declare function create(client: ObjectiveAI, body: VectorCompletionCreateParamsNonStreaming, options?: RequestOptions): Promise<VectorCompletion$1>;
@@ -119815,7 +119815,7 @@ declare const RetrieveSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>>>;
 }, z__default.core.$strip>;
 type Retrieve = z__default.infer<typeof RetrieveSchema>;
-declare const RetrieveJsonSchema: JSONSchema;
+declare const RetrieveJsonSchema: JsonSchema;
 declare function retrieve$1(client: ObjectiveAI, id: string, options?: RequestOptions): Promise<Retrieve>;
 
 declare const EnsembleSchema$1: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodObject<{
@@ -120552,7 +120552,7 @@ declare const EnsembleSchema$1: z__default.ZodUnion<readonly [z__default.ZodStri
     }, z__default.core.$strip>>;
 }, z__default.core.$strip>]>;
 type Ensemble$1 = z__default.infer<typeof EnsembleSchema$1>;
-declare const EnsembleJsonSchema$1: JSONSchema;
+declare const EnsembleJsonSchema$1: JsonSchema;
 
 declare const VectorResponseSchema: z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
@@ -120594,7 +120594,7 @@ declare const VectorResponseSchema: z__default.ZodUnion<readonly [z__default.Zod
     }, z__default.core.$strip>;
 }, z__default.core.$strip>], "type">>]>;
 type VectorResponse = z__default.infer<typeof VectorResponseSchema>;
-declare const VectorResponseJsonSchema: JSONSchema;
+declare const VectorResponseJsonSchema: JsonSchema;
 declare const VectorResponseExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
@@ -120650,7 +120650,7 @@ declare const VectorResponseExpressionSchema: z__default.ZodUnion<readonly [z__d
     }>;
 }, z__default.core.$strict>]>]>;
 type VectorResponseExpression = z__default.infer<typeof VectorResponseExpressionSchema>;
-declare const VectorResponseExpressionJsonSchema: JSONSchema;
+declare const VectorResponseExpressionJsonSchema: JsonSchema;
 declare const VectorResponsesSchema: z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
@@ -120691,7 +120691,7 @@ declare const VectorResponsesSchema: z__default.ZodArray<z__default.ZodUnion<rea
     }, z__default.core.$strip>;
 }, z__default.core.$strip>], "type">>]>>;
 type VectorResponses = z__default.infer<typeof VectorResponsesSchema>;
-declare const VectorResponsesJsonSchema: JSONSchema;
+declare const VectorResponsesJsonSchema: JsonSchema;
 declare const VectorResponsesExpressionSchema: z__default.ZodUnion<readonly [z__default.ZodArray<z__default.ZodUnion<readonly [z__default.ZodUnion<readonly [z__default.ZodString, z__default.ZodArray<z__default.ZodDiscriminatedUnion<[z__default.ZodObject<{
     type: z__default.ZodLiteral<"text">;
     text: z__default.ZodString;
@@ -120762,7 +120762,7 @@ declare const VectorResponsesExpressionSchema: z__default.ZodUnion<readonly [z__
     }>;
 }, z__default.core.$strict>]>]>;
 type VectorResponsesExpression = z__default.infer<typeof VectorResponsesExpressionSchema>;
-declare const VectorResponsesExpressionJsonSchema: JSONSchema;
+declare const VectorResponsesExpressionJsonSchema: JsonSchema;
 
 type index$4_ProfileEntry = ProfileEntry;
 declare const index$4_ProfileEntryJsonSchema: typeof ProfileEntryJsonSchema;
@@ -120797,10 +120797,10 @@ declare namespace index$4 {
 
 declare const EnsembleSchema: z__default.ZodString;
 type Ensemble = z__default.infer<typeof EnsembleSchema>;
-declare const EnsembleJsonSchema: JSONSchema;
+declare const EnsembleJsonSchema: JsonSchema;
 
 declare const ScoresSchema: z__default.ZodArray<z__default.ZodNumber>;
-declare const ScoresJsonSchema: JSONSchema;
+declare const ScoresJsonSchema: JsonSchema;
 type Scores = z__default.infer<typeof ScoresSchema>;
 declare namespace Scores {
     function merged(a: Scores, b: Scores): [Scores, boolean];
@@ -120829,7 +120829,7 @@ declare const UsageSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>;
     total_cost: z__default.ZodNumber;
 }, z__default.core.$strip>;
-declare const UsageJsonSchema: JSONSchema;
+declare const UsageJsonSchema: JsonSchema;
 type Usage = z__default.infer<typeof UsageSchema>;
 declare namespace Usage {
     function isEmpty({ completion_tokens, prompt_tokens, total_tokens, completion_tokens_details, prompt_tokens_details, cost, cost_details, total_cost, }: Usage): boolean;
@@ -120845,7 +120845,7 @@ declare const VoteSchema: z__default.ZodObject<{
     from_cache: z__default.ZodOptional<z__default.ZodBoolean>;
     from_rng: z__default.ZodOptional<z__default.ZodBoolean>;
 }, z__default.core.$strip>;
-declare const VoteJsonSchema: JSONSchema;
+declare const VoteJsonSchema: JsonSchema;
 type Vote = z__default.infer<typeof VoteSchema>;
 declare namespace Vote {
     function mergedList(a: Vote[], b: Vote[]): [Vote[], boolean];
@@ -120861,10 +120861,10 @@ declare const VotesSchema: z__default.ZodArray<z__default.ZodObject<{
     from_rng: z__default.ZodOptional<z__default.ZodBoolean>;
 }, z__default.core.$strip>>;
 type Votes = z__default.infer<typeof VotesSchema>;
-declare const VotesJsonSchema: JSONSchema;
+declare const VotesJsonSchema: JsonSchema;
 
 declare const WeightsSchema: z__default.ZodArray<z__default.ZodNumber>;
-declare const WeightsJsonSchema: JSONSchema;
+declare const WeightsJsonSchema: JsonSchema;
 type Weights = z__default.infer<typeof WeightsSchema>;
 declare namespace Weights {
     function merged(a: Weights, b: Weights): [Weights, boolean];
@@ -121824,7 +121824,7 @@ declare const CacheVoteRequestSchema: z__default.ZodObject<{
     }, z__default.core.$strip>], "type">>]>>;
 }, z__default.core.$strip>;
 type CacheVoteRequest = z__default.infer<typeof CacheVoteRequestSchema>;
-declare const CacheVoteRequestJsonSchema: JSONSchema;
+declare const CacheVoteRequestJsonSchema: JsonSchema;
 
 type request_CacheVoteRequest = CacheVoteRequest;
 declare const request_CacheVoteRequestJsonSchema: typeof CacheVoteRequestJsonSchema;
@@ -121846,7 +121846,7 @@ declare const CacheVoteSchema: z__default.ZodObject<{
     }, z__default.core.$strip>>>;
 }, z__default.core.$strip>;
 type CacheVote = z__default.infer<typeof CacheVoteSchema>;
-declare const CacheVoteJsonSchema: JSONSchema;
+declare const CacheVoteJsonSchema: JsonSchema;
 
 type response_CacheVote = CacheVote;
 declare const response_CacheVoteJsonSchema: typeof CacheVoteJsonSchema;
@@ -121879,7 +121879,7 @@ declare const ObjectiveAIErrorSchema: z__default.ZodObject<{
     message: z__default.ZodType<JsonValue, unknown, z__default.core.$ZodTypeInternals<JsonValue, unknown>>;
 }, z__default.core.$strip>;
 type ObjectiveAIError = z__default.infer<typeof ObjectiveAIErrorSchema>;
-declare const ObjectiveAIErrorJsonSchema: JSONSchema;
+declare const ObjectiveAIErrorJsonSchema: JsonSchema;
 /**
  * Error thrown when an API request fails.
  *
@@ -121929,7 +121929,7 @@ declare function getZodSchema(title: string): z__default.ZodType | undefined;
  * meta title, or `undefined` if no schema has that title.
  * Results are cached after the first conversion for each title.
  */
-declare function getJsonSchema(title: string): JSONSchema | undefined;
+declare function getJsonSchema(title: string): JsonSchema | undefined;
 /**
  * Returns all registered meta titles.
  */
@@ -121938,7 +121938,7 @@ declare function listTitles(): string[];
  * Recursively collects all deduplicated `$ref` values reachable from a
  * JSON Schema, resolving each ref via the registry.
  */
-declare function listRefDependencies(schema: JSONSchema): string[];
+declare function listRefDependencies(schema: JsonSchema): string[];
 interface SchemaRegistry {
     getZodSchema: typeof getZodSchema;
     getJsonSchema: typeof getJsonSchema;
@@ -121946,4 +121946,4 @@ interface SchemaRegistry {
     listRefDependencies: typeof listRefDependencies;
 }
 
-export { type AnyOfInputSchema, type ArrayInputSchema, index$x as Auth, index$r as Chat, index$q as Ensemble, index$p as EnsembleLlm, index$5 as Functions, type JSONSchema, JSONSchemaJsonSchema, JSONSchemaSchema, type JsonValue, type JsonValueExpression, JsonValueExpressionJsonSchema, JsonValueExpressionSchema, JsonValueJsonSchema, JsonValueSchema, type ObjectInputSchema, ObjectiveAI, type ObjectiveAIError, ObjectiveAIErrorJsonSchema, ObjectiveAIErrorSchema, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsJsonSchema, ObjectiveAIOptionsSchema, type RequestOptions, RequestOptionsJsonSchema, RequestOptionsSchema, type SchemaRegistry, Stream$1 as Stream, index as Vector, convert, createSchemaRegistry, getJsonSchema, getZodSchema, isObjectiveAIError, listRefDependencies, listTitles };
+export { type AnyOfInputSchema, type ArrayInputSchema, index$x as Auth, index$r as Chat, index$q as Ensemble, index$p as EnsembleLlm, index$5 as Functions, type JsonSchema, JsonSchemaJsonSchema, JsonSchemaSchema, type JsonValue, type JsonValueExpression, JsonValueExpressionJsonSchema, JsonValueExpressionSchema, JsonValueJsonSchema, JsonValueSchema, type ObjectInputSchema, ObjectiveAI, type ObjectiveAIError, ObjectiveAIErrorJsonSchema, ObjectiveAIErrorSchema, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsJsonSchema, ObjectiveAIOptionsSchema, type RequestOptions, RequestOptionsJsonSchema, RequestOptionsSchema, type SchemaRegistry, Stream$1 as Stream, index as Vector, convert, createSchemaRegistry, getJsonSchema, getZodSchema, isObjectiveAIError, listRefDependencies, listTitles };

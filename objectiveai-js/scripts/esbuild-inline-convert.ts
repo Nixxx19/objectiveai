@@ -43,9 +43,9 @@ export function inlineConvertPlugin(): Plugin {
         let modified = false;
 
         for (const [jsonSchemaName, value] of fileSchemas) {
-          // Replace: export const XyzJsonSchema: JSONSchema = convert(SomeSchema);
+          // Replace: export const XyzJsonSchema: JsonSchema = convert(SomeSchema);
           const pattern = new RegExp(
-            `(export const ${jsonSchemaName}): JSONSchema =\\s*convert\\(\\s*\\w+\\s*,?\\s*\\);?`,
+            `(export const ${jsonSchemaName}): JsonSchema =\\s*convert\\(\\s*\\w+\\s*,?\\s*\\);?`,
             "s",
           );
           if (pattern.test(source)) {
@@ -61,12 +61,12 @@ export function inlineConvertPlugin(): Plugin {
 
         // Remove unused convert import if no convert() calls remain
         if (!/\bconvert\(/.test(source)) {
-          // Remove convert from import, keep type JSONSchema
+          // Remove convert from import, keep type JsonSchema
           source = source.replace(
-            /import\s*\{\s*convert\s*,\s*type\s+JSONSchema\s*\}\s*from\s*["'][^"']+["'];?\n?/g,
+            /import\s*\{\s*convert\s*,\s*type\s+JsonSchema\s*\}\s*from\s*["'][^"']+["'];?\n?/g,
             "",
           );
-          // Also handle if JSONSchema type is no longer needed
+          // Also handle if JsonSchema type is no longer needed
           // (keep it since it's used in the type annotation)
         }
 
