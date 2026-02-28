@@ -14,6 +14,7 @@ objectiveai/
 ├── objectiveai-api/                # API server (self-hostable, or import as library)
 ├── objectiveai-rs-wasm-js/         # WASM bindings for browser/Node.js
 ├── objectiveai-js/                 # TypeScript SDK (npm: objectiveai)
+├── objectiveai-json-schema/        # Generated JSON Schema files (built from JS SDK)
 ├── objectiveai-cli/                # ObjectiveAI CLI
 ├── objectiveai-web/                # Next.js web interface (production)
 ├── objectiveai-scripts/            # Utility scripts (see objectiveai-scripts/README.md)
@@ -258,6 +259,26 @@ Exports:
 - `compileFunctionTasks(function, input)` - Compile tasks client-side
 
 Enables browser-based validation and preview without server round-trips.
+
+## JSON Schema (`objectiveai-json-schema/`)
+
+Generated JSON Schema files for all Zod schemas in the TypeScript SDK. Used by `objectiveai-rs/build.rs` to inline schemas at compile time for LLM-callable tools.
+
+**Build:** Requires the JS SDK to be built first (`objectiveai-js/dist/` must exist).
+
+```bash
+cd objectiveai-json-schema
+node build.js
+```
+
+**How `build.js` works:**
+1. Cleans all existing `.json` and `lengths.csv` files
+2. Imports the built JS SDK (`objectiveai-js/dist/index.js`)
+3. Walks all exported Zod schemas with a `title` in their metadata
+4. Converts each to JSON Schema via `convert()` and writes `{title}.json`
+5. Writes `lengths.csv` with line counts sorted descending
+
+**Consumed by:** `objectiveai-rs/build.rs` reads these JSON files, extracts `$ref` dependencies, and generates a Rust lookup module (`schema_lookup.rs`) that inlines all schemas via `include_str!`. This powers `schema_tools()` which provides LLM-callable tools that return JSON Schema definitions.
 
 ## Development
 
