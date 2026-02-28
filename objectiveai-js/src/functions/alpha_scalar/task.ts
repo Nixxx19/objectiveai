@@ -7,7 +7,7 @@ import { convert, type JsonSchema } from "../../jsonSchema.js";
 
 // Branch Tasks
 
-export const AlphaScalarFunctionTaskExpressionSchema = z
+export const AlphaScalarScalarFunctionTaskExpressionSchema = z
   .object({
     type: z.literal("alpha.scalar.function"),
     remote: RemoteSchema,
@@ -30,11 +30,11 @@ export const AlphaScalarFunctionTaskExpressionSchema = z
     ),
   })
   .describe("An alpha scalar function task expression.")
-  .meta({ title: "AlphaScalarFunctionTaskExpression" });
-export type AlphaScalarFunctionTaskExpression = z.infer<typeof AlphaScalarFunctionTaskExpressionSchema>;
-export const AlphaScalarFunctionTaskExpressionJsonSchema: JsonSchema = convert(AlphaScalarFunctionTaskExpressionSchema);
+  .meta({ title: "AlphaScalarScalarFunctionTaskExpression" });
+export type AlphaScalarScalarFunctionTaskExpression = z.infer<typeof AlphaScalarScalarFunctionTaskExpressionSchema>;
+export const AlphaScalarScalarFunctionTaskExpressionJsonSchema: JsonSchema = convert(AlphaScalarScalarFunctionTaskExpressionSchema);
 
-export const PlaceholderAlphaScalarFunctionTaskExpressionSchema = z
+export const AlphaScalarPlaceholderScalarFunctionTaskExpressionSchema = z
   .object({
     type: z.literal("placeholder.alpha.scalar.function"),
     name: z.string().describe("The name of the placeholder function."),
@@ -52,14 +52,14 @@ export const PlaceholderAlphaScalarFunctionTaskExpressionSchema = z
   .describe(
     "A placeholder alpha scalar function task expression. Always outputs 0.5.",
   )
-  .meta({ title: "PlaceholderAlphaScalarFunctionTaskExpression" });
-export type PlaceholderAlphaScalarFunctionTaskExpression = z.infer<typeof PlaceholderAlphaScalarFunctionTaskExpressionSchema>;
-export const PlaceholderAlphaScalarFunctionTaskExpressionJsonSchema: JsonSchema = convert(PlaceholderAlphaScalarFunctionTaskExpressionSchema);
+  .meta({ title: "AlphaScalarPlaceholderScalarFunctionTaskExpression" });
+export type AlphaScalarPlaceholderScalarFunctionTaskExpression = z.infer<typeof AlphaScalarPlaceholderScalarFunctionTaskExpressionSchema>;
+export const AlphaScalarPlaceholderScalarFunctionTaskExpressionJsonSchema: JsonSchema = convert(AlphaScalarPlaceholderScalarFunctionTaskExpressionSchema);
 
 export const AlphaScalarBranchTaskExpressionSchema = z
   .discriminatedUnion("type", [
-    AlphaScalarFunctionTaskExpressionSchema,
-    PlaceholderAlphaScalarFunctionTaskExpressionSchema,
+    AlphaScalarScalarFunctionTaskExpressionSchema,
+    AlphaScalarPlaceholderScalarFunctionTaskExpressionSchema,
   ])
   .describe("A branch task expression for an alpha scalar function.")
   .meta({ title: "AlphaScalarBranchTaskExpression" });
