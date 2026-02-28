@@ -2,7 +2,7 @@
 
 use crate::{HttpClient, HttpError};
 
-/// Lists all Ensembles that have been used by the authenticated user.
+/// Lists all Ensembles that have been used.
 pub async fn list_ensembles(
     client: &HttpClient,
 ) -> Result<super::response::ListEnsemble, HttpError> {
