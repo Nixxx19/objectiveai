@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "scalar.function"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "TaskExpression",
+        "description": "A task to be executed as part of the function. Will first be compiled using the parent function's input. May be skipped or mapped."
+      },
+      "description": "The list of tasks to be executed as part of the function. Each will first be compiled using the parent function's input."
+    }
+  },
+  "required": [
+    "type",
+    "tasks"
+  ],
+  "description": "A scalar function defined inline. Each task's output expression must return a number in [0,1]. The function's output is the weighted average of all task outputs using profile weights. If there is only one task, its output becomes the function's output directly."
+}

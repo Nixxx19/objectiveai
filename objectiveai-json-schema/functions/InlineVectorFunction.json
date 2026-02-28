@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "vector.function"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "TaskExpression",
+        "description": "A task to be executed as part of the function. Will first be compiled using the parent function's input. May be skipped or mapped."
+      },
+      "description": "The list of tasks to be executed as part of the function. Each will first be compiled using the parent function's input."
+    },
+    "input_split": {
+      "anyOf": [
+        {
+          "$ref": "Expression",
+          "description": "An expression (JMESPath, Starlark, or Special) which evaluates to a value."
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Splits the function input into an array of sub-inputs, one per output element. The array length must equal `output_length`. Each sub-input, when executed independently, must produce `output_length = 1`. Used by execution strategies (e.g., swiss_system) that process subsets of the split inputs in parallel pools. Only required when using such a strategy. Receives: `input`."
+    },
+    "input_merge": {
+      "anyOf": [
+        {
+          "$ref": "Expression",
+          "description": "An expression (JMESPath, Starlark, or Special) which evaluates to a value."
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Recombines a variable-size, arbitrarily-ordered subset of sub-inputs (produced by `input_split`) into a single input. The merged input is then executed as a normal function call. Used by execution strategies (e.g., swiss_system) that group sub-inputs into pools for parallel evaluation. Only required when using such a strategy. Receives: `input` (an array of sub-inputs)."
+    }
+  },
+  "required": [
+    "type",
+    "tasks"
+  ],
+  "description": "A vector function defined inline. Each task's output expression must return an array of numbers summing to ~1. The function's output is the weighted average of all task outputs using profile weights. If there is only one task, its output becomes the function's output directly."
+}

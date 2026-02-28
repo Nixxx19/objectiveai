@@ -1,0 +1,53 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "$jmespath": {
+          "type": "string",
+          "description": "A JMESPath expression."
+        }
+      },
+      "required": [
+        "$jmespath"
+      ],
+      "description": "A JMESPath expression which evaluates to a value."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "$starlark": {
+          "type": "string",
+          "description": "A Starlark expression."
+        }
+      },
+      "required": [
+        "$starlark"
+      ],
+      "description": "A Starlark expression which evaluates to a value."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "$special": {
+          "enum": [
+            "input",
+            "output",
+            "l1_normalized_function_output",
+            "input_items_output_length",
+            "input_items_optional_context_split",
+            "input_items_optional_context_merge",
+            "vector_completion_scores",
+            "vector_completion_scores_weighted_sum"
+          ],
+          "description": "A predefined special expression variant."
+        }
+      },
+      "required": [
+        "$special"
+      ],
+      "description": "A special predefined expression."
+    }
+  ],
+  "description": "An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`."
+}

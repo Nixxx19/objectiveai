@@ -1,0 +1,25 @@
+{
+  "anyOf": [
+    {
+      "$ref": "ScalarFunctionTaskExpression",
+      "description": "A scalar function task expression."
+    },
+    {
+      "$ref": "VectorFunctionTaskExpression",
+      "description": "A vector function task expression."
+    },
+    {
+      "$ref": "VectorCompletionTaskExpression",
+      "description": "A vector completion task expression."
+    },
+    {
+      "$ref": "PlaceholderScalarFunctionTaskExpression",
+      "description": "A placeholder scalar function task expression. Always outputs 0.5."
+    },
+    {
+      "$ref": "PlaceholderVectorFunctionTaskExpression",
+      "description": "A placeholder vector function task expression. Always outputs an equalized vector."
+    }
+  ],
+  "description": "A task to be executed as part of the function. Will first be compiled using the parent function's input. May be skipped or mapped."
+}

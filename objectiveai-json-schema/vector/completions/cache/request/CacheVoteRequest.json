@@ -1,0 +1,92 @@
+{
+  "type": "object",
+  "properties": {
+    "model": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "The unique identifier for the Ensemble LLM."
+        },
+        {
+          "$ref": "EnsembleLlmBase",
+          "description": "An LLM to be used within an Ensemble or standalone with Chat Completions."
+        }
+      ],
+      "description": "The Ensemble LLM to use for this completion. May be a unique ID or an inline definition."
+    },
+    "models": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "The unique identifier for the Ensemble LLM."
+              },
+              {
+                "$ref": "EnsembleLlmBase",
+                "description": "An LLM to be used within an Ensemble or standalone with Chat Completions."
+              }
+            ],
+            "description": "The Ensemble LLM to use for this completion. May be a unique ID or an inline definition."
+          },
+          "description": "Fallback Ensemble LLMs to use if the primary Ensemble LLM fails."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "Message",
+        "description": "A message exchanged in a chat conversation."
+      },
+      "description": "A list of messages exchanged in a chat conversation."
+    },
+    "tools": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "Tool",
+            "description": "A tool that the assistant can call."
+          },
+          "description": "A list of tools that the assistant can call."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "description": "Plain text content."
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "RichContentPart",
+              "description": "A rich content part."
+            },
+            "description": "An array of rich content parts."
+          }
+        ],
+        "description": "A possible assistant response. The LLMs in the Ensemble may vote for this option."
+      },
+      "description": "A list of possible assistant responses which the LLMs in the Ensemble will vote on. The output scores will be of the same length, each corresponding to one response. The winner is the response with the highest score."
+    }
+  },
+  "required": [
+    "model",
+    "messages",
+    "responses"
+  ],
+  "description": "Parameters for requesting a cached vote from the ObjectiveAI votes cache."
+}

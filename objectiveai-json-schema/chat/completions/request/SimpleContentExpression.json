@@ -1,0 +1,21 @@
+{
+  "anyOf": [
+    {
+      "type": "string",
+      "description": "Plain text content."
+    },
+    {
+      "type": "array",
+      "items": {
+        "$ref": "SimpleContentPartExpression",
+        "description": "A simple content part."
+      },
+      "description": "An array of simple content parts."
+    },
+    {
+      "$ref": "Expression",
+      "description": "An expression which evaluates to simple content. Receives: `input`, `map` (if mapped)."
+    }
+  ],
+  "description": "Simple content."
+}

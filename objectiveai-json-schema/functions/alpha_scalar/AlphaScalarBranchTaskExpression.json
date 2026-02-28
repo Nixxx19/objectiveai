@@ -1,0 +1,126 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "alpha.scalar.function"
+        },
+        "remote": {
+          "enum": [
+            "github",
+            "filesystem"
+          ],
+          "description": "The remote source hosting the repository."
+        },
+        "owner": {
+          "type": "string",
+          "description": "The owner of the repository containing the function."
+        },
+        "repository": {
+          "type": "string",
+          "description": "The name of the repository containing the function."
+        },
+        "commit": {
+          "type": "string",
+          "description": "The commit SHA of the repository containing the function."
+        },
+        "skip": {
+          "$ref": "Expression",
+          "description": "An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`."
+        },
+        "input": {
+          "$ref": "Expression",
+          "description": "An expression which evaluates to the input for the child scalar function. Receives: `input`."
+        }
+      },
+      "required": [
+        "type",
+        "remote",
+        "owner",
+        "repository",
+        "commit",
+        "input"
+      ],
+      "description": "An alpha scalar function task expression."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "placeholder.alpha.scalar.function"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the placeholder function."
+        },
+        "spec": {
+          "type": "string",
+          "description": "The specification of the placeholder function."
+        },
+        "input_schema": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "object"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The description of the object input."
+            },
+            "properties": {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "InputSchema"
+              },
+              "description": "The properties of the object input."
+            },
+            "required": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The required properties of the object input."
+            }
+          },
+          "required": [
+            "type",
+            "properties"
+          ],
+          "description": "The input schema for the placeholder scalar function."
+        },
+        "skip": {
+          "$ref": "Expression",
+          "description": "An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`."
+        },
+        "input": {
+          "$ref": "Expression",
+          "description": "An expression which evaluates to the input for the placeholder scalar function. Receives: `input`."
+        }
+      },
+      "required": [
+        "type",
+        "name",
+        "spec",
+        "input_schema",
+        "input"
+      ],
+      "description": "A placeholder alpha scalar function task expression. Always outputs 0.5."
+    }
+  ],
+  "description": "A branch task expression for an alpha scalar function."
+}

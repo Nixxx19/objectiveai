@@ -1,0 +1,38 @@
+{
+  "type": "object",
+  "properties": {
+    "token": {
+      "type": "string",
+      "description": "The token string."
+    },
+    "bytes": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The byte representation of the token."
+    },
+    "logprob": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The log probability of the token."
+    }
+  },
+  "required": [
+    "token"
+  ],
+  "description": "The log probability of a token in the list of top tokens."
+}

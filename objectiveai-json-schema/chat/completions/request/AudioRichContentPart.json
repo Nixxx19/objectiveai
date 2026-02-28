@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "input_audio"
+    },
+    "input_audio": {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "description": "Base64 encoded audio data."
+        },
+        "format": {
+          "enum": [
+            "wav",
+            "mp3"
+          ],
+          "description": "The format of the encoded audio data."
+        }
+      },
+      "required": [
+        "data",
+        "format"
+      ],
+      "description": "The audio data and its format."
+    }
+  },
+  "required": [
+    "type",
+    "input_audio"
+  ],
+  "description": "An audio rich content part."
+}

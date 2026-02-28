@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "properties": {
+    "remote": {
+      "enum": [
+        "github",
+        "filesystem"
+      ],
+      "description": "The remote source hosting the repository."
+    },
+    "owner": {
+      "type": "string",
+      "description": "The owner of the repository containing the profile."
+    },
+    "repository": {
+      "type": "string",
+      "description": "The name of the repository containing the profile."
+    },
+    "commit": {
+      "type": "string",
+      "description": "The commit SHA of the repository containing the profile."
+    }
+  },
+  "required": [
+    "remote",
+    "owner",
+    "repository",
+    "commit"
+  ]
+}

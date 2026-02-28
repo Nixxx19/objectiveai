@@ -1,0 +1,174 @@
+{
+  "anyOf": [
+    {
+      "anyOf": [
+        {
+          "$ref": "TextRichContentPartExpression",
+          "description": "A text rich content part."
+        },
+        {
+          "$ref": "ImageRichContentPartExpression",
+          "description": "An image rich content part."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "input_audio"
+            },
+            "input_audio": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "string",
+                      "description": "Base64 encoded audio data."
+                    },
+                    "format": {
+                      "enum": [
+                        "wav",
+                        "mp3"
+                      ],
+                      "description": "The format of the encoded audio data."
+                    }
+                  },
+                  "required": [
+                    "data",
+                    "format"
+                  ],
+                  "description": "The audio data and its format."
+                },
+                {
+                  "$ref": "Expression",
+                  "description": "An expression which evaluates to the audio definition. Receives: `input`, `map` (if mapped)."
+                }
+              ],
+              "description": "The audio data and its format."
+            }
+          },
+          "required": [
+            "type",
+            "input_audio"
+          ],
+          "description": "An audio rich content part."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "enum": [
+                "video_url",
+                "input_video"
+              ]
+            },
+            "video_url": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "description": "URL of the video."
+                    }
+                  },
+                  "required": [
+                    "url"
+                  ]
+                },
+                {
+                  "$ref": "Expression",
+                  "description": "An expression which evaluates to the video URL definition. Receives: `input`, `map` (if mapped)."
+                }
+              ],
+              "description": "The video URL definition."
+            }
+          },
+          "required": [
+            "type",
+            "video_url"
+          ],
+          "description": "A video rich content part."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "const": "file"
+            },
+            "file": {
+              "anyOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "file_data": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "description": "The base64 encoded file data, used when passing the file to the model as a string."
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "file_id": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "description": "The ID of an uploaded file to use as input."
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "filename": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "description": "The name of the file, used when passing the file to the model as a string."
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    },
+                    "file_url": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "description": "The URL of the file, used when passing the file to the model as a URL."
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "description": "The file to be used as input, either as base64 data, an uploaded file ID, or a URL."
+                },
+                {
+                  "$ref": "Expression",
+                  "description": "An expression which evaluates to the file definition. Receives: `input`, `map` (if mapped)."
+                }
+              ],
+              "description": "The file to be used as input, either as base64 data, an uploaded file ID, or a URL."
+            }
+          },
+          "required": [
+            "type",
+            "file"
+          ],
+          "description": "A file rich content part."
+        }
+      ],
+      "description": "A rich content part."
+    },
+    {
+      "$ref": "Expression",
+      "description": "An expression which evaluates to a rich content part. Receives: `input`, `map` (if mapped)."
+    }
+  ],
+  "description": "A rich content part."
+}

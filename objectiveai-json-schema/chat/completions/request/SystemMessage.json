@@ -1,0 +1,41 @@
+{
+  "type": "object",
+  "properties": {
+    "role": {
+      "const": "system"
+    },
+    "content": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "Plain text content."
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "SimpleContentPart",
+            "description": "A simple content part."
+          },
+          "description": "An array of simple content parts."
+        }
+      ],
+      "description": "Simple content."
+    },
+    "name": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "An optional name for the participant. Provides the model information to differentiate between participants of the same role."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "role",
+    "content"
+  ],
+  "description": "Developer-provided instructions that the model should follow, regardless of messages sent by the user."
+}

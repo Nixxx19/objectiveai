@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "placeholder.scalar.function"
+    },
+    "input_schema": {
+      "$ref": "InputSchema",
+      "description": "An input schema defining the structure of function inputs."
+    },
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "Expression",
+          "description": "An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "map": {
+      "anyOf": [
+        {
+          "$ref": "Expression",
+          "description": "Expression that evaluates to the number of mapped task instances. Each instance receives `map` as an integer index (0-based)."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "input": {
+      "$ref": "InputValueExpression",
+      "description": "A value provided as input to a function."
+    },
+    "output": {
+      "$ref": "Expression",
+      "description": "An expression which transforms the task result into a FunctionOutput. Receives `output` as one of 4 variants depending on task type: a single FunctionOutput (for non-mapped function tasks), an array of FunctionOutputs (for mapped function tasks), a VectorCompletionOutput (for non-mapped vector completion tasks), or an array of VectorCompletionOutputs (for mapped vector completion tasks). Must return a FunctionOutput valid for the parent function's type: scalar functions require a number in [0,1], vector functions require an array of numbers summing to ~1. The function's final output is the weighted average of all task outputs using profile weights. Receives: `input`, `output`."
+    }
+  },
+  "required": [
+    "type",
+    "input_schema",
+    "input",
+    "output"
+  ],
+  "description": "A placeholder scalar function task expression. Always outputs 0.5."
+}

@@ -1,0 +1,179 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "remote": {
+          "enum": [
+            "github",
+            "filesystem"
+          ],
+          "description": "The remote source hosting the repository."
+        },
+        "owner": {
+          "type": "string",
+          "description": "The owner of the repository containing the profile."
+        },
+        "repository": {
+          "type": "string",
+          "description": "The name of the repository containing the profile."
+        },
+        "commit": {
+          "type": "string",
+          "description": "The commit SHA of the repository containing the profile."
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "TaskProfile",
+            "description": "The profile for a task."
+          },
+          "description": "The list of task profiles."
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "description": "Legacy representation: a simple list of weights. Must be of the same length as the Ensemble's `llms` field, ignoring count."
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "weight": {
+                    "type": "number",
+                    "description": "The weight for this LLM in the ensemble. Must be between 0 and 1."
+                  },
+                  "invert": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "If true, invert this LLM's vote distribution before combining. When omitted or false, the vote distribution is used as-is."
+                  }
+                },
+                "required": [
+                  "weight"
+                ],
+                "description": "An entry in a vector completion profile with an explicit weight and optional invert flag."
+              },
+              "description": "Profile entries with explicit `weight` and optional `invert` for each LLM in the ensemble."
+            }
+          ],
+          "description": "The weights for each task used in weighted averaging of task outputs. Can be either a list of weights or a list of objects with `weight` and optional `invert`."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the profile."
+        }
+      },
+      "required": [
+        "remote",
+        "owner",
+        "repository",
+        "commit",
+        "tasks",
+        "profile",
+        "description"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "remote": {
+          "enum": [
+            "github",
+            "filesystem"
+          ],
+          "description": "The remote source hosting the repository."
+        },
+        "owner": {
+          "type": "string",
+          "description": "The owner of the repository containing the profile."
+        },
+        "repository": {
+          "type": "string",
+          "description": "The name of the repository containing the profile."
+        },
+        "commit": {
+          "type": "string",
+          "description": "The commit SHA of the repository containing the profile."
+        },
+        "ensemble": {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "The unique identifier for the Ensemble."
+            },
+            {
+              "$ref": "EnsembleBase",
+              "description": "An ensemble of LLMs."
+            }
+          ],
+          "description": "The Ensemble to use for this completion. May be a unique ID or an inline definition."
+        },
+        "profile": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "description": "Legacy representation: a simple list of weights. Must be of the same length as the Ensemble's `llms` field, ignoring count."
+            },
+            {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "weight": {
+                    "type": "number",
+                    "description": "The weight for this LLM in the ensemble. Must be between 0 and 1."
+                  },
+                  "invert": {
+                    "anyOf": [
+                      {
+                        "type": "boolean"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "If true, invert this LLM's vote distribution before combining. When omitted or false, the vote distribution is used as-is."
+                  }
+                },
+                "required": [
+                  "weight"
+                ],
+                "description": "An entry in a vector completion profile with an explicit weight and optional invert flag."
+              },
+              "description": "Profile entries with explicit `weight` and optional `invert` for each LLM in the ensemble."
+            }
+          ],
+          "description": "The weights for each LLM in the ensemble."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the profile."
+        }
+      },
+      "required": [
+        "remote",
+        "owner",
+        "repository",
+        "commit",
+        "ensemble",
+        "profile",
+        "description"
+      ]
+    }
+  ]
+}

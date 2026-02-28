@@ -1,0 +1,16 @@
+{
+  "type": "object",
+  "properties": {
+    "anyOf": {
+      "type": "array",
+      "items": {
+        "$ref": "InputSchema"
+      },
+      "description": "The possible schemas that the input can match."
+    }
+  },
+  "required": [
+    "anyOf"
+  ],
+  "description": "A union of schemas - input must match at least one."
+}

@@ -1,0 +1,24 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "image_url"
+    },
+    "image_url": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "The Base64 URL of the generated image."
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  "required": [
+    "type",
+    "image_url"
+  ]
+}

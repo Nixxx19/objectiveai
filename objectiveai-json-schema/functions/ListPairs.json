@@ -1,0 +1,83 @@
+{
+  "type": "object",
+  "properties": {
+    "data": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "function": {
+            "type": "object",
+            "properties": {
+              "remote": {
+                "enum": [
+                  "github",
+                  "filesystem"
+                ],
+                "description": "The remote source hosting the repository."
+              },
+              "owner": {
+                "type": "string",
+                "description": "The owner of the repository containing the function."
+              },
+              "repository": {
+                "type": "string",
+                "description": "The name of the repository containing the function."
+              },
+              "commit": {
+                "type": "string",
+                "description": "The commit SHA of the repository containing the function."
+              }
+            },
+            "required": [
+              "remote",
+              "owner",
+              "repository",
+              "commit"
+            ],
+            "description": "The function."
+          },
+          "profile": {
+            "type": "object",
+            "properties": {
+              "remote": {
+                "enum": [
+                  "github",
+                  "filesystem"
+                ],
+                "description": "The remote source hosting the repository."
+              },
+              "owner": {
+                "type": "string",
+                "description": "The owner of the repository containing the profile."
+              },
+              "repository": {
+                "type": "string",
+                "description": "The name of the repository containing the profile."
+              },
+              "commit": {
+                "type": "string",
+                "description": "The commit SHA of the repository containing the profile."
+              }
+            },
+            "required": [
+              "remote",
+              "owner",
+              "repository",
+              "commit"
+            ],
+            "description": "The profile."
+          }
+        },
+        "required": [
+          "function",
+          "profile"
+        ]
+      },
+      "description": "A list of Function-Profile pairs."
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

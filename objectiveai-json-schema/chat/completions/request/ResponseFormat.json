@@ -1,0 +1,110 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "text"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "The response will be arbitrary text."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "json_object"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "The response will be a JSON object."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "json_schema"
+        },
+        "json_schema": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string",
+              "description": "The name of the JSON schema."
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The description of the JSON schema."
+            },
+            "schema": {
+              "$ref": "JsonValue",
+              "description": "The JSON schema definition."
+            },
+            "strict": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Whether to enforce strict adherence to the JSON schema."
+            }
+          },
+          "required": [
+            "name"
+          ],
+          "description": "A JSON schema definition for constraining model output."
+        }
+      },
+      "required": [
+        "type",
+        "json_schema"
+      ],
+      "description": "The response will conform to the provided JSON schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "grammar"
+        },
+        "grammar": {
+          "type": "string",
+          "description": "The grammar definition to constrain the response."
+        }
+      },
+      "required": [
+        "type",
+        "grammar"
+      ],
+      "description": "The response will conform to the provided grammar definition."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "python"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "The response will be Python code."
+    }
+  ],
+  "description": "The desired format of the model's response."
+}

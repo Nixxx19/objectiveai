@@ -1,0 +1,48 @@
+{
+  "type": "object",
+  "properties": {
+    "role": {
+      "const": "tool"
+    },
+    "content": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "Plain text content."
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "RichContentPartExpression",
+            "description": "A rich content part."
+          },
+          "description": "An array of rich content parts."
+        },
+        {
+          "$ref": "Expression",
+          "description": "An expression which evaluates to rich content. Receives: `input`, `map` (if mapped)."
+        }
+      ],
+      "description": "Rich content."
+    },
+    "tool_call_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "The ID of the tool call that this message is responding to."
+        },
+        {
+          "$ref": "Expression",
+          "description": "An expression which evaluates to a string. Receives: `input`, `map` (if mapped)."
+        }
+      ],
+      "description": "The ID of the tool call that this message is responding to."
+    }
+  },
+  "required": [
+    "role",
+    "content",
+    "tool_call_id"
+  ],
+  "description": "Messages sent by tools in response to tool calls made by the assistant."
+}

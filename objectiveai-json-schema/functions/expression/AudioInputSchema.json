@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "audio"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The description of the audio input."
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "description": "An audio input schema."
+}

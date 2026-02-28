@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "file"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The description of the file input."
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "description": "A file input schema."
+}

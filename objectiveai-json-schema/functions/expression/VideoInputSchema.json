@@ -1,0 +1,23 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "video"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The description of the video input."
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "description": "A video input schema."
+}

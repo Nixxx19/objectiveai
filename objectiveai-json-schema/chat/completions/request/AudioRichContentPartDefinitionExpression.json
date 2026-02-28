@@ -1,0 +1,30 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "data": {
+          "type": "string",
+          "description": "Base64 encoded audio data."
+        },
+        "format": {
+          "enum": [
+            "wav",
+            "mp3"
+          ],
+          "description": "The format of the encoded audio data."
+        }
+      },
+      "required": [
+        "data",
+        "format"
+      ],
+      "description": "The audio data and its format."
+    },
+    {
+      "$ref": "Expression",
+      "description": "An expression which evaluates to the audio definition. Receives: `input`, `map` (if mapped)."
+    }
+  ],
+  "description": "The audio data and its format."
+}

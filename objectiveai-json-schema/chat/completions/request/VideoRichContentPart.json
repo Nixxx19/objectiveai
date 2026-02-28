@@ -1,0 +1,28 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "enum": [
+        "video_url",
+        "input_video"
+      ]
+    },
+    "video_url": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string",
+          "description": "URL of the video."
+        }
+      },
+      "required": [
+        "url"
+      ]
+    }
+  },
+  "required": [
+    "type",
+    "video_url"
+  ],
+  "description": "A video rich content part."
+}

@@ -1,0 +1,49 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "array"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The description of the array input."
+    },
+    "minItems": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The minimum number of items in the array input."
+    },
+    "maxItems": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The maximum number of items in the array input."
+    },
+    "items": {
+      "$ref": "InputSchema"
+    }
+  },
+  "required": [
+    "type",
+    "items"
+  ],
+  "description": "An array input schema."
+}

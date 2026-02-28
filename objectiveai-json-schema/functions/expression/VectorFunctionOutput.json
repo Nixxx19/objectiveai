@@ -1,0 +1,16 @@
+{
+  "anyOf": [
+    {
+      "type": "array",
+      "items": {
+        "type": "number"
+      },
+      "description": "A valid output of a vector function execution / function execution task. A vector of numbers, summing to 1."
+    },
+    {
+      "$ref": "JsonValue",
+      "description": "The erroneous output of a function execution, containing the invalid output which failed validation."
+    }
+  ],
+  "description": "The output of a vector function execution / function execution task."
+}

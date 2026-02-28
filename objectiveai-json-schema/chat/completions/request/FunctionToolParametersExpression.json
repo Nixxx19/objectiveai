@@ -1,0 +1,16 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "JsonValueExpression",
+        "description": "A JSON value."
+      }
+    },
+    {
+      "$ref": "Expression",
+      "description": "An expression which evaluates to a JSON schema object. Receives: `input`, `map` (if mapped)."
+    }
+  ],
+  "description": "The JSON schema defining the parameters of the function."
+}

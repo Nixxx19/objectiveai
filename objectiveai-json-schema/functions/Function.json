@@ -1,0 +1,31 @@
+{
+  "anyOf": [
+    {
+      "anyOf": [
+        {
+          "$ref": "InlineScalarFunction",
+          "description": "A scalar function defined inline. Each task's output expression must return a number in [0,1]. The function's output is the weighted average of all task outputs using profile weights. If there is only one task, its output becomes the function's output directly."
+        },
+        {
+          "$ref": "InlineVectorFunction",
+          "description": "A vector function defined inline. Each task's output expression must return an array of numbers summing to ~1. The function's output is the weighted average of all task outputs using profile weights. If there is only one task, its output becomes the function's output directly."
+        }
+      ],
+      "description": "A function defined inline."
+    },
+    {
+      "anyOf": [
+        {
+          "$ref": "RemoteScalarFunction",
+          "description": "A remote scalar function. \"function.json\""
+        },
+        {
+          "$ref": "RemoteVectorFunction",
+          "description": "A remote vector function. \"function.json\""
+        }
+      ],
+      "description": "A remote function. \"function.json\""
+    }
+  ],
+  "description": "A function."
+}

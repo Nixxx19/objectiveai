@@ -1,0 +1,212 @@
+{
+  "type": "object",
+  "properties": {
+    "retry": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The unique ID of a previous incomplete or failed completion. Successful votes from it will be reused, sans any that were RNGed or came from cache."
+    },
+    "from_cache": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "If true, uses cached votes from the global ObjectiveAI votes cache when available. Has lower priority than `retry`, higher priority than `from_rng`."
+    },
+    "from_rng": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "If true, any remaining votes are generated via RNG. Has lower priority than `retry` or `from_cache`."
+    },
+    "upstreams": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "Upstream",
+            "description": "The upstream provider that served the request."
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Available upstreams for this request."
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "Message",
+        "description": "A message exchanged in a chat conversation."
+      },
+      "description": "A list of messages exchanged in a chat conversation."
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "CompletionProvider",
+          "description": "Options for selecting the upstream provider of this completion."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ensemble": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "The unique identifier for the Ensemble."
+        },
+        {
+          "$ref": "EnsembleBase",
+          "description": "An ensemble of LLMs."
+        }
+      ],
+      "description": "The Ensemble to use for this completion. May be a unique ID or an inline definition."
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "description": "Legacy representation: a simple list of weights. Must be of the same length as the Ensemble's `llms` field, ignoring count."
+        },
+        {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "weight": {
+                "type": "number",
+                "description": "The weight for this LLM in the ensemble. Must be between 0 and 1."
+              },
+              "invert": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "If true, invert this LLM's vote distribution before combining. When omitted or false, the vote distribution is used as-is."
+              }
+            },
+            "required": [
+              "weight"
+            ],
+            "description": "An entry in a vector completion profile with an explicit weight and optional invert flag."
+          },
+          "description": "Profile entries with explicit `weight` and optional `invert` for each LLM in the ensemble."
+        }
+      ],
+      "description": "The profile to use for the completion. Must be of the same length as the Ensemble's `llms` field, ignoring count. Can be either a list of weights or a list of objects with `weight` and optional `invert`."
+    },
+    "seed": {
+      "anyOf": [
+        {
+          "description": "If specified, upstream systems will make a best effort to sample deterministically, such that repeated requests with the same seed and parameters should return the same result."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tools": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "Tool",
+            "description": "A tool that the assistant can call."
+          },
+          "description": "A list of tools that the assistant can call."
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "A list of tools that the assistant can call. These are readonly and will only be useful for explaining prior tool calls or otherwise influencing behavior."
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "description": "Plain text content."
+          },
+          {
+            "type": "array",
+            "items": {
+              "$ref": "RichContentPart",
+              "description": "A rich content part."
+            },
+            "description": "An array of rich content parts."
+          }
+        ],
+        "description": "A possible assistant response. The LLMs in the Ensemble may vote for this option."
+      },
+      "description": "A list of possible assistant responses which the LLMs in the Ensemble will vote on. The output scores will be of the same length, each corresponding to one response. The winner is the response with the highest score."
+    },
+    "backoff_max_elapsed_time": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "description": "The maximum total time in milliseconds to spend on retries when a transient error occurs."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "first_chunk_timeout": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "description": "The maximum time in milliseconds to wait for the first chunk of a streaming response."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "other_chunk_timeout": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "description": "The maximum time in milliseconds to wait between subsequent chunks of a streaming response."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "messages",
+    "ensemble",
+    "profile",
+    "responses"
+  ],
+  "description": "Base parameters for creating a vector completion."
+}

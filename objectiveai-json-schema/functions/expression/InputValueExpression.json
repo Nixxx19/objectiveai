@@ -1,0 +1,46 @@
+{
+  "anyOf": [
+    {
+      "$ref": "ImageRichContentPart",
+      "description": "An image rich content part."
+    },
+    {
+      "$ref": "AudioRichContentPart",
+      "description": "An audio rich content part."
+    },
+    {
+      "$ref": "VideoRichContentPart",
+      "description": "A video rich content part."
+    },
+    {
+      "$ref": "FileRichContentPart",
+      "description": "A file rich content part."
+    },
+    {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "InputValueExpression"
+      }
+    },
+    {
+      "type": "array",
+      "items": {
+        "$ref": "InputValueExpression"
+      }
+    },
+    {
+      "type": "string"
+    },
+    {
+      "type": "number"
+    },
+    {
+      "type": "boolean"
+    },
+    {
+      "$ref": "Expression",
+      "description": "An expression which evaluates to an input value. Receives: `input`, `map` (if mapped)."
+    }
+  ],
+  "description": "A value provided as input to a function."
+}

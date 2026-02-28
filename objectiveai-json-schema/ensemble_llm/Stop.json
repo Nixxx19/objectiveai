@@ -1,0 +1,16 @@
+{
+  "anyOf": [
+    {
+      "type": "string",
+      "description": "Generation will stop when this string is generated."
+    },
+    {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Generation will stop when any of these strings are generated."
+    }
+  ],
+  "description": "The assistant will stop when any of the provided strings are generated."
+}

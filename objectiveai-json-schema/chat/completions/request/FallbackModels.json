@@ -1,0 +1,17 @@
+{
+  "type": "array",
+  "items": {
+    "anyOf": [
+      {
+        "type": "string",
+        "description": "The unique identifier for the Ensemble LLM."
+      },
+      {
+        "$ref": "EnsembleLlmBase",
+        "description": "An LLM to be used within an Ensemble or standalone with Chat Completions."
+      }
+    ],
+    "description": "The Ensemble LLM to use for this completion. May be a unique ID or an inline definition."
+  },
+  "description": "Fallback Ensemble LLMs to use if the primary Ensemble LLM fails."
+}

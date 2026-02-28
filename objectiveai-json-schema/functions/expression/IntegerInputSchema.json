@@ -1,0 +1,45 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "integer"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The description of the integer input."
+    },
+    "minimum": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The minimum allowed value for the integer input."
+    },
+    "maximum": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The maximum allowed value for the integer input."
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "description": "An integer input schema."
+}

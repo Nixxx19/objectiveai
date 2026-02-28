@@ -1,0 +1,26 @@
+{
+  "anyOf": [
+    {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "Plain text content."
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "RichContentPart",
+            "description": "A rich content part."
+          },
+          "description": "An array of rich content parts."
+        }
+      ],
+      "description": "A possible assistant response. The LLMs in the Ensemble may vote for this option."
+    },
+    {
+      "$ref": "Expression",
+      "description": "An expression which evaluates to a possible assistant response. Receives: `input`, `map` (if mapped)."
+    }
+  ],
+  "description": "A possible assistant response. The LLMs in the Ensemble may vote for this option."
+}

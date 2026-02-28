@@ -1,0 +1,357 @@
+{
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "object"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the object input."
+        },
+        "properties": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "InputSchema"
+          },
+          "description": "The properties of the object input."
+        },
+        "required": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The required properties of the object input."
+        }
+      },
+      "required": [
+        "type",
+        "properties"
+      ],
+      "description": "An object input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "array"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the array input."
+        },
+        "minItems": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The minimum number of items in the array input."
+        },
+        "maxItems": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The maximum number of items in the array input."
+        },
+        "items": {
+          "$ref": "InputSchema"
+        }
+      },
+      "required": [
+        "type",
+        "items"
+      ],
+      "description": "An array input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "string"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the string input."
+        },
+        "enum": {
+          "anyOf": [
+            {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The enumeration of allowed string values."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "A string input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "number"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the number input."
+        },
+        "minimum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The minimum allowed value for the number input."
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The maximum allowed value for the number input."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "A number input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "integer"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the integer input."
+        },
+        "minimum": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The minimum allowed value for the integer input."
+        },
+        "maximum": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The maximum allowed value for the integer input."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "An integer input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "boolean"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the boolean input."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "A boolean input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "image"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the image input."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "An image input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "audio"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the audio input."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "An audio input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "video"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the video input."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "A video input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "file"
+        },
+        "description": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "description": "The description of the file input."
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "description": "A file input schema."
+    },
+    {
+      "type": "object",
+      "properties": {
+        "anyOf": {
+          "type": "array",
+          "items": {
+            "$ref": "InputSchema"
+          },
+          "description": "The possible schemas that the input can match."
+        }
+      },
+      "required": [
+        "anyOf"
+      ],
+      "description": "A union of schemas - input must match at least one."
+    }
+  ],
+  "description": "An input schema defining the structure of function inputs."
+}

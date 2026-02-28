@@ -1,0 +1,34 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "swiss_system"
+    },
+    "pool": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How many vector responses for each execution. Default is 10."
+    },
+    "rounds": {
+      "anyOf": [
+        {
+          "type": "number"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "How many sequential rounds of comparison. Default is 3."
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "description": "Swiss system strategy for vector function execution."
+}

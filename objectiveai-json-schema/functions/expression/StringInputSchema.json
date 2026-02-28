@@ -1,0 +1,37 @@
+{
+  "type": "object",
+  "properties": {
+    "type": {
+      "const": "string"
+    },
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The description of the string input."
+    },
+    "enum": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The enumeration of allowed string values."
+    }
+  },
+  "required": [
+    "type"
+  ],
+  "description": "A string input schema."
+}

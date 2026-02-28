@@ -1,0 +1,85 @@
+{
+  "type": "object",
+  "properties": {
+    "name": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "The name of the function."
+        },
+        {
+          "$ref": "Expression",
+          "description": "An expression which evaluates to a string. Receives: `input`, `map` (if mapped)."
+        }
+      ],
+      "description": "The name of the function."
+    },
+    "description": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "string",
+              "description": "The description of the function."
+            },
+            {
+              "$ref": "Expression",
+              "description": "An expression which evaluates to a string. Receives: `input`, `map` (if mapped)."
+            }
+          ],
+          "description": "The description of the function."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "parameters": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": {
+                "$ref": "JsonValueExpression",
+                "description": "A JSON value."
+              }
+            },
+            {
+              "$ref": "Expression",
+              "description": "An expression which evaluates to a JSON schema object. Receives: `input`, `map` (if mapped)."
+            }
+          ],
+          "description": "The JSON schema defining the parameters of the function."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "strict": {
+      "anyOf": [
+        {
+          "anyOf": [
+            {
+              "type": "boolean",
+              "description": "Whether to enforce strict adherence to the parameter schema."
+            },
+            {
+              "$ref": "Expression",
+              "description": "An expression which evaluates to a boolean. Receives: `input`, `map` (if mapped)."
+            }
+          ],
+          "description": "Whether to enforce strict adherence to the parameter schema."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ],
+  "description": "The definition of a function tool."
+}

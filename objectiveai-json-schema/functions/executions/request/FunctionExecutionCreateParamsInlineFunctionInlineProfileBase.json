@@ -1,0 +1,279 @@
+{
+  "type": "object",
+  "properties": {
+    "retry_token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "The retry token provided by a previous incomplete or failed function execution."
+    },
+    "from_cache": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "If true, vector completion tasks use cached votes from the global ObjectiveAI votes cache when available. Has lower priority than `retry_token`, higher priority than `from_rng`."
+    },
+    "from_rng": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "If true, any remaining votes from vector completion tasks are generated via RNG. Has lower priority than `retry_token` or `from_cache`."
+    },
+    "upstreams": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "Upstream",
+            "description": "The upstream provider that served the request."
+          }
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Available upstreams for this request."
+    },
+    "strategy": {
+      "anyOf": [
+        {
+          "$ref": "FunctionExecutionStrategy",
+          "description": "Strategy for function execution."
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "description": "Strategy for function execution. Defaults to 'default'. Use 'swiss_system' for vector functions to run tournament-style ranking across multiple rounds."
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "$ref": "FunctionExecutionReasoning",
+          "description": "If provided, a reasoning summary for the Function Execution will be generated. This reasoning summary attempts to detail why the final Output is what it is, based on AI assertions made during execution."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "input": {
+      "$ref": "InputValue",
+      "description": "A value provided as input to a function."
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "CompletionProvider",
+          "description": "Options for selecting the upstream provider of this completion."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seed": {
+      "anyOf": [
+        {
+          "description": "If specified, upstream systems will make a best effort to sample deterministically, such that repeated requests with the same seed and parameters should return the same result."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "backoff_max_elapsed_time": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "description": "The maximum total time in milliseconds to spend on retries when a transient error occurs."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "first_chunk_timeout": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "description": "The maximum time in milliseconds to wait for the first chunk of a streaming response."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "other_chunk_timeout": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "description": "The maximum time in milliseconds to wait between subsequent chunks of a streaming response."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "function": {
+      "anyOf": [
+        {
+          "$ref": "InlineScalarFunction",
+          "description": "A scalar function defined inline. Each task's output expression must return a number in [0,1]. The function's output is the weighted average of all task outputs using profile weights. If there is only one task, its output becomes the function's output directly."
+        },
+        {
+          "$ref": "InlineVectorFunction",
+          "description": "A vector function defined inline. Each task's output expression must return an array of numbers summing to ~1. The function's output is the weighted average of all task outputs using profile weights. If there is only one task, its output becomes the function's output directly."
+        }
+      ],
+      "description": "A function defined inline."
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "object",
+          "properties": {
+            "tasks": {
+              "type": "array",
+              "items": {
+                "$ref": "TaskProfile",
+                "description": "The profile for a task."
+              },
+              "description": "The list of task profiles."
+            },
+            "profile": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "Legacy representation: a simple list of weights. Must be of the same length as the Ensemble's `llms` field, ignoring count."
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "weight": {
+                        "type": "number",
+                        "description": "The weight for this LLM in the ensemble. Must be between 0 and 1."
+                      },
+                      "invert": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "description": "If true, invert this LLM's vote distribution before combining. When omitted or false, the vote distribution is used as-is."
+                      }
+                    },
+                    "required": [
+                      "weight"
+                    ],
+                    "description": "An entry in a vector completion profile with an explicit weight and optional invert flag."
+                  },
+                  "description": "Profile entries with explicit `weight` and optional `invert` for each LLM in the ensemble."
+                }
+              ],
+              "description": "The weights for each task used in weighted averaging of task outputs. Can be either a list of weights or a list of objects with `weight` and optional `invert`."
+            }
+          },
+          "required": [
+            "tasks",
+            "profile"
+          ],
+          "description": "A tasks-based function profile defined inline."
+        },
+        {
+          "type": "object",
+          "properties": {
+            "ensemble": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "description": "The unique identifier for the Ensemble."
+                },
+                {
+                  "$ref": "EnsembleBase",
+                  "description": "An ensemble of LLMs."
+                }
+              ],
+              "description": "The Ensemble to use for this completion. May be a unique ID or an inline definition."
+            },
+            "profile": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "description": "Legacy representation: a simple list of weights. Must be of the same length as the Ensemble's `llms` field, ignoring count."
+                },
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "weight": {
+                        "type": "number",
+                        "description": "The weight for this LLM in the ensemble. Must be between 0 and 1."
+                      },
+                      "invert": {
+                        "anyOf": [
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "description": "If true, invert this LLM's vote distribution before combining. When omitted or false, the vote distribution is used as-is."
+                      }
+                    },
+                    "required": [
+                      "weight"
+                    ],
+                    "description": "An entry in a vector completion profile with an explicit weight and optional invert flag."
+                  },
+                  "description": "Profile entries with explicit `weight` and optional `invert` for each LLM in the ensemble."
+                }
+              ],
+              "description": "The weights for each LLM in the ensemble."
+            }
+          },
+          "required": [
+            "ensemble",
+            "profile"
+          ],
+          "description": "An auto function profile defined inline. Applies a single ensemble and weights to all vector completion tasks."
+        }
+      ],
+      "description": "A function profile defined inline."
+    }
+  },
+  "required": [
+    "input",
+    "function",
+    "profile"
+  ],
+  "description": "Base parameters for executing an inline function with an inline profile."
+}

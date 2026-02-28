@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "properties": {
+    "model": {
+      "anyOf": [
+        {
+          "type": "string",
+          "description": "The unique identifier for the Ensemble LLM."
+        },
+        {
+          "$ref": "EnsembleLlmBase",
+          "description": "An LLM to be used within an Ensemble or standalone with Chat Completions."
+        }
+      ],
+      "description": "The Ensemble LLM to use for this completion. May be a unique ID or an inline definition."
+    },
+    "models": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "type": "string",
+                "description": "The unique identifier for the Ensemble LLM."
+              },
+              {
+                "$ref": "EnsembleLlmBase",
+                "description": "An LLM to be used within an Ensemble or standalone with Chat Completions."
+              }
+            ],
+            "description": "The Ensemble LLM to use for this completion. May be a unique ID or an inline definition."
+          },
+          "description": "Fallback Ensemble LLMs to use if the primary Ensemble LLM fails."
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "model"
+  ],
+  "description": "If provided, a reasoning summary for the Function Execution will be generated. This reasoning summary attempts to detail why the final Output is what it is, based on AI assertions made during execution."
+}

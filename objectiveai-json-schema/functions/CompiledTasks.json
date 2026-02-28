@@ -1,0 +1,66 @@
+{
+  "type": "array",
+  "items": {
+    "anyOf": [
+      {
+        "anyOf": [
+          {
+            "$ref": "ScalarFunctionTask",
+            "description": "A scalar function task."
+          },
+          {
+            "$ref": "VectorFunctionTask",
+            "description": "A vector function task."
+          },
+          {
+            "$ref": "VectorCompletionTask",
+            "description": "A vector completion task."
+          },
+          {
+            "$ref": "PlaceholderScalarFunctionTask",
+            "description": "A placeholder scalar function task. Always outputs 0.5."
+          },
+          {
+            "$ref": "PlaceholderVectorFunctionTask",
+            "description": "A placeholder vector function task. Always outputs an equalized vector."
+          }
+        ],
+        "description": "An un-mapped, un-skipped task."
+      },
+      {
+        "type": "array",
+        "items": {
+          "anyOf": [
+            {
+              "$ref": "ScalarFunctionTask",
+              "description": "A scalar function task."
+            },
+            {
+              "$ref": "VectorFunctionTask",
+              "description": "A vector function task."
+            },
+            {
+              "$ref": "VectorCompletionTask",
+              "description": "A vector completion task."
+            },
+            {
+              "$ref": "PlaceholderScalarFunctionTask",
+              "description": "A placeholder scalar function task. Always outputs 0.5."
+            },
+            {
+              "$ref": "PlaceholderVectorFunctionTask",
+              "description": "A placeholder vector function task. Always outputs an equalized vector."
+            }
+          ],
+          "description": "A task to be executed as part of the function."
+        },
+        "description": "A task which was mapped over an input array."
+      },
+      {
+        "type": "null"
+      }
+    ],
+    "description": "A compiled task, which may be un-mapped, mapped, or skipped."
+  },
+  "description": "The compiled list of tasks to be executed as part of the function."
+}
