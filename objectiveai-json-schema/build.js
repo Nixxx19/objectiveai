@@ -1,63 +1,57 @@
-const { readFile, readdir, rm, mkdir, writeFile } = require("node:fs/promises");
+const { readdir, rm, writeFile } = require("node:fs/promises");
 const { join } = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 const ROOT = __dirname;
-const SRC = join(ROOT, "..", "objectiveai-js", "src");
 
 async function clean() {
   const entries = await readdir(ROOT, { withFileTypes: true });
   for (const entry of entries) {
-    const full = join(ROOT, entry.name);
     if (entry.isFile() && (entry.name.endsWith(".json") || entry.name === "lengths.csv")) {
-      await rm(full);
-    } else if (entry.isDirectory()) {
-      await rm(full, { recursive: true });
+      await rm(join(ROOT, entry.name));
     }
   }
 }
 
-async function getNamespaceMap(indexTsPath) {
-  let content;
-  try {
-    content = await readFile(indexTsPath, "utf-8");
-  } catch {
-    return {};
-  }
-  const map = {};
-  const re = /export\s+\*\s+as\s+(\w+)\s+from\s+["']\.\/([^"']+)["']/g;
-  let m;
-  while ((m = re.exec(content)) !== null) {
-    map[m[1]] = m[2].replace(/\/index(\.js)?$/, "").replace(/\.js$/, "");
-  }
-  return map;
+function isZodSchema(val) {
+  return (
+    typeof val === "object" &&
+    val !== null &&
+    typeof val.meta === "function" &&
+    typeof val.parse === "function"
+  );
 }
 
-async function walk(obj, subDir, results, visited) {
+function walk(obj, results, visited) {
   if (visited.has(obj)) return;
   visited.add(obj);
-
-  const indexTs = join(SRC, subDir, "index.ts");
-  const nsMap = await getNamespaceMap(indexTs);
 
   for (const key of Object.keys(obj)) {
     if (key.startsWith("__") || key === "default") continue;
     const val = obj[key];
+    if (typeof val !== "object" || val === null) continue;
+
     if (
-      key.endsWith("JsonSchema") &&
-      typeof val === "object" &&
-      val !== null &&
-      !Array.isArray(val)
+      key.endsWith("Schema") &&
+      !key.endsWith("JsonSchema") &&
+      isZodSchema(val)
     ) {
-      const name = key.slice(0, -"JsonSchema".length);
-      results.push({ dir: subDir, name, value: val });
+      let meta;
+      try {
+        meta = val.meta();
+      } catch {
+        continue;
+      }
+      if (!meta || !meta.title || meta.wrapper) continue;
+      results.set(meta.title, val);
     } else if (
-      key in nsMap &&
-      typeof val === "object" &&
-      val !== null
+      /^[A-Z]/.test(key) &&
+      !key.endsWith("Schema") &&
+      !key.endsWith("JsonSchema") &&
+      !Array.isArray(val) &&
+      typeof val.parse !== "function"
     ) {
-      const next = subDir ? `${subDir}/${nsMap[key]}` : nsMap[key];
-      await walk(val, next, results, visited);
+      walk(val, results, visited);
     }
   }
 }
@@ -67,20 +61,20 @@ async function build() {
 
   const distPath = join(ROOT, "..", "objectiveai-js", "dist", "index.js");
   const mod = await import(pathToFileURL(distPath).href);
+  const { convert } = mod;
 
-  const results = [];
-  await walk(mod, "", results, new Set());
+  const results = new Map();
+  walk(mod, results, new Set());
 
   const lengths = [];
-  for (const { dir, name, value } of results) {
-    const targetDir = dir ? join(ROOT, dir) : ROOT;
-    await mkdir(targetDir, { recursive: true });
+  for (const [title, schema] of results) {
+    const value = convert(schema);
     const json = JSON.stringify(value, null, 2) + "\n";
-    await writeFile(join(targetDir, `${name}.json`), json);
+    const fileName = `${title}.json`;
+    await writeFile(join(ROOT, fileName), json);
 
-    const relPath = dir ? `${dir}/${name}.json` : `${name}.json`;
     const lineCount = json.split("\n").length - 1;
-    lengths.push({ path: relPath, lines: lineCount });
+    lengths.push({ path: fileName, lines: lineCount });
   }
 
   lengths.sort((a, b) => b.lines - a.lines);
@@ -90,7 +84,7 @@ async function build() {
     "\n";
   await writeFile(join(ROOT, "lengths.csv"), csv);
 
-  console.log(`Written ${results.length} JSON schema files`);
+  console.log(`Written ${results.size} JSON schema files`);
 }
 
 build().catch(console.error);
