@@ -2,7 +2,7 @@
 
 use crate::{HttpClient, HttpError};
 
-/// Lists all Agents that have been used by the authenticated user.
+/// Lists all Agents that have been used.
 pub async fn list_agents(
     client: &HttpClient,
 ) -> Result<super::response::ListAgent, HttpError> {
