@@ -145,6 +145,14 @@ const schemaRefs: string[] = [
   "EnsembleLlmProvider",
   "CompletionProvider",
   "Upstream",
+  "AlphaScalarFunctionTaskExpression",
+  "AlphaScalarVectorCompletionTaskExpression",
+  "PlaceholderAlphaScalarFunctionTaskExpression",
+  "AlphaVectorScalarFunctionTaskExpression",
+  "AlphaVectorFunctionTaskExpression",
+  "AlphaVectorVectorCompletionTaskExpression",
+  "PlaceholderAlphaVectorScalarFunctionTaskExpression",
+  "PlaceholderAlphaVectorFunctionTaskExpression",
 ];
 
 const propertyRefsBySchema = new WeakMap<z.ZodType, Record<string, string>>();
