@@ -567,7 +567,7 @@ impl super::InventionState for AlphaVectorLeafState {
     fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
         vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
-            Self::write_input_schema_tool(this), Self::read_input_schema_tool(this),
+            Self::write_input_schema_tool(this),
         ]
     }
     fn validate_input_schema(this: &Arc<Mutex<Self>>) -> Result<(), String> {
