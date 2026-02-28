@@ -3,10 +3,15 @@
 use serde::{Deserialize, Serialize};
 
 /// An MCP server that the agent can connect to.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(
+    Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord,
+)]
 pub struct McpServer {
     /// The URL of the MCP server.
     pub url: String,
+    /// Whether this MCP server uses authorization.
+    #[serde(default)]
+    pub authorization: bool,
 }
 
 impl McpServer {
@@ -31,9 +36,21 @@ pub mod mcp_servers {
     //! Functions for working with [`McpServers`](super::McpServers).
 
     /// Validates all MCP servers in the list.
+    ///
+    /// Checks that no duplicate servers exist.
     pub fn validate(this: &super::McpServers) -> Result<(), String> {
         for server in this {
             server.validate()?;
+        }
+        for (i, a) in this.iter().enumerate() {
+            for b in &this[i + 1..] {
+                if a == b {
+                    return Err(format!(
+                        "`mcp_servers` contains duplicate entry: \"{}\"",
+                        a.url
+                    ));
+                }
+            }
         }
         Ok(())
     }
