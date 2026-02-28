@@ -38,6 +38,7 @@ pub mod ensemble_llm;
 pub mod error;
 pub mod functions;
 pub mod prefixed_uuid;
+pub mod upstream;
 pub mod vector;
 
 #[cfg(test)]

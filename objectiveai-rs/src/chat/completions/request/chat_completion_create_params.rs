@@ -1,6 +1,5 @@
 //! Chat completion request parameters.
 
-use crate::chat;
 use serde::{Deserialize, Serialize};
 
 /// Parameters for creating a chat completion.
@@ -8,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct ChatCompletionCreateParams {
     /// Available upstreams for this request
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstreams: Option<Vec<chat::completions::Upstream>>,
+    pub upstreams: Option<Vec<crate::upstream::Upstream>>,
     /// The conversation messages.
     pub messages: Vec<super::Message>,
     /// Provider routing preferences.

@@ -24,7 +24,7 @@ pub struct VectorCompletionCreateParams {
     // --- Core configuration ---
     /// Available upstreams for this request
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstreams: Option<Vec<crate::chat::completions::Upstream>>,
+    pub upstreams: Option<Vec<crate::upstream::Upstream>>,
     /// The conversation messages (the prompt).
     pub messages: Vec<chat::completions::request::Message>,
     /// Provider routing preferences.

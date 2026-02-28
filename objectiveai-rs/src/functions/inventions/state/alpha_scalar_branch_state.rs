@@ -24,29 +24,29 @@ pub struct AlphaScalarBranchState {
 impl AlphaScalarBranchState {
     pub fn read_spec_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "ReadSpec",
-            description: "Read Spec",
-            args_type: crate::functions::inventions::ToolArgsType::None,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "ReadSpec",
+            "Read Spec",
+            crate::upstream::ToolArgsType::None,
+            {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
                     Ok(state.params.spec.clone())
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn read_essay_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "ReadEssay",
-            description: "Read Essay",
-            args_type: crate::functions::inventions::ToolArgsType::None,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "ReadEssay",
+            "Read Essay",
+            crate::upstream::ToolArgsType::None,
+            {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
@@ -55,18 +55,18 @@ impl AlphaScalarBranchState {
                         None => Err("Essay has not been written".to_string()),
                     }
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn write_essay_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "WriteEssay",
-            description: "Write Essay",
-            args_type: crate::functions::inventions::ToolArgsType::String,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "WriteEssay",
+            "Write Essay",
+            crate::upstream::ToolArgsType::String,
+            {
                 let state = Arc::clone(this);
                 move |args| {
                     let essay = match args {
@@ -84,8 +84,8 @@ impl AlphaScalarBranchState {
                     state.essay = Some(essay);
                     Ok("Ok".to_string())
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn validate_essay(this: &Arc<Mutex<Self>>) -> Result<(), String> {
@@ -104,12 +104,12 @@ impl AlphaScalarBranchState {
 
     pub fn read_input_schema_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "ReadInputSchema",
-            description: "Read Input Schema",
-            args_type: crate::functions::inventions::ToolArgsType::None,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "ReadInputSchema",
+            "Read Input Schema",
+            crate::upstream::ToolArgsType::None,
+            {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
@@ -122,18 +122,18 @@ impl AlphaScalarBranchState {
                         }
                     }
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn write_input_schema_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "WriteInputSchema",
-            description: "Write Input Schema",
-            args_type: crate::functions::inventions::ToolArgsType::Object,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "WriteInputSchema",
+            "Write Input Schema",
+            crate::upstream::ToolArgsType::Object,
+            {
                 let state = Arc::clone(this);
                 move |args| {
                     let args_str = match serde_json::to_string(&args) {
@@ -180,8 +180,8 @@ impl AlphaScalarBranchState {
                     state.input_schema = Some(input_schema);
                     Ok("Ok".to_string())
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn validate_input_schema(
@@ -202,12 +202,12 @@ impl AlphaScalarBranchState {
 
     pub fn read_essay_tasks_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "ReadEssayTasks",
-            description: "Read Essay Tasks",
-            args_type: crate::functions::inventions::ToolArgsType::None,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "ReadEssayTasks",
+            "Read Essay Tasks",
+            crate::upstream::ToolArgsType::None,
+            {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
@@ -218,18 +218,18 @@ impl AlphaScalarBranchState {
                         }
                     }
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn write_essay_tasks_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "WriteEssayTasks",
-            description: "Write Essay Tasks",
-            args_type: crate::functions::inventions::ToolArgsType::String,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "WriteEssayTasks",
+            "Write Essay Tasks",
+            crate::upstream::ToolArgsType::String,
+            {
                 let state = Arc::clone(this);
                 move |args| {
                     let essay_tasks = match args {
@@ -247,8 +247,8 @@ impl AlphaScalarBranchState {
                     state.essay_tasks = Some(essay_tasks);
                     Ok("Ok".to_string())
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn validate_essay_tasks(this: &Arc<Mutex<Self>>) -> Result<(), String> {
@@ -267,12 +267,12 @@ impl AlphaScalarBranchState {
 
     pub fn read_tasks_length_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "ReadTasksLength",
-            description: "Read Tasks Length",
-            args_type: crate::functions::inventions::ToolArgsType::None,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "ReadTasksLength",
+            "Read Tasks Length",
+            crate::upstream::ToolArgsType::None,
+            {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
@@ -281,18 +281,18 @@ impl AlphaScalarBranchState {
                         None => Ok("0".to_string()),
                     }
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn read_task_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "ReadTask",
-            description: "Read Task by index",
-            args_type: crate::functions::inventions::ToolArgsType::Number,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "ReadTask",
+            "Read Task by index",
+            crate::upstream::ToolArgsType::Number,
+            {
                 let state = Arc::clone(this);
                 move |args| {
                     let index = match args {
@@ -325,18 +325,18 @@ impl AlphaScalarBranchState {
                         None => Err("Tasks have not been written".to_string()),
                     }
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn delete_task_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "DeleteTask",
-            description: "Delete Task by index",
-            args_type: crate::functions::inventions::ToolArgsType::Number,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "DeleteTask",
+            "Delete Task by index",
+            crate::upstream::ToolArgsType::Number,
+            {
                 let state = Arc::clone(this);
                 move |args| {
                     let index = match args {
@@ -369,18 +369,18 @@ impl AlphaScalarBranchState {
                         None => Err("Tasks have not been written".to_string()),
                     }
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn append_task_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "AppendTask",
-            description: "Append Task",
-            args_type: crate::functions::inventions::ToolArgsType::Object,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "AppendTask",
+            "Append Task",
+            crate::upstream::ToolArgsType::Object,
+            {
                 let state = Arc::clone(this);
                 move |args| {
                     let args_str = match serde_json::to_string(&args) {
@@ -438,18 +438,18 @@ impl AlphaScalarBranchState {
                     }
                     Ok(state.tasks.as_ref().unwrap().len().to_string())
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn check_function_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "CheckFunction",
-            description: "Check if function is valid",
-            args_type: crate::functions::inventions::ToolArgsType::None,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "CheckFunction",
+            "Check if function is valid",
+            crate::upstream::ToolArgsType::None,
+            {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
@@ -475,8 +475,8 @@ impl AlphaScalarBranchState {
                         Err(e) => Err(format!("Function is invalid: {}", e)),
                     }
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String> {
@@ -498,12 +498,12 @@ impl AlphaScalarBranchState {
 
     pub fn read_description_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "ReadDescription",
-            description: "Read Description",
-            args_type: crate::functions::inventions::ToolArgsType::None,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "ReadDescription",
+            "Read Description",
+            crate::upstream::ToolArgsType::None,
+            {
                 let state = Arc::clone(this);
                 move |_| {
                     let state = state.lock().unwrap();
@@ -514,18 +514,18 @@ impl AlphaScalarBranchState {
                         }
                     }
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn write_description_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::functions::inventions::Tool {
-        crate::functions::inventions::Tool {
-            name: "WriteDescription",
-            description: "Write Description",
-            args_type: crate::functions::inventions::ToolArgsType::String,
-            call: Arc::new({
+    ) -> crate::upstream::Tool {
+        crate::upstream::Tool::new_sync(
+            "WriteDescription",
+            "Write Description",
+            crate::upstream::ToolArgsType::String,
+            {
                 let state = Arc::clone(this);
                 move |args| {
                     let description = match args {
@@ -548,8 +548,8 @@ impl AlphaScalarBranchState {
                     state.description = Some(description);
                     Ok("Ok".to_string())
                 }
-            }),
-        }
+            },
+        )
     }
 
     pub fn validate_description(this: &Arc<Mutex<Self>>) -> Result<(), String> {
@@ -605,14 +605,14 @@ impl super::InventionState for AlphaScalarBranchState {
     }
     fn into_state(self) -> super::State { super::State::AlphaScalarBranch(self) }
 
-    fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+    fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
         vec![Self::read_spec_tool(this), Self::write_essay_tool(this)]
     }
     fn validate_essay(this: &Arc<Mutex<Self>>) -> Result<(), String> {
         AlphaScalarBranchState::validate_essay(this)
     }
 
-    fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+    fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
         let mut tools = vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::write_input_schema_tool(this),
@@ -624,7 +624,7 @@ impl super::InventionState for AlphaScalarBranchState {
         AlphaScalarBranchState::validate_input_schema(this)
     }
 
-    fn essay_tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+    fn essay_tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
         vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::read_input_schema_tool(this), Self::write_essay_tasks_tool(this),
@@ -634,7 +634,7 @@ impl super::InventionState for AlphaScalarBranchState {
         AlphaScalarBranchState::validate_essay_tasks(this)
     }
 
-    fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+    fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
         let mut tools = vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::read_input_schema_tool(this), Self::read_essay_tasks_tool(this),
@@ -649,7 +649,7 @@ impl super::InventionState for AlphaScalarBranchState {
         AlphaScalarBranchState::validate_function(this)
     }
 
-    fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::Tool> {
+    fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
         vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::read_input_schema_tool(this), Self::read_essay_tasks_tool(this),
