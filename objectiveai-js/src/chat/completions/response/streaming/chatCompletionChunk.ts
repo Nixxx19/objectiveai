@@ -38,7 +38,8 @@ export const ChatCompletionChunkSchema = z
       .optional()
       .describe("The provider used for this chat completion."),
   })
-  .describe("A chunk in a streaming chat completion response.");
+  .describe("A chunk in a streaming chat completion response.")
+  .meta({ title: "ChatCompletionChunk" });
 export type ChatCompletionChunk = z.infer<typeof ChatCompletionChunkSchema>;
 export const ChatCompletionChunkJsonSchema: JsonSchema = convert(ChatCompletionChunkSchema);
 

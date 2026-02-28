@@ -19,7 +19,8 @@ export const VectorCompletionTaskChunkSchema =
     error: ObjectiveAIErrorSchema.optional().describe(
       "When present, indicates that an error occurred during the vector completion task."
     ),
-  }).describe("A chunk of a vector completion task.");
+  }).describe("A chunk of a vector completion task.")
+  .meta({ title: "VectorCompletionTaskChunk" });
 export type VectorCompletionTaskChunk = z.infer<
   typeof VectorCompletionTaskChunkSchema
 >;

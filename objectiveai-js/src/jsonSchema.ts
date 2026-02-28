@@ -153,6 +153,10 @@ const schemaRefs: string[] = [
   "AlphaVectorVectorCompletionTaskExpression",
   "PlaceholderAlphaVectorScalarFunctionTaskExpression",
   "PlaceholderAlphaVectorFunctionTaskExpression",
+  "ChatCompletionUsage",
+  "VectorCompletionUsage",
+  "VectorCompletionTask",
+  "VectorCompletionTaskChunk",
 ];
 
 const propertyRefsBySchema = new WeakMap<z.ZodType, Record<string, string>>();

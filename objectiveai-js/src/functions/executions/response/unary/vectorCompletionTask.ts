@@ -14,5 +14,6 @@ export const VectorCompletionTaskSchema = VectorCompletionSchema.extend({
   error: ObjectiveAIErrorSchema.nullable().describe(
     "When non-null, indicates that an error occurred during the vector completion task."
   ),
-}).describe("A vector completion task.");
+}).describe("A vector completion task.")
+  .meta({ title: "VectorCompletionTask" });
 export type VectorCompletionTask = z.infer<typeof VectorCompletionTaskSchema>;

@@ -32,7 +32,8 @@ export const VectorCompletionChunkSchema = z
     object: ResponseObjectSchema,
     usage: UsageSchema.optional(),
   })
-  .describe("A chunk in a streaming vector completion response.");
+  .describe("A chunk in a streaming vector completion response.")
+  .meta({ title: "VectorCompletionChunk" });
 export type VectorCompletionChunk = z.infer<typeof VectorCompletionChunkSchema>;
 export const VectorCompletionChunkJsonSchema: JsonSchema = convert(VectorCompletionChunkSchema);
 

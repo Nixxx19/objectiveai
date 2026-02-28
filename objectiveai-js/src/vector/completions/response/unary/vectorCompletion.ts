@@ -27,6 +27,7 @@ export const VectorCompletionSchema = z
     object: z.literal("vector.completion"),
     usage: UsageSchema,
   })
-  .describe("A unary vector completion response.");
+  .describe("A unary vector completion response.")
+  .meta({ title: "VectorCompletion" });
 export type VectorCompletion = z.infer<typeof VectorCompletionSchema>;
 export const VectorCompletionJsonSchema: JsonSchema = convert(VectorCompletionSchema);

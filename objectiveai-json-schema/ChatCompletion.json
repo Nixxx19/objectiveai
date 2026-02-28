@@ -3,72 +3,57 @@
   "properties": {
     "id": {
       "type": "string",
-      "description": "The unique identifier of the function execution."
+      "description": "The unique identifier of the chat completion."
     },
-    "tasks": {
+    "upstream_id": {
+      "type": "string",
+      "description": "The unique identifier of the upstream chat completion."
+    },
+    "choices": {
       "type": "array",
       "items": {
-        "anyOf": [
-          {
-            "description": "A chunk of a function execution task."
-          },
-          {
-            "$ref": "VectorCompletionTaskChunk",
-            "description": "A chunk of a vector completion task."
-          }
-        ],
-        "description": "A chunk of a task execution."
-      },
-      "description": "The tasks executed as part of the function execution."
-    },
-    "tasks_errors": {
-      "type": "boolean",
-      "description": "When true, indicates that one or more tasks encountered errors during execution."
-    },
-    "reasoning": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "The unique identifier of the chat completion."
-        },
-        "upstream_id": {
-          "type": "string",
-          "description": "The unique identifier of the upstream chat completion."
-        },
-        "choices": {
-          "type": "array",
-          "items": {
+        "type": "object",
+        "properties": {
+          "message": {
             "type": "object",
             "properties": {
-              "delta": {
-                "type": "object",
-                "properties": {
-                  "content": {
-                    "type": "string",
-                    "description": "The content added in this delta."
+              "content": {
+                "anyOf": [
+                  {
+                    "type": "string"
                   },
-                  "refusal": {
-                    "type": "string",
-                    "description": "The refusal message added in this delta."
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The content of the message."
+              },
+              "refusal": {
+                "anyOf": [
+                  {
+                    "type": "string"
                   },
-                  "role": {
-                    "enum": [
-                      "assistant"
-                    ],
-                    "description": "The role of the message author."
-                  },
-                  "tool_calls": {
+                  {
+                    "type": "null"
+                  }
+                ],
+                "description": "The refusal message, if any."
+              },
+              "role": {
+                "enum": [
+                  "assistant"
+                ],
+                "description": "The role of the message author."
+              },
+              "tool_calls": {
+                "anyOf": [
+                  {
                     "type": "array",
                     "items": {
                       "anyOf": [
                         {
                           "type": "object",
                           "properties": {
-                            "index": {
-                              "type": "integer",
-                              "description": "The index of the tool call in the sequence of tool calls."
-                            },
                             "type": {
                               "const": "function"
                             },
@@ -87,74 +72,92 @@
                                   "type": "string",
                                   "description": "The arguments passed to the function."
                                 }
-                              }
-                            }
-                          },
-                          "required": [
-                            "index"
-                          ],
-                          "description": "A function tool call made by the assistant."
-                        }
-                      ],
-                      "description": "A tool call made by the assistant."
-                    },
-                    "description": "Tool calls made in this delta."
-                  },
-                  "reasoning": {
-                    "type": "string",
-                    "description": "The reasoning added in this delta."
-                  },
-                  "images": {
-                    "type": "array",
-                    "items": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "type": {
-                              "const": "image_url"
-                            },
-                            "image_url": {
-                              "type": "object",
-                              "properties": {
-                                "url": {
-                                  "type": "string",
-                                  "description": "The Base64 URL of the generated image."
-                                }
                               },
                               "required": [
-                                "url"
+                                "name",
+                                "arguments"
                               ]
                             }
                           },
                           "required": [
                             "type",
-                            "image_url"
-                          ]
+                            "id"
+                          ],
+                          "description": "A function tool call made by the assistant."
                         }
                       ],
-                      "description": "An image generated by the model."
-                    },
-                    "description": "Images added in this delta."
+                      "description": "A tool call made by the assistant."
+                    }
+                  },
+                  {
+                    "type": "null"
                   }
-                },
-                "description": "A delta in a streaming chat completion response."
-              },
-              "finish_reason": {
-                "enum": [
-                  "stop",
-                  "length",
-                  "tool_calls",
-                  "content_filter",
-                  "error"
                 ],
-                "description": "The reason why the assistant ceased to generate further tokens."
+                "description": "The tool calls made by the assistant, if any."
               },
-              "index": {
-                "type": "integer",
-                "description": "The index of the choice in the list of choices."
+              "reasoning": {
+                "type": "string",
+                "description": "The reasoning provided by the assistant, if any."
               },
-              "logprobs": {
+              "images": {
+                "type": "array",
+                "items": {
+                  "anyOf": [
+                    {
+                      "type": "object",
+                      "properties": {
+                        "type": {
+                          "const": "image_url"
+                        },
+                        "image_url": {
+                          "type": "object",
+                          "properties": {
+                            "url": {
+                              "type": "string",
+                              "description": "The Base64 URL of the generated image."
+                            }
+                          },
+                          "required": [
+                            "url"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "type",
+                        "image_url"
+                      ]
+                    }
+                  ],
+                  "description": "An image generated by the model."
+                },
+                "description": "The images generated by the assistant, if any."
+              }
+            },
+            "required": [
+              "content",
+              "refusal",
+              "role",
+              "tool_calls"
+            ],
+            "description": "A message generated by the assistant."
+          },
+          "finish_reason": {
+            "enum": [
+              "stop",
+              "length",
+              "tool_calls",
+              "content_filter",
+              "error"
+            ],
+            "description": "The reason why the assistant ceased to generate further tokens."
+          },
+          "index": {
+            "type": "integer",
+            "description": "The index of the choice in the list of choices."
+          },
+          "logprobs": {
+            "anyOf": [
+              {
                 "type": "object",
                 "properties": {
                   "content": {
@@ -331,193 +334,67 @@
                   }
                 },
                 "description": "The log probabilities of the tokens generated by the model."
+              },
+              {
+                "type": "null"
               }
-            },
-            "required": [
-              "delta",
-              "index"
-            ],
-            "description": "A choice in a streaming chat completion response."
-          },
-          "description": "The list of choices in this chunk."
+            ]
+          }
         },
-        "created": {
-          "type": "integer",
-          "description": "The Unix timestamp (in seconds) when the chat completion was created."
-        },
-        "model": {
-          "type": "string",
-          "description": "The unique identifier of the Ensemble LLM used for this chat completion."
-        },
-        "upstream_model": {
-          "type": "string",
-          "description": "The upstream model used for this chat completion."
-        },
-        "object": {
-          "const": "chat.completion.chunk"
-        },
-        "service_tier": {
-          "type": "string"
-        },
-        "system_fingerprint": {
-          "type": "string"
-        },
-        "usage": {
-          "$ref": "ChatCompletionUsage",
-          "description": "Token and cost usage statistics for the completion."
-        },
-        "upstream": {
-          "$ref": "Upstream",
-          "description": "The upstream provider that served the request."
-        },
-        "provider": {
-          "type": "string",
-          "description": "The provider used for this chat completion."
-        },
-        "error": {
-          "type": "object",
-          "properties": {
-            "code": {
-              "type": "integer",
-              "description": "The status code of the error."
-            },
-            "message": {
-              "$ref": "JsonValue",
-              "description": "The message or details of the error."
-            }
-          },
-          "required": [
-            "code",
-            "message"
-          ],
-          "description": "When present, indicates that an error occurred during the chat completion."
-        }
+        "required": [
+          "message",
+          "finish_reason",
+          "index",
+          "logprobs"
+        ],
+        "description": "A choice in a unary chat completion response."
       },
-      "required": [
-        "id",
-        "upstream_id",
-        "choices",
-        "created",
-        "model",
-        "upstream_model",
-        "object",
-        "upstream"
-      ],
-      "description": "A chunk of a reasoning summary generation."
-    },
-    "output": {
-      "anyOf": [
-        {
-          "type": "number",
-          "description": "The scalar output of the function execution."
-        },
-        {
-          "type": "array",
-          "items": {
-            "type": "number"
-          },
-          "description": "The vector output of the function execution."
-        },
-        {
-          "$ref": "JsonValue",
-          "description": "The erroneous output of the function execution."
-        }
-      ],
-      "description": "The output of the function execution."
-    },
-    "error": {
-      "type": "object",
-      "properties": {
-        "code": {
-          "type": "integer",
-          "description": "The status code of the error."
-        },
-        "message": {
-          "$ref": "JsonValue",
-          "description": "The message or details of the error."
-        }
-      },
-      "required": [
-        "code",
-        "message"
-      ],
-      "description": "When present, indicates that an error occurred during the function execution."
-    },
-    "retry_token": {
-      "type": "string",
-      "description": "A token which may be used to retry the function execution."
+      "description": "The list of choices in this chat completion."
     },
     "created": {
       "type": "integer",
-      "description": "The UNIX timestamp (in seconds) when the function execution chunk was created."
+      "description": "The Unix timestamp (in seconds) when the chat completion was created."
     },
-    "function": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "description": "The unique identifier of the function being executed."
+    "model": {
+      "type": "string",
+      "description": "The unique identifier of the Ensemble LLM used for this chat completion."
     },
-    "profile": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "description": "The unique identifier of the profile being used."
+    "upstream_model": {
+      "type": "string",
+      "description": "The upstream model used for this chat completion."
     },
     "object": {
-      "enum": [
-        "scalar.function.execution.chunk",
-        "vector.function.execution.chunk"
-      ],
-      "description": "The object type."
+      "const": "chat.completion"
+    },
+    "service_tier": {
+      "type": "string"
+    },
+    "system_fingerprint": {
+      "type": "string"
     },
     "usage": {
-      "$ref": "VectorCompletionUsage",
+      "$ref": "ChatCompletionUsage",
       "description": "Token and cost usage statistics for the completion."
     },
-    "index": {
-      "type": "integer",
-      "description": "The index of the task in the sequence of tasks."
+    "upstream": {
+      "$ref": "Upstream",
+      "description": "The upstream provider that served the request."
     },
-    "task_index": {
-      "type": "integer",
-      "description": "The index of the task amongst all mapped and non-skipped compiled tasks. Used internally."
-    },
-    "task_path": {
-      "type": "array",
-      "items": {
-        "type": "integer"
-      },
-      "description": "The path of this task which may be used to navigate which nested task this is amongst the root functions tasks and sub-tasks."
-    },
-    "swiss_round": {
-      "type": "number",
-      "description": "The Swiss system round number (1-indexed)."
-    },
-    "swiss_pool_index": {
-      "type": "number",
-      "description": "The index of this task within its Swiss system pool."
+    "provider": {
+      "type": "string",
+      "description": "The provider used for this chat completion."
     }
   },
   "required": [
     "id",
-    "tasks",
+    "upstream_id",
+    "choices",
     "created",
-    "function",
-    "profile",
+    "model",
+    "upstream_model",
     "object",
-    "index",
-    "task_index",
-    "task_path"
+    "usage",
+    "upstream"
   ],
-  "description": "A chunk of a function execution task."
+  "description": "A unary chat completion response."
 }

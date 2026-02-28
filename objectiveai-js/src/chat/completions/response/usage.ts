@@ -148,7 +148,8 @@ export const UsageSchema = z
         "Whether the completion used a BYOK (Bring Your Own Key) API Key.",
       ),
   })
-  .describe("Token and cost usage statistics for the completion.");
+  .describe("Token and cost usage statistics for the completion.")
+  .meta({ title: "ChatCompletionUsage" });
 export type Usage = z.infer<typeof UsageSchema>;
 export const UsageJsonSchema: JsonSchema = convert(UsageSchema);
 

@@ -31,7 +31,8 @@ export const UsageSchema = z
       .number()
       .describe("The total cost in credits incurred including upstream costs."),
   })
-  .describe("Token and cost usage statistics for the completion.");
+  .describe("Token and cost usage statistics for the completion.")
+  .meta({ title: "VectorCompletionUsage" });
 export type Usage = z.infer<typeof UsageSchema>;
 export const UsageJsonSchema: JsonSchema = convert(UsageSchema);
 

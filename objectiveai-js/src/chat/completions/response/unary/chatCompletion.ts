@@ -37,6 +37,7 @@ export const ChatCompletionSchema = z
       .optional()
       .describe("The provider used for this chat completion."),
   })
-  .describe("A unary chat completion response.");
+  .describe("A unary chat completion response.")
+  .meta({ title: "ChatCompletion" });
 export type ChatCompletion = z.infer<typeof ChatCompletionSchema>;
 export const ChatCompletionJsonSchema: JsonSchema = convert(ChatCompletionSchema);

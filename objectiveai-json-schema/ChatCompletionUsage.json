@@ -1,0 +1,101 @@
+{
+  "type": "object",
+  "properties": {
+    "completion_tokens": {
+      "type": "integer",
+      "description": "The number of tokens generated in the completion."
+    },
+    "prompt_tokens": {
+      "type": "integer",
+      "description": "The number of tokens in the prompt."
+    },
+    "total_tokens": {
+      "type": "integer",
+      "description": "The total number of tokens used in the prompt or generated in the completion."
+    },
+    "completion_tokens_details": {
+      "type": "object",
+      "properties": {
+        "accepted_prediction_tokens": {
+          "type": "integer",
+          "description": "The number of accepted prediction tokens in the completion."
+        },
+        "audio_tokens": {
+          "type": "integer",
+          "description": "The number of generated audio tokens in the completion."
+        },
+        "reasoning_tokens": {
+          "type": "integer",
+          "description": "The number of generated reasoning tokens in the completion."
+        },
+        "rejected_prediction_tokens": {
+          "type": "integer",
+          "description": "The number of rejected prediction tokens in the completion."
+        }
+      },
+      "description": "Detailed breakdown of generated completion tokens."
+    },
+    "prompt_tokens_details": {
+      "type": "object",
+      "properties": {
+        "audio_tokens": {
+          "type": "integer",
+          "description": "The number of audio tokens in the prompt."
+        },
+        "cached_tokens": {
+          "type": "integer",
+          "description": "The number of cached tokens in the prompt."
+        },
+        "cache_write_tokens": {
+          "type": "integer",
+          "description": "The number of prompt tokens written to cache."
+        },
+        "video_tokens": {
+          "type": "integer",
+          "description": "The number of video tokens in the prompt."
+        }
+      },
+      "description": "Detailed breakdown of prompt tokens."
+    },
+    "cost": {
+      "type": "number",
+      "description": "The cost in credits incurred for this completion."
+    },
+    "cost_details": {
+      "type": "object",
+      "properties": {
+        "upstream_inference_cost": {
+          "type": "number",
+          "description": "The cost incurred upstream."
+        },
+        "upstream_upstream_inference_cost": {
+          "type": "number",
+          "description": "The cost incurred by upstream's upstream."
+        }
+      },
+      "description": "Detailed breakdown of upstream costs incurred."
+    },
+    "total_cost": {
+      "type": "number",
+      "description": "The total cost in credits incurred including upstream costs."
+    },
+    "cost_multiplier": {
+      "type": "number",
+      "description": "The cost multiplier applied to upstream costs for computing ObjectiveAI costs."
+    },
+    "is_byok": {
+      "type": "boolean",
+      "description": "Whether the completion used a BYOK (Bring Your Own Key) API Key."
+    }
+  },
+  "required": [
+    "completion_tokens",
+    "prompt_tokens",
+    "total_tokens",
+    "cost",
+    "total_cost",
+    "cost_multiplier",
+    "is_byok"
+  ],
+  "description": "Token and cost usage statistics for the completion."
+}
