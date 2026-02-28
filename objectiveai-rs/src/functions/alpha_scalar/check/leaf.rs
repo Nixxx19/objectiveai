@@ -72,19 +72,6 @@ pub fn check_alpha_leaf_scalar_function(
             ));
         }
 
-        // Responses must not be plain text
-        for (j, resp) in vc.responses.iter().enumerate() {
-            if matches!(
-                resp,
-                crate::chat::completions::request::RichContent::Text(_)
-            ) {
-                return Err(format!(
-                    "AS11: Task [{}], response [{}]: response must be an array of content parts, \
-                     not a plain string",
-                    i, j
-                ));
-            }
-        }
     }
 
     // --- Transpile and run generate() loop ---

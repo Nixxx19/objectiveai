@@ -171,38 +171,6 @@ fn responses_less_than_2() {
     test_err(&f, "AS10");
 }
 
-#[test]
-fn responses_plain_text() {
-    let f = RemoteFunction::Leaf {
-        description: "test".to_string(),
-        input_schema: ObjectInputSchema {
-            description: None,
-            properties: index_map! {
-                "text" => InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })
-            },
-            required: Some(vec!["text".to_string()]),
-        },
-        tasks: vec![LeafTaskExpression::VectorCompletion(
-            VectorCompletionTaskExpression {
-                skip: None,
-                messages: Expression::Starlark(
-                    "[{'role': 'user', 'content': [{'type': 'text', 'text': input['text']}]}]"
-                        .to_string(),
-                ),
-                responses: vec![
-                    RichContent::Text("bad plain string".to_string()),
-                    RichContent::Parts(vec![RichContentPart::Text {
-                        text: "Option B".to_string(),
-                    }]),
-                ],
-            },
-        )],
-    };
-    test_err(&f, "AS11");
-}
 
 // --- Success cases ---
 
