@@ -52,7 +52,7 @@ pub enum BetaBashCodeExecutionResultBlockType {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaBashCodeExecutionResultBlock {
-    pub content: Vec<serde_json::Value>,
+    pub content: Vec<super::BetaBashCodeExecutionOutputBlock>,
     pub return_code: f64,
     pub stderr: String,
     pub stdout: String,

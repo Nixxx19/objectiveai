@@ -13,5 +13,5 @@ pub struct BetaToolUseBlock {
     pub name: String,
     pub r#type: BetaToolUseBlockType,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub caller: Option<serde_json::Value>,
+    pub caller: Option<super::BetaCaller>,
 }

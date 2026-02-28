@@ -13,7 +13,7 @@ pub struct BetaWebSearchToolResultBlock {
     #[serde(rename = "type")]
     pub r#type: BetaWebSearchToolResultBlockType,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub caller: Option<serde_json::Value>,
+    pub caller: Option<super::BetaCaller>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]

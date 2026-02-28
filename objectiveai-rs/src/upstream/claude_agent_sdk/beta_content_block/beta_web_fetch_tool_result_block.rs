@@ -13,7 +13,7 @@ pub struct BetaWebFetchToolResultBlock {
     #[serde(rename = "type")]
     pub r#type: BetaWebFetchToolResultBlockType,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub caller: Option<serde_json::Value>,
+    pub caller: Option<super::BetaCaller>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
@@ -57,7 +57,7 @@ pub enum BetaWebFetchBlockType {
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct BetaWebFetchBlock {
-    pub content: serde_json::Value,
+    pub content: super::BetaDocumentBlock,
     pub retrieved_at: Option<String>,
     #[serde(rename = "type")]
     pub r#type: BetaWebFetchBlockType,

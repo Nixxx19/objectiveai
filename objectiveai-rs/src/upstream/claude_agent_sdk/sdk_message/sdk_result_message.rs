@@ -67,7 +67,7 @@ pub enum SDKResultErrorSubtype {
 pub struct SDKPermissionDenial {
     pub tool_name: String,
     pub tool_use_id: String,
-    pub tool_input: serde_json::Map<String, serde_json::Value>,
+    pub tool_input: indexmap::IndexMap<String, serde_json::Value>,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]

@@ -1,8 +1,12 @@
+mod beta_bash_code_execution_output_block;
 mod beta_bash_code_execution_tool_result_block;
+mod beta_caller;
+mod beta_code_execution_output_block;
 mod beta_code_execution_tool_result_block;
 mod beta_compaction_block;
 mod beta_container_upload_block;
 mod beta_content_block;
+mod beta_document_block;
 mod beta_mcp_tool_result_block;
 mod beta_mcp_tool_use_block;
 mod beta_redacted_thinking_block;
@@ -15,11 +19,15 @@ mod beta_tool_use_block;
 mod beta_web_fetch_tool_result_block;
 mod beta_web_search_tool_result_block;
 
+pub use beta_bash_code_execution_output_block::*;
 pub use beta_bash_code_execution_tool_result_block::*;
+pub use beta_caller::*;
+pub use beta_code_execution_output_block::*;
 pub use beta_code_execution_tool_result_block::*;
 pub use beta_compaction_block::*;
 pub use beta_container_upload_block::*;
 pub use beta_content_block::*;
+pub use beta_document_block::*;
 pub use beta_mcp_tool_result_block::*;
 pub use beta_mcp_tool_use_block::*;
 pub use beta_redacted_thinking_block::*;
