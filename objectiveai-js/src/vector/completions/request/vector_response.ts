@@ -1,7 +1,4 @@
-import {
-  RichContentPartsSchema,
-  RichContentSchema,
-} from "src/chat/completions/request/message";
+import { RichContentSchema } from "src/chat/completions/request/message";
 import { ExpressionSchema } from "src/functions/expression/expression";
 import z from "zod";
 import { convert, type JSONSchema } from "../../../json_schema";
@@ -51,57 +48,3 @@ export type VectorResponsesExpression = z.infer<
   typeof VectorResponsesExpressionSchema
 >;
 export const VectorResponsesExpressionJsonSchema: JSONSchema = convert(VectorResponsesExpressionSchema);
-
-// Quality Scalar Vector Responses (content parts only, no plain strings; for scalar parent functions)
-
-export const QualityScalarVectorResponseSchema =
-  RichContentPartsSchema.describe(VectorResponseSchema.description!).meta({
-    title: "RichContentParts",
-    wrapper: true,
-  });
-export type QualityScalarVectorResponse = z.infer<
-  typeof QualityScalarVectorResponseSchema
->;
-export const QualityScalarVectorResponseJsonSchema: JSONSchema = convert(QualityScalarVectorResponseSchema);
-
-export const QualityScalarVectorResponseExpressionSchema = z
-  .union([
-    QualityScalarVectorResponseSchema,
-    ExpressionSchema.describe(
-      "An expression which evaluates to an array of content parts. Receives: `input`, `map` (if mapped).",
-    ),
-  ])
-  .describe(VectorResponseSchema.description!);
-export type QualityScalarVectorResponseExpression = z.infer<
-  typeof QualityScalarVectorResponseExpressionSchema
->;
-export const QualityScalarVectorResponseExpressionJsonSchema: JSONSchema = convert(QualityScalarVectorResponseExpressionSchema);
-
-export const QualityScalarVectorResponsesSchema = z
-  .array(QualityScalarVectorResponseSchema)
-  .describe(VectorResponsesSchema.description!);
-export type QualityScalarVectorResponses = z.infer<
-  typeof QualityScalarVectorResponsesSchema
->;
-export const QualityScalarVectorResponsesJsonSchema: JSONSchema = convert(QualityScalarVectorResponsesSchema);
-
-export const QualityScalarVectorResponsesExpressionSchema = z
-  .array(QualityScalarVectorResponseExpressionSchema)
-  .describe(VectorResponsesSchema.description!);
-export type QualityScalarVectorResponsesExpression = z.infer<
-  typeof QualityScalarVectorResponsesExpressionSchema
->;
-export const QualityScalarVectorResponsesExpressionJsonSchema: JSONSchema = convert(QualityScalarVectorResponsesExpressionSchema);
-
-// Quality Vector Vector Responses (must be a single expression; for vector parent functions)
-
-export const QualityVectorVectorResponsesExpressionSchema =
-  ExpressionSchema.describe(
-    "An expression which evaluates to an array of possible assistant responses. " +
-      "Vector function responses must be a single expression, not a fixed array. " +
-      "Receives: `input`, `map` (if mapped).",
-  ).meta({ title: "Expression", wrapper: true });
-export type QualityVectorVectorResponsesExpression = z.infer<
-  typeof QualityVectorVectorResponsesExpressionSchema
->;
-export const QualityVectorVectorResponsesExpressionJsonSchema: JSONSchema = convert(QualityVectorVectorResponsesExpressionSchema);

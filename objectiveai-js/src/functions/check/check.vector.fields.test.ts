@@ -47,11 +47,11 @@ function validObjectFields() {
 
 describe("checkVectorFields", () => {
   it("accepts valid array schema", () => {
-    expect(() => Functions.Quality.checkVectorFields(validArrayFields())).not.toThrow();
+    expect(() => Functions.Check.checkVectorFields(validArrayFields() as any)).not.toThrow();
   });
 
   it("accepts valid object schema", () => {
-    expect(() => Functions.Quality.checkVectorFields(validObjectFields())).not.toThrow();
+    expect(() => Functions.Check.checkVectorFields(validObjectFields() as any)).not.toThrow();
   });
 
   it("accepts valid integer array schema", () => {
@@ -66,7 +66,7 @@ describe("checkVectorFields", () => {
       input_split: { $starlark: "[[x] for x in input]" },
       input_merge: { $starlark: "[x[0] for x in input]" },
     };
-    expect(() => Functions.Quality.checkVectorFields(fields)).not.toThrow();
+    expect(() => Functions.Check.checkVectorFields(fields as any)).not.toThrow();
   });
 
   // ── error tests ──────────────────────────────────────────────────
@@ -76,7 +76,7 @@ describe("checkVectorFields", () => {
       ...validArrayFields(),
       output_length: { $starlark: "undefined_var" },
     };
-    expect(() => Functions.Quality.checkVectorFields(fields)).toThrow(
+    expect(() => Functions.Check.checkVectorFields(fields as any)).toThrow(
       /VF01/,
     );
   });
@@ -86,7 +86,7 @@ describe("checkVectorFields", () => {
       ...validArrayFields(),
       output_length: { $starlark: "'not_a_number'" },
     };
-    expect(() => Functions.Quality.checkVectorFields(fields)).toThrow(
+    expect(() => Functions.Check.checkVectorFields(fields as any)).toThrow(
       /VF01/,
     );
   });
@@ -96,7 +96,7 @@ describe("checkVectorFields", () => {
       ...validArrayFields(),
       input_split: { $starlark: "undefined_var" },
     };
-    expect(() => Functions.Quality.checkVectorFields(fields)).toThrow(
+    expect(() => Functions.Check.checkVectorFields(fields as any)).toThrow(
       /VF04/,
     );
   });
@@ -106,7 +106,7 @@ describe("checkVectorFields", () => {
       ...validArrayFields(),
       input_split: { $starlark: "[input[0:1], input[1:2]]" },
     };
-    expect(() => Functions.Quality.checkVectorFields(fields)).toThrow(
+    expect(() => Functions.Check.checkVectorFields(fields as any)).toThrow(
       /VF06/,
     );
   });
@@ -123,7 +123,7 @@ describe("checkVectorFields", () => {
       input_split: { $starlark: "[[x, x] for x in input]" },
       input_merge: { $starlark: "[x[0] for x in input]" },
     };
-    expect(() => Functions.Quality.checkVectorFields(fields)).toThrow(
+    expect(() => Functions.Check.checkVectorFields(fields as any)).toThrow(
       /VF09/,
     );
   });
@@ -133,7 +133,7 @@ describe("checkVectorFields", () => {
       ...validArrayFields(),
       input_merge: { $starlark: "undefined_var" },
     };
-    expect(() => Functions.Quality.checkVectorFields(fields)).toThrow(
+    expect(() => Functions.Check.checkVectorFields(fields as any)).toThrow(
       /VF10/,
     );
   });

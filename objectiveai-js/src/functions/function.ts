@@ -1,15 +1,6 @@
 import z from "zod";
-import {
-  InputSchemaSchema,
-  QualityVectorFunctionInputSchemaSchema,
-} from "./expression/input";
-import {
-  QualityBranchScalarFunctionTasksExpressionsSchema,
-  QualityBranchVectorFunctionTasksExpressionsSchema,
-  QualityLeafScalarTasksExpressionsSchema,
-  QualityLeafVectorTasksExpressionsSchema,
-  TaskExpressionsSchema,
-} from "./task";
+import { InputSchemaSchema } from "./expression/input";
+import { TaskExpressionsSchema } from "./task";
 import { ExpressionSchema } from "./expression/expression";
 import { convert, type JSONSchema } from "../json_schema";
 
@@ -130,89 +121,3 @@ export const FunctionSchema = z
   .meta({ title: "Function" });
 export type Function = z.infer<typeof FunctionSchema>;
 export const FunctionJsonSchema: JSONSchema = convert(FunctionSchema);
-
-// Quality Leaf Remote Function (depth 0: vector.completion tasks only)
-
-export const QualityLeafRemoteScalarFunctionSchema =
-  RemoteScalarFunctionSchema.extend({
-    tasks: QualityLeafScalarTasksExpressionsSchema,
-  })
-    .describe(RemoteScalarFunctionSchema.description!)
-    .meta({ title: "QualityLeafRemoteScalarFunction" });
-export type QualityLeafRemoteScalarFunction = z.infer<
-  typeof QualityLeafRemoteScalarFunctionSchema
->;
-export const QualityLeafRemoteScalarFunctionJsonSchema: JSONSchema = convert(
-  QualityLeafRemoteScalarFunctionSchema,
-);
-
-export const QualityLeafRemoteVectorFunctionSchema =
-  RemoteVectorFunctionSchema.extend({
-    input_schema: QualityVectorFunctionInputSchemaSchema,
-    tasks: QualityLeafVectorTasksExpressionsSchema,
-  })
-    .describe(RemoteVectorFunctionSchema.description!)
-    .meta({ title: "QualityLeafRemoteVectorFunction" });
-export type QualityLeafRemoteVectorFunction = z.infer<
-  typeof QualityLeafRemoteVectorFunctionSchema
->;
-export const QualityLeafRemoteVectorFunctionJsonSchema: JSONSchema = convert(
-  QualityLeafRemoteVectorFunctionSchema,
-);
-
-export const QualityLeafRemoteFunctionSchema = z
-  .discriminatedUnion("type", [
-    QualityLeafRemoteScalarFunctionSchema,
-    QualityLeafRemoteVectorFunctionSchema,
-  ])
-  .describe(RemoteFunctionSchema.description!)
-  .meta({ title: "QualityLeafRemoteFunction" });
-export type QualityLeafRemoteFunction = z.infer<
-  typeof QualityLeafRemoteFunctionSchema
->;
-export const QualityLeafRemoteFunctionJsonSchema: JSONSchema = convert(
-  QualityLeafRemoteFunctionSchema,
-);
-
-// Quality Branch Remote Function (depth > 0: function/placeholder tasks)
-
-export const QualityBranchRemoteScalarFunctionSchema =
-  RemoteScalarFunctionSchema.extend({
-    tasks: QualityBranchScalarFunctionTasksExpressionsSchema,
-  })
-    .describe(RemoteScalarFunctionSchema.description!)
-    .meta({ title: "QualityBranchRemoteScalarFunction" });
-export type QualityBranchRemoteScalarFunction = z.infer<
-  typeof QualityBranchRemoteScalarFunctionSchema
->;
-export const QualityBranchRemoteScalarFunctionJsonSchema: JSONSchema = convert(
-  QualityBranchRemoteScalarFunctionSchema,
-);
-
-export const QualityBranchRemoteVectorFunctionSchema =
-  RemoteVectorFunctionSchema.extend({
-    input_schema: QualityVectorFunctionInputSchemaSchema,
-    tasks: QualityBranchVectorFunctionTasksExpressionsSchema,
-  })
-    .describe(RemoteVectorFunctionSchema.description!)
-    .meta({ title: "QualityBranchRemoteVectorFunction" });
-export type QualityBranchRemoteVectorFunction = z.infer<
-  typeof QualityBranchRemoteVectorFunctionSchema
->;
-export const QualityBranchRemoteVectorFunctionJsonSchema: JSONSchema = convert(
-  QualityBranchRemoteVectorFunctionSchema,
-);
-
-export const QualityBranchRemoteFunctionSchema = z
-  .discriminatedUnion("type", [
-    QualityBranchRemoteScalarFunctionSchema,
-    QualityBranchRemoteVectorFunctionSchema,
-  ])
-  .describe(RemoteFunctionSchema.description!)
-  .meta({ title: "QualityBranchRemoteFunction" });
-export type QualityBranchRemoteFunction = z.infer<
-  typeof QualityBranchRemoteFunctionSchema
->;
-export const QualityBranchRemoteFunctionJsonSchema: JSONSchema = convert(
-  QualityBranchRemoteFunctionSchema,
-);

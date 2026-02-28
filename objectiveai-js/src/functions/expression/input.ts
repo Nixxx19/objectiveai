@@ -458,30 +458,6 @@ export const InputSchemaSchema = z
 export type InputSchema = z.infer<typeof InputSchemaSchema>;
 export const InputSchemaJsonSchema: JSONSchema = convert(InputSchemaSchema);
 
-export const QualityVectorFunctionObjectInputSchemaSchema =
-  ObjectInputSchemaSchema.describe(
-    ObjectInputSchemaSchema.description! +
-      " At least one property must be a required array.",
-  ).meta({ title: "ObjectInputSchema", wrapper: true });
-export type QualityVectorFunctionObjectInputSchema = z.infer<
-  typeof QualityVectorFunctionObjectInputSchemaSchema
->;
-export const QualityVectorFunctionObjectInputSchemaJsonSchema: JSONSchema =
-  convert(QualityVectorFunctionObjectInputSchemaSchema);
-
-export const QualityVectorFunctionInputSchemaSchema = z
-  .union([ArrayInputSchemaSchema, QualityVectorFunctionObjectInputSchemaSchema])
-  .describe(
-    "Input schema for a vector function. Must be an array or an object with at least one required array property.",
-  )
-  .meta({ title: "QualityVectorFunctionInputSchema" });
-export type QualityVectorFunctionInputSchema = z.infer<
-  typeof QualityVectorFunctionInputSchemaSchema
->;
-export const QualityVectorFunctionInputSchemaJsonSchema: JSONSchema = convert(
-  QualityVectorFunctionInputSchemaSchema,
-);
-
 export type InputSchemaToZodSchema =
   | ObjectInputSchemaToZodSchema
   | ArrayInputSchemaToZodSchema
