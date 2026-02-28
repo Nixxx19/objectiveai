@@ -257,11 +257,15 @@ fn run_all_steps<T: InventionState>(
         let input_schema_prompt = if is_scalar {
             "Create the InputSchema for your Scalar Function. \
             Ensure that it adheres to the specifications outlined in your Spec \
-            and is consistent with the essay you wrote describing your function.".to_string()
+            and is consistent with the essay you wrote describing your function. \
+            If handling multimodal content, use `type`: `image`, `audio`, `video`, or `file` depending. \
+            Multimodal types exist in addition to common primitives (e.g. `string`, `array`, etc)".to_string()
         } else {
             "Create the InputSchema for your Vector Function. \
             Ensure that it adheres to the specifications outlined in your Spec \
-            and is consistent with the essay you wrote describing your function.".to_string()
+            and is consistent with the essay you wrote describing your function. \
+            If handling multimodal content, use `type`: `image`, `audio`, `video`, or `file` depending. \
+            Multimodal types exist in addition to common primitives (e.g. `string`, `array`, etc)".to_string()
         };
         let mut step = run_step(
             upstream_client.clone(), request.clone(),
