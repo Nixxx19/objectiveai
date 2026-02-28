@@ -1,9 +1,9 @@
 import z from "zod";
 import { RoleSchema } from "../role";
-import { ToolCall, ToolCallSchema } from "./tool_call";
-import { ResponseImageSchema, ResponseImage } from "../response_image";
+import { ToolCall, ToolCallSchema } from "./toolCall";
+import { ResponseImageSchema, ResponseImage } from "../responseImage";
 import { merge, mergedString } from "src/merge";
-import { convert, type JsonSchema } from "../../../../json_schema";
+import { convert, type JsonSchema } from "../../../../jsonSchema";
 
 export const DeltaSchema = z
   .object({

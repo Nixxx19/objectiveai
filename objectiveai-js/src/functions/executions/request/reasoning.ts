@@ -3,7 +3,7 @@ import {
   ModelSchema,
 } from "src/chat/completions/request/model";
 import z from "zod";
-import { convert, type JsonSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../jsonSchema";
 
 export const ReasoningSchema = z
   .object({

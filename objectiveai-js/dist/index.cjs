@@ -27,8 +27,8 @@ var __copyProps = (to, from, except, desc) => {
 };
 var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 var ApiKeySchema, ApiKeyJsonSchema, ApiKeyWithMetadataSchema, ApiKeyWithMetadataJsonSchema;
-var init_api_key = __esm({
-  "src/auth/api_key/api_key.ts"() {
+var init_apiKey = __esm({
+  "src/auth/api_key/apiKey.ts"() {
     ApiKeySchema = z6__default.default.string().describe(
       "An ObjectiveAI API Key. The format is always `apk` followed by 32 hexadecimal characters."
     );
@@ -70,7 +70,7 @@ function disable(client, key, options) {
 var ListItemSchema, ListItemJsonSchema, ListSchema, ListJsonSchema;
 var init_http = __esm({
   "src/auth/api_key/http.ts"() {
-    init_api_key();
+    init_apiKey();
     ListItemSchema = ApiKeyWithMetadataSchema.extend({
       cost: z6__default.default.number().describe("The total cost incurred while using this API key.")
     });
@@ -82,8 +82,8 @@ var init_http = __esm({
   }
 });
 var OpenRouterByokApiKeySchema, OpenRouterByokApiKeyJsonSchema;
-var init_openrouter_byok_api_key = __esm({
-  "src/auth/api_key/openrouter/openrouter_byok_api_key.ts"() {
+var init_openrouterByokApiKey = __esm({
+  "src/auth/api_key/openrouter/openrouterByokApiKey.ts"() {
     OpenRouterByokApiKeySchema = z6__default.default.object({
       api_key: z6__default.default.string().describe("The OpenRouter API key.")
     });
@@ -125,7 +125,7 @@ __export(openrouter_exports, {
 });
 var init_openrouter = __esm({
   "src/auth/api_key/openrouter/index.ts"() {
-    init_openrouter_byok_api_key();
+    init_openrouterByokApiKey();
     init_http2();
   }
 });
@@ -146,9 +146,9 @@ __export(api_key_exports, {
   disable: () => disable,
   list: () => list
 });
-var init_api_key2 = __esm({
+var init_api_key = __esm({
   "src/auth/api_key/index.ts"() {
-    init_api_key();
+    init_apiKey();
     init_http();
     init_openrouter();
   }
@@ -196,7 +196,7 @@ __export(auth_exports, {
 });
 var init_auth = __esm({
   "src/auth/index.ts"() {
-    init_api_key2();
+    init_api_key();
     init_credits2();
   }
 });
@@ -671,8 +671,8 @@ var init_message = __esm({
   }
 });
 var OutputModeSchema, OutputModeJsonSchema;
-var init_output_mode = __esm({
-  "src/ensemble_llm/output_mode.ts"() {
+var init_outputMode = __esm({
+  "src/ensemble_llm/outputMode.ts"() {
     OutputModeSchema = z6__default.default.enum(["instruction", "json_schema", "tool_call"]).describe(
       `For Vector Completions only, specifies the LLM's voting output mode. For "instruction", the assistant is instructed to output a key. For "json_schema", the assistant is constrained to output a valid key using a JSON schema. For "tool_call", the assistant is instructed to output a tool call to select the key.`
     );
@@ -761,9 +761,9 @@ var init_verbosity = __esm({
   }
 });
 var EnsembleLlmBaseSchema, EnsembleLlmBaseJsonSchema, EnsembleLlmBaseWithFallbacksAndCountSchema, EnsembleLlmBaseWithFallbacksAndCountJsonSchema, EnsembleLlmSchema, EnsembleLlmJsonSchema, EnsembleLlmWithFallbacksAndCountSchema, EnsembleLlmWithFallbacksAndCountJsonSchema;
-var init_ensemble_llm = __esm({
-  "src/ensemble_llm/ensemble_llm.ts"() {
-    init_output_mode();
+var init_ensembleLlm = __esm({
+  "src/ensemble_llm/ensembleLlm.ts"() {
+    init_outputMode();
     init_message();
     init_stop();
     init_provider();
@@ -854,7 +854,7 @@ var init_ensemble_llm = __esm({
 var ModelSchema, ModelJsonSchema, FallbackModelsSchema, FallbackModelsJsonSchema;
 var init_model = __esm({
   "src/chat/completions/request/model.ts"() {
-    init_ensemble_llm();
+    init_ensembleLlm();
     ModelSchema = z6__default.default.union([
       z6__default.default.string().describe("The unique identifier for the Ensemble LLM.").meta({ title: "EnsembleLlmId" }),
       EnsembleLlmBaseSchema
@@ -950,8 +950,8 @@ var init_json = __esm({
   }
 });
 var TextResponseFormatSchema, TextResponseFormatJsonSchema, JsonObjectResponseFormatSchema, JsonObjectResponseFormatJsonSchema, JsonSchemaResponseFormatJsonSchemaSchema, JsonSchemaResponseFormatJsonSchemaJsonSchema, JsonSchemaResponseFormatSchema, JsonSchemaResponseFormatJsonSchema, GrammarResponseFormatSchema, GrammarResponseFormatJsonSchema, PythonResponseFormatSchema, PythonResponseFormatJsonSchema, ResponseFormatSchema, ResponseFormatJsonSchema;
-var init_response_format = __esm({
-  "src/chat/completions/request/response_format.ts"() {
+var init_responseFormat = __esm({
+  "src/chat/completions/request/responseFormat.ts"() {
     init_json();
     TextResponseFormatSchema = z6__default.default.object({
       type: z6__default.default.literal("text")
@@ -993,8 +993,8 @@ var init_response_format = __esm({
   }
 });
 var FunctionToolChoiceFunctionSchema, FunctionToolChoiceFunctionJsonSchema, FunctionToolChoiceSchema, FunctionToolChoiceJsonSchema, ToolChoiceSchema, ToolChoiceJsonSchema;
-var init_tool_choice = __esm({
-  "src/chat/completions/request/tool_choice.ts"() {
+var init_toolChoice = __esm({
+  "src/chat/completions/request/toolChoice.ts"() {
     FunctionToolChoiceFunctionSchema = z6__default.default.object({
       name: z6__default.default.string().describe("The name of the function the assistant will call.")
     }).meta({ title: "FunctionToolChoiceFunction" });
@@ -1122,13 +1122,13 @@ var init_upstream = __esm({
   }
 });
 var SeedSchema, SeedJsonSchema, BackoffMaxElapsedTimeSchema, BackoffMaxElapsedTimeJsonSchema, FirstChunkTimeoutSchema, FirstChunkTimeoutJsonSchema, OtherChunkTimeoutSchema, OtherChunkTimeoutJsonSchema, ChatCompletionCreateParamsBaseSchema, ChatCompletionCreateParamsBaseJsonSchema, StreamTrueSchema, StreamTrueJsonSchema, ChatCompletionCreateParamsStreamingSchema, ChatCompletionCreateParamsStreamingJsonSchema, StreamFalseSchema, StreamFalseJsonSchema, ChatCompletionCreateParamsNonStreamingSchema, ChatCompletionCreateParamsNonStreamingJsonSchema, StreamSchema, StreamJsonSchema, ChatCompletionCreateParamsSchema, ChatCompletionCreateParamsJsonSchema;
-var init_chat_completion_create_params = __esm({
-  "src/chat/completions/request/chat_completion_create_params.ts"() {
+var init_chatCompletionCreateParams = __esm({
+  "src/chat/completions/request/chatCompletionCreateParams.ts"() {
     init_message();
     init_model();
     init_provider2();
-    init_response_format();
-    init_tool_choice();
+    init_responseFormat();
+    init_toolChoice();
     init_tool();
     init_prediction();
     init_upstream();
@@ -1447,19 +1447,19 @@ __export(request_exports, {
 });
 var init_request = __esm({
   "src/chat/completions/request/index.ts"() {
-    init_chat_completion_create_params();
+    init_chatCompletionCreateParams();
     init_message();
     init_model();
     init_prediction();
     init_provider2();
-    init_response_format();
+    init_responseFormat();
     init_tool();
-    init_tool_choice();
+    init_toolChoice();
   }
 });
 var FinishReasonSchema, FinishReasonJsonSchema;
-var init_finish_reason = __esm({
-  "src/chat/completions/response/finish_reason.ts"() {
+var init_finishReason = __esm({
+  "src/chat/completions/response/finishReason.ts"() {
     FinishReasonSchema = z6__default.default.enum(["stop", "length", "tool_calls", "content_filter", "error"]).describe("The reason why the assistant ceased to generate further tokens.");
     FinishReasonJsonSchema = { "enum": ["stop", "length", "tool_calls", "content_filter", "error"], "description": "The reason why the assistant ceased to generate further tokens." };
   }
@@ -1549,8 +1549,8 @@ var init_logprobs = __esm({
   }
 });
 var ResponseImageImageUrlSchema, ResponseImageImageUrlJsonSchema, ResponseImageSchema, ResponseImageJsonSchema, ResponseImage;
-var init_response_image = __esm({
-  "src/chat/completions/response/response_image.ts"() {
+var init_responseImage = __esm({
+  "src/chat/completions/response/responseImage.ts"() {
     ResponseImageImageUrlSchema = z6__default.default.object({
       type: z6__default.default.literal("image_url"),
       image_url: z6__default.default.object({
@@ -1582,8 +1582,8 @@ var init_role = __esm({
   }
 });
 var FunctionToolCallDefinitionSchema, FunctionToolCallDefinitionJsonSchema, FunctionToolCallDefinition, FunctionToolCallSchema, FunctionToolCallJsonSchema, FunctionToolCall, ToolCallSchema, ToolCallJsonSchema, ToolCall;
-var init_tool_call = __esm({
-  "src/chat/completions/response/streaming/tool_call.ts"() {
+var init_toolCall = __esm({
+  "src/chat/completions/response/streaming/toolCall.ts"() {
     init_merge();
     FunctionToolCallDefinitionSchema = z6__default.default.object({
       name: z6__default.default.string().optional().describe("The name of the function."),
@@ -1687,8 +1687,8 @@ var DeltaSchema, DeltaJsonSchema, Delta;
 var init_delta = __esm({
   "src/chat/completions/response/streaming/delta.ts"() {
     init_role();
-    init_tool_call();
-    init_response_image();
+    init_toolCall();
+    init_responseImage();
     init_merge();
     DeltaSchema = z6__default.default.object({
       content: z6__default.default.string().optional().describe("The content added in this delta."),
@@ -1743,7 +1743,7 @@ var ChoiceSchema, ChoiceJsonSchema, Choice;
 var init_choice = __esm({
   "src/chat/completions/response/streaming/choice.ts"() {
     init_delta();
-    init_finish_reason();
+    init_finishReason();
     init_logprobs();
     init_merge();
     ChoiceSchema = z6__default.default.object({
@@ -1910,19 +1910,19 @@ var init_usage = __esm({
   }
 });
 var ResponseObjectSchema, ResponseObjectJsonSchema;
-var init_response_object = __esm({
-  "src/chat/completions/response/streaming/response_object.ts"() {
+var init_responseObject = __esm({
+  "src/chat/completions/response/streaming/responseObject.ts"() {
     ResponseObjectSchema = z6__default.default.literal("chat.completion.chunk");
     ResponseObjectJsonSchema = { "const": "chat.completion.chunk" };
   }
 });
 var ChatCompletionChunkSchema, ChatCompletionChunkJsonSchema, ChatCompletionChunk;
-var init_chat_completion_chunk = __esm({
-  "src/chat/completions/response/streaming/chat_completion_chunk.ts"() {
+var init_chatCompletionChunk = __esm({
+  "src/chat/completions/response/streaming/chatCompletionChunk.ts"() {
     init_choice();
     init_upstream();
     init_usage();
-    init_response_object();
+    init_responseObject();
     init_merge();
     ChatCompletionChunkSchema = z6__default.default.object({
       id: z6__default.default.string().describe("The unique identifier of the chat completion."),
@@ -2016,16 +2016,16 @@ __export(streaming_exports, {
 });
 var init_streaming = __esm({
   "src/chat/completions/response/streaming/index.ts"() {
-    init_chat_completion_chunk();
+    init_chatCompletionChunk();
     init_choice();
     init_delta();
-    init_response_object();
-    init_tool_call();
+    init_responseObject();
+    init_toolCall();
   }
 });
 var FunctionToolCallDefinitionSchema2, FunctionToolCallDefinitionJsonSchema2, FunctionToolCallSchema2, FunctionToolCallJsonSchema2, ToolCallSchema2, ToolCallJsonSchema2;
-var init_tool_call2 = __esm({
-  "src/chat/completions/response/unary/tool_call.ts"() {
+var init_toolCall2 = __esm({
+  "src/chat/completions/response/unary/toolCall.ts"() {
     FunctionToolCallDefinitionSchema2 = z6__default.default.object({
       name: z6__default.default.string().describe("The name of the function."),
       arguments: z6__default.default.string().describe("The arguments passed to the function.")
@@ -2045,8 +2045,8 @@ var MessageSchema2, MessageJsonSchema2;
 var init_message2 = __esm({
   "src/chat/completions/response/unary/message.ts"() {
     init_role();
-    init_tool_call2();
-    init_response_image();
+    init_toolCall2();
+    init_responseImage();
     MessageSchema2 = z6__default.default.object({
       content: z6__default.default.string().nullable().describe("The content of the message."),
       refusal: z6__default.default.string().nullable().describe("The refusal message, if any."),
@@ -2062,7 +2062,7 @@ var ChoiceSchema2, ChoiceJsonSchema2;
 var init_choice2 = __esm({
   "src/chat/completions/response/unary/choice.ts"() {
     init_message2();
-    init_finish_reason();
+    init_finishReason();
     init_logprobs();
     ChoiceSchema2 = z6__default.default.object({
       message: MessageSchema2,
@@ -2074,19 +2074,19 @@ var init_choice2 = __esm({
   }
 });
 var ResponseObjectSchema2, ResponseObjectJsonSchema2;
-var init_response_object2 = __esm({
-  "src/chat/completions/response/unary/response_object.ts"() {
+var init_responseObject2 = __esm({
+  "src/chat/completions/response/unary/responseObject.ts"() {
     ResponseObjectSchema2 = z6__default.default.literal("chat.completion");
     ResponseObjectJsonSchema2 = { "const": "chat.completion" };
   }
 });
 var ChatCompletionSchema, ChatCompletionJsonSchema;
-var init_chat_completion = __esm({
-  "src/chat/completions/response/unary/chat_completion.ts"() {
+var init_chatCompletion = __esm({
+  "src/chat/completions/response/unary/chatCompletion.ts"() {
     init_choice2();
     init_upstream();
     init_usage();
-    init_response_object2();
+    init_responseObject2();
     ChatCompletionSchema = z6__default.default.object({
       id: z6__default.default.string().describe("The unique identifier of the chat completion."),
       upstream_id: z6__default.default.string().describe("The unique identifier of the upstream chat completion."),
@@ -2129,11 +2129,11 @@ __export(unary_exports, {
 });
 var init_unary = __esm({
   "src/chat/completions/response/unary/index.ts"() {
-    init_chat_completion();
+    init_chatCompletion();
     init_choice2();
     init_message2();
-    init_response_object2();
-    init_tool_call2();
+    init_responseObject2();
+    init_toolCall2();
   }
 });
 
@@ -2174,9 +2174,9 @@ __export(response_exports, {
 });
 var init_response = __esm({
   "src/chat/completions/response/index.ts"() {
-    init_finish_reason();
+    init_finishReason();
     init_logprobs();
-    init_response_image();
+    init_responseImage();
     init_role();
     init_streaming();
     init_unary();
@@ -2217,7 +2217,7 @@ var init_chat = __esm({
 var EnsembleBaseSchema, EnsembleBaseJsonSchema, EnsembleSchema, EnsembleJsonSchema;
 var init_ensemble = __esm({
   "src/ensemble/ensemble.ts"() {
-    init_ensemble_llm();
+    init_ensembleLlm();
     EnsembleBaseSchema = z6__default.default.object({
       llms: z6__default.default.array(EnsembleLlmBaseWithFallbacksAndCountSchema).describe("The list of LLMs that make up the ensemble.")
     }).describe("An ensemble of LLMs.").meta({ title: "EnsembleBase" });
@@ -2942,7 +2942,7 @@ function retrieveUsage2(client, id, options) {
 var ListItemSchema3, ListItemJsonSchema3, ListSchema3, ListJsonSchema3, RetrieveSchema2, RetrieveJsonSchema2, HistoricalUsageSchema2, HistoricalUsageJsonSchema2;
 var init_http6 = __esm({
   "src/ensemble_llm/http.ts"() {
-    init_ensemble_llm();
+    init_ensembleLlm();
     ListItemSchema3 = z6__default.default.object({
       id: z6__default.default.string().describe("The unique identifier for the Ensemble LLM.")
     });
@@ -3022,11 +3022,11 @@ __export(ensemble_llm_exports, {
   retrieveUsage: () => retrieveUsage2,
   validate: () => validate2
 });
-var init_ensemble_llm2 = __esm({
+var init_ensemble_llm = __esm({
   "src/ensemble_llm/index.ts"() {
-    init_ensemble_llm();
+    init_ensembleLlm();
     init_http6();
-    init_output_mode();
+    init_outputMode();
     init_provider();
     init_reasoning();
     init_stop();
@@ -4145,8 +4145,8 @@ var init_profile2 = __esm({
   }
 });
 var VectorResponseSchema, VectorResponseJsonSchema, VectorResponseExpressionSchema, VectorResponseExpressionJsonSchema, VectorResponsesSchema, VectorResponsesJsonSchema, VectorResponsesExpressionSchema, VectorResponsesExpressionJsonSchema;
-var init_vector_response = __esm({
-  "src/vector/completions/request/vector_response.ts"() {
+var init_vectorResponse = __esm({
+  "src/vector/completions/request/vectorResponse.ts"() {
     init_message();
     init_expression();
     VectorResponseSchema = RichContentSchema.describe(
@@ -4180,7 +4180,7 @@ var init_task3 = __esm({
     init_input();
     init_message();
     init_tool();
-    init_vector_response();
+    init_vectorResponse();
     init_remote();
     TaskExpressionSkipSchema = ExpressionSchema.describe(
       "An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`."
@@ -4426,14 +4426,14 @@ var init_function3 = __esm({
   }
 });
 var FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseSchema, FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseJsonSchema, FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingSchema, FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingJsonSchema, FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingSchema, FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreamingJsonSchema, FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema, FunctionExecutionCreateParamsRemoteFunctionRemoteProfileJsonSchema, FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema, FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseJsonSchema, FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingSchema, FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingJsonSchema, FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingSchema, FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreamingJsonSchema, FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema, FunctionExecutionCreateParamsRemoteFunctionInlineProfileJsonSchema, FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema, FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseJsonSchema, FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingSchema, FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingJsonSchema, FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingSchema, FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreamingJsonSchema, FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema, FunctionExecutionCreateParamsInlineFunctionRemoteProfileJsonSchema, FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema, FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseJsonSchema, FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingSchema, FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingJsonSchema, FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingSchema, FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreamingJsonSchema, FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema, FunctionExecutionCreateParamsInlineFunctionInlineProfileJsonSchema;
-var init_function_execution_create_params = __esm({
-  "src/functions/executions/request/function_execution_create_params.ts"() {
+var init_functionExecutionCreateParams = __esm({
+  "src/functions/executions/request/functionExecutionCreateParams.ts"() {
     init_reasoning2();
     init_strategy();
     init_input();
     init_provider2();
     init_upstream();
-    init_chat_completion_create_params();
+    init_chatCompletionCreateParams();
     init_profile2();
     init_function3();
     FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseSchema = z6__default.default.object({
@@ -4625,7 +4625,7 @@ __export(request_exports2, {
 });
 var init_request2 = __esm({
   "src/functions/executions/request/index.ts"() {
-    init_function_execution_create_params();
+    init_functionExecutionCreateParams();
     init_reasoning2();
     init_strategy();
   }
@@ -4686,11 +4686,11 @@ var init_error = __esm({
   }
 });
 
-// src/functions/executions/response/streaming/reasoning_summary_chunk.ts
+// src/functions/executions/response/streaming/reasoningSummaryChunk.ts
 var ReasoningSummaryChunkSchema, ReasoningSummaryChunk;
-var init_reasoning_summary_chunk = __esm({
-  "src/functions/executions/response/streaming/reasoning_summary_chunk.ts"() {
-    init_chat_completion_chunk();
+var init_reasoningSummaryChunk = __esm({
+  "src/functions/executions/response/streaming/reasoningSummaryChunk.ts"() {
+    init_chatCompletionChunk();
     init_error();
     init_merge();
     ReasoningSummaryChunkSchema = ChatCompletionChunkSchema.extend({
@@ -4773,11 +4773,11 @@ var init_task4 = __esm({
   }
 });
 var FunctionExecutionTaskChunkSchema, FunctionExecutionTaskChunk;
-var init_function_execution_task_chunk = __esm({
-  "src/functions/executions/response/streaming/function_execution_task_chunk.ts"() {
-    init_function_execution_chunk();
+var init_functionExecutionTaskChunk = __esm({
+  "src/functions/executions/response/streaming/functionExecutionTaskChunk.ts"() {
+    init_functionExecutionChunk();
     init_task4();
-    init_task_chunk();
+    init_taskChunk();
     FunctionExecutionTaskChunkSchema = z6__default.default.lazy(
       () => FunctionExecutionChunkSchema.extend({
         index: TaskIndexSchema,
@@ -4918,9 +4918,9 @@ var init_weights = __esm({
   }
 });
 var ChatCompletionChunkSchema2, ChatCompletionChunkJsonSchema2, ChatCompletionChunk2;
-var init_chat_completion_chunk2 = __esm({
-  "src/vector/completions/response/streaming/chat_completion_chunk.ts"() {
-    init_chat_completion_chunk();
+var init_chatCompletionChunk2 = __esm({
+  "src/vector/completions/response/streaming/chatCompletionChunk.ts"() {
+    init_chatCompletionChunk();
     init_error();
     init_merge();
     ChatCompletionChunkSchema2 = ChatCompletionChunkSchema.extend({
@@ -4981,22 +4981,22 @@ var init_chat_completion_chunk2 = __esm({
   }
 });
 var ResponseObjectSchema3, ResponseObjectJsonSchema3;
-var init_response_object3 = __esm({
-  "src/vector/completions/response/streaming/response_object.ts"() {
+var init_responseObject3 = __esm({
+  "src/vector/completions/response/streaming/responseObject.ts"() {
     ResponseObjectSchema3 = z6__default.default.literal("vector.completion.chunk");
     ResponseObjectJsonSchema3 = { "const": "vector.completion.chunk" };
   }
 });
 var VectorCompletionChunkSchema, VectorCompletionChunkJsonSchema, VectorCompletionChunk;
-var init_vector_completion_chunk = __esm({
-  "src/vector/completions/response/streaming/vector_completion_chunk.ts"() {
+var init_vectorCompletionChunk = __esm({
+  "src/vector/completions/response/streaming/vectorCompletionChunk.ts"() {
     init_ensemble4();
     init_scores();
     init_vote();
     init_weights();
-    init_chat_completion_chunk2();
+    init_chatCompletionChunk2();
     init_usage2();
-    init_response_object3();
+    init_responseObject3();
     init_merge();
     VectorCompletionChunkSchema = z6__default.default.object({
       id: z6__default.default.string().describe("The unique identifier of the vector completion."),
@@ -5052,13 +5052,13 @@ var init_vector_completion_chunk = __esm({
   }
 });
 
-// src/functions/executions/response/streaming/vector_completion_task_chunk.ts
+// src/functions/executions/response/streaming/vectorCompletionTaskChunk.ts
 var VectorCompletionTaskChunkSchema, VectorCompletionTaskChunk;
-var init_vector_completion_task_chunk = __esm({
-  "src/functions/executions/response/streaming/vector_completion_task_chunk.ts"() {
+var init_vectorCompletionTaskChunk = __esm({
+  "src/functions/executions/response/streaming/vectorCompletionTaskChunk.ts"() {
     init_error();
     init_task4();
-    init_vector_completion_chunk();
+    init_vectorCompletionChunk();
     init_merge();
     VectorCompletionTaskChunkSchema = VectorCompletionChunkSchema.extend({
       index: TaskIndexSchema,
@@ -5095,10 +5095,10 @@ var init_vector_completion_task_chunk = __esm({
   }
 });
 var TaskChunkSchema, TaskChunk;
-var init_task_chunk = __esm({
-  "src/functions/executions/response/streaming/task_chunk.ts"() {
-    init_function_execution_task_chunk();
-    init_vector_completion_task_chunk();
+var init_taskChunk = __esm({
+  "src/functions/executions/response/streaming/taskChunk.ts"() {
+    init_functionExecutionTaskChunk();
+    init_vectorCompletionTaskChunk();
     TaskChunkSchema = z6__default.default.union([FunctionExecutionTaskChunkSchema, VectorCompletionTaskChunkSchema]).describe("A chunk of a task execution.");
     ((TaskChunk2) => {
       function merged(a, b) {
@@ -5145,21 +5145,21 @@ var init_task_chunk = __esm({
   }
 });
 var ResponseObjectSchema4;
-var init_response_object4 = __esm({
-  "src/functions/executions/response/streaming/response_object.ts"() {
+var init_responseObject4 = __esm({
+  "src/functions/executions/response/streaming/responseObject.ts"() {
     ResponseObjectSchema4 = z6__default.default.enum(["scalar.function.execution.chunk", "vector.function.execution.chunk"]).describe("The object type.");
   }
 });
 var FunctionExecutionChunkSchema, FunctionExecutionChunk;
-var init_function_execution_chunk = __esm({
-  "src/functions/executions/response/streaming/function_execution_chunk.ts"() {
-    init_reasoning_summary_chunk();
+var init_functionExecutionChunk = __esm({
+  "src/functions/executions/response/streaming/functionExecutionChunk.ts"() {
+    init_reasoningSummaryChunk();
     init_json();
     init_error();
     init_usage2();
-    init_task_chunk();
+    init_taskChunk();
     init_merge();
-    init_response_object4();
+    init_responseObject4();
     FunctionExecutionChunkSchema = z6__default.default.object({
       id: z6__default.default.string().describe("The unique identifier of the function execution."),
       tasks: z6__default.default.array(TaskChunkSchema).describe("The tasks executed as part of the function execution."),
@@ -5254,18 +5254,18 @@ __export(streaming_exports2, {
 });
 var init_streaming2 = __esm({
   "src/functions/executions/response/streaming/index.ts"() {
-    init_function_execution_chunk();
-    init_function_execution_task_chunk();
-    init_reasoning_summary_chunk();
-    init_response_object4();
-    init_task_chunk();
-    init_vector_completion_task_chunk();
+    init_functionExecutionChunk();
+    init_functionExecutionTaskChunk();
+    init_reasoningSummaryChunk();
+    init_responseObject4();
+    init_taskChunk();
+    init_vectorCompletionTaskChunk();
   }
 });
 var ChatCompletionSchema2, ChatCompletionJsonSchema2;
-var init_chat_completion2 = __esm({
-  "src/vector/completions/response/unary/chat_completion.ts"() {
-    init_chat_completion();
+var init_chatCompletion2 = __esm({
+  "src/vector/completions/response/unary/chatCompletion.ts"() {
+    init_chatCompletion();
     init_error();
     ChatCompletionSchema2 = ChatCompletionSchema.extend({
       index: z6__default.default.uint32().describe("The index of the completion amongst all chat completions."),
@@ -5279,9 +5279,9 @@ var init_chat_completion2 = __esm({
   }
 });
 var VectorCompletionSchema, VectorCompletionJsonSchema;
-var init_vector_completion = __esm({
-  "src/vector/completions/response/unary/vector_completion.ts"() {
-    init_chat_completion2();
+var init_vectorCompletion = __esm({
+  "src/vector/completions/response/unary/vectorCompletion.ts"() {
+    init_chatCompletion2();
     init_vote();
     init_scores();
     init_weights();
@@ -5306,11 +5306,11 @@ var init_vector_completion = __esm({
   }
 });
 
-// src/functions/executions/response/unary/vector_completion_task.ts
+// src/functions/executions/response/unary/vectorCompletionTask.ts
 var VectorCompletionTaskSchema2;
-var init_vector_completion_task = __esm({
-  "src/functions/executions/response/unary/vector_completion_task.ts"() {
-    init_vector_completion();
+var init_vectorCompletionTask = __esm({
+  "src/functions/executions/response/unary/vectorCompletionTask.ts"() {
+    init_vectorCompletion();
     init_task4();
     init_error();
     VectorCompletionTaskSchema2 = VectorCompletionSchema.extend({
@@ -5324,11 +5324,11 @@ var init_vector_completion_task = __esm({
   }
 });
 var FunctionExecutionTaskSchema;
-var init_function_execution_task = __esm({
-  "src/functions/executions/response/unary/function_execution_task.ts"() {
+var init_functionExecutionTask = __esm({
+  "src/functions/executions/response/unary/functionExecutionTask.ts"() {
     init_task4();
     init_task5();
-    init_function_execution();
+    init_functionExecution();
     FunctionExecutionTaskSchema = z6__default.default.lazy(
       () => FunctionExecutionSchema.extend({
         index: TaskIndexSchema,
@@ -5347,17 +5347,17 @@ var init_function_execution_task = __esm({
 var TaskSchema2;
 var init_task5 = __esm({
   "src/functions/executions/response/unary/task.ts"() {
-    init_vector_completion_task();
-    init_function_execution_task();
+    init_vectorCompletionTask();
+    init_functionExecutionTask();
     TaskSchema2 = z6__default.default.union([FunctionExecutionTaskSchema, VectorCompletionTaskSchema2]).describe("A task execution.");
   }
 });
 
-// src/functions/executions/response/unary/reasoning_summary.ts
+// src/functions/executions/response/unary/reasoningSummary.ts
 var ReasoningSummarySchema;
-var init_reasoning_summary = __esm({
-  "src/functions/executions/response/unary/reasoning_summary.ts"() {
-    init_chat_completion();
+var init_reasoningSummary = __esm({
+  "src/functions/executions/response/unary/reasoningSummary.ts"() {
+    init_chatCompletion();
     init_error();
     ReasoningSummarySchema = ChatCompletionSchema.extend({
       error: exports.ObjectiveAIErrorSchema.nullable().describe(
@@ -5367,20 +5367,20 @@ var init_reasoning_summary = __esm({
   }
 });
 var ResponseObjectSchema5;
-var init_response_object5 = __esm({
-  "src/functions/executions/response/unary/response_object.ts"() {
+var init_responseObject5 = __esm({
+  "src/functions/executions/response/unary/responseObject.ts"() {
     ResponseObjectSchema5 = z6__default.default.enum(["scalar.function.execution", "vector.function.execution"]).describe("The object type.");
   }
 });
 var FunctionExecutionSchema;
-var init_function_execution = __esm({
-  "src/functions/executions/response/unary/function_execution.ts"() {
+var init_functionExecution = __esm({
+  "src/functions/executions/response/unary/functionExecution.ts"() {
     init_task5();
-    init_reasoning_summary();
+    init_reasoningSummary();
     init_json();
     init_error();
     init_usage2();
-    init_response_object5();
+    init_responseObject5();
     FunctionExecutionSchema = z6__default.default.object({
       id: z6__default.default.string().describe("The unique identifier of the function execution."),
       tasks: z6__default.default.array(TaskSchema2).describe("The tasks executed as part of the function execution."),
@@ -5422,12 +5422,12 @@ __export(unary_exports2, {
 });
 var init_unary2 = __esm({
   "src/functions/executions/response/unary/index.ts"() {
-    init_function_execution();
-    init_function_execution_task();
-    init_reasoning_summary();
-    init_response_object5();
+    init_functionExecution();
+    init_functionExecutionTask();
+    init_reasoningSummary();
+    init_responseObject5();
     init_task5();
-    init_vector_completion_task();
+    init_vectorCompletionTask();
   }
 });
 
@@ -5881,13 +5881,13 @@ var init_dataset = __esm({
   }
 });
 var FunctionProfileComputationCreateParamsRemoteFunctionBaseSchema, FunctionProfileComputationCreateParamsRemoteFunctionStreamingSchema, FunctionProfileComputationCreateParamsRemoteFunctionNonStreamingSchema, FunctionProfileComputationCreateParamsRemoteFunctionSchema, FunctionProfileComputationCreateParamsInlineFunctionBaseSchema, FunctionProfileComputationCreateParamsInlineFunctionStreamingSchema, FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSchema, FunctionProfileComputationCreateParamsInlineFunctionSchema;
-var init_function_profile_computation_create_params = __esm({
-  "src/functions/profiles/computations/request/function_profile_computation_create_params.ts"() {
+var init_functionProfileComputationCreateParams = __esm({
+  "src/functions/profiles/computations/request/functionProfileComputationCreateParams.ts"() {
     init_dataset();
     init_ensemble3();
     init_provider2();
     init_upstream();
-    init_chat_completion_create_params();
+    init_chatCompletionCreateParams();
     init_function3();
     FunctionProfileComputationCreateParamsRemoteFunctionBaseSchema = z6__default.default.object({
       retry_token: z6__default.default.string().optional().nullable().describe(
@@ -5979,12 +5979,12 @@ __export(request_exports3, {
 var init_request3 = __esm({
   "src/functions/profiles/computations/request/index.ts"() {
     init_dataset();
-    init_function_profile_computation_create_params();
+    init_functionProfileComputationCreateParams();
   }
 });
 var FittingStatsSchema;
-var init_fitting_stats = __esm({
-  "src/functions/profiles/computations/response/fitting_stats.ts"() {
+var init_fittingStats = __esm({
+  "src/functions/profiles/computations/response/fittingStats.ts"() {
     FittingStatsSchema = z6__default.default.object({
       loss: z6__default.default.number().describe("The final sum loss achieved during weights fitting."),
       executions: z6__default.default.uint32().describe(
@@ -6003,9 +6003,9 @@ var init_fitting_stats = __esm({
   }
 });
 var FunctionExecutionChunkSchema2, FunctionExecutionChunk2;
-var init_function_execution_chunk2 = __esm({
-  "src/functions/profiles/computations/response/streaming/function_execution_chunk.ts"() {
-    init_function_execution_chunk();
+var init_functionExecutionChunk2 = __esm({
+  "src/functions/profiles/computations/response/streaming/functionExecutionChunk.ts"() {
+    init_functionExecutionChunk();
     FunctionExecutionChunkSchema2 = FunctionExecutionChunkSchema.extend({
       index: z6__default.default.uint32().describe(
         "The index of the function execution chunk in the list of executions."
@@ -6075,20 +6075,20 @@ var init_function_execution_chunk2 = __esm({
   }
 });
 var ResponseObjectSchema6;
-var init_response_object6 = __esm({
-  "src/functions/profiles/computations/response/streaming/response_object.ts"() {
+var init_responseObject6 = __esm({
+  "src/functions/profiles/computations/response/streaming/responseObject.ts"() {
     ResponseObjectSchema6 = z6__default.default.literal(
       "function.profile.computation.chunk"
     );
   }
 });
 var FunctionProfileComputationChunkSchema, FunctionProfileComputationChunk;
-var init_function_profile_computation_chunk = __esm({
-  "src/functions/profiles/computations/response/streaming/function_profile_computation_chunk.ts"() {
-    init_function_execution_chunk2();
+var init_functionProfileComputationChunk = __esm({
+  "src/functions/profiles/computations/response/streaming/functionProfileComputationChunk.ts"() {
+    init_functionExecutionChunk2();
     init_profile2();
-    init_fitting_stats();
-    init_response_object6();
+    init_fittingStats();
+    init_responseObject6();
     init_usage2();
     init_merge();
     FunctionProfileComputationChunkSchema = z6__default.default.object({
@@ -6170,15 +6170,15 @@ __export(streaming_exports3, {
 });
 var init_streaming3 = __esm({
   "src/functions/profiles/computations/response/streaming/index.ts"() {
-    init_function_execution_chunk2();
-    init_function_profile_computation_chunk();
-    init_response_object6();
+    init_functionExecutionChunk2();
+    init_functionProfileComputationChunk();
+    init_responseObject6();
   }
 });
 var FunctionExecutionSchema2;
-var init_function_execution2 = __esm({
-  "src/functions/profiles/computations/response/unary/function_execution.ts"() {
-    init_function_execution();
+var init_functionExecution2 = __esm({
+  "src/functions/profiles/computations/response/unary/functionExecution.ts"() {
+    init_functionExecution();
     FunctionExecutionSchema2 = FunctionExecutionSchema.extend({
       index: z6__default.default.uint32().describe("The index of the function execution in the list of executions."),
       dataset: z6__default.default.uint32().describe(
@@ -6194,18 +6194,18 @@ var init_function_execution2 = __esm({
   }
 });
 var ResponseObjectSchema7;
-var init_response_object7 = __esm({
-  "src/functions/profiles/computations/response/unary/response_object.ts"() {
+var init_responseObject7 = __esm({
+  "src/functions/profiles/computations/response/unary/responseObject.ts"() {
     ResponseObjectSchema7 = z6__default.default.literal("function.profile.computation");
   }
 });
 var FunctionProfileComputationSchema;
-var init_function_profile_computation = __esm({
-  "src/functions/profiles/computations/response/unary/function_profile_computation.ts"() {
-    init_function_execution2();
+var init_functionProfileComputation = __esm({
+  "src/functions/profiles/computations/response/unary/functionProfileComputation.ts"() {
+    init_functionExecution2();
     init_profile2();
-    init_fitting_stats();
-    init_response_object7();
+    init_fittingStats();
+    init_responseObject7();
     init_usage2();
     FunctionProfileComputationSchema = z6__default.default.object({
       id: z6__default.default.string().describe("The unique identifier of the function profile computation."),
@@ -6241,9 +6241,9 @@ __export(unary_exports3, {
 });
 var init_unary3 = __esm({
   "src/functions/profiles/computations/response/unary/index.ts"() {
-    init_function_execution2();
-    init_function_profile_computation();
-    init_response_object7();
+    init_functionExecution2();
+    init_functionProfileComputation();
+    init_responseObject7();
   }
 });
 
@@ -6256,7 +6256,7 @@ __export(response_exports3, {
 });
 var init_response3 = __esm({
   "src/functions/profiles/computations/response/index.ts"() {
-    init_fitting_stats();
+    init_fittingStats();
     init_streaming3();
     init_unary3();
   }
@@ -6573,16 +6573,16 @@ var init_http11 = __esm({
   }
 });
 var VectorCompletionCreateParamsBaseSchema, VectorCompletionCreateParamsBaseJsonSchema, VectorCompletionCreateParamsStreamingSchema, VectorCompletionCreateParamsStreamingJsonSchema, VectorCompletionCreateParamsNonStreamingSchema, VectorCompletionCreateParamsNonStreamingJsonSchema, VectorCompletionCreateParamsSchema, VectorCompletionCreateParamsJsonSchema;
-var init_vector_completion_create_params = __esm({
-  "src/vector/completions/request/vector_completion_create_params.ts"() {
+var init_vectorCompletionCreateParams = __esm({
+  "src/vector/completions/request/vectorCompletionCreateParams.ts"() {
     init_message();
     init_provider2();
     init_upstream();
     init_ensemble3();
     init_profile();
-    init_chat_completion_create_params();
+    init_chatCompletionCreateParams();
     init_tool();
-    init_vector_response();
+    init_vectorResponse();
     VectorCompletionCreateParamsBaseSchema = z6__default.default.object({
       retry: z6__default.default.string().optional().nullable().describe(
         "The unique ID of a previous incomplete or failed completion. Successful votes from it will be reused, sans any that were RNGed or came from cache."
@@ -6653,8 +6653,8 @@ var init_request4 = __esm({
   "src/vector/completions/request/index.ts"() {
     init_ensemble3();
     init_profile();
-    init_vector_completion_create_params();
-    init_vector_response();
+    init_vectorCompletionCreateParams();
+    init_vectorResponse();
   }
 });
 
@@ -6672,14 +6672,14 @@ __export(streaming_exports4, {
 });
 var init_streaming4 = __esm({
   "src/vector/completions/response/streaming/index.ts"() {
-    init_chat_completion_chunk2();
-    init_response_object3();
-    init_vector_completion_chunk();
+    init_chatCompletionChunk2();
+    init_responseObject3();
+    init_vectorCompletionChunk();
   }
 });
 var ResponseObjectSchema8, ResponseObjectJsonSchema4;
-var init_response_object8 = __esm({
-  "src/vector/completions/response/unary/response_object.ts"() {
+var init_responseObject8 = __esm({
+  "src/vector/completions/response/unary/responseObject.ts"() {
     ResponseObjectSchema8 = z6__default.default.literal("vector.completion");
     ResponseObjectJsonSchema4 = { "const": "vector.completion" };
   }
@@ -6697,9 +6697,9 @@ __export(unary_exports4, {
 });
 var init_unary4 = __esm({
   "src/vector/completions/response/unary/index.ts"() {
-    init_chat_completion2();
-    init_response_object8();
-    init_vector_completion();
+    init_chatCompletion2();
+    init_responseObject8();
+    init_vectorCompletion();
   }
 });
 
@@ -6762,7 +6762,7 @@ var init_request5 = __esm({
     init_model();
     init_message();
     init_tool();
-    init_vector_response();
+    init_vectorResponse();
     CacheVoteRequestSchema = z6__default.default.object({
       model: ModelSchema,
       models: FallbackModelsSchema.optional().nullable(),
@@ -7351,8 +7351,8 @@ function unwrap(schema) {
   return { inner: current, optional, nullable, description };
 }
 exports.JsonSchemaSchema = void 0; var lazyRefs, schemaRefs, propertyRefsBySchema; exports.JsonSchemaJsonSchema = void 0;
-var init_json_schema = __esm({
-  "src/json_schema.ts"() {
+var init_jsonSchema = __esm({
+  "src/jsonSchema.ts"() {
     exports.JsonSchemaSchema = z6__default.default.lazy(
       () => z6__default.default.object({
         $ref: z6__default.default.string().optional(),
@@ -7545,9 +7545,9 @@ function listRefDependencies(schema) {
   return [...seen];
 }
 var zodMap, jsonSchemaCache;
-var init_schema_registry = __esm({
-  "src/schema_registry.ts"() {
-    init_json_schema();
+var init_schemaRegistry = __esm({
+  "src/schemaRegistry.ts"() {
+    init_jsonSchema();
     jsonSchemaCache = /* @__PURE__ */ new Map();
   }
 });
@@ -7589,15 +7589,15 @@ var init_index = __esm({
     init_auth();
     init_chat();
     init_ensemble2();
-    init_ensemble_llm2();
+    init_ensemble_llm();
     init_functions();
     init_vector();
     init_error();
     init_client();
     init_stream();
     init_json();
-    init_json_schema();
-    init_schema_registry();
+    init_jsonSchema();
+    init_schemaRegistry();
   }
 });
 init_index();

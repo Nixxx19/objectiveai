@@ -1,8 +1,8 @@
 import z from "zod";
 import { MessageSchema } from "./message";
-import { FinishReasonSchema } from "../finish_reason";
+import { FinishReasonSchema } from "../finishReason";
 import { LogprobsSchema } from "../logprobs";
-import { convert, type JsonSchema } from "../../../../json_schema";
+import { convert, type JsonSchema } from "../../../../jsonSchema";
 
 export const ChoiceSchema = z
   .object({

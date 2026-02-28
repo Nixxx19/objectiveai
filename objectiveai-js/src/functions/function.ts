@@ -2,7 +2,7 @@ import z from "zod";
 import { InputSchemaSchema } from "./expression/input";
 import { TaskExpressionsSchema } from "./task";
 import { ExpressionSchema } from "./expression/expression";
-import { convert, type JsonSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../jsonSchema";
 
 // Inline Function
 

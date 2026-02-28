@@ -1,6 +1,6 @@
-import { EnsembleLlmBaseSchema } from "src/ensemble_llm/ensemble_llm";
+import { EnsembleLlmBaseSchema } from "src/ensemble_llm/ensembleLlm";
 import z from "zod";
-import { convert, type JsonSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../jsonSchema";
 
 export const ModelSchema = z
   .union([

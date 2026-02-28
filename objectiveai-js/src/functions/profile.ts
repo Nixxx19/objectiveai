@@ -1,7 +1,7 @@
 import { EnsembleSchema } from "src/vector/completions/request/ensemble";
 import { ProfileSchema as VectorProfileSchema } from "src/vector/completions/request/profile";
 import z from "zod";
-import { convert, type JsonSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../jsonSchema";
 import { RemoteSchema } from "./remote";
 
 // Inline/Remote Auto Profiles (single ensemble+weights for all tasks)

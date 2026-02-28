@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JsonSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../jsonSchema";
 
 export const CreditsSchema = z.object({
   credits: z.number().describe("The current number of credits available."),

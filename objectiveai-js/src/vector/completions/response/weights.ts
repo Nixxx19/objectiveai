@@ -1,6 +1,6 @@
 import z from "zod";
 import { Scores } from "./scores";
-import { convert, type JsonSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../jsonSchema";
 
 export const WeightsSchema = z
   .array(z.number())

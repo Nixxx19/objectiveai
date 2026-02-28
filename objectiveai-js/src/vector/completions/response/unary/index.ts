@@ -1,3 +1,3 @@
-export * from "./chat_completion";
-export * from "./response_object";
-export * from "./vector_completion";
+export * from "./chatCompletion";
+export * from "./responseObject";
+export * from "./vectorCompletion";

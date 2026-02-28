@@ -5,7 +5,7 @@ import { VectorCompletion } from "src/vector/completions/response/unary";
 import { VotesSchema } from "src/vector/completions/response/vote";
 import { WeightsSchema } from "src/vector/completions/response/weights";
 import z from "zod";
-import { convert, type JsonSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../jsonSchema";
 
 export const VectorCompletionOutputSchema = z
   .object({

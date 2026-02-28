@@ -1,9 +1,9 @@
 import {
   EnsembleLlmBaseWithFallbacksAndCountSchema,
   EnsembleLlmWithFallbacksAndCountSchema,
-} from "src/ensemble_llm/ensemble_llm";
+} from "src/ensemble_llm/ensembleLlm";
 import z from "zod";
-import { convert, type JsonSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../jsonSchema";
 
 export const EnsembleBaseSchema = z
   .object({

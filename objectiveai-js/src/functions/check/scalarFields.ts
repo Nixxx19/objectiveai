@@ -1,6 +1,6 @@
 import z from "zod";
 import { InputSchemaSchema } from "../expression/input.js";
-import { convert, type JsonSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../jsonSchema";
 
 /**
  * Zod schema for the fields needed to validate a scalar function's input

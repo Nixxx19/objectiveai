@@ -1,5 +1,5 @@
 import { ObjectiveAI, RequestOptions } from "../../../client";
-import { OpenRouterByokApiKey } from "./openrouter_byok_api_key";
+import { OpenRouterByokApiKey } from "./openrouterByokApiKey";
 
 export function retrieve(
   client: ObjectiveAI,

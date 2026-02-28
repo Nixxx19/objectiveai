@@ -1,8 +1,8 @@
 import { ObjectiveAI, RequestOptions } from "../../../client";
 import type { Remote } from "../../remote";
 import { Stream } from "../../../stream";
-import { FunctionProfileComputationChunk } from "./response/streaming/function_profile_computation_chunk";
-import { FunctionProfileComputation } from "./response/unary/function_profile_computation";
+import { FunctionProfileComputationChunk } from "./response/streaming/functionProfileComputationChunk";
+import { FunctionProfileComputation } from "./response/unary/functionProfileComputation";
 import {
   FunctionProfileComputationCreateParamsInlineFunction,
   FunctionProfileComputationCreateParamsInlineFunctionNonStreaming,
@@ -10,7 +10,7 @@ import {
   FunctionProfileComputationCreateParamsRemoteFunction,
   FunctionProfileComputationCreateParamsRemoteFunctionNonStreaming,
   FunctionProfileComputationCreateParamsRemoteFunctionStreaming,
-} from "./request/function_profile_computation_create_params";
+} from "./request/functionProfileComputationCreateParams";
 import { InlineFunction } from "../../function";
 
 export function inlineFunctionCreate(

@@ -8,7 +8,7 @@ import {
   ListItemSchema as ProfileListItemSchema,
   RetrieveSchema as ProfileRetrieveSchema,
 } from "./profiles/http";
-import { convert, type JsonSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../jsonSchema";
 import { RemoteSchema, type Remote } from "./remote";
 
 export const ListItemSchema = z.object({

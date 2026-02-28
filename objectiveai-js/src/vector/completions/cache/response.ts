@@ -1,6 +1,6 @@
 import z from "zod";
 import { VoteSchema } from "../response/vote";
-import { convert, type JsonSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../jsonSchema";
 
 export const CacheVoteSchema = z
   .object({

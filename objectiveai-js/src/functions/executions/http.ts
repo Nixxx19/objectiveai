@@ -1,7 +1,7 @@
 import { ObjectiveAI, RequestOptions } from "../../client";
 import { Stream } from "../../stream";
-import { FunctionExecutionChunk } from "./response/streaming/function_execution_chunk";
-import { FunctionExecution } from "./response/unary/function_execution";
+import { FunctionExecutionChunk } from "./response/streaming/functionExecutionChunk";
+import { FunctionExecution } from "./response/unary/functionExecution";
 import type { Remote } from "../remote";
 import {
   FunctionExecutionCreateParamsInlineFunctionInlineProfile,
@@ -16,7 +16,7 @@ import {
   FunctionExecutionCreateParamsRemoteFunctionRemoteProfile,
   FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreaming,
   FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreaming,
-} from "./request/function_execution_create_params";
+} from "./request/functionExecutionCreateParams";
 import { InlineFunction } from "../function";
 import { InlineProfile } from "../profile";
 

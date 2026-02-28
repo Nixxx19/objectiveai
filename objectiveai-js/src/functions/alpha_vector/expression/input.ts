@@ -2,7 +2,7 @@ import z from "zod";
 import { ObjectInputSchemaSchema } from "../../expression/input.js";
 import { InputSchemaSchema } from "../../expression/input.js";
 import { ExpressionSchema } from "../../expression/expression.js";
-import { convert, type JsonSchema } from "../../../json_schema.js";
+import { convert, type JsonSchema } from "../../../jsonSchema.js";
 
 export const AlphaVectorFunctionInputSchemaSchema = z
   .object({

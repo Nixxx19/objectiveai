@@ -1,3 +1,3 @@
-export * from "./function_execution_create_params";
+export * from "./functionExecutionCreateParams";
 export * from "./reasoning";
 export * from "./strategy";

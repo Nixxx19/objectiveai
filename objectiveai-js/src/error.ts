@@ -1,5 +1,5 @@
 import z from "zod";
-import { convert, type JsonSchema } from "./json_schema";
+import { convert, type JsonSchema } from "./jsonSchema";
 import { JsonValueSchema, type JsonValue } from "./json";
 
 export const ObjectiveAIErrorSchema = z

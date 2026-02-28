@@ -1,7 +1,7 @@
 import z from "zod";
 import { ObjectiveAI, RequestOptions } from "../client";
 import { EnsembleSchema } from "./ensemble";
-import { convert, type JsonSchema } from "../json_schema";
+import { convert, type JsonSchema } from "../jsonSchema";
 
 export const ListItemSchema = z.object({
   id: z.string().describe("The unique identifier for the Ensemble."),

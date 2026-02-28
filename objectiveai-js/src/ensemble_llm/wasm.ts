@@ -1,6 +1,6 @@
 import { mapsToRecords } from "src/mapsToRecords";
 import { validateEnsembleLlm } from "../wasm/loader.js";
-import { EnsembleLlm, EnsembleLlmBase } from "./ensemble_llm";
+import { EnsembleLlm, EnsembleLlmBase } from "./ensembleLlm";
 
 export function validate(ensemble: EnsembleLlmBase): EnsembleLlm {
   const value = validateEnsembleLlm(ensemble);

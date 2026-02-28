@@ -4,7 +4,7 @@ import {
   AlphaScalarBranchTaskExpressionsSchema,
   AlphaScalarLeafTaskExpressionsSchema,
 } from "./task.js";
-import { convert, type JsonSchema } from "../../json_schema.js";
+import { convert, type JsonSchema } from "../../jsonSchema.js";
 
 export const AlphaScalarBranchRemoteFunctionSchema = z
   .object({

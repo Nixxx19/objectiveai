@@ -1,7 +1,7 @@
 import z from "zod";
-import { ApiKeyWithMetadata, ApiKeyWithMetadataSchema } from "./api_key";
+import { ApiKeyWithMetadata, ApiKeyWithMetadataSchema } from "./apiKey";
 import { ObjectiveAI, RequestOptions } from "../../client";
-import { convert, type JsonSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../jsonSchema";
 
 export const ListItemSchema = ApiKeyWithMetadataSchema.extend({
   cost: z

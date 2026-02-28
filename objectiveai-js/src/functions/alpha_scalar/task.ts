@@ -3,7 +3,7 @@ import { ExpressionSchema } from "../expression/expression.js";
 import { ObjectInputSchemaSchema } from "../expression/input.js";
 import { RichContentSchema } from "src/chat/completions/request/message";
 import { RemoteSchema } from "../remote.js";
-import { convert, type JsonSchema } from "../../json_schema.js";
+import { convert, type JsonSchema } from "../../jsonSchema.js";
 
 // Branch Tasks
 

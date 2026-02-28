@@ -1,9 +1,9 @@
 import z from "zod";
 import { Delta, DeltaSchema } from "./delta";
-import { FinishReasonSchema } from "../finish_reason";
+import { FinishReasonSchema } from "../finishReason";
 import { Logprobs, LogprobsSchema } from "../logprobs";
 import { merge } from "src/merge";
-import { convert, type JsonSchema } from "../../../../json_schema";
+import { convert, type JsonSchema } from "../../../../jsonSchema";
 
 export const ChoiceSchema = z
   .object({

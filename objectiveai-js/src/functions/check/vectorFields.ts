@@ -1,7 +1,7 @@
 import z from "zod";
 import { InputSchemaSchema } from "../expression/input.js";
 import { ExpressionSchema } from "../expression/expression.js";
-import { convert, type JsonSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../jsonSchema";
 
 /**
  * Zod schema for the 4 fields needed to validate a vector function's

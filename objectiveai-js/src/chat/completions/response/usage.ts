@@ -1,6 +1,6 @@
 import { numberIsEmpty } from "src/isEmpty";
 import z from "zod";
-import { convert, type JsonSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../jsonSchema";
 
 export const UsageCompletionTokensDetailsSchema = z
   .object({

@@ -8,8 +8,8 @@ export * from "./error";
 export * from "./client";
 export * from "./stream";
 export * from "./json";
-export * from "./json_schema";
-export * from "./schema_registry";
+export * from "./jsonSchema";
+export * from "./schemaRegistry";
 
 export type {
   ObjectInputSchema,

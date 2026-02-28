@@ -6,7 +6,7 @@ import {
   AlphaVectorFunctionInputExpressionSchema,
   AlphaVectorFunctionInputSchemaSchema,
 } from "./expression/input.js";
-import { convert, type JsonSchema } from "../../json_schema.js";
+import { convert, type JsonSchema } from "../../jsonSchema.js";
 
 // Branch Tasks
 

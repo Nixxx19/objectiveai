@@ -1,12 +1,12 @@
 import { ObjectiveAI, RequestOptions } from "../../client";
 import { Stream } from "../../stream";
-import { ChatCompletion } from "./response/unary/chat_completion";
+import { ChatCompletion } from "./response/unary/chatCompletion";
 import {
   ChatCompletionCreateParams,
   ChatCompletionCreateParamsStreaming,
   ChatCompletionCreateParamsNonStreaming,
-} from "./request/chat_completion_create_params";
-import { ChatCompletionChunk } from "./response/streaming/chat_completion_chunk";
+} from "./request/chatCompletionCreateParams";
+import { ChatCompletionChunk } from "./response/streaming/chatCompletionChunk";
 
 export function create(
   client: ObjectiveAI,

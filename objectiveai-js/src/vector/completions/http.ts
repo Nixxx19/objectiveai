@@ -1,14 +1,14 @@
 import z from "zod";
-import { convert, type JsonSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../jsonSchema";
 import { ObjectiveAI, RequestOptions } from "../../client";
 import { Stream } from "../../stream";
-import { VectorCompletion } from "./response/unary/vector_completion";
+import { VectorCompletion } from "./response/unary/vectorCompletion";
 import {
   VectorCompletionCreateParams,
   VectorCompletionCreateParamsStreaming,
   VectorCompletionCreateParamsNonStreaming,
-} from "./request/vector_completion_create_params";
-import { VectorCompletionChunk } from "./response/streaming/vector_completion_chunk";
+} from "./request/vectorCompletionCreateParams";
+import { VectorCompletionChunk } from "./response/streaming/vectorCompletionChunk";
 import { VotesSchema } from "./response/vote";
 
 export function create(

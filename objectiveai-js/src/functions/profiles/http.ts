@@ -1,7 +1,7 @@
 import z from "zod";
 import { ObjectiveAI, RequestOptions } from "../../client";
 import { RemoteTasksProfileSchema, RemoteAutoProfileSchema } from "../profile";
-import { convert, type JsonSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../jsonSchema";
 import { RemoteSchema, type Remote } from "../remote";
 
 export const ListItemSchema = z.object({

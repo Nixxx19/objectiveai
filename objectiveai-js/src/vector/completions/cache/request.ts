@@ -5,8 +5,8 @@ import {
 } from "src/chat/completions/request/model";
 import { MessagesSchema } from "src/chat/completions/request/message";
 import { ToolsSchema } from "src/chat/completions/request/tool";
-import { VectorResponsesSchema } from "../request/vector_response";
-import { convert, type JsonSchema } from "../../../json_schema";
+import { VectorResponsesSchema } from "../request/vectorResponse";
+import { convert, type JsonSchema } from "../../../jsonSchema";
 
 export const CacheVoteRequestSchema = z
   .object({

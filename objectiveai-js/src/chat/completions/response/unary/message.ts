@@ -1,8 +1,8 @@
 import z from "zod";
 import { RoleSchema } from "../role";
-import { ToolCallSchema } from "./tool_call";
-import { ResponseImageSchema } from "../response_image";
-import { convert, type JsonSchema } from "../../../../json_schema";
+import { ToolCallSchema } from "./toolCall";
+import { ResponseImageSchema } from "../responseImage";
+import { convert, type JsonSchema } from "../../../../jsonSchema";
 
 export const MessageSchema = z
   .object({

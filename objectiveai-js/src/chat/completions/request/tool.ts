@@ -1,7 +1,7 @@
 import { ExpressionSchema } from "src/functions/expression/expression";
 import { JsonValueExpressionSchema, JsonValueSchema } from "src/json";
 import z from "zod";
-import { convert, type JsonSchema } from "../../../json_schema";
+import { convert, type JsonSchema } from "../../../jsonSchema";
 
 export const FunctionToolNameSchema = z
   .string()

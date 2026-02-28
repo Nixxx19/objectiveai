@@ -1,2 +1,2 @@
-export * from "./openrouter_byok_api_key";
+export * from "./openrouterByokApiKey";
 export * from "./http";

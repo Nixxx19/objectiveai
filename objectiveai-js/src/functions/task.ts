@@ -16,8 +16,8 @@ import {
 import {
   VectorResponsesExpressionSchema,
   VectorResponsesSchema,
-} from "src/vector/completions/request/vector_response";
-import { convert, type JsonSchema } from "../json_schema";
+} from "src/vector/completions/request/vectorResponse";
+import { convert, type JsonSchema } from "../jsonSchema";
 import { RemoteSchema } from "./remote";
 
 // Task Expression

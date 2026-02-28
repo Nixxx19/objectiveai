@@ -10,7 +10,7 @@ import {
 } from "src/chat/completions/request/message";
 import z from "zod";
 import { Expression, ExpressionSchema } from "./expression";
-import { convert, type JsonSchema } from "../../json_schema";
+import { convert, type JsonSchema } from "../../jsonSchema";
 
 // Input Schema
 

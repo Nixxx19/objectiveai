@@ -51,7 +51,7 @@ async function main() {
 
   // Import the built module to get all the computed values
   // This requires that convert() works when importing from source
-  const { convert } = await import(pathToFileURL(path.resolve(__dirname, "../src/json_schema.ts")).href);
+  const { convert } = await import(pathToFileURL(path.resolve(__dirname, "../src/jsonSchema.ts")).href);
 
   // Now import each file and compute the JsonSchemas
   const results: Record<string, any> = {};

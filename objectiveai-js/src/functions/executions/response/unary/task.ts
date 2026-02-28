@@ -1,6 +1,6 @@
 import z from "zod";
-import { VectorCompletionTaskSchema } from "./vector_completion_task";
-import { FunctionExecutionTaskSchema } from "./function_execution_task";
+import { VectorCompletionTaskSchema } from "./vectorCompletionTask";
+import { FunctionExecutionTaskSchema } from "./functionExecutionTask";
 
 export const TaskSchema = z
   .union([FunctionExecutionTaskSchema, VectorCompletionTaskSchema])
