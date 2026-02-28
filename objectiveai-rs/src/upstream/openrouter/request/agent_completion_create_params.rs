@@ -74,16 +74,16 @@ pub struct AgentCompletionCreateParams {
     pub seed: Option<i64>,
     /// Tool choice configuration from request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tool_choice: Option<crate::agent::completions::request::ToolChoice>,
+    pub tool_choice: Option<super::ToolChoice>,
     /// Available tools from request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<crate::agent::completions::request::Tool>>,
+    pub tools: Option<Vec<super::Tool>>,
     /// Whether to allow parallel tool calls from request.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parallel_tool_calls: Option<bool>,
     /// Prediction hints from request.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub prediction: Option<crate::agent::completions::request::Prediction>,
+    pub prediction: Option<super::Prediction>,
 
     /// Always true for streaming requests.
     pub stream: bool,
@@ -134,10 +134,10 @@ impl AgentCompletionCreateParams {
             top_logprobs: request.top_logprobs,
             response_format: request.response_format.clone(),
             seed: request.seed,
-            tool_choice: request.tool_choice.clone(),
-            tools: request.tools.clone(),
-            parallel_tool_calls: request.parallel_tool_calls,
-            prediction: request.prediction.clone(),
+            tool_choice: None,
+            tools: None,
+            parallel_tool_calls: None,
+            prediction: None,
             stream: true,
             stream_options: super::StreamOptions {
                 include_usage: Some(true),

@@ -30,18 +30,6 @@ pub struct AgentCompletionCreateParams {
     /// Whether to stream the response.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
-    /// How the model should use tools.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tool_choice: Option<super::ToolChoice>,
-    /// Available tools/functions the model can call.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<super::Tool>>,
-    /// Whether the model can make multiple tool calls in parallel.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub parallel_tool_calls: Option<bool>,
-    /// Predicted output for speculative decoding.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub prediction: Option<super::Prediction>,
 
     // --- Retry configuration ---
     /// Maximum elapsed time (ms) for exponential backoff retries.

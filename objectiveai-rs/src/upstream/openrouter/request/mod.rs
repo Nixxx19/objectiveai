@@ -9,7 +9,9 @@ pub mod prompt;
 mod provider;
 /// Response format construction for vector completions.
 pub mod response_format;
+mod prediction;
 mod stream_options;
+mod tool;
 /// Tool choice construction for vector completions.
 pub mod tool_choice;
 /// Tools construction for vector completions.
@@ -17,6 +19,8 @@ pub mod tools;
 mod usage;
 
 pub use agent_completion_create_params::*;
+pub use prediction::*;
 pub use provider::*;
 pub use stream_options::*;
+pub use tool::*;
 pub use usage::*;
