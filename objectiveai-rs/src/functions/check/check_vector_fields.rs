@@ -333,13 +333,11 @@ pub(crate) fn inputs_equal(a: &Input, b: &Input) -> bool {
         }
         (Input::Object(a), Input::Object(b)) => {
             a.len() == b.len()
-                && a.iter().zip(b.iter()).all(|((ka, va), (kb, vb))| {
-                    ka == kb && inputs_equal(va, vb)
+                && a.iter().all(|(ka, va)| {
+                    b.get(ka).is_some_and(|vb| inputs_equal(va, vb))
                 })
         }
-        (Input::RichContentPart(a), Input::RichContentPart(b)) => {
-            serde_json::to_string(a).ok() == serde_json::to_string(b).ok()
-        }
+        (Input::RichContentPart(a), Input::RichContentPart(b)) => a == b,
         _ => false,
     }
 }

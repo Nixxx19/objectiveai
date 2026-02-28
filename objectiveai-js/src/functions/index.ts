@@ -1,3 +1,5 @@
+export * as AlphaScalar from "./alpha_scalar";
+export * as AlphaVector from "./alpha_vector";
 export * as Executions from "./executions";
 export * as Expression from "./expression";
 export * from "./function";

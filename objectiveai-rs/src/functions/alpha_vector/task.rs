@@ -101,6 +101,7 @@ impl PartialPlaceholderBranchTaskExpression {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(tag = "type")]
 pub enum LeafTaskExpression {
     #[serde(rename = "vector.completion")]
     VectorCompletion(VectorCompletionTaskExpression),
