@@ -321,11 +321,11 @@ fn run_all_steps<T: InventionState>(
                     "Create the Tasks for your Scalar Function. Create {tasks_str} placeholder tasks \
                     based on your EssayTasks. Each task defines a sub-function which will be \
                     automatically invented after you finish. \
-                    For TaskSpec: write a detailed `spec` for the task describing what the \
-                    sub-function should evaluate. \
-                    Task Guidelines: `skip` (conditional skip expression), `input` (derives task \
-                    input from parent input), `output` (transforms sub-function result). \
-                    Expression context: `input` (function input), `output` (in output expressions). \
+                    Each task has: `name` (sub-function name), `spec` (detailed description of what \
+                    the sub-function should evaluate), `input_schema` (the sub-function's input schema), \
+                    `skip` (optional conditional skip expression), and `input` (expression deriving \
+                    the sub-function's input from the parent function's input). \
+                    Expression context: `input` (the parent function's input). \
                     Use CheckFunction to validate. Re-read Spec first — it is the source of truth.",
                 )
             } else {
@@ -336,11 +336,13 @@ fn run_all_steps<T: InventionState>(
                     The ObjectiveAI system will return a vector of scores evaluating which \
                     response the LLM is most likely to reply with. These probabilities form \
                     the fundamental basis for how the Function scores the input. \
+                    Each task has: `messages` (Starlark expression producing the prompt), \
+                    `responses` (array of possible assistant replies), and optional `skip`. \
                     Be clever — do not ask the LLM to directly evaluate items. Make items \
                     into real responses. Each response should correspond to some score. \
                     Scores should be normalized so an equalized response vector yields a \
                     final score of 0.5. \
-                    Expression context: `input` (function input), `output` (in output expressions). \
+                    Expression context: `input` (the function's input). \
                     Use CheckFunction to validate. Re-read Spec first — it is the source of truth.",
                 )
             }
@@ -348,16 +350,13 @@ fn run_all_steps<T: InventionState>(
             format!(
                 "Create the Tasks for your Vector Function. Create {tasks_str} placeholder tasks \
                 based on your EssayTasks. You can mix two types: \
-                Unmapped vector tasks (placeholder.vector.function) rank the input items. \
-                Mapped scalar tasks (placeholder.scalar.function with map) iterate over \
-                input items and score each individually. At most 50% of tasks can be \
-                mapped scalar tasks. \
-                For TaskSpec: write a detailed `spec` for the task describing what the \
-                sub-function should evaluate. \
-                For Vector Tasks: create InputSchema, OutputLength, InputSplit, InputMerge expressions. \
-                For Mapped Scalar Tasks: define an InputMap expression. \
-                Task fields: `skip`, `input`, `output`. \
-                Expression context: `input`, `map` (for mapped tasks), `output` (in output expressions). \
+                Vector sub-functions (placeholder.alpha.vector.function) rank the input items. \
+                Scalar sub-functions (placeholder.alpha.scalar.function) score individual items. \
+                Each task has: `name` (sub-function name), `spec` (detailed description of what \
+                the sub-function should evaluate), `input_schema` (the sub-function's input schema), \
+                `skip` (optional conditional skip expression), and `input` (expression deriving \
+                the sub-function's input from the parent function's input). \
+                Expression context: `input` (the parent function's input). \
                 Use CheckFunction to validate. Re-read Spec first — it is the source of truth.",
             )
         } else {
@@ -368,10 +367,12 @@ fn run_all_steps<T: InventionState>(
                 The ObjectiveAI system will return a vector of scores evaluating which \
                 response the LLM is most likely to reply with. These probabilities form \
                 the fundamental basis for how the Function ranks items. \
-                Messages never contain the items to be ranked — items go into responses. \
+                Each task has: `messages` (Starlark expression producing the prompt), \
+                `responses` (Starlark expression producing possible assistant replies), \
+                and optional `skip`. \
                 Be clever — do not ask the LLM to directly evaluate items. Make items \
                 into real responses. \
-                Expression context: `input` (function input), `output` (in output expressions). \
+                Expression context: `input` (the function's input). \
                 Use CheckFunction to validate. Re-read Spec first — it is the source of truth.",
             )
         };
