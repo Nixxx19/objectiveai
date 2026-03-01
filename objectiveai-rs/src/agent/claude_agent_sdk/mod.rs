@@ -1,7 +1,7 @@
 mod agent;
 mod effort;
 mod output_mode;
-mod upstream;
+pub mod upstream;
 
 pub use agent::*;
 pub use effort::*;

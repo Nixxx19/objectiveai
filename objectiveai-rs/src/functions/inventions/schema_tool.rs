@@ -1,12 +1,12 @@
 use std::collections::HashSet;
 
-use crate::upstream::{Tool, ToolArgsType};
+use super::tool::{InventionTool, InventionToolArgsType};
 
 mod schema_lookup {
     include!(concat!(env!("OUT_DIR"), "/schema_lookup.rs"));
 }
 
-pub fn schema_tools(schemas: &[&str]) -> Vec<Tool> {
+pub fn schema_tools(schemas: &[&str]) -> Vec<InventionTool> {
     let mut seen = HashSet::new();
     let mut tools = Vec::new();
     let mut stack: Vec<&str> = schemas.iter().copied().collect();
@@ -20,10 +20,10 @@ pub fn schema_tools(schemas: &[&str]) -> Vec<Tool> {
             let tool_name = schema_lookup::tool_name(name).unwrap();
             let tool_desc = schema_lookup::tool_description(name).unwrap();
 
-            tools.push(Tool::new_sync(
+            tools.push(InventionTool::new_sync(
                 tool_name,
                 tool_desc,
-                ToolArgsType::None,
+                InventionToolArgsType::None,
                 move |_| Ok(content.to_string()),
             ));
 

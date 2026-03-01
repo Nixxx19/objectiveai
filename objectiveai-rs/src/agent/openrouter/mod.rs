@@ -3,7 +3,7 @@ mod output_mode;
 mod provider;
 mod reasoning;
 mod stop;
-mod upstream;
+pub mod upstream;
 mod verbosity;
 
 pub use agent::*;

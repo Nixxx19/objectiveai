@@ -1,6 +1,6 @@
 mod agent;
 mod output_mode;
-mod upstream;
+pub mod upstream;
 
 pub use agent::*;
 pub use output_mode::*;

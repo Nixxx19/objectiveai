@@ -20,7 +20,7 @@ pub struct AgentCompletionChunk {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub usage: Option<response::Usage>,
     /// Upstream provider
-    pub upstream: crate::upstream::Upstream,
+    pub upstream: crate::agent::Upstream,
     /// Error details if this completion failed.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<crate::error::ResponseError>,

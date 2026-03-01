@@ -24,11 +24,11 @@ pub struct AlphaVectorLeafState {
 impl AlphaVectorLeafState {
     pub fn read_spec_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "ReadSpec",
             "Read Spec",
-            crate::upstream::ToolArgsType::None,
+            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -41,11 +41,11 @@ impl AlphaVectorLeafState {
 
     pub fn read_essay_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "ReadEssay",
             "Read Essay",
-            crate::upstream::ToolArgsType::None,
+            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -61,11 +61,11 @@ impl AlphaVectorLeafState {
 
     pub fn write_essay_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "WriteEssay",
             "Write Essay",
-            crate::upstream::ToolArgsType::String,
+            crate::functions::inventions::InventionToolArgsType::String,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -104,11 +104,11 @@ impl AlphaVectorLeafState {
 
     pub fn read_input_schema_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "ReadInputSchema",
             "Read Input Schema",
-            crate::upstream::ToolArgsType::None,
+            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -128,11 +128,11 @@ impl AlphaVectorLeafState {
 
     pub fn write_input_schema_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "WriteInputSchema",
             "Write Input Schema",
-            crate::upstream::ToolArgsType::Object,
+            crate::functions::inventions::InventionToolArgsType::Object,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -190,11 +190,11 @@ impl AlphaVectorLeafState {
 
     pub fn read_essay_tasks_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "ReadEssayTasks",
             "Read Essay Tasks",
-            crate::upstream::ToolArgsType::None,
+            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -212,11 +212,11 @@ impl AlphaVectorLeafState {
 
     pub fn write_essay_tasks_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "WriteEssayTasks",
             "Write Essay Tasks",
-            crate::upstream::ToolArgsType::String,
+            crate::functions::inventions::InventionToolArgsType::String,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -255,11 +255,11 @@ impl AlphaVectorLeafState {
 
     pub fn read_tasks_length_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "ReadTasksLength",
             "Read Tasks Length",
-            crate::upstream::ToolArgsType::None,
+            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -275,11 +275,11 @@ impl AlphaVectorLeafState {
 
     pub fn read_task_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "ReadTask",
             "Read Task by index",
-            crate::upstream::ToolArgsType::Number,
+            crate::functions::inventions::InventionToolArgsType::Number,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -319,11 +319,11 @@ impl AlphaVectorLeafState {
 
     pub fn delete_task_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "DeleteTask",
             "Delete Task by index",
-            crate::upstream::ToolArgsType::Number,
+            crate::functions::inventions::InventionToolArgsType::Number,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -363,11 +363,11 @@ impl AlphaVectorLeafState {
 
     pub fn append_task_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "AppendTask",
             "Append Task",
-            crate::upstream::ToolArgsType::Object,
+            crate::functions::inventions::InventionToolArgsType::Object,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -407,11 +407,11 @@ impl AlphaVectorLeafState {
 
     pub fn check_function_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "CheckFunction",
             "Check if function is valid",
-            crate::upstream::ToolArgsType::None,
+            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -460,11 +460,11 @@ impl AlphaVectorLeafState {
 
     pub fn read_description_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "ReadDescription",
             "Read Description",
-            crate::upstream::ToolArgsType::None,
+            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -482,11 +482,11 @@ impl AlphaVectorLeafState {
 
     pub fn write_description_tool(
         this: &Arc<Mutex<Self>>,
-    ) -> crate::upstream::Tool {
-        crate::upstream::Tool::new_sync(
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync(
             "WriteDescription",
             "Write Description",
-            crate::upstream::ToolArgsType::String,
+            crate::functions::inventions::InventionToolArgsType::String,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -557,14 +557,14 @@ impl super::InventionState for AlphaVectorLeafState {
     }
     fn into_state(self) -> super::State { super::State::AlphaVectorLeaf(self) }
 
-    fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
+    fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
         vec![Self::read_spec_tool(this), Self::write_essay_tool(this)]
     }
     fn validate_essay(this: &Arc<Mutex<Self>>) -> Result<(), String> {
         AlphaVectorLeafState::validate_essay(this)
     }
 
-    fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
+    fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
         let mut tools = vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::write_input_schema_tool(this),
@@ -576,7 +576,7 @@ impl super::InventionState for AlphaVectorLeafState {
         AlphaVectorLeafState::validate_input_schema(this)
     }
 
-    fn essay_tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
+    fn essay_tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
         vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::read_input_schema_tool(this), Self::write_essay_tasks_tool(this),
@@ -586,7 +586,7 @@ impl super::InventionState for AlphaVectorLeafState {
         AlphaVectorLeafState::validate_essay_tasks(this)
     }
 
-    fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
+    fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
         let mut tools = vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::read_input_schema_tool(this), Self::read_essay_tasks_tool(this),
@@ -601,7 +601,7 @@ impl super::InventionState for AlphaVectorLeafState {
         AlphaVectorLeafState::validate_function(this)
     }
 
-    fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool> {
+    fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
         vec![
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::read_input_schema_tool(this), Self::read_essay_tasks_tool(this),

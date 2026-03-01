@@ -406,20 +406,6 @@ pub struct VectorCompletionTaskExpression {
             >,
         >,
     >,
-    /// Expression for tools available to the completion (read-only context).
-    /// Receives: `input`, `map` (if mapped).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<
-        super::expression::WithExpression<
-            Option<
-                Vec<
-                    super::expression::WithExpression<
-                        agent::completions::request::ToolExpression,
-                    >,
-                >,
-            >,
-        >,
-    >,
     /// Expression for the possible responses the LLMs can vote for.
     /// Receives: `input`, `map` (if mapped).
     pub responses: super::expression::WithExpression<
@@ -467,30 +453,6 @@ impl VectorCompletionTaskExpression {
             }
         }
 
-        // compile tools
-        let tools = self
-            .tools
-            .map(|tools| tools.compile_one(params))
-            .transpose()?
-            .flatten()
-            .map(|tools| {
-                let mut compiled_tools = Vec::with_capacity(tools.len());
-                for tool in tools {
-                    match tool.compile_one_or_many(params)? {
-                        super::expression::OneOrMany::One(one_tool) => {
-                            compiled_tools.push(one_tool.compile(params)?);
-                        }
-                        super::expression::OneOrMany::Many(many_tools) => {
-                            for tool in many_tools {
-                                compiled_tools.push(tool.compile(params)?);
-                            }
-                        }
-                    }
-                }
-                Ok::<_, super::expression::ExpressionError>(compiled_tools)
-            })
-            .transpose()?;
-
         // compile responses
         let responses = self.responses.compile_one(params)?;
         let mut compiled_responses = Vec::with_capacity(responses.len());
@@ -509,7 +471,6 @@ impl VectorCompletionTaskExpression {
 
         Ok(VectorCompletionTask {
             messages: compiled_messages,
-            tools,
             responses: compiled_responses,
             output: self.output,
         })
@@ -521,9 +482,6 @@ impl VectorCompletionTaskExpression {
 pub struct VectorCompletionTask {
     /// The resolved conversation messages.
     pub messages: Vec<agent::completions::message::Message>,
-    /// The resolved tools (read-only context for the completion).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<agent::completions::request::Tool>>,
     /// The resolved response options the LLMs can vote for.
     pub responses: Vec<agent::completions::message::RichContent>,
     /// Expression to transform the task result into a valid function output.

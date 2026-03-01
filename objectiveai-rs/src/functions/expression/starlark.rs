@@ -541,10 +541,7 @@ mod tests {
         RichContentExpression, RichContentPartExpression,
         SimpleContentExpression, SimpleContentPartExpression,
         SystemMessageExpression, ToolMessageExpression,
-        UserMessageExpression, ValueExpression, VideoUrl,
-    };
-    use crate::agent::completions::request::{
-        FunctionToolExpression, ToolExpression,
+        UserMessageExpression, VideoUrl,
     };
     use crate::functions::expression::{
         FunctionOutput, Input, InputExpression, Params, ParamsOwned,
@@ -1763,162 +1760,6 @@ mod tests {
     }
 
     #[test]
-    fn test_starlark_value_expression_null() {
-        let params = make_params(empty_input());
-        assert_starlark_deep_eq("None", &params, &ValueExpression::Null);
-    }
-
-    #[test]
-    fn test_starlark_value_expression_bool() {
-        let params = make_params(empty_input());
-        assert_starlark_deep_eq("True", &params, &ValueExpression::Bool(true));
-        assert_starlark_deep_eq(
-            "False",
-            &params,
-            &ValueExpression::Bool(false),
-        );
-    }
-
-    #[test]
-    fn test_starlark_value_expression_number() {
-        let params = make_params(empty_input());
-        assert_starlark_deep_eq(
-            "42",
-            &params,
-            &ValueExpression::Number(serde_json::Number::from(42)),
-        );
-        assert_starlark_deep_eq(
-            "3.14",
-            &params,
-            &ValueExpression::Number(
-                serde_json::Number::from_f64(3.14).unwrap(),
-            ),
-        );
-    }
-
-    #[test]
-    fn test_starlark_value_expression_string() {
-        let params = make_params(empty_input());
-        assert_starlark_deep_eq(
-            "\"s\"",
-            &params,
-            &ValueExpression::String("s".to_string()),
-        );
-    }
-
-    #[test]
-    fn test_starlark_value_expression_array() {
-        let params = make_params(empty_input());
-        let expected = ValueExpression::Array(vec![
-            WithExpression::Value(ValueExpression::Number(
-                serde_json::Number::from(1),
-            )),
-            WithExpression::Value(ValueExpression::String("a".to_string())),
-        ]);
-        assert_starlark_deep_eq("[1, \"a\"]", &params, &expected);
-    }
-
-    #[test]
-    fn test_starlark_value_expression_object() {
-        let params = make_params(empty_input());
-        let mut map = IndexMap::new();
-        map.insert(
-            "k".to_string(),
-            WithExpression::Value(ValueExpression::Bool(false)),
-        );
-        let expected = ValueExpression::Object(map);
-        assert_starlark_deep_eq("{\"k\": False}", &params, &expected);
-    }
-
-    #[test]
-    fn test_starlark_function_tool_expression_name_only() {
-        let params = make_params(empty_input());
-        let expected = FunctionToolExpression {
-            name: WithExpression::Value("f".to_string()),
-            description: None,
-            parameters: None,
-            strict: None,
-        };
-        assert_starlark_deep_eq("{\"name\": \"f\"}", &params, &expected);
-    }
-
-    #[test]
-    fn test_starlark_function_tool_expression_with_description() {
-        let params = make_params(empty_input());
-        let expected = FunctionToolExpression {
-            name: WithExpression::Value("g".to_string()),
-            description: Some(WithExpression::Value(Some("desc".to_string()))),
-            parameters: None,
-            strict: None,
-        };
-        assert_starlark_deep_eq(
-            "{\"name\": \"g\", \"description\": \"desc\"}",
-            &params,
-            &expected,
-        );
-    }
-
-    #[test]
-    fn test_starlark_function_tool_expression_with_parameters() {
-        let params = make_params(empty_input());
-        let mut params_map = IndexMap::new();
-        params_map.insert(
-            "x".to_string(),
-            WithExpression::Value(ValueExpression::String("s".to_string())),
-        );
-        let expected = FunctionToolExpression {
-            name: WithExpression::Value("h".to_string()),
-            description: None,
-            parameters: Some(WithExpression::Value(Some(params_map))),
-            strict: None,
-        };
-        assert_starlark_deep_eq(
-            "{\"name\": \"h\", \"parameters\": {\"x\": \"s\"}}",
-            &params,
-            &expected,
-        );
-    }
-
-    #[test]
-    fn test_starlark_function_tool_expression_with_strict() {
-        let params = make_params(empty_input());
-        let expected = FunctionToolExpression {
-            name: WithExpression::Value("s".to_string()),
-            description: None,
-            parameters: None,
-            strict: Some(WithExpression::Value(Some(true))),
-        };
-        assert_starlark_deep_eq(
-            "{\"name\": \"s\", \"strict\": True}",
-            &params,
-            &expected,
-        );
-    }
-
-    #[test]
-    fn test_starlark_function_tool_expression_all_fields() {
-        let params = make_params(empty_input());
-        let mut params_map = IndexMap::new();
-        params_map.insert(
-            "a".to_string(),
-            WithExpression::Value(ValueExpression::Number(
-                serde_json::Number::from(1),
-            )),
-        );
-        let expected = FunctionToolExpression {
-            name: WithExpression::Value("all".to_string()),
-            description: Some(WithExpression::Value(Some("d".to_string()))),
-            parameters: Some(WithExpression::Value(Some(params_map))),
-            strict: Some(WithExpression::Value(Some(false))),
-        };
-        assert_starlark_deep_eq(
-            "{\"name\": \"all\", \"description\": \"d\", \"parameters\": {\"a\": 1}, \"strict\": False}",
-            &params,
-            &expected,
-        );
-    }
-
-    #[test]
     fn test_starlark_assistant_tool_call_function_expression() {
         let params = make_params(empty_input());
         let expected = AssistantToolCallFunctionExpression {
@@ -1965,24 +1806,6 @@ mod tests {
         };
         assert_starlark_deep_eq(
             "{\"type\": \"function\", \"function\": {\"name\": \"g\", \"arguments\": \"{}\"}}",
-            &params,
-            &expected,
-        );
-    }
-
-    #[test]
-    fn test_starlark_tool_expression() {
-        let params = make_params(empty_input());
-        let expected = ToolExpression::Function {
-            function: WithExpression::Value(FunctionToolExpression {
-                name: WithExpression::Value("do_it".to_string()),
-                description: None,
-                parameters: None,
-                strict: None,
-            }),
-        };
-        assert_starlark_deep_eq(
-            "{\"type\": \"function\", \"function\": {\"name\": \"do_it\"}}",
             &params,
             &expected,
         );

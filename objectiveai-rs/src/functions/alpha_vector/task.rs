@@ -339,7 +339,6 @@ impl VectorCompletionTaskExpression {
             messages: functions::expression::WithExpression::Expression(
                 self.messages,
             ),
-            tools: None,
             responses: functions::expression::WithExpression::Expression(
                 self.responses,
             ),

@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FunctionInvention {
     pub id: String,
-    pub completions: Vec<super::Completion>,
+    pub completions: Vec<super::AgentCompletion>,
     pub state: functions::inventions::State,
     pub function: Option<functions::AlphaRemoteFunction>,
     pub created: u64,
@@ -31,7 +31,7 @@ impl From<response::streaming::FunctionInventionChunk> for FunctionInvention {
             id,
             completions: completions
                 .into_iter()
-                .map(super::Completion::from)
+                .map(super::AgentCompletion::from)
                 .collect(),
             state: state.unwrap_or(
                 functions::inventions::State::AlphaScalarBranch(

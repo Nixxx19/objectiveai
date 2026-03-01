@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FunctionInventionChunk {
     pub id: String,
-    pub completions: Vec<super::CompletionChunk>,
+    pub completions: Vec<super::AgentCompletionChunk>,
     // yielded after steps with the current state
     #[serde(skip_serializing_if = "Option::is_none")]
     pub state: Option<functions::inventions::State>,
@@ -54,33 +54,32 @@ impl FunctionInventionChunk {
 
     fn push_completions(
         &mut self,
-        other_completions: &[super::CompletionChunk],
+        other_completions: &[super::AgentCompletionChunk],
     ) {
         fn push_completion(
-            completions: &mut Vec<super::CompletionChunk>,
-            other: &super::CompletionChunk,
+            completions: &mut Vec<super::AgentCompletionChunk>,
+            other: &super::AgentCompletionChunk,
         ) {
             fn find_completion(
-                completions: &mut Vec<super::CompletionChunk>,
+                completions: &mut Vec<super::AgentCompletionChunk>,
                 index: u64,
-            ) -> Option<&mut super::CompletionChunk> {
+            ) -> Option<&mut super::AgentCompletionChunk> {
                 for completion in completions {
-                    if completion.index() == index {
+                    if completion.index == index {
                         return Some(completion);
                     }
                 }
                 None
             }
-            if let Some(existing) =
-                find_completion(completions, other.index())
+            if let Some(completion) = find_completion(completions, other.index)
             {
-                existing.push(other);
+                completion.push(other);
             } else {
                 completions.push(other.clone());
             }
         }
-        for other in other_completions {
-            push_completion(&mut self.completions, other);
+        for other_completion in other_completions {
+            push_completion(&mut self.completions, other_completion);
         }
     }
 }

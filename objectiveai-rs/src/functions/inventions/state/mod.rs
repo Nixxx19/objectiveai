@@ -26,19 +26,19 @@ pub trait InventionState: Clone + Send + 'static {
     fn object() -> super::response::streaming::Object;
     fn into_state(self) -> State;
 
-    fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool>;
+    fn essay_tools(this: &Arc<Mutex<Self>>) -> Vec<super::InventionTool>;
     fn validate_essay(this: &Arc<Mutex<Self>>) -> Result<(), String>;
 
-    fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool>;
+    fn input_schema_tools(this: &Arc<Mutex<Self>>) -> Vec<super::InventionTool>;
     fn validate_input_schema(this: &Arc<Mutex<Self>>) -> Result<(), String>;
 
-    fn essay_tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool>;
+    fn essay_tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<super::InventionTool>;
     fn validate_essay_tasks(this: &Arc<Mutex<Self>>) -> Result<(), String>;
 
-    fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool>;
+    fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<super::InventionTool>;
     fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String>;
 
-    fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::upstream::Tool>;
+    fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<super::InventionTool>;
     fn validate_description(this: &Arc<Mutex<Self>>) -> Result<(), String>;
 
     fn write_readme(this: &Arc<Mutex<Self>>);

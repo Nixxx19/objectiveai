@@ -312,10 +312,7 @@ mod tests {
         AssistantToolCallExpression, AssistantToolCallFunctionExpression, File,
         ImageUrl, InputAudio, MessageExpression, RichContentExpression,
         RichContentPartExpression, SimpleContentExpression,
-        SimpleContentPartExpression, ValueExpression, VideoUrl,
-    };
-    use crate::agent::completions::request::{
-        FunctionToolExpression, ToolExpression,
+        SimpleContentPartExpression, VideoUrl,
     };
     use crate::functions::expression::{
         ExpressionError, FunctionOutput, Input, InputExpression, Params,
@@ -527,7 +524,7 @@ mod tests {
     }
 
     #[test]
-    fn expression_outputs_input_expression_and_value_expression() {
+    fn expression_outputs_input_expression() {
         let params = empty_params();
 
         let ie: InputExpression = starlark_one("{\"k\": \"v\"}", &params);
@@ -537,16 +534,6 @@ mod tests {
             }
             other => {
                 panic!("expected InputExpression::Object, got {:?}", other)
-            }
-        }
-
-        let ve: ValueExpression = starlark_one("{\"x\": 1}", &params);
-        match ve {
-            ValueExpression::Object(map) => {
-                assert!(map.contains_key("x"));
-            }
-            other => {
-                panic!("expected ValueExpression::Object, got {:?}", other)
             }
         }
     }
@@ -601,7 +588,7 @@ mod tests {
     }
 
     #[test]
-    fn expression_outputs_message_and_tool_types() {
+    fn expression_outputs_message_types() {
         let params = empty_params();
 
         let msg: MessageExpression =
@@ -619,31 +606,11 @@ mod tests {
         );
         assert_eq!(messages.len(), 2);
         assert!(matches!(messages[0], WithExpression::Value(_)));
-
-        let tool: ToolExpression = starlark_one(
-            "{\"type\": \"function\", \"function\": {\"name\": \"do_thing\"}}",
-            &params,
-        );
-        match tool {
-            ToolExpression::Function { .. } => {}
-        }
-
-        let tools: Vec<WithExpression<ToolExpression>> = starlark_one(
-            "[{\"type\": \"function\", \"function\": {\"name\": \"do_thing\"}}]",
-            &params,
-        );
-        assert_eq!(tools.len(), 1);
     }
 
     #[test]
-    fn expression_outputs_function_tool_and_assistant_tool_call_types() {
+    fn expression_outputs_assistant_tool_call_types() {
         let params = empty_params();
-
-        let fte: FunctionToolExpression =
-            starlark_one("{\"name\": \"do_thing\"}", &params);
-        assert!(
-            matches!(fte.name, WithExpression::Value(ref s) if s == "do_thing")
-        );
 
         let atcf: AssistantToolCallFunctionExpression = starlark_one(
             "{\"name\": \"do_thing\", \"arguments\": \"{}\"}",
