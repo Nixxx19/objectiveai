@@ -1,6 +1,6 @@
 //! Delta type for streaming agent completion responses.
 
-use crate::agent::completions::response;
+use crate::agent;
 use serde::{Deserialize, Serialize};
 
 /// A delta (incremental update) in a streaming response.
@@ -17,17 +17,18 @@ pub struct Delta {
     pub refusal: Option<String>,
     /// The role (only present in the first delta).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub role: Option<response::Role>,
+    pub role: Option<super::Role>,
     /// Tool call updates.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tool_calls: Option<Vec<super::ToolCall>>,
+    pub tool_calls:
+        Option<Vec<agent::completions::response::streaming::ToolCall>>,
 
     /// New reasoning text since the last delta.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<String>,
     /// New generated images.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub images: Option<Vec<response::Image>>,
+    pub images: Option<Vec<super::Image>>,
 }
 
 impl Delta {
@@ -43,28 +44,47 @@ impl Delta {
             images,
         }: &Delta,
     ) {
-        response::util::push_option_string(&mut self.content, content);
-        response::util::push_option_string(&mut self.refusal, refusal);
+        agent::completions::response::util::push_option_string(
+            &mut self.content,
+            content,
+        );
+        agent::completions::response::util::push_option_string(
+            &mut self.refusal,
+            refusal,
+        );
         if self.role.is_none() {
             self.role = role.clone();
         }
         self.push_tool_calls(tool_calls);
-        response::util::push_option_string(&mut self.reasoning, reasoning);
-        response::util::push_option_vec(&mut self.images, images);
+        agent::completions::response::util::push_option_string(
+            &mut self.reasoning,
+            reasoning,
+        );
+        agent::completions::response::util::push_option_vec(
+            &mut self.images,
+            images,
+        );
     }
 
     fn push_tool_calls(
         &mut self,
-        other_tool_calls: &Option<Vec<super::ToolCall>>,
+        other_tool_calls: &Option<
+            Vec<agent::completions::response::streaming::ToolCall>,
+        >,
     ) {
         fn push_tool_call(
-            tool_calls: &mut Vec<super::ToolCall>,
-            other: &super::ToolCall,
+            tool_calls: &mut Vec<
+                agent::completions::response::streaming::ToolCall,
+            >,
+            other: &agent::completions::response::streaming::ToolCall,
         ) {
             fn find_tool_call(
-                tool_calls: &mut Vec<super::ToolCall>,
+                tool_calls: &mut Vec<
+                    agent::completions::response::streaming::ToolCall,
+                >,
                 index: u64,
-            ) -> Option<&mut super::ToolCall> {
+            ) -> Option<&mut agent::completions::response::streaming::ToolCall>
+            {
                 for tool_call in tool_calls {
                     if tool_call.index == index {
                         return Some(tool_call);

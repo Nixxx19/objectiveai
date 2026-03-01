@@ -9,8 +9,11 @@ pub struct ToolResponse {
     pub inner: agent::completions::request::ToolMessage,
 }
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
+#[derive(
+    Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq,
+)]
 pub enum ToolRole {
     #[serde(rename = "tool")]
+    #[default]
     Tool,
 }

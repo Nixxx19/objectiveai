@@ -10,35 +10,17 @@ use serde::{Deserialize, Serialize};
 /// using the [`push`](Self::push) method.
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AgentCompletionChunk {
-    /// ObjectiveAI's unique identifier for this completion.
     pub id: String,
-    /// The upstream provider's identifier.
-    pub upstream_id: String,
-    /// The choice deltas in this chunk.
-    pub choices: Vec<super::Choice>,
-    /// Unix timestamp when the completion was created.
+    pub upstream_id: Option<String>,
     pub created: u64,
-    /// The Agent ID used.
-    pub model: String,
-    /// The upstream model identifier.
-    pub upstream_model: String,
+    pub messages: Vec<super::MessageChunk>,
     /// The object type (always "agent.completion.chunk").
     pub object: super::Object,
-    /// The service tier used, if applicable.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub service_tier: Option<String>,
-    /// A fingerprint of the model configuration.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub system_fingerprint: Option<String>,
     /// Token usage (only present in the final chunk).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub usage: Option<response::Usage>,
     /// Upstream provider
     pub upstream: crate::upstream::Upstream,
-
-    /// The provider that served the request (OpenRouter-specific).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub provider: Option<String>,
 }
 
 impl AgentCompletionChunk {
@@ -48,21 +30,10 @@ impl AgentCompletionChunk {
     pub fn push(
         &mut self,
         AgentCompletionChunk {
-            choices,
-            service_tier,
-            system_fingerprint,
-            usage,
-            provider,
-            ..
+            messages, usage, ..
         }: &AgentCompletionChunk,
     ) {
-        self.push_choices(choices);
-        if self.service_tier.is_none() {
-            self.service_tier = service_tier.clone();
-        }
-        if self.system_fingerprint.is_none() {
-            self.system_fingerprint = system_fingerprint.clone();
-        }
+        self.push_messages(messages);
         match (&mut self.usage, usage) {
             (Some(self_usage), Some(other_usage)) => {
                 self_usage.push(other_usage);
@@ -72,35 +43,32 @@ impl AgentCompletionChunk {
             }
             _ => {}
         }
-        if self.provider.is_none() {
-            self.provider = provider.clone();
-        }
     }
 
-    fn push_choices(&mut self, other_choices: &[super::Choice]) {
-        fn push_choice(
-            choices: &mut Vec<super::Choice>,
-            other: &super::Choice,
+    fn push_messages(&mut self, other_choices: &[super::MessageChunk]) {
+        fn push_message(
+            messages: &mut Vec<super::MessageChunk>,
+            other: &super::MessageChunk,
         ) {
-            fn find_choice(
-                choices: &mut Vec<super::Choice>,
+            fn find_message(
+                messages: &mut Vec<super::MessageChunk>,
                 index: u64,
-            ) -> Option<&mut super::Choice> {
-                for choice in choices {
-                    if choice.index == index {
-                        return Some(choice);
+            ) -> Option<&mut super::MessageChunk> {
+                for message in messages {
+                    if message.index() == index {
+                        return Some(message);
                     }
                 }
                 None
             }
-            if let Some(choice) = find_choice(choices, other.index) {
-                choice.push(other);
+            if let Some(message) = find_message(messages, other.index()) {
+                message.push(other);
             } else {
-                choices.push(other.clone());
+                messages.push(other.clone());
             }
         }
-        for other_choice in other_choices {
-            push_choice(&mut self.choices, other_choice);
+        for other_message in other_choices {
+            push_message(&mut self.messages, other_message);
         }
     }
 }

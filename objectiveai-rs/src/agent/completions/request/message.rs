@@ -1463,6 +1463,33 @@ pub enum RichContent {
 }
 
 impl RichContent {
+    pub fn push(&mut self, other: &RichContent) {
+        match (self, other) {
+            (RichContent::Text(self_text), RichContent::Text(other_text)) => {
+                self_text.push_str(&other_text);
+            }
+            (RichContent::Text(self_text), RichContent::Parts(other_parts)) => {
+                let mut parts = Vec::with_capacity(1 + other_parts.len());
+                parts.push(RichContentPart::Text {
+                    text: std::mem::take(self_text),
+                });
+                parts.extend(other_parts.iter().cloned());
+                *self = RichContent::Parts(parts);
+            }
+            (RichContent::Parts(self_parts), RichContent::Text(other_text)) => {
+                self_parts.push(RichContentPart::Text {
+                    text: other_text.clone(),
+                });
+            }
+            (
+                RichContent::Parts(self_parts),
+                RichContent::Parts(other_parts),
+            ) => {
+                self_parts.extend(other_parts.iter().cloned());
+            }
+        }
+    }
+
     /// Prepares the content by normalizing parts.
     ///
     /// This consolidates consecutive text parts, removes empty parts,
@@ -2322,7 +2349,11 @@ impl crate::functions::expression::FromSpecial
 }
 
 impl crate::functions::expression::FromSpecial
-    for Vec<crate::functions::expression::WithExpression<AssistantToolCallExpression>>
+    for Vec<
+        crate::functions::expression::WithExpression<
+            AssistantToolCallExpression,
+        >,
+    >
 {
     fn from_special(
         _special: &crate::functions::expression::Special,
