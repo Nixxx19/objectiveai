@@ -6,6 +6,9 @@ use twox_hash::XxHash3_128;
 /// The base configuration for a Claude Agent SDK Agent (without computed ID).
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AgentBase {
+    /// The upstream provider marker.
+    pub upstream: super::Upstream,
+
     /// The upstream language model identifier.
     pub model: String,
 

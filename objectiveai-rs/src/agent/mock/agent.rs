@@ -6,6 +6,9 @@ use twox_hash::XxHash3_128;
 /// The base configuration for a Mock Agent (without computed ID).
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AgentBase {
+    /// The upstream provider marker.
+    pub upstream: super::Upstream,
+
     /// The output mode for vector completions. Ignored for agent completions.
     pub output_mode: super::OutputMode,
 }

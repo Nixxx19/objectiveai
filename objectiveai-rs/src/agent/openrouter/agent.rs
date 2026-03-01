@@ -7,6 +7,9 @@ use twox_hash::XxHash3_128;
 /// The base configuration for an OpenRouter Agent (without computed ID).
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AgentBase {
+    /// The upstream provider marker.
+    pub upstream: super::Upstream,
+
     /// The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).
     pub model: String,
 
