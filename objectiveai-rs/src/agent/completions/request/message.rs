@@ -1080,10 +1080,8 @@ impl AssistantToolCall {
     }
 }
 
-impl From<crate::agent::completions::response::streaming::ToolCall> for AssistantToolCall {
-    fn from(
-        tc: crate::agent::completions::response::streaming::ToolCall,
-    ) -> Self {
+impl From<AssistantToolCallDelta> for AssistantToolCall {
+    fn from(tc: AssistantToolCallDelta) -> Self {
         AssistantToolCall::Function {
             id: tc.id.unwrap_or_default(),
             function: tc.function.unwrap_or_default().into(),
@@ -1206,10 +1204,8 @@ impl AssistantToolCallFunction {
     }
 }
 
-impl From<crate::agent::completions::response::streaming::ToolCallFunction> for AssistantToolCallFunction {
-    fn from(
-        f: crate::agent::completions::response::streaming::ToolCallFunction,
-    ) -> Self {
+impl From<AssistantToolCallFunctionDelta> for AssistantToolCallFunction {
+    fn from(f: AssistantToolCallFunctionDelta) -> Self {
         Self {
             name: f.name.unwrap_or_default(),
             arguments: f.arguments.unwrap_or_default(),
@@ -1261,6 +1257,81 @@ impl FromStarlarkValue for AssistantToolCallFunction {
                 )
             })?,
         })
+    }
+}
+
+/// A tool call delta in a streaming response.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AssistantToolCallDelta {
+    /// The index of this tool call.
+    pub index: u64,
+    /// The type of tool call (always "function").
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub r#type: Option<AssistantToolCallType>,
+    /// The unique ID of this tool call.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<String>,
+    /// The function call details.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub function: Option<AssistantToolCallFunctionDelta>,
+}
+
+impl AssistantToolCallDelta {
+    /// Accumulates another tool call into this one.
+    pub fn push(&mut self, other: &AssistantToolCallDelta) {
+        if self.r#type.is_none() {
+            self.r#type = other.r#type;
+        }
+        if self.id.is_none() {
+            self.id = other.id.clone();
+        }
+        match (&mut self.function, &other.function) {
+            (Some(self_function), Some(other_function)) => {
+                self_function.push(other_function);
+            }
+            (None, Some(other_function)) => {
+                self.function = Some(other_function.clone());
+            }
+            _ => {}
+        }
+    }
+}
+
+/// The type of tool call.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
+pub enum AssistantToolCallType {
+    /// A function call.
+    #[serde(rename = "function")]
+    #[default]
+    Function,
+}
+
+/// Function call details in a streaming tool call.
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct AssistantToolCallFunctionDelta {
+    /// The function name (only present in the first delta).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+    /// The arguments being streamed (accumulated across deltas).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub arguments: Option<String>,
+}
+
+impl AssistantToolCallFunctionDelta {
+    /// Accumulates another function call delta into this one.
+    pub fn push(&mut self, other: &AssistantToolCallFunctionDelta) {
+        if self.name.is_none() {
+            self.name = other.name.clone();
+        }
+        match (&mut self.arguments, &other.arguments) {
+            (Some(self_arguments), Some(other_arguments)) => {
+                self_arguments.push_str(other_arguments);
+            }
+            (None, Some(other_arguments)) => {
+                self.arguments = Some(other_arguments.clone());
+            }
+            _ => {}
+        }
     }
 }
 

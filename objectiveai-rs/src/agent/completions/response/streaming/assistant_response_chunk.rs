@@ -20,7 +20,7 @@ pub struct AssistantResponseChunk {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tool_calls: Option<Vec<super::ToolCall>>,
+    pub tool_calls: Option<Vec<crate::agent::completions::request::AssistantToolCallDelta>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub content: Option<request::RichContent>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -96,16 +96,16 @@ impl AssistantResponseChunk {
 
     fn push_tool_calls(
         &mut self,
-        other_tool_calls: &Option<Vec<super::ToolCall>>,
+        other_tool_calls: &Option<Vec<crate::agent::completions::request::AssistantToolCallDelta>>,
     ) {
         fn push_tool_call(
-            tool_calls: &mut Vec<super::ToolCall>,
-            other: &super::ToolCall,
+            tool_calls: &mut Vec<crate::agent::completions::request::AssistantToolCallDelta>,
+            other: &crate::agent::completions::request::AssistantToolCallDelta,
         ) {
             fn find_tool_call(
-                tool_calls: &mut Vec<super::ToolCall>,
+                tool_calls: &mut Vec<crate::agent::completions::request::AssistantToolCallDelta>,
                 index: u64,
-            ) -> Option<&mut super::ToolCall> {
+            ) -> Option<&mut crate::agent::completions::request::AssistantToolCallDelta> {
                 for tool_call in tool_calls {
                     if tool_call.index == index {
                         return Some(tool_call);
