@@ -1080,6 +1080,17 @@ impl AssistantToolCall {
     }
 }
 
+impl From<crate::agent::completions::response::streaming::ToolCall> for AssistantToolCall {
+    fn from(
+        tc: crate::agent::completions::response::streaming::ToolCall,
+    ) -> Self {
+        AssistantToolCall::Function {
+            id: tc.id.unwrap_or_default(),
+            function: tc.function.unwrap_or_default().into(),
+        }
+    }
+}
+
 impl FromStarlarkValue for AssistantToolCall {
     fn from_starlark_value(
         value: &StarlarkValue,
@@ -1192,6 +1203,17 @@ impl AssistantToolCallFunction {
     /// Returns `true` if both name and arguments are empty.
     pub fn is_empty(&self) -> bool {
         self.name.is_empty() && self.arguments.is_empty()
+    }
+}
+
+impl From<crate::agent::completions::response::streaming::ToolCallFunction> for AssistantToolCallFunction {
+    fn from(
+        f: crate::agent::completions::response::streaming::ToolCallFunction,
+    ) -> Self {
+        Self {
+            name: f.name.unwrap_or_default(),
+            arguments: f.arguments.unwrap_or_default(),
+        }
     }
 }
 

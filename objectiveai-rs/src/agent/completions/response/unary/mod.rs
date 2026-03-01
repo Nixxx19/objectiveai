@@ -4,13 +4,11 @@
 //! are accumulated into a final result.
 
 mod agent_completion;
-mod choice;
+mod assistant_response;
 mod message;
 mod object;
-mod tool_call;
 
 pub use agent_completion::*;
-pub use choice::*;
+pub use assistant_response::*;
 pub use message::*;
 pub use object::*;
-pub use tool_call::*;
