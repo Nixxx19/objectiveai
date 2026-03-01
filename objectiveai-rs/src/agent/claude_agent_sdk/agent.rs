@@ -1,0 +1,141 @@
+//! Claude Agent SDK Agent types and validation logic.
+
+use serde::{Deserialize, Serialize};
+use twox_hash::XxHash3_128;
+
+/// The base configuration for a Claude Agent SDK Agent (without computed ID).
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct AgentBase {
+    /// The upstream language model identifier.
+    pub model: String,
+
+    /// The output mode for vector completions. Ignored for agent completions.
+    pub output_mode: super::OutputMode,
+
+    /// Enable synthetic reasoning for non-reasoning LLMs.
+    ///
+    /// **Vector completions only.** Ignored for agent completions.
+    ///
+    /// When enabled, forces the LLM to output a `_think` field before voting,
+    /// simulating chain-of-thought reasoning. Requires `output_mode` to be
+    /// `ToolCall` (not `Instruction`).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub synthetic_reasoning: Option<bool>,
+
+    /// Whether thinking/extended thinking is enabled.
+    ///
+    /// Defaults to `true`. Set to `false` to disable.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub thinking: Option<bool>,
+
+    /// The effort level for model output.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub effort: Option<super::Effort>,
+
+    /// System prompt for the agent.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub system_prompt: Option<String>,
+
+    /// Rich content prepended to the user's prompt.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub prefix_content: Option<super::super::completions::message::RichContent>,
+
+    /// Rich content appended after the user's prompt.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub suffix_content: Option<super::super::completions::message::RichContent>,
+
+    /// MCP servers the agent can connect to.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mcp_servers: Option<super::super::McpServers>,
+}
+
+impl AgentBase {
+    /// Normalizes the configuration for deterministic ID computation.
+    pub fn prepare(&mut self) {
+        self.synthetic_reasoning = match self.synthetic_reasoning {
+            Some(false) => None,
+            other => other,
+        };
+        self.thinking = match self.thinking {
+            Some(true) => None,
+            other => other,
+        };
+        self.effort = match self.effort.take() {
+            Some(effort) => effort.prepare(),
+            None => None,
+        };
+        self.system_prompt = match self.system_prompt.take() {
+            Some(system_prompt) if system_prompt.is_empty() => None,
+            other => other,
+        };
+        self.prefix_content = match self.prefix_content.take() {
+            Some(prefix_content) if prefix_content.is_empty() => None,
+            Some(mut prefix_content) => {
+                prefix_content.prepare();
+                if prefix_content.is_empty() { None } else { Some(prefix_content) }
+            }
+            None => None,
+        };
+        self.suffix_content = match self.suffix_content.take() {
+            Some(suffix_content) if suffix_content.is_empty() => None,
+            Some(mut suffix_content) => {
+                suffix_content.prepare();
+                if suffix_content.is_empty() { None } else { Some(suffix_content) }
+            }
+            None => None,
+        };
+        self.mcp_servers = match self.mcp_servers.take() {
+            Some(mcp_servers) => super::super::mcp::mcp_servers::prepare(mcp_servers),
+            None => None,
+        };
+    }
+
+    /// Validates the configuration.
+    pub fn validate(&self) -> Result<(), String> {
+        if self.model.is_empty() {
+            return Err("`model` string cannot be empty".to_string());
+        }
+        if self.synthetic_reasoning.is_some()
+            && let super::OutputMode::Instruction = self.output_mode
+        {
+            return Err(
+                "`synthetic_reasoning` cannot be true when `output_mode` is \"instruction\""
+                    .to_string(),
+            );
+        }
+        if let Some(effort) = &self.effort {
+            effort.validate()?;
+        }
+        if let Some(mcp_servers) = &self.mcp_servers {
+            super::super::mcp::mcp_servers::validate(mcp_servers)?;
+        }
+        Ok(())
+    }
+
+    /// Computes the deterministic content-addressed ID.
+    pub fn id(&self) -> String {
+        let mut hasher = XxHash3_128::with_seed(0);
+        hasher.write(serde_json::to_string(self).unwrap().as_bytes());
+        format!("{:0>22}", base62::encode(hasher.finish_128()))
+    }
+}
+
+/// A validated Claude Agent SDK Agent with its computed content-addressed ID.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Agent {
+    /// The deterministic content-addressed ID (22-character base62 string).
+    pub id: String,
+    /// The normalized configuration.
+    #[serde(flatten)]
+    pub base: AgentBase,
+}
+
+impl TryFrom<AgentBase> for Agent {
+    type Error = String;
+    fn try_from(mut base: AgentBase) -> Result<Self, Self::Error> {
+        base.prepare();
+        base.validate()?;
+        let id = base.id();
+        Ok(Agent { id, base })
+    }
+}

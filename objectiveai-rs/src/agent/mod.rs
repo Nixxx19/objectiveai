@@ -27,24 +27,19 @@
 //! - Collections are sorted for deterministic ordering
 
 mod agent;
+pub mod claude_agent_sdk;
 pub mod completions;
 mod mcp;
+pub mod mock;
+pub mod openrouter;
 mod output_mode;
-mod provider;
-mod reasoning;
 pub mod response;
-mod stop;
 mod upstream;
-mod verbosity;
 
 pub use agent::*;
 pub use mcp::*;
 pub use output_mode::*;
-pub use provider::*;
-pub use reasoning::*;
-pub use stop::*;
 pub use upstream::*;
-pub use verbosity::*;
 
 #[cfg(feature = "http")]
 mod http;

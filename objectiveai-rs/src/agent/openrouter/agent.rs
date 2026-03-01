@@ -1,26 +1,12 @@
-//! Core Agent types and validation logic.
+//! OpenRouter Agent types and validation logic.
 
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
 
-/// The base configuration for an Agent (without computed ID).
-///
-/// This struct contains all configurable parameters for a single agent within
-/// an ensemble. Use [`TryFrom`] to convert to [`Agent`] which includes
-/// the computed content-addressed ID.
-///
-/// # Normalization
-///
-/// Before ID computation, configurations are normalized via [`prepare`](Self::prepare):
-/// - Default values are removed (e.g., `temperature: 1.0` → `None`)
-/// - Empty collections are removed
-/// - Collections are sorted for deterministic ordering
+/// The base configuration for an OpenRouter Agent (without computed ID).
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AgentBase {
-    /// The upstream providers to route requests through.
-    pub upstreams: Vec<super::Upstream>,
-
     /// The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).
     pub model: String,
 
@@ -31,33 +17,26 @@ pub struct AgentBase {
     /// Enable synthetic reasoning for non-reasoning LLMs.
     ///
     /// **Vector completions only.** Ignored for agent completions.
-    ///
-    /// When enabled, forces the LLM to output a `_think` field before voting,
-    /// simulating chain-of-thought reasoning. Requires `output_mode` to be
-    /// `JsonSchema` or `ToolCall` (not `Instruction`).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub synthetic_reasoning: Option<bool>,
 
     /// Number of top log probabilities to return (2-20).
     ///
     /// **Vector completions only.** Ignored for agent completions.
-    ///
-    /// When set, vector completion votes use token probabilities instead of
-    /// discrete selections (if the upstream model provides logprobs).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub top_logprobs: Option<u64>,
 
     /// Messages prepended to the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub prefix_messages: Option<Vec<super::completions::message::Message>>,
+    pub prefix_messages: Option<Vec<super::super::completions::message::Message>>,
 
     /// Messages appended after the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub suffix_messages: Option<Vec<super::completions::message::Message>>,
+    pub suffix_messages: Option<Vec<super::super::completions::message::Message>>,
 
     /// MCP servers the agent can connect to.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub mcp_servers: Option<super::McpServers>,
+    pub mcp_servers: Option<super::super::McpServers>,
 
     // --- OpenAI-compatible parameters ---
     /// Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).
@@ -109,41 +88,8 @@ pub struct AgentBase {
     pub verbosity: Option<super::Verbosity>,
 }
 
-impl Default for AgentBase {
-    fn default() -> Self {
-        Self {
-            upstreams: Vec::new(),
-            model: String::new(),
-            output_mode: super::OutputMode::default(),
-            synthetic_reasoning: None,
-            top_logprobs: None,
-            prefix_messages: None,
-            suffix_messages: None,
-            mcp_servers: None,
-            frequency_penalty: None,
-            logit_bias: None,
-            max_completion_tokens: None,
-            presence_penalty: None,
-            stop: None,
-            temperature: None,
-            top_p: None,
-            max_tokens: None,
-            min_p: None,
-            provider: None,
-            reasoning: None,
-            repetition_penalty: None,
-            top_a: None,
-            top_k: None,
-            verbosity: None,
-        }
-    }
-}
-
 impl AgentBase {
     /// Normalizes the configuration for deterministic ID computation.
-    ///
-    /// This method removes default values, empty collections, and sorts
-    /// collections to ensure identical configurations produce identical IDs.
     pub fn prepare(&mut self) {
         self.synthetic_reasoning = match self.synthetic_reasoning {
             Some(false) => None,
@@ -156,7 +102,7 @@ impl AgentBase {
         self.prefix_messages = match self.prefix_messages.take() {
             Some(prefix_messages) if prefix_messages.is_empty() => None,
             Some(mut prefix_messages) => {
-                super::completions::message::prompt::prepare(&mut prefix_messages);
+                super::super::completions::message::prompt::prepare(&mut prefix_messages);
                 if prefix_messages.is_empty() { None } else { Some(prefix_messages) }
             }
             None => None,
@@ -164,13 +110,13 @@ impl AgentBase {
         self.suffix_messages = match self.suffix_messages.take() {
             Some(suffix_messages) if suffix_messages.is_empty() => None,
             Some(mut suffix_messages) => {
-                super::completions::message::prompt::prepare(&mut suffix_messages);
+                super::super::completions::message::prompt::prepare(&mut suffix_messages);
                 if suffix_messages.is_empty() { None } else { Some(suffix_messages) }
             }
             None => None,
         };
         self.mcp_servers = match self.mcp_servers.take() {
-            Some(mcp_servers) => super::mcp::mcp_servers::prepare(mcp_servers),
+            Some(mcp_servers) => super::super::mcp::mcp_servers::prepare(mcp_servers),
             None => None,
         };
         self.frequency_penalty = match self.frequency_penalty {
@@ -241,9 +187,6 @@ impl AgentBase {
     }
 
     /// Validates the configuration.
-    ///
-    /// Checks that all fields are within valid ranges and that incompatible
-    /// options are not combined (e.g., `synthetic_reasoning` with `Instruction` mode).
     pub fn validate(&self) -> Result<(), String> {
         fn validate_f64(
             name: &str,
@@ -280,7 +223,6 @@ impl AgentBase {
             }
             Ok(())
         }
-        super::upstream::validate::validate(&self.upstreams)?;
         if self.model.is_empty() {
             return Err("`model` string cannot be empty".to_string());
         }
@@ -298,7 +240,7 @@ impl AgentBase {
             return Err("`top_logprobs` must be at most 20".to_string());
         }
         if let Some(mcp_servers) = &self.mcp_servers {
-            super::mcp::mcp_servers::validate(mcp_servers)?;
+            super::super::mcp::mcp_servers::validate(mcp_servers)?;
         }
         validate_f64("frequency_penalty", self.frequency_penalty, -2.0, 2.0)?;
         if let Some(logit_bias) = &self.logit_bias {
@@ -353,9 +295,6 @@ impl AgentBase {
     }
 
     /// Computes the deterministic content-addressed ID.
-    ///
-    /// The ID is a base62-encoded XXHash3-128 hash of the JSON serialization,
-    /// padded to 22 characters.
     pub fn id(&self) -> String {
         let mut hasher = XxHash3_128::with_seed(0);
         hasher.write(serde_json::to_string(self).unwrap().as_bytes());
@@ -363,10 +302,7 @@ impl AgentBase {
     }
 }
 
-/// A validated Agent with its computed content-addressed ID.
-///
-/// Created by converting from [`AgentBase`] via [`TryFrom`].
-/// The conversion normalizes and validates the configuration, then computes the ID.
+/// A validated OpenRouter Agent with its computed content-addressed ID.
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct Agent {
     /// The deterministic content-addressed ID (22-character base62 string).
@@ -383,96 +319,5 @@ impl TryFrom<AgentBase> for Agent {
         base.validate()?;
         let id = base.id();
         Ok(Agent { id, base })
-    }
-}
-
-/// Wrapper that adds fallback agents and a count to any agent type.
-///
-/// Used to specify how many instances of an agent to include in an ensemble,
-/// along with fallback agents to try if the primary fails.
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct WithFallbacksAndCount<T> {
-    /// Number of instances of this agent in the ensemble. Defaults to 1.
-    #[serde(default = "WithFallbacksAndCount::<T>::default_count")]
-    pub count: u64,
-    /// The primary agent configuration.
-    #[serde(flatten)]
-    pub inner: T,
-    /// Fallback agents to try if the primary fails.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub fallbacks: Option<Vec<T>>,
-}
-
-impl<T> WithFallbacksAndCount<T> {
-    fn default_count() -> u64 {
-        1
-    }
-}
-
-/// An [`AgentBase`] with optional fallbacks and count (pre-validation).
-pub type AgentBaseWithFallbacksAndCount =
-    WithFallbacksAndCount<AgentBase>;
-
-/// A validated [`Agent`] with optional fallbacks and count.
-pub type AgentWithFallbacksAndCount = WithFallbacksAndCount<Agent>;
-
-impl AgentWithFallbacksAndCount {
-    /// Returns the concatenated IDs of the primary agent and all fallbacks.
-    ///
-    /// Used by [`Ensemble`](crate::ensemble::Ensemble) to compute its own
-    /// content-addressed ID.
-    pub fn full_id(&self) -> String {
-        match &self.fallbacks {
-            Some(fallbacks) => {
-                let mut full_id = String::with_capacity(
-                    self.inner.id.len() + fallbacks.len() * 22,
-                );
-                full_id.push_str(&self.inner.id);
-                for fallback in fallbacks {
-                    full_id.push_str(&fallback.id);
-                }
-                full_id
-            }
-            None => self.inner.id.clone(),
-        }
-    }
-
-    /// Returns an iterator over the IDs of the primary agent and all fallbacks.
-    pub fn ids(&self) -> impl Iterator<Item = &str> {
-        std::iter::once(self.inner.id.as_str()).chain(
-            self.fallbacks.as_ref().into_iter().flat_map(|fallbacks| {
-                fallbacks.iter().map(|fallback| fallback.id.as_str())
-            }),
-        )
-    }
-}
-
-impl TryFrom<AgentBaseWithFallbacksAndCount>
-    for AgentWithFallbacksAndCount
-{
-    type Error = String;
-    fn try_from(
-        AgentBaseWithFallbacksAndCount {
-            count,
-            inner: base_inner,
-            fallbacks: base_fallbacks,
-        }: AgentBaseWithFallbacksAndCount,
-    ) -> Result<Self, Self::Error> {
-        let inner = base_inner.try_into()?;
-        let fallbacks = match base_fallbacks {
-            Some(base_fallbacks) if base_fallbacks.len() > 0 => {
-                let mut fallbacks = Vec::with_capacity(base_fallbacks.len());
-                for base_fallback in base_fallbacks {
-                    fallbacks.push(base_fallback.try_into()?);
-                }
-                Some(fallbacks)
-            }
-            _ => None,
-        };
-        Ok(AgentWithFallbacksAndCount {
-            count,
-            inner,
-            fallbacks,
-        })
     }
 }

@@ -19,6 +19,30 @@ pub enum SimpleContent {
 }
 
 impl SimpleContent {
+    pub fn push(&mut self, other: &SimpleContent) {
+        match (&mut *self, other) {
+            (SimpleContent::Text(self_text), SimpleContent::Text(other_text)) => {
+                self_text.push_str(&other_text);
+            }
+            (SimpleContent::Text(self_text), SimpleContent::Parts(other_parts)) => {
+                let mut parts = Vec::with_capacity(1 + other_parts.len());
+                parts.push(SimpleContentPart::Text {
+                    text: std::mem::take(self_text),
+                });
+                parts.extend(other_parts.iter().cloned());
+                *self = SimpleContent::Parts(parts);
+            }
+            (SimpleContent::Parts(self_parts), SimpleContent::Text(other_text)) => {
+                self_parts.push(SimpleContentPart::Text {
+                    text: other_text.clone(),
+                });
+            }
+            (SimpleContent::Parts(self_parts), SimpleContent::Parts(other_parts)) => {
+                self_parts.extend(other_parts.iter().cloned());
+            }
+        }
+    }
+
     /// Prepares the content by consolidating parts into a single text string.
     pub fn prepare(&mut self) {
         match self {

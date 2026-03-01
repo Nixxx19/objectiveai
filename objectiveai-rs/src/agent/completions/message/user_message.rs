@@ -20,6 +20,20 @@ pub struct UserMessage {
 }
 
 impl UserMessage {
+    pub fn push(&mut self, other: &UserMessage) {
+        self.content.push(&other.content);
+        if let Some(other_name) = &other.name {
+            match &mut self.name {
+                Some(self_name) => self_name.push_str(other_name),
+                None => self.name = Some(other_name.clone()),
+            }
+        }
+    }
+
+    pub fn has_name(&self) -> bool {
+        self.name.as_ref().is_some_and(|n| !n.is_empty())
+    }
+
     /// Prepares the message by normalizing content and optional fields.
     pub fn prepare(&mut self) {
         self.content.prepare();

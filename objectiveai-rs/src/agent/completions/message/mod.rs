@@ -27,13 +27,65 @@ use starlark::values::{UnpackValue, Value as StarlarkValue};
 
 /// Utilities for working with message prompts.
 pub mod prompt {
-    /// Prepares a list of messages by normalizing each one.
-    pub fn prepare(messages: &mut Vec<super::Message>) {
-        messages.iter_mut().for_each(super::Message::prepare);
+    use super::Message;
+
+    /// Returns whether two messages are the same chainable role
+    /// (developer, user, or system) and the pair has at most one name.
+    fn is_chain(a: &Message, b: &Message) -> bool {
+        match (a, b) {
+            (Message::Developer(a), Message::Developer(b)) => {
+                !(a.has_name() && b.has_name())
+            }
+            (Message::System(a), Message::System(b)) => {
+                !(a.has_name() && b.has_name())
+            }
+            (Message::User(a), Message::User(b)) => {
+                !(a.has_name() && b.has_name())
+            }
+            _ => false,
+        }
+    }
+
+    /// Pushes `other` into `target` (same-role merge).
+    fn push(target: &mut Message, other: &Message) {
+        match (target, other) {
+            (Message::Developer(t), Message::Developer(o)) => t.push(o),
+            (Message::System(t), Message::System(o)) => t.push(o),
+            (Message::User(t), Message::User(o)) => t.push(o),
+            _ => unreachable!(),
+        }
+    }
+
+    /// Prepares a list of messages by normalizing each one, then
+    /// merging chains of consecutive same-role developer/user/system
+    /// messages (only when at most one message in the chain has a name).
+    pub fn prepare(messages: &mut Vec<Message>) {
+        messages.iter_mut().for_each(Message::prepare);
+
+        // scan for any chain to avoid allocation if none exist
+        let has_chain = messages.windows(2).any(|w| is_chain(&w[0], &w[1]));
+        if !has_chain {
+            return;
+        }
+
+        let mut merged = Vec::with_capacity(messages.len());
+        for msg in messages.drain(..) {
+            if let Some(last) = merged.last_mut() {
+                if is_chain(last, &msg) {
+                    push(last, &msg);
+                    continue;
+                }
+            }
+            merged.push(msg);
+        }
+        *messages = merged;
+
+        // re-prepare after merging
+        prepare(messages);
     }
 
     /// Computes a content-addressed ID for a list of messages.
-    pub fn id(messages: &[super::Message]) -> String {
+    pub fn id(messages: &[Message]) -> String {
         let mut hasher = twox_hash::XxHash3_128::with_seed(0);
         hasher.write(serde_json::to_string(messages).unwrap().as_bytes());
         format!("{:0>22}", base62::encode(hasher.finish_128()))
