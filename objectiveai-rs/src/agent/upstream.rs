@@ -12,7 +12,7 @@ pub enum Upstream {
     #[default]
     Unknown,
     /// OpenRouter Upstream.
-    OpenRouter,
+    Openrouter,
     /// Claude Agent SDK Upstream.
     ClaudeAgentSdk,
     /// Mock Upstream.
