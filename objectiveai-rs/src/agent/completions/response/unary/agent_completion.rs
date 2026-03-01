@@ -18,6 +18,8 @@ pub struct AgentCompletion {
     pub usage: Option<response::Usage>,
     /// Upstream provider
     pub upstream: crate::upstream::Upstream,
+    /// Error details if this completion failed.
+    pub error: Option<crate::error::ResponseError>,
 }
 
 impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
@@ -30,6 +32,7 @@ impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
             object,
             usage,
             upstream,
+            error,
         }: response::streaming::AgentCompletionChunk,
     ) -> Self {
         Self {
@@ -40,6 +43,7 @@ impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
             object: object.into(),
             usage,
             upstream,
+            error,
         }
     }
 }

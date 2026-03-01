@@ -21,6 +21,9 @@ pub struct AgentCompletionChunk {
     pub usage: Option<response::Usage>,
     /// Upstream provider
     pub upstream: crate::upstream::Upstream,
+    /// Error details if this completion failed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub error: Option<crate::error::ResponseError>,
 }
 
 impl AgentCompletionChunk {
@@ -30,7 +33,7 @@ impl AgentCompletionChunk {
     pub fn push(
         &mut self,
         AgentCompletionChunk {
-            messages, usage, ..
+            messages, usage, error, ..
         }: &AgentCompletionChunk,
     ) {
         self.push_messages(messages);
@@ -42,6 +45,11 @@ impl AgentCompletionChunk {
                 self.usage = Some(other_usage.clone());
             }
             _ => {}
+        }
+        if self.error.is_none() {
+            if let Some(other_error) = error {
+                self.error = Some(other_error.clone());
+            }
         }
     }
 
