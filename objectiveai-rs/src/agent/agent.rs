@@ -23,6 +23,10 @@ impl AgentBase {
         }
     }
 
+    pub fn model(&self) -> &str {
+        self.as_ref().model()
+    }
+
     pub fn upstream(&self) -> super::Upstream {
         self.as_ref().upstream()
     }
@@ -76,6 +80,14 @@ impl<'a> AgentBaseRef<'a> {
                 AgentBase::ClaudeAgentSdk(b.clone())
             }
             AgentBaseRef::Mock(b) => AgentBase::Mock(b.clone()),
+        }
+    }
+
+    pub fn model(&self) -> &'a str {
+        match self {
+            AgentBaseRef::Openrouter(b) => &b.model,
+            AgentBaseRef::ClaudeAgentSdk(b) => &b.model,
+            AgentBaseRef::Mock(_) => super::mock::AgentBase::model(),
         }
     }
 

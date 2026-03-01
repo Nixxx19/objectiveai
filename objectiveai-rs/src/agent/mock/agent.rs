@@ -28,6 +28,10 @@ impl AgentBase {
         hasher.write(serde_json::to_string(self).unwrap().as_bytes());
         format!("{:0>22}", base62::encode(hasher.finish_128()))
     }
+
+    pub const fn model() -> &'static str {
+        "mock"
+    }
 }
 
 /// A validated Mock Agent with its computed content-addressed ID.
