@@ -196,7 +196,7 @@ pub struct VectorCompletionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
     pub messages: functions::expression::Expression,
-    pub responses: Vec<agent::completions::request::RichContent>,
+    pub responses: Vec<agent::completions::message::RichContent>,
 }
 
 impl VectorCompletionTaskExpression {
@@ -211,7 +211,7 @@ impl VectorCompletionTaskExpression {
             responses: functions::expression::WithExpression::Value(
                 self.responses
                     .into_iter()
-                    .map(agent::completions::request::RichContentExpression::from)
+                    .map(agent::completions::message::RichContentExpression::from)
                     .map(functions::expression::WithExpression::Value)
                     .collect(),
             ),

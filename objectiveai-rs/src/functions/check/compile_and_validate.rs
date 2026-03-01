@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 use rand::Rng;
 use rust_decimal::Decimal;
 
-use crate::agent::completions::request::{Message, RichContent, SimpleContent};
+use crate::agent::completions::message::{Message, RichContent, SimpleContent};
 use crate::functions::expression::{
     FunctionOutput, Params, ParamsRef, TaskOutput, TaskOutputOwned,
     VectorCompletionOutput,

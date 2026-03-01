@@ -2,7 +2,7 @@
 
 #![cfg(test)]
 
-use crate::agent::completions::request::{RichContent, RichContentPart};
+use crate::agent::completions::message::{RichContent, RichContentPart};
 use crate::functions::alpha_scalar::{
     LeafTaskExpression, RemoteFunction, VectorCompletionTaskExpression,
 };

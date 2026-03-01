@@ -9,7 +9,7 @@ pub struct AgentCompletionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub upstreams: Option<Vec<crate::upstream::Upstream>>,
     /// The conversation messages.
-    pub messages: Vec<super::Message>,
+    pub messages: Vec<super::super::message::Message>,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<super::Provider>,

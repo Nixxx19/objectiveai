@@ -26,7 +26,7 @@ pub struct VectorCompletionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub upstreams: Option<Vec<crate::upstream::Upstream>>,
     /// The conversation messages (the prompt).
-    pub messages: Vec<agent::completions::request::Message>,
+    pub messages: Vec<agent::completions::message::Message>,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
@@ -49,7 +49,7 @@ pub struct VectorCompletionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tools: Option<Vec<agent::completions::request::Tool>>,
     /// The possible responses the LLMs can vote for.
-    pub responses: Vec<agent::completions::request::RichContent>,
+    pub responses: Vec<agent::completions::message::RichContent>,
 
     // --- Retry configuration ---
     /// Maximum elapsed time (ms) for exponential backoff retries.

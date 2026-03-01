@@ -402,7 +402,7 @@ pub struct VectorCompletionTaskExpression {
     pub messages: super::expression::WithExpression<
         Vec<
             super::expression::WithExpression<
-                agent::completions::request::MessageExpression,
+                agent::completions::message::MessageExpression,
             >,
         >,
     >,
@@ -425,7 +425,7 @@ pub struct VectorCompletionTaskExpression {
     pub responses: super::expression::WithExpression<
         Vec<
             super::expression::WithExpression<
-                agent::completions::request::RichContentExpression,
+                agent::completions::message::RichContentExpression,
             >,
         >,
     >,
@@ -520,12 +520,12 @@ impl VectorCompletionTaskExpression {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct VectorCompletionTask {
     /// The resolved conversation messages.
-    pub messages: Vec<agent::completions::request::Message>,
+    pub messages: Vec<agent::completions::message::Message>,
     /// The resolved tools (read-only context for the completion).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tools: Option<Vec<agent::completions::request::Tool>>,
     /// The resolved response options the LLMs can vote for.
-    pub responses: Vec<agent::completions::request::RichContent>,
+    pub responses: Vec<agent::completions::message::RichContent>,
     /// Expression to transform the task result into a valid function output.
     ///
     /// Receives `output` as `VectorCompletion(VectorCompletionOutput)` containing

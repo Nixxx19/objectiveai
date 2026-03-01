@@ -1,6 +1,6 @@
 //! Streaming agent completion chunk type.
 
-use crate::agent::completions::{request, response};
+use crate::agent::completions::{message, response};
 use serde::{Deserialize, Serialize};
 
 /// A chunk of a streaming agent completion response.
@@ -20,9 +20,9 @@ pub struct AssistantResponseChunk {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub tool_calls: Option<Vec<crate::agent::completions::request::AssistantToolCallDelta>>,
+    pub tool_calls: Option<Vec<message::AssistantToolCallDelta>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub content: Option<request::RichContent>,
+    pub content: Option<message::RichContent>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refusal: Option<String>,
     pub finish_reason: Option<response::FinishReason>,
@@ -96,16 +96,16 @@ impl AssistantResponseChunk {
 
     fn push_tool_calls(
         &mut self,
-        other_tool_calls: &Option<Vec<crate::agent::completions::request::AssistantToolCallDelta>>,
+        other_tool_calls: &Option<Vec<message::AssistantToolCallDelta>>,
     ) {
         fn push_tool_call(
-            tool_calls: &mut Vec<crate::agent::completions::request::AssistantToolCallDelta>,
-            other: &crate::agent::completions::request::AssistantToolCallDelta,
+            tool_calls: &mut Vec<message::AssistantToolCallDelta>,
+            other: &message::AssistantToolCallDelta,
         ) {
             fn find_tool_call(
-                tool_calls: &mut Vec<crate::agent::completions::request::AssistantToolCallDelta>,
+                tool_calls: &mut Vec<message::AssistantToolCallDelta>,
                 index: u64,
-            ) -> Option<&mut crate::agent::completions::request::AssistantToolCallDelta> {
+            ) -> Option<&mut message::AssistantToolCallDelta> {
                 for tool_call in tool_calls {
                     if tool_call.index == index {
                         return Some(tool_call);

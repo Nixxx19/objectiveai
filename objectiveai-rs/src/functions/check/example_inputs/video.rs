@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use crate::agent::completions::request::{RichContentPart, VideoUrl};
+use crate::agent::completions::message::{RichContentPart, VideoUrl};
 use crate::functions::expression::{Input, VideoInputSchema};
 
 pub const fn permutations(_schema: &VideoInputSchema) -> usize {

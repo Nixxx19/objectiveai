@@ -1,6 +1,6 @@
 use rand::Rng;
 
-use crate::agent::completions::request::{InputAudio, RichContentPart};
+use crate::agent::completions::message::{InputAudio, RichContentPart};
 use crate::functions::expression::{AudioInputSchema, Input};
 
 pub const fn permutations(_schema: &AudioInputSchema) -> usize {

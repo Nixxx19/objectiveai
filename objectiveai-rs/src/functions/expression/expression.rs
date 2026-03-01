@@ -308,12 +308,14 @@ impl<T: super::special::FromSpecial> FromSpecial
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::agent::completions::request::{
+    use crate::agent::completions::message::{
         AssistantToolCallExpression, AssistantToolCallFunctionExpression, File,
-        FunctionToolExpression, ImageUrl, InputAudio, MessageExpression,
-        RichContentExpression, RichContentPartExpression,
-        SimpleContentExpression, SimpleContentPartExpression, ToolExpression,
-        ValueExpression, VideoUrl,
+        ImageUrl, InputAudio, MessageExpression, RichContentExpression,
+        RichContentPartExpression, SimpleContentExpression,
+        SimpleContentPartExpression, ValueExpression, VideoUrl,
+    };
+    use crate::agent::completions::request::{
+        FunctionToolExpression, ToolExpression,
     };
     use crate::functions::expression::{
         ExpressionError, FunctionOutput, Input, InputExpression, Params,

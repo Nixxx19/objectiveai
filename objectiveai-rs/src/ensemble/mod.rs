@@ -17,7 +17,7 @@
 //! ```
 //! use objectiveai::ensemble::{EnsembleBase, Ensemble};
 //! use objectiveai::agent::{AgentBase, AgentBaseWithFallbacksAndCount, OutputMode};
-//! use objectiveai::agent::completions::request::{Message, SystemMessage, SimpleContent};
+//! use objectiveai::agent::completions::message::{Message, SystemMessage, SimpleContent};
 //!
 //! let ensemble_base = EnsembleBase {
 //!     llms: vec![

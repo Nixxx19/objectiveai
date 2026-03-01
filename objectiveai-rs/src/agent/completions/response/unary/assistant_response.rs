@@ -1,6 +1,6 @@
 //! Assistant response type for unary agent completions.
 
-use crate::agent::completions::{request, response};
+use crate::agent::completions::{message, response};
 use serde::{Deserialize, Serialize};
 
 /// An assistant response in a unary agent completion.
@@ -15,8 +15,8 @@ pub struct AssistantResponse {
     pub upstream_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<String>,
-    pub tool_calls: Option<Vec<request::AssistantToolCall>>,
-    pub content: Option<request::RichContent>,
+    pub tool_calls: Option<Vec<message::AssistantToolCall>>,
+    pub content: Option<message::RichContent>,
     pub refusal: Option<String>,
     pub finish_reason: response::FinishReason,
     pub logprobs: Option<response::Logprobs>,

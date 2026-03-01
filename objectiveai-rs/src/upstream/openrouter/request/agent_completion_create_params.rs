@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentCompletionCreateParams {
     /// Messages for the conversation, including any prefix/suffix from the Agent.
-    pub messages: Vec<crate::agent::completions::request::Message>,
+    pub messages: Vec<crate::agent::completions::message::Message>,
     /// Provider preferences merged from request and Agent.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<super::Provider>,

@@ -1,5 +1,6 @@
 //! Agent completions request and response types.
 
+pub mod message;
 pub mod request;
 pub mod response;
 

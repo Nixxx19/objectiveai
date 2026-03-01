@@ -1,0 +1,144 @@
+//! User message types.
+
+use super::rich_content::{RichContent, RichContentExpression};
+use crate::functions;
+use functions::expression::{
+    ExpressionError, FromStarlarkValue, WithExpression,
+};
+use serde::{Deserialize, Serialize};
+use starlark::values::dict::DictRef as StarlarkDictRef;
+use starlark::values::{UnpackValue, Value as StarlarkValue};
+
+/// A user message from the end user.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UserMessage {
+    /// The message content (supports text, images, audio, video, files).
+    pub content: RichContent,
+    /// Optional name for the user.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
+}
+
+impl UserMessage {
+    /// Prepares the message by normalizing content and optional fields.
+    pub fn prepare(&mut self) {
+        self.content.prepare();
+        if self.name.as_ref().is_some_and(String::is_empty) {
+            self.name = None;
+        }
+    }
+}
+
+impl FromStarlarkValue for UserMessage {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
+        let dict = StarlarkDictRef::from_value(*value).ok_or_else(|| {
+            ExpressionError::StarlarkConversionError(
+                "UserMessage: expected dict".into(),
+            )
+        })?;
+        let mut content = None;
+        let mut name = None;
+        for (k, v) in dict.iter() {
+            let key = <&str as UnpackValue>::unpack_value(k)
+                .map_err(|e| {
+                    ExpressionError::StarlarkConversionError(e.to_string())
+                })?
+                .ok_or_else(|| {
+                    ExpressionError::StarlarkConversionError(
+                        "UserMessage: expected string key".into(),
+                    )
+                })?;
+            match key {
+                "content" => {
+                    content = Some(RichContent::from_starlark_value(&v)?)
+                }
+                "name" => name = Option::<String>::from_starlark_value(&v)?,
+                _ => {}
+            }
+        }
+        Ok(UserMessage {
+            content: content.ok_or_else(|| {
+                ExpressionError::StarlarkConversionError(
+                    "UserMessage: missing content".into(),
+                )
+            })?,
+            name,
+        })
+    }
+}
+
+/// Expression variant of [`UserMessage`] for dynamic content.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct UserMessageExpression {
+    /// The message content expression.
+    pub content: functions::expression::WithExpression<RichContentExpression>,
+    /// Optional name expression.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<functions::expression::WithExpression<Option<String>>>,
+}
+
+impl UserMessageExpression {
+    /// Compiles the expression into a concrete [`UserMessage`].
+    pub fn compile(
+        self,
+        params: &functions::expression::Params,
+    ) -> Result<UserMessage, functions::expression::ExpressionError> {
+        let content = self.content.compile_one(params)?.compile(params)?;
+        let name = self
+            .name
+            .map(|name| name.compile_one(params))
+            .transpose()?
+            .flatten();
+        Ok(UserMessage { content, name })
+    }
+}
+
+impl FromStarlarkValue for UserMessageExpression {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
+        let dict = StarlarkDictRef::from_value(*value).ok_or_else(|| {
+            ExpressionError::StarlarkConversionError(
+                "UserMessageExpression: expected dict".into(),
+            )
+        })?;
+        let mut content = None;
+        let mut name = None;
+        for (k, v) in dict.iter() {
+            let key = <&str as UnpackValue>::unpack_value(k)
+                .map_err(|e| {
+                    ExpressionError::StarlarkConversionError(e.to_string())
+                })?
+                .ok_or_else(|| {
+                    ExpressionError::StarlarkConversionError(
+                        "UserMessageExpression: expected string key".into(),
+                    )
+                })?;
+            match key {
+                "content" => {
+                    content = Some(WithExpression::Value(
+                        RichContentExpression::from_starlark_value(&v)?,
+                    ))
+                }
+                "name" => {
+                    name = Some(WithExpression::Value(if v.is_none() {
+                        None
+                    } else {
+                        Some(String::from_starlark_value(&v)?)
+                    }));
+                }
+                _ => {}
+            }
+        }
+        Ok(UserMessageExpression {
+            content: content.ok_or_else(|| {
+                ExpressionError::StarlarkConversionError(
+                    "UserMessageExpression: missing content".into(),
+                )
+            })?,
+            name,
+        })
+    }
+}

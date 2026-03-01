@@ -46,11 +46,11 @@ pub struct AgentBase {
 
     /// Messages prepended to the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub prefix_messages: Option<Vec<super::completions::request::Message>>,
+    pub prefix_messages: Option<Vec<super::completions::message::Message>>,
 
     /// Messages appended after the user's prompt.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub suffix_messages: Option<Vec<super::completions::request::Message>>,
+    pub suffix_messages: Option<Vec<super::completions::message::Message>>,
 
     /// MCP servers the agent can connect to.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -154,7 +154,7 @@ impl AgentBase {
             Some(mut prefix_messages) => {
                 prefix_messages
                     .iter_mut()
-                    .for_each(super::completions::request::Message::prepare);
+                    .for_each(super::completions::message::Message::prepare);
                 Some(prefix_messages)
             }
             None => None,
@@ -164,7 +164,7 @@ impl AgentBase {
             Some(mut suffix_messages) => {
                 suffix_messages
                     .iter_mut()
-                    .for_each(super::completions::request::Message::prepare);
+                    .for_each(super::completions::message::Message::prepare);
                 Some(suffix_messages)
             }
             None => None,

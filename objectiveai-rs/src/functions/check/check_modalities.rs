@@ -5,7 +5,7 @@
 //! type declared in the input schema actually appears in at least one compiled
 //! task's messages or responses.
 
-use crate::agent::completions::request::{Message, RichContent, RichContentPart};
+use crate::agent::completions::message::{Message, RichContent, RichContentPart};
 use crate::functions::expression::InputSchema;
 use crate::functions::VectorCompletionTask;
 

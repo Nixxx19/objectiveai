@@ -6,7 +6,7 @@ pub struct ToolResponse {
     pub role: ToolRole,
     pub index: u64,
     #[serde(flatten)]
-    pub inner: agent::completions::request::ToolMessage,
+    pub inner: agent::completions::message::ToolMessage,
 }
 
 #[derive(
