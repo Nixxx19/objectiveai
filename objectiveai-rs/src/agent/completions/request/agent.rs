@@ -1,8 +1,8 @@
-//! Model specification for agent completion requests.
+//! Agent specification for agent completion requests.
 
 use serde::{Deserialize, Serialize};
 
-/// The model to use for agent completion.
+/// The agent to use for agent completion.
 ///
 /// Can be either:
 /// - An inline [`AgentBase`](super::super::super::AgentBase) configuration
@@ -13,7 +13,7 @@ use serde::{Deserialize, Serialize};
 /// ObjectiveAI's database from any successful use by anyone.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(untagged)]
-pub enum Model {
+pub enum Agent {
     /// The content-addressed ID of an Agent stored in ObjectiveAI's database.
     Id(String),
     /// An inline Agent configuration.

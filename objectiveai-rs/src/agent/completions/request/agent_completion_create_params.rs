@@ -13,11 +13,11 @@ pub struct AgentCompletionCreateParams {
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<super::Provider>,
-    /// The model to use (inline Agent or stored ID).
-    pub model: super::Model,
-    /// Alternative models to try if the primary model fails.
+    /// The agent to use (inline Agent or stored ID).
+    pub agent: super::Agent,
+    /// Alternative agents to try if the primary agent fails.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub models: Option<Vec<super::Model>>,
+    pub agents: Option<Vec<super::Agent>>,
     /// Number of top log probabilities to return per token.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub top_logprobs: Option<u64>,
