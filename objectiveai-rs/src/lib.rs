@@ -30,13 +30,12 @@
 //! - [`HttpClient`] - HTTP client for API requests
 //! - [`HttpError`] - HTTP error types
 
-pub mod auth;
 pub mod agent;
+pub mod auth;
 pub mod ensemble;
 pub mod error;
 pub mod functions;
 pub mod prefixed_uuid;
-pub mod upstream;
 pub mod vector;
 
 #[cfg(test)]
