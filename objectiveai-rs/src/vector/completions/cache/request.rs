@@ -19,18 +19,16 @@ impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
 
 #[derive(Debug, Clone, Serialize)]
 pub struct CacheVoteRequestRef<'a> {
-    pub model: &'a agent::completions::request::Model,
-    pub models: Option<&'a [agent::completions::request::Model]>,
+    pub agent: &'a agent::Agent,
+    pub agents: Option<&'a [agent::Agent]>,
     pub messages: &'a [agent::completions::message::Message],
-    pub tools: Option<&'a [agent::completions::request::Tool]>,
     pub responses: &'a [agent::completions::message::RichContent],
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CacheVoteRequestOwned {
-    pub model: agent::completions::request::Model,
-    pub models: Option<Vec<agent::completions::request::Model>>,
+    pub agent: agent::Agent,
+    pub agents: Option<Vec<agent::Agent>>,
     pub messages: Vec<agent::completions::message::Message>,
-    pub tools: Option<Vec<agent::completions::request::Tool>>,
     pub responses: Vec<agent::completions::message::RichContent>,
 }

@@ -45,9 +45,6 @@ pub struct VectorCompletionCreateParams {
     /// Whether to stream the response.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
-    /// Tools available (read-only context, not callable in vector completions).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<agent::completions::request::Tool>>,
     /// The possible responses the LLMs can vote for.
     pub responses: Vec<agent::completions::message::RichContent>,
 
