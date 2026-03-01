@@ -9,12 +9,10 @@ pub struct FunctionInventionRecursiveCreateParams {
     pub github_token: Option<String>,
     pub state: functions::inventions::ParamsState,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstreams: Option<Vec<crate::upstream::Upstream>>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
-    pub model: agent::completions::request::Model,
+    pub agent: agent::Agent,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub models: Option<Vec<agent::completions::request::Model>>,
+    pub agents: Option<Vec<agent::Agent>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub top_logprobs: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]

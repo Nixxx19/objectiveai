@@ -5,9 +5,6 @@ use serde::{Deserialize, Serialize};
 /// Parameters for creating a agent completion.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AgentCompletionCreateParams {
-    /// Available upstreams for this request
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstreams: Option<Vec<crate::upstream::Upstream>>,
     /// The conversation messages.
     pub messages: Vec<super::super::message::Message>,
     /// Provider routing preferences.
