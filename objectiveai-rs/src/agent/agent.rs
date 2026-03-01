@@ -18,6 +18,9 @@ use twox_hash::XxHash3_128;
 /// - Collections are sorted for deterministic ordering
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AgentBase {
+    /// The upstream providers to route requests through.
+    pub upstreams: Vec<super::Upstream>,
+
     /// The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).
     pub model: String,
 
@@ -109,6 +112,7 @@ pub struct AgentBase {
 impl Default for AgentBase {
     fn default() -> Self {
         Self {
+            upstreams: Vec::new(),
             model: String::new(),
             output_mode: super::OutputMode::default(),
             synthetic_reasoning: None,
@@ -280,6 +284,7 @@ impl AgentBase {
             }
             Ok(())
         }
+        super::upstream::validate::validate(&self.upstreams)?;
         if self.model.is_empty() {
             return Err("`model` string cannot be empty".to_string());
         }

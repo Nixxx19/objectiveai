@@ -34,6 +34,7 @@ mod provider;
 mod reasoning;
 pub mod response;
 mod stop;
+mod upstream;
 mod verbosity;
 
 pub use agent::*;
@@ -42,6 +43,7 @@ pub use output_mode::*;
 pub use provider::*;
 pub use reasoning::*;
 pub use stop::*;
+pub use upstream::*;
 pub use verbosity::*;
 
 #[cfg(feature = "http")]
