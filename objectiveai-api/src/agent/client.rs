@@ -1,96 +1,96 @@
-//! Ensemble LLM client for listing, retrieving, and fetching Ensemble LLMs.
+//! Agent client for listing, retrieving, and fetching Agents.
 
 use crate::ctx;
 use std::sync::Arc;
 
-/// Client for Ensemble LLM operations.
+/// Client for Agent operations.
 ///
-/// Combines a caching fetcher for Ensemble LLM definitions with a retrieval
+/// Combines a caching fetcher for Agent definitions with a retrieval
 /// client for listing and usage statistics.
-pub struct Client<CTXEXT, FENSLLM, RTRVL> {
-    /// Caching fetcher for Ensemble LLM definitions.
-    pub ensemble_llm_fetcher: Arc<super::fetcher::CachingFetcher<CTXEXT, FENSLLM>>,
-    /// Client for listing Ensemble LLMs and getting usage.
+pub struct Client<CTXEXT, FAGENT, RTRVL> {
+    /// Caching fetcher for Agent definitions.
+    pub agent_fetcher: Arc<super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
+    /// Client for listing Agents and getting usage.
     pub retrieval_client: Arc<RTRVL>,
     /// Phantom data for the context extension type.
     pub _ctx_ext: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<CTXEXT, FENSLLM, RTRVL> Client<CTXEXT, FENSLLM, RTRVL> {
-    /// Creates a new Ensemble LLM client.
+impl<CTXEXT, FAGENT, RTRVL> Client<CTXEXT, FAGENT, RTRVL> {
+    /// Creates a new Agent client.
     pub fn new(
-        ensemble_llm_fetcher: Arc<
+        agent_fetcher: Arc<
             super::fetcher::CachingFetcher<
                 CTXEXT,
-                FENSLLM,
+                FAGENT,
             >,
         >,
         retrieval_client: Arc<RTRVL>,
     ) -> Self {
         Self {
-            ensemble_llm_fetcher,
+            agent_fetcher,
             retrieval_client,
             _ctx_ext: std::marker::PhantomData,
         }
     }
 }
 
-impl<CTXEXT, FENSLLM, RTRVL> Client<CTXEXT, FENSLLM, RTRVL>
+impl<CTXEXT, FAGENT, RTRVL> Client<CTXEXT, FAGENT, RTRVL>
 where
     CTXEXT: Send + Sync + 'static,
-    FENSLLM: super::fetcher::Fetcher<CTXEXT>
+    FAGENT: super::fetcher::Fetcher<CTXEXT>
         + Send
         + Sync
         + 'static,
     RTRVL: super::retrieval_client::Client<CTXEXT> + Send + Sync + 'static,
 {
-    /// Lists all Ensemble LLMs.
+    /// Lists all Agents.
     pub async fn list(
         &self,
         ctx: ctx::Context<CTXEXT>,
     ) -> Result<
-        objectiveai::ensemble_llm::response::ListEnsembleLlm,
+        objectiveai::agent::response::ListAgent,
         objectiveai::error::ResponseError,
     > {
         self.retrieval_client.list(ctx).await
     }
 
-    /// Retrieves an Ensemble LLM by its ID.
+    /// Retrieves an Agent by its ID.
     ///
-    /// Returns a 404 error if the Ensemble LLM is not found.
+    /// Returns a 404 error if the Agent is not found.
     pub async fn get(
         &self,
         ctx: ctx::Context<CTXEXT>,
         id: &str,
     ) -> Result<
-        objectiveai::ensemble_llm::response::GetEnsembleLlm,
+        objectiveai::agent::response::GetAgent,
         objectiveai::error::ResponseError,
     > {
-        self.ensemble_llm_fetcher
+        self.agent_fetcher
             .fetch(ctx, id)
             .await?
             .ok_or_else(|| objectiveai::error::ResponseError {
                 code: 404,
                 message: serde_json::json!({
-                    "kind": "ensemble_llm",
-                    "error": "Ensemble LLM not found"
+                    "kind": "agent",
+                    "error": "Agent not found"
                 }),
             })
             .map(|(inner, created)| {
-                objectiveai::ensemble_llm::response::GetEnsembleLlm {
+                objectiveai::agent::response::GetAgent {
                     created,
                     inner,
                 }
             })
     }
 
-    /// Retrieves usage statistics for an Ensemble LLM.
+    /// Retrieves usage statistics for an Agent.
     pub async fn get_usage(
         &self,
         ctx: ctx::Context<CTXEXT>,
         id: &str,
     ) -> Result<
-        objectiveai::ensemble_llm::response::UsageEnsembleLlm,
+        objectiveai::agent::response::UsageAgent,
         objectiveai::error::ResponseError,
     > {
         self.retrieval_client.get_usage(ctx, id).await

@@ -1,4 +1,4 @@
-//! Fetchers for retrieving Ensemble LLM definitions.
+//! Fetchers for retrieving Agent definitions.
 
 mod caching_fetcher;
 mod fetcher;

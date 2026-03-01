@@ -1,24 +1,24 @@
-//! Caching wrapper for Ensemble LLM fetchers.
+//! Caching wrapper for Agent fetchers.
 
 use crate::ctx;
 use futures::FutureExt;
 use std::sync::Arc;
 
-/// Wraps an Ensemble LLM fetcher with per-request deduplication caching.
+/// Wraps an Agent fetcher with per-request deduplication caching.
 ///
-/// When multiple parts of a request need the same Ensemble LLM, this fetcher
+/// When multiple parts of a request need the same Agent, this fetcher
 /// ensures only one actual fetch is performed. Subsequent requests for the
-/// same Ensemble LLM ID within the same request context share the result.
+/// same Agent ID within the same request context share the result.
 #[derive(Debug, Clone)]
-pub struct CachingFetcher<CTXEXT, FENSLLM> {
+pub struct CachingFetcher<CTXEXT, FAGENT> {
     /// The underlying fetcher to delegate to on cache miss.
-    pub inner: Arc<FENSLLM>,
+    pub inner: Arc<FAGENT>,
     _marker: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<CTXEXT, FENSLLM> CachingFetcher<CTXEXT, FENSLLM> {
+impl<CTXEXT, FAGENT> CachingFetcher<CTXEXT, FAGENT> {
     /// Creates a new caching fetcher wrapping the given inner fetcher.
-    pub fn new(inner: Arc<FENSLLM>) -> Self {
+    pub fn new(inner: Arc<FAGENT>) -> Self {
         Self {
             inner,
             _marker: std::marker::PhantomData,
@@ -26,12 +26,12 @@ impl<CTXEXT, FENSLLM> CachingFetcher<CTXEXT, FENSLLM> {
     }
 }
 
-impl<CTXEXT, FENSLLM> CachingFetcher<CTXEXT, FENSLLM>
+impl<CTXEXT, FAGENT> CachingFetcher<CTXEXT, FAGENT>
 where
     CTXEXT: Send + Sync + 'static,
-    FENSLLM: super::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FAGENT: super::Fetcher<CTXEXT> + Send + Sync + 'static,
 {
-    /// Spawns concurrent fetch tasks for multiple Ensemble LLM IDs.
+    /// Spawns concurrent fetch tasks for multiple Agent IDs.
     ///
     /// This allows pre-warming the cache when the set of required IDs is known
     /// ahead of time, reducing latency by parallelizing the fetches.
@@ -41,7 +41,7 @@ where
         ids: impl Iterator<Item = &'id str>,
     ) {
         for id in ids {
-            ctx.ensemble_llm_cache
+            ctx.agent_cache
                 .entry(id.to_owned())
                 .or_insert_with(|| {
                     let (tx, rx) = tokio::sync::oneshot::channel();
@@ -57,7 +57,7 @@ where
         }
     }
 
-    /// Fetches an Ensemble LLM, using the request-scoped cache for deduplication.
+    /// Fetches an Agent, using the request-scoped cache for deduplication.
     ///
     /// If another fetch for the same ID is already in progress within this
     /// request context, waits for and shares that result instead of fetching again.
@@ -66,13 +66,13 @@ where
         ctx: ctx::Context<CTXEXT>,
         id: &str,
     ) -> Result<
-        Option<(objectiveai::ensemble_llm::EnsembleLlm, u64)>,
+        Option<(objectiveai::agent::Agent, u64)>,
         objectiveai::error::ResponseError,
     > {
         // Clone the shared future while holding the lock, then release the lock before awaiting.
         // This prevents deadlocks when multiple concurrent fetches hash to the same DashMap shard.
         let shared = ctx
-            .ensemble_llm_cache
+            .agent_cache
             .entry(id.to_owned())
             .or_insert_with(|| {
                 let (tx, rx) = tokio::sync::oneshot::channel();

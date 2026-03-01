@@ -1,4 +1,4 @@
-//! ObjectiveAI Ensemble LLM retrieval client implementation.
+//! ObjectiveAI Agent retrieval client implementation.
 
 use crate::ctx;
 use std::sync::Arc;
@@ -25,10 +25,10 @@ where
         &self,
         _ctx: ctx::Context<CTXEXT>,
     ) -> Result<
-        objectiveai::ensemble_llm::response::ListEnsembleLlm,
+        objectiveai::agent::response::ListAgent,
         objectiveai::error::ResponseError,
     > {
-        objectiveai::ensemble_llm::list_ensemble_llms(&self.client)
+        objectiveai::agent::list_agents(&self.client)
             .await
             .map_err(|e| objectiveai::error::ResponseError::from(&e))
     }
@@ -38,10 +38,10 @@ where
         _ctx: ctx::Context<CTXEXT>,
         id: &str,
     ) -> Result<
-        objectiveai::ensemble_llm::response::UsageEnsembleLlm,
+        objectiveai::agent::response::UsageAgent,
         objectiveai::error::ResponseError,
     > {
-        objectiveai::ensemble_llm::get_ensemble_llm_usage(&self.client, id)
+        objectiveai::agent::get_agent_usage(&self.client, id)
             .await
             .map_err(|e| objectiveai::error::ResponseError::from(&e))
     }

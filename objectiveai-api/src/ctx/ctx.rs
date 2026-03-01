@@ -12,7 +12,7 @@ use std::sync::Arc;
 /// # Caches
 ///
 /// The caches deduplicate concurrent fetches for the same resource within a request.
-/// When multiple parts of a request need the same ensemble or ensemble LLM,
+/// When multiple parts of a request need the same ensemble or agent,
 /// only one fetch is performed and the result is shared.
 #[derive(Debug)]
 pub struct Context<CTXEXT> {
@@ -34,14 +34,14 @@ pub struct Context<CTXEXT> {
             >,
         >,
     >,
-    /// Cache for ensemble LLM fetches, keyed by ensemble LLM ID.
-    pub ensemble_llm_cache: Arc<
+    /// Cache for agent fetches, keyed by agent ID.
+    pub agent_cache: Arc<
         DashMap<
             String,
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
-                        Option<(objectiveai::ensemble_llm::EnsembleLlm, u64)>,
+                        Option<(objectiveai::agent::Agent, u64)>,
                         objectiveai::error::ResponseError,
                     >,
                 >,
@@ -98,7 +98,7 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
             ext: self.ext.clone(),
             cost_multiplier: self.cost_multiplier,
             ensemble_cache: self.ensemble_cache.clone(),
-            ensemble_llm_cache: self.ensemble_llm_cache.clone(),
+            agent_cache: self.agent_cache.clone(),
             latest_commit_cache: self.latest_commit_cache.clone(),
             function_cache: self.function_cache.clone(),
             profile_cache: self.profile_cache.clone(),
@@ -113,7 +113,7 @@ impl<CTXEXT> Context<CTXEXT> {
             ext,
             cost_multiplier,
             ensemble_cache: Arc::new(DashMap::new()),
-            ensemble_llm_cache: Arc::new(DashMap::new()),
+            agent_cache: Arc::new(DashMap::new()),
             latest_commit_cache: Arc::new(DashMap::new()),
             function_cache: Arc::new(DashMap::new()),
             profile_cache: Arc::new(DashMap::new()),

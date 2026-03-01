@@ -9,7 +9,7 @@
 //! - [`chat`] - Chat completions with Ensemble LLMs
 //! - [`ctx`] - Request context and extensions
 //! - [`ensemble`] - Ensemble management and retrieval
-//! - [`ensemble_llm`] - Ensemble LLM management and retrieval
+//! - [`agent`] - Agent management and retrieval
 //! - [`error`] - Error response handling
 //! - [`functions`] - Function execution and profile management
 //! - [`util`] - Utility types for streaming and indexing
@@ -23,8 +23,8 @@ pub mod chat;
 pub mod ctx;
 /// Ensemble management, fetching, and retrieval.
 pub mod ensemble;
-/// Ensemble LLM management, fetching, and retrieval.
-pub mod ensemble_llm;
+/// Agent management, fetching, and retrieval.
+pub mod agent;
 /// Error response handling and conversion.
 pub mod error;
 /// Function execution, profile management, and computations.
