@@ -16,27 +16,27 @@
 //!
 //! ```
 //! use objectiveai::ensemble::{EnsembleBase, Ensemble};
-//! use objectiveai::agent::{AgentBase, AgentBaseWithFallbacksAndCount, OutputMode};
+//! use objectiveai::agent::{AgentBase, AgentBaseWithFallbacksAndCount};
+//! use objectiveai::agent::openrouter;
 //! use objectiveai::agent::completions::message::{Message, SystemMessage, SimpleContent};
 //!
 //! let ensemble_base = EnsembleBase {
-//!     llms: vec![
+//!     agents: vec![
 //!         // A simple GPT-4 configuration
 //!         AgentBaseWithFallbacksAndCount {
 //!             count: 1,
-//!             inner: AgentBase {
+//!             inner: AgentBase::Openrouter(openrouter::AgentBase {
 //!                 model: "openai/gpt-4o".to_string(),
-//!                 output_mode: OutputMode::Instruction,
 //!                 ..Default::default()
-//!             },
+//!             }),
 //!             fallbacks: None,
 //!         },
 //!         // Claude with a system prompt
 //!         AgentBaseWithFallbacksAndCount {
 //!             count: 1,
-//!             inner: AgentBase {
+//!             inner: AgentBase::Openrouter(openrouter::AgentBase {
 //!                 model: "anthropic/claude-3.5-sonnet".to_string(),
-//!                 output_mode: OutputMode::JsonSchema,
+//!                 output_mode: openrouter::OutputMode::JsonSchema,
 //!                 prefix_messages: Some(vec![
 //!                     Message::System(SystemMessage {
 //!                         content: SimpleContent::Text("You are a careful evaluator.".to_string()),
@@ -44,18 +44,18 @@
 //!                     }),
 //!                 ]),
 //!                 ..Default::default()
-//!             },
+//!             }),
 //!             fallbacks: None,
 //!         },
 //!         // Gemini with lower temperature
 //!         AgentBaseWithFallbacksAndCount {
 //!             count: 2, // Include 2 instances
-//!             inner: AgentBase {
+//!             inner: AgentBase::Openrouter(openrouter::AgentBase {
 //!                 model: "google/gemini-2.0-flash-001".to_string(),
-//!                 output_mode: OutputMode::ToolCall,
+//!                 output_mode: openrouter::OutputMode::ToolCall,
 //!                 temperature: Some(0.3),
 //!                 ..Default::default()
-//!             },
+//!             }),
 //!             fallbacks: None,
 //!         },
 //!     ],

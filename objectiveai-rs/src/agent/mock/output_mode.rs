@@ -13,12 +13,13 @@ use serde::{Deserialize, Serialize};
 ///
 /// **Note:** This setting is only relevant for vector completions and is
 /// completely ignored for agent completions.
-#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Hash)]
 #[serde(rename_all = "snake_case")]
 pub enum OutputMode {
     /// The model is instructed via the prompt to output a specific key.
     ///
     /// This is the default and most widely supported mode.
+    #[default]
     Instruction,
     /// A JSON schema response format is used with an enum of possible keys.
     ///

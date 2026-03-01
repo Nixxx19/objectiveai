@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
 
 /// The base configuration for a Mock Agent (without computed ID).
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct AgentBase {
     /// The upstream provider marker.
     pub upstream: super::Upstream,
