@@ -20,9 +20,7 @@ pub use tool_message::*;
 pub use user_message::*;
 
 use crate::functions;
-use functions::expression::{
-    ExpressionError, FromStarlarkValue, WithExpression,
-};
+use functions::expression::{ExpressionError, FromStarlarkValue};
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
@@ -246,9 +244,7 @@ impl FromStarlarkValue for MessageExpression {
     }
 }
 
-crate::functions::expression::impl_from_special_unsupported!(
-    MessageExpression,
-);
+crate::functions::expression::impl_from_special_unsupported!(MessageExpression,);
 
 impl crate::functions::expression::FromSpecial
     for Vec<crate::functions::expression::WithExpression<MessageExpression>>
