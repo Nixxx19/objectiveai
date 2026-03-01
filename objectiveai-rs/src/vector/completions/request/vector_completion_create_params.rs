@@ -1,6 +1,7 @@
 //! Vector completion request parameters.
 
 use crate::agent;
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 /// Parameters for creating a vector completion.
@@ -44,6 +45,11 @@ pub struct VectorCompletionCreateParams {
     pub stream: Option<bool>,
     /// The possible responses the LLMs can vote for.
     pub responses: Vec<agent::completions::message::RichContent>,
+
+    // --- MCP server authorization ---
+    /// Map from MCP server URL to authorization header value.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mcp_server_authorization: Option<IndexMap<String, String>>,
 
     // --- Retry configuration ---
     /// Maximum elapsed time (ms) for exponential backoff retries.

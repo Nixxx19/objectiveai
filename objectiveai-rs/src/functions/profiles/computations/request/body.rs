@@ -1,4 +1,5 @@
 use crate::{agent, functions, vector};
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -32,6 +33,11 @@ pub struct FunctionRemoteRequestBody {
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
+
+    // MCP server authorization
+    /// Map from MCP server URL to authorization header value.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mcp_server_authorization: Option<IndexMap<String, String>>,
 
     // retry config
     #[serde(skip_serializing_if = "Option::is_none")]
