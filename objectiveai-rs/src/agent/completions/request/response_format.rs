@@ -12,11 +12,23 @@ pub enum ResponseFormat {
     /// Response must be valid JSON.
     JsonObject,
     /// Response must conform to a JSON schema.
-    JsonSchema { json_schema: JsonSchema },
+    JsonSchema {
+        /// The JSON Schema definition.
+        schema: IndexMap<String, serde_json::Value>,
+    },
     /// Response must conform to a grammar.
     Grammar { grammar: String },
     /// Response must be valid Python code.
     Python,
+    /// The final assistant message will contain this tool call
+    ToolCall {
+        /// The name of the tool.
+        name: String,
+        /// A description of the tool.
+        description: String,
+        /// The JSON Schema definition.
+        schema: IndexMap<String, serde_json::Value>,
+    },
 }
 
 /// A map from agent ID to response format, allowing per-agent configuration.
@@ -30,20 +42,4 @@ pub enum ResponseFormatParam {
     Single(ResponseFormat),
     /// Per-agent response formats, keyed by agent ID.
     PerAgent(PerAgentResponseFormat),
-}
-
-/// A JSON schema for structured output.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct JsonSchema {
-    /// The name of the schema.
-    pub name: String,
-    /// A description of the schema's purpose.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub description: Option<String>,
-    /// The JSON Schema definition.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub schema: Option<serde_json::Value>,
-    /// Whether to enforce strict schema validation.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub strict: Option<bool>,
 }
