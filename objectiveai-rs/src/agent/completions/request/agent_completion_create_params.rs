@@ -18,7 +18,7 @@ pub struct AgentCompletionCreateParams {
     pub agents: Option<Vec<super::Agent>>,
     /// Output format constraints (text, JSON, or JSON schema).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub response_format: Option<super::ResponseFormat>,
+    pub response_format: Option<super::ResponseFormatParam>,
     /// Random seed for deterministic generation.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,
