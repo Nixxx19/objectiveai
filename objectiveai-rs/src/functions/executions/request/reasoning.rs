@@ -9,8 +9,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Reasoning {
     /// The primary agent to use for generating reasoning summaries.
-    pub agent: agent::Agent,
+    pub agent: agent::completions::request::Agent,
     /// Fallback agents tried in order if the primary is rate-limited or errors.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub agents: Option<Vec<agent::Agent>>,
+    pub agents: Option<Vec<agent::completions::request::Agent>>,
 }

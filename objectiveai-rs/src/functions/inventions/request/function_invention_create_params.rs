@@ -13,9 +13,9 @@ pub struct FunctionInventionCreateParams {
     pub state: functions::inventions::ParamsState,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,
-    pub agent: agent::Agent,
+    pub agent: agent::completions::request::Agent,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub agents: Option<Vec<agent::Agent>>,
+    pub agents: Option<Vec<agent::completions::request::Agent>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub top_logprobs: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
