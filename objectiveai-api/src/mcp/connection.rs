@@ -67,6 +67,20 @@ impl Connection {
         }
     }
 
+    /// Creates an exponential backoff configuration from the connection's fields.
+    fn backoff(&self) -> backoff::ExponentialBackoff {
+        backoff::ExponentialBackoff {
+            current_interval: self.backoff_current_interval,
+            initial_interval: self.backoff_initial_interval,
+            randomization_factor: self.backoff_randomization_factor,
+            multiplier: self.backoff_multiplier,
+            max_interval: self.backoff_max_interval,
+            start_time: std::time::Instant::now(),
+            max_elapsed_time: Some(self.backoff_max_elapsed_time),
+            clock: backoff::SystemClock::default(),
+        }
+    }
+
     /// Builds a POST request with all required headers and the call timeout.
     fn post(&self) -> reqwest::RequestBuilder {
         let mut request = self
@@ -92,7 +106,10 @@ impl Connection {
         request
     }
 
-    /// Sends a JSON-RPC request and deserializes the result.
+    /// Sends a JSON-RPC request with exponential backoff retries.
+    ///
+    /// Network errors and non-success HTTP status codes are retried.
+    /// Session expiration (404) and JSON-RPC errors are permanent failures.
     async fn rpc<P: serde::Serialize, R: serde::de::DeserializeOwned>(
         &self,
         method: &str,
@@ -106,36 +123,49 @@ impl Connection {
             "params": params,
         });
 
-        let response = self
-            .post()
-            .json(&body)
-            .send()
-            .await
-            .map_err(super::Error::Request)?;
+        backoff::future::retry(self.backoff(), || async {
+            let response = self
+                .post()
+                .json(&body)
+                .send()
+                .await
+                .map_err(|e| {
+                    backoff::Error::transient(super::Error::Request(e))
+                })?;
 
-        if response.status() == reqwest::StatusCode::NOT_FOUND {
-            return Err(super::Error::SessionExpired);
-        }
-        if !response.status().is_success() {
-            let code = response.status();
-            let body = response.text().await.unwrap_or_default();
-            return Err(super::Error::BadStatus { code, body });
-        }
+            if response.status() == reqwest::StatusCode::NOT_FOUND {
+                return Err(backoff::Error::permanent(
+                    super::Error::SessionExpired,
+                ));
+            }
+            if !response.status().is_success() {
+                let code = response.status();
+                let body = response.text().await.unwrap_or_default();
+                return Err(backoff::Error::transient(
+                    super::Error::BadStatus { code, body },
+                ));
+            }
 
-        let rpc_response: JsonRpcResponse<R> =
-            response.json().await.map_err(super::Error::Request)?;
+            let rpc_response: JsonRpcResponse<R> =
+                response.json().await.map_err(|e| {
+                    backoff::Error::transient(super::Error::Request(e))
+                })?;
 
-        match rpc_response {
-            JsonRpcResponse::Success { result, .. } => Ok(result),
-            JsonRpcResponse::Error { error, .. } => Err(super::Error::JsonRpc {
-                code: error.code,
-                message: error.message,
-                data: error.data,
-            }),
-        }
+            match rpc_response {
+                JsonRpcResponse::Success { result, .. } => Ok(result),
+                JsonRpcResponse::Error { error, .. } => {
+                    Err(backoff::Error::permanent(super::Error::JsonRpc {
+                        code: error.code,
+                        message: error.message,
+                        data: error.data,
+                    }))
+                }
+            }
+        })
+        .await
     }
 
-    /// Sends a JSON-RPC notification (no response expected).
+    /// Sends a JSON-RPC notification (no response expected, no retries).
     pub(super) async fn notify<P: serde::Serialize>(
         &self,
         method: &str,

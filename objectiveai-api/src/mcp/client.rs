@@ -18,6 +18,8 @@ pub struct Client {
     pub x_title: Option<String>,
     /// Referer header value.
     pub referer: Option<String>,
+    /// Timeout for the initial connection (initialize request).
+    pub connect_timeout: Duration,
 
     /// Current backoff interval for retry logic.
     pub backoff_current_interval: Duration,
@@ -31,8 +33,6 @@ pub struct Client {
     pub backoff_max_interval: Duration,
     /// Maximum total time to spend on retries.
     pub backoff_max_elapsed_time: Duration,
-    /// Timeout for the initial connection (initialize request).
-    pub connect_timeout: Duration,
     /// Timeout for individual RPC calls after connection is established.
     pub call_timeout: Duration,
 }
@@ -44,13 +44,13 @@ impl Client {
         user_agent: Option<String>,
         x_title: Option<String>,
         referer: Option<String>,
+        connect_timeout: Duration,
         backoff_current_interval: Duration,
         backoff_initial_interval: Duration,
         backoff_randomization_factor: f64,
         backoff_multiplier: f64,
         backoff_max_interval: Duration,
         backoff_max_elapsed_time: Duration,
-        connect_timeout: Duration,
         call_timeout: Duration,
     ) -> Self {
         Self {
@@ -58,13 +58,13 @@ impl Client {
             user_agent,
             x_title,
             referer,
+            connect_timeout,
             backoff_current_interval,
             backoff_initial_interval,
             backoff_randomization_factor,
             backoff_multiplier,
             backoff_max_interval,
             backoff_max_elapsed_time,
-            connect_timeout,
             call_timeout,
         }
     }
@@ -114,7 +114,8 @@ impl Client {
             request = request.header("Referer", referer);
         }
 
-        let response = request.send().await.map_err(super::Error::Connection)?;
+        let response =
+            request.send().await.map_err(super::Error::Connection)?;
 
         if !response.status().is_success() {
             let code = response.status();
@@ -131,8 +132,9 @@ impl Client {
             .ok_or(super::Error::NoSessionId)?;
 
         // Parse the initialize result to confirm success.
-        let rpc_response: super::connection::JsonRpcResponse<serde_json::Value> =
-            response.json().await.map_err(super::Error::Request)?;
+        let rpc_response: super::connection::JsonRpcResponse<
+            serde_json::Value,
+        > = response.json().await.map_err(super::Error::Request)?;
 
         if let super::connection::JsonRpcResponse::Error { error, .. } =
             rpc_response
@@ -162,7 +164,9 @@ impl Client {
         ));
 
         // Send the initialized notification.
-        connection.notify("initialized", &serde_json::json!({})).await?;
+        connection
+            .notify("initialized", &serde_json::json!({}))
+            .await?;
 
         Ok(connection)
     }
