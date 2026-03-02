@@ -16,9 +16,6 @@ pub struct AgentCompletionCreateParams {
     /// Alternative agents to try if the primary agent fails.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agents: Option<Vec<super::Agent>>,
-    /// Number of top log probabilities to return per token.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub top_logprobs: Option<u64>,
     /// Output format constraints (text, JSON, or JSON schema).
     #[serde(skip_serializing_if = "Option::is_none")]
     pub response_format: Option<super::ResponseFormat>,
