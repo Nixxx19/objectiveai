@@ -39,7 +39,9 @@ impl std::default::Default for OutputMode {
 impl From<super::openrouter::OutputMode> for OutputMode {
     fn from(mode: super::openrouter::OutputMode) -> Self {
         match mode {
-            super::openrouter::OutputMode::Instruction => OutputMode::Instruction,
+            super::openrouter::OutputMode::Instruction => {
+                OutputMode::Instruction
+            }
             super::openrouter::OutputMode::JsonSchema => OutputMode::JsonSchema,
             super::openrouter::OutputMode::ToolCall => OutputMode::ToolCall,
         }
@@ -49,8 +51,9 @@ impl From<super::openrouter::OutputMode> for OutputMode {
 impl From<super::claude_agent_sdk::OutputMode> for OutputMode {
     fn from(mode: super::claude_agent_sdk::OutputMode) -> Self {
         match mode {
-            super::claude_agent_sdk::OutputMode::Instruction => OutputMode::Instruction,
-            super::claude_agent_sdk::OutputMode::ToolCall => OutputMode::ToolCall,
+            super::claude_agent_sdk::OutputMode::Instruction => {
+                OutputMode::Instruction
+            }
         }
     }
 }
