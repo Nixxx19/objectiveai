@@ -167,7 +167,7 @@ impl ChatCompletionCreateParams {
                     source: ToolSource::Mcp {
                         url: connection.url.clone(),
                     },
-                    tool: mcp_tool_to_openrouter(tool),
+                    tool: super::Tool::new_from_mcp(tool),
                 });
             }
         }
@@ -178,7 +178,7 @@ impl ChatCompletionCreateParams {
                 sourced_tools.push(SourcedTool {
                     name: tool.name.to_string(),
                     source: ToolSource::Invention,
-                    tool: invention_tool_to_openrouter(tool),
+                    tool: super::Tool::new_from_invention(tool),
                 });
             }
         }
@@ -288,59 +288,6 @@ fn resolve_response_format(
         objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(map) => {
             map.get(&agent.id).cloned()
         }
-    }
-}
-
-/// Converts an MCP tool to an OpenRouter function tool.
-fn mcp_tool_to_openrouter(tool: &crate::mcp::tool::Tool) -> super::Tool {
-    let mut map = IndexMap::new();
-    map.insert(
-        "type".to_string(),
-        serde_json::Value::String("object".to_string()),
-    );
-    if let Some(props) = &tool.input_schema.properties {
-        map.insert(
-            "properties".to_string(),
-            serde_json::Value::Object(
-                props.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
-            ),
-        );
-    }
-    if let Some(req) = &tool.input_schema.required {
-        map.insert(
-            "required".to_string(),
-            serde_json::Value::Array(
-                req.iter()
-                    .map(|s| serde_json::Value::String(s.clone()))
-                    .collect(),
-            ),
-        );
-    }
-    for (k, v) in &tool.input_schema.extra {
-        map.insert(k.clone(), v.clone());
-    }
-
-    super::Tool::Function {
-        function: super::FunctionTool {
-            name: tool.name.clone(),
-            description: tool.description.clone(),
-            parameters: Some(map),
-            strict: None,
-        },
-    }
-}
-
-/// Converts an invention tool to an OpenRouter function tool.
-fn invention_tool_to_openrouter(
-    tool: &objectiveai::functions::inventions::InventionTool,
-) -> super::Tool {
-    super::Tool::Function {
-        function: super::FunctionTool {
-            name: tool.name.to_string(),
-            description: Some(tool.description.to_string()),
-            parameters: Some(tool.parameters.clone()),
-            strict: None,
-        },
     }
 }
 
