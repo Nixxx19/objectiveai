@@ -35,6 +35,7 @@ pub mod auth;
 pub mod ensemble;
 pub mod error;
 pub mod functions;
+pub mod json_schema;
 pub mod prefixed_uuid;
 pub mod vector;
 

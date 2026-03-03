@@ -25,10 +25,9 @@ impl AlphaScalarLeafState {
     pub fn read_spec_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
             "ReadSpec",
             "Read Spec",
-            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -42,10 +41,9 @@ impl AlphaScalarLeafState {
     pub fn read_essay_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
             "ReadEssay",
             "Read Essay",
-            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -62,26 +60,40 @@ impl AlphaScalarLeafState {
     pub fn write_essay_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::schema::EssayObject>(
             "WriteEssay",
             "Write Essay",
-            crate::functions::inventions::InventionToolArgsType::String,
             {
                 let state = Arc::clone(this);
                 move |args| {
-                    let essay = match args {
-                        serde_json::Value::String(essay) => essay,
-                        _ => {
-                            return Err(
-                                "Invalid argument, expected string".to_string()
-                            );
+                    let args_str = match serde_json::to_string(&args) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e
+                            ));
                         }
                     };
-                    if essay.trim().len() == 0 {
+                    let parsed = match serde_path_to_error::deserialize::<
+                        _,
+                        crate::functions::inventions::schema::EssayObject,
+                    >(
+                        &mut serde_json::Deserializer::from_str(&args_str),
+                    ) {
+                        Ok(o) => o,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e,
+                            ));
+                        }
+                    };
+                    if parsed.essay.trim().len() == 0 {
                         return Err("Essay cannot be empty".to_string());
                     }
                     let mut state = state.lock().unwrap();
-                    state.essay = Some(essay);
+                    state.essay = Some(parsed.essay);
                     Ok("Ok".to_string())
                 }
             },
@@ -105,10 +117,9 @@ impl AlphaScalarLeafState {
     pub fn read_input_schema_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
             "ReadInputSchema",
             "Read Input Schema",
-            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -129,10 +140,9 @@ impl AlphaScalarLeafState {
     pub fn write_input_schema_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::AnyObjectJsonSchema>(
             "WriteInputSchema",
             "Write Input Schema",
-            crate::functions::inventions::InventionToolArgsType::Object,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -203,10 +213,9 @@ impl AlphaScalarLeafState {
     pub fn read_essay_tasks_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
             "ReadEssayTasks",
             "Read Essay Tasks",
-            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -225,26 +234,40 @@ impl AlphaScalarLeafState {
     pub fn write_essay_tasks_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::schema::EssayTasksObject>(
             "WriteEssayTasks",
             "Write Essay Tasks",
-            crate::functions::inventions::InventionToolArgsType::String,
             {
                 let state = Arc::clone(this);
                 move |args| {
-                    let essay_tasks = match args {
-                        serde_json::Value::String(essay_tasks) => essay_tasks,
-                        _ => {
-                            return Err(
-                                "Invalid argument, expected string".to_string()
-                            );
+                    let args_str = match serde_json::to_string(&args) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e
+                            ));
                         }
                     };
-                    if essay_tasks.trim().len() == 0 {
+                    let parsed = match serde_path_to_error::deserialize::<
+                        _,
+                        crate::functions::inventions::schema::EssayTasksObject,
+                    >(
+                        &mut serde_json::Deserializer::from_str(&args_str),
+                    ) {
+                        Ok(o) => o,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e,
+                            ));
+                        }
+                    };
+                    if parsed.essay_tasks.trim().len() == 0 {
                         return Err("Essay tasks cannot be empty".to_string());
                     }
                     let mut state = state.lock().unwrap();
-                    state.essay_tasks = Some(essay_tasks);
+                    state.essay_tasks = Some(parsed.essay_tasks);
                     Ok("Ok".to_string())
                 }
             },
@@ -268,10 +291,9 @@ impl AlphaScalarLeafState {
     pub fn read_tasks_length_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
             "ReadTasksLength",
             "Read Tasks Length",
-            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -288,30 +310,36 @@ impl AlphaScalarLeafState {
     pub fn read_task_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::schema::IndexObject>(
             "ReadTask",
             "Read Task by index",
-            crate::functions::inventions::InventionToolArgsType::Number,
             {
                 let state = Arc::clone(this);
                 move |args| {
-                    let index = match args {
-                        serde_json::Value::Number(n) => {
-                            if let Some(u) = n.as_u64() {
-                                u as usize
-                            } else {
-                                return Err(
-                                    "Invalid argument, expected non-negative integer"
-                                        .to_string()
-                                );
-                            }
-                        }
-                        _ => {
-                            return Err(
-                                "Invalid argument, expected number".to_string()
-                            );
+                    let args_str = match serde_json::to_string(&args) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e
+                            ));
                         }
                     };
+                    let parsed = match serde_path_to_error::deserialize::<
+                        _,
+                        crate::functions::inventions::schema::IndexObject,
+                    >(
+                        &mut serde_json::Deserializer::from_str(&args_str),
+                    ) {
+                        Ok(o) => o,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e,
+                            ));
+                        }
+                    };
+                    let index = parsed.index as usize;
                     let state = state.lock().unwrap();
                     match &state.tasks {
                         Some(tasks) => {
@@ -332,30 +360,36 @@ impl AlphaScalarLeafState {
     pub fn delete_task_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::schema::IndexObject>(
             "DeleteTask",
             "Delete Task by index",
-            crate::functions::inventions::InventionToolArgsType::Number,
             {
                 let state = Arc::clone(this);
                 move |args| {
-                    let index = match args {
-                        serde_json::Value::Number(n) => {
-                            if let Some(u) = n.as_u64() {
-                                u as usize
-                            } else {
-                                return Err(
-                                    "Invalid argument, expected non-negative integer"
-                                        .to_string()
-                                );
-                            }
-                        }
-                        _ => {
-                            return Err(
-                                "Invalid argument, expected number".to_string()
-                            );
+                    let args_str = match serde_json::to_string(&args) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e
+                            ));
                         }
                     };
+                    let parsed = match serde_path_to_error::deserialize::<
+                        _,
+                        crate::functions::inventions::schema::IndexObject,
+                    >(
+                        &mut serde_json::Deserializer::from_str(&args_str),
+                    ) {
+                        Ok(o) => o,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e,
+                            ));
+                        }
+                    };
+                    let index = parsed.index as usize;
                     let mut state = state.lock().unwrap();
                     match &mut state.tasks {
                         Some(tasks) => {
@@ -376,10 +410,9 @@ impl AlphaScalarLeafState {
     pub fn append_task_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::AnyObjectJsonSchema>(
             "AppendTask",
             "Append Task",
-            crate::functions::inventions::InventionToolArgsType::Object,
             {
                 let state = Arc::clone(this);
                 move |args| {
@@ -420,10 +453,9 @@ impl AlphaScalarLeafState {
     pub fn check_function_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
             "CheckFunction",
             "Check if function is valid",
-            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -473,10 +505,9 @@ impl AlphaScalarLeafState {
     pub fn read_description_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
             "ReadDescription",
             "Read Description",
-            crate::functions::inventions::InventionToolArgsType::None,
             {
                 let state = Arc::clone(this);
                 move |_| {
@@ -495,31 +526,45 @@ impl AlphaScalarLeafState {
     pub fn write_description_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {
-        crate::functions::inventions::InventionTool::new_sync(
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::schema::DescriptionObject>(
             "WriteDescription",
             "Write Description",
-            crate::functions::inventions::InventionToolArgsType::String,
             {
                 let state = Arc::clone(this);
                 move |args| {
-                    let description = match args {
-                        serde_json::Value::String(description) => description,
-                        _ => {
-                            return Err(
-                                "Invalid argument, expected string".to_string()
-                            );
+                    let args_str = match serde_json::to_string(&args) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e
+                            ));
                         }
                     };
-                    if description.trim().len() == 0 {
+                    let parsed = match serde_path_to_error::deserialize::<
+                        _,
+                        crate::functions::inventions::schema::DescriptionObject,
+                    >(
+                        &mut serde_json::Deserializer::from_str(&args_str),
+                    ) {
+                        Ok(o) => o,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e,
+                            ));
+                        }
+                    };
+                    if parsed.description.trim().len() == 0 {
                         return Err("Description cannot be empty".to_string());
-                    } else if description.len() > 350 {
+                    } else if parsed.description.len() > 350 {
                         return Err(format!(
                             "Description is {} bytes, exceeds maximum of 350 bytes",
-                            description.len(),
+                            parsed.description.len(),
                         ));
                     }
                     let mut state = state.lock().unwrap();
-                    state.description = Some(description);
+                    state.description = Some(parsed.description);
                     Ok("Ok".to_string())
                 }
             },

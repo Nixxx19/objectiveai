@@ -22,10 +22,9 @@ pub struct InventionTool {
 }
 
 impl InventionTool {
-    pub fn new_sync(
+    pub fn new_sync<T: crate::json_schema::JsonSchema>(
         name: &'static str,
         description: &'static str,
-        parameters: serde_json::Map<String, serde_json::Value>,
         f: impl Fn(serde_json::Value) -> Result<String, String>
         + Send
         + Sync
@@ -34,7 +33,7 @@ impl InventionTool {
         Self {
             name,
             description,
-            parameters: parameters.into_iter().collect(),
+            parameters: T::indexmap_json_schema(),
             call: Arc::new(move |args| {
                 let result = f(args);
                 Box::pin(async move { result })
@@ -42,10 +41,9 @@ impl InventionTool {
         }
     }
 
-    pub fn new_async(
+    pub fn new_async<T: crate::json_schema::JsonSchema>(
         name: &'static str,
         description: &'static str,
-        parameters: serde_json::Map<String, serde_json::Value>,
         f: impl Fn(
             serde_json::Value,
         )
@@ -57,7 +55,7 @@ impl InventionTool {
         Self {
             name,
             description,
-            parameters: parameters.into_iter().collect(),
+            parameters: T::indexmap_json_schema(),
             call: Arc::new(move |args| f(args)),
         }
     }

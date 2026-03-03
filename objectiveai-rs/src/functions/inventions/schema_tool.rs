@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use super::tool::{InventionTool, InventionToolArgsType};
+use super::tool::InventionTool;
 
 mod schema_lookup {
     include!(concat!(env!("OUT_DIR"), "/schema_lookup.rs"));
@@ -20,10 +20,9 @@ pub fn schema_tools(schemas: &[&str]) -> Vec<InventionTool> {
             let tool_name = schema_lookup::tool_name(name).unwrap();
             let tool_desc = schema_lookup::tool_description(name).unwrap();
 
-            tools.push(InventionTool::new_sync(
+            tools.push(InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
                 tool_name,
                 tool_desc,
-                InventionToolArgsType::None,
                 move |_| Ok(content.to_string()),
             ));
 
