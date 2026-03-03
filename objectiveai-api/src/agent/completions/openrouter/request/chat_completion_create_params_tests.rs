@@ -229,7 +229,7 @@ fn test_invention_response_format_name_conflict() {
 }
 
 #[test]
-fn test_top_logprobs_zero_sets_logprobs_false() {
+fn test_top_logprobs_zero_omits_logprobs() {
     let agent = objectiveai::agent::openrouter::Agent {
         id: String::new(),
         base: objectiveai::agent::openrouter::AgentBase {
@@ -286,8 +286,8 @@ fn test_top_logprobs_zero_sets_logprobs_false() {
             top_a: None,
             top_k: None,
             verbosity: None,
-            logprobs: Some(false),
-            top_logprobs: Some(0),
+            logprobs: None,
+            top_logprobs: None,
             response_format: None,
             seed: None,
             tool_choice: None,

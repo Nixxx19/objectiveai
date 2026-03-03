@@ -270,12 +270,16 @@ impl ChatCompletionCreateParams {
             top_a: agent.base.top_a,
             top_k: agent.base.top_k,
             verbosity: agent.base.verbosity,
-            logprobs: if let Some(top_logprobs) = agent.base.top_logprobs {
-                Some(top_logprobs > 0)
+            logprobs: if let Some(top_logprobs) = agent.base.top_logprobs && top_logprobs > 0 {
+                Some(true)
             } else {
                 None
             },
-            top_logprobs: agent.base.top_logprobs,
+            top_logprobs: if let Some(top_logprobs) = agent.base.top_logprobs && top_logprobs > 0 {
+                Some(top_logprobs)
+            } else {
+                None
+            },
             response_format: openrouter_response_format,
             seed: params.seed,
             tool_choice,
