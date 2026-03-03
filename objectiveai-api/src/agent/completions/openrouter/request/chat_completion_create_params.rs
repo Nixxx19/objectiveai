@@ -111,17 +111,44 @@ struct SourcedTool {
 }
 
 impl ChatCompletionCreateParams {
-    /// Creates request parameters from an Agent, request params, messages,
-    /// MCP connections, and optional invention tools.
-    ///
-    /// Fetches MCP tools concurrently, merges them with invention tools and
-    /// any response-format tool, resolves name conflicts with suffixes, and
-    /// populates the `tools` and `tool_choice` fields.
+    /// Creates request parameters by fetching MCP tools from live connections,
+    /// then delegating to [`new_with_tools`](Self::new_with_tools).
     pub async fn new(
         agent: &objectiveai::agent::openrouter::Agent,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         mcp_connections: &[Arc<crate::mcp::Connection>],
+        invention_tools: Option<
+            &[objectiveai::functions::inventions::InventionTool],
+        >,
+    ) -> Result<Self, super::super::Error> {
+        let mcp_tools: Vec<Arc<Result<Vec<crate::mcp::tool::Tool>, crate::mcp::Error>>> =
+            futures::future::join_all(
+                mcp_connections.iter().map(|c| c.list_tools()),
+            )
+            .await;
+
+        Self::new_with_tools(
+            agent,
+            params,
+            messages,
+            mcp_connections,
+            &mcp_tools,
+            invention_tools,
+        )
+    }
+
+    /// Creates request parameters from pre-fetched MCP tool results.
+    ///
+    /// Merges MCP tools, invention tools, and any response-format tool,
+    /// resolves name conflicts with suffixes, and populates the `tools`
+    /// and `tool_choice` fields.
+    pub(super) fn new_with_tools(
+        agent: &objectiveai::agent::openrouter::Agent,
+        params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+        messages: &[objectiveai::agent::completions::message::Message],
+        mcp_connections: &[Arc<crate::mcp::Connection>],
+        mcp_tools: &[Arc<Result<Vec<crate::mcp::tool::Tool>, crate::mcp::Error>>],
         invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
@@ -142,19 +169,11 @@ impl ChatCompletionCreateParams {
                 None => (None, None),
             };
 
-        // --- Step 3: Fetch MCP tools concurrently ---
-        let mcp_results = futures::future::join_all(
-            mcp_connections.iter().map(|c| c.list_tools()),
-        )
-        .await;
-
-        // --- Step 4: Build sourced tool list ---
+        // --- Step 3: Build sourced tool list ---
         let mut sourced_tools = Vec::new();
 
         // MCP tools
-        for (connection, result) in
-            mcp_connections.iter().zip(mcp_results.iter())
-        {
+        for (connection, result) in mcp_connections.iter().zip(mcp_tools.iter()) {
             let tools = result.as_ref().as_ref().map_err(|e| {
                 super::super::Error::Mcp {
                     url: connection.url.clone(),
@@ -201,10 +220,10 @@ impl ChatCompletionCreateParams {
             });
         }
 
-        // --- Step 5: Resolve name conflicts ---
+        // --- Step 4: Resolve name conflicts ---
         let final_tools = resolve_name_conflicts(sourced_tools);
 
-        // --- Step 6: Determine tool_choice ---
+        // --- Step 5: Determine tool_choice ---
         let (tools, tool_choice) = if final_tools.is_empty() {
             (None, None)
         } else if let Some((ref name, _, _, required)) = response_format_tool {
