@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// The format of the model's response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ResponseFormat {
     /// Plain text response (default).
@@ -69,7 +69,7 @@ impl ResponseFormat {
 }
 
 /// A JSON schema for structured output.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct JsonSchema {
     /// The name of the schema.
     pub name: String,

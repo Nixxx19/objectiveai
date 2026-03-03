@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Provider routing and selection preferences.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct Provider {
     /// Whether to allow providers to collect data.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -32,7 +32,7 @@ pub struct Provider {
 }
 
 /// Data collection policy for providers.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ProviderDataCollection {
     /// Do not allow data collection.
@@ -42,7 +42,7 @@ pub enum ProviderDataCollection {
 }
 
 /// How to sort/prioritize providers.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum ProviderSort {
     /// Prioritize by price (cheapest first).
@@ -54,7 +54,7 @@ pub enum ProviderSort {
 }
 
 /// Maximum price constraints per token type.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub struct ProviderMaxPrice {
     /// Maximum price per prompt token.
     #[serde(skip_serializing_if = "Option::is_none")]

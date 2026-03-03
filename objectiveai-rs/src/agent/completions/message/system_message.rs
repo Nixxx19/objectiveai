@@ -10,7 +10,7 @@ use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
 
 /// A system message setting context or instructions.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SystemMessage {
     /// The message content.
     pub content: SimpleContent,

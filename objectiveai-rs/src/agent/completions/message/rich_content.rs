@@ -13,7 +13,7 @@ use starlark::values::{
 };
 
 /// Rich content for user/assistant messages (supports multimodal input).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum RichContent {
     /// Plain text content.

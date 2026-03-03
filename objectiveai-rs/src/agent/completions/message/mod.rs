@@ -93,7 +93,7 @@ pub mod prompt {
 }
 
 /// A message in the conversation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "role")]
 pub enum Message {
     /// A developer message (similar to system, but from the developer).

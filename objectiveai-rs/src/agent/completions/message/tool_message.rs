@@ -10,7 +10,7 @@ use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
 
 /// A tool message containing the result of a tool call.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ToolMessage {
     /// The content of the tool response.
     pub content: RichContent,

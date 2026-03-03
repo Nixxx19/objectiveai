@@ -10,7 +10,7 @@ use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
 
 /// A developer message.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct DeveloperMessage {
     /// The message content.
     pub content: SimpleContent,

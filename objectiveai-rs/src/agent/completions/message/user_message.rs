@@ -10,7 +10,7 @@ use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
 
 /// A user message from the end user.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UserMessage {
     /// The message content (supports text, images, audio, video, files).
     pub content: RichContent,

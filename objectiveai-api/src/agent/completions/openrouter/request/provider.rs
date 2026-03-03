@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Some fields come from the Agent (allow_fallbacks, require_parameters, etc.)
 /// while others come from the request (data_collection, zdr, sort, etc.).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Provider {
     /// Whether to allow fallback to other providers. From Agent.
     #[serde(skip_serializing_if = "Option::is_none")]

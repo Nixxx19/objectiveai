@@ -9,7 +9,7 @@ use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
 
 /// Simple text content for system/developer messages.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum SimpleContent {
     /// Plain text content.
@@ -135,7 +135,7 @@ impl FromStarlarkValue for SimpleContentExpression {
 }
 
 /// A part of simple text content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum SimpleContentPart {
     /// A text part.

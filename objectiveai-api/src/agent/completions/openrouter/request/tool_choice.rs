@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Controls how the model uses tools.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum ToolChoice {
     /// The model will not call any tools.
     #[serde(rename = "none")]
@@ -20,7 +20,7 @@ pub enum ToolChoice {
 }
 
 /// Specifies a specific function the model must call.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum ToolChoiceFunction {
     /// A specific function to call.
@@ -30,7 +30,7 @@ pub enum ToolChoiceFunction {
 }
 
 /// The function name for a forced tool choice.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ToolChoiceFunctionFunction {
     /// The name of the function to call.
     pub name: String,

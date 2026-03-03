@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// This setting hints to the model how detailed its responses should be.
 /// Not all models support this parameter.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize)]
 pub enum Verbosity {
     /// Minimal output, concise responses.
     #[serde(rename = "low")]

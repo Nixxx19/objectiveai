@@ -9,7 +9,7 @@ use std::sync::Arc;
 ///
 /// Combines parameters from both the Agent configuration and the
 /// incoming request to create a complete request for OpenRouter.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ChatCompletionCreateParams {
     /// Messages for the conversation, including any prefix/suffix from the Agent.
     pub messages: Vec<objectiveai::agent::completions::message::Message>,

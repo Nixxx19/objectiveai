@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// When you have a good guess about what the model will output, providing a
 /// prediction can significantly speed up generation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum Prediction {
     /// A content prediction.
@@ -14,7 +14,7 @@ pub enum Prediction {
 }
 
 /// The content of a prediction.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum PredictionContent {
     /// Plain text prediction.
@@ -24,7 +24,7 @@ pub enum PredictionContent {
 }
 
 /// A part of a prediction.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum PredictionContentPart {
     /// A text part.

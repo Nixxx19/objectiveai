@@ -10,7 +10,7 @@ use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
 
 /// An assistant message (model's previous response).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AssistantMessage {
     /// The message content, if any.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -287,7 +287,7 @@ impl FromStarlarkValue for AssistantMessageExpression {
 }
 
 /// A tool call made by the assistant.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "snake_case")]
 pub enum AssistantToolCall {
     /// A function call with an ID and function details.
@@ -419,7 +419,7 @@ impl FromStarlarkValue for AssistantToolCallExpression {
 }
 
 /// Details of a function call made by the assistant.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AssistantToolCallFunction {
     /// The name of the function to call.
     pub name: String,
@@ -491,7 +491,7 @@ impl FromStarlarkValue for AssistantToolCallFunction {
 }
 
 /// A tool call delta in a streaming response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct AssistantToolCallDelta {
     /// The index of this tool call.
     pub index: u64,
@@ -528,7 +528,7 @@ impl AssistantToolCallDelta {
 }
 
 /// The type of tool call.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
 pub enum AssistantToolCallType {
     /// A function call.
     #[serde(rename = "function")]
@@ -537,7 +537,7 @@ pub enum AssistantToolCallType {
 }
 
 /// Function call details in a streaming tool call.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct AssistantToolCallFunctionDelta {
     /// The function name (only present in the first delta).
     #[serde(skip_serializing_if = "Option::is_none")]

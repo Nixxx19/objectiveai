@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// When the model generates any of these sequences, it immediately
 /// stops producing further tokens.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Stop {
     /// A single stop sequence.
