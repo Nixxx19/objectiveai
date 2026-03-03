@@ -1,5 +1,5 @@
 pub trait UpstreamClient<AGENT> {
-    type State: Clone + Send + Sync + 'static;
+    type State: Send + Sync + 'static;
     type Stream: futures::Stream<Item = StreamItem<Self::State>>
         + Send
         + 'static;
@@ -7,9 +7,9 @@ pub trait UpstreamClient<AGENT> {
         &self,
         agent: &AGENT,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
-        continuation: Option<Vec<ContinuationItem<Self::State>>>,
+        continuation: Option<&[ContinuationItem<Self::State>]>,
         invention_tools: Option<
-            Vec<objectiveai::functions::inventions::InventionTool>,
+            &[objectiveai::functions::inventions::InventionTool],
         >,
     ) -> impl Future<
         Output = Result<
