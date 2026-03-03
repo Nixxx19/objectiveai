@@ -117,6 +117,7 @@ impl ChatCompletionCreateParams {
         agent: &objectiveai::agent::openrouter::Agent,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
+        continuation: Option<&[crate::agent::completions::upstream_client::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
         mcp_connections: &[Arc<crate::mcp::Connection>],
         invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
@@ -138,6 +139,7 @@ impl ChatCompletionCreateParams {
             agent,
             params,
             messages,
+            continuation,
             mcp_connections,
             &mcp_tools,
             invention_tools,
@@ -153,12 +155,33 @@ impl ChatCompletionCreateParams {
         agent: &objectiveai::agent::openrouter::Agent,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
+        continuation: Option<&[crate::agent::completions::upstream_client::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
         mcp_connections: &[Arc<crate::mcp::Connection>],
         mcp_tools: &[Arc<Vec<crate::mcp::tool::Tool>>],
         invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
     ) -> Self {
+        use crate::agent::completions::upstream_client::ContinuationItem;
+        use objectiveai::agent::completions::message::Message;
+
+        // --- Step 0: Build messages array (messages + continuation) ---
+        let continuation = continuation.unwrap_or_default();
+        let mut all_messages =
+            Vec::with_capacity(messages.len() + continuation.len());
+        all_messages.extend_from_slice(messages);
+        all_messages.extend(continuation.iter().map(|item| match item {
+            ContinuationItem::State(assistant) => {
+                Message::Assistant(assistant.clone())
+            }
+            ContinuationItem::ToolMessage(tool) => {
+                Message::Tool(tool.clone())
+            }
+            ContinuationItem::UserMessage(user) => {
+                Message::User(user.clone())
+            }
+        }));
+
         // --- Step 1: Resolve response_format for this agent ---
         let resolved_response_format = resolve_response_format(params, agent);
 
@@ -250,7 +273,8 @@ impl ChatCompletionCreateParams {
         Self {
             // `messages` already includes prefix/suffix from the agent —
             // the caller (UpstreamClient) handles that merging.
-            messages: messages.to_vec(),
+            // `continuation` assistant responses are appended after.
+            messages: all_messages,
             provider: super::provider::Provider::new(
                 params.provider,
                 agent.base.provider.as_ref(),

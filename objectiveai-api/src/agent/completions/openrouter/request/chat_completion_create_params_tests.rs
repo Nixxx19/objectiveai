@@ -45,6 +45,7 @@ fn test_no_tools_empty_params() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -162,6 +163,7 @@ fn test_invention_response_format_name_conflict() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         Some(&invention_tools),
@@ -261,6 +263,7 @@ fn test_top_logprobs_zero_omits_logprobs() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -389,6 +392,7 @@ fn test_multiple_invention_tools_no_conflicts() {
         &agent,
         &params,
         &messages,
+        None,
         &[],
         &[],
         Some(&invention_tools),
@@ -516,6 +520,7 @@ fn test_toolcall_not_required_uses_auto_choice() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -645,6 +650,7 @@ fn test_invention_tool_parameters_preserved() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         Some(&invention_tools),
@@ -754,6 +760,7 @@ fn test_agent_base_fields_passthrough() {
         &agent,
         &params,
         &messages,
+        None,
         &[],
         &[],
         None,
@@ -858,6 +865,7 @@ fn test_provider_merging_both_sides() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -962,6 +970,7 @@ fn test_per_agent_response_format_miss() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -1063,6 +1072,7 @@ fn test_json_schema_response_format_extracts_title() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -1207,6 +1217,7 @@ fn test_seed_passthrough() {
         &agent,
         &params,
         &messages,
+        None,
         &[],
         &[],
         None,
@@ -1306,6 +1317,7 @@ fn test_toolcall_required_forces_function_choice() {
         &agent,
         &params,
         &[],
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -1706,6 +1718,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -2297,6 +2310,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -2634,6 +2648,7 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         Some(&invention_tools),
@@ -2830,6 +2845,7 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         None,
@@ -3098,6 +3114,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
         &agent,
         &params,
         &messages,
+        None,
         &mcp_connections,
         &mcp_tools,
         Some(&invention_tools),
@@ -3233,6 +3250,289 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
                 },
             },
         ]),
+        parallel_tool_calls: None,
+        prediction: None,
+        stream: true,
+        stream_options: super::StreamOptions {
+            include_usage: Some(true),
+        },
+        usage: super::Usage { include: true },
+    };
+
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_continuation_assistant_message_appended() {
+    let agent = objectiveai::agent::openrouter::Agent {
+        id: String::new(),
+        base: objectiveai::agent::openrouter::AgentBase {
+            model: "test-model".to_string(),
+            ..Default::default()
+        },
+    };
+
+    let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
+        messages: vec![],
+        provider: None,
+        agent: objectiveai::agent::completions::request::Agent::Id("unused".to_string()),
+        agents: None,
+        response_format: None,
+        seed: None,
+        stream: None,
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    };
+
+    let messages = vec![objectiveai::agent::completions::message::Message::User(
+        objectiveai::agent::completions::message::UserMessage {
+            content: objectiveai::agent::completions::message::RichContent::Text(
+                "Hello".to_string(),
+            ),
+            name: None,
+        },
+    )];
+
+    let continuation = vec![
+        crate::agent::completions::upstream_client::ContinuationItem::State(
+            objectiveai::agent::completions::message::AssistantMessage {
+                content: Some(objectiveai::agent::completions::message::RichContent::Text(
+                    "Hi there!".to_string(),
+                )),
+                name: None,
+                refusal: None,
+                tool_calls: None,
+                reasoning: None,
+            },
+        ),
+    ];
+
+    let mcp_connections: Vec<std::sync::Arc<crate::mcp::Connection>> = vec![];
+    let mcp_tools: Vec<std::sync::Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
+
+    let result = ChatCompletionCreateParams::new_with_tools(
+        &agent,
+        &params,
+        &messages,
+        Some(&continuation),
+        &mcp_connections,
+        &mcp_tools,
+        None,
+    );
+
+    let expected = ChatCompletionCreateParams {
+        messages: vec![
+            objectiveai::agent::completions::message::Message::User(
+                objectiveai::agent::completions::message::UserMessage {
+                    content: objectiveai::agent::completions::message::RichContent::Text(
+                        "Hello".to_string(),
+                    ),
+                    name: None,
+                },
+            ),
+            objectiveai::agent::completions::message::Message::Assistant(
+                objectiveai::agent::completions::message::AssistantMessage {
+                    content: Some(
+                        objectiveai::agent::completions::message::RichContent::Text(
+                            "Hi there!".to_string(),
+                        ),
+                    ),
+                    name: None,
+                    refusal: None,
+                    tool_calls: None,
+                    reasoning: None,
+                },
+            ),
+        ],
+        provider: None,
+        model: "test-model".to_string(),
+        frequency_penalty: None,
+        logit_bias: None,
+        max_completion_tokens: None,
+        presence_penalty: None,
+        stop: None,
+        temperature: None,
+        top_p: None,
+        max_tokens: None,
+        min_p: None,
+        reasoning: None,
+        repetition_penalty: None,
+        top_a: None,
+        top_k: None,
+        verbosity: None,
+        logprobs: None,
+        top_logprobs: None,
+        response_format: None,
+        seed: None,
+        tool_choice: None,
+        tools: None,
+        parallel_tool_calls: None,
+        prediction: None,
+        stream: true,
+        stream_options: super::StreamOptions {
+            include_usage: Some(true),
+        },
+        usage: super::Usage { include: true },
+    };
+
+    assert_eq!(result, expected);
+}
+
+#[test]
+fn test_continuation_mixed_items() {
+    let agent = objectiveai::agent::openrouter::Agent {
+        id: String::new(),
+        base: objectiveai::agent::openrouter::AgentBase {
+            model: "test-model".to_string(),
+            ..Default::default()
+        },
+    };
+
+    let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
+        messages: vec![],
+        provider: None,
+        agent: objectiveai::agent::completions::request::Agent::Id("unused".to_string()),
+        agents: None,
+        response_format: None,
+        seed: None,
+        stream: None,
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    };
+
+    let messages = vec![objectiveai::agent::completions::message::Message::User(
+        objectiveai::agent::completions::message::UserMessage {
+            content: objectiveai::agent::completions::message::RichContent::Text(
+                "What is the weather?".to_string(),
+            ),
+            name: None,
+        },
+    )];
+
+    let continuation = vec![
+        // Assistant made a tool call
+        crate::agent::completions::upstream_client::ContinuationItem::State(
+            objectiveai::agent::completions::message::AssistantMessage {
+                content: None,
+                name: None,
+                refusal: None,
+                tool_calls: Some(vec![
+                    objectiveai::agent::completions::message::AssistantToolCall::Function {
+                        id: "call_abc".to_string(),
+                        function:
+                            objectiveai::agent::completions::message::AssistantToolCallFunction {
+                                name: "get_weather".to_string(),
+                                arguments: "{\"city\":\"NYC\"}".to_string(),
+                            },
+                    },
+                ]),
+                reasoning: None,
+            },
+        ),
+        // Tool response
+        crate::agent::completions::upstream_client::ContinuationItem::ToolMessage(
+            objectiveai::agent::completions::message::ToolMessage {
+                content: objectiveai::agent::completions::message::RichContent::Text(
+                    "Sunny, 72F".to_string(),
+                ),
+                tool_call_id: "call_abc".to_string(),
+            },
+        ),
+        // User follow-up
+        crate::agent::completions::upstream_client::ContinuationItem::UserMessage(
+            objectiveai::agent::completions::message::UserMessage {
+                content: objectiveai::agent::completions::message::RichContent::Text(
+                    "Thanks! What about tomorrow?".to_string(),
+                ),
+                name: None,
+            },
+        ),
+    ];
+
+    let mcp_connections: Vec<std::sync::Arc<crate::mcp::Connection>> = vec![];
+    let mcp_tools: Vec<std::sync::Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
+
+    let result = ChatCompletionCreateParams::new_with_tools(
+        &agent,
+        &params,
+        &messages,
+        Some(&continuation),
+        &mcp_connections,
+        &mcp_tools,
+        None,
+    );
+
+    let expected = ChatCompletionCreateParams {
+        messages: vec![
+            objectiveai::agent::completions::message::Message::User(
+                objectiveai::agent::completions::message::UserMessage {
+                    content: objectiveai::agent::completions::message::RichContent::Text(
+                        "What is the weather?".to_string(),
+                    ),
+                    name: None,
+                },
+            ),
+            objectiveai::agent::completions::message::Message::Assistant(
+                objectiveai::agent::completions::message::AssistantMessage {
+                    content: None,
+                    name: None,
+                    refusal: None,
+                    tool_calls: Some(vec![
+                        objectiveai::agent::completions::message::AssistantToolCall::Function {
+                            id: "call_abc".to_string(),
+                            function:
+                                objectiveai::agent::completions::message::AssistantToolCallFunction {
+                                    name: "get_weather".to_string(),
+                                    arguments: "{\"city\":\"NYC\"}".to_string(),
+                                },
+                        },
+                    ]),
+                    reasoning: None,
+                },
+            ),
+            objectiveai::agent::completions::message::Message::Tool(
+                objectiveai::agent::completions::message::ToolMessage {
+                    content: objectiveai::agent::completions::message::RichContent::Text(
+                        "Sunny, 72F".to_string(),
+                    ),
+                    tool_call_id: "call_abc".to_string(),
+                },
+            ),
+            objectiveai::agent::completions::message::Message::User(
+                objectiveai::agent::completions::message::UserMessage {
+                    content: objectiveai::agent::completions::message::RichContent::Text(
+                        "Thanks! What about tomorrow?".to_string(),
+                    ),
+                    name: None,
+                },
+            ),
+        ],
+        provider: None,
+        model: "test-model".to_string(),
+        frequency_penalty: None,
+        logit_bias: None,
+        max_completion_tokens: None,
+        presence_penalty: None,
+        stop: None,
+        temperature: None,
+        top_p: None,
+        max_tokens: None,
+        min_p: None,
+        reasoning: None,
+        repetition_penalty: None,
+        top_a: None,
+        top_k: None,
+        verbosity: None,
+        logprobs: None,
+        top_logprobs: None,
+        response_format: None,
+        seed: None,
+        tool_choice: None,
+        tools: None,
         parallel_tool_calls: None,
         prediction: None,
         stream: true,
