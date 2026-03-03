@@ -1,7 +1,7 @@
 use crate::agent;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ToolResponse {
     pub role: ToolRole,
     pub index: u64,

@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 /// Multiple chunks are received via Server-Sent Events and can be
 /// accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)
 /// using the [`push`](Self::push) method.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct AssistantResponseChunk {
     pub role: response::AssistantRole,
     pub index: u64,

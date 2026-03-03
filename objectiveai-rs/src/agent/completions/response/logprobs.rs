@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 
 /// Log probabilities for generated tokens.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Logprobs {
     /// Log probabilities for content tokens.
     pub content: Option<Vec<Logprob>>,
@@ -36,7 +36,7 @@ impl Logprobs {
 }
 
 /// Log probability information for a single token.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Logprob {
     /// The token string.
     pub token: String,
@@ -49,7 +49,7 @@ pub struct Logprob {
 }
 
 /// A top alternative token with its log probability.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct TopLogprob {
     /// The token string.
     pub token: String,

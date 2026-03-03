@@ -4,7 +4,7 @@ use crate::agent::completions::response::util;
 use serde::{Deserialize, Serialize};
 
 /// Token usage and cost statistics for a completion.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct Usage {
     /// Number of tokens in the completion.
     pub completion_tokens: u64,
@@ -78,7 +78,7 @@ impl Usage {
 }
 
 /// Detailed breakdown of completion token usage.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct CompletionTokensDetails {
     /// Tokens from accepted predictions (speculative decoding).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -122,7 +122,7 @@ impl CompletionTokensDetails {
 }
 
 /// Detailed breakdown of prompt token usage.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct PromptTokensDetails {
     /// Audio input tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -160,7 +160,7 @@ impl PromptTokensDetails {
 }
 
 /// Detailed cost breakdown.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CostDetails {
     /// Cost charged by the immediate upstream (e.g., OpenRouter).
     pub upstream_inference_cost: rust_decimal::Decimal,

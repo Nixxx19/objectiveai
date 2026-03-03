@@ -38,7 +38,7 @@ pub trait StatusError {
 ///     message: json!({"error": "Invalid request"}),
 /// };
 /// ```
-#[derive(Debug, Clone, Serialize, Deserialize, thiserror::Error)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, thiserror::Error)]
 #[error("{}", &serde_json::to_string(self).unwrap_or_default())]
 pub struct ResponseError {
     /// The HTTP status code of the error response.

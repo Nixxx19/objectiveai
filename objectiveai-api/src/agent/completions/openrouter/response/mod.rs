@@ -18,3 +18,6 @@ pub use image::*;
 pub use object::*;
 pub use role::*;
 pub use usage::*;
+
+#[cfg(test)]
+mod chat_completion_chunk_tests;
