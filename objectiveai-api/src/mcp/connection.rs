@@ -10,24 +10,24 @@ use std::time::Duration;
 /// include the `Mcp-Session-Id` header for session continuity.
 #[derive(Debug)]
 pub struct Connection {
-    http_client: reqwest::Client,
-    url: String,
-    session_id: String,
-    authorization: Option<String>,
-    user_agent: Option<String>,
-    x_title: Option<String>,
-    referer: Option<String>,
+    pub http_client: reqwest::Client,
+    pub url: String,
+    pub session_id: String,
+    pub authorization: Option<String>,
+    pub user_agent: Option<String>,
+    pub x_title: Option<String>,
+    pub referer: Option<String>,
 
-    backoff_current_interval: Duration,
-    backoff_initial_interval: Duration,
-    backoff_randomization_factor: f64,
-    backoff_multiplier: f64,
-    backoff_max_interval: Duration,
-    backoff_max_elapsed_time: Duration,
-    call_timeout: Duration,
+    pub backoff_current_interval: Duration,
+    pub backoff_initial_interval: Duration,
+    pub backoff_randomization_factor: f64,
+    pub backoff_multiplier: f64,
+    pub backoff_max_interval: Duration,
+    pub backoff_max_elapsed_time: Duration,
+    pub call_timeout: Duration,
 
     /// Auto-incrementing request ID (starts at 2; 1 was used for initialize).
-    next_id: AtomicU64,
+    pub next_id: AtomicU64,
 }
 
 impl Connection {
@@ -124,12 +124,8 @@ impl Connection {
         });
 
         backoff::future::retry(self.backoff(), || async {
-            let response = self
-                .post()
-                .json(&body)
-                .send()
-                .await
-                .map_err(|e| {
+            let response =
+                self.post().json(&body).send().await.map_err(|e| {
                     backoff::Error::transient(super::Error::Request(e))
                 })?;
 
