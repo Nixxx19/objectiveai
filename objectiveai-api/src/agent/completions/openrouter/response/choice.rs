@@ -1,6 +1,5 @@
 //! Choice type for streaming agent completion responses.
 
-use crate::agent::completions::response;
 use serde::{Deserialize, Serialize};
 
 /// A choice in a streaming agent completion chunk.
@@ -9,12 +8,12 @@ pub struct Choice {
     /// The content delta for this choice.
     pub delta: super::Delta,
     /// The reason generation stopped, if complete.
-    pub finish_reason: Option<response::FinishReason>,
+    pub finish_reason: Option<objectiveai::agent::completions::response::FinishReason>,
     /// The index of this choice.
     pub index: u64,
     /// Log probabilities for tokens, if requested.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub logprobs: Option<response::Logprobs>,
+    pub logprobs: Option<objectiveai::agent::completions::response::Logprobs>,
 }
 
 impl Choice {

@@ -1,17 +1,7 @@
-//! Tool/function definitions for agent completions.
+//! Tool/function definitions for chat completions.
 
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-
-/// Utilities for working with tool lists.
-pub mod tools {
-    /// Computes a content-addressed ID for a list of tools.
-    pub fn id(tools: &[super::Tool]) -> String {
-        let mut hasher = twox_hash::XxHash3_128::with_seed(0);
-        hasher.write(serde_json::to_string(tools).unwrap().as_bytes());
-        format!("{:0>22}", base62::encode(hasher.finish_128()))
-    }
-}
 
 /// A tool that can be called by the model.
 #[derive(Debug, Clone, Serialize, Deserialize)]

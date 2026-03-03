@@ -1,4 +1,4 @@
-//! Response format construction for completions.
+//! Response format construction for chat completions.
 
 use serde::{Deserialize, Serialize};
 
@@ -16,6 +16,56 @@ pub enum ResponseFormat {
     Grammar { grammar: String },
     /// Response must be valid Python code.
     Python,
+}
+
+impl ResponseFormat {
+    /// Converts a non-ToolCall objectiveai ResponseFormat to the OpenRouter ResponseFormat.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called with the `ToolCall` variant — that variant must be
+    /// extracted into a tool before reaching this method.
+    pub fn new(rf: &objectiveai::agent::completions::request::ResponseFormat) -> Self {
+        match rf {
+            objectiveai::agent::completions::request::ResponseFormat::Text => Self::Text,
+            objectiveai::agent::completions::request::ResponseFormat::JsonObject => {
+                Self::JsonObject
+            }
+            objectiveai::agent::completions::request::ResponseFormat::JsonSchema {
+                schema,
+            } => Self::JsonSchema {
+                json_schema: JsonSchema {
+                    name: schema
+                        .get("title")
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("response")
+                        .to_string(),
+                    description: schema
+                        .get("description")
+                        .and_then(|v| v.as_str())
+                        .map(|s| s.to_string()),
+                    schema: Some(serde_json::Value::Object(
+                        schema
+                            .iter()
+                            .map(|(k, v)| (k.clone(), v.clone()))
+                            .collect(),
+                    )),
+                    strict: None,
+                },
+            },
+            objectiveai::agent::completions::request::ResponseFormat::Grammar {
+                grammar,
+            } => Self::Grammar {
+                grammar: grammar.clone(),
+            },
+            objectiveai::agent::completions::request::ResponseFormat::Python => Self::Python,
+            objectiveai::agent::completions::request::ResponseFormat::ToolCall { .. } => {
+                unreachable!(
+                    "ToolCall variant should be handled before calling ResponseFormat::new"
+                )
+            }
+        }
+    }
 }
 
 /// A JSON schema for structured output.

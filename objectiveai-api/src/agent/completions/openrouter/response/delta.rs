@@ -1,6 +1,5 @@
 //! Delta type for streaming agent completion responses.
 
-use crate::agent;
 use serde::{Deserialize, Serialize};
 
 /// A delta (incremental update) in a streaming response.
@@ -21,7 +20,7 @@ pub struct Delta {
     /// Tool call updates.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tool_calls:
-        Option<Vec<agent::completions::response::streaming::ToolCall>>,
+        Option<Vec<objectiveai::agent::completions::message::AssistantToolCallDelta>>,
 
     /// New reasoning text since the last delta.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -44,11 +43,11 @@ impl Delta {
             images,
         }: &Delta,
     ) {
-        agent::completions::response::util::push_option_string(
+        objectiveai::agent::completions::response::util::push_option_string(
             &mut self.content,
             content,
         );
-        agent::completions::response::util::push_option_string(
+        objectiveai::agent::completions::response::util::push_option_string(
             &mut self.refusal,
             refusal,
         );
@@ -56,11 +55,11 @@ impl Delta {
             self.role = role.clone();
         }
         self.push_tool_calls(tool_calls);
-        agent::completions::response::util::push_option_string(
+        objectiveai::agent::completions::response::util::push_option_string(
             &mut self.reasoning,
             reasoning,
         );
-        agent::completions::response::util::push_option_vec(
+        objectiveai::agent::completions::response::util::push_option_vec(
             &mut self.images,
             images,
         );
@@ -69,21 +68,21 @@ impl Delta {
     fn push_tool_calls(
         &mut self,
         other_tool_calls: &Option<
-            Vec<agent::completions::response::streaming::ToolCall>,
+            Vec<objectiveai::agent::completions::message::AssistantToolCallDelta>,
         >,
     ) {
         fn push_tool_call(
             tool_calls: &mut Vec<
-                agent::completions::response::streaming::ToolCall,
+                objectiveai::agent::completions::message::AssistantToolCallDelta,
             >,
-            other: &agent::completions::response::streaming::ToolCall,
+            other: &objectiveai::agent::completions::message::AssistantToolCallDelta,
         ) {
             fn find_tool_call(
                 tool_calls: &mut Vec<
-                    agent::completions::response::streaming::ToolCall,
+                    objectiveai::agent::completions::message::AssistantToolCallDelta,
                 >,
                 index: u64,
-            ) -> Option<&mut agent::completions::response::streaming::ToolCall>
+            ) -> Option<&mut objectiveai::agent::completions::message::AssistantToolCallDelta>
             {
                 for tool_call in tool_calls {
                     if tool_call.index == index {

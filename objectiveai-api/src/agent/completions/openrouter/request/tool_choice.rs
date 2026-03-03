@@ -1,4 +1,4 @@
-//! Tool choice configuration for completions.
+//! Tool choice configuration for chat completions.
 
 use serde::{Deserialize, Serialize};
 
