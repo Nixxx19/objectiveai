@@ -4,11 +4,10 @@
 //! including model identity, prompt structure, decoding parameters, and output mode.
 
 mod client;
+pub mod completions;
 /// Fetchers for retrieving Agent definitions by ID.
 pub mod fetcher;
 /// Retrieval clients for listing Agents and getting usage statistics.
 pub mod retrieval_client;
-mod upstream;
 
 pub use client::*;
-pub use upstream::*;
