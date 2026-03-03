@@ -2,6 +2,8 @@ use std::future::Future;
 use std::pin::Pin;
 use std::sync::Arc;
 
+use indexmap::IndexMap;
+
 pub type CallInventionTool = Arc<
     dyn Fn(
             serde_json::Value,
@@ -15,7 +17,7 @@ pub type CallInventionTool = Arc<
 pub struct InventionTool {
     pub name: &'static str,
     pub description: &'static str,
-    pub args_type: InventionToolArgsType,
+    pub parameters: IndexMap<String, serde_json::Value>,
     pub call: CallInventionTool,
 }
 
@@ -23,7 +25,7 @@ impl InventionTool {
     pub fn new_sync(
         name: &'static str,
         description: &'static str,
-        args_type: InventionToolArgsType,
+        parameters: serde_json::Map<String, serde_json::Value>,
         f: impl Fn(serde_json::Value) -> Result<String, String>
         + Send
         + Sync
@@ -32,7 +34,7 @@ impl InventionTool {
         Self {
             name,
             description,
-            args_type,
+            parameters: parameters.into_iter().collect(),
             call: Arc::new(move |args| {
                 let result = f(args);
                 Box::pin(async move { result })
@@ -43,7 +45,7 @@ impl InventionTool {
     pub fn new_async(
         name: &'static str,
         description: &'static str,
-        args_type: InventionToolArgsType,
+        parameters: serde_json::Map<String, serde_json::Value>,
         f: impl Fn(
             serde_json::Value,
         )
@@ -55,18 +57,8 @@ impl InventionTool {
         Self {
             name,
             description,
-            args_type,
+            parameters: parameters.into_iter().collect(),
             call: Arc::new(move |args| f(args)),
         }
     }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum InventionToolArgsType {
-    String,
-    Number,
-    Boolean,
-    Object,
-    Array,
-    None,
 }
