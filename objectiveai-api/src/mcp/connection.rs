@@ -91,22 +91,7 @@ impl Connection {
         if conn.initialize_result.capabilities.tools.is_some() {
             let conn = Arc::clone(&conn);
             tokio::spawn(async move {
-                let mut guard = conn.tools.write().await;
-                let mut all_tools = Vec::new();
-                let mut cursor: Option<String> = None;
-                let result = loop {
-                    match conn.rpc_list_tools(cursor.as_deref()).await {
-                        Ok(page) => {
-                            all_tools.extend(page.tools);
-                            cursor = page.next_cursor;
-                            if cursor.is_none() {
-                                break Ok(all_tools);
-                            }
-                        }
-                        Err(e) => break Err(e),
-                    }
-                };
-                *guard = Arc::new(result);
+                conn.refresh_tools().await;
             });
         }
 
@@ -114,23 +99,35 @@ impl Connection {
         if conn.initialize_result.capabilities.resources.is_some() {
             let conn = Arc::clone(&conn);
             tokio::spawn(async move {
-                let mut guard = conn.resources.write().await;
-                let mut all_resources = Vec::new();
-                let mut cursor: Option<String> = None;
-                let result = loop {
-                    match conn.rpc_list_resources(cursor.as_deref()).await {
-                        Ok(page) => {
-                            all_resources.extend(page.resources);
-                            cursor = page.next_cursor;
-                            if cursor.is_none() {
-                                break Ok(all_resources);
-                            }
-                        }
-                        Err(e) => break Err(e),
-                    }
-                };
-                *guard = Arc::new(result);
+                conn.refresh_resources().await;
             });
+        }
+
+        // Spawn listener for list_changed notifications if supported.
+        {
+            let tools_list_changed = conn
+                .initialize_result
+                .capabilities
+                .tools
+                .and_then(|t| t.list_changed)
+                .unwrap_or(false);
+            let resources_list_changed = conn
+                .initialize_result
+                .capabilities
+                .resources
+                .and_then(|r| r.list_changed)
+                .unwrap_or(false);
+
+            if tools_list_changed || resources_list_changed {
+                let conn = Arc::clone(&conn);
+                tokio::spawn(async move {
+                    conn.listen_for_list_changes(
+                        tools_list_changed,
+                        resources_list_changed,
+                    )
+                    .await;
+                });
+            }
         }
 
         conn
@@ -335,6 +332,127 @@ impl Connection {
         )
         .await
     }
+
+    /// Re-fetches all tools from the server, replacing the cached list.
+    async fn refresh_tools(&self) {
+        let mut guard = self.tools.write().await;
+        let mut all_tools = Vec::new();
+        let mut cursor: Option<String> = None;
+        let result = loop {
+            match self.rpc_list_tools(cursor.as_deref()).await {
+                Ok(page) => {
+                    all_tools.extend(page.tools);
+                    cursor = page.next_cursor;
+                    if cursor.is_none() {
+                        break Ok(all_tools);
+                    }
+                }
+                Err(e) => break Err(e),
+            }
+        };
+        *guard = Arc::new(result);
+    }
+
+    /// Re-fetches all resources from the server, replacing the cached list.
+    async fn refresh_resources(&self) {
+        let mut guard = self.resources.write().await;
+        let mut all_resources = Vec::new();
+        let mut cursor: Option<String> = None;
+        let result = loop {
+            match self.rpc_list_resources(cursor.as_deref()).await {
+                Ok(page) => {
+                    all_resources.extend(page.resources);
+                    cursor = page.next_cursor;
+                    if cursor.is_none() {
+                        break Ok(all_resources);
+                    }
+                }
+                Err(e) => break Err(e),
+            }
+        };
+        *guard = Arc::new(result);
+    }
+
+    /// Builds a GET request to the MCP endpoint for receiving server
+    /// notifications via SSE.
+    fn get(&self) -> reqwest::RequestBuilder {
+        let mut request = self
+            .http_client
+            .get(&self.url)
+            .header("Accept", "text/event-stream")
+            .header("Mcp-Session-Id", &self.session_id);
+
+        if let Some(auth) = &self.authorization {
+            request = request.header("Authorization", auth);
+        }
+        if let Some(ua) = &self.user_agent {
+            request = request.header("User-Agent", ua);
+        }
+        if let Some(title) = &self.x_title {
+            request = request.header("X-Title", title);
+        }
+        if let Some(referer) = &self.referer {
+            request = request.header("Referer", referer);
+        }
+        request
+    }
+
+    /// Opens a GET SSE stream to the MCP endpoint and listens for
+    /// `notifications/tools/list_changed` and
+    /// `notifications/resources/list_changed`. On each notification,
+    /// write-locks and re-fetches the full list. Reconnects on
+    /// disconnection with a brief delay.
+    async fn listen_for_list_changes(
+        &self,
+        tools: bool,
+        resources: bool,
+    ) {
+        use futures_util::TryStreamExt;
+        use tokio::io::AsyncBufReadExt;
+        use tokio_util::io::StreamReader;
+
+        loop {
+            let response = match self.get().send().await {
+                Ok(r) if r.status().is_success() => r,
+                _ => {
+                    tokio::time::sleep(self.backoff_initial_interval).await;
+                    continue;
+                }
+            };
+
+            let stream = response
+                .bytes_stream()
+                .map_err(|e| std::io::Error::new(std::io::ErrorKind::Other, e));
+            let reader = StreamReader::new(stream);
+            let mut lines = reader.lines();
+
+            while let Ok(Some(line)) = lines.next_line().await {
+                // SSE data lines start with "data: ".
+                let data = match line.strip_prefix("data: ") {
+                    Some(d) => d,
+                    None => continue,
+                };
+
+                let method = match serde_json::from_str::<JsonRpcNotification>(data) {
+                    Ok(n) => n.method,
+                    Err(_) => continue,
+                };
+
+                match method.as_str() {
+                    "notifications/tools/list_changed" if tools => {
+                        self.refresh_tools().await;
+                    }
+                    "notifications/resources/list_changed" if resources => {
+                        self.refresh_resources().await;
+                    }
+                    _ => {}
+                }
+            }
+
+            // Stream ended — reconnect after a brief delay.
+            tokio::time::sleep(self.backoff_initial_interval).await;
+        }
+    }
 }
 
 /// JSON-RPC 2.0 response envelope.
@@ -363,4 +481,12 @@ pub(super) struct JsonRpcError {
     pub code: i64,
     pub message: String,
     pub data: Option<serde_json::Value>,
+}
+
+/// JSON-RPC 2.0 notification (no `id` field).
+#[derive(serde::Deserialize)]
+struct JsonRpcNotification {
+    #[allow(dead_code)]
+    jsonrpc: String,
+    method: String,
 }
