@@ -81,7 +81,7 @@ impl ChatCompletionChunk {
                 created: self.created,
                 agent,
                 model: self.model,
-                upstream_id: self.id.clone(),
+                upstream_id: self.id,
                 reasoning: choice.delta.reasoning,
                 tool_calls: choice.delta.tool_calls,
                 content,
