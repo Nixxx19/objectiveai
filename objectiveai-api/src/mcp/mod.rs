@@ -1,6 +1,7 @@
 mod client;
 mod connection;
 mod error;
+pub mod initialize_result;
 pub mod resource;
 pub mod shared;
 pub mod tool;

@@ -131,20 +131,21 @@ impl Client {
             .map(String::from)
             .ok_or(super::Error::NoSessionId)?;
 
-        // Parse the initialize result to confirm success.
+        // Parse the initialize result.
         let rpc_response: super::connection::JsonRpcResponse<
-            serde_json::Value,
+            super::initialize_result::InitializeResult,
         > = response.json().await.map_err(super::Error::Request)?;
 
-        if let super::connection::JsonRpcResponse::Error { error, .. } =
-            rpc_response
-        {
-            return Err(super::Error::JsonRpc {
-                code: error.code,
-                message: error.message,
-                data: error.data,
-            });
-        }
+        let initialize_result = match rpc_response {
+            super::connection::JsonRpcResponse::Success { result, .. } => result,
+            super::connection::JsonRpcResponse::Error { error, .. } => {
+                return Err(super::Error::JsonRpc {
+                    code: error.code,
+                    message: error.message,
+                    data: error.data,
+                });
+            }
+        };
 
         let connection = super::Connection::new(
             self.http_client.clone(),
@@ -161,6 +162,7 @@ impl Client {
             self.backoff_max_interval,
             self.backoff_max_elapsed_time,
             self.call_timeout,
+            initialize_result,
         );
 
         // Send the initialized notification.

@@ -1,7 +1,7 @@
 //! MCP connection for communicating with an MCP server.
 
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::time::Duration;
 use tokio::sync::RwLock;
 
@@ -32,13 +32,17 @@ pub struct Connection {
     pub backoff_max_elapsed_time: Duration,
     pub call_timeout: Duration,
 
+    /// The server's capabilities and info from the initialize response.
+    pub initialize_result: super::initialize_result::InitializeResult,
+
     /// Auto-incrementing request ID (starts at 2; 1 was used for initialize).
-    pub next_id: AtomicU64,
+    next_id: AtomicU64,
 
     /// All tools from the server, populated by background pagination.
     tools: RwLock<Arc<Result<Vec<super::tool::Tool>, super::Error>>>,
     /// All resources from the server, populated by background pagination.
-    resources: RwLock<Arc<Result<Vec<super::resource::Resource>, super::Error>>>,
+    resources:
+        RwLock<Arc<Result<Vec<super::resource::Resource>, super::Error>>>,
 }
 
 impl Connection {
@@ -60,6 +64,7 @@ impl Connection {
         backoff_max_interval: Duration,
         backoff_max_elapsed_time: Duration,
         call_timeout: Duration,
+        initialize_result: super::initialize_result::InitializeResult,
     ) -> Arc<Self> {
         let conn = Arc::new(Self {
             http_client,
@@ -76,6 +81,7 @@ impl Connection {
             backoff_max_interval,
             backoff_max_elapsed_time,
             call_timeout,
+            initialize_result,
             next_id: AtomicU64::new(2),
             tools: RwLock::new(Arc::new(Ok(Vec::new()))),
             resources: RwLock::new(Arc::new(Ok(Vec::new()))),
@@ -278,7 +284,9 @@ impl Connection {
     ///
     /// Blocks until background pagination completes, then returns a
     /// cheap `Arc` clone of the result.
-    pub async fn list_tools(&self) -> Arc<Result<Vec<super::tool::Tool>, super::Error>> {
+    pub async fn list_tools(
+        &self,
+    ) -> Arc<Result<Vec<super::tool::Tool>, super::Error>> {
         Arc::clone(&self.tools.read().await)
     }
 
@@ -308,7 +316,9 @@ impl Connection {
     ///
     /// Blocks until background pagination completes, then returns a
     /// cheap `Arc` clone of the result.
-    pub async fn list_resources(&self) -> Arc<Result<Vec<super::resource::Resource>, super::Error>> {
+    pub async fn list_resources(
+        &self,
+    ) -> Arc<Result<Vec<super::resource::Resource>, super::Error>> {
         Arc::clone(&self.resources.read().await)
     }
 
