@@ -3,7 +3,7 @@ pub trait UpstreamClient<AGENT> {
     type Stream: futures::Stream<Item = StreamItem<Self::State>>
         + Send
         + 'static;
-    async fn create(
+    fn create(
         &self,
         agent: &AGENT,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
@@ -11,7 +11,13 @@ pub trait UpstreamClient<AGENT> {
         invention_tools: Option<
             Vec<objectiveai::functions::inventions::InventionTool>,
         >,
-    ) -> Result<(Self::Stream, Self::State), objectiveai::error::ResponseError>;
+    ) -> impl Future<
+        Output = Result<
+            (Self::Stream, Self::State),
+            objectiveai::error::ResponseError,
+        >,
+    > + Send
+    + 'static;
 }
 
 #[derive(Debug, Clone)]
