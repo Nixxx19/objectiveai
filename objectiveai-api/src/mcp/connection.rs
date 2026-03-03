@@ -46,6 +46,54 @@ pub struct Connection {
 }
 
 impl Connection {
+    /// Creates a minimal connection for unit testing.
+    /// Only the `url` field is meaningful; other fields are defaulted.
+    #[cfg(test)]
+    pub(crate) fn new_for_test(url: String) -> Arc<Self> {
+        Arc::new(Self {
+            http_client: reqwest::Client::new(),
+            url,
+            session_id: String::new(),
+            authorization: None,
+            user_agent: None,
+            x_title: None,
+            referer: None,
+            backoff_current_interval: Duration::from_millis(500),
+            backoff_initial_interval: Duration::from_millis(500),
+            backoff_randomization_factor: 0.5,
+            backoff_multiplier: 1.5,
+            backoff_max_interval: Duration::from_secs(60),
+            backoff_max_elapsed_time: Duration::from_secs(900),
+            call_timeout: Duration::from_secs(30),
+            initialize_result: super::initialize_result::InitializeResult {
+                protocol_version: "2025-03-26".into(),
+                capabilities:
+                    super::initialize_result::ServerCapabilities {
+                        experimental: None,
+                        logging: None,
+                        completions: None,
+                        prompts: None,
+                        resources: None,
+                        tools: None,
+                        tasks: None,
+                    },
+                server_info: super::initialize_result::Implementation {
+                    name: "test".into(),
+                    title: None,
+                    version: "0.0.0".into(),
+                    website_url: None,
+                    description: None,
+                    icons: None,
+                },
+                instructions: None,
+                _meta: None,
+            },
+            next_id: AtomicU64::new(2),
+            tools: RwLock::new(Ok(Arc::new(Vec::new()))),
+            resources: RwLock::new(Ok(Arc::new(Vec::new()))),
+        })
+    }
+
     /// Creates a new connection and spawns background tasks to paginate
     /// all tools and resources. Called internally by
     /// [`Client::connect`](super::Client::connect).
