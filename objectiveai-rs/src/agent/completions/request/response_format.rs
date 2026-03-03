@@ -28,6 +28,9 @@ pub enum ResponseFormat {
         description: String,
         /// The JSON Schema definition.
         schema: IndexMap<String, serde_json::Value>,
+        /// Whether the tool MUST be called.
+        #[serde(skip_serializing_if = "Option::is_none")]
+        required: Option<bool>,
     },
 }
 
