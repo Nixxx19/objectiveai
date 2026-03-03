@@ -6,7 +6,7 @@ pub struct DefaultContextExt;
 impl super::ContextExt for DefaultContextExt {
     async fn get_byok(
         &self,
-        _upstream: objectiveai::upstream::Upstream,
+        _upstream: objectiveai::agent::Upstream,
     ) -> Result<Option<String>, objectiveai::error::ResponseError> {
         Ok(None)
     }

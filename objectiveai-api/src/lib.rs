@@ -17,7 +17,7 @@
 
 /// Authentication and API key management.
 pub mod auth;
-/// Chat completions with Ensemble LLMs.
+// /// Chat completions with Ensemble LLMs.
 // pub mod chat;
 /// Request context and extensions for dependency injection.
 pub mod ctx;
@@ -27,11 +27,11 @@ pub mod ensemble;
 pub mod agent;
 /// Error response handling and conversion.
 pub mod error;
-/// Function execution, profile management, and computations.
+// /// Function execution, profile management, and computations.
 // pub mod functions;
 /// MCP (Model Context Protocol) types.
 pub mod mcp;
 /// Utility types for streaming and choice indexing.
 pub mod util;
-/// Vector completions for scoring and ranking responses.
+// /// Vector completions for scoring and ranking responses.
 // pub mod vector;

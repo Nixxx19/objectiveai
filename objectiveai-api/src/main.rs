@@ -1,3 +1,8 @@
+// TODO: Re-enable after refactor is complete.
+fn main() {}
+
+#[cfg(any())]
+mod _old {
 //! ObjectiveAI API server.
 //!
 //! REST API server for chat completions, vector completions, Functions,
@@ -1940,3 +1945,4 @@ async fn get_ensemble_llm_usage(
         Err(e) => e.into_response(),
     }
 }
+} // mod _old
