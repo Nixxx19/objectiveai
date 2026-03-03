@@ -7,10 +7,10 @@ pub trait UpstreamClient<AGENT> {
         &self,
         agent: &AGENT,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+        continuation: Option<Vec<ContinuationItem<Self::State>>>,
         invention_tools: Option<
             Vec<objectiveai::functions::inventions::InventionTool>,
         >,
-        continuation: Option<Vec<ContinuationItem<Self::State>>>,
     ) -> Result<(Self::Stream, Self::State), objectiveai::error::ResponseError>;
 }
 
