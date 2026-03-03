@@ -87,8 +87,8 @@ impl Connection {
             resources: RwLock::new(Arc::new(Ok(Vec::new()))),
         });
 
-        // Spawn background tool lister.
-        {
+        // Spawn background tool lister if the server supports tools.
+        if conn.initialize_result.capabilities.tools.is_some() {
             let conn = Arc::clone(&conn);
             tokio::spawn(async move {
                 let mut guard = conn.tools.write().await;
@@ -110,8 +110,8 @@ impl Connection {
             });
         }
 
-        // Spawn background resource lister.
-        {
+        // Spawn background resource lister if the server supports resources.
+        if conn.initialize_result.capabilities.resources.is_some() {
             let conn = Arc::clone(&conn);
             tokio::spawn(async move {
                 let mut guard = conn.resources.write().await;
