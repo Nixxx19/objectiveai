@@ -284,7 +284,7 @@ impl Connection {
     pub async fn list_tools(
         &self,
     ) -> Arc<Result<Vec<super::tool::Tool>, super::Error>> {
-        Arc::clone(&self.tools.read().await)
+        Arc::clone(&*self.tools.read().await)
     }
 
     /// Calls a tool on the MCP server.
@@ -316,7 +316,7 @@ impl Connection {
     pub async fn list_resources(
         &self,
     ) -> Arc<Result<Vec<super::resource::Resource>, super::Error>> {
-        Arc::clone(&self.resources.read().await)
+        Arc::clone(&*self.resources.read().await)
     }
 
     /// Reads a resource from the MCP server.
