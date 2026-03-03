@@ -20,3 +20,6 @@ pub use stream_options::*;
 pub use tool::*;
 pub use tool_choice::*;
 pub use usage::*;
+
+#[cfg(test)]
+mod chat_completion_create_params_tests;

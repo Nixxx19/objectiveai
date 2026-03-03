@@ -122,20 +122,26 @@ impl ChatCompletionCreateParams {
             &[objectiveai::functions::inventions::InventionTool],
         >,
     ) -> Result<Self, super::super::Error> {
-        let mcp_tools: Vec<Arc<Result<Vec<crate::mcp::tool::Tool>, crate::mcp::Error>>> =
-            futures::future::join_all(
-                mcp_connections.iter().map(|c| c.list_tools()),
-            )
-            .await;
+        let mcp_tools = futures::future::try_join_all(
+            mcp_connections.iter().map(|c| async {
+                c.list_tools().await.map_err(|error| {
+                    super::super::Error::Mcp {
+                        url: c.url.clone(),
+                        error,
+                    }
+                })
+            }),
+        )
+        .await?;
 
-        Self::new_with_tools(
+        Ok(Self::new_with_tools(
             agent,
             params,
             messages,
             mcp_connections,
             &mcp_tools,
             invention_tools,
-        )
+        ))
     }
 
     /// Creates request parameters from pre-fetched MCP tool results.
@@ -148,11 +154,11 @@ impl ChatCompletionCreateParams {
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         mcp_connections: &[Arc<crate::mcp::Connection>],
-        mcp_tools: &[Arc<Result<Vec<crate::mcp::tool::Tool>, crate::mcp::Error>>],
+        mcp_tools: &[Arc<Vec<crate::mcp::tool::Tool>>],
         invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
-    ) -> Result<Self, super::super::Error> {
+    ) -> Self {
         // --- Step 1: Resolve response_format for this agent ---
         let resolved_response_format = resolve_response_format(params, agent);
 
@@ -173,14 +179,8 @@ impl ChatCompletionCreateParams {
         let mut sourced_tools = Vec::new();
 
         // MCP tools
-        for (connection, result) in mcp_connections.iter().zip(mcp_tools.iter()) {
-            let tools = result.as_ref().as_ref().map_err(|e| {
-                super::super::Error::Mcp {
-                    url: connection.url.clone(),
-                    message: e.to_string(),
-                }
-            })?;
-            for tool in tools {
+        for (connection, tools) in mcp_connections.iter().zip(mcp_tools.iter()) {
+            for tool in tools.iter() {
                 sourced_tools.push(SourcedTool {
                     name: tool.name.clone(),
                     source: ToolSource::Mcp {
@@ -247,7 +247,7 @@ impl ChatCompletionCreateParams {
             )
         };
 
-        Ok(Self {
+        Self {
             // `messages` already includes prefix/suffix from the agent —
             // the caller (UpstreamClient) handles that merging.
             messages: messages.to_vec(),
@@ -287,7 +287,7 @@ impl ChatCompletionCreateParams {
                 include_usage: Some(true),
             },
             usage: super::Usage { include: true },
-        })
+        }
     }
 }
 

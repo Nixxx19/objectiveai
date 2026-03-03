@@ -39,10 +39,10 @@ pub struct Connection {
     next_id: AtomicU64,
 
     /// All tools from the server, populated by background pagination.
-    tools: RwLock<Arc<Result<Vec<super::tool::Tool>, super::Error>>>,
+    tools: RwLock<Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>>>,
     /// All resources from the server, populated by background pagination.
     resources:
-        RwLock<Arc<Result<Vec<super::resource::Resource>, super::Error>>>,
+        RwLock<Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>>>,
 }
 
 impl Connection {
@@ -83,8 +83,8 @@ impl Connection {
             call_timeout,
             initialize_result,
             next_id: AtomicU64::new(2),
-            tools: RwLock::new(Arc::new(Ok(Vec::new()))),
-            resources: RwLock::new(Arc::new(Ok(Vec::new()))),
+            tools: RwLock::new(Ok(Arc::new(Vec::new()))),
+            resources: RwLock::new(Ok(Arc::new(Vec::new()))),
         });
 
         // Spawn background tool lister if the server supports tools.
@@ -283,8 +283,8 @@ impl Connection {
     /// cheap `Arc` clone of the result.
     pub async fn list_tools(
         &self,
-    ) -> Arc<Result<Vec<super::tool::Tool>, super::Error>> {
-        Arc::clone(&*self.tools.read().await)
+    ) -> Result<Arc<Vec<super::tool::Tool>>, Arc<super::Error>> {
+        self.tools.read().await.clone()
     }
 
     /// Calls a tool on the MCP server.
@@ -315,8 +315,8 @@ impl Connection {
     /// cheap `Arc` clone of the result.
     pub async fn list_resources(
         &self,
-    ) -> Arc<Result<Vec<super::resource::Resource>, super::Error>> {
-        Arc::clone(&*self.resources.read().await)
+    ) -> Result<Arc<Vec<super::resource::Resource>>, Arc<super::Error>> {
+        self.resources.read().await.clone()
     }
 
     /// Reads a resource from the MCP server.
@@ -344,13 +344,13 @@ impl Connection {
                     all_tools.extend(page.tools);
                     cursor = page.next_cursor;
                     if cursor.is_none() {
-                        break Ok(all_tools);
+                        break Ok(Arc::new(all_tools));
                     }
                 }
-                Err(e) => break Err(e),
+                Err(e) => break Err(Arc::new(e)),
             }
         };
-        *guard = Arc::new(result);
+        *guard = result;
     }
 
     /// Re-fetches all resources from the server, replacing the cached list.
@@ -364,13 +364,13 @@ impl Connection {
                     all_resources.extend(page.resources);
                     cursor = page.next_cursor;
                     if cursor.is_none() {
-                        break Ok(all_resources);
+                        break Ok(Arc::new(all_resources));
                     }
                 }
-                Err(e) => break Err(e),
+                Err(e) => break Err(Arc::new(e)),
             }
         };
-        *guard = Arc::new(result);
+        *guard = result;
     }
 
     /// Builds a GET request to the MCP endpoint for receiving server
