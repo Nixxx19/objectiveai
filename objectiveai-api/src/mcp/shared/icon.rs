@@ -11,7 +11,7 @@ pub enum IconTheme {
 }
 
 /// An icon that can be displayed in a user interface.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Icon {
     /// URL or data URI for the icon.
     pub src: String,
