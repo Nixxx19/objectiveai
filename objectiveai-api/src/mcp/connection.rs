@@ -1,13 +1,19 @@
 //! MCP connection for communicating with an MCP server.
 
 use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::RwLock;
 
 /// An active connection to an MCP server using the Streamable HTTP transport.
 ///
 /// Created by [`Client::connect`](super::Client::connect). Provides methods
 /// for listing/calling tools and listing/reading resources. All requests
 /// include the `Mcp-Session-Id` header for session continuity.
+///
+/// On creation, background tasks are spawned to paginate through all tools
+/// and resources. The write lock is held for the entire duration of
+/// pagination, so readers block until all pages have been fetched.
 #[derive(Debug)]
 pub struct Connection {
     pub http_client: reqwest::Client,
@@ -28,10 +34,17 @@ pub struct Connection {
 
     /// Auto-incrementing request ID (starts at 2; 1 was used for initialize).
     pub next_id: AtomicU64,
+
+    /// All tools from the server, populated by background pagination.
+    tools: RwLock<Arc<Result<Vec<super::tool::Tool>, super::Error>>>,
+    /// All resources from the server, populated by background pagination.
+    resources: RwLock<Arc<Result<Vec<super::resource::Resource>, super::Error>>>,
 }
 
 impl Connection {
-    /// Creates a new connection. Called internally by [`Client::connect`](super::Client::connect).
+    /// Creates a new connection and spawns background tasks to paginate
+    /// all tools and resources. Called internally by
+    /// [`Client::connect`](super::Client::connect).
     pub(super) fn new(
         http_client: reqwest::Client,
         url: String,
@@ -47,8 +60,8 @@ impl Connection {
         backoff_max_interval: Duration,
         backoff_max_elapsed_time: Duration,
         call_timeout: Duration,
-    ) -> Self {
-        Self {
+    ) -> Arc<Self> {
+        let conn = Arc::new(Self {
             http_client,
             url,
             session_id,
@@ -64,7 +77,57 @@ impl Connection {
             backoff_max_elapsed_time,
             call_timeout,
             next_id: AtomicU64::new(2),
+            tools: RwLock::new(Arc::new(Ok(Vec::new()))),
+            resources: RwLock::new(Arc::new(Ok(Vec::new()))),
+        });
+
+        // Spawn background tool lister.
+        {
+            let conn = Arc::clone(&conn);
+            tokio::spawn(async move {
+                let mut guard = conn.tools.write().await;
+                let mut all_tools = Vec::new();
+                let mut cursor: Option<String> = None;
+                let result = loop {
+                    match conn.rpc_list_tools(cursor.as_deref()).await {
+                        Ok(page) => {
+                            all_tools.extend(page.tools);
+                            cursor = page.next_cursor;
+                            if cursor.is_none() {
+                                break Ok(all_tools);
+                            }
+                        }
+                        Err(e) => break Err(e),
+                    }
+                };
+                *guard = Arc::new(result);
+            });
         }
+
+        // Spawn background resource lister.
+        {
+            let conn = Arc::clone(&conn);
+            tokio::spawn(async move {
+                let mut guard = conn.resources.write().await;
+                let mut all_resources = Vec::new();
+                let mut cursor: Option<String> = None;
+                let result = loop {
+                    match conn.rpc_list_resources(cursor.as_deref()).await {
+                        Ok(page) => {
+                            all_resources.extend(page.resources);
+                            cursor = page.next_cursor;
+                            if cursor.is_none() {
+                                break Ok(all_resources);
+                            }
+                        }
+                        Err(e) => break Err(e),
+                    }
+                };
+                *guard = Arc::new(result);
+            });
+        }
+
+        conn
     }
 
     /// Creates an exponential backoff configuration from the connection's fields.
@@ -197,8 +260,8 @@ impl Connection {
         &self.session_id
     }
 
-    /// Lists the tools available on the MCP server.
-    pub async fn list_tools(
+    /// Sends a `tools/list` RPC call for a single page.
+    async fn rpc_list_tools(
         &self,
         cursor: Option<&str>,
     ) -> Result<super::tool::ListToolsResult, super::Error> {
@@ -211,6 +274,14 @@ impl Connection {
         .await
     }
 
+    /// Returns all tools from the server.
+    ///
+    /// Blocks until background pagination completes, then returns a
+    /// cheap `Arc` clone of the result.
+    pub async fn list_tools(&self) -> Arc<Result<Vec<super::tool::Tool>, super::Error>> {
+        Arc::clone(&self.tools.read().await)
+    }
+
     /// Calls a tool on the MCP server.
     pub async fn call_tool(
         &self,
@@ -219,8 +290,8 @@ impl Connection {
         self.rpc("tools/call", params).await
     }
 
-    /// Lists the resources available on the MCP server.
-    pub async fn list_resources(
+    /// Sends a `resources/list` RPC call for a single page.
+    async fn rpc_list_resources(
         &self,
         cursor: Option<&str>,
     ) -> Result<super::resource::ListResourcesResult, super::Error> {
@@ -231,6 +302,14 @@ impl Connection {
             },
         )
         .await
+    }
+
+    /// Returns all resources from the server.
+    ///
+    /// Blocks until background pagination completes, then returns a
+    /// cheap `Arc` clone of the result.
+    pub async fn list_resources(&self) -> Arc<Result<Vec<super::resource::Resource>, super::Error>> {
+        Arc::clone(&self.resources.read().await)
     }
 
     /// Reads a resource from the MCP server.

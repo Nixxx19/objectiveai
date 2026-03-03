@@ -146,7 +146,7 @@ impl Client {
             });
         }
 
-        let connection = Arc::new(super::Connection::new(
+        let connection = super::Connection::new(
             self.http_client.clone(),
             url,
             session_id,
@@ -161,7 +161,7 @@ impl Client {
             self.backoff_max_interval,
             self.backoff_max_elapsed_time,
             self.call_timeout,
-        ));
+        );
 
         // Send the initialized notification.
         connection
