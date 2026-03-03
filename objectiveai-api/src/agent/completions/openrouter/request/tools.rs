@@ -1,0 +1,1 @@
+//! Tools construction for completions.
