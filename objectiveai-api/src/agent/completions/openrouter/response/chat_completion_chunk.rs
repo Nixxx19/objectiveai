@@ -32,35 +32,80 @@ pub struct ChatCompletionChunk {
 }
 
 impl ChatCompletionChunk {
-    // /// Transforms this upstream chunk into the downstream ObjectiveAI format.
-    // ///
-    // /// Replaces the upstream ID and model with ObjectiveAI's values while preserving
-    // /// the original values in `upstream_id` and `upstream_model` fields.
-    // pub fn into_downstream(
-    //     self,
-    //     id: String,
-    //     model: String,
-    //     is_byok: bool,
-    //     cost_multiplier: rust_decimal::Decimal,
-    // ) -> crate::agent::completions::response::streaming::ChatCompletionChunk
-    // {
-    //     crate::agent::completions::response::streaming::ChatCompletionChunk {
-    //         id,
-    //         upstream_id: self.id,
-    //         choices: self.choices,
-    //         created: self.created,
-    //         model,
-    //         upstream_model: self.model,
-    //         object: self.object,
-    //         service_tier: self.service_tier,
-    //         system_fingerprint: self.system_fingerprint,
-    //         usage: self
-    //             .usage
-    //             .map(|usage| usage.into_downstream(is_byok, cost_multiplier)),
-    //         upstream: crate::upstream::Upstream::OpenRouter,
-    //         provider: self.provider,
-    //     }
-    // }
+    /// Transforms this upstream OpenRouter chunk into the downstream
+    /// [`AgentCompletionChunk`] format.
+    ///
+    /// OpenRouter completions always have exactly one choice and only
+    /// produce assistant responses (no tool responses).
+    pub fn into_downstream(
+        self,
+        id: String,
+        agent: String,
+        is_byok: bool,
+        cost_multiplier: rust_decimal::Decimal,
+    ) -> objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+        // OpenRouter always returns exactly one choice.
+        let choice = self.choices.into_iter().next().unwrap_or_default();
+
+        // Merge text content and images into a single RichContent value.
+        let content = match (choice.delta.content, choice.delta.images) {
+            (Some(text), Some(images)) => {
+                let mut parts = vec![
+                    objectiveai::agent::completions::message::RichContentPart::Text {
+                        text,
+                    },
+                ];
+                parts.extend(images.into_iter().map(
+                    objectiveai::agent::completions::message::RichContentPart::from,
+                ));
+                Some(objectiveai::agent::completions::message::RichContent::Parts(parts))
+            }
+            (Some(text), None) => {
+                Some(objectiveai::agent::completions::message::RichContent::Text(text))
+            }
+            (None, Some(images)) => {
+                Some(objectiveai::agent::completions::message::RichContent::Parts(
+                    images
+                        .into_iter()
+                        .map(objectiveai::agent::completions::message::RichContentPart::from)
+                        .collect(),
+                ))
+            }
+            (None, None) => None,
+        };
+
+        let message = objectiveai::agent::completions::response::streaming::MessageChunk::Assistant(
+            objectiveai::agent::completions::response::streaming::AssistantResponseChunk {
+                role: Default::default(),
+                index: 0,
+                created: self.created,
+                agent,
+                model: self.model,
+                upstream_id: self.id.clone(),
+                reasoning: choice.delta.reasoning,
+                tool_calls: choice.delta.tool_calls,
+                content,
+                refusal: choice.delta.refusal,
+                finish_reason: choice.finish_reason,
+                logprobs: choice.logprobs,
+                service_tier: self.service_tier,
+                system_fingerprint: self.system_fingerprint,
+                provider: self.provider,
+            },
+        );
+
+        objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+            id,
+            created: self.created,
+            messages: vec![message],
+            object: Default::default(),
+            usage: self
+                .usage
+                .map(|usage| usage.into_downstream(is_byok, cost_multiplier)),
+            upstream: objectiveai::agent::Upstream::Openrouter,
+            error: None,
+        }
+    }
 
     /// Merges another chunk into this one.
     ///

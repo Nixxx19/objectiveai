@@ -7,8 +7,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AgentCompletion {
     pub id: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstream_id: Option<String>,
     pub created: u64,
     pub messages: Vec<super::Message>,
     /// The object type (always "agent.completion").
@@ -26,7 +24,6 @@ impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
     fn from(
         response::streaming::AgentCompletionChunk {
             id,
-            upstream_id,
             created,
             messages,
             object,
@@ -37,7 +34,6 @@ impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
     ) -> Self {
         Self {
             id,
-            upstream_id,
             created,
             messages: messages.into_iter().map(Into::into).collect(),
             object: object.into(),

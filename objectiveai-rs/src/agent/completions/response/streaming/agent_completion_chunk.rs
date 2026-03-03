@@ -11,7 +11,6 @@ use serde::{Deserialize, Serialize};
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct AgentCompletionChunk {
     pub id: String,
-    pub upstream_id: Option<String>,
     pub created: u64,
     pub messages: Vec<super::MessageChunk>,
     /// The object type (always "agent.completion.chunk").

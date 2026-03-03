@@ -11,8 +11,7 @@ pub struct AssistantResponse {
     pub created: u64,
     pub agent: String,
     pub model: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstream_id: Option<String>,
+    pub upstream_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<String>,
     pub tool_calls: Option<Vec<message::AssistantToolCall>>,

@@ -15,8 +15,7 @@ pub struct AssistantResponseChunk {
     pub created: u64,
     pub agent: String,
     pub model: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstream_id: Option<String>,
+    pub upstream_id: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -80,7 +79,7 @@ impl AssistantResponseChunk {
             }
             _ => {}
         }
-        if self.upstream_id.is_none() {
+        if self.upstream_id.is_empty() {
             self.upstream_id = upstream_id.clone();
         }
         if self.service_tier.is_none() {

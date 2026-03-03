@@ -29,3 +29,22 @@ pub struct ImageUrl {
     /// URL where the image can be accessed.
     pub url: String,
 }
+
+impl From<Image> for objectiveai::agent::completions::message::ImageUrl {
+    fn from(image: Image) -> Self {
+        match image {
+            Image::ImageUrl { image_url } => Self {
+                url: image_url.url,
+                detail: None,
+            },
+        }
+    }
+}
+
+impl From<Image> for objectiveai::agent::completions::message::RichContentPart {
+    fn from(image: Image) -> Self {
+        Self::ImageUrl {
+            image_url: image.into(),
+        }
+    }
+}
