@@ -36,6 +36,7 @@ fn test_text_delta() {
                         index: 0,
                         created: 1000,
                         agent: "agent-1".to_string(),
+                        upstream_id: "sess-1".to_string(),
                         content: Some(objectiveai::agent::completions::message::RichContent::Text("Hello world".to_string())),
                         ..Default::default()
                     },
@@ -83,6 +84,7 @@ fn test_thinking_delta() {
                         index: 3,
                         created: 2000,
                         agent: "agent-2".to_string(),
+                        upstream_id: "sess-2".to_string(),
                         reasoning: Some("Let me consider...".to_string()),
                         ..Default::default()
                     },
@@ -133,6 +135,7 @@ fn test_tool_use_content_block_start() {
                         index: 5,
                         created: 3000,
                         agent: "agent-3".to_string(),
+                        upstream_id: "sess-3".to_string(),
                         tool_calls: Some(vec![
                             objectiveai::agent::completions::message::AssistantToolCallDelta {
                                 index: 2,
@@ -190,6 +193,7 @@ fn test_input_json_delta() {
                         index: 0,
                         created: 4000,
                         agent: "agent-4".to_string(),
+                        upstream_id: "sess-4".to_string(),
                         tool_calls: Some(vec![
                             objectiveai::agent::completions::message::AssistantToolCallDelta {
                                 index: 2,
@@ -254,6 +258,7 @@ fn test_message_delta_tool_use_stop_reason() {
                         index: 0,
                         created: 5000,
                         agent: "agent-5".to_string(),
+                        upstream_id: "sess-5".to_string(),
                         finish_reason: Some(objectiveai::agent::completions::response::FinishReason::ToolCalls),
                         ..Default::default()
                     },

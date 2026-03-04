@@ -20,12 +20,13 @@ impl BetaRawMessageStreamEvent {
         created: u64,
         agent: String,
         assistant_index: u64,
+        session_id: String,
     ) -> Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> {
         use objectiveai::agent::completions::message;
         use objectiveai::agent::completions::response;
 
         let message_chunk = match self {
-            // MessageStart: extract upstream_id and model
+            // MessageStart: extract model, use session_id as upstream_id
             Self::MessageStart(event) => {
                 let msg = event.message;
                 Some(response::streaming::MessageChunk::Assistant(
@@ -35,7 +36,7 @@ impl BetaRawMessageStreamEvent {
                         created,
                         agent: agent.clone(),
                         model: msg.model,
-                        upstream_id: msg.id,
+                        upstream_id: session_id.clone(),
                         ..Default::default()
                     },
                 ))
@@ -51,6 +52,7 @@ impl BetaRawMessageStreamEvent {
                                 index: assistant_index,
                                 created,
                                 agent: agent.clone(),
+                                upstream_id: session_id.clone(),
                                 tool_calls: Some(vec![message::AssistantToolCallDelta {
                                     index: event.index as u64,
                                     r#type: Some(message::AssistantToolCallType::Function),
@@ -71,6 +73,7 @@ impl BetaRawMessageStreamEvent {
                                 index: assistant_index,
                                 created,
                                 agent: agent.clone(),
+                                upstream_id: session_id.clone(),
                                 tool_calls: Some(vec![message::AssistantToolCallDelta {
                                     index: event.index as u64,
                                     r#type: Some(message::AssistantToolCallType::Function),
@@ -91,6 +94,7 @@ impl BetaRawMessageStreamEvent {
                                 index: assistant_index,
                                 created,
                                 agent: agent.clone(),
+                                upstream_id: session_id.clone(),
                                 tool_calls: Some(vec![message::AssistantToolCallDelta {
                                     index: event.index as u64,
                                     r#type: Some(message::AssistantToolCallType::Function),
@@ -118,6 +122,7 @@ impl BetaRawMessageStreamEvent {
                                 index: assistant_index,
                                 created,
                                 agent: agent.clone(),
+                                upstream_id: session_id.clone(),
                                 content: Some(message::RichContent::Text(delta.text)),
                                 ..Default::default()
                             },
@@ -130,6 +135,7 @@ impl BetaRawMessageStreamEvent {
                                 index: assistant_index,
                                 created,
                                 agent: agent.clone(),
+                                upstream_id: session_id.clone(),
                                 reasoning: Some(delta.thinking),
                                 ..Default::default()
                             },
@@ -142,6 +148,7 @@ impl BetaRawMessageStreamEvent {
                                 index: assistant_index,
                                 created,
                                 agent: agent.clone(),
+                                upstream_id: session_id.clone(),
                                 tool_calls: Some(vec![message::AssistantToolCallDelta {
                                     index: event.index as u64,
                                     r#type: None,
@@ -182,6 +189,7 @@ impl BetaRawMessageStreamEvent {
                         index: assistant_index,
                         created,
                         agent: agent.clone(),
+                        upstream_id: session_id.clone(),
                         finish_reason,
                         ..Default::default()
                     },
