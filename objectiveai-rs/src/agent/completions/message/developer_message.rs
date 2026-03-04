@@ -22,11 +22,8 @@ pub struct DeveloperMessage {
 impl DeveloperMessage {
     pub fn push(&mut self, other: &DeveloperMessage) {
         self.content.push(&other.content);
-        if let Some(other_name) = &other.name {
-            match &mut self.name {
-                Some(self_name) => self_name.push_str(other_name),
-                None => self.name = Some(other_name.clone()),
-            }
+        if self.name.is_none() {
+            self.name.clone_from(&other.name);
         }
     }
 

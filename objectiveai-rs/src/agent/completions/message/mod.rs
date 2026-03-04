@@ -30,17 +30,18 @@ pub mod prompt {
     use super::Message;
 
     /// Returns whether two messages are the same chainable role
-    /// (developer, user, or system) and the pair has at most one name.
+    /// (developer, user, or system) and have compatible names
+    /// (at most one has a name, or both have the same name).
     fn is_chain(a: &Message, b: &Message) -> bool {
         match (a, b) {
             (Message::Developer(a), Message::Developer(b)) => {
-                !(a.has_name() && b.has_name())
+                !a.has_name() || !b.has_name() || a.name == b.name
             }
             (Message::System(a), Message::System(b)) => {
-                !(a.has_name() && b.has_name())
+                !a.has_name() || !b.has_name() || a.name == b.name
             }
             (Message::User(a), Message::User(b)) => {
-                !(a.has_name() && b.has_name())
+                !a.has_name() || !b.has_name() || a.name == b.name
             }
             _ => false,
         }
