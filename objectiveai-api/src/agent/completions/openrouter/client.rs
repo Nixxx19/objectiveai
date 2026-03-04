@@ -1,0 +1,326 @@
+//! OpenRouter HTTP client for agent completions.
+
+use crate::agent::completions::upstream_client::{
+    ContinuationItem, StreamItem, UpstreamClient,
+};
+use eventsource_stream::Event as MessageEvent;
+use futures::{Stream, StreamExt};
+use reqwest_eventsource::{Event, EventSource, RequestBuilderExt};
+use std::pin::Pin;
+use std::sync::Arc;
+
+/// Generates a unique response ID for an agent completion.
+pub fn response_id(created: u64) -> String {
+    let uuid = uuid::Uuid::new_v4();
+    format!("agntcpl-{}-{}", uuid.simple(), created)
+}
+
+/// HTTP client for communicating with the OpenRouter API for agent completions.
+#[derive(Debug, Clone)]
+pub struct Client {
+    /// The underlying HTTP client.
+    pub http_client: reqwest::Client,
+    /// Base URL for the OpenRouter API.
+    pub api_base: String,
+    /// API key for authentication with OpenRouter.
+    pub api_key: String,
+    /// Optional User-Agent header value.
+    pub user_agent: Option<String>,
+    /// Optional X-Title header value.
+    pub x_title: Option<String>,
+    /// Optional Referer header value (sent as both referer and http-referer).
+    pub referer: Option<String>,
+}
+
+impl Client {
+    /// Creates an SSE EventSource for the streaming request.
+    fn create_streaming_event_source(
+        &self,
+        api_key: &str,
+        request: &super::request::ChatCompletionCreateParams,
+    ) -> EventSource {
+        let mut http_request = self
+            .http_client
+            .post(format!("{}/chat/completions", self.api_base))
+            .header("authorization", format!("Bearer {}", api_key));
+        if let Some(ref user_agent) = self.user_agent {
+            http_request = http_request.header("user-agent", user_agent);
+        }
+        if let Some(ref x_title) = self.x_title {
+            http_request = http_request.header("x-title", x_title);
+        }
+        if let Some(ref referer) = self.referer {
+            http_request = http_request
+                .header("referer", referer)
+                .header("http-referer", referer);
+        }
+        http_request.json(request).eventsource().unwrap()
+    }
+
+    /// Processes the SSE EventSource into a stream of agent completion chunks,
+    /// followed by a final accumulated state.
+    fn create_streaming_stream(
+        mut event_source: EventSource,
+        id: String,
+        agent: String,
+        is_byok: bool,
+        cost_multiplier: rust_decimal::Decimal,
+    ) -> impl Stream<
+        Item = StreamItem<
+            objectiveai::agent::completions::message::AssistantMessage,
+        >,
+    > + Send
+    + 'static {
+        async_stream::stream! {
+            use objectiveai::agent::completions::message::AssistantMessage;
+            use objectiveai::agent::completions::response::streaming::{
+                AgentCompletionChunk, AssistantResponseChunk, MessageChunk,
+            };
+
+            let mut accumulated: Option<AssistantResponseChunk> = None;
+
+            while let Some(event) = event_source.next().await {
+                match event {
+                    Ok(Event::Open) => continue,
+                    Ok(Event::Message(MessageEvent { data, .. })) => {
+                        if data == "[DONE]" {
+                            break;
+                        } else if data.starts_with(":") {
+                            continue;
+                        } else if data.is_empty() {
+                            continue;
+                        }
+                        let mut de =
+                            serde_json::Deserializer::from_str(&data);
+                        match serde_path_to_error::deserialize::<
+                            _,
+                            super::response::ChatCompletionChunk,
+                        >(&mut de)
+                        {
+                            Ok(chunk) => {
+                                let downstream = chunk.into_downstream(
+                                    id.clone(),
+                                    agent.clone(),
+                                    is_byok,
+                                    cost_multiplier,
+                                );
+
+                                // Accumulate the assistant response chunk.
+                                for message in &downstream.messages {
+                                    if let MessageChunk::Assistant(
+                                        assistant_chunk,
+                                    ) = message
+                                    {
+                                        match &mut accumulated {
+                                            Some(acc) => {
+                                                acc.push(assistant_chunk)
+                                            }
+                                            None => {
+                                                accumulated = Some(
+                                                    assistant_chunk.clone(),
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+                                yield StreamItem::Chunk(downstream);
+                            }
+                            Err(e) => {
+                                // Try to parse as a provider error JSON,
+                                // otherwise report as deserialization error.
+                                let error = match serde_json::from_str::<serde_json::Value>(&data) {
+                                    Ok(value) => {
+                                        let code = value
+                                            .pointer("/error/code")
+                                            .and_then(|c| c.as_u64())
+                                            .unwrap_or(500)
+                                            as u16;
+                                        objectiveai::error::ResponseError {
+                                            code,
+                                            message: serde_json::json!({
+                                                "kind": "provider_error",
+                                                "error": value,
+                                            }),
+                                        }
+                                    }
+                                    Err(_) => {
+                                        objectiveai::error::ResponseError {
+                                            code: 500,
+                                            message: serde_json::json!({
+                                                "kind": "deserialization",
+                                                "error": e.to_string(),
+                                            }),
+                                        }
+                                    }
+                                };
+                                yield StreamItem::Chunk(AgentCompletionChunk {
+                                    id: id.clone(),
+                                    error: Some(error),
+                                    ..Default::default()
+                                });
+                            }
+                        }
+                    }
+                    Err(reqwest_eventsource::Error::InvalidStatusCode(
+                        code,
+                        response,
+                    )) => {
+                        let body = match response.text().await {
+                            Ok(body) => {
+                                match serde_json::from_str::<
+                                    serde_json::Value,
+                                >(
+                                    &body,
+                                ) {
+                                    Ok(value) => value,
+                                    Err(_) => {
+                                        serde_json::Value::String(body)
+                                    }
+                                }
+                            }
+                            Err(_) => serde_json::Value::Null,
+                        };
+                        yield StreamItem::Chunk(AgentCompletionChunk {
+                            id: id.clone(),
+                            error: Some(
+                                objectiveai::error::ResponseError {
+                                    code: code.as_u16(),
+                                    message: serde_json::json!({
+                                        "kind": "bad_status",
+                                        "error": body,
+                                    }),
+                                },
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                    Err(e) => {
+                        yield StreamItem::Chunk(AgentCompletionChunk {
+                            id: id.clone(),
+                            error: Some(
+                                objectiveai::error::ResponseError {
+                                    code: 500,
+                                    message: serde_json::json!({
+                                        "kind": "stream_error",
+                                        "error": e.to_string(),
+                                    }),
+                                },
+                            ),
+                            ..Default::default()
+                        });
+                    }
+                }
+            }
+
+            // Yield the final accumulated state.
+            let state = match accumulated {
+                Some(acc) => AssistantMessage {
+                    content: acc.content,
+                    name: None,
+                    refusal: acc.refusal,
+                    tool_calls: acc.tool_calls.map(|tcs| {
+                        tcs.into_iter().map(Into::into).collect()
+                    }),
+                    reasoning: acc.reasoning,
+                },
+                None => AssistantMessage {
+                    content: None,
+                    name: None,
+                    refusal: None,
+                    tool_calls: None,
+                    reasoning: None,
+                },
+            };
+            yield StreamItem::State(state);
+        }
+    }
+}
+
+impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
+    type State = objectiveai::agent::completions::message::AssistantMessage;
+    type Stream = Pin<
+        Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
+    >;
+
+    fn create(
+        &self,
+        agent: &objectiveai::agent::openrouter::Agent,
+        params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+        messages: &[objectiveai::agent::completions::message::Message],
+        mcp_connections: &[Arc<crate::mcp::Connection>],
+        invention_tools: Option<
+            &[objectiveai::functions::inventions::InventionTool],
+        >,
+        continuation: Option<&[ContinuationItem<Self::State>]>,
+        byok: Option<&str>,
+        cost_multiplier: rust_decimal::Decimal,
+    ) -> impl Future<
+        Output = Result<
+            (Self::Stream, Self::State),
+            objectiveai::error::ResponseError,
+        >,
+    > + Send
+    + 'static {
+        let agent = agent.clone();
+        let params = params.clone();
+        let messages = messages.to_vec();
+        let mcp_connections = mcp_connections.to_vec();
+        let invention_tools = invention_tools.map(|t| t.to_vec());
+        let continuation = continuation.map(|c| c.to_vec());
+        let client = self.clone();
+        let is_byok = byok.is_some();
+        let byok = byok.map(String::from);
+
+        async move {
+            let created =
+                std::time::SystemTime::now()
+                    .duration_since(std::time::UNIX_EPOCH)
+                    .unwrap_or_default()
+                    .as_secs();
+            let id = response_id(created);
+
+            let request =
+                super::request::ChatCompletionCreateParams::new(
+                    &agent,
+                    &params,
+                    &messages,
+                    continuation.as_deref(),
+                    &mcp_connections,
+                    invention_tools.as_deref(),
+                )
+                .await
+                .map_err(|e| objectiveai::error::ResponseError {
+                    code: 500,
+                    message: serde_json::json!({
+                        "kind": "openrouter",
+                        "error": e.to_string(),
+                    }),
+                })?;
+
+            let api_key = byok.as_deref().unwrap_or(&client.api_key);
+            let event_source =
+                client.create_streaming_event_source(api_key, &request);
+
+            let stream = Self::create_streaming_stream(
+                event_source,
+                id,
+                agent.id.clone(),
+                is_byok,
+                cost_multiplier,
+            );
+
+            let initial_state = Self::State {
+                content: None,
+                name: None,
+                refusal: None,
+                tool_calls: None,
+                reasoning: None,
+            };
+
+            let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
+                Box::pin(stream);
+            Ok((boxed, initial_state))
+        }
+    }
+}

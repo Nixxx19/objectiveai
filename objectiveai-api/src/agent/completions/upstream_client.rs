@@ -26,6 +26,10 @@ pub trait UpstreamClient<AGENT> {
         // the upstream client can continue conversations from previous state
         // the agent may change
         continuation: Option<&[ContinuationItem<Self::State>]>,
+        // optional user-provided API key (BYOK) — used as authorization if provided
+        byok: Option<&str>,
+        // cost multiplier for usage reporting
+        cost_multiplier: rust_decimal::Decimal,
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),
