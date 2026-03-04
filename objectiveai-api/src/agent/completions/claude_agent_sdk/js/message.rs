@@ -8,3 +8,7 @@ pub fn build_message(prompt: &Prompt) -> Result<String, super::super::Error> {
         .map_err(|e| super::super::Error::Json(e.to_string()))?;
     Ok(format!("    const message = {json};"))
 }
+
+#[cfg(test)]
+#[path = "message_tests.rs"]
+mod tests;
