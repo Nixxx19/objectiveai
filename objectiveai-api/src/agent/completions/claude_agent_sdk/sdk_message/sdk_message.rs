@@ -35,6 +35,7 @@ impl SDKMessage {
         id: String,
         created: u64,
         agent: String,
+        assistant_index: u64,
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
     ) -> Option<
@@ -45,9 +46,11 @@ impl SDKMessage {
     > {
         match self {
             Self::PartialAssistantMessage(msg) => {
-                msg.into_downstream(id, created, agent).map(Ok)
+                msg.into_downstream(id, created, agent, assistant_index).map(Ok)
             }
-            Self::UserMessage(msg) => msg.into_downstream(id, created).map(Ok),
+            Self::UserMessage(msg) => {
+                msg.into_downstream(id, created, assistant_index).map(Ok)
+            }
             Self::ResultMessage(msg) => {
                 Some(Ok(msg.into_downstream(id, created, is_byok, cost_multiplier)))
             }

@@ -50,6 +50,7 @@ impl SDKUserMessage {
         self,
         id: String,
         created: u64,
+        assistant_index: u64,
     ) -> Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> {
         let (Some(tool_use_result), Some(tool_call_id)) =
             (self.tool_use_result, self.parent_tool_use_id)
@@ -61,7 +62,7 @@ impl SDKUserMessage {
         let message = objectiveai::agent::completions::response::streaming::MessageChunk::Tool(
             objectiveai::agent::completions::response::ToolResponse {
                 role: Default::default(),
-                index: 0,
+                index: assistant_index + 1,
                 inner: objectiveai::agent::completions::message::ToolMessage {
                     content: objectiveai::agent::completions::message::RichContent::Text(
                         content_str,

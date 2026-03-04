@@ -19,6 +19,7 @@ impl BetaRawMessageStreamEvent {
         id: String,
         created: u64,
         agent: String,
+        assistant_index: u64,
     ) -> Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> {
         use objectiveai::agent::completions::message;
         use objectiveai::agent::completions::response;
@@ -30,7 +31,7 @@ impl BetaRawMessageStreamEvent {
                 Some(response::streaming::MessageChunk::Assistant(
                     response::streaming::AssistantResponseChunk {
                         role: Default::default(),
-                        index: 0,
+                        index: assistant_index,
                         created,
                         agent: agent.clone(),
                         model: msg.model,
@@ -178,7 +179,7 @@ impl BetaRawMessageStreamEvent {
                 Some(response::streaming::MessageChunk::Assistant(
                     response::streaming::AssistantResponseChunk {
                         role: Default::default(),
-                        index: 0,
+                        index: assistant_index,
                         created,
                         agent: agent.clone(),
                         finish_reason,
