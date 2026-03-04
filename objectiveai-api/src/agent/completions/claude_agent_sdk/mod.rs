@@ -6,6 +6,7 @@ pub mod beta_usage;
 mod client;
 pub mod content_block_param;
 mod error;
+pub mod invention_server;
 pub mod mcp_server_config;
 mod prompt;
 pub mod sdk_message;
