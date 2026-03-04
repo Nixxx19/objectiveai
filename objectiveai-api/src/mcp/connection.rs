@@ -347,6 +347,169 @@ impl Connection {
         self.rpc("tools/call", params).await
     }
 
+    /// Calls a tool and converts the result into a [`ToolMessage`].
+    ///
+    /// Content blocks are mapped as follows:
+    /// - `text` → text part
+    /// - `image` → image_url part (data URL)
+    /// - `audio` → input_audio part
+    /// - `resource` (embedded text) → text part
+    /// - `resource` (embedded blob, image mime) → image_url part (data URL)
+    /// - `resource` (embedded blob, other mime) → file part
+    /// - `resource_link` → if the URI appears in `list_resources`, fetches
+    ///   via `read_resource` and inlines the content using the same
+    ///   text/blob rules; otherwise serializes the link as JSON text
+    ///
+    /// If `is_error` is set on the result, the content is prefixed with
+    /// an error indicator.
+    pub async fn call_tool_as_message(
+        &self,
+        params: &super::tool::CallToolRequestParams,
+        tool_call_id: String,
+    ) -> Result<
+        objectiveai::agent::completions::message::ToolMessage,
+        super::Error,
+    > {
+        use objectiveai::agent::completions::message::{
+            File, ImageUrl, InputAudio, RichContent, RichContentPart,
+            ToolMessage,
+        };
+        use super::shared::ResourceContentsUnion;
+        use super::tool::ContentBlock;
+
+        let result = self.call_tool(params).await?;
+
+        // Build the set of known resource URIs for resource_link resolution.
+        let known_resource_uris: std::collections::HashSet<String> =
+            match self.list_resources().await {
+                Ok(resources) => {
+                    resources.iter().map(|r| r.uri.clone()).collect()
+                }
+                Err(_) => std::collections::HashSet::new(),
+            };
+
+        /// Converts a `ResourceContentsUnion` into one or more rich content
+        /// parts. Text resources become text parts. Blob resources with an
+        /// image MIME type become image_url parts (data URL); all other blobs
+        /// become file parts.
+        fn resource_contents_to_part(
+            contents: &ResourceContentsUnion,
+        ) -> RichContentPart {
+            match contents {
+                ResourceContentsUnion::Text(text) => {
+                    RichContentPart::Text {
+                        text: text.text.clone(),
+                    }
+                }
+                ResourceContentsUnion::Blob(blob) => {
+                    let mime = blob
+                        .base
+                        .mime_type
+                        .as_deref()
+                        .unwrap_or("application/octet-stream");
+
+                    if mime.starts_with("image/") {
+                        RichContentPart::ImageUrl {
+                            image_url: ImageUrl {
+                                url: format!(
+                                    "data:{};base64,{}",
+                                    mime, blob.blob
+                                ),
+                                detail: None,
+                            },
+                        }
+                    } else {
+                        // Extract a filename from the URI path, if any.
+                        let filename = blob
+                            .base
+                            .uri
+                            .rsplit('/')
+                            .next()
+                            .filter(|s| !s.is_empty())
+                            .map(String::from);
+
+                        RichContentPart::File {
+                            file: File {
+                                file_data: Some(blob.blob.clone()),
+                                filename,
+                                file_id: None,
+                                file_url: None,
+                            },
+                        }
+                    }
+                }
+            }
+        }
+
+        let mut parts: Vec<RichContentPart> = Vec::new();
+
+        for block in &result.content {
+            match block {
+                ContentBlock::Text(text) => {
+                    parts.push(RichContentPart::Text {
+                        text: text.text.clone(),
+                    });
+                }
+                ContentBlock::Image(image) => {
+                    parts.push(RichContentPart::ImageUrl {
+                        image_url: ImageUrl {
+                            url: format!(
+                                "data:{};base64,{}",
+                                image.mime_type, image.data
+                            ),
+                            detail: None,
+                        },
+                    });
+                }
+                ContentBlock::Audio(audio) => {
+                    parts.push(RichContentPart::InputAudio {
+                        input_audio: InputAudio {
+                            data: audio.data.clone(),
+                            format: audio.mime_type.clone(),
+                        },
+                    });
+                }
+                ContentBlock::EmbeddedResource(embedded) => {
+                    parts.push(resource_contents_to_part(
+                        &embedded.resource,
+                    ));
+                }
+                ContentBlock::ResourceLink(link) => {
+                    if known_resource_uris.contains(&link.uri) {
+                        // Fetch the resource and inline its contents.
+                        let read_result =
+                            self.read_resource(&link.uri).await?;
+                        for contents in &read_result.contents {
+                            parts.push(
+                                resource_contents_to_part(contents),
+                            );
+                        }
+                    } else {
+                        // Not a known resource; serialize as JSON text.
+                        parts.push(RichContentPart::Text {
+                            text: serde_json::to_string(link)
+                                .unwrap_or_default(),
+                        });
+                    }
+                }
+            }
+        }
+
+        let content = match parts.len() {
+            0 => RichContent::Text(String::new()),
+            1 => match parts.remove(0) {
+                RichContentPart::Text { text } => RichContent::Text(text),
+                other => RichContent::Parts(vec![other]),
+            },
+            _ => RichContent::Parts(parts),
+        };
+
+        Ok(ToolMessage {
+            content,
+            tool_call_id,
+        })
+    }
+
     /// Sends a `resources/list` RPC call for a single page.
     async fn rpc_list_resources(
         &self,
