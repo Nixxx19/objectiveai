@@ -38,6 +38,7 @@ fn test_text_only_content() {
         "obj-1".to_string(),
         1000,
         "agent-a".to_string(),
+        0,
         false,
         Decimal::from(1),
     );
@@ -91,6 +92,7 @@ fn test_empty_delta() {
         "obj-2".to_string(),
         1000,
         "agent-b".to_string(),
+        0,
         false,
         Decimal::from(1),
     );
@@ -154,6 +156,7 @@ fn test_images_only() {
         "obj-3".to_string(),
         1000,
         "agent-c".to_string(),
+        0,
         false,
         Decimal::from(1),
     );
@@ -226,6 +229,7 @@ fn test_text_and_images_merged() {
         "obj-4".to_string(),
         1000,
         "agent-d".to_string(),
+        0,
         false,
         Decimal::from(1),
     );
@@ -312,6 +316,7 @@ fn test_usage_with_cost_multiplier() {
         "obj-5".to_string(),
         2000,
         "agent-e".to_string(),
+        0,
         false,
         multiplier,
     );
@@ -396,6 +401,7 @@ fn test_reasoning_and_tool_calls() {
         "obj-6".to_string(),
         1000,
         "agent-f".to_string(),
+        0,
         false,
         Decimal::from(1),
     );
@@ -483,6 +489,7 @@ fn test_byok_cost_splitting() {
         "obj-7".to_string(),
         3000,
         "agent-g".to_string(),
+        0,
         true,
         multiplier,
     );

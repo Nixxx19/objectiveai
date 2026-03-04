@@ -42,6 +42,7 @@ impl ChatCompletionChunk {
         id: String,
         created: u64,
         agent: String,
+        index: u64,
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
     ) -> objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
@@ -78,7 +79,7 @@ impl ChatCompletionChunk {
         let message = objectiveai::agent::completions::response::streaming::MessageChunk::Assistant(
             objectiveai::agent::completions::response::streaming::AssistantResponseChunk {
                 role: Default::default(),
-                index: 0,
+                index,
                 created: self.created,
                 agent,
                 model: self.model,

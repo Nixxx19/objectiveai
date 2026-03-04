@@ -58,6 +58,7 @@ impl Client {
         id: String,
         created: u64,
         agent: String,
+        index: u64,
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
     ) -> impl Stream<
@@ -97,6 +98,7 @@ impl Client {
                                     id.clone(),
                                     created,
                                     agent.clone(),
+                                    index,
                                     is_byok,
                                     cost_multiplier,
                                 );
@@ -294,11 +296,27 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
             let event_source =
                 client.create_streaming_event_source(api_key, &request);
 
+            let index = continuation
+                .as_deref()
+                .map(|c| {
+                    c.iter()
+                        .filter(|item| {
+                            matches!(
+                                item,
+                                ContinuationItem::State(_)
+                                    | ContinuationItem::ToolMessage(_)
+                            )
+                        })
+                        .count() as u64
+                })
+                .unwrap_or(0);
+
             let stream = Self::create_streaming_stream(
                 event_source,
                 id,
                 created,
                 agent.id.clone(),
+                index,
                 is_byok,
                 cost_multiplier,
             );
