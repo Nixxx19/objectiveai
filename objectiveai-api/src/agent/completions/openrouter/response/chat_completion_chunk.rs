@@ -40,6 +40,7 @@ impl ChatCompletionChunk {
     pub fn into_downstream(
         self,
         id: String,
+        created: u64,
         agent: String,
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
@@ -96,7 +97,7 @@ impl ChatCompletionChunk {
 
         objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id,
-            created: self.created,
+            created,
             messages: vec![message],
             object: Default::default(),
             usage: self

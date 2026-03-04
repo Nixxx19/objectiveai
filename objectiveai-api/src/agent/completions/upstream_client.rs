@@ -7,6 +7,10 @@ pub trait UpstreamClient<AGENT> {
         + 'static;
     fn create(
         &self,
+        // unique identifier for this completion
+        id: &str,
+        // unix timestamp when the completion was created
+        created: u64,
         // the agent that the upstream client uses
         agent: &AGENT,
         // the original request params for the agent completion

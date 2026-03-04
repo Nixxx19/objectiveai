@@ -9,12 +9,6 @@ use reqwest_eventsource::{Event, EventSource, RequestBuilderExt};
 use std::pin::Pin;
 use std::sync::Arc;
 
-/// Generates a unique response ID for an agent completion.
-pub fn response_id(created: u64) -> String {
-    let uuid = uuid::Uuid::new_v4();
-    format!("agntcpl-{}-{}", uuid.simple(), created)
-}
-
 /// HTTP client for communicating with the OpenRouter API for agent completions.
 #[derive(Debug, Clone)]
 pub struct Client {
@@ -62,6 +56,7 @@ impl Client {
     fn create_streaming_stream(
         mut event_source: EventSource,
         id: String,
+        created: u64,
         agent: String,
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
@@ -100,6 +95,7 @@ impl Client {
                             Ok(chunk) => {
                                 let downstream = chunk.into_downstream(
                                     id.clone(),
+                                    created,
                                     agent.clone(),
                                     is_byok,
                                     cost_multiplier,
@@ -245,6 +241,8 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
 
     fn create(
         &self,
+        id: &str,
+        created: u64,
         agent: &objectiveai::agent::openrouter::Agent,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
@@ -262,6 +260,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         >,
     > + Send
     + 'static {
+        let id = id.to_string();
         let agent = agent.clone();
         let params = params.clone();
         let messages = messages.to_vec();
@@ -273,13 +272,6 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         let byok = byok.map(String::from);
 
         async move {
-            let created =
-                std::time::SystemTime::now()
-                    .duration_since(std::time::UNIX_EPOCH)
-                    .unwrap_or_default()
-                    .as_secs();
-            let id = response_id(created);
-
             let request =
                 super::request::ChatCompletionCreateParams::new(
                     &agent,
@@ -305,6 +297,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
             let stream = Self::create_streaming_stream(
                 event_source,
                 id,
+                created,
                 agent.id.clone(),
                 is_byok,
                 cost_multiplier,

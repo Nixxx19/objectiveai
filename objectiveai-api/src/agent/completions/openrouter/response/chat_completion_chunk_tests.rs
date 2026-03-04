@@ -36,6 +36,7 @@ fn test_text_only_content() {
 
     let result = chunk.into_downstream(
         "obj-1".to_string(),
+        1000,
         "agent-a".to_string(),
         false,
         Decimal::from(1),
@@ -88,6 +89,7 @@ fn test_empty_delta() {
 
     let result = chunk.into_downstream(
         "obj-2".to_string(),
+        1000,
         "agent-b".to_string(),
         false,
         Decimal::from(1),
@@ -150,6 +152,7 @@ fn test_images_only() {
 
     let result = chunk.into_downstream(
         "obj-3".to_string(),
+        1000,
         "agent-c".to_string(),
         false,
         Decimal::from(1),
@@ -221,6 +224,7 @@ fn test_text_and_images_merged() {
 
     let result = chunk.into_downstream(
         "obj-4".to_string(),
+        1000,
         "agent-d".to_string(),
         false,
         Decimal::from(1),
@@ -306,6 +310,7 @@ fn test_usage_with_cost_multiplier() {
     let multiplier = Decimal::from_str("1.5").unwrap();
     let result = chunk.into_downstream(
         "obj-5".to_string(),
+        2000,
         "agent-e".to_string(),
         false,
         multiplier,
@@ -389,6 +394,7 @@ fn test_reasoning_and_tool_calls() {
 
     let result = chunk.into_downstream(
         "obj-6".to_string(),
+        1000,
         "agent-f".to_string(),
         false,
         Decimal::from(1),
@@ -475,6 +481,7 @@ fn test_byok_cost_splitting() {
     let multiplier = Decimal::from_str("2.0").unwrap();
     let result = chunk.into_downstream(
         "obj-7".to_string(),
+        3000,
         "agent-g".to_string(),
         true,
         multiplier,
