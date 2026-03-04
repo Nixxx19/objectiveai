@@ -14,3 +14,6 @@ mod state;
 pub use client::*;
 pub use error::*;
 pub use state::*;
+
+#[cfg(test)]
+mod prompt_tests;

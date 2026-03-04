@@ -5,6 +5,7 @@ use super::sdk_message::{
 };
 use objectiveai::agent::completions::message::{Message, RichContent, SimpleContent, SimpleContentPart};
 
+#[derive(Debug, Clone, PartialEq)]
 pub struct Prompt {
     pub system_prompt: Option<String>,
     pub message: SDKUserMessage,
