@@ -4,7 +4,7 @@ use crate::agent::completions::response;
 use serde::{Deserialize, Serialize};
 
 /// A complete agent completion response.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct AgentCompletion {
     pub id: String,
     pub created: u64,

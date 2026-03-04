@@ -4,7 +4,7 @@ use crate::agent::completions::{message, response};
 use serde::{Deserialize, Serialize};
 
 /// An assistant response in a unary agent completion.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 pub struct AssistantResponse {
     pub role: response::AssistantRole,
     pub index: u64,

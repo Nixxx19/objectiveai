@@ -372,6 +372,10 @@ fn generate_from_schema(
     }
 }
 
+#[cfg(test)]
+#[path = "client_tests.rs"]
+mod tests;
+
 /// Generates a random alphanumeric string (with spaces) of length between `min` and `max`.
 fn random_string(rng: &mut impl Rng, min: usize, max: usize) -> String {
     let len = rng.random_range(min..=max);
@@ -409,7 +413,11 @@ fn generate_tool_arguments(
                 inv.parameters.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
             ))
         }
-        Some(ResolvedTool::ResponseFormat) => None,
+        Some(ResolvedTool::ResponseFormat { schema, .. }) => {
+            Some(serde_json::Value::Object(
+                schema.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+            ))
+        }
         None => None,
     };
 

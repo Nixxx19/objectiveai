@@ -4,7 +4,7 @@ use crate::agent::completions::response;
 use serde::{Deserialize, Serialize};
 
 /// The object type for agent completion responses.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 pub enum Object {
     /// A agent completion object.
     #[serde(rename = "agent.completion")]

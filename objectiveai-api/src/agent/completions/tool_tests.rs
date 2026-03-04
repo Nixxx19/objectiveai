@@ -66,7 +66,7 @@ fn test_single_response_format_tool() {
     let rf = response_format_tool("submit");
     let (names, map) = resolve_tools(&[], &[], None, Some(&rf));
     assert_eq!(names, vec!["submit"]);
-    assert!(matches!(map.get("submit"), Some(ResolvedTool::ResponseFormat)));
+    assert!(matches!(map.get("submit"), Some(ResolvedTool::ResponseFormat { .. })));
 }
 
 #[test]
@@ -146,7 +146,7 @@ fn test_invention_conflicts_with_response_format() {
     let (names, map) = resolve_tools(&[], &[], Some(&[inv]), Some(&rf));
     assert_eq!(names.len(), 2);
     assert!(map.contains_key("submit"), "response format keeps original name");
-    assert!(matches!(map.get("submit"), Some(ResolvedTool::ResponseFormat)));
+    assert!(matches!(map.get("submit"), Some(ResolvedTool::ResponseFormat { .. })));
     assert!(map.contains_key("submit (objectiveai-invention)"));
 }
 
@@ -158,7 +158,7 @@ fn test_mcp_conflicts_with_response_format() {
     let (names, map) = resolve_tools(&[conn], &[tools], None, Some(&rf));
     assert_eq!(names.len(), 2);
     assert!(map.contains_key("submit"), "response format keeps original name");
-    assert!(matches!(map.get("submit"), Some(ResolvedTool::ResponseFormat)));
+    assert!(matches!(map.get("submit"), Some(ResolvedTool::ResponseFormat { .. })));
     assert!(map.contains_key("submit (alpha)"));
 }
 
@@ -173,7 +173,7 @@ fn test_four_way_conflict_mcp_x2_invention_response_format() {
     let (names, map) = resolve_tools(&[conn1, conn2], &[tools1, tools2], Some(&[inv]), Some(&rf));
     assert_eq!(names.len(), 4);
     assert!(map.contains_key("render"), "response format keeps original name");
-    assert!(matches!(map.get("render"), Some(ResolvedTool::ResponseFormat)));
+    assert!(matches!(map.get("render"), Some(ResolvedTool::ResponseFormat { .. })));
     assert!(map.contains_key("render (alpha)"));
     assert!(map.contains_key("render (beta)"));
     assert!(map.contains_key("render (objectiveai-invention)"));

@@ -6,8 +6,11 @@ use std::sync::Arc;
 pub enum ResolvedTool {
     /// An invention tool provided by ObjectiveAI.
     InventionTool(objectiveai::functions::inventions::InventionTool),
-    /// A response-format tool (no extra data needed).
-    ResponseFormat,
+    /// A response-format tool carrying its description and JSON schema.
+    ResponseFormat {
+        description: String,
+        schema: indexmap::IndexMap<String, serde_json::Value>,
+    },
     /// An MCP tool, with its connection and the original tool name on the server.
     Mcp {
         connection: Arc<crate::mcp::Connection>,
@@ -25,7 +28,10 @@ enum ToolSource {
         url: String,
     },
     Invention(objectiveai::functions::inventions::InventionTool),
-    ResponseFormat,
+    ResponseFormat {
+        description: String,
+        schema: indexmap::IndexMap<String, serde_json::Value>,
+    },
 }
 
 /// A tool paired with its origin for name-conflict resolution.
@@ -77,12 +83,17 @@ pub fn resolve_tools(
     // Response format tool.
     if let Some(objectiveai::agent::completions::request::ResponseFormat::ToolCall {
         name,
+        description,
+        schema,
         ..
     }) = response_format
     {
         sourced.push(SourcedTool {
             name: name.clone(),
-            source: ToolSource::ResponseFormat,
+            source: ToolSource::ResponseFormat {
+                description: description.clone(),
+                schema: schema.clone(),
+            },
         });
     }
 
@@ -143,7 +154,7 @@ fn resolve_name_conflicts(
                 ToolSource::Invention(_) => {
                     format!("{} (objectiveai-invention)", st.name)
                 }
-                ToolSource::ResponseFormat => st.name.clone(),
+                ToolSource::ResponseFormat { .. } => st.name.clone(),
             }
         };
 
@@ -153,7 +164,12 @@ fn resolve_name_conflicts(
                 tool: tool.clone(),
             },
             ToolSource::Invention(tool) => ResolvedTool::InventionTool(tool.clone()),
-            ToolSource::ResponseFormat => ResolvedTool::ResponseFormat,
+            ToolSource::ResponseFormat { description, schema } => {
+                ResolvedTool::ResponseFormat {
+                    description: description.clone(),
+                    schema: schema.clone(),
+                }
+            }
         };
 
         names.push(resolved_name.clone());

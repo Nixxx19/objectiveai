@@ -151,19 +151,14 @@ impl ChatCompletionCreateParams {
                     crate::agent::completions::tool::ResolvedTool::InventionTool(inv) => {
                         super::Tool::new_from_invention(resolved_name.clone(), inv)
                     }
-                    crate::agent::completions::tool::ResolvedTool::ResponseFormat => {
-                        if let Some(objectiveai::agent::completions::request::ResponseFormat::ToolCall {
-                            description, schema, ..
-                        }) = resolve_response_format(params, agent)
-                        {
-                            super::Tool::new_from_response_format(
-                                resolved_name.clone(),
-                                description,
-                                schema,
-                            )
-                        } else {
-                            return None;
-                        }
+                    crate::agent::completions::tool::ResolvedTool::ResponseFormat {
+                        description, schema,
+                    } => {
+                        super::Tool::new_from_response_format(
+                            resolved_name.clone(),
+                            description.clone(),
+                            schema.clone(),
+                        )
                     }
                 })
             })
