@@ -43,3 +43,6 @@ pub use sdk_tool_progress_message::*;
 pub use sdk_tool_use_summary_message::*;
 pub use sdk_user_message::*;
 pub use sdk_user_message_replay::*;
+
+#[cfg(test)]
+mod sdk_message_tests;

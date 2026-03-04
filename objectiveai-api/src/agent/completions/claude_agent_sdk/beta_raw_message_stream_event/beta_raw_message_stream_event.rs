@@ -48,7 +48,7 @@ impl BetaRawMessageStreamEvent {
                         Some(response::streaming::MessageChunk::Assistant(
                             response::streaming::AssistantResponseChunk {
                                 role: Default::default(),
-                                index: 0,
+                                index: assistant_index,
                                 created,
                                 agent: agent.clone(),
                                 tool_calls: Some(vec![message::AssistantToolCallDelta {
@@ -68,7 +68,7 @@ impl BetaRawMessageStreamEvent {
                         Some(response::streaming::MessageChunk::Assistant(
                             response::streaming::AssistantResponseChunk {
                                 role: Default::default(),
-                                index: 0,
+                                index: assistant_index,
                                 created,
                                 agent: agent.clone(),
                                 tool_calls: Some(vec![message::AssistantToolCallDelta {
@@ -88,7 +88,7 @@ impl BetaRawMessageStreamEvent {
                         Some(response::streaming::MessageChunk::Assistant(
                             response::streaming::AssistantResponseChunk {
                                 role: Default::default(),
-                                index: 0,
+                                index: assistant_index,
                                 created,
                                 agent: agent.clone(),
                                 tool_calls: Some(vec![message::AssistantToolCallDelta {
@@ -115,7 +115,7 @@ impl BetaRawMessageStreamEvent {
                         Some(response::streaming::MessageChunk::Assistant(
                             response::streaming::AssistantResponseChunk {
                                 role: Default::default(),
-                                index: 0,
+                                index: assistant_index,
                                 created,
                                 agent: agent.clone(),
                                 content: Some(message::RichContent::Text(delta.text)),
@@ -127,7 +127,7 @@ impl BetaRawMessageStreamEvent {
                         Some(response::streaming::MessageChunk::Assistant(
                             response::streaming::AssistantResponseChunk {
                                 role: Default::default(),
-                                index: 0,
+                                index: assistant_index,
                                 created,
                                 agent: agent.clone(),
                                 reasoning: Some(delta.thinking),
@@ -139,7 +139,7 @@ impl BetaRawMessageStreamEvent {
                         Some(response::streaming::MessageChunk::Assistant(
                             response::streaming::AssistantResponseChunk {
                                 role: Default::default(),
-                                index: 0,
+                                index: assistant_index,
                                 created,
                                 agent: agent.clone(),
                                 tool_calls: Some(vec![message::AssistantToolCallDelta {
