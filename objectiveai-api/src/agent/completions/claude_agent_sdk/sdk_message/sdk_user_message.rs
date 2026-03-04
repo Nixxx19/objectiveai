@@ -20,6 +20,32 @@ pub enum MessageParamContent {
     Blocks(Vec<super::super::content_block_param::ContentBlockParam>),
 }
 
+impl MessageParamContent {
+    pub fn push(&mut self, block: super::super::content_block_param::ContentBlockParam) {
+        match self {
+            MessageParamContent::String(s) => {
+                let mut blocks = if s.is_empty() {
+                    vec![]
+                } else {
+                    vec![super::super::content_block_param::ContentBlockParam::Text(
+                        super::super::content_block_param::TextBlockParam {
+                            text: std::mem::take(s),
+                            r#type: super::super::content_block_param::TextBlockParamType::Text,
+                            cache_control: None,
+                            citations: None,
+                        },
+                    )]
+                };
+                blocks.push(block);
+                *self = MessageParamContent::Blocks(blocks);
+            }
+            MessageParamContent::Blocks(blocks) => {
+                blocks.push(block);
+            }
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct MessageParam {
     pub content: MessageParamContent,
