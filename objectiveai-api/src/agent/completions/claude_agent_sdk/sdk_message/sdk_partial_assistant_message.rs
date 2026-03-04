@@ -14,3 +14,16 @@ pub struct SDKPartialAssistantMessage {
     pub uuid: String,
     pub session_id: String,
 }
+
+impl SDKPartialAssistantMessage {
+    /// Transforms this upstream partial assistant message into a downstream
+    /// [`AgentCompletionChunk`], or `None` if the inner event should be ignored.
+    pub fn into_downstream(
+        self,
+        id: String,
+        created: u64,
+        agent: String,
+    ) -> Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> {
+        self.event.into_downstream(id, created, agent)
+    }
+}

@@ -39,3 +39,48 @@ pub struct SDKUserMessage {
     pub uuid: Option<String>,
     pub session_id: String,
 }
+
+impl SDKUserMessage {
+    /// Transforms this upstream user message into a downstream
+    /// [`AgentCompletionChunk`], or `None` if not a tool response.
+    ///
+    /// Only produces a chunk when both `tool_use_result` and
+    /// `parent_tool_use_id` are present.
+    pub fn into_downstream(
+        self,
+        id: String,
+        created: u64,
+    ) -> Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk> {
+        let (Some(tool_use_result), Some(tool_call_id)) =
+            (self.tool_use_result, self.parent_tool_use_id)
+        else {
+            return None;
+        };
+
+        let content_str = serde_json::to_string(&tool_use_result).unwrap_or_default();
+        let message = objectiveai::agent::completions::response::streaming::MessageChunk::Tool(
+            objectiveai::agent::completions::response::ToolResponse {
+                role: Default::default(),
+                index: 0,
+                inner: objectiveai::agent::completions::message::ToolMessage {
+                    content: objectiveai::agent::completions::message::RichContent::Text(
+                        content_str,
+                    ),
+                    tool_call_id,
+                },
+            },
+        );
+
+        Some(
+            objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                id,
+                created,
+                messages: vec![message],
+                object: Default::default(),
+                usage: None,
+                upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
+                error: None,
+            },
+        )
+    }
+}

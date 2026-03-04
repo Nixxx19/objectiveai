@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use indexmap::IndexMap;
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
@@ -82,4 +82,86 @@ pub struct ModelUsage {
     pub cost_usd: rust_decimal::Decimal,
     pub context_window: i64,
     pub max_output_tokens: i64,
+}
+
+impl SDKResultMessage {
+    /// Transforms this upstream result message into a downstream
+    /// [`AgentCompletionChunk`] with final usage and cost information.
+    pub fn into_downstream(
+        self,
+        id: String,
+        created: u64,
+        is_byok: bool,
+        cost_multiplier: rust_decimal::Decimal,
+    ) -> objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+        let (total_cost_usd, usage, error) = match &self {
+            SDKResultMessage::Success(s) => (s.total_cost_usd, &s.usage, None),
+            SDKResultMessage::Error(e) => (
+                e.total_cost_usd,
+                &e.usage,
+                Some(objectiveai::error::ResponseError {
+                    code: 500,
+                    message: serde_json::Value::String(
+                        e.errors.join("; "),
+                    ),
+                }),
+            ),
+        };
+
+        let prompt_tokens = (usage.input_tokens
+            + usage.cache_creation_input_tokens
+            + usage.cache_read_input_tokens) as u64;
+        let completion_tokens = usage.output_tokens as u64;
+        let total_tokens = prompt_tokens + completion_tokens;
+
+        let prompt_tokens_details =
+            Some(objectiveai::agent::completions::response::PromptTokensDetails {
+                audio_tokens: None,
+                cached_tokens: Some(usage.cache_read_input_tokens as u64),
+                cache_write_tokens: Some(usage.cache_creation_input_tokens as u64),
+                video_tokens: None,
+            });
+
+        // For Claude Agent SDK, Anthropic is the direct upstream with no intermediary,
+        // so upstream_inference_cost = total_cost_usd and there is no upstream's upstream.
+        let upstream_inference_cost = total_cost_usd;
+        let upstream_upstream_inference_cost = rust_decimal::Decimal::ZERO;
+        let upstream_total_cost = upstream_inference_cost + upstream_upstream_inference_cost;
+        let total_cost = upstream_total_cost * cost_multiplier;
+        let (cost, cost_details, total_cost) = if is_byok {
+            (
+                total_cost - upstream_total_cost,
+                Some(objectiveai::agent::completions::response::CostDetails {
+                    upstream_inference_cost,
+                    upstream_upstream_inference_cost,
+                }),
+                total_cost,
+            )
+        } else {
+            (total_cost, None, total_cost)
+        };
+
+        let downstream_usage = objectiveai::agent::completions::response::Usage {
+            completion_tokens,
+            prompt_tokens,
+            total_tokens,
+            completion_tokens_details: None,
+            prompt_tokens_details,
+            cost,
+            cost_details,
+            total_cost,
+            cost_multiplier,
+            is_byok,
+        };
+
+        objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+            id,
+            created,
+            messages: vec![],
+            object: Default::default(),
+            usage: Some(downstream_usage),
+            upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
+            error,
+        }
+    }
 }
