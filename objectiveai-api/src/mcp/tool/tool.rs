@@ -37,6 +37,13 @@ pub struct Tool {
     pub _meta: Option<IndexMap<String, serde_json::Value>>,
 }
 
+impl Tool {
+    /// Returns a key identifying this tool, scoped to its connection.
+    pub fn tool_key(&self, connection_tool_key: &str) -> String {
+        format!("{connection_tool_key}-{}", self.name)
+    }
+}
+
 /// The type of a JSON Schema used by MCP tools.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 #[serde(rename_all = "lowercase")]

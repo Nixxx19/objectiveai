@@ -1,5 +1,6 @@
 //! Response format configuration for agent completions.
 
+use std::hash::{Hash, Hasher};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
@@ -32,6 +33,15 @@ pub enum ResponseFormat {
         #[serde(skip_serializing_if = "Option::is_none")]
         required: Option<bool>,
     },
+}
+
+impl ResponseFormat {
+    pub fn tool_key(&self) -> String {
+        let json = serde_json::to_string(self).unwrap_or_default();
+        let mut h = std::collections::hash_map::DefaultHasher::new();
+        json.hash(&mut h);
+        format!("{:x}", h.finish())
+    }
 }
 
 /// A map from agent ID to response format, allowing per-agent configuration.

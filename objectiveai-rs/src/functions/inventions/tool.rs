@@ -22,6 +22,18 @@ pub struct InventionTool {
 }
 
 impl InventionTool {
+    pub fn tool_key(&self) -> String {
+        use std::hash::{Hash, Hasher};
+        let mut h = std::collections::hash_map::DefaultHasher::new();
+        self.name.hash(&mut h);
+        self.description.hash(&mut h);
+        for (k, v) in &self.parameters {
+            k.hash(&mut h);
+            v.to_string().hash(&mut h);
+        }
+        format!("{:x}", h.finish())
+    }
+
     pub fn new_sync<T: crate::json_schema::JsonSchema>(
         name: &'static str,
         description: &'static str,

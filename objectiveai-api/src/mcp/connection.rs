@@ -306,6 +306,11 @@ impl Connection {
         Ok(())
     }
 
+    /// Returns a key identifying this connection for tool namespacing.
+    pub fn tool_key(&self) -> String {
+        format!("{}-{}", self.initialize_result.server_info.name, self.url)
+    }
+
     /// Returns the session ID for this connection.
     pub fn session_id(&self) -> &str {
         &self.session_id
