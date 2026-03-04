@@ -3,16 +3,22 @@
 use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
+use std::time::Duration;
 
 use futures::Stream;
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 
 use super::super::tool::ResolvedTool;
 use super::super::upstream_client::{ContinuationItem, StreamItem, UpstreamClient};
 
-/// Mock upstream client that generates random responses.
+/// Mock upstream client that generates random responses with configurable delay.
 #[derive(Debug, Clone)]
-pub struct Client;
+pub struct Client {
+    /// Delay before yielding each chunk.
+    pub delay: Duration,
+    /// Optional RNG seed for deterministic output.
+    pub seed: Option<u64>,
+}
 
 /// Resolves the response format for this agent from the request params.
 fn resolve_response_format(
@@ -24,6 +30,22 @@ fn resolve_response_format(
         ResponseFormatParam::Single(rf) => Some(rf.clone()),
         ResponseFormatParam::PerAgent(map) => map.get(agent_id).cloned(),
     }
+}
+
+/// The outcome of the tool-vs-content dice roll.
+enum MockResponse {
+    /// Respond with text content, split across N chunks.
+    Content {
+        text: String,
+        n_chunks: usize,
+    },
+    /// Respond with a tool call, arguments split across N delta chunks.
+    ToolCall {
+        tool_name: String,
+        call_id: String,
+        arguments: String,
+        n_deltas: usize,
+    },
 }
 
 impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
@@ -46,7 +68,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         tool_names: &[String],
         tool_map: &HashMap<String, ResolvedTool>,
         _continuation: Option<&[ContinuationItem<Self::State>]>,
-        _byok: Option<&str>,
+        byok: Option<&str>,
         _cost_multiplier: rust_decimal::Decimal,
     ) -> impl Future<
         Output = Result<
@@ -60,17 +82,12 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         let response_format = resolve_response_format(&agent.id, params);
         let tool_names = tool_names.to_vec();
         let tool_map = tool_map.clone();
+        let delay = self.delay;
+        let seed = self.seed;
+        let is_byok = byok.is_some();
 
         async move {
-            use objectiveai::agent::completions::message::{
-                AssistantToolCallDelta, AssistantToolCallFunctionDelta,
-                AssistantToolCallType, RichContent,
-            };
             use objectiveai::agent::completions::request::ResponseFormat;
-            use objectiveai::agent::completions::response::streaming::{
-                AgentCompletionChunk, AssistantResponseChunk, MessageChunk,
-            };
-            use objectiveai::agent::completions::response::FinishReason;
 
             // Reject Grammar and Python response formats.
             if let Some(ref rf) = response_format {
@@ -88,119 +105,170 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 }
             }
 
-            // Determine if we should call a tool or respond as-is.
-            let mut rng = rand::rng();
-
-            // Check for required tool call from response format.
-            let required_tool = match &response_format {
-                Some(ResponseFormat::ToolCall {
-                    name, required: Some(true), ..
-                }) => {
-                    // Find this tool in the map.
-                    if tool_map.contains_key(name) {
-                        Some(name.clone())
-                    } else {
-                        None
-                    }
-                }
-                _ => None,
+            let mut rng = match seed {
+                Some(s) => rand::rngs::StdRng::seed_from_u64(s),
+                None => rand::rngs::StdRng::from_os_rng(),
             };
 
-            let (finish_reason, content, tool_calls) = if let Some(ref tool_name) = required_tool {
-                // Required tool call — always call it.
-                let arguments = generate_tool_arguments(&tool_map, tool_name, &mut rng);
-                (
-                    FinishReason::ToolCalls,
-                    None,
-                    Some(vec![AssistantToolCallDelta {
-                        index: 0,
-                        r#type: Some(AssistantToolCallType::Function),
-                        id: Some(format!("call_mock_{}", rng.random_range(0u64..u64::MAX))),
-                        function: Some(AssistantToolCallFunctionDelta {
-                            name: Some(tool_name.clone()),
-                            arguments: Some(arguments),
-                        }),
-                    }]),
-                )
-            } else if !tool_names.is_empty() {
-                // Roll the dice: equal probability for each tool or respond as-is,
-                // with respond as-is having a minimum 25% chance.
-                let n_tools = tool_names.len();
-                let respond_as_is_weight = if n_tools >= 3 {
-                    // 25% minimum for respond-as-is
-                    25u32
-                } else {
-                    // Equal share: 1/(n_tools+1) as percentage
-                    (100 / (n_tools as u32 + 1)).max(25)
-                };
-                let tool_weight = (100 - respond_as_is_weight) / n_tools as u32;
-                let roll = rng.random_range(0u32..100);
+            // --- Reasoning: roll 0-5 chunks ---
+            let n_reasoning = rng.random_range(0u32..=5);
+            let reasoning_chunks: Vec<String> = (0..n_reasoning)
+                .map(|_| random_string(&mut rng, 20, 200))
+                .collect();
 
-                if roll < respond_as_is_weight {
-                    // Respond as-is.
-                    let content = generate_content(&response_format, &mut rng);
-                    (FinishReason::Stop, content, None)
-                } else {
-                    // Pick a tool based on the roll.
-                    let tool_index = ((roll - respond_as_is_weight) / tool_weight.max(1))
-                        .min(n_tools as u32 - 1) as usize;
-                    let tool_name = &tool_names[tool_index];
-                    let arguments = generate_tool_arguments(&tool_map, tool_name, &mut rng);
-                    (
-                        FinishReason::ToolCalls,
-                        None,
-                        Some(vec![AssistantToolCallDelta {
-                            index: 0,
-                            r#type: Some(AssistantToolCallType::Function),
-                            id: Some(format!("call_mock_{}", rng.random_range(0u64..u64::MAX))),
-                            function: Some(AssistantToolCallFunctionDelta {
-                                name: Some(tool_name.clone()),
-                                arguments: Some(arguments),
-                            }),
-                        }]),
-                    )
-                }
-            } else {
-                // No tools — respond as-is.
-                let content = generate_content(&response_format, &mut rng);
-                (FinishReason::Stop, content, None)
-            };
-
-            // 50/50 chance to include reasoning.
-            let reasoning = if rng.random_bool(0.5) {
-                Some(random_string(&mut rng, 20, 200))
-            } else {
-                None
-            };
-
-            let chunk = AgentCompletionChunk {
-                id: id.clone(),
-                created,
-                messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
-                    role: Default::default(),
-                    index: 0,
-                    created,
-                    agent: agent_id,
-                    model: "mock".into(),
-                    upstream_id: id.clone(),
-                    reasoning,
-                    tool_calls,
-                    content,
-                    refusal: None,
-                    finish_reason: Some(finish_reason),
-                    logprobs: None,
-                    service_tier: None,
-                    system_fingerprint: None,
-                    provider: None,
-                })],
-                object: Default::default(),
-                usage: None,
-                upstream: Default::default(),
-                error: None,
-            };
+            // --- Tool call vs content ---
+            let mock_response = resolve_mock_response(
+                &response_format,
+                &tool_names,
+                &tool_map,
+                &mut rng,
+            );
 
             let stream = async_stream::stream! {
-                yield StreamItem::Chunk(chunk);
+                use objectiveai::agent::completions::message::{
+                    AssistantToolCallDelta, AssistantToolCallFunctionDelta,
+                    AssistantToolCallType, RichContent,
+                };
+                use objectiveai::agent::completions::response::streaming::{
+                    AgentCompletionChunk, AssistantResponseChunk, MessageChunk,
+                };
+                use objectiveai::agent::completions::response::FinishReason;
+
+                // --- Yield reasoning chunks ---
+                for reasoning_text in &reasoning_chunks {
+                    if !delay.is_zero() {
+                        tokio::time::sleep(delay).await;
+                    }
+                    yield StreamItem::Chunk(AgentCompletionChunk {
+                        id: id.clone(),
+                        created,
+                        messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
+                            index: 0,
+                            created,
+                            agent: agent_id.clone(),
+                            model: "mock".into(),
+                            upstream_id: id.clone(),
+                            reasoning: Some(reasoning_text.clone()),
+                            ..Default::default()
+                        })],
+                        ..Default::default()
+                    });
+                }
+
+                // --- Yield content or tool call chunks ---
+                match &mock_response {
+                    MockResponse::Content { text, n_chunks } => {
+                        let chunk_size = (text.len() + n_chunks - 1) / n_chunks;
+                        let parts: Vec<&str> = if text.is_empty() {
+                            vec![""]
+                        } else {
+                            text.as_bytes()
+                                .chunks(chunk_size.max(1))
+                                .map(|b| std::str::from_utf8(b).unwrap_or(""))
+                                .collect()
+                        };
+
+                        for (i, part) in parts.iter().enumerate() {
+                            let is_last = i == parts.len() - 1;
+                            if !delay.is_zero() {
+                                tokio::time::sleep(delay).await;
+                            }
+                            yield StreamItem::Chunk(AgentCompletionChunk {
+                                id: id.clone(),
+                                created,
+                                messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
+                                    index: 0,
+                                    created,
+                                    agent: agent_id.clone(),
+                                    model: "mock".into(),
+                                    upstream_id: id.clone(),
+                                    content: Some(RichContent::Text(part.to_string())),
+                                    finish_reason: if is_last {
+                                        Some(FinishReason::Stop)
+                                    } else {
+                                        None
+                                    },
+                                    ..Default::default()
+                                })],
+                                ..Default::default()
+                            });
+                        }
+                    }
+                    MockResponse::ToolCall { tool_name, call_id, arguments, n_deltas } => {
+                        let chunk_size = (arguments.len() + n_deltas - 1) / n_deltas;
+                        let parts: Vec<&str> = if arguments.is_empty() {
+                            vec![""]
+                        } else {
+                            arguments.as_bytes()
+                                .chunks(chunk_size.max(1))
+                                .map(|b| std::str::from_utf8(b).unwrap_or(""))
+                                .collect()
+                        };
+
+                        for (i, part) in parts.iter().enumerate() {
+                            let is_first = i == 0;
+                            let is_last = i == parts.len() - 1;
+                            if !delay.is_zero() {
+                                tokio::time::sleep(delay).await;
+                            }
+                            yield StreamItem::Chunk(AgentCompletionChunk {
+                                id: id.clone(),
+                                created,
+                                messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
+                                    index: 0,
+                                    created,
+                                    agent: agent_id.clone(),
+                                    model: "mock".into(),
+                                    upstream_id: id.clone(),
+                                    tool_calls: Some(vec![AssistantToolCallDelta {
+                                        index: 0,
+                                        r#type: if is_first {
+                                            Some(AssistantToolCallType::Function)
+                                        } else {
+                                            None
+                                        },
+                                        id: if is_first {
+                                            Some(call_id.clone())
+                                        } else {
+                                            None
+                                        },
+                                        function: Some(AssistantToolCallFunctionDelta {
+                                            name: if is_first {
+                                                Some(tool_name.clone())
+                                            } else {
+                                                None
+                                            },
+                                            arguments: Some(part.to_string()),
+                                        }),
+                                    }]),
+                                    finish_reason: if is_last {
+                                        Some(FinishReason::ToolCalls)
+                                    } else {
+                                        None
+                                    },
+                                    ..Default::default()
+                                })],
+                                ..Default::default()
+                            });
+                        }
+                    }
+                }
+
+                // --- Yield usage chunk ---
+                if !delay.is_zero() {
+                    tokio::time::sleep(delay).await;
+                }
+                yield StreamItem::Chunk(AgentCompletionChunk {
+                    id: id.clone(),
+                    created,
+                    usage: Some(objectiveai::agent::completions::response::Usage {
+                        is_byok,
+                        ..Default::default()
+                    }),
+                    ..Default::default()
+                });
+
+                // --- Yield final state ---
                 yield StreamItem::State(());
             };
 
@@ -211,50 +279,96 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
     }
 }
 
-/// Generates content for a respond-as-is case based on response format.
-fn generate_content(
+/// Decides whether to call a tool or respond with content, and generates the data.
+fn resolve_mock_response(
+    response_format: &Option<objectiveai::agent::completions::request::ResponseFormat>,
+    tool_names: &[String],
+    tool_map: &HashMap<String, ResolvedTool>,
+    rng: &mut impl Rng,
+) -> MockResponse {
+    use objectiveai::agent::completions::request::ResponseFormat;
+
+    // Check for required tool call from response format.
+    if let Some(ResponseFormat::ToolCall {
+        name, required: Some(true), ..
+    }) = response_format
+    {
+        if tool_map.contains_key(name) {
+            let arguments = generate_tool_arguments(tool_map, name, rng);
+            return MockResponse::ToolCall {
+                tool_name: name.clone(),
+                call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
+                arguments,
+                n_deltas: rng.random_range(1u32..=5) as usize,
+            };
+        }
+    }
+
+    if !tool_names.is_empty() {
+        // Roll the dice: equal probability for each tool or respond as-is,
+        // with respond-as-is having a minimum 25% chance.
+        let n_tools = tool_names.len();
+        let respond_as_is_weight = if n_tools >= 3 {
+            25u32
+        } else {
+            (100 / (n_tools as u32 + 1)).max(25)
+        };
+        let tool_weight = (100 - respond_as_is_weight) / n_tools as u32;
+        let roll = rng.random_range(0u32..100);
+
+        if roll >= respond_as_is_weight {
+            let tool_index = ((roll - respond_as_is_weight) / tool_weight.max(1))
+                .min(n_tools as u32 - 1) as usize;
+            let tool_name = &tool_names[tool_index];
+            let arguments = generate_tool_arguments(tool_map, tool_name, rng);
+            return MockResponse::ToolCall {
+                tool_name: tool_name.clone(),
+                call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
+                arguments,
+                n_deltas: rng.random_range(1u32..=5) as usize,
+            };
+        }
+    }
+
+    // Respond as-is with content.
+    let text = generate_content_string(response_format, rng);
+    MockResponse::Content {
+        text,
+        n_chunks: rng.random_range(1u32..=5) as usize,
+    }
+}
+
+/// Generates the content string for a respond-as-is case based on response format.
+fn generate_content_string(
     response_format: &Option<objectiveai::agent::completions::request::ResponseFormat>,
     rng: &mut impl Rng,
-) -> Option<objectiveai::agent::completions::message::RichContent> {
-    use objectiveai::agent::completions::message::RichContent;
+) -> String {
     use objectiveai::agent::completions::request::ResponseFormat;
 
     match response_format {
-        Some(ResponseFormat::JsonObject) => {
-            Some(RichContent::Text("{}".into()))
+        Some(ResponseFormat::JsonObject) => "{}".into(),
+        Some(ResponseFormat::JsonSchema { schema }) | Some(ResponseFormat::ToolCall { schema, .. }) => {
+            generate_from_schema(schema, rng)
         }
-        Some(ResponseFormat::JsonSchema { schema }) => {
-            match serde_json::from_value::<super::json_schema::JsonSchema>(
-                serde_json::Value::Object(
-                    schema.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
-                ),
-            ) {
-                Ok(js) => {
-                    let value = js.generate_from_rng(rng);
-                    Some(RichContent::Text(serde_json::to_string(&value).unwrap_or_else(|_| "{}".into())))
-                }
-                Err(_) => Some(RichContent::Text("{}".into())),
-            }
+        _ => random_string(rng, 10, 100),
+    }
+}
+
+/// Generates a JSON string from an IndexMap schema, falling back to "{}".
+fn generate_from_schema(
+    schema: &indexmap::IndexMap<String, serde_json::Value>,
+    rng: &mut impl Rng,
+) -> String {
+    match serde_json::from_value::<super::json_schema::JsonSchema>(
+        serde_json::Value::Object(
+            schema.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
+        ),
+    ) {
+        Ok(js) => {
+            let value = js.generate_from_rng(rng);
+            serde_json::to_string(&value).unwrap_or_else(|_| "{}".into())
         }
-        Some(ResponseFormat::ToolCall { schema, .. }) => {
-            // If we're responding as-is with a non-required ToolCall format,
-            // generate from the schema as content.
-            match serde_json::from_value::<super::json_schema::JsonSchema>(
-                serde_json::Value::Object(
-                    schema.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
-                ),
-            ) {
-                Ok(js) => {
-                    let value = js.generate_from_rng(rng);
-                    Some(RichContent::Text(serde_json::to_string(&value).unwrap_or_else(|_| "{}".into())))
-                }
-                Err(_) => Some(RichContent::Text("{}".into())),
-            }
-        }
-        _ => {
-            // Text or None — generate a random string.
-            Some(RichContent::Text(random_string(rng, 10, 100)))
-        }
+        Err(_) => "{}".into(),
     }
 }
 
@@ -278,7 +392,6 @@ fn generate_tool_arguments(
 ) -> String {
     let schema_value = match tool_map.get(tool_name) {
         Some(ResolvedTool::Mcp { tool, .. }) => {
-            // Build a JSON object from the MCP tool's input_schema.
             let mut map = serde_json::Map::new();
             map.insert("type".into(), serde_json::json!("object"));
             if let Some(props) = &tool.input_schema.properties {
