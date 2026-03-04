@@ -45,6 +45,35 @@ pub struct McpHttpServerConfig {
     pub headers: Option<indexmap::IndexMap<String, String>>,
 }
 
+impl From<&crate::mcp::Connection> for McpHttpServerConfig {
+    fn from(conn: &crate::mcp::Connection) -> Self {
+        let mut headers = indexmap::IndexMap::new();
+
+        if let Some(auth) = &conn.authorization {
+            headers.insert("Authorization".to_string(), auth.clone());
+        }
+        if let Some(ua) = &conn.user_agent {
+            headers.insert("User-Agent".to_string(), ua.clone());
+        }
+        if let Some(title) = &conn.x_title {
+            headers.insert("X-Title".to_string(), title.clone());
+        }
+        if let Some(referer) = &conn.referer {
+            headers.insert("Referer".to_string(), referer.clone());
+        }
+
+        McpHttpServerConfig {
+            r#type: McpHttpServerConfigType::Http,
+            url: conn.url.clone(),
+            headers: if headers.is_empty() {
+                None
+            } else {
+                Some(headers)
+            },
+        }
+    }
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(untagged)]
 pub enum McpServerConfig {
