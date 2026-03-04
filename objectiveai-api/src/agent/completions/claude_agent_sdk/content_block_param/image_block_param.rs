@@ -59,11 +59,11 @@ pub struct ImageBlockParam {
     pub cache_control: Option<super::CacheControlEphemeral>,
 }
 
-impl TryFrom<ImageUrl> for ImageBlockParam {
+impl TryFrom<&ImageUrl> for ImageBlockParam {
     type Error = String;
 
-    fn try_from(image_url: ImageUrl) -> Result<Self, Self::Error> {
-        let url = image_url.url;
+    fn try_from(image_url: &ImageUrl) -> Result<Self, Self::Error> {
+        let url = &image_url.url;
         if url.starts_with("data:") {
             let comma_index = url.find(',').ok_or("invalid data URI: no comma")?;
             let meta = &url[5..comma_index];
@@ -90,7 +90,7 @@ impl TryFrom<ImageUrl> for ImageBlockParam {
                 r#type: ImageBlockParamType::Image,
                 source: ImageSource::URL(URLImageSource {
                     r#type: URLImageSourceType::Url,
-                    url,
+                    url: url.clone(),
                 }),
                 cache_control: None,
             })

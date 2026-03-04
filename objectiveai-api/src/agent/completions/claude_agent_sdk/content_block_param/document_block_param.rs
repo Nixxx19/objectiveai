@@ -108,25 +108,25 @@ pub struct DocumentBlockParam {
     pub title: Option<String>,
 }
 
-impl TryFrom<File> for DocumentBlockParam {
+impl TryFrom<&File> for DocumentBlockParam {
     type Error = String;
 
-    fn try_from(file: File) -> Result<Self, Self::Error> {
-        if let Some(file_url) = file.file_url {
+    fn try_from(file: &File) -> Result<Self, Self::Error> {
+        if let Some(file_url) = &file.file_url {
             return Ok(DocumentBlockParam {
                 r#type: DocumentBlockParamType::Document,
                 source: DocumentSource::URLPDF(URLPDFSource {
                     r#type: URLPDFSourceType::Url,
-                    url: file_url,
+                    url: file_url.clone(),
                 }),
                 cache_control: None,
                 citations: None,
                 context: None,
-                title: file.filename,
+                title: file.filename.clone(),
             });
         }
 
-        if let Some(file_data) = file.file_data {
+        if let Some(file_data) = &file.file_data {
             let is_pdf = file
                 .filename
                 .as_ref()
@@ -136,13 +136,13 @@ impl TryFrom<File> for DocumentBlockParam {
             let source = if is_pdf {
                 DocumentSource::Base64PDF(Base64PDFSource {
                     r#type: Base64PDFSourceType::Base64,
-                    data: file_data,
+                    data: file_data.clone(),
                     media_type: Base64PDFSourceMediaType::ApplicationPdf,
                 })
             } else {
                 DocumentSource::PlainText(PlainTextSource {
                     r#type: PlainTextSourceType::Text,
-                    data: file_data,
+                    data: file_data.clone(),
                     media_type: PlainTextSourceMediaType::TextPlain,
                 })
             };
@@ -153,7 +153,7 @@ impl TryFrom<File> for DocumentBlockParam {
                 cache_control: None,
                 citations: None,
                 context: None,
-                title: file.filename,
+                title: file.filename.clone(),
             });
         }
 

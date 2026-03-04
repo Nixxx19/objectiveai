@@ -21,17 +21,17 @@ pub enum ContentBlockParam {
     ContainerUpload(super::ContainerUploadBlockParam),
 }
 
-impl TryFrom<objectiveai::agent::completions::message::RichContentPart> for ContentBlockParam {
+impl TryFrom<&objectiveai::agent::completions::message::RichContentPart> for ContentBlockParam {
     type Error = String;
 
     fn try_from(
-        part: objectiveai::agent::completions::message::RichContentPart,
+        part: &objectiveai::agent::completions::message::RichContentPart,
     ) -> Result<Self, Self::Error> {
         use objectiveai::agent::completions::message::RichContentPart;
 
         match part {
             RichContentPart::Text { text } => Ok(ContentBlockParam::Text(super::TextBlockParam {
-                text,
+                text: text.clone(),
                 r#type: super::TextBlockParamType::Text,
                 cache_control: None,
                 citations: None,
