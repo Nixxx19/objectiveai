@@ -1,3 +1,4 @@
+use objectiveai::agent::completions::message::File;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
@@ -105,4 +106,62 @@ pub struct DocumentBlockParam {
     pub context: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub title: Option<String>,
+}
+
+impl TryFrom<File> for DocumentBlockParam {
+    type Error = String;
+
+    fn try_from(file: File) -> Result<Self, Self::Error> {
+        if let Some(file_url) = file.file_url {
+            return Ok(DocumentBlockParam {
+                r#type: DocumentBlockParamType::Document,
+                source: DocumentSource::URLPDF(URLPDFSource {
+                    r#type: URLPDFSourceType::Url,
+                    url: file_url,
+                }),
+                cache_control: None,
+                citations: None,
+                context: None,
+                title: file.filename,
+            });
+        }
+
+        if let Some(file_data) = file.file_data {
+            let is_pdf = file
+                .filename
+                .as_ref()
+                .map(|n| n.to_lowercase().ends_with(".pdf"))
+                .unwrap_or(false);
+
+            let source = if is_pdf {
+                DocumentSource::Base64PDF(Base64PDFSource {
+                    r#type: Base64PDFSourceType::Base64,
+                    data: file_data,
+                    media_type: Base64PDFSourceMediaType::ApplicationPdf,
+                })
+            } else {
+                DocumentSource::PlainText(PlainTextSource {
+                    r#type: PlainTextSourceType::Text,
+                    data: file_data,
+                    media_type: PlainTextSourceMediaType::TextPlain,
+                })
+            };
+
+            return Ok(DocumentBlockParam {
+                r#type: DocumentBlockParamType::Document,
+                source,
+                cache_control: None,
+                citations: None,
+                context: None,
+                title: file.filename,
+            });
+        }
+
+        let desc = file
+            .filename
+            .as_deref()
+            .or(file.file_id.as_deref())
+            .unwrap_or("unknown");
+        Err(format!("unsupported file: no data or URL provided ({desc})"))
+    }
 }
