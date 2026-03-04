@@ -252,6 +252,8 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
+        tool_names: &[String],
+        tool_map: &std::collections::HashMap<String, super::super::tool::ResolvedTool>,
         continuation: Option<&[ContinuationItem<Self::State>]>,
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,
@@ -266,8 +268,8 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         let agent = agent.clone();
         let params = params.clone();
         let messages = messages.to_vec();
-        let mcp_connections = mcp_connections.to_vec();
-        let invention_tools = invention_tools.map(|t| t.to_vec());
+        let tool_names = tool_names.to_vec();
+        let tool_map = tool_map.clone();
         let continuation = continuation.map(|c| c.to_vec());
         let client = self.clone();
         let is_byok = byok.is_some();
@@ -280,17 +282,9 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                     &params,
                     &messages,
                     continuation.as_deref(),
-                    &mcp_connections,
-                    invention_tools.as_deref(),
-                )
-                .await
-                .map_err(|e| objectiveai::error::ResponseError {
-                    code: 500,
-                    message: serde_json::json!({
-                        "kind": "openrouter",
-                        "error": e.to_string(),
-                    }),
-                })?;
+                    &tool_names,
+                    &tool_map,
+                );
 
             let api_key = byok.as_deref().unwrap_or(&client.api_key);
             let event_source =

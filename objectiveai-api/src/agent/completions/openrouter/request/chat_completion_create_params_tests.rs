@@ -1,7 +1,36 @@
 //! Tests for [`ChatCompletionCreateParams`] construction.
 
 use super::*;
+use std::collections::HashMap;
 use std::sync::Arc;
+
+/// Helper to resolve tools and build params, replacing the old `new_with_tools`.
+fn build_params(
+    agent: &objectiveai::agent::openrouter::Agent,
+    params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+    messages: &[objectiveai::agent::completions::message::Message],
+    continuation: Option<&[crate::agent::completions::upstream_client::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
+    mcp_connections: &[Arc<crate::mcp::Connection>],
+    mcp_tools: &[Arc<Vec<crate::mcp::tool::Tool>>],
+    invention_tools: Option<&[objectiveai::functions::inventions::InventionTool]>,
+) -> ChatCompletionCreateParams {
+    let resolved_rf = params.response_format.as_ref().and_then(|rfp| {
+        match rfp {
+            objectiveai::agent::completions::request::ResponseFormatParam::Single(rf) => Some(rf.clone()),
+            objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(map) => map.get(&agent.id).cloned(),
+        }
+    });
+    let (tool_names, tool_map) = crate::agent::completions::tool::resolve_tools(
+        mcp_connections,
+        mcp_tools,
+        invention_tools,
+        resolved_rf.as_ref(),
+    );
+    ChatCompletionCreateParams::new(
+        agent, params, messages, continuation,
+        &tool_names, &tool_map,
+    )
+}
 
 #[test]
 fn test_no_tools_empty_params() {
@@ -41,7 +70,7 @@ fn test_no_tools_empty_params() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -159,7 +188,7 @@ fn test_invention_response_format_name_conflict() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let mut result = ChatCompletionCreateParams::new_with_tools(
+    let mut result = build_params(
         &agent,
         &params,
         &messages,
@@ -211,7 +240,7 @@ fn test_invention_response_format_name_conflict() {
             },
             super::Tool::Function {
                 function: super::FunctionTool {
-                    name: "output (invention)".to_string(),
+                    name: "output (objectiveai-invention)".to_string(),
                     description: Some("Invention output".to_string()),
                     parameters: Some(inv_params),
                     strict: None,
@@ -259,7 +288,7 @@ fn test_top_logprobs_zero_omits_logprobs() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -388,7 +417,7 @@ fn test_multiple_invention_tools_no_conflicts() {
         },
     ];
 
-    let mut result = ChatCompletionCreateParams::new_with_tools(
+    let mut result = build_params(
         &agent,
         &params,
         &messages,
@@ -516,7 +545,7 @@ fn test_toolcall_not_required_uses_auto_choice() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -646,7 +675,7 @@ fn test_invention_tool_parameters_preserved() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -756,7 +785,7 @@ fn test_agent_base_fields_passthrough() {
         ),
     ];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -861,7 +890,7 @@ fn test_provider_merging_both_sides() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -966,7 +995,7 @@ fn test_per_agent_response_format_miss() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -1068,7 +1097,7 @@ fn test_json_schema_response_format_extracts_title() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -1213,7 +1242,7 @@ fn test_seed_passthrough() {
         ),
     ];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -1313,7 +1342,7 @@ fn test_toolcall_required_forces_function_choice() {
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &[],
@@ -1410,6 +1439,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
 
     // Server 1: file operations
     let conn1 = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://files.example.com/mcp".into(),
     );
     let tools1 = Arc::new(vec![
@@ -1509,6 +1539,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
 
     // Server 2: database operations
     let conn2 = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://db.example.com/mcp".into(),
     );
     let tools2 = Arc::new(vec![
@@ -1611,6 +1642,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
 
     // Server 3: web/HTTP operations
     let conn3 = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://web.example.com/mcp".into(),
     );
     let tools3 = Arc::new(vec![
@@ -1714,7 +1746,7 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
     let mcp_connections = vec![conn1, conn2, conn3];
     let mcp_tools = vec![tools1, tools2, tools3];
 
-    let mut result = ChatCompletionCreateParams::new_with_tools(
+    let mut result = build_params(
         &agent,
         &params,
         &messages,
@@ -2002,6 +2034,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
 
     // Server 1: knowledge base — has "search" (the duplicate)
     let conn1 = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://kb.example.com/mcp".into(),
     );
     let tools1 = Arc::new(vec![
@@ -2100,6 +2133,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
 
     // Server 2: code search — also has "search" (the duplicate!)
     let conn2 = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://code.example.com/mcp".into(),
     );
     let tools2 = Arc::new(vec![
@@ -2204,6 +2238,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
 
     // Server 3: email — no duplicates
     let conn3 = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://mail.example.com/mcp".into(),
     );
     let tools3 = Arc::new(vec![
@@ -2306,7 +2341,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
     let mcp_connections = vec![conn1, conn2, conn3];
     let mcp_tools = vec![tools1, tools2, tools3];
 
-    let mut result = ChatCompletionCreateParams::new_with_tools(
+    let mut result = build_params(
         &agent,
         &params,
         &messages,
@@ -2493,7 +2528,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
                 strict: None,
             }},
             super::Tool::Function { function: super::FunctionTool {
-                name: "search (https://code.example.com/mcp)".into(),
+                name: "search (test(https://code.example.com/mcp))".into(),
                 description: Some("Search code repositories".into()),
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
@@ -2507,7 +2542,7 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
                 strict: None,
             }},
             super::Tool::Function { function: super::FunctionTool {
-                name: "search (https://kb.example.com/mcp)".into(),
+                name: "search (test(https://kb.example.com/mcp))".into(),
                 description: Some("Search the knowledge base".into()),
                 parameters: Some(indexmap::indexmap! {
                     "type".into() => serde_json::json!("object"),
@@ -2584,6 +2619,7 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
 
     // MCP server has a tool named "analyze"
     let conn = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://analytics.example.com/mcp".into(),
     );
     let mcp_tools_list = Arc::new(vec![
@@ -2644,7 +2680,7 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
     let mcp_connections = vec![conn];
     let mcp_tools = vec![mcp_tools_list];
 
-    let mut result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -2653,14 +2689,6 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
         &mcp_tools,
         Some(&invention_tools),
     );
-
-    if let Some(tools) = result.tools.as_mut() {
-        tools.sort_by(|a, b| {
-            let name_a = match a { Tool::Function { function } => &function.name };
-            let name_b = match b { Tool::Function { function } => &function.name };
-            name_a.cmp(name_b)
-        });
-    }
 
     let expected = ChatCompletionCreateParams {
         messages: messages.clone(),
@@ -2686,26 +2714,10 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
         seed: None,
         tool_choice: Some(super::tool_choice::ToolChoice::Auto),
         tools: Some(vec![
-            // Invention "analyze" keeps plain name (no RF in conflict set).
+            // MCP "analyze" gets server name suffix (MCP tools come first).
             super::Tool::Function {
                 function: super::FunctionTool {
-                    name: "analyze".into(),
-                    description: Some("Analyze with custom logic".into()),
-                    parameters: Some(indexmap::indexmap! {
-                        "type".into() => serde_json::json!("object"),
-                        "properties".into() => serde_json::json!({
-                            "text": {"type": "string"},
-                            "depth": {"type": "integer"}
-                        }),
-                        "required".into() => serde_json::json!(["text"]),
-                    }),
-                    strict: None,
-                },
-            },
-            // MCP "analyze" gets URL suffix.
-            super::Tool::Function {
-                function: super::FunctionTool {
-                    name: "analyze (https://analytics.example.com/mcp)".into(),
+                    name: "analyze (test)".into(),
                     description: Some("Run analytics query".into()),
                     parameters: Some(indexmap::indexmap! {
                         "type".into() => serde_json::json!("object"),
@@ -2726,6 +2738,22 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
                     description: Some("List available datasets".into()),
                     parameters: Some(indexmap::indexmap! {
                         "type".into() => serde_json::json!("object"),
+                    }),
+                    strict: None,
+                },
+            },
+            // Invention "analyze" gets "(objectiveai-invention)" suffix (after MCP).
+            super::Tool::Function {
+                function: super::FunctionTool {
+                    name: "analyze (objectiveai-invention)".into(),
+                    description: Some("Analyze with custom logic".into()),
+                    parameters: Some(indexmap::indexmap! {
+                        "type".into() => serde_json::json!("object"),
+                        "properties".into() => serde_json::json!({
+                            "text": {"type": "string"},
+                            "depth": {"type": "integer"}
+                        }),
+                        "required".into() => serde_json::json!(["text"]),
                     }),
                     strict: None,
                 },
@@ -2796,6 +2824,7 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
 
     // MCP server also has a tool named "evaluate"
     let conn = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://grading.example.com/mcp".into(),
     );
     let mcp_tools_list = Arc::new(vec![
@@ -2841,7 +2870,7 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
     let mcp_connections = vec![conn];
     let mcp_tools = vec![mcp_tools_list];
 
-    let mut result = ChatCompletionCreateParams::new_with_tools(
+    let mut result = build_params(
         &agent,
         &params,
         &messages,
@@ -2907,7 +2936,7 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
             // MCP "evaluate" gets URL suffix.
             super::Tool::Function {
                 function: super::FunctionTool {
-                    name: "evaluate (https://grading.example.com/mcp)".into(),
+                    name: "evaluate (test)".into(),
                     description: Some("Grade a student submission".into()),
                     parameters: Some(indexmap::indexmap! {
                         "type".into() => serde_json::json!("object"),
@@ -3004,6 +3033,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
 
     // MCP server 1 has "output"
     let conn1 = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://renderer.example.com/mcp".into(),
     );
     let mcp_tools1 = Arc::new(vec![
@@ -3048,6 +3078,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
 
     // MCP server 2 also has "output"
     let conn2 = crate::mcp::Connection::new_for_test(
+        "test".into(),
         "https://logger.example.com/mcp".into(),
     );
     let mcp_tools2 = Arc::new(vec![
@@ -3110,7 +3141,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
     let mcp_connections = vec![conn1, conn2];
     let mcp_tools = vec![mcp_tools1, mcp_tools2];
 
-    let mut result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -3119,14 +3150,6 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
         &mcp_tools,
         Some(&invention_tools),
     );
-
-    if let Some(tools) = result.tools.as_mut() {
-        tools.sort_by(|a, b| {
-            let name_a = match a { Tool::Function { function } => &function.name };
-            let name_b = match b { Tool::Function { function } => &function.name };
-            name_a.cmp(name_b)
-        });
-    }
 
     let expected = ChatCompletionCreateParams {
         messages: messages.clone(),
@@ -3152,42 +3175,10 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
         seed: None,
         tool_choice: Some(super::tool_choice::ToolChoice::Auto),
         tools: Some(vec![
-            // RF "output" keeps plain name.
+            // MCP1 renderer "output" gets (server_name(url)) suffix (same server name).
             super::Tool::Function {
                 function: super::FunctionTool {
-                    name: "output".into(),
-                    description: Some("Structured output from RF".into()),
-                    parameters: Some(indexmap::indexmap! {
-                        "type".into() => serde_json::json!("object"),
-                        "properties".into() => serde_json::json!({
-                            "result": {"type": "string"}
-                        }),
-                    }),
-                    strict: None,
-                },
-            },
-            // MCP logger "output" gets URL suffix.
-            super::Tool::Function {
-                function: super::FunctionTool {
-                    name: "output (https://logger.example.com/mcp)".into(),
-                    description: Some("Write to log output".into()),
-                    parameters: Some(indexmap::indexmap! {
-                        "type".into() => serde_json::json!("object"),
-                        "properties".into() => serde_json::Value::Object(
-                            vec![
-                                ("level".into(), serde_json::json!({"type": "string", "enum": ["debug", "info", "warn", "error"]})),
-                                ("message".into(), serde_json::json!({"type": "string"})),
-                            ].into_iter().collect(),
-                        ),
-                        "required".into() => serde_json::json!(["level", "message"]),
-                    }),
-                    strict: None,
-                },
-            },
-            // MCP renderer "output" gets URL suffix.
-            super::Tool::Function {
-                function: super::FunctionTool {
-                    name: "output (https://renderer.example.com/mcp)".into(),
+                    name: "output (test(https://renderer.example.com/mcp))".into(),
                     description: Some("Render output to display".into()),
                     parameters: Some(indexmap::indexmap! {
                         "type".into() => serde_json::json!("object"),
@@ -3202,22 +3193,7 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
                     strict: None,
                 },
             },
-            // Invention "output" gets " (invention)" suffix (RF is in conflict set).
-            super::Tool::Function {
-                function: super::FunctionTool {
-                    name: "output (invention)".into(),
-                    description: Some("Invention output formatter".into()),
-                    parameters: Some(indexmap::indexmap! {
-                        "type".into() => serde_json::json!("object"),
-                        "properties".into() => serde_json::json!({
-                            "data": {"type": "object"},
-                            "template": {"type": "string"}
-                        }),
-                        "required".into() => serde_json::json!(["data"]),
-                    }),
-                    strict: None,
-                },
-            },
+            // MCP1 "preview" (unique, no suffix).
             super::Tool::Function {
                 function: super::FunctionTool {
                     name: "preview".into(),
@@ -3234,6 +3210,25 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
                     strict: None,
                 },
             },
+            // MCP2 logger "output" gets (server_name(url)) suffix (same server name).
+            super::Tool::Function {
+                function: super::FunctionTool {
+                    name: "output (test(https://logger.example.com/mcp))".into(),
+                    description: Some("Write to log output".into()),
+                    parameters: Some(indexmap::indexmap! {
+                        "type".into() => serde_json::json!("object"),
+                        "properties".into() => serde_json::Value::Object(
+                            vec![
+                                ("level".into(), serde_json::json!({"type": "string", "enum": ["debug", "info", "warn", "error"]})),
+                                ("message".into(), serde_json::json!({"type": "string"})),
+                            ].into_iter().collect(),
+                        ),
+                        "required".into() => serde_json::json!(["level", "message"]),
+                    }),
+                    strict: None,
+                },
+            },
+            // MCP2 "tail_logs" (unique, no suffix).
             super::Tool::Function {
                 function: super::FunctionTool {
                     name: "tail_logs".into(),
@@ -3245,6 +3240,36 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
                                 ("n".into(), serde_json::json!({"type": "integer", "default": 50})),
                             ].into_iter().collect(),
                         ),
+                    }),
+                    strict: None,
+                },
+            },
+            // Invention "output" gets "(objectiveai-invention)" suffix.
+            super::Tool::Function {
+                function: super::FunctionTool {
+                    name: "output (objectiveai-invention)".into(),
+                    description: Some("Invention output formatter".into()),
+                    parameters: Some(indexmap::indexmap! {
+                        "type".into() => serde_json::json!("object"),
+                        "properties".into() => serde_json::json!({
+                            "data": {"type": "object"},
+                            "template": {"type": "string"}
+                        }),
+                        "required".into() => serde_json::json!(["data"]),
+                    }),
+                    strict: None,
+                },
+            },
+            // RF "output" keeps plain name (last, response format never gets suffix).
+            super::Tool::Function {
+                function: super::FunctionTool {
+                    name: "output".into(),
+                    description: Some("Structured output from RF".into()),
+                    parameters: Some(indexmap::indexmap! {
+                        "type".into() => serde_json::json!("object"),
+                        "properties".into() => serde_json::json!({
+                            "result": {"type": "string"}
+                        }),
                     }),
                     strict: None,
                 },
@@ -3312,7 +3337,7 @@ fn test_continuation_assistant_message_appended() {
     let mcp_connections: Vec<std::sync::Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<std::sync::Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,
@@ -3456,7 +3481,7 @@ fn test_continuation_mixed_items() {
     let mcp_connections: Vec<std::sync::Arc<crate::mcp::Connection>> = vec![];
     let mcp_tools: Vec<std::sync::Arc<Vec<crate::mcp::tool::Tool>>> = vec![];
 
-    let result = ChatCompletionCreateParams::new_with_tools(
+    let result = build_params(
         &agent,
         &params,
         &messages,

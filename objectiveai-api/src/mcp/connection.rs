@@ -47,9 +47,8 @@ pub struct Connection {
 
 impl Connection {
     /// Creates a minimal connection for unit testing.
-    /// Only the `url` field is meaningful; other fields are defaulted.
     #[cfg(test)]
-    pub(crate) fn new_for_test(url: String) -> Arc<Self> {
+    pub(crate) fn new_for_test(name: String, url: String) -> Arc<Self> {
         Arc::new(Self {
             http_client: reqwest::Client::new(),
             url,
@@ -78,7 +77,7 @@ impl Connection {
                         tasks: None,
                     },
                 server_info: super::initialize_result::Implementation {
-                    name: "test".into(),
+                    name,
                     title: None,
                     version: "0.0.0".into(),
                     website_url: None,

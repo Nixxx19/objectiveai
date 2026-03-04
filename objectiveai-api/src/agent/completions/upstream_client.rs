@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 
 pub trait UpstreamClient<AGENT> {
@@ -26,6 +27,10 @@ pub trait UpstreamClient<AGENT> {
         invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
+        // resolved tool names (in order) from tool::resolve_tools
+        tool_names: &[String],
+        // map from resolved tool name to its origin
+        tool_map: &HashMap<String, super::tool::ResolvedTool>,
         // a continuation from a previous agent completion
         // the upstream client can continue conversations from previous state
         // the agent may change

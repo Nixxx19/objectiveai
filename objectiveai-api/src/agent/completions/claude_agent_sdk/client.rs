@@ -95,6 +95,8 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
         invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
+        tool_names: &[String],
+        tool_map: &std::collections::HashMap<String, super::super::tool::ResolvedTool>,
         continuation: Option<&[ContinuationItem<Self::State>]>,
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,

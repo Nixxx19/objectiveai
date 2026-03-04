@@ -1,9 +1,8 @@
 //! Chat completion request parameters for OpenRouter.
 
+use std::collections::HashMap;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
-use std::sync::Arc;
 
 /// Chat completion request parameters formatted for the OpenRouter API.
 ///
@@ -95,72 +94,15 @@ pub struct ChatCompletionCreateParams {
     pub usage: super::Usage,
 }
 
-/// Which source a tool originates from, used for conflict resolution.
-#[derive(Debug, Clone, PartialEq, Eq)]
-enum ToolSource {
-    Mcp { url: String },
-    Invention,
-    ResponseFormat,
-}
-
-/// A tool paired with its origin for name-conflict resolution.
-struct SourcedTool {
-    name: String,
-    source: ToolSource,
-    tool: super::Tool,
-}
-
 impl ChatCompletionCreateParams {
-    /// Creates request parameters by fetching MCP tools from live connections,
-    /// then delegating to [`new_with_tools`](Self::new_with_tools).
-    pub async fn new(
+    /// Creates request parameters from pre-resolved tool names and map.
+    pub fn new(
         agent: &objectiveai::agent::openrouter::Agent,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
         continuation: Option<&[crate::agent::completions::upstream_client::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
-        mcp_connections: &[Arc<crate::mcp::Connection>],
-        invention_tools: Option<
-            &[objectiveai::functions::inventions::InventionTool],
-        >,
-    ) -> Result<Self, super::super::Error> {
-        let mcp_tools = futures::future::try_join_all(
-            mcp_connections.iter().map(|c| async {
-                c.list_tools().await.map_err(|error| {
-                    super::super::Error::Mcp {
-                        url: c.url.clone(),
-                        error,
-                    }
-                })
-            }),
-        )
-        .await?;
-
-        Ok(Self::new_with_tools(
-            agent,
-            params,
-            messages,
-            continuation,
-            mcp_connections,
-            &mcp_tools,
-            invention_tools,
-        ))
-    }
-
-    /// Creates request parameters from pre-fetched MCP tool results.
-    ///
-    /// Merges MCP tools, invention tools, and any response-format tool,
-    /// resolves name conflicts with suffixes, and populates the `tools`
-    /// and `tool_choice` fields.
-    pub(super) fn new_with_tools(
-        agent: &objectiveai::agent::openrouter::Agent,
-        params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
-        messages: &[objectiveai::agent::completions::message::Message],
-        continuation: Option<&[crate::agent::completions::upstream_client::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
-        mcp_connections: &[Arc<crate::mcp::Connection>],
-        mcp_tools: &[Arc<Vec<crate::mcp::tool::Tool>>],
-        invention_tools: Option<
-            &[objectiveai::functions::inventions::InventionTool],
-        >,
+        tool_names: &[String],
+        tool_map: &HashMap<String, crate::agent::completions::tool::ResolvedTool>,
     ) -> Self {
         use crate::agent::completions::upstream_client::ContinuationItem;
         use objectiveai::agent::completions::message::Message;
@@ -186,70 +128,51 @@ impl ChatCompletionCreateParams {
         let resolved_response_format = resolve_response_format(params, agent);
 
         // --- Step 2: Extract ToolCall variant (if any) from response_format ---
-        let (openrouter_response_format, response_format_tool) =
+        let (openrouter_response_format, response_format_tool_required) =
             match resolved_response_format {
                 Some(objectiveai::agent::completions::request::ResponseFormat::ToolCall {
                     name,
-                    description,
-                    schema,
                     required,
-                }) => (None, Some((name, description, schema, required))),
+                    ..
+                }) => (None, Some((name, required))),
                 Some(rf) => (Some(super::response_format::ResponseFormat::new(&rf)), None),
                 None => (None, None),
             };
 
-        // --- Step 3: Build sourced tool list ---
-        let mut sourced_tools = Vec::new();
+        // --- Step 3: Convert resolved tools to OpenRouter tools ---
+        let final_tools: Vec<super::Tool> = tool_names
+            .iter()
+            .filter_map(|resolved_name| {
+                let resolved = tool_map.get(resolved_name)?;
+                Some(match resolved {
+                    crate::agent::completions::tool::ResolvedTool::Mcp { tool, .. } => {
+                        super::Tool::new_from_mcp(resolved_name.clone(), tool)
+                    }
+                    crate::agent::completions::tool::ResolvedTool::InventionTool(inv) => {
+                        super::Tool::new_from_invention(resolved_name.clone(), inv)
+                    }
+                    crate::agent::completions::tool::ResolvedTool::ResponseFormat => {
+                        if let Some(objectiveai::agent::completions::request::ResponseFormat::ToolCall {
+                            description, schema, ..
+                        }) = resolve_response_format(params, agent)
+                        {
+                            super::Tool::new_from_response_format(
+                                resolved_name.clone(),
+                                description,
+                                schema,
+                            )
+                        } else {
+                            return None;
+                        }
+                    }
+                })
+            })
+            .collect();
 
-        // MCP tools
-        for (connection, tools) in mcp_connections.iter().zip(mcp_tools.iter()) {
-            for tool in tools.iter() {
-                sourced_tools.push(SourcedTool {
-                    name: tool.name.clone(),
-                    source: ToolSource::Mcp {
-                        url: connection.url.clone(),
-                    },
-                    tool: super::Tool::new_from_mcp(tool),
-                });
-            }
-        }
-
-        // Invention tools
-        if let Some(inv_tools) = invention_tools {
-            for tool in inv_tools {
-                sourced_tools.push(SourcedTool {
-                    name: tool.name.to_string(),
-                    source: ToolSource::Invention,
-                    tool: super::Tool::new_from_invention(tool),
-                });
-            }
-        }
-
-        // Response format tool
-        if let Some((ref name, ref description, ref schema, _)) =
-            response_format_tool
-        {
-            sourced_tools.push(SourcedTool {
-                name: name.clone(),
-                source: ToolSource::ResponseFormat,
-                tool: super::Tool::Function {
-                    function: super::FunctionTool {
-                        name: name.clone(),
-                        description: Some(description.clone()),
-                        parameters: Some(schema.clone()),
-                        strict: None,
-                    },
-                },
-            });
-        }
-
-        // --- Step 4: Resolve name conflicts ---
-        let final_tools = resolve_name_conflicts(sourced_tools);
-
-        // --- Step 5: Determine tool_choice ---
+        // --- Step 4: Determine tool_choice ---
         let (tools, tool_choice) = if final_tools.is_empty() {
             (None, None)
-        } else if let Some((ref name, _, _, required)) = response_format_tool {
+        } else if let Some((ref name, required)) = response_format_tool_required {
             let choice = if required == Some(true) {
                 super::tool_choice::ToolChoice::Function(
                     super::tool_choice::ToolChoiceFunction::Function {
@@ -271,9 +194,6 @@ impl ChatCompletionCreateParams {
         };
 
         Self {
-            // `messages` already includes prefix/suffix from the agent —
-            // the caller (UpstreamClient) handles that merging.
-            // `continuation` assistant responses are appended after.
             messages: all_messages,
             provider: super::provider::Provider::new(
                 params.provider,
@@ -338,70 +258,3 @@ fn resolve_response_format(
     }
 }
 
-/// Resolves name conflicts across MCP, invention, and response-format tools.
-///
-/// Suffix rules (only applied when there IS a conflict on the same name):
-/// - MCP tools always get ` (<url>)` suffix
-/// - Invention tools get ` (invention)` suffix only when conflicting with the response format tool
-/// - Response format tool never gets a suffix
-fn resolve_name_conflicts(sourced_tools: Vec<SourcedTool>) -> Vec<super::Tool> {
-    // Group tools by name to find conflicts.
-    let mut by_name: HashMap<String, Vec<usize>> = HashMap::new();
-    for (i, st) in sourced_tools.iter().enumerate() {
-        by_name.entry(st.name.clone()).or_default().push(i);
-    }
-
-    let mut result = Vec::with_capacity(sourced_tools.len());
-    let mut processed = vec![false; sourced_tools.len()];
-
-    for (name, indices) in &by_name {
-        let has_conflict = indices.len() > 1;
-
-        for &i in indices {
-            processed[i] = true;
-            let st = &sourced_tools[i];
-
-            if !has_conflict {
-                // No conflict — use the tool as-is.
-                result.push(st.tool.clone());
-                continue;
-            }
-
-            // Determine whether this tool's name needs a suffix.
-            let suffix = match &st.source {
-                ToolSource::Mcp { url } => Some(format!(" ({})", url)),
-                ToolSource::Invention => {
-                    // Invention gets suffix only when conflicting with a response format tool.
-                    let conflicts_with_rf = indices.iter().any(|&j| {
-                        sourced_tools[j].source == ToolSource::ResponseFormat
-                    });
-                    if conflicts_with_rf {
-                        Some(" (invention)".to_string())
-                    } else {
-                        None
-                    }
-                }
-                ToolSource::ResponseFormat => None,
-            };
-
-            let mut tool = st.tool.clone();
-            if let Some(suffix) = suffix {
-                match &mut tool {
-                    super::Tool::Function { function } => {
-                        function.name = format!("{}{}", name, suffix);
-                    }
-                }
-            }
-            result.push(tool);
-        }
-    }
-
-    // Include any tools not in the by_name map (shouldn't happen, but defensive).
-    for (i, st) in sourced_tools.iter().enumerate() {
-        if !processed[i] {
-            result.push(st.tool.clone());
-        }
-    }
-
-    result
-}

@@ -12,8 +12,8 @@ pub enum Tool {
 }
 
 impl Tool {
-    /// Creates a Tool from an MCP tool definition.
-    pub fn new_from_mcp(tool: &crate::mcp::tool::Tool) -> Self {
+    /// Creates a Tool from an MCP tool definition with a resolved name.
+    pub fn new_from_mcp(name: String, tool: &crate::mcp::tool::Tool) -> Self {
         let mut map = IndexMap::new();
         map.insert(
             "type".to_string(),
@@ -43,7 +43,7 @@ impl Tool {
 
         Self::Function {
             function: FunctionTool {
-                name: tool.name.clone(),
+                name,
                 description: tool.description.clone(),
                 parameters: Some(map),
                 strict: None,
@@ -51,15 +51,32 @@ impl Tool {
         }
     }
 
-    /// Creates a Tool from an invention tool definition.
+    /// Creates a Tool from an invention tool definition with a resolved name.
     pub fn new_from_invention(
+        name: String,
         tool: &objectiveai::functions::inventions::InventionTool,
     ) -> Self {
         Self::Function {
             function: FunctionTool {
-                name: tool.name.to_string(),
+                name,
                 description: Some(tool.description.to_string()),
                 parameters: Some(tool.parameters.clone()),
+                strict: None,
+            },
+        }
+    }
+
+    /// Creates a Tool from a response format ToolCall definition with a resolved name.
+    pub fn new_from_response_format(
+        name: String,
+        description: String,
+        schema: IndexMap<String, serde_json::Value>,
+    ) -> Self {
+        Self::Function {
+            function: FunctionTool {
+                name,
+                description: Some(description),
+                parameters: Some(schema),
                 strict: None,
             },
         }
