@@ -24,6 +24,17 @@ pub enum SDKMessage {
 }
 
 impl SDKMessage {
+    /// Returns the session ID if this message variant carries one.
+    pub fn session_id(&self) -> Option<&str> {
+        match self {
+            Self::PartialAssistantMessage(msg) => Some(&msg.session_id),
+            Self::ResultMessage(msg) => Some(msg.session_id()),
+            Self::UserMessage(msg) => Some(&msg.session_id),
+            Self::AssistantMessage(msg) => Some(&msg.session_id),
+            _ => None,
+        }
+    }
+
     /// Transforms this upstream SDK message into a downstream
     /// [`AgentCompletionChunk`].
     ///

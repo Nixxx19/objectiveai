@@ -37,4 +37,14 @@ impl Effort {
     pub fn validate(&self) -> Result<(), String> {
         Ok(())
     }
+
+    /// Returns the string representation of the effort level.
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Effort::Low => "low",
+            Effort::Medium => "medium",
+            Effort::High => "high",
+            Effort::Max => "max",
+        }
+    }
 }

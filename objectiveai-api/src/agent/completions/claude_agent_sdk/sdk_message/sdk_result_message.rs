@@ -85,6 +85,14 @@ pub struct ModelUsage {
 }
 
 impl SDKResultMessage {
+    /// Returns the session ID from the result message.
+    pub fn session_id(&self) -> &str {
+        match self {
+            SDKResultMessage::Success(s) => &s.session_id,
+            SDKResultMessage::Error(e) => &e.session_id,
+        }
+    }
+
     /// Transforms this upstream result message into a downstream
     /// [`AgentCompletionChunk`] with final usage and cost information.
     pub fn into_downstream(

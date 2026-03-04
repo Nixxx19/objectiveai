@@ -12,7 +12,7 @@ use objectiveai::functions::inventions::InventionTool;
 
 pub struct InventionServer {
     pub(super) port: u16,
-    shutdown_tx: Option<tokio::sync::oneshot::Sender<()>>,
+    server_handle: tokio::task::AbortHandle,
 }
 
 impl InventionServer {
@@ -21,24 +21,18 @@ impl InventionServer {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let port = listener.local_addr().unwrap().port();
 
-        let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel::<()>();
-
         let router = Router::new()
             .route("/mcp", post(handle_jsonrpc))
             .with_state(tools);
 
-        tokio::spawn(async move {
-            axum::serve(listener, router)
-                .with_graceful_shutdown(async {
-                    let _ = shutdown_rx.await;
-                })
-                .await
-                .ok();
-        });
+        let server_handle = tokio::spawn(async move {
+            axum::serve(listener, router).await.ok();
+        })
+        .abort_handle();
 
         Self {
             port,
-            shutdown_tx: Some(shutdown_tx),
+            server_handle,
         }
     }
 
@@ -53,9 +47,7 @@ impl InventionServer {
 
 impl Drop for InventionServer {
     fn drop(&mut self) {
-        if let Some(tx) = self.shutdown_tx.take() {
-            let _ = tx.send(());
-        }
+        self.server_handle.abort();
     }
 }
 

@@ -11,6 +11,27 @@ pub enum Error {
 
     #[error("invalid messages: {0}")]
     InvalidMessages(String),
+
+    #[error("unsupported response format")]
+    UnsupportedResponseFormat,
+
+    #[error("spawn error: {0}")]
+    Spawn(String),
+
+    #[error("IO error: {0}")]
+    Io(String),
+
+    #[error("deserialization error: {0}")]
+    Json(String),
+
+    #[error("stderr: {0}")]
+    Stderr(String),
+
+    #[error("no output from subprocess")]
+    NoOutput,
+
+    #[error("stream timeout")]
+    StreamTimeout,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -20,6 +41,13 @@ impl objectiveai::error::StatusError for Error {
             Self::InvalidContinuation(_) => 400,
             Self::InvalidByok => 400,
             Self::InvalidMessages(_) => 400,
+            Self::UnsupportedResponseFormat => 400,
+            Self::Spawn(_) => 500,
+            Self::Io(_) => 500,
+            Self::Json(_) => 500,
+            Self::Stderr(_) => 500,
+            Self::NoOutput => 500,
+            Self::StreamTimeout => 500,
         }
     }
 
