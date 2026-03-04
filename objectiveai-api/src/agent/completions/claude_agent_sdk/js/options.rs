@@ -101,3 +101,7 @@ pub fn build_options(
 
     format!("    const opts = {{\n{},\n    }};", fields.join(",\n"))
 }
+
+#[cfg(test)]
+#[path = "options_tests.rs"]
+mod tests;
