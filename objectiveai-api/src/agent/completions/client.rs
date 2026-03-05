@@ -10,12 +10,14 @@ pub fn response_id(created: u64) -> String {
 
 // ---------------------------------------------------------------------------
 
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
     /// MCP Client
     pub mcp_client: Arc<crate::mcp::Client>,
     /// Caching fetcher for Ensemble LLM definitions.
     pub agent_fetcher:
         Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
+    /// Handler for tracking usage after completion.
+    pub usage_handler: Arc<CUSG>,
     /// Upstream client for Openrouter agents.
     pub openrouter: Arc<OPENROUTER>,
     /// Upstream client for Claude Agent SDK agents.
@@ -41,10 +43,11 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> {
     pub other_chunk_timeout: Duration,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> {
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
     pub fn new(
         mcp_client: Arc<crate::mcp::Client>,
         agent_fetcher: Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
+        usage_handler: Arc<CUSG>,
         openrouter: Arc<OPENROUTER>,
         claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
         mock: Arc<MOCK>,
@@ -60,6 +63,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Client<CTXEXT, OPENROUTER
         Self {
             mcp_client,
             agent_fetcher,
+            usage_handler,
             openrouter,
             claude_agent_sdk,
             mock,
@@ -75,13 +79,14 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Client<CTXEXT, OPENROUTER
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Clone
-    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Clone
+    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
 {
     fn clone(&self) -> Self {
         Self {
             mcp_client: self.mcp_client.clone(),
             agent_fetcher: self.agent_fetcher.clone(),
+            usage_handler: self.usage_handler.clone(),
             openrouter: self.openrouter.clone(),
             claude_agent_sdk: self.claude_agent_sdk.clone(),
             mock: self.mock.clone(),
@@ -97,14 +102,133 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Clone
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
     CLAUDEAGENTSDK: super::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
     MOCK: super::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
     FAGENT: super::super::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    CUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
+    /// Creates a unary agent completion, tracking usage after completion.
+    ///
+    /// Internally streams the response and aggregates chunks into a single response.
+    pub async fn create_unary_handle_usage(
+        self: Arc<Self>,
+        ctx: ctx::Context<CTXEXT>,
+        params: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
+        continuation: Option<
+            super::Continuation<
+                OPENROUTER::State,
+                CLAUDEAGENTSDK::State,
+                MOCK::State,
+            >,
+        >,
+        invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
+    ) -> Result<
+        objectiveai::agent::completions::response::unary::AgentCompletion,
+        super::Error,
+    > {
+        let mut aggregate: Option<
+            objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+        > = None;
+        let mut stream = self
+            .create_streaming_handle_usage(ctx, params, continuation, invention_tools)
+            .await?;
+        while let Some(item) = stream.next().await {
+            match item {
+                super::StreamItem::Chunk(chunk) => match &mut aggregate {
+                    Some(agg) => agg.push(&chunk),
+                    None => aggregate = Some(chunk),
+                },
+                super::StreamItem::State(_) => {}
+            }
+        }
+        Ok(aggregate.unwrap().into())
+    }
+
+    /// Creates a streaming agent completion, tracking usage after the stream ends.
+    pub async fn create_streaming_handle_usage(
+        self: Arc<Self>,
+        ctx: ctx::Context<CTXEXT>,
+        params: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
+        continuation: Option<
+            super::Continuation<
+                OPENROUTER::State,
+                CLAUDEAGENTSDK::State,
+                MOCK::State,
+            >,
+        >,
+        invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
+    ) -> Result<
+        impl futures::Stream<
+            Item = super::StreamItem<
+                super::Continuation<
+                    OPENROUTER::State,
+                    CLAUDEAGENTSDK::State,
+                    MOCK::State,
+                >,
+            >,
+        > + Send
+        + Unpin
+        + 'static,
+        super::Error,
+    > {
+        let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+        let _ = tokio::spawn(async move {
+            let stream = match self
+                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools)
+                .await
+            {
+                Ok(stream) => stream,
+                Err(e) => {
+                    let _ = tx.send(Err(e));
+                    return;
+                }
+            };
+            let mut aggregate: Option<
+                objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+            > = None;
+            let mut error = false;
+            futures::pin_mut!(stream);
+            while let Some(item) = stream.next().await {
+                match &item {
+                    super::StreamItem::Chunk(chunk) => {
+                        if chunk.error.is_some() {
+                            error = true;
+                        }
+                        match &mut aggregate {
+                            Some(agg) => agg.push(chunk),
+                            None => aggregate = Some(chunk.clone()),
+                        }
+                    }
+                    super::StreamItem::State(_) => {}
+                }
+                let _ = tx.send(Ok(item));
+            }
+            drop(stream);
+            drop(tx);
+            if !error {
+                if let Some(agg) = aggregate {
+                    self.usage_handler
+                        .handle_usage(ctx, params, agg.into())
+                        .await;
+                }
+            }
+        });
+        let mut stream =
+            tokio_stream::wrappers::UnboundedReceiverStream::new(rx);
+        match stream.next().await {
+            Some(Ok(first)) => Ok(
+                futures::stream::iter(std::iter::once(first))
+                    .chain(stream.map(Result::unwrap)),
+            ),
+            Some(Err(e)) => Err(e),
+            None => unreachable!(),
+        }
+    }
+
     pub async fn create_streaming(
         &self,
         ctx: ctx::Context<CTXEXT>,

@@ -40,6 +40,21 @@ impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubFetcher {
     }
 }
 
+struct StubUsageHandler;
+
+impl crate::agent::completions::usage_handler::UsageHandler<ctx::DefaultContextExt>
+    for StubUsageHandler
+{
+    fn handle_usage(
+        &self,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _request: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
+        _response: objectiveai::agent::completions::response::unary::AgentCompletion,
+    ) -> impl std::future::Future<Output = ()> + Send + 'static {
+        async {}
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Client constructor
 // ---------------------------------------------------------------------------
@@ -53,6 +68,7 @@ fn make_client_with_tool_limit(
     UnimplementedUpstreamClient,
     crate::agent::completions::mock::client::Client,
     StubFetcher,
+    StubUsageHandler,
 > {
     super::Client {
         mcp_client: Arc::new(crate::mcp::Client::new(
@@ -72,6 +88,7 @@ fn make_client_with_tool_limit(
         agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
             Arc::new(StubFetcher),
         )),
+        usage_handler: Arc::new(StubUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
         mock: Arc::new(crate::agent::completions::mock::client::Client {
@@ -99,6 +116,7 @@ fn make_client(
     UnimplementedUpstreamClient,
     crate::agent::completions::mock::client::Client,
     StubFetcher,
+    StubUsageHandler,
 > {
     make_client_with_tool_limit(seed, None)
 }
