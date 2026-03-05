@@ -311,7 +311,7 @@ fn test_content_block_stop_and_message_stop_ignored() {
     );
 }
 
-/// 7. UserMessage with tool_use_result produces a tool response at assistant_index + 1.
+/// 7. UserMessage with tool_use_result produces a tool response at the given message_index.
 #[test]
 fn test_user_message_tool_result() {
     let msg = SDKMessage::UserMessage(SDKUserMessage {
@@ -336,7 +336,7 @@ fn test_user_message_tool_result() {
                 objectiveai::agent::completions::response::streaming::MessageChunk::Tool(
                     objectiveai::agent::completions::response::ToolResponse {
                         role: Default::default(),
-                        index: 5,
+                        index: 4,
                         inner: objectiveai::agent::completions::message::ToolMessage {
                             content: objectiveai::agent::completions::message::RichContent::Text(
                                 "{\"output\":\"file contents\"}".to_string(),

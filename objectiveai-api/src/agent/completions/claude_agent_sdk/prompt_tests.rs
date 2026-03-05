@@ -301,6 +301,7 @@ fn test_continuation_with_state_and_user() {
 
     let continuation = vec![
         ContinuationItem::State(super::State {
+            message_count: 1,
             session_id: "sess-abc".to_string(),
         }),
         ContinuationItem::UserMessage(UserMessage {
@@ -449,6 +450,7 @@ fn test_error_tool_after_state_in_continuation() {
 
     let continuation = vec![
         ContinuationItem::State(super::State {
+            message_count: 1,
             session_id: "s1".to_string(),
         }),
         ContinuationItem::ToolMessage(ToolMessage {
@@ -474,6 +476,7 @@ fn test_error_continuation_name_mismatch() {
 
     let continuation = vec![
         ContinuationItem::State(super::State {
+            message_count: 1,
             session_id: "s1".to_string(),
         }),
         ContinuationItem::UserMessage(UserMessage {

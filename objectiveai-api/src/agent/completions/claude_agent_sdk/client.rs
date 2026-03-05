@@ -153,18 +153,18 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
             .map_err(|e| objectiveai::error::ResponseError::from(&e))?;
 
             // Compute assistant_index from continuation.
+            // State items carry a message_count (may be >1 since the SDK
+            // handles its own multi-turn loop). Other items count as 1.
             let assistant_index = continuation
                 .as_deref()
                 .map(|c| {
                     c.iter()
-                        .filter(|item| {
-                            matches!(
-                                item,
-                                ContinuationItem::State(_)
-                                    | ContinuationItem::ToolMessage(_)
-                            )
+                        .map(|item| match item {
+                            ContinuationItem::State(s) => s.message_count,
+                            ContinuationItem::ToolMessage(_) => 1,
+                            ContinuationItem::UserMessage(_) => 0,
                         })
-                        .count() as u64
+                        .sum::<u64>()
                 })
                 .unwrap_or(0);
 
@@ -174,6 +174,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
 
             let initial_state = super::State {
                 session_id: prompt.message.session_id.clone(),
+                message_count: 0,
             };
 
             // Write JS to temp file.
@@ -234,6 +235,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
 
                 let mut latest_session_id = String::new();
                 let mut had_error = false;
+                let mut msg_index = assistant_index;
 
                 loop {
                     match lines_stream.next().await {
@@ -297,12 +299,23 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                 id.clone(),
                                 created,
                                 agent_id.clone(),
-                                assistant_index,
+                                msg_index,
                                 is_byok,
                                 cost_multiplier,
                             ) {
                                 Some(Ok(chunk)) => {
+                                    // Advance the index when a message slot is
+                                    // complete: an assistant turn with a finish
+                                    // reason, or a tool response.
+                                    use objectiveai::agent::completions::response::streaming::MessageChunk;
+                                    let advances_index = chunk.messages.iter().any(|m| match m {
+                                        MessageChunk::Assistant(a) => a.finish_reason.is_some(),
+                                        MessageChunk::Tool(_) => true,
+                                    });
                                     yield StreamItem::Chunk(chunk);
+                                    if advances_index {
+                                        msg_index += 1;
+                                    }
                                 }
                                 Some(Err(e)) => {
                                     yield StreamItem::Chunk(
@@ -324,9 +337,10 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 }
 
                 if !had_error {
-                    // Yield final state with session_id.
+                    // Yield final state with session_id and message count.
                     yield StreamItem::State(super::State {
                         session_id: latest_session_id,
+                        message_count: msg_index - assistant_index,
                     });
                 }
             };
