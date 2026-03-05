@@ -62,6 +62,8 @@ async fn run_mock(
     let client = Client {
         delay: Duration::ZERO,
         seed: Some(seed),
+        max_tool_calls: None,
+        tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
     };
 
     let messages = vec![];
@@ -279,6 +281,8 @@ async fn test_grammar_response_format_rejected() {
     let client = Client {
         delay: Duration::ZERO,
         seed: Some(42),
+        max_tool_calls: None,
+        tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
     };
     let agent = default_agent();
     let params = params_with_response_format(ResponseFormat::Grammar {
@@ -302,6 +306,8 @@ async fn test_python_response_format_rejected() {
     let client = Client {
         delay: Duration::ZERO,
         seed: Some(42),
+        max_tool_calls: None,
+        tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
     };
     let agent = default_agent();
     let params = params_with_response_format(ResponseFormat::Python);

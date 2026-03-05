@@ -3,18 +3,36 @@
 use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 use futures::Stream;
 use rand::{Rng, SeedableRng};
 use super::super::{ContinuationItem, StreamItem, UpstreamClient, ResolvedTool};
 
 /// Mock upstream client that generates random responses with configurable delay.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub struct Client {
     /// Delay before yielding each chunk.
     pub delay: Duration,
     /// Optional RNG seed for deterministic output.
     pub seed: Option<u64>,
+    /// Optional maximum number of tool calls across all continuations.
+    /// When the counter reaches this limit, the mock will always respond
+    /// with content instead of a tool call.
+    pub max_tool_calls: Option<u32>,
+    /// Shared counter tracking how many tool calls have been made.
+    pub tool_call_count: Arc<AtomicU32>,
+}
+
+impl Clone for Client {
+    fn clone(&self) -> Self {
+        Self {
+            delay: self.delay,
+            seed: self.seed,
+            max_tool_calls: self.max_tool_calls,
+            tool_call_count: self.tool_call_count.clone(),
+        }
+    }
 }
 
 /// Resolves the response format for this agent from the request params.
@@ -83,6 +101,8 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         let delay = self.delay;
         let cont_len = _continuation.map_or(0u64, |c| c.len() as u64);
         let seed = self.seed.map(|s| s.wrapping_add(cont_len));
+        let max_tool_calls = self.max_tool_calls;
+        let tool_call_count = self.tool_call_count.clone();
         let is_byok = byok.is_some();
 
         async move {
@@ -123,12 +143,19 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 .collect();
 
             // --- Tool call vs content ---
+            let tools_exhausted = match max_tool_calls {
+                Some(max) => tool_call_count.load(Ordering::Relaxed) >= max,
+                None => false,
+            };
             let mock_response = resolve_mock_response(
                 &response_format,
-                &tool_names,
+                if tools_exhausted { &[] } else { &tool_names },
                 &tool_map,
                 &mut rng,
             );
+            if matches!(&mock_response, MockResponse::ToolCall { .. }) {
+                tool_call_count.fetch_add(1, Ordering::Relaxed);
+            }
 
             let stream = async_stream::stream! {
                 use objectiveai::agent::completions::message::{

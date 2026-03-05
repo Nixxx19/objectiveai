@@ -553,6 +553,10 @@ where
                     break;
                 }
 
+                // Reset aggregate so the next iteration doesn't carry
+                // old tool calls forward from the previous response.
+                aggregate = None;
+
                 match upstream
                     .create(
                         &id,
