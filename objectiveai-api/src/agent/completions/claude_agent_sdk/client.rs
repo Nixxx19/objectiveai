@@ -344,11 +344,10 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                         Box::pin(StreamOnce::new(first).chain(stream));
                     Ok((boxed, initial_state))
                 }
-                None => {
-                    // Empty stream — just return state.
-                    let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
-                        Box::pin(StreamOnce::new(StreamItem::State(initial_state.clone())));
-                    Ok((boxed, initial_state))
+                Some(StreamItem::State(_)) | None => {
+                    Err(objectiveai::error::ResponseError::from(
+                        &super::Error::NoOutput,
+                    ))
                 }
             }
         }

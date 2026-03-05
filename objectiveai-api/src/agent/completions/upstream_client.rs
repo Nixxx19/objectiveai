@@ -5,6 +5,10 @@ use std::sync::Arc;
 /// would fail before producing any non-error chunk, it must return
 /// `Err(...)` from `create` instead of yielding an error chunk into
 /// the stream.
+///
+/// The stream must always contain at least one non-state chunk before
+/// the final state item. If the upstream produces no chunks at all,
+/// it must return `Err(...)` from `create` instead of an empty stream.
 pub trait UpstreamClient<AGENT> {
     type State: Send + Sync + 'static;
     type Stream: futures::Stream<Item = StreamItem<Self::State>>

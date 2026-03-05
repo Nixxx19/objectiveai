@@ -13,4 +13,21 @@ pub enum Error {
         /// The underlying MCP error.
         error: Arc<crate::mcp::Error>,
     },
+
+    /// The upstream produced no chunks.
+    #[error("empty stream")]
+    EmptyStream,
+}
+
+impl objectiveai::error::StatusError for Error {
+    fn status(&self) -> u16 {
+        match self {
+            Self::Mcp { .. } => 502,
+            Self::EmptyStream => 500,
+        }
+    }
+
+    fn message(&self) -> Option<serde_json::Value> {
+        Some(serde_json::Value::String(self.to_string()))
+    }
 }
