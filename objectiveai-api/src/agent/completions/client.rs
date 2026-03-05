@@ -445,7 +445,6 @@ where
             > = None;
             let mut stream: Pin<Box<dyn futures::Stream<Item = super::StreamItem<U::State>> + Send>> =
                 Box::pin(initial_stream);
-
             loop {
                 let mut current_state: Option<U::State> = None;
                 let mut had_error = false;
@@ -489,9 +488,6 @@ where
                     continuation_items.push(super::ContinuationItem::State(state));
                 }
 
-                let next_index_base = agg.messages.len() as u64;
-                let mut next_idx = next_index_base;
-
                 for (call_id, call_name, call_args) in &callable {
                     match tool_map.get(call_name) {
                         Some(super::tool::ResolvedTool::Mcp { connection, tool }) => {
@@ -510,14 +506,14 @@ where
                                 .await
                             {
                                 Ok(tool_msg) => {
-                                    let chunk = make_tool_chunk(&id, created, next_idx, &tool_msg);
+                                    let idx = continuation_items.len() as u64;
+                                    let chunk = make_tool_chunk(&id, created, idx, &tool_msg);
                                     if let Some(ref mut agg) = aggregate {
                                         agg.push(&chunk);
                                     }
                                     yield super::StreamItem::Chunk(chunk);
                                     continuation_items
                                         .push(super::ContinuationItem::ToolMessage(tool_msg));
-                                    next_idx += 1;
                                 }
                                 Err(_) => {
                                     had_error = true;
@@ -536,14 +532,14 @@ where
                                 content: RichContent::Text(content),
                                 tool_call_id: call_id.clone(),
                             };
-                            let chunk = make_tool_chunk(&id, created, next_idx, &tool_msg);
+                            let idx = continuation_items.len() as u64;
+                            let chunk = make_tool_chunk(&id, created, idx, &tool_msg);
                             if let Some(ref mut agg) = aggregate {
                                 agg.push(&chunk);
                             }
                             yield super::StreamItem::Chunk(chunk);
                             continuation_items
                                 .push(super::ContinuationItem::ToolMessage(tool_msg));
-                            next_idx += 1;
                         }
                         _ => {}
                     }

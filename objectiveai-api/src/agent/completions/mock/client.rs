@@ -176,7 +176,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                         id: id.clone(),
                         created,
                         messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
-                            index: 0,
+                            index: cont_len,
                             created,
                             agent: agent_id.clone(),
                             model: "mock".into(),
@@ -210,7 +210,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                                 id: id.clone(),
                                 created,
                                 messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
-                                    index: 0,
+                                    index: cont_len,
                                     created,
                                     agent: agent_id.clone(),
                                     model: "mock".into(),
@@ -248,7 +248,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                                 id: id.clone(),
                                 created,
                                 messages: vec![MessageChunk::Assistant(AssistantResponseChunk {
-                                    index: 0,
+                                    index: cont_len,
                                     created,
                                     agent: agent_id.clone(),
                                     model: "mock".into(),

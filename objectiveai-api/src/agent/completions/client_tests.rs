@@ -10,6 +10,7 @@ use objectiveai::agent::completions::request::{
     Agent as AgentParam, AgentCompletionCreateParams, ResponseFormat,
     ResponseFormatParam,
 };
+use objectiveai::agent::completions::response::unary::AgentCompletion;
 use objectiveai::agent::mock::AgentBase as MockAgentBase;
 
 use crate::agent::completions::upstream_client::UnimplementedUpstreamClient;
@@ -110,6 +111,40 @@ fn make_ctx() -> ctx::Context<ctx::DefaultContextExt> {
 }
 
 // ---------------------------------------------------------------------------
+// Snapshot helpers
+// ---------------------------------------------------------------------------
+
+fn aggregate<S>(
+    items: &[StreamItem<S>],
+) -> AgentCompletion {
+    let mut agg: Option<
+        objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+    > = None;
+    for item in items {
+        if let StreamItem::Chunk(chunk) = item {
+            match &mut agg {
+                Some(a) => a.push(chunk),
+                None => agg = Some(chunk.clone()),
+            }
+        }
+    }
+    agg.expect("stream should have at least one chunk").into()
+}
+
+fn normalize(mut c: AgentCompletion) -> AgentCompletion {
+    use objectiveai::agent::completions::response::unary::Message;
+    c.id = String::new();
+    c.created = 0;
+    for msg in &mut c.messages {
+        if let Message::Assistant(asst) = msg {
+            asst.upstream_id = String::new();
+            asst.created = 0;
+        }
+    }
+    c
+}
+
+// ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
 
@@ -141,6 +176,12 @@ async fn test_basic_mock_agent_seed_42() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2, "should have at least one chunk and one state");
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_basic_mock_agent_seed_42.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Default mock agent with seed 123.
@@ -171,6 +212,12 @@ async fn test_basic_mock_agent_seed_123() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_basic_mock_agent_seed_123.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Same seed produces identical streams.
@@ -206,8 +253,6 @@ async fn test_deterministic_with_same_seed() {
         .unwrap();
     let items_b: Vec<_> = Box::pin(stream_b).collect().await;
 
-    // Compare chunk count and chunk payloads (ignore State since it contains agent IDs
-    // that are identical but Continuation doesn't impl PartialEq).
     let chunks_a: Vec<_> = items_a.iter().filter_map(|i| match i {
         StreamItem::Chunk(c) => Some(c),
         _ => None,
@@ -217,6 +262,15 @@ async fn test_deterministic_with_same_seed() {
         _ => None,
     }).collect();
     assert_eq!(chunks_a.len(), chunks_b.len());
+
+    let completion_a = normalize(aggregate(&items_a));
+    let completion_b = normalize(aggregate(&items_b));
+    assert_eq!(completion_a, completion_b);
+
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_deterministic_with_same_seed.json")
+    ).unwrap();
+    assert_eq!(completion_a, expected);
 }
 
 /// Different seeds produce different streams.
@@ -252,7 +306,6 @@ async fn test_different_seeds_differ() {
         .unwrap();
     let items_b: Vec<_> = Box::pin(stream_b).collect().await;
 
-    // At minimum the chunk counts or content should differ.
     let chunks_a: Vec<_> = items_a.iter().filter_map(|i| match i {
         StreamItem::Chunk(c) => Some(serde_json::to_string(c).unwrap()),
         _ => None,
@@ -262,6 +315,19 @@ async fn test_different_seeds_differ() {
         _ => None,
     }).collect();
     assert_ne!(chunks_a, chunks_b);
+
+    let completion_a = normalize(aggregate(&items_a));
+    let completion_b = normalize(aggregate(&items_b));
+
+    let expected_a: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_different_seeds_differ_a.json")
+    ).unwrap();
+    assert_eq!(completion_a, expected_a);
+
+    let expected_b: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_different_seeds_differ_b.json")
+    ).unwrap();
+    assert_eq!(completion_b, expected_b);
 }
 
 /// Mock agent with error=true should fail.
@@ -324,6 +390,12 @@ async fn test_with_single_user_message() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_with_single_user_message.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Messages: developer + user messages.
@@ -363,6 +435,12 @@ async fn test_with_developer_and_user_messages() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_with_developer_and_user_messages.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Response format: JsonObject.
@@ -393,6 +471,12 @@ async fn test_json_object_response_format() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_json_object_response_format.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Response format: JsonSchema with object schema.
@@ -431,6 +515,12 @@ async fn test_json_schema_response_format() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_json_schema_response_format.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Response format: Text.
@@ -461,6 +551,12 @@ async fn test_text_response_format() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_text_response_format.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Response format: Grammar should be rejected by mock client.
@@ -555,6 +651,12 @@ async fn test_required_tool_call_response_format() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_required_tool_call_response_format.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Response format: ToolCall with required=None (optional).
@@ -596,6 +698,12 @@ async fn test_optional_tool_call_response_format() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_optional_tool_call_response_format.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// With invention tools provided.
@@ -653,6 +761,12 @@ async fn test_with_invention_tools() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_with_invention_tools.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// With invention tools and ToolCall response format.
@@ -705,6 +819,12 @@ async fn test_invention_tools_with_tool_call_response_format() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_invention_tools_with_tool_call_response_format.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Single invention tool that returns an error.
@@ -745,9 +865,14 @@ async fn test_invention_tool_returns_error() {
         .expect("should succeed even with failing invention tool");
 
     let items: Vec<_> = Box::pin(stream).collect().await;
-    // Stream should still produce items — the error is wrapped as tool message content.
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_invention_tool_returns_error.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Multiple user messages in a conversation.
@@ -787,6 +912,12 @@ async fn test_multiple_user_messages() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_multiple_user_messages.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Mock agent with error=Some(false) should succeed (normalized to None by prepare).
@@ -820,6 +951,12 @@ async fn test_mock_agent_error_false_succeeds() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_mock_agent_error_false_succeeds.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Final stream item is always a Continuation::Mock.
@@ -857,6 +994,12 @@ async fn test_final_item_is_mock_continuation() {
         }
         other => panic!("expected State(Continuation::Mock), got {other:?}"),
     }
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_final_item_is_mock_continuation.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// PerAgent response format targeting the mock agent's ID.
@@ -894,6 +1037,12 @@ async fn test_per_agent_response_format() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_per_agent_response_format.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// PerAgent response format with unknown agent ID (should fall back to no format).
@@ -930,6 +1079,12 @@ async fn test_per_agent_response_format_unknown_id() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_per_agent_response_format_unknown_id.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// JsonSchema with nested object schema.
@@ -982,6 +1137,12 @@ async fn test_json_schema_nested_object() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_json_schema_nested_object.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Fallback agents: primary errors, fallback succeeds.
@@ -1017,6 +1178,12 @@ async fn test_fallback_agent_on_error() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_fallback_agent_on_error.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Both primary and fallback agents error — should fail.
@@ -1094,6 +1261,12 @@ async fn test_multiple_fallback_agents() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_multiple_fallback_agents.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// With continuation from a previous Mock run.
@@ -1134,6 +1307,12 @@ async fn test_with_mock_continuation() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_with_mock_continuation.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Stream produces chunks before the final state.
@@ -1172,6 +1351,12 @@ async fn test_stream_yields_chunks_before_state() {
         matches!(items.last(), Some(StreamItem::State(_))),
         "state should be the last item",
     );
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_stream_yields_chunks_before_state.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Large seed value.
@@ -1202,6 +1387,12 @@ async fn test_large_seed_value() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_large_seed_value.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
 
 /// Seed 0.
@@ -1232,4 +1423,10 @@ async fn test_seed_zero() {
     let items: Vec<_> = Box::pin(stream).collect().await;
     assert!(items.len() >= 2);
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
+
+    let completion = normalize(aggregate(&items));
+    let expected: AgentCompletion = serde_json::from_str(
+        include_str!("../../../assets/agent/completions/client_tests/test_seed_zero.json")
+    ).unwrap();
+    assert_eq!(completion, expected);
 }
