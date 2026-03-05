@@ -804,3 +804,7 @@ fn make_tool_chunk(
         ..Default::default()
     }
 }
+
+#[cfg(test)]
+#[path = "client_tests.rs"]
+mod tests;

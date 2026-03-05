@@ -81,7 +81,8 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         let tool_names = tool_names.to_vec();
         let tool_map = tool_map.clone();
         let delay = self.delay;
-        let seed = self.seed;
+        let cont_len = _continuation.map_or(0u64, |c| c.len() as u64);
+        let seed = self.seed.map(|s| s.wrapping_add(cont_len));
         let is_byok = byok.is_some();
 
         async move {
@@ -377,10 +378,6 @@ fn generate_from_schema(
     }
 }
 
-#[cfg(test)]
-#[path = "client_tests.rs"]
-mod tests;
-
 /// Generates a random alphanumeric string (with spaces) of length between `min` and `max`.
 fn random_string(rng: &mut impl Rng, min: usize, max: usize) -> String {
     let len = rng.random_range(min..=max);
@@ -439,3 +436,7 @@ fn generate_tool_arguments(
         None => "{}".into(),
     }
 }
+
+#[cfg(test)]
+#[path = "client_tests.rs"]
+mod tests;
