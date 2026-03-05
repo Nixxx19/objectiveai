@@ -1,35 +1,101 @@
-use std::sync::Arc;
+use std::{sync::Arc, time::Duration};
+use crate::{ctx, util::StreamOnce};
 
 pub fn response_id(created: u64) -> String {
     let uuid = uuid::Uuid::new_v4();
     format!("agtcpl-{}-{created}", uuid.simple())
 }
 
-pub struct Client<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
-    pub openrouter: OPENROUTER,
-    pub claude_agent_sdk: CLAUDEAGENTSDK,
-    pub mock: MOCK,
-}
-
-impl<OPENROUTER, CLAUDEAGENTSDK, MOCK> Client<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
-    pub fn new(
-        openrouter: OPENROUTER,
-        claude_agent_sdk: CLAUDEAGENTSDK,
-        mock: MOCK,
-    ) -> Self {
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Clone
+    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
+{
+    fn clone(&self) -> Self {
         Self {
-            openrouter,
-            claude_agent_sdk,
-            mock,
+            mcp_client: self.mcp_client.clone(),
+            agent_fetcher: self.agent_fetcher.clone(),
+            usage_handler: self.usage_handler.clone(),
+            openrouter: self.openrouter.clone(),
+            claude_agent_sdk: self.claude_agent_sdk.clone(),
+            mock: self.mock.clone(),
+            backoff_current_interval: self.backoff_current_interval,
+            backoff_initial_interval: self.backoff_initial_interval,
+            backoff_randomization_factor: self.backoff_randomization_factor,
+            backoff_multiplier: self.backoff_multiplier,
+            backoff_max_interval: self.backoff_max_interval,
+            backoff_max_elapsed_time: self.backoff_max_elapsed_time,
         }
     }
 }
 
-impl<OPENROUTER, CLAUDEAGENTSDK, MOCK> Client<OPENROUTER, CLAUDEAGENTSDK, MOCK>
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
+    /// MCP Client
+    pub mcp_client: Arc<crate::mcp::Client>,
+    /// Caching fetcher for Ensemble LLM definitions.
+    pub agent_fetcher:
+        Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
+    /// Handler for tracking usage after completion.
+    pub usage_handler: Arc<CUSG>,
+    /// Upstream client for Openrouter agents.
+    pub openrouter: Arc<OPENROUTER>,
+    /// Upstream client for Claude Agent SDK agents.
+    pub claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
+    /// Upstream client for Mock agents.
+    pub mock: Arc<MOCK>,
+
+    /// Current backoff interval for retry logic.
+    pub backoff_current_interval: Duration,
+    /// Initial backoff interval for retry logic.
+    pub backoff_initial_interval: Duration,
+    /// Randomization factor for backoff jitter.
+    pub backoff_randomization_factor: f64,
+    /// Multiplier for exponential backoff growth.
+    pub backoff_multiplier: f64,
+    /// Maximum backoff interval.
+    pub backoff_max_interval: Duration,
+    /// Maximum total time to spend on retries.
+    pub backoff_max_elapsed_time: Duration,
+}
+
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
+    pub fn new(
+        mcp_client: Arc<crate::mcp::Client>,
+        agent_fetcher: Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
+        usage_handler: Arc<CUSG>,
+        openrouter: Arc<OPENROUTER>,
+        claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
+        mock: Arc<MOCK>,
+        backoff_current_interval: Duration,
+        backoff_initial_interval: Duration,
+        backoff_randomization_factor: f64,
+        backoff_multiplier: f64,
+        backoff_max_interval: Duration,
+        backoff_max_elapsed_time: Duration,
+    ) -> Self {
+        Self {
+            mcp_client,
+            agent_fetcher,
+            usage_handler,
+            openrouter,
+            claude_agent_sdk,
+            mock,
+            backoff_current_interval,
+            backoff_initial_interval,
+            backoff_randomization_factor,
+            backoff_multiplier,
+            backoff_max_interval,
+            backoff_max_elapsed_time,
+        }
+    }
+}
+
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
 where
-    OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent>,
-    CLAUDEAGENTSDK: super::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent>,
-    MOCK: super::UpstreamClient<objectiveai::agent::mock::Agent>,
+    CTXEXT: ctx::ContextExt + Send + Sync + 'static,
+    OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: super::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
+    MOCK: super::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
+    FAGENT: super::super::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    CUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_streaming(
         &self,
@@ -61,5 +127,138 @@ where
 
         // Placeholder: return an empty stream.
         Ok(futures::stream::empty())
+    }
+
+    /// Resolves agents and connects to their MCP servers concurrently.
+    ///
+    /// For each agent in `params` (primary + fallbacks), spawns a tokio task that
+    /// calls [`resolve_agent`](Self::resolve_agent). Returns `Ok(None)` for agents
+    /// that are skipped (continuation mismatch or missing MCP authorization).
+    pub fn resolve_agents(
+        &self,
+        ctx: ctx::Context<CTXEXT>,
+        params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+        continuation: Option<
+            &super::Continuation<
+                OPENROUTER::State,
+                CLAUDEAGENTSDK::State,
+                MOCK::State,
+            >,
+        >,
+    ) -> Vec<
+        tokio::task::JoinHandle<
+            Result<
+                Option<(objectiveai::agent::Agent, Vec<Arc<crate::mcp::Connection>>)>,
+                super::Error,
+            >,
+        >,
+    > {
+        use objectiveai::agent::Upstream;
+
+        let continuation_upstream = continuation.map(|c| match c {
+            super::Continuation::Openrouter(_) => Upstream::Openrouter,
+            super::Continuation::ClaudeAgentSdk(_) => Upstream::ClaudeAgentSdk,
+            super::Continuation::Mock(_) => Upstream::Mock,
+        });
+
+        let request_agents = std::iter::once(&params.agent)
+            .chain(params.agents.iter().flatten());
+
+        let mcp_server_authorization = params.mcp_server_authorization.clone();
+        let mut handles = Vec::new();
+
+        for request_agent in request_agents {
+            let request_agent = request_agent.clone();
+            let ctx = ctx.clone();
+            let client = self.clone();
+            let mcp_server_authorization = mcp_server_authorization.clone();
+
+            handles.push(tokio::spawn(async move {
+                client
+                    .resolve_agent(
+                        ctx,
+                        &request_agent,
+                        mcp_server_authorization.as_ref(),
+                        continuation_upstream,
+                    )
+                    .await
+            }));
+        }
+
+        handles
+    }
+
+    /// Resolves a request agent (inline or by ID) into a validated Agent
+    /// and connects to its MCP servers.
+    ///
+    /// Returns `Ok(None)` if:
+    /// - The agent's upstream kind doesn't match the continuation
+    /// - An MCP server requires authorization but none was provided
+    pub async fn resolve_agent(
+        &self,
+        ctx: ctx::Context<CTXEXT>,
+        agent: &objectiveai::agent::completions::request::Agent,
+        mcp_server_authorization: Option<&indexmap::IndexMap<String, String>>,
+        continuation: Option<objectiveai::agent::Upstream>,
+    ) -> Result<
+        Option<(objectiveai::agent::Agent, Vec<Arc<crate::mcp::Connection>>)>,
+        super::Error,
+    > {
+        use objectiveai::agent::completions::request::Agent as RequestAgent;
+
+        let agent = match agent {
+            RequestAgent::Provided(base) => {
+                // Check upstream kind before validation so that a
+                // continuation mismatch returns None instead of an error.
+                if let Some(expected) = continuation {
+                    if base.upstream() != expected {
+                        return Ok(None);
+                    }
+                }
+                objectiveai::agent::Agent::try_from(base.clone())
+                    .map_err(super::Error::InvalidAgent)?
+            }
+            RequestAgent::Id(id) => {
+                match self.agent_fetcher.fetch(ctx, id).await? {
+                    Some((agent, _created)) => {
+                        if let Some(expected) = continuation {
+                            if agent.base().upstream() != expected {
+                                return Ok(None);
+                            }
+                        }
+                        agent
+                    }
+                    None => return Err(super::Error::AgentNotFound(id.clone())),
+                }
+            }
+        };
+
+        // Connect to MCP servers concurrently.
+        let mcp_connections = match agent.base().mcp_servers() {
+            Some(servers) if !servers.is_empty() => {
+                let mut futs = Vec::with_capacity(servers.len());
+                for server in servers {
+                    let authorization = if server.authorization {
+                        match mcp_server_authorization.and_then(|m| m.get(&server.url)) {
+                            Some(auth) => Some(auth.clone()),
+                            None => return Ok(None),
+                        }
+                    } else {
+                        None
+                    };
+                    futs.push(self.mcp_client.connect(server.url.clone(), authorization));
+                }
+
+                let results = futures::future::join_all(futs).await;
+                let mut connections = Vec::with_capacity(results.len());
+                for result in results {
+                    connections.push(result?);
+                }
+                connections
+            }
+            _ => Vec::new(),
+        };
+
+        Ok(Some((agent, mcp_connections)))
     }
 }
