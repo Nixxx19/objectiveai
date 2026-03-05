@@ -8,386 +8,14 @@ pub fn response_id(created: u64) -> String {
     format!("agtcpl-{}-{created}", uuid.simple())
 }
 
-/// Resolves the response format for a given agent from the request params.
-fn resolve_response_format(
-    agent_id: &str,
-    params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
-) -> Option<objectiveai::agent::completions::request::ResponseFormat> {
-    use objectiveai::agent::completions::request::ResponseFormatParam;
-    match params.response_format.as_ref()? {
-        ResponseFormatParam::Single(rf) => Some(rf.clone()),
-        ResponseFormatParam::PerAgent(map) => map.get(agent_id).cloned(),
-    }
-}
-
-/// Extracts callable tool calls (MCP and invention) from the accumulated chunk.
-/// Returns `(call_id, resolved_tool_name, arguments_json)` for each callable tool.
-fn extract_callable_tool_calls(
-    aggregate: &objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
-    tool_map: &HashMap<String, super::tool::ResolvedTool>,
-) -> Vec<(String, String, String)> {
-    use objectiveai::agent::completions::response::streaming::MessageChunk;
-
-    let mut callable = Vec::new();
-    // Find the last assistant message and extract its accumulated tool calls.
-    for msg in aggregate.messages.iter().rev() {
-        if let MessageChunk::Assistant(chunk) = msg {
-            if let Some(tool_calls) = &chunk.tool_calls {
-                for tc in tool_calls {
-                    let id = tc.id.clone().unwrap_or_default();
-                    let name = tc
-                        .function
-                        .as_ref()
-                        .and_then(|f| f.name.clone())
-                        .unwrap_or_default();
-                    let args = tc
-                        .function
-                        .as_ref()
-                        .and_then(|f| f.arguments.clone())
-                        .unwrap_or_default();
-                    if name.is_empty() {
-                        continue;
-                    }
-                    match tool_map.get(&name) {
-                        Some(super::tool::ResolvedTool::Mcp { .. })
-                        | Some(super::tool::ResolvedTool::InventionTool(_)) => {
-                            callable.push((id, name, args));
-                        }
-                        _ => {}
-                    }
-                }
-            }
-            break; // only inspect the last assistant message
-        }
-    }
-    callable
-}
-
-/// Builds an `AgentCompletionChunk` containing a single tool-response message.
-fn make_tool_chunk(
-    id: &str,
-    created: u64,
-    index: u64,
-    tool_msg: &objectiveai::agent::completions::message::ToolMessage,
-) -> objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-    use objectiveai::agent::completions::response::streaming::{
-        AgentCompletionChunk, MessageChunk,
-    };
-    use objectiveai::agent::completions::response::ToolResponse;
-    AgentCompletionChunk {
-        id: id.to_string(),
-        created,
-        messages: vec![MessageChunk::Tool(ToolResponse {
-            role: Default::default(),
-            index,
-            inner: tool_msg.clone(),
-        })],
-        ..Default::default()
-    }
-}
-
-/// Runs the streaming + tool-calling loop for a locked agent.
-///
-/// Streams chunks to `tx`, executes callable tools (MCP and invention),
-/// re-invokes the upstream for each continuation until no more callable
-/// tool calls remain, then sends the final `Continuation` as the last
-/// stream item.
-///
-/// Returns the accumulated `AgentCompletionChunk` for usage tracking,
-/// or `None` if no chunks were produced.
-async fn run_agent_loop<A, U, CONT>(
-    tx: &tokio::sync::mpsc::UnboundedSender<super::StreamItem<CONT>>,
-    upstream: &U,
-    agent: &A,
-    mcp_connections: &[Arc<crate::mcp::Connection>],
-    params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
-    invention_tools: Option<&[objectiveai::functions::inventions::InventionTool]>,
-    tool_names: &[String],
-    tool_map: &HashMap<String, super::tool::ResolvedTool>,
-    initial_stream: U::Stream,
-    mut continuation_items: Vec<super::ContinuationItem<U::State>>,
-    id: &str,
-    created: u64,
-    other_chunk_timeout: Duration,
-    byok: Option<&str>,
-    cost_multiplier: rust_decimal::Decimal,
-    wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT,
-) -> Option<objectiveai::agent::completions::response::streaming::AgentCompletionChunk>
-where
-    U: super::UpstreamClient<A> + Send + Sync,
-    U::State: Send + Sync,
-    U::Stream: Send + 'static,
-    A: Send + Sync,
-    CONT: Send + 'static,
-{
-    use objectiveai::agent::completions::message::{RichContent, ToolMessage};
-
-    let mut aggregate: Option<
-        objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
-    > = None;
-    let mut stream: Pin<Box<dyn futures::Stream<Item = super::StreamItem<U::State>> + Send>> =
-        Box::pin(initial_stream);
-
-    loop {
-        // --- Stream all items from the current upstream stream. ---
-        let mut current_state: Option<U::State> = None;
-        let mut had_error = false;
-
-        loop {
-            match tokio::time::timeout(other_chunk_timeout, stream.next()).await {
-                Ok(Some(super::StreamItem::Chunk(chunk))) => {
-                    match &mut aggregate {
-                        Some(agg) => agg.push(&chunk),
-                        None => aggregate = Some(chunk.clone()),
-                    }
-                    if tx.send(super::StreamItem::Chunk(chunk)).is_err() {
-                        return aggregate; // receiver dropped
-                    }
-                }
-                Ok(Some(super::StreamItem::State(state))) => {
-                    current_state = Some(state);
-                    break;
-                }
-                Ok(None) => break,
-                Err(_) => {
-                    had_error = true;
-                    break;
-                }
-            }
-        }
-
-        if had_error {
-            break;
-        }
-
-        let Some(ref agg) = aggregate else { break };
-
-        // --- Check for callable tool calls in the accumulated response. ---
-        let callable = extract_callable_tool_calls(agg, tool_map);
-
-        if callable.is_empty() {
-            // Done — send the final continuation.
-            let cont = wrap_continuation(continuation_items);
-            let _ = tx.send(super::StreamItem::State(cont));
-            break;
-        }
-
-        // --- Save the current upstream state as a continuation item. ---
-        if let Some(state) = current_state.take() {
-            continuation_items.push(super::ContinuationItem::State(state));
-        }
-
-        // --- Execute each callable tool. ---
-        let next_index_base = agg.messages.len() as u64;
-        let mut next_idx = next_index_base;
-
-        for (call_id, call_name, call_args) in &callable {
-            match tool_map.get(call_name) {
-                Some(super::tool::ResolvedTool::Mcp { connection, tool }) => {
-                    let args: Option<indexmap::IndexMap<String, serde_json::Value>> =
-                        serde_json::from_str(call_args).ok();
-                    match connection
-                        .call_tool_as_message(
-                            &crate::mcp::tool::CallToolRequestParams {
-                                name: tool.name.clone(),
-                                arguments: args,
-                                _meta: None,
-                                task: None,
-                            },
-                            call_id.clone(),
-                        )
-                        .await
-                    {
-                        Ok(tool_msg) => {
-                            let chunk = make_tool_chunk(id, created, next_idx, &tool_msg);
-                            if let Some(ref mut agg) = aggregate {
-                                agg.push(&chunk);
-                            }
-                            let _ = tx.send(super::StreamItem::Chunk(chunk));
-                            continuation_items
-                                .push(super::ContinuationItem::ToolMessage(tool_msg));
-                            next_idx += 1;
-                        }
-                        Err(_) => {
-                            had_error = true;
-                            break;
-                        }
-                    }
-                }
-                Some(super::tool::ResolvedTool::InventionTool(inv)) => {
-                    let args: serde_json::Value = serde_json::from_str(call_args)
-                        .unwrap_or(serde_json::Value::Object(Default::default()));
-                    let content = match (inv.call)(args).await {
-                        Ok(text) => text,
-                        Err(text) => format!("Error: {text}"),
-                    };
-                    let tool_msg = ToolMessage {
-                        content: RichContent::Text(content),
-                        tool_call_id: call_id.clone(),
-                    };
-                    let chunk = make_tool_chunk(id, created, next_idx, &tool_msg);
-                    if let Some(ref mut agg) = aggregate {
-                        agg.push(&chunk);
-                    }
-                    let _ = tx.send(super::StreamItem::Chunk(chunk));
-                    continuation_items.push(super::ContinuationItem::ToolMessage(tool_msg));
-                    next_idx += 1;
-                }
-                _ => {} // ResponseFormat or unknown — not callable
-            }
-        }
-
-        if had_error {
-            break;
-        }
-
-        // --- Create a new upstream stream with the updated continuation. ---
-        match upstream
-            .create(
-                id,
-                created,
-                agent,
-                params,
-                &params.messages,
-                mcp_connections,
-                invention_tools,
-                tool_names,
-                tool_map,
-                Some(&continuation_items),
-                byok,
-                cost_multiplier,
-            )
-            .await
-        {
-            Ok((new_stream, _new_state)) => {
-                stream = Box::pin(new_stream);
-            }
-            Err(_) => break,
-        }
-    }
-
-    aggregate
-}
-
-/// Attempts to create an upstream stream and spawn the agent loop.
-///
-/// On success, takes ownership of `cont_items` (via `std::mem::take`) and
-/// spawns a background task running `run_agent_loop`. Returns a boxed stream.
-/// On failure, `cont_items` remains intact for BYOK retry.
-async fn try_create_and_spawn<A, U, CTXEXT, CUSG, CONT>(
-    upstream: Arc<U>,
-    usage_handler: Arc<CUSG>,
-    agent: &A,
-    mcp_connections: &[Arc<crate::mcp::Connection>],
-    params: &Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
-    ctx: &ctx::Context<CTXEXT>,
-    invention_tools: &Option<Vec<objectiveai::functions::inventions::InventionTool>>,
-    tool_names: &[String],
-    tool_map: &HashMap<String, super::tool::ResolvedTool>,
-    cont_items: &mut Vec<super::ContinuationItem<U::State>>,
-    id: &str,
-    created: u64,
-    first_chunk_timeout: Duration,
-    other_chunk_timeout: Duration,
-    byok: Option<&str>,
-    wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT + Send + 'static,
-) -> Result<
-    Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
-    super::Error,
->
-where
-    U: super::UpstreamClient<A> + Send + Sync + 'static,
-    U::State: Send + Sync + 'static,
-    U::Stream: Send + 'static,
-    A: Send + Sync + Clone + 'static,
-    CTXEXT: Send + Sync + 'static,
-    CUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
-    CONT: Send + 'static,
-{
-    let cont_ref = if cont_items.is_empty() {
-        None
-    } else {
-        Some(cont_items.as_slice())
-    };
-    let create_fut = upstream.create(
-        id,
-        created,
-        agent,
-        params,
-        &params.messages,
-        mcp_connections,
-        invention_tools.as_deref(),
-        tool_names,
-        tool_map,
-        cont_ref,
-        byok,
-        ctx.cost_multiplier,
-    );
-    let (stream, _state) = tokio::time::timeout(first_chunk_timeout, create_fut)
-        .await
-        .map_err(|_| super::Error::Timeout)?
-        .map_err(super::Error::Upstream)?;
-
-    // Success — take ownership of continuation items and spawn the loop.
-    let cont_items = std::mem::take(cont_items);
-    let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
-    let agent = agent.clone();
-    let mcp_connections = mcp_connections.to_vec();
-    let params = params.clone();
-    let ctx = ctx.clone();
-    let invention_tools = invention_tools.clone();
-    let tool_names = tool_names.to_vec();
-    let tool_map = tool_map.clone();
-    let id = id.to_string();
-    let byok_owned = byok.map(|s| s.to_string());
-
-    tokio::spawn(async move {
-        let aggregate = run_agent_loop(
-            &tx,
-            &*upstream,
-            &agent,
-            &mcp_connections,
-            &params,
-            invention_tools.as_deref(),
-            &tool_names,
-            &tool_map,
-            stream,
-            cont_items,
-            &id,
-            created,
-            other_chunk_timeout,
-            byok_owned.as_deref(),
-            ctx.cost_multiplier,
-            wrap_continuation,
-        )
-        .await;
-        drop(tx);
-        if let Some(agg) = aggregate {
-            usage_handler
-                .handle_usage(ctx, params, agg.into())
-                .await;
-        }
-    });
-
-    let mut rx_stream = tokio_stream::wrappers::UnboundedReceiverStream::new(rx);
-    match rx_stream.next().await {
-        Some(item @ super::StreamItem::Chunk(_)) => Ok(Box::pin(
-            futures::stream::iter(std::iter::once(item)).chain(rx_stream),
-        )),
-        _ => Err(super::Error::EmptyStream),
-    }
-}
-
 // ---------------------------------------------------------------------------
 
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> {
     /// MCP Client
     pub mcp_client: Arc<crate::mcp::Client>,
     /// Caching fetcher for Ensemble LLM definitions.
     pub agent_fetcher:
         Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
-    /// Handler for tracking usage after completion.
-    pub usage_handler: Arc<CUSG>,
     /// Upstream client for Openrouter agents.
     pub openrouter: Arc<OPENROUTER>,
     /// Upstream client for Claude Agent SDK agents.
@@ -413,11 +41,10 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
     pub other_chunk_timeout: Duration,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> {
     pub fn new(
         mcp_client: Arc<crate::mcp::Client>,
         agent_fetcher: Arc<super::super::fetcher::CachingFetcher<CTXEXT, FAGENT>>,
-        usage_handler: Arc<CUSG>,
         openrouter: Arc<OPENROUTER>,
         claude_agent_sdk: Arc<CLAUDEAGENTSDK>,
         mock: Arc<MOCK>,
@@ -433,7 +60,6 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPEN
         Self {
             mcp_client,
             agent_fetcher,
-            usage_handler,
             openrouter,
             claude_agent_sdk,
             mock,
@@ -449,14 +75,13 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPEN
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Clone
-    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Clone
+    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT>
 {
     fn clone(&self) -> Self {
         Self {
             mcp_client: self.mcp_client.clone(),
             agent_fetcher: self.agent_fetcher.clone(),
-            usage_handler: self.usage_handler.clone(),
             openrouter: self.openrouter.clone(),
             claude_agent_sdk: self.claude_agent_sdk.clone(),
             mock: self.mock.clone(),
@@ -472,14 +97,13 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Clone
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
     CLAUDEAGENTSDK: super::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
     MOCK: super::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
     FAGENT: super::super::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    CUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_streaming(
         &self,
@@ -502,8 +126,7 @@ where
                     MOCK::State,
                 >,
             >,
-        > + Send
-            + 'static,
+        > + Send,
         super::Error,
     > {
 
@@ -512,8 +135,6 @@ where
             .unwrap()
             .as_secs();
         let id = response_id(created);
-        let first_chunk_timeout = self.first_chunk_timeout;
-        let other_chunk_timeout = self.other_chunk_timeout;
 
         // 1. Resolve agents concurrently (borrows continuation temporarily).
         let handles = self.resolve_agents(ctx.clone(), &params, continuation.as_ref());
@@ -668,54 +289,57 @@ where
                 };
 
                 for byok_attempt in &byok_attempts {
-                    let result = match agent {
+                    let err = match agent {
                         objectiveai::agent::Agent::Openrouter(or_agent) => {
                             let a = or_agent.clone();
                             let c = mcp_connections.clone();
-                            try_create_and_spawn(
-                                self.openrouter.clone(), self.usage_handler.clone(),
-                                or_agent, mcp_connections, &params, &ctx, &invention_tools,
-                                &tool_names, &tool_map, &mut cont_items_or,
-                                &id, created, first_chunk_timeout, other_chunk_timeout,
-                                *byok_attempt,
+                            match self.run_agent_loop(
+                                self.openrouter.clone(), or_agent, &params, mcp_connections,
+                                invention_tools.as_deref(), &tool_names, &tool_map,
+                                &mut cont_items_or, &id, created,
+                                *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::Openrouter {
                                     items, agent: a, mcp_connections: c,
                                 },
-                            ).await
+                            ).await {
+                                Ok(stream) => return Ok(stream),
+                                Err(e) => e,
+                            }
                         }
                         objectiveai::agent::Agent::ClaudeAgentSdk(cas_agent) => {
                             let a = cas_agent.clone();
                             let c = mcp_connections.clone();
-                            try_create_and_spawn(
-                                self.claude_agent_sdk.clone(), self.usage_handler.clone(),
-                                cas_agent, mcp_connections, &params, &ctx, &invention_tools,
-                                &tool_names, &tool_map, &mut cont_items_cas,
-                                &id, created, first_chunk_timeout, other_chunk_timeout,
-                                *byok_attempt,
+                            match self.run_agent_loop(
+                                self.claude_agent_sdk.clone(), cas_agent, &params, mcp_connections,
+                                invention_tools.as_deref(), &tool_names, &tool_map,
+                                &mut cont_items_cas, &id, created,
+                                *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::ClaudeAgentSdk {
                                     items, agent: a, mcp_connections: c,
                                 },
-                            ).await
+                            ).await {
+                                Ok(stream) => return Ok(stream),
+                                Err(e) => e,
+                            }
                         }
                         objectiveai::agent::Agent::Mock(mock_agent) => {
                             let a = mock_agent.clone();
                             let c = mcp_connections.clone();
-                            try_create_and_spawn(
-                                self.mock.clone(), self.usage_handler.clone(),
-                                mock_agent, mcp_connections, &params, &ctx, &invention_tools,
-                                &tool_names, &tool_map, &mut cont_items_mock,
-                                &id, created, first_chunk_timeout, other_chunk_timeout,
-                                *byok_attempt,
+                            match self.run_agent_loop(
+                                self.mock.clone(), mock_agent, &params, mcp_connections,
+                                invention_tools.as_deref(), &tool_names, &tool_map,
+                                &mut cont_items_mock, &id, created,
+                                *byok_attempt, ctx.cost_multiplier,
                                 move |items| super::Continuation::Mock {
                                     items, agent: a, mcp_connections: c,
                                 },
-                            ).await
+                            ).await {
+                                Ok(stream) => return Ok(stream),
+                                Err(e) => e,
+                            }
                         }
                     };
-                    match result {
-                        Ok(stream) => return Ok(stream),
-                        Err(e) => errors.push(e),
-                    }
+                    errors.push(err);
                 }
             }
 
@@ -737,6 +361,222 @@ where
                 }
             }
         }
+    }
+
+    /// Creates an upstream stream and runs the tool-calling loop.
+    ///
+    /// 1. Calls `upstream.create()` with `first_chunk_timeout`.
+    /// 2. Returns a stream that yields chunks as they arrive, executes
+    ///    callable tools (MCP and invention), and re-invokes the upstream
+    ///    for each continuation until no more callable tool calls remain.
+    /// 3. The final stream item is always `StreamItem::State(CONT)`.
+    ///
+    /// On success, takes ownership of `cont_items` (via `std::mem::take`).
+    /// On failure, `cont_items` remains intact for BYOK retry.
+    async fn run_agent_loop<A, U, CONT>(
+        &self,
+        upstream: Arc<U>,
+        agent: &A,
+        params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+        mcp_connections: &[Arc<crate::mcp::Connection>],
+        invention_tools: Option<&[objectiveai::functions::inventions::InventionTool]>,
+        tool_names: &[String],
+        tool_map: &HashMap<String, super::tool::ResolvedTool>,
+        cont_items: &mut Vec<super::ContinuationItem<U::State>>,
+        id: &str,
+        created: u64,
+        byok: Option<&str>,
+        cost_multiplier: rust_decimal::Decimal,
+        wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT + Send + 'static,
+    ) -> Result<
+        Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
+        super::Error,
+    >
+    where
+        U: super::UpstreamClient<A> + Send + Sync + 'static,
+        U::State: Send + Sync + 'static,
+        U::Stream: Send + 'static,
+        A: Send + Sync + Clone + 'static,
+        CONT: Send + 'static,
+    {
+        // --- Create the initial upstream stream with timeout. ---
+        let cont_ref = if cont_items.is_empty() {
+            None
+        } else {
+            Some(cont_items.as_slice())
+        };
+        let create_fut = upstream.create(
+            id,
+            created,
+            agent,
+            params,
+            &params.messages,
+            mcp_connections,
+            invention_tools,
+            tool_names,
+            tool_map,
+            cont_ref,
+            byok,
+            cost_multiplier,
+        );
+        let (initial_stream, _state) =
+            tokio::time::timeout(self.first_chunk_timeout, create_fut)
+                .await
+                .map_err(|_| super::Error::Timeout)?
+                .map_err(super::Error::Upstream)?;
+
+        // Success — take ownership of continuation items and build the stream.
+        let mut continuation_items = std::mem::take(cont_items);
+        let other_chunk_timeout = self.other_chunk_timeout;
+        let agent = agent.clone();
+        let mcp_connections = mcp_connections.to_vec();
+        let params = params.clone();
+        let invention_tools = invention_tools.map(|s| s.to_vec());
+        let tool_names = tool_names.to_vec();
+        let tool_map = tool_map.clone();
+        let id = id.to_string();
+        let byok = byok.map(|s| s.to_string());
+
+        Ok(Box::pin(async_stream::stream! {
+            use objectiveai::agent::completions::message::{RichContent, ToolMessage};
+
+            let mut aggregate: Option<
+                objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+            > = None;
+            let mut stream: Pin<Box<dyn futures::Stream<Item = super::StreamItem<U::State>> + Send>> =
+                Box::pin(initial_stream);
+
+            loop {
+                let mut current_state: Option<U::State> = None;
+                let mut had_error = false;
+
+                loop {
+                    match tokio::time::timeout(other_chunk_timeout, stream.next()).await {
+                        Ok(Some(super::StreamItem::Chunk(chunk))) => {
+                            match &mut aggregate {
+                                Some(agg) => agg.push(&chunk),
+                                None => aggregate = Some(chunk.clone()),
+                            }
+                            yield super::StreamItem::Chunk(chunk);
+                        }
+                        Ok(Some(super::StreamItem::State(state))) => {
+                            current_state = Some(state);
+                            break;
+                        }
+                        Ok(None) => break,
+                        Err(_) => {
+                            had_error = true;
+                            break;
+                        }
+                    }
+                }
+
+                if had_error {
+                    break;
+                }
+
+                let Some(ref agg) = aggregate else { break };
+
+                let callable = extract_callable_tool_calls(agg, &tool_map);
+
+                if callable.is_empty() {
+                    let cont = wrap_continuation(continuation_items);
+                    yield super::StreamItem::State(cont);
+                    break;
+                }
+
+                if let Some(state) = current_state.take() {
+                    continuation_items.push(super::ContinuationItem::State(state));
+                }
+
+                let next_index_base = agg.messages.len() as u64;
+                let mut next_idx = next_index_base;
+
+                for (call_id, call_name, call_args) in &callable {
+                    match tool_map.get(call_name) {
+                        Some(super::tool::ResolvedTool::Mcp { connection, tool }) => {
+                            let args: Option<indexmap::IndexMap<String, serde_json::Value>> =
+                                serde_json::from_str(call_args).ok();
+                            match connection
+                                .call_tool_as_message(
+                                    &crate::mcp::tool::CallToolRequestParams {
+                                        name: tool.name.clone(),
+                                        arguments: args,
+                                        _meta: None,
+                                        task: None,
+                                    },
+                                    call_id.clone(),
+                                )
+                                .await
+                            {
+                                Ok(tool_msg) => {
+                                    let chunk = make_tool_chunk(&id, created, next_idx, &tool_msg);
+                                    if let Some(ref mut agg) = aggregate {
+                                        agg.push(&chunk);
+                                    }
+                                    yield super::StreamItem::Chunk(chunk);
+                                    continuation_items
+                                        .push(super::ContinuationItem::ToolMessage(tool_msg));
+                                    next_idx += 1;
+                                }
+                                Err(_) => {
+                                    had_error = true;
+                                    break;
+                                }
+                            }
+                        }
+                        Some(super::tool::ResolvedTool::InventionTool(inv)) => {
+                            let args: serde_json::Value = serde_json::from_str(call_args)
+                                .unwrap_or(serde_json::Value::Object(Default::default()));
+                            let content = match (inv.call)(args).await {
+                                Ok(text) => text,
+                                Err(text) => format!("Error: {text}"),
+                            };
+                            let tool_msg = ToolMessage {
+                                content: RichContent::Text(content),
+                                tool_call_id: call_id.clone(),
+                            };
+                            let chunk = make_tool_chunk(&id, created, next_idx, &tool_msg);
+                            if let Some(ref mut agg) = aggregate {
+                                agg.push(&chunk);
+                            }
+                            yield super::StreamItem::Chunk(chunk);
+                            continuation_items
+                                .push(super::ContinuationItem::ToolMessage(tool_msg));
+                            next_idx += 1;
+                        }
+                        _ => {}
+                    }
+                }
+
+                if had_error {
+                    break;
+                }
+
+                match upstream
+                    .create(
+                        &id,
+                        created,
+                        &agent,
+                        &params,
+                        &params.messages,
+                        &mcp_connections,
+                        invention_tools.as_deref(),
+                        &tool_names,
+                        &tool_map,
+                        Some(&continuation_items),
+                        byok.as_deref(),
+                        cost_multiplier,
+                    )
+                    .await
+                {
+                    Ok((new_stream, _new_state)) => {
+                        stream = Box::pin(new_stream);
+                    }
+                    Err(_) => break,
+                }
+            }
+        }))
     }
 
     /// Resolves agents and connects to their MCP servers concurrently.
@@ -884,5 +724,83 @@ where
         };
 
         Ok(Some((agent, mcp_connections)))
+    }
+}
+
+/// Resolves the response format for a given agent from the request params.
+fn resolve_response_format(
+    agent_id: &str,
+    params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+) -> Option<objectiveai::agent::completions::request::ResponseFormat> {
+    use objectiveai::agent::completions::request::ResponseFormatParam;
+    match params.response_format.as_ref()? {
+        ResponseFormatParam::Single(rf) => Some(rf.clone()),
+        ResponseFormatParam::PerAgent(map) => map.get(agent_id).cloned(),
+    }
+}
+
+/// Extracts callable tool calls (MCP and invention) from the accumulated chunk.
+/// Returns `(call_id, resolved_tool_name, arguments_json)` for each callable tool.
+fn extract_callable_tool_calls(
+    aggregate: &objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+    tool_map: &HashMap<String, super::tool::ResolvedTool>,
+) -> Vec<(String, String, String)> {
+    use objectiveai::agent::completions::response::streaming::MessageChunk;
+
+    let mut callable = Vec::new();
+    // Find the last assistant message and extract its accumulated tool calls.
+    for msg in aggregate.messages.iter().rev() {
+        if let MessageChunk::Assistant(chunk) = msg {
+            if let Some(tool_calls) = &chunk.tool_calls {
+                for tc in tool_calls {
+                    let id = tc.id.clone().unwrap_or_default();
+                    let name = tc
+                        .function
+                        .as_ref()
+                        .and_then(|f| f.name.clone())
+                        .unwrap_or_default();
+                    let args = tc
+                        .function
+                        .as_ref()
+                        .and_then(|f| f.arguments.clone())
+                        .unwrap_or_default();
+                    if name.is_empty() {
+                        continue;
+                    }
+                    match tool_map.get(&name) {
+                        Some(super::tool::ResolvedTool::Mcp { .. })
+                        | Some(super::tool::ResolvedTool::InventionTool(_)) => {
+                            callable.push((id, name, args));
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            break; // only inspect the last assistant message
+        }
+    }
+    callable
+}
+
+/// Builds an `AgentCompletionChunk` containing a single tool-response message.
+fn make_tool_chunk(
+    id: &str,
+    created: u64,
+    index: u64,
+    tool_msg: &objectiveai::agent::completions::message::ToolMessage,
+) -> objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+    use objectiveai::agent::completions::response::streaming::{
+        AgentCompletionChunk, MessageChunk,
+    };
+    use objectiveai::agent::completions::response::ToolResponse;
+    AgentCompletionChunk {
+        id: id.to_string(),
+        created,
+        messages: vec![MessageChunk::Tool(ToolResponse {
+            role: Default::default(),
+            index,
+            inner: tool_msg.clone(),
+        })],
+        ..Default::default()
     }
 }
