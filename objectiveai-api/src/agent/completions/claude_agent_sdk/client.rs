@@ -195,6 +195,9 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                             ..Default::default()
                         },
                     );
+                    yield StreamItem::State(super::State {
+                        session_id: String::new(),
+                    });
                     return;
                 }
 
@@ -229,6 +232,9 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                 ..Default::default()
                             },
                         );
+                        yield StreamItem::State(super::State {
+                            session_id: String::new(),
+                        });
                         return;
                     }
                 };
