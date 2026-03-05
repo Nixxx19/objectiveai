@@ -5,6 +5,7 @@ pub mod openrouter;
 mod state;
 pub mod tool;
 mod upstream_client;
+pub mod usage_handler;
 
 pub use client::*;
 pub use state::*;
