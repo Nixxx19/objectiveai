@@ -7,10 +7,34 @@ pub enum Error {
     AgentNotFound(String),
 
     #[error("MCP connection error: {0}")]
-    McpConnection(#[from] crate::mcp::Error),
+    McpConnection(crate::mcp::Error),
+
+    #[error("MCP list_tools error ({url}): {error}")]
+    McpListTools {
+        url: String,
+        error: std::sync::Arc<crate::mcp::Error>,
+    },
+
+    #[error("MCP call_tool error: {0}")]
+    McpCallTool(crate::mcp::Error),
 
     #[error("{0}")]
     Fetch(objectiveai::error::ResponseError),
+
+    #[error("upstream error: {0}")]
+    Upstream(objectiveai::error::ResponseError),
+
+    #[error("no agents resolved")]
+    NoAgentsResolved,
+
+    #[error("all agents failed: {0:?}")]
+    MultipleErrors(Vec<Error>),
+
+    #[error("timeout")]
+    Timeout,
+
+    #[error("empty stream")]
+    EmptyStream,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -19,20 +43,23 @@ impl objectiveai::error::StatusError for Error {
             Self::InvalidAgent(_) => 400,
             Self::AgentNotFound(_) => 404,
             Self::McpConnection(_) => 502,
+            Self::McpListTools { .. } => 502,
+            Self::McpCallTool(_) => 502,
             Self::Fetch(e) => e.code,
+            Self::Upstream(e) => e.code,
+            Self::NoAgentsResolved => 400,
+            Self::MultipleErrors(errors) => {
+                errors.first().map(|e| e.status()).unwrap_or(500)
+            }
+            Self::Timeout => 504,
+            Self::EmptyStream => 502,
         }
     }
 
     fn message(&self) -> Option<serde_json::Value> {
         match self {
-            Self::Fetch(e) => Some(e.message.clone()),
+            Self::Fetch(e) | Self::Upstream(e) => Some(e.message.clone()),
             _ => Some(serde_json::Value::String(self.to_string())),
         }
-    }
-}
-
-impl From<objectiveai::error::ResponseError> for Error {
-    fn from(e: objectiveai::error::ResponseError) -> Self {
-        Self::Fetch(e)
     }
 }
