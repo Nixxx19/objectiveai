@@ -195,9 +195,6 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                             ..Default::default()
                         },
                     );
-                    yield StreamItem::State(super::State {
-                        session_id: String::new(),
-                    });
                     return;
                 }
 
@@ -232,9 +229,6 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                 ..Default::default()
                             },
                         );
-                        yield StreamItem::State(super::State {
-                            session_id: String::new(),
-                        });
                         return;
                     }
                 };
@@ -255,6 +249,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
 
                 let timeout_duration = Duration::from_secs(300);
                 let mut latest_session_id = String::new();
+                let mut had_error = false;
 
                 // Keep invention_server alive for the duration of the stream.
                 let _invention_server_guard = invention_server;
@@ -287,6 +282,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                     ..Default::default()
                                 },
                             );
+                            had_error = true;
                             break;
                         }
                         Ok(None) => {
@@ -310,6 +306,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                         ..Default::default()
                                     },
                                 );
+                                had_error = true;
                             }
                             break;
                         }
@@ -324,6 +321,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                     ..Default::default()
                                 },
                             );
+                            had_error = true;
                             break;
                         }
                         Ok(Some(Ok(line))) => {
@@ -367,6 +365,8 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                             ..Default::default()
                                         },
                                     );
+                                    had_error = true;
+                                    break;
                                 }
                                 None => {
                                     // Ignored message type.
@@ -376,10 +376,12 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                     }
                 }
 
-                // Yield final state with session_id.
-                yield StreamItem::State(super::State {
-                    session_id: latest_session_id,
-                });
+                if !had_error {
+                    // Yield final state with session_id.
+                    yield StreamItem::State(super::State {
+                        session_id: latest_session_id,
+                    });
+                }
             };
 
             let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =

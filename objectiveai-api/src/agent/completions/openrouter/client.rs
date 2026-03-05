@@ -74,6 +74,7 @@ impl Client {
             };
 
             let mut accumulated: Option<AssistantResponseChunk> = None;
+            let mut had_error = false;
 
             while let Some(event) = event_source.next().await {
                 match event {
@@ -157,6 +158,8 @@ impl Client {
                                     error: Some(error),
                                     ..Default::default()
                                 });
+                                had_error = true;
+                                break;
                             }
                         }
                     }
@@ -192,6 +195,8 @@ impl Client {
                             ),
                             ..Default::default()
                         });
+                        had_error = true;
+                        break;
                     }
                     Err(e) => {
                         yield StreamItem::Chunk(AgentCompletionChunk {
@@ -207,30 +212,34 @@ impl Client {
                             ),
                             ..Default::default()
                         });
+                        had_error = true;
+                        break;
                     }
                 }
             }
 
-            // Yield the final accumulated state.
-            let state = match accumulated {
-                Some(acc) => AssistantMessage {
-                    content: acc.content,
-                    name: None,
-                    refusal: acc.refusal,
-                    tool_calls: acc.tool_calls.map(|tcs| {
-                        tcs.into_iter().map(Into::into).collect()
-                    }),
-                    reasoning: acc.reasoning,
-                },
-                None => AssistantMessage {
-                    content: None,
-                    name: None,
-                    refusal: None,
-                    tool_calls: None,
-                    reasoning: None,
-                },
-            };
-            yield StreamItem::State(state);
+            if !had_error {
+                // Yield the final accumulated state.
+                let state = match accumulated {
+                    Some(acc) => AssistantMessage {
+                        content: acc.content,
+                        name: None,
+                        refusal: acc.refusal,
+                        tool_calls: acc.tool_calls.map(|tcs| {
+                            tcs.into_iter().map(Into::into).collect()
+                        }),
+                        reasoning: acc.reasoning,
+                    },
+                    None => AssistantMessage {
+                        content: None,
+                        name: None,
+                        refusal: None,
+                        tool_calls: None,
+                        reasoning: None,
+                    },
+                };
+                yield StreamItem::State(state);
+            }
         }
     }
 }
