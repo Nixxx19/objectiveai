@@ -1,6 +1,10 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+/// The first stream item must never be an error chunk. If the upstream
+/// would fail before producing any non-error chunk, it must return
+/// `Err(...)` from `create` instead of yielding an error chunk into
+/// the stream.
 pub trait UpstreamClient<AGENT> {
     type State: Send + Sync + 'static;
     type Stream: futures::Stream<Item = StreamItem<Self::State>>

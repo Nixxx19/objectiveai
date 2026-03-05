@@ -1,17 +1,17 @@
 use std::pin::Pin;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
-use futures::Stream;
+use futures::{Stream, StreamExt};
 use tokio::io::AsyncBufReadExt;
 use tokio::io::BufReader;
 use tokio::process::Command;
-use tokio_stream::StreamExt;
 use tokio_stream::wrappers::LinesStream;
 
 use super::super::{ContinuationItem, StreamItem, UpstreamClient};
 use super::invention_server::InventionServer;
 use super::prompt::Prompt;
 use super::sdk_message::SDKMessage;
+use crate::util::StreamOnce;
 
 /// Claude Agent SDK client for agent completions.
 ///
@@ -176,80 +176,64 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 session_id: prompt.message.session_id.clone(),
             };
 
+            // Write JS to temp file.
+            let tmp_dir = std::env::temp_dir();
+            let tmp_path = tmp_dir.join(format!(
+                "claude_agent_sdk_{}_{tmp_id}.js",
+                std::process::id()
+            ));
+            std::fs::write(&tmp_path, &js).map_err(|e| {
+                objectiveai::error::ResponseError::from(
+                    &super::Error::Io(e.to_string()),
+                )
+            })?;
+
+            // Guard that removes the temp file on drop (handles early returns
+            // and stream cancellation).
+            struct TmpGuard(std::path::PathBuf);
+            impl Drop for TmpGuard {
+                fn drop(&mut self) {
+                    let _ = std::fs::remove_file(&self.0);
+                }
+            }
+            let tmp_guard = TmpGuard(tmp_path.clone());
+
+            // Spawn node subprocess.
+            let mut cmd = Command::new("node");
+            cmd.arg(&tmp_path)
+                .stdin(std::process::Stdio::null())
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped());
+            if let Some(ref sp) = sdk_path {
+                cmd.env("CLAUDE_AGENT_SDK_PATH", sp);
+            }
+            let mut child = cmd.spawn().map_err(|e| {
+                objectiveai::error::ResponseError::from(
+                    &super::Error::Spawn(e.to_string()),
+                )
+            })?;
+
+            // Collect stderr in background.
+            let stderr = child.stderr.take().expect("stderr was piped");
+            let stderr_handle = tokio::spawn(async move {
+                let mut buf = String::new();
+                let mut reader = BufReader::new(stderr);
+                let _ = tokio::io::AsyncReadExt::read_to_string(&mut reader, &mut buf).await;
+                buf
+            });
+
+            // Read stdout lines.
+            let stdout = child.stdout.take().expect("stdout was piped");
+            let reader = BufReader::new(stdout);
+            let mut lines_stream = LinesStream::new(reader.lines());
+
             let stream = async_stream::stream! {
-                // Write JS to temp file.
-                let tmp_dir = std::env::temp_dir();
-                let tmp_path = tmp_dir.join(format!(
-                    "claude_agent_sdk_{}_{tmp_id}.js",
-                    std::process::id()
-                ));
-                if let Err(e) = std::fs::write(&tmp_path, &js) {
-                    yield StreamItem::Chunk(
-                        objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-                            id: id.clone(),
-                            error: Some(objectiveai::error::ResponseError::from(
-                                &super::Error::Io(e.to_string()),
-                            )),
-                            ..Default::default()
-                        },
-                    );
-                    return;
-                }
-
-                // Guard that removes the temp file on drop (handles early returns
-                // and stream cancellation).
-                struct TmpGuard(std::path::PathBuf);
-                impl Drop for TmpGuard {
-                    fn drop(&mut self) {
-                        let _ = std::fs::remove_file(&self.0);
-                    }
-                }
-                let _tmp_guard = TmpGuard(tmp_path.clone());
-
-                // Spawn node subprocess.
-                let mut cmd = Command::new("node");
-                cmd.arg(&tmp_path)
-                    .stdin(std::process::Stdio::null())
-                    .stdout(std::process::Stdio::piped())
-                    .stderr(std::process::Stdio::piped());
-                if let Some(ref sp) = sdk_path {
-                    cmd.env("CLAUDE_AGENT_SDK_PATH", sp);
-                }
-                let mut child = match cmd.spawn() {
-                    Ok(child) => child,
-                    Err(e) => {
-                        yield StreamItem::Chunk(
-                            objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-                                id: id.clone(),
-                                error: Some(objectiveai::error::ResponseError::from(
-                                    &super::Error::Spawn(e.to_string()),
-                                )),
-                                ..Default::default()
-                            },
-                        );
-                        return;
-                    }
-                };
-
-                // Collect stderr in background.
-                let stderr = child.stderr.take().expect("stderr was piped");
-                let stderr_handle = tokio::spawn(async move {
-                    let mut buf = String::new();
-                    let mut reader = BufReader::new(stderr);
-                    let _ = tokio::io::AsyncReadExt::read_to_string(&mut reader, &mut buf).await;
-                    buf
-                });
-
-                // Read stdout lines.
-                let stdout = child.stdout.take().expect("stdout was piped");
-                let reader = BufReader::new(stdout);
-                let mut lines_stream = LinesStream::new(reader.lines());
+                // Keep guards alive for the duration of the stream.
+                let _tmp_guard = tmp_guard;
+                let _invention_server_guard = invention_server;
 
                 let mut latest_session_id = String::new();
                 let mut had_error = false;
-
-                // Keep invention_server alive for the duration of the stream.
-                let _invention_server_guard = invention_server;
 
                 loop {
                     match lines_stream.next().await {
@@ -347,9 +331,26 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 }
             };
 
-            let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
-                Box::pin(stream);
-            Ok((boxed, initial_state))
+            // Await the first stream item. If it is an error chunk,
+            // return Err so the caller never sees an error as the
+            // first yielded item.
+            let mut stream = Box::pin(stream);
+            match stream.next().await {
+                Some(StreamItem::Chunk(chunk)) if chunk.error.is_some() => {
+                    Err(chunk.error.unwrap())
+                }
+                Some(first) => {
+                    let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
+                        Box::pin(StreamOnce::new(first).chain(stream));
+                    Ok((boxed, initial_state))
+                }
+                None => {
+                    // Empty stream — just return state.
+                    let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
+                        Box::pin(StreamOnce::new(StreamItem::State(initial_state.clone())));
+                    Ok((boxed, initial_state))
+                }
+            }
         }
     }
 }

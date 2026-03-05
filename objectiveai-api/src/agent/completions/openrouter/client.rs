@@ -3,6 +3,7 @@
 use crate::agent::completions::{
     ContinuationItem, StreamItem, UpstreamClient,
 };
+use crate::util::StreamOnce;
 use eventsource_stream::Event as MessageEvent;
 use futures::{Stream, StreamExt};
 use reqwest_eventsource::{Event, EventSource, RequestBuilderExt};
@@ -332,9 +333,26 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                 reasoning: None,
             };
 
-            let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
-                Box::pin(stream);
-            Ok((boxed, initial_state))
+            // Await the first stream item. If it is an error chunk,
+            // return Err so the caller never sees an error as the
+            // first yielded item.
+            let mut stream = Box::pin(stream);
+            match stream.next().await {
+                Some(StreamItem::Chunk(chunk)) if chunk.error.is_some() => {
+                    return Err(chunk.error.unwrap());
+                }
+                Some(first) => {
+                    let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
+                        Box::pin(StreamOnce::new(first).chain(stream));
+                    Ok((boxed, initial_state))
+                }
+                None => {
+                    // Empty stream — just return an empty stream with state.
+                    let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
+                        Box::pin(StreamOnce::new(StreamItem::State(initial_state.clone())));
+                    Ok((boxed, initial_state))
+                }
+            }
         }
     }
 }
