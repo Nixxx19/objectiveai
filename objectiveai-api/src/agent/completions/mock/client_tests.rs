@@ -153,7 +153,7 @@ async fn test_no_tools_no_response_format_seed_42() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -185,7 +185,7 @@ async fn test_no_tools_no_response_format_seed_123() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -217,7 +217,7 @@ async fn test_no_tools_no_response_format_seed_1() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -249,7 +249,7 @@ async fn test_no_tools_no_response_format_seed_2() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -343,7 +343,7 @@ async fn test_json_object_response_format() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -383,7 +383,7 @@ async fn test_json_schema_response_format() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -415,7 +415,7 @@ async fn test_text_response_format() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -471,7 +471,7 @@ async fn test_with_mcp_tools() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -523,7 +523,7 @@ async fn test_required_tool_call() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -609,7 +609,7 @@ async fn test_multiple_mcp_tools() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -661,7 +661,7 @@ async fn test_invention_tools_only() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -713,7 +713,7 @@ async fn test_mcp_and_invention_no_response_format() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }
@@ -778,7 +778,7 @@ async fn test_mcp_invention_and_response_format() {
                 provider: None,
             })],
             object: Object::AgentCompletion,
-            usage: Some(Usage { is_byok: false, ..Default::default() }),
+            usage: Usage { is_byok: false, ..Default::default() },
             upstream: Default::default(),
             error: None,
         }

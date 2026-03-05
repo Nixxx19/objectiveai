@@ -1,6 +1,6 @@
 //! OpenRouter HTTP client for agent completions.
 
-use crate::agent::completions::upstream_client::{
+use crate::agent::completions::{
     ContinuationItem, StreamItem, UpstreamClient,
 };
 use eventsource_stream::Event as MessageEvent;

@@ -1,7 +1,6 @@
 //! Tests for [`ChatCompletionCreateParams`] construction.
 
 use super::*;
-use std::collections::HashMap;
 use std::sync::Arc;
 
 /// Helper to resolve tools and build params, replacing the old `new_with_tools`.
@@ -9,7 +8,7 @@ fn build_params(
     agent: &objectiveai::agent::openrouter::Agent,
     params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
     messages: &[objectiveai::agent::completions::message::Message],
-    continuation: Option<&[crate::agent::completions::upstream_client::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
+    continuation: Option<&[crate::agent::completions::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
     mcp_connections: &[Arc<crate::mcp::Connection>],
     mcp_tools: &[Arc<Vec<crate::mcp::tool::Tool>>],
     invention_tools: Option<&[objectiveai::functions::inventions::InventionTool]>,
@@ -3321,7 +3320,7 @@ fn test_continuation_assistant_message_appended() {
     )];
 
     let continuation = vec![
-        crate::agent::completions::upstream_client::ContinuationItem::State(
+        crate::agent::completions::ContinuationItem::State(
             objectiveai::agent::completions::message::AssistantMessage {
                 content: Some(objectiveai::agent::completions::message::RichContent::Text(
                     "Hi there!".to_string(),
@@ -3440,7 +3439,7 @@ fn test_continuation_mixed_items() {
 
     let continuation = vec![
         // Assistant made a tool call
-        crate::agent::completions::upstream_client::ContinuationItem::State(
+        crate::agent::completions::ContinuationItem::State(
             objectiveai::agent::completions::message::AssistantMessage {
                 content: None,
                 name: None,
@@ -3459,7 +3458,7 @@ fn test_continuation_mixed_items() {
             },
         ),
         // Tool response
-        crate::agent::completions::upstream_client::ContinuationItem::ToolMessage(
+        crate::agent::completions::ContinuationItem::ToolMessage(
             objectiveai::agent::completions::message::ToolMessage {
                 content: objectiveai::agent::completions::message::RichContent::Text(
                     "Sunny, 72F".to_string(),
@@ -3468,7 +3467,7 @@ fn test_continuation_mixed_items() {
             },
         ),
         // User follow-up
-        crate::agent::completions::upstream_client::ContinuationItem::UserMessage(
+        crate::agent::completions::ContinuationItem::UserMessage(
             objectiveai::agent::completions::message::UserMessage {
                 content: objectiveai::agent::completions::message::RichContent::Text(
                     "Thanks! What about tomorrow?".to_string(),

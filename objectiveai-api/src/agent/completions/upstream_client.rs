@@ -34,7 +34,7 @@ pub trait UpstreamClient<AGENT> {
         // a continuation from a previous agent completion
         // the upstream client can continue conversations from previous state
         // the agent may change
-        continuation: Option<&[ContinuationItem<Self::State>]>,
+        continuation: Option<&[super::ContinuationItem<Self::State>]>,
         // optional user-provided API key (BYOK) — used as authorization if provided
         byok: Option<&str>,
         // cost multiplier for usage reporting
@@ -52,11 +52,4 @@ pub trait UpstreamClient<AGENT> {
 pub enum StreamItem<STATE> {
     Chunk(objectiveai::agent::completions::response::streaming::AgentCompletionChunk),
     State(STATE),
-}
-
-#[derive(Debug, Clone)]
-pub enum ContinuationItem<STATE> {
-    State(STATE),
-    ToolMessage(objectiveai::agent::completions::message::ToolMessage),
-    UserMessage(objectiveai::agent::completions::message::UserMessage),
 }

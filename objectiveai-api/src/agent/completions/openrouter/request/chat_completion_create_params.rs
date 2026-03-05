@@ -100,11 +100,11 @@ impl ChatCompletionCreateParams {
         agent: &objectiveai::agent::openrouter::Agent,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         messages: &[objectiveai::agent::completions::message::Message],
-        continuation: Option<&[crate::agent::completions::upstream_client::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
+        continuation: Option<&[crate::agent::completions::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
         tool_names: &[String],
         tool_map: &HashMap<String, crate::agent::completions::tool::ResolvedTool>,
     ) -> Self {
-        use crate::agent::completions::upstream_client::ContinuationItem;
+        use crate::agent::completions::ContinuationItem;
         use objectiveai::agent::completions::message::Message;
 
         // --- Step 0: Build messages array (messages + continuation) ---

@@ -4,12 +4,9 @@ use std::collections::HashMap;
 use std::pin::Pin;
 use std::sync::Arc;
 use std::time::Duration;
-
 use futures::Stream;
 use rand::{Rng, SeedableRng};
-
-use super::super::tool::ResolvedTool;
-use super::super::upstream_client::{ContinuationItem, StreamItem, UpstreamClient};
+use super::super::{ContinuationItem, StreamItem, UpstreamClient, ResolvedTool};
 
 /// Mock upstream client that generates random responses with configurable delay.
 #[derive(Debug, Clone)]

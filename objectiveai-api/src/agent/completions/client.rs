@@ -11,6 +11,20 @@ pub struct Client<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
     pub mock: MOCK,
 }
 
+impl<OPENROUTER, CLAUDEAGENTSDK, MOCK> Client<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
+    pub fn new(
+        openrouter: OPENROUTER,
+        claude_agent_sdk: CLAUDEAGENTSDK,
+        mock: MOCK,
+    ) -> Self {
+        Self {
+            openrouter,
+            claude_agent_sdk,
+            mock,
+        }
+    }
+}
+
 impl<OPENROUTER, CLAUDEAGENTSDK, MOCK> Client<OPENROUTER, CLAUDEAGENTSDK, MOCK>
 where
     OPENROUTER: super::UpstreamClient<objectiveai::agent::openrouter::Agent>,
@@ -21,13 +35,11 @@ where
         &self,
         params: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
         continuation: Option<
-            &[super::ContinuationItem<
-                super::State<
-                    OPENROUTER::State,
-                    CLAUDEAGENTSDK::State,
-                    MOCK::State,
-                >,
-            >],
+            super::Continuation<
+                OPENROUTER::State,
+                CLAUDEAGENTSDK::State,
+                MOCK::State,
+            >,
         >,
     ) -> Result<
         impl futures::Stream<
