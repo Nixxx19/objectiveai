@@ -763,6 +763,7 @@ async fn test_with_invention_tools() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
+
     let expected: AgentCompletion = serde_json::from_str(
         include_str!("../../../assets/agent/completions/client_tests/test_with_invention_tools.json")
     ).unwrap();
@@ -821,6 +822,7 @@ async fn test_invention_tools_with_tool_call_response_format() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
+
     let expected: AgentCompletion = serde_json::from_str(
         include_str!("../../../assets/agent/completions/client_tests/test_invention_tools_with_tool_call_response_format.json")
     ).unwrap();

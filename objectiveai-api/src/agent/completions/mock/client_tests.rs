@@ -599,13 +599,22 @@ async fn test_multiple_mcp_tools() {
                 model: "mock".into(),
                 upstream_id: "mock-test-id".into(),
                 reasoning: Some("6eQ3F7G WtO c1gbEHD4a5tOh6AC9JRXoBY06ZSBtBe9ZdLSIBdE 9lKtWBkODlLuHVGeUjosZW7iEy1EombDdr5LVjyIx9HCw6TYWfA9bI80SKeoxiZPaUJCI1IyjtRrtBXdrAeDE0xq4pr1lXvF8V2wmVmMm2ScQZ3JOMCATXt7h7badD6f vuITcBIMm7g9kQsW4oYO8O gUoB3Z82Dge4LB4SrIXIoDEnoKRzd8c1Q04bPwbL3UQCExVpKQFmahi4mzzyBCBBq09JNCBav7jhxtvPB81KfKF5qqbnxF4JSdrOWuPmI2eA1DQVlICJmekz0MJmyG".into()),
-                tool_calls: Some(vec![AssistantToolCall::Function {
-                    id: "call_mock_12791539320035428755".into(),
-                    function: AssistantToolCallFunction {
-                        name: "directions".into(),
-                        arguments: "{\"from\":\"uLGraSV4vlCYGs2CJbz17zTkmo\",\"to\":\"pgBRoC0hftsPsGEg5y9yciuq\"}".into(),
+                tool_calls: Some(vec![
+                    AssistantToolCall::Function {
+                        id: "call_mock_12791539320035428755".into(),
+                        function: AssistantToolCallFunction {
+                            name: "directions".into(),
+                            arguments: "{\"from\":\"uLGraSV4vlCYGs2CJbz17zTkmo\",\"to\":\"pgBRoC0hftsPsGEg5y9yciuq\"}".into(),
+                        },
                     },
-                }]),
+                    AssistantToolCall::Function {
+                        id: "call_mock_9258486154652128339".into(),
+                        function: AssistantToolCallFunction {
+                            name: "directions".into(),
+                            arguments: "{\"from\":\"ODyHavBAXY7ilU\",\"to\":\"N6NZw\"}".into(),
+                        },
+                    },
+                ]),
                 content: None,
                 refusal: None,
                 finish_reason: FinishReason::ToolCalls,
@@ -651,13 +660,29 @@ async fn test_invention_tools_only() {
                 model: "mock".into(),
                 upstream_id: "mock-test-id".into(),
                 reasoning: Some("32vtUo3rxTcDjLHp3Eyst9aXBN7ocD3KQQKiVpJzrhLUL M213ea vGzRR0FBs3WexDDnzVdyRxXVdq8J2zwkMh5B8BbVV7jt3parzDmkK2ydNpOSESFLc9uoGKBNwfH4 bBWtK0HIg8CPGmRIqzqSuCmhQy kZQrQpak9doRcL8BQiCq5CIsfFDgIvgtXZ2i7c4Uct7nFEt R2zwvkSyxW9WHgswSOw7FFLFqe1ieaa37WKnh1fDvpKIqgLSn0P3GcWjQjKULRBA3NmDdDGUrTeK80hCUG21kI0CKR31H79tBhrLY571wc0eEYButlLL9bj".into()),
-                tool_calls: Some(vec![AssistantToolCall::Function {
-                    id: "call_mock_3455269600397602557".into(),
-                    function: AssistantToolCallFunction {
-                        name: "execute_code".into(),
-                        arguments: "{\"language\":\"tWoJ8xOQ\",\"code\":\"4Rp5lBZMaA4fSggDNTR\"}".into(),
+                tool_calls: Some(vec![
+                    AssistantToolCall::Function {
+                        id: "call_mock_3455269600397602557".into(),
+                        function: AssistantToolCallFunction {
+                            name: "execute_code".into(),
+                            arguments: "{\"language\":\"tWoJ8xOQ\",\"code\":\"4Rp5lBZMaA4fSggDNTR\"}".into(),
+                        },
                     },
-                }]),
+                    AssistantToolCall::Function {
+                        id: "call_mock_8479485837367955825".into(),
+                        function: AssistantToolCallFunction {
+                            name: "execute_code".into(),
+                            arguments: "{\"language\":\"ARs2MzUkDNz1svAXf\",\"code\":\"uFllY5nk\"}".into(),
+                        },
+                    },
+                    AssistantToolCall::Function {
+                        id: "call_mock_9211892752638480659".into(),
+                        function: AssistantToolCallFunction {
+                            name: "execute_code".into(),
+                            arguments: "{\"language\":\"7zV2sOFv0dkULWBuFQLGZ\",\"code\":\"ZypwpWFxLyCzoF7EJ7tR\"}".into(),
+                        },
+                    },
+                ]),
                 content: None,
                 refusal: None,
                 finish_reason: FinishReason::ToolCalls,
