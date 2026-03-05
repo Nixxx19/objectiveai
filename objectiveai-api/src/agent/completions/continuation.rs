@@ -1,16 +1,23 @@
-/// The upstream client state for an agent completion, parameterized by client type.
-#[derive(Debug, Clone)]
-pub enum State<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
-    Openrouter(OPENROUTER),
-    ClaudeAgentSdk(CLAUDEAGENTSDK),
-    Mock(MOCK),
-}
+use std::sync::Arc;
+use crate::mcp;
 
 #[derive(Debug, Clone)]
 pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
-    Openrouter(Vec<ContinuationItem<OPENROUTER>>),
-    ClaudeAgentSdk(Vec<ContinuationItem<CLAUDEAGENTSDK>>),
-    Mock(Vec<ContinuationItem<MOCK>>),
+    Openrouter {
+        items: Vec<ContinuationItem<OPENROUTER>>,
+        agent: objectiveai::agent::openrouter::Agent,
+        mcp_connections: Vec<Arc<mcp::Connection>>,
+    },
+    ClaudeAgentSdk {
+        items: Vec<ContinuationItem<CLAUDEAGENTSDK>>,
+        agent: objectiveai::agent::claude_agent_sdk::Agent,
+        mcp_connections: Vec<Arc<mcp::Connection>>,
+    },
+    Mock {
+        items: Vec<ContinuationItem<MOCK>>,
+        agent: objectiveai::agent::mock::Agent,
+        mcp_connections: Vec<Arc<mcp::Connection>>,
+    },
 }
 
 #[derive(Debug, Clone)]

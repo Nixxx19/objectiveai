@@ -109,6 +109,7 @@ where
 {
     pub async fn create_streaming(
         &self,
+        ctx: ctx::Context<CTXEXT>,
         params: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
         continuation: Option<
             super::Continuation<
@@ -117,10 +118,11 @@ where
                 MOCK::State,
             >,
         >,
+        invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
-                super::State<
+                super::Continuation<
                     OPENROUTER::State,
                     CLAUDEAGENTSDK::State,
                     MOCK::State,
@@ -155,9 +157,13 @@ where
 
     /// Resolves agents and connects to their MCP servers concurrently.
     ///
-    /// For each agent in `params` (primary + fallbacks), spawns a tokio task that
-    /// calls [`resolve_agent`](Self::resolve_agent). Returns `Ok(None)` for agents
-    /// that are skipped (continuation mismatch or missing MCP authorization).
+    /// If `continuation` is provided, returns the agent and MCP connections
+    /// stored in it directly (single-element vec, no spawned tasks).
+    ///
+    /// Otherwise, for each agent in `params` (primary + fallbacks), spawns a
+    /// tokio task that calls [`resolve_agent`](Self::resolve_agent). Returns
+    /// `Ok(None)` for agents that are skipped (continuation mismatch or
+    /// missing MCP authorization).
     pub fn resolve_agents(
         &self,
         ctx: ctx::Context<CTXEXT>,
@@ -177,13 +183,23 @@ where
             >,
         >,
     > {
-        use objectiveai::agent::Upstream;
-
-        let continuation_upstream = continuation.map(|c| match c {
-            super::Continuation::Openrouter(_) => Upstream::Openrouter,
-            super::Continuation::ClaudeAgentSdk(_) => Upstream::ClaudeAgentSdk,
-            super::Continuation::Mock(_) => Upstream::Mock,
-        });
+        // If continuation is provided, return its agent and connections directly.
+        if let Some(cont) = continuation {
+            let (agent, mcp_connections) = match cont {
+                super::Continuation::Openrouter { agent, mcp_connections, .. } => {
+                    (objectiveai::agent::Agent::Openrouter(agent.clone()), mcp_connections.clone())
+                }
+                super::Continuation::ClaudeAgentSdk { agent, mcp_connections, .. } => {
+                    (objectiveai::agent::Agent::ClaudeAgentSdk(agent.clone()), mcp_connections.clone())
+                }
+                super::Continuation::Mock { agent, mcp_connections, .. } => {
+                    (objectiveai::agent::Agent::Mock(agent.clone()), mcp_connections.clone())
+                }
+            };
+            return vec![tokio::spawn(async move {
+                Ok(Some((agent, mcp_connections)))
+            })];
+        }
 
         let request_agents = std::iter::once(&params.agent)
             .chain(params.agents.iter().flatten());
@@ -203,7 +219,7 @@ where
                         ctx,
                         &request_agent,
                         mcp_server_authorization.as_ref(),
-                        continuation_upstream,
+                        None,
                     )
                     .await
             }));
