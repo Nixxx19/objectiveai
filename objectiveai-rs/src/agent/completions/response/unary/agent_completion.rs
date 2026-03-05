@@ -11,9 +11,7 @@ pub struct AgentCompletion {
     pub messages: Vec<super::Message>,
     /// The object type (always "agent.completion").
     pub object: super::Object,
-    /// Token usage (only present in the final chunk).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<response::Usage>,
+    pub usage: response::Usage,
     /// Upstream provider
     pub upstream: crate::agent::Upstream,
     /// Error details if this completion failed.
@@ -37,7 +35,7 @@ impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
             created,
             messages: messages.into_iter().map(Into::into).collect(),
             object: object.into(),
-            usage,
+            usage: usage.unwrap_or_default(),
             upstream,
             error,
         }
