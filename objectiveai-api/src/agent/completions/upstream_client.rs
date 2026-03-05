@@ -56,6 +56,45 @@ pub trait UpstreamClient<AGENT> {
     + 'static;
 }
 
+pub struct UnimplementedUpstreamClient;
+
+impl<AGENT> UpstreamClient<AGENT> for UnimplementedUpstreamClient {
+    type State = ();
+    type Stream = futures::stream::Empty<StreamItem<Self::State>>;
+    fn create(
+        &self,
+        _id: &str,
+        _created: u64,
+        _agent: &AGENT,
+        _params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+        _messages: &[objectiveai::agent::completions::message::Message],
+        _mcp_connections: &[Arc<crate::mcp::Connection>],
+        _invention_tools: Option<
+            &[objectiveai::functions::inventions::InventionTool],
+        >,
+        _tool_names: &[String],
+        _tool_map: &HashMap<String, super::tool::ResolvedTool>,
+        _continuation: Option<&[super::ContinuationItem<Self::State>]>,
+        _byok: Option<&str>,
+        _cost_multiplier: rust_decimal::Decimal,
+    ) -> impl Future<
+        Output = Result<
+            (Self::Stream, Self::State),
+            objectiveai::error::ResponseError,
+        >,
+    > + Send
+    + 'static {
+        async {
+            Err(
+                objectiveai::error::ResponseError {
+                    code: 501,
+                    message: serde_json::Value::Null,
+                }
+            )
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum StreamItem<STATE> {
     Chunk(objectiveai::agent::completions::response::streaming::AgentCompletionChunk),
