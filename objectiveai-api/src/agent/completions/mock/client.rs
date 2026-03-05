@@ -76,6 +76,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
     + 'static {
         let id = id.to_string();
         let agent_id = agent.id.clone();
+        let error = agent.base.error == Some(true);
         let response_format = resolve_response_format(&agent.id, params);
         let tool_names = tool_names.to_vec();
         let tool_map = tool_map.clone();
@@ -85,6 +86,13 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
 
         async move {
             use objectiveai::agent::completions::request::ResponseFormat;
+
+            if error {
+                return Err(objectiveai::error::ResponseError {
+                    code: 500,
+                    message: serde_json::json!("Expected error"),
+                });
+            }
 
             // Reject Grammar and Python response formats.
             if let Some(ref rf) = response_format {

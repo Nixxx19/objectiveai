@@ -11,11 +11,19 @@ pub struct AgentBase {
 
     /// The output mode for vector completions. Ignored for agent completions.
     pub output_mode: super::OutputMode,
+
+    /// If true, the mock client will return an error instead of a response.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub error: Option<bool>,
 }
 
 impl AgentBase {
     /// Normalizes the configuration for deterministic ID computation.
-    pub fn prepare(&mut self) {}
+    pub fn prepare(&mut self) {
+        if self.error == Some(false) {
+            self.error = None;
+        }
+    }
 
     /// Validates the configuration.
     pub fn validate(&self) -> Result<(), String> {
