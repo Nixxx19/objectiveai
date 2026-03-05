@@ -6,27 +6,6 @@ pub fn response_id(created: u64) -> String {
     format!("agtcpl-{}-{created}", uuid.simple())
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Clone
-    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
-{
-    fn clone(&self) -> Self {
-        Self {
-            mcp_client: self.mcp_client.clone(),
-            agent_fetcher: self.agent_fetcher.clone(),
-            usage_handler: self.usage_handler.clone(),
-            openrouter: self.openrouter.clone(),
-            claude_agent_sdk: self.claude_agent_sdk.clone(),
-            mock: self.mock.clone(),
-            backoff_current_interval: self.backoff_current_interval,
-            backoff_initial_interval: self.backoff_initial_interval,
-            backoff_randomization_factor: self.backoff_randomization_factor,
-            backoff_multiplier: self.backoff_multiplier,
-            backoff_max_interval: self.backoff_max_interval,
-            backoff_max_elapsed_time: self.backoff_max_elapsed_time,
-        }
-    }
-}
-
 pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
     /// MCP Client
     pub mcp_client: Arc<crate::mcp::Client>,
@@ -54,6 +33,10 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
     pub backoff_max_interval: Duration,
     /// Maximum total time to spend on retries.
     pub backoff_max_elapsed_time: Duration,
+    /// Maximum wait time for the first chunk in a streaming response.
+    pub first_chunk_timeout: Duration,
+    /// Maximum wait time between subsequent chunks in a streaming response.
+    pub other_chunk_timeout: Duration,
 }
 
 impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> {
@@ -70,6 +53,8 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPEN
         backoff_multiplier: f64,
         backoff_max_interval: Duration,
         backoff_max_elapsed_time: Duration,
+        first_chunk_timeout: Duration,
+        other_chunk_timeout: Duration,
     ) -> Self {
         Self {
             mcp_client,
@@ -84,6 +69,31 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Client<CTXEXT, OPEN
             backoff_multiplier,
             backoff_max_interval,
             backoff_max_elapsed_time,
+            first_chunk_timeout,
+            other_chunk_timeout,
+        }
+    }
+}
+
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG> Clone
+    for Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>
+{
+    fn clone(&self) -> Self {
+        Self {
+            mcp_client: self.mcp_client.clone(),
+            agent_fetcher: self.agent_fetcher.clone(),
+            usage_handler: self.usage_handler.clone(),
+            openrouter: self.openrouter.clone(),
+            claude_agent_sdk: self.claude_agent_sdk.clone(),
+            mock: self.mock.clone(),
+            backoff_current_interval: self.backoff_current_interval,
+            backoff_initial_interval: self.backoff_initial_interval,
+            backoff_randomization_factor: self.backoff_randomization_factor,
+            backoff_multiplier: self.backoff_multiplier,
+            backoff_max_interval: self.backoff_max_interval,
+            backoff_max_elapsed_time: self.backoff_max_elapsed_time,
+            first_chunk_timeout: self.first_chunk_timeout,
+            other_chunk_timeout: self.other_chunk_timeout,
         }
     }
 }
@@ -117,13 +127,27 @@ where
                 >,
             >,
         >,
-        objectiveai::error::ResponseError,
+        super::Error,
     > {
         let created = std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap()
             .as_secs();
         let id = response_id(created);
+
+        // backoff and timeouts
+        let backoff = backoff::ExponentialBackoff {
+            current_interval: self.backoff_current_interval,
+            initial_interval: self.backoff_initial_interval,
+            randomization_factor: self.backoff_randomization_factor,
+            multiplier: self.backoff_multiplier,
+            max_interval: self.backoff_max_interval,
+            start_time: std::time::Instant::now(),
+            max_elapsed_time: Some(self.backoff_max_elapsed_time),
+            clock: backoff::SystemClock::default(),
+        };
+        let first_chunk_timeout = self.first_chunk_timeout;
+        let other_chunk_timeout = self.other_chunk_timeout;
 
         // Placeholder: return an empty stream.
         Ok(futures::stream::empty())
