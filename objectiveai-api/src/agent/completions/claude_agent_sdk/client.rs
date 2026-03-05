@@ -1,8 +1,6 @@
 use std::pin::Pin;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::Duration;
-
 use futures::Stream;
 use tokio::io::AsyncBufReadExt;
 use tokio::io::BufReader;
@@ -247,7 +245,6 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 let reader = BufReader::new(stdout);
                 let mut lines_stream = LinesStream::new(reader.lines());
 
-                let timeout_duration = Duration::from_secs(300);
                 let mut latest_session_id = String::new();
                 let mut had_error = false;
 
@@ -255,46 +252,12 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 let _invention_server_guard = invention_server;
 
                 loop {
-                    match tokio::time::timeout(timeout_duration, lines_stream.next()).await {
-                        Err(_) => {
-                            // Stream timeout.
-                            let _ = child.kill().await;
-                            let stderr_ctx = tokio::time::timeout(
-                                Duration::from_secs(2),
-                                stderr_handle,
-                            )
-                            .await
-                            .ok()
-                            .and_then(|r| r.ok())
-                            .unwrap_or_default();
-
-                            let err = if stderr_ctx.is_empty() {
-                                super::Error::StreamTimeout
-                            } else {
-                                super::Error::Stderr(
-                                    format!("stream timeout; stderr: {stderr_ctx}"),
-                                )
-                            };
-                            yield StreamItem::Chunk(
-                                objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-                                    id: id.clone(),
-                                    error: Some(objectiveai::error::ResponseError::from(&err)),
-                                    ..Default::default()
-                                },
-                            );
-                            had_error = true;
-                            break;
-                        }
-                        Ok(None) => {
+                    match lines_stream.next().await {
+                        None => {
                             // Process ended — collect stderr.
-                            let stderr_ctx = tokio::time::timeout(
-                                Duration::from_secs(2),
-                                stderr_handle,
-                            )
-                            .await
-                            .ok()
-                            .and_then(|r| r.ok())
-                            .unwrap_or_default();
+                            let stderr_ctx = stderr_handle.await
+                                .ok()
+                                .unwrap_or_default();
 
                             if !stderr_ctx.is_empty() {
                                 yield StreamItem::Chunk(
@@ -310,7 +273,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                             }
                             break;
                         }
-                        Ok(Some(Err(e))) => {
+                        Some(Err(e)) => {
                             let _ = child.kill().await;
                             yield StreamItem::Chunk(
                                 objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
@@ -324,7 +287,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                             had_error = true;
                             break;
                         }
-                        Ok(Some(Ok(line))) => {
+                        Some(Ok(line)) => {
                             let trimmed = line.trim();
                             if trimmed.is_empty() {
                                 continue;

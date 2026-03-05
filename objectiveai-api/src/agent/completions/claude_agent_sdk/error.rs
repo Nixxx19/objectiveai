@@ -29,9 +29,6 @@ pub enum Error {
 
     #[error("no output from subprocess")]
     NoOutput,
-
-    #[error("stream timeout")]
-    StreamTimeout,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -47,7 +44,6 @@ impl objectiveai::error::StatusError for Error {
             Self::Json(_) => 500,
             Self::Stderr(_) => 500,
             Self::NoOutput => 500,
-            Self::StreamTimeout => 500,
         }
     }
 
