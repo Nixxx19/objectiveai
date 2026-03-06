@@ -1,7 +1,7 @@
 //! Tests for the function execution client.
 //!
 //! These tests use mock implementations of all fetcher traits and set
-//! `from_rng: true` on all requests to avoid network traffic.
+//! Uses mock clients to avoid network traffic.
 
 use crate::{chat, ctx, ensemble, ensemble_llm, functions, vector};
 use futures::StreamExt;
@@ -261,7 +261,7 @@ fn create_test_chat_client() -> Arc<TestChatClient> {
         )));
     let usage_handler = Arc::new(MockChatUsageHandler);
 
-    // Create OpenRouter client with dummy values (won't be used since from_rng=true)
+    // Create OpenRouter client with dummy values
     let openrouter_client =
         chat::completions::upstream::openrouter::Client::new(
             reqwest::Client::new(),
@@ -494,7 +494,7 @@ fn create_simple_scalar_profile() -> objectiveai::functions::InlineProfile {
 mod tests {
     use super::*;
 
-    /// Tests that a simple vector function execution with from_rng produces valid output.
+    /// Tests that a simple vector function execution produces valid output.
     #[tokio::test]
     async fn test_vector_function_execution_with_rng() {
         let chat_client = create_test_chat_client();
@@ -511,7 +511,6 @@ mod tests {
                 base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
                     retry_token: None,
                     from_cache: None,
-                    from_rng: Some(true), // Use RNG instead of network calls
                     upstreams: None,
                     reasoning: None,
                     strategy: None,
@@ -556,7 +555,7 @@ mod tests {
         }
     }
 
-    /// Tests that a simple scalar function execution with from_rng produces valid output.
+    /// Tests that a simple scalar function execution produces valid output.
     #[tokio::test]
     async fn test_scalar_function_execution_with_rng() {
         let chat_client = create_test_chat_client();
@@ -573,7 +572,6 @@ mod tests {
                 base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
                     retry_token: None,
                     from_cache: None,
-                    from_rng: Some(true),
                     upstreams: None,
                     reasoning: None,
                     strategy: None,
@@ -612,7 +610,7 @@ mod tests {
         }
     }
 
-    /// Tests streaming function execution with from_rng.
+    /// Tests streaming function execution.
     #[tokio::test]
     async fn test_streaming_function_execution_with_rng() {
         let chat_client = create_test_chat_client();
@@ -629,7 +627,6 @@ mod tests {
                 base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
                     retry_token: None,
                     from_cache: None,
-                    from_rng: Some(true),
                     upstreams: None,
                     reasoning: None,
                     strategy: None,
@@ -807,7 +804,6 @@ mod tests {
                 base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
                     retry_token: None,
                     from_cache: None,
-                    from_rng: Some(true),
                     upstreams: None,
                     reasoning: None,
                     strategy: None,
@@ -910,7 +906,6 @@ mod tests {
                 base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
                     retry_token: None,
                     from_cache: None,
-                    from_rng: Some(true),
                     upstreams: None,
                     reasoning: None,
                     strategy: None,

@@ -18,9 +18,6 @@ pub struct VectorCompletionCreateParams {
     /// If true, uses cached votes when available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub from_cache: Option<bool>,
-    /// If true, remaining votes are generated randomly (for testing/simulation).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub from_rng: Option<bool>,
 
     // --- Core configuration ---
     /// The conversation messages (the prompt).

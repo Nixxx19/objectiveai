@@ -132,7 +132,6 @@ mod tests {
             weight: dec!(1),
             retry: None,
             from_cache: None,
-            from_rng: None,
             completion_index: None,
         }
     }

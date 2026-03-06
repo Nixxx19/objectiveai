@@ -289,7 +289,6 @@ where
                 votes.iter_mut().for_each(|vote| {
                     vote.retry = Some(true);
                     vote.from_cache = Some(true);
-                    vote.from_rng = None;
                     vote.completion_index = None;
                 });
                 (ensemble, votes, request.profile.clone())
@@ -318,7 +317,6 @@ where
                 votes.iter_mut().for_each(|vote| {
                     vote.retry = Some(true);
                     vote.from_cache = Some(true);
-                    vote.from_rng = None;
                     vote.completion_index = None;
                 });
                 (ensemble, votes, aligned_profile)
@@ -531,59 +529,6 @@ where
                 .any(|v| v.flat_ensemble_index == *flat_ensemble_index as u64)
         });
 
-        // generate votes with RNG if requested
-        if request.from_rng.is_some_and(|bool| bool) {
-            for (flat_ensemble_index, ensemble_index, agent, weight, invert) in
-                &llms
-            {
-                let agent_id = agent.inner.id();
-                let mut rng = make_rng(
-                    request.seed.map(|s| per_agent_seed(s, agent_id) as u64),
-                );
-                // initialize the vote vector
-                let mut vote = vec![Decimal::ZERO; request_responses_len];
-                // generate a random value for each entry
-                let mut sum = Decimal::ZERO;
-                for i in 0..request_responses_len {
-                    let v = Decimal::from(rng.random_range(0..=u64::MAX))
-                        / Decimal::from(u64::MAX);
-                    vote[i] = v;
-                    sum += v;
-                }
-                // normalize the vote vector
-                for v in &mut vote {
-                    *v /= sum;
-                }
-                // optionally invert the vote based on the profile
-                if *invert {
-                    vote = invert_and_l1_normalize(vote);
-                }
-                // push the vote
-                static_votes.push(
-                    objectiveai::vector::completions::response::Vote {
-                        model: agent.inner.id().to_string(),
-                        ensemble_index: *ensemble_index as u64,
-                        flat_ensemble_index: *flat_ensemble_index as u64,
-                        prompt_id: prompt_id.clone(),
-                        tools_id: None,
-                        responses_ids: responses_ids.clone(),
-                        vote,
-                        weight: *weight,
-                        retry: None,
-                        from_cache: None,
-                        from_rng: Some(true),
-                        completion_index: None,
-                    },
-                );
-            }
-        }
-
-        // filter LLMs that now have votes from RNG
-        llms.retain(|(flat_ensemble_index, _, _, _, _)| {
-            !static_votes
-                .iter()
-                .any(|v| v.flat_ensemble_index == *flat_ensemble_index as u64)
-        });
 
         // sort retry/cached/rng votes
         static_votes.sort_by_key(|vote| vote.flat_ensemble_index);
@@ -1002,7 +947,6 @@ where
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                from_rng: None,
                                 completion_index: Some(completion_index),
                             });
                         } else if let Some(mut cont) = continuation.take() {
@@ -1084,8 +1028,7 @@ where
                                                 weight,
                                                 retry: None,
                                                 from_cache: None,
-                                                from_rng: None,
-                                                completion_index: Some(completion_index),
+                                                                completion_index: Some(completion_index),
                                             });
                                         }
                                     }
@@ -1109,8 +1052,7 @@ where
                                             weight,
                                             retry: None,
                                             from_cache: None,
-                                            from_rng: None,
-                                            completion_index: Some(completion_index),
+                                                        completion_index: Some(completion_index),
                                         });
                                     }
                                 }
@@ -1135,7 +1077,6 @@ where
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                from_rng: None,
                                 completion_index: Some(completion_index),
                             });
                         } else if let Some(mut cont) = continuation.take() {
@@ -1219,8 +1160,7 @@ where
                                                         weight,
                                                         retry: None,
                                                         from_cache: None,
-                                                        from_rng: None,
-                                                        completion_index: Some(completion_index),
+                                                                                completion_index: Some(completion_index),
                                                     });
                                                 }
                                             }
@@ -1251,7 +1191,6 @@ where
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                from_rng: None,
                                 completion_index: Some(completion_index),
                             });
                         }

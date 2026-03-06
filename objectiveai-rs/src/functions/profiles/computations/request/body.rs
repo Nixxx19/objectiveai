@@ -17,9 +17,6 @@ pub struct FunctionRemoteRequestBody {
     // if true, vector completions use cached votes when available
     #[serde(skip_serializing_if = "Option::is_none")]
     pub from_cache: Option<bool>,
-    // if true, remaining vector completion votes are RNGed
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub from_rng: Option<bool>,
 
     // core config
     #[serde(skip_serializing_if = "Option::is_none")]

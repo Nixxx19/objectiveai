@@ -228,7 +228,6 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Which is better?".to_string()),
             name: None,
@@ -329,7 +328,6 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Which is best?".to_string()),
             name: None,
@@ -431,7 +429,6 @@ async fn test_two_agents_equal_weights_seed_42() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Pick one".to_string()),
             name: None,
@@ -532,7 +529,6 @@ async fn test_two_agents_unequal_weights_seed_42() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Pick one".to_string()),
             name: None,
@@ -645,7 +641,6 @@ async fn test_three_agents_4_responses_seed_99() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Rank these".to_string()),
             name: None,
@@ -748,7 +743,6 @@ async fn test_invert_vote_seed_42() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Which is worse?".to_string()),
             name: None,
@@ -855,8 +849,7 @@ async fn test_deterministic_same_seed() {
         Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
             retry: None,
             from_cache: None,
-            from_rng: None,
-            messages: vec![Message::User(UserMessage {
+                messages: vec![Message::User(UserMessage {
                 content: RichContent::Text("Pick one".to_string()),
                 name: None,
             })],
@@ -962,8 +955,7 @@ async fn test_different_seeds_differ() {
         Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
             retry: None,
             from_cache: None,
-            from_rng: None,
-            messages: vec![Message::User(UserMessage {
+                messages: vec![Message::User(UserMessage {
                 content: RichContent::Text("Pick one".to_string()),
                 name: None,
             })],
@@ -1068,7 +1060,6 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Pick the best".to_string()),
             name: None,
@@ -1166,7 +1157,6 @@ async fn test_json_schema_single_agent_seed_77() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Rate the following essays on clarity".to_string()),
             name: None,
@@ -1268,7 +1258,6 @@ async fn test_tool_call_single_agent_seed_55() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Which logo design is most memorable?".to_string()),
             name: None,
@@ -1369,7 +1358,6 @@ async fn test_error_agent_skipped_seed_42() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Evaluate these proposals".to_string()),
             name: None,
@@ -1470,7 +1458,6 @@ async fn test_mixed_output_modes_seed_88() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Compare these vacation destinations".to_string()),
             name: None,
@@ -1594,7 +1581,6 @@ async fn test_image_responses_instruction_seed_33() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Which painting has the best composition?".to_string()),
             name: None,
@@ -1720,7 +1706,6 @@ async fn test_video_and_file_responses_seed_66() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Parts(vec![
                 RichContentPart::Text { text: "Review these submissions and pick the best one".to_string() },
@@ -1860,7 +1845,6 @@ async fn test_three_different_agents_seed_11() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Parts(vec![
                 RichContentPart::Text { text: "Which dish looks the most appetizing?".to_string() },
@@ -1993,7 +1977,6 @@ async fn test_json_schema_many_responses_seed_22() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Rank these programming languages by expressiveness".to_string()),
             name: None,
@@ -2100,7 +2083,6 @@ async fn test_tool_call_two_agents_seed_44() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Parts(vec![
                 RichContentPart::Text { text: "Which UI mockup should we go with?".to_string() },
@@ -2237,7 +2219,6 @@ async fn test_error_and_healthy_agents_seed_99() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Parts(vec![
                 RichContentPart::Text { text: "Evaluate these architectural plans".to_string() },
@@ -2391,7 +2372,6 @@ async fn test_only_final_chunk_has_usage() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Pick one".to_string()),
             name: None,
@@ -2515,7 +2495,6 @@ async fn test_error_zero_responses() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Pick one".to_string()),
             name: None,
@@ -2565,7 +2544,6 @@ async fn test_error_one_response() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Rate this".to_string()),
             name: None,
@@ -2617,7 +2595,6 @@ async fn test_error_invalid_ensemble_all_count_zero() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Compare".to_string()),
             name: None,
@@ -2682,7 +2659,6 @@ async fn test_error_invalid_ensemble_empty_agents() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Which is better?".to_string()),
             name: None,
@@ -2725,7 +2701,6 @@ async fn test_error_invalid_ensemble_profile_length_mismatch() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Choose".to_string()),
             name: None,
@@ -2789,7 +2764,6 @@ async fn test_error_invalid_ensemble_conflicting_invert() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Rank these".to_string()),
             name: None,
@@ -2861,7 +2835,6 @@ async fn test_error_invalid_profile_all_zero_weights() {
     let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: None,
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Score these".to_string()),
             name: None,

@@ -30,7 +30,6 @@ fn vector_request(
         ),
         retry: None,
         from_cache: None,
-        from_rng: None,
         upstreams: None,
         provider: None,
         seed: None,

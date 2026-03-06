@@ -54,11 +54,6 @@ pub struct Vote {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub from_cache: Option<bool>,
 
-    /// If true, this vote was randomly generated (for testing/simulation).
-    /// Mutually exclusive with `from_cache` and `retry`.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub from_rng: Option<bool>,
-
     // --- Internal ---
 
     /// Internal index for correlating with completions. Not serialized.
@@ -79,7 +74,6 @@ impl ToStarlarkValue for Vote {
             ("weight", self.weight.to_starlark_value(heap)),
             ("retry", self.retry.to_starlark_value(heap)),
             ("from_cache", self.from_cache.to_starlark_value(heap)),
-            ("from_rng", self.from_rng.to_starlark_value(heap)),
         ]))
     }
 }

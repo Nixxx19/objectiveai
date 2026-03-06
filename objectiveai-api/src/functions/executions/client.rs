@@ -2468,7 +2468,6 @@ where
                     objectiveai::vector::completions::request::VectorCompletionCreateParams {
                         retry: retry_token.clone(),
                         from_cache: request_base.from_cache,
-                        from_rng: request_base.from_rng,
                         upstreams: request_base.upstreams.clone(),
                         messages: ftp.messages,
                         provider: request_base.provider,
