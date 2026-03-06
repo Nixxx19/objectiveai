@@ -2501,3 +2501,489 @@ async fn test_only_final_chunk_has_usage() {
     let last = chunks.last().unwrap();
     assert!(last.usage.is_some(), "final chunk should have usage");
 }
+
+// ---------------------------------------------------------------------------
+// Error tests
+// ---------------------------------------------------------------------------
+
+/// Helper to build a client for error tests (no snapshot needed).
+fn make_error_test_client() -> Arc<
+    super::Client<
+        ctx::DefaultContextExt,
+        UnimplementedUpstreamClient,
+        UnimplementedUpstreamClient,
+        crate::agent::completions::mock::client::Client,
+        StubAgentFetcher,
+        StubAgentUsageHandler,
+        StubEnsembleFetcher,
+        StubCompletionVotesFetcher,
+        StubCacheVoteFetcher,
+        StubVectorUsageHandler,
+    >,
+> {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    })
+}
+
+/// Zero responses → ExpectedTwoOrMoreRequestVectorResponses(0).
+#[tokio::test]
+async fn test_error_zero_responses() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Pick one".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::Instruction,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let err = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .err()
+        .expect("should fail with zero responses");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("expected two or more") && msg.contains("got 0"),
+        "unexpected error: {msg}"
+    );
+}
+
+/// One response → ExpectedTwoOrMoreRequestVectorResponses(1).
+#[tokio::test]
+async fn test_error_one_response() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Rate this".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::JsonSchema,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Only option".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let err = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .err()
+        .expect("should fail with one response");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("expected two or more") && msg.contains("got 1"),
+        "unexpected error: {msg}"
+    );
+}
+
+/// All agents have count=0 → InvalidEnsemble (no agents after filtering).
+#[tokio::test]
+async fn test_error_invalid_ensemble_all_count_zero() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Compare".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 0,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 0,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::ToolCall,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(5, 1),
+            Decimal::new(5, 1),
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("A".to_string()),
+            RichContent::Text("B".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let err = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .err()
+        .expect("should fail with all count-0 agents");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("invalid ensemble"),
+        "unexpected error: {msg}"
+    );
+}
+
+/// Empty agents vec → InvalidEnsemble.
+#[tokio::test]
+async fn test_error_invalid_ensemble_empty_agents() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Which is better?".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("X".to_string()),
+            RichContent::Text("Y".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let err = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .err()
+        .expect("should fail with empty agents");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("invalid ensemble"),
+        "unexpected error: {msg}"
+    );
+}
+
+/// Profile length doesn't match agents length → InvalidEnsemble (caught by try_from_with_profile).
+#[tokio::test]
+async fn test_error_invalid_ensemble_profile_length_mismatch() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Choose".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("A".to_string()),
+            RichContent::Text("B".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let err = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .err()
+        .expect("should fail with profile/agents length mismatch");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("invalid ensemble") && msg.contains("does not match"),
+        "unexpected error: {msg}"
+    );
+}
+
+/// Duplicate agents with conflicting invert flags → InvalidEnsemble.
+#[tokio::test]
+async fn test_error_invalid_ensemble_conflicting_invert() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Rank these".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    // Same agent definition — will be merged, but conflicting invert flags
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Entries(vec![
+            objectiveai::vector::completions::request::ProfileEntry {
+                weight: Decimal::new(5, 1),
+                invert: Some(false),
+            },
+            objectiveai::vector::completions::request::ProfileEntry {
+                weight: Decimal::new(5, 1),
+                invert: Some(true),
+            },
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("A".to_string()),
+            RichContent::Text("B".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let err = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .err()
+        .expect("should fail with conflicting invert flags");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("invalid ensemble") && msg.contains("conflicting invert"),
+        "unexpected error: {msg}"
+    );
+}
+
+/// All profile weights are zero → InvalidProfile("profile must have one or more positive weights").
+#[tokio::test]
+async fn test_error_invalid_profile_all_zero_weights() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Score these".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::ToolCall,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ZERO,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("A".to_string()),
+            RichContent::Text("B".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let err = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .err()
+        .expect("should fail with all-zero weights");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("invalid profile") && msg.contains("one or more positive"),
+        "unexpected error: {msg}"
+    );
+}
