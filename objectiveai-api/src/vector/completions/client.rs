@@ -5,9 +5,9 @@ use crate::{
     util::{ChoiceIndexer, StreamOnce},
 };
 use futures::{FutureExt, Stream, StreamExt, TryStreamExt};
-use rand::Rng;
+use rand::{Rng, SeedableRng};
 use rust_decimal::Decimal;
-use std::{collections::HashMap, sync::Arc, time};
+use std::{collections::HashMap, hash::Hasher, sync::Arc, time};
 
 /// Generates a unique response ID for a vector completion.
 pub fn response_id(created: u64) -> String {
@@ -533,10 +533,13 @@ where
 
         // generate votes with RNG if requested
         if request.from_rng.is_some_and(|bool| bool) {
-            let mut rng = rand::rng();
             for (flat_ensemble_index, ensemble_index, agent, weight, invert) in
                 &llms
             {
+                let agent_id = agent.inner.id();
+                let mut rng = make_rng(
+                    request.seed.map(|s| per_agent_seed(s, agent_id) as u64),
+                );
                 // initialize the vote vector
                 let mut vote = vec![Decimal::ZERO; request_responses_len];
                 // generate a random value for each entry
@@ -756,12 +759,15 @@ where
         let mut vector_pfx_data: HashMap<String, super::PfxData> = HashMap::new();
         let mut vector_pfx_indices: HashMap<String, Vec<(String, usize)>> = HashMap::new();
         {
-            let mut rng = rand::rng();
             for a in std::iter::once(&agent.inner).chain(
                 agent.fallbacks
                     .iter()
                     .flat_map(|fallbacks| fallbacks.iter()),
             ) {
+                let agent_id = a.id().to_string();
+                let mut rng = make_rng(
+                    request.seed.map(|s| per_agent_seed(s, &agent_id) as u64),
+                );
                 let top_logprobs = match a {
                     objectiveai::agent::Agent::Openrouter(a) => a.base.top_logprobs,
                     _ => None,
@@ -776,7 +782,6 @@ where
                 );
                 let pfx_indices = pfx_tree.pfx_indices(&mut rng, request_responses_len);
                 let responses_key_pattern = pfx_tree.regex_pattern(&pfx_indices);
-                let agent_id = a.id().to_string();
                 vector_pfx_data.insert(
                     agent_id.clone(),
                     super::PfxData {
@@ -849,6 +854,8 @@ where
             objectiveai::agent::OutputMode::Instruction => None,
         };
 
+        let primary_id = agent.inner.id().to_string();
+
         // Build the AgentCompletionCreateParams (messages are NOT modified here)
         let agent_params = Arc::new(objectiveai::agent::completions::request::AgentCompletionCreateParams {
             messages: request.messages.clone(),
@@ -862,15 +869,13 @@ where
                     .collect()
             }),
             response_format: response_format.clone(),
-            seed: None,
+            seed: request.seed.map(|s| per_agent_seed(s, &primary_id)),
             stream: Some(false),
             mcp_server_authorization: None,
             backoff_max_elapsed_time: None,
             first_chunk_timeout: None,
             other_chunk_timeout: None,
         });
-
-        let primary_id = agent.inner.id().to_string();
 
         // Call the agent completions client, capturing the continuation for potential retry
         let completion_index = indexer.get(flat_ensemble_index);
@@ -1318,6 +1323,23 @@ fn rich_content_to_string(
             }
             result
         }
+    }
+}
+
+/// Computes a per-agent seed by hashing the base seed with the agent ID.
+///
+/// This ensures each agent in an ensemble gets a different but deterministic seed.
+fn per_agent_seed(seed: i64, agent_id: &str) -> i64 {
+    let mut hasher = twox_hash::XxHash3_64::with_seed(seed as u64);
+    hasher.write(agent_id.as_bytes());
+    hasher.finish() as i64
+}
+
+/// Creates an RNG, seeded if a seed is provided (for deterministic results).
+fn make_rng(seed: Option<u64>) -> impl Rng {
+    match seed {
+        Some(seed) => rand::rngs::StdRng::seed_from_u64(seed),
+        None => rand::rngs::StdRng::from_os_rng(),
     }
 }
 
