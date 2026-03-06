@@ -2396,3 +2396,108 @@ async fn test_error_and_healthy_agents_seed_99() {
         include_str!("../../../assets/vector/completions/client_tests/error_and_healthy_agents_seed_99.json"),
     );
 }
+
+/// Only the final chunk should carry usage; all earlier chunks should have usage: None.
+#[tokio::test]
+async fn test_only_final_chunk_has_usage() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Pick one".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 2,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::Instruction,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("A".to_string()),
+            RichContent::Text("B".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(chunks.len() >= 2, "need at least 2 chunks to test usage placement, got {}", chunks.len());
+
+    // All chunks except the last should have usage: None
+    for (i, chunk) in chunks[..chunks.len() - 1].iter().enumerate() {
+        assert!(chunk.usage.is_none(), "chunk {i} should not have usage, but got: {:?}", chunk.usage);
+    }
+
+    // The last chunk must have usage
+    let last = chunks.last().unwrap();
+    assert!(last.usage.is_some(), "final chunk should have usage");
+}
