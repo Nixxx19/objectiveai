@@ -162,6 +162,17 @@ fn normalize(mut c: AgentCompletion) -> AgentCompletion {
     c
 }
 
+fn assert_snapshot(json: &str, path: &str, expected: &str) {
+    if std::env::var("UPDATE_AGENT_COMPLETION_SNAPSHOTS").as_deref() == Ok("1") {
+        std::fs::write(path, json).unwrap();
+        eprintln!("Updated snapshot: {path}");
+        let written = std::fs::read_to_string(path).unwrap();
+        assert_eq!(json, written.trim_end());
+    } else {
+        assert_eq!(json, expected.trim_end());
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Tests
 // ---------------------------------------------------------------------------
@@ -193,10 +204,12 @@ async fn test_basic_mock_agent_seed_42() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_basic_mock_agent_seed_42.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_basic_mock_agent_seed_42.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_basic_mock_agent_seed_42.json"),
+    );
 }
 
 /// Default mock agent with seed 123.
@@ -226,10 +239,12 @@ async fn test_basic_mock_agent_seed_123() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_basic_mock_agent_seed_123.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_basic_mock_agent_seed_123.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_basic_mock_agent_seed_123.json"),
+    );
 }
 
 /// Same seed produces identical streams.
@@ -276,10 +291,12 @@ async fn test_deterministic_with_same_seed() {
     let completion_b = normalize(aggregate(&items_b));
     assert_eq!(completion_a, completion_b);
 
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_deterministic_with_same_seed.json")
-    ).unwrap();
-    assert_eq!(completion_a, expected);
+    let json_a = serde_json::to_string_pretty(&completion_a).unwrap();
+    assert_snapshot(
+        &json_a,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_deterministic_with_same_seed.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_deterministic_with_same_seed.json"),
+    );
 }
 
 /// Different seeds produce different streams.
@@ -325,15 +342,19 @@ async fn test_different_seeds_differ() {
     let completion_a = normalize(aggregate(&items_a));
     let completion_b = normalize(aggregate(&items_b));
 
-    let expected_a: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_different_seeds_differ_a.json")
-    ).unwrap();
-    assert_eq!(completion_a, expected_a);
+    let json_a = serde_json::to_string_pretty(&completion_a).unwrap();
+    assert_snapshot(
+        &json_a,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_different_seeds_differ_a.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_different_seeds_differ_a.json"),
+    );
 
-    let expected_b: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_different_seeds_differ_b.json")
-    ).unwrap();
-    assert_eq!(completion_b, expected_b);
+    let json_b = serde_json::to_string_pretty(&completion_b).unwrap();
+    assert_snapshot(
+        &json_b,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_different_seeds_differ_b.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_different_seeds_differ_b.json"),
+    );
 }
 
 /// Mock agent with error=true should fail.
@@ -392,10 +413,12 @@ async fn test_with_single_user_message() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_with_single_user_message.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_with_single_user_message.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_with_single_user_message.json"),
+    );
 }
 
 /// Messages: developer + user messages.
@@ -434,10 +457,12 @@ async fn test_with_developer_and_user_messages() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_with_developer_and_user_messages.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_with_developer_and_user_messages.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_with_developer_and_user_messages.json"),
+    );
 }
 
 /// Response format: JsonObject.
@@ -467,10 +492,12 @@ async fn test_json_object_response_format() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_json_object_response_format.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_json_object_response_format.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_json_object_response_format.json"),
+    );
 }
 
 /// Response format: JsonSchema with object schema.
@@ -508,10 +535,12 @@ async fn test_json_schema_response_format() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_json_schema_response_format.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_json_schema_response_format.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_json_schema_response_format.json"),
+    );
 }
 
 /// Response format: Text.
@@ -541,10 +570,12 @@ async fn test_text_response_format() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_text_response_format.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_text_response_format.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_text_response_format.json"),
+    );
 }
 
 /// Response format: Grammar should be rejected by mock client.
@@ -632,10 +663,12 @@ async fn test_required_tool_call_response_format() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_required_tool_call_response_format.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_required_tool_call_response_format.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_required_tool_call_response_format.json"),
+    );
 }
 
 /// Response format: ToolCall with required=None (optional).
@@ -676,10 +709,12 @@ async fn test_optional_tool_call_response_format() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_optional_tool_call_response_format.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_optional_tool_call_response_format.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_optional_tool_call_response_format.json"),
+    );
 }
 
 /// With invention tools provided.
@@ -737,10 +772,12 @@ async fn test_with_invention_tools() {
 
     let completion = normalize(aggregate(&items));
 
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_with_invention_tools.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_with_invention_tools.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_with_invention_tools.json"),
+    );
 }
 
 /// With invention tools and ToolCall response format.
@@ -793,10 +830,12 @@ async fn test_invention_tools_with_tool_call_response_format() {
 
     let completion = normalize(aggregate(&items));
 
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_invention_tools_with_tool_call_response_format.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_invention_tools_with_tool_call_response_format.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_invention_tools_with_tool_call_response_format.json"),
+    );
 }
 
 /// Single invention tool that returns an error.
@@ -838,10 +877,12 @@ async fn test_invention_tool_returns_error() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_invention_tool_returns_error.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_invention_tool_returns_error.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_invention_tool_returns_error.json"),
+    );
 }
 
 /// Multiple user messages in a conversation.
@@ -880,10 +921,12 @@ async fn test_multiple_user_messages() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_multiple_user_messages.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_multiple_user_messages.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_multiple_user_messages.json"),
+    );
 }
 
 /// Mock agent with error=Some(false) should succeed (normalized to None by prepare).
@@ -916,10 +959,12 @@ async fn test_mock_agent_error_false_succeeds() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_mock_agent_error_false_succeeds.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_mock_agent_error_false_succeeds.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_mock_agent_error_false_succeeds.json"),
+    );
 }
 
 /// Final stream item is always a Continuation::Mock.
@@ -956,10 +1001,12 @@ async fn test_final_item_is_mock_continuation() {
     }
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_final_item_is_mock_continuation.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_final_item_is_mock_continuation.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_final_item_is_mock_continuation.json"),
+    );
 }
 
 /// PerAgent response format targeting the mock agent's ID.
@@ -996,10 +1043,12 @@ async fn test_per_agent_response_format() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_per_agent_response_format.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_per_agent_response_format.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_per_agent_response_format.json"),
+    );
 }
 
 /// PerAgent response format with unknown agent ID (should fall back to no format).
@@ -1035,10 +1084,12 @@ async fn test_per_agent_response_format_unknown_id() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_per_agent_response_format_unknown_id.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_per_agent_response_format_unknown_id.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_per_agent_response_format_unknown_id.json"),
+    );
 }
 
 /// JsonSchema with nested object schema.
@@ -1090,10 +1141,12 @@ async fn test_json_schema_nested_object() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_json_schema_nested_object.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_json_schema_nested_object.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_json_schema_nested_object.json"),
+    );
 }
 
 /// Fallback agents: primary errors, fallback succeeds.
@@ -1128,10 +1181,12 @@ async fn test_fallback_agent_on_error() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_fallback_agent_on_error.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_fallback_agent_on_error.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_fallback_agent_on_error.json"),
+    );
 }
 
 /// Both primary and fallback agents error — should fail.
@@ -1205,10 +1260,12 @@ async fn test_multiple_fallback_agents() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_multiple_fallback_agents.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_multiple_fallback_agents.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_multiple_fallback_agents.json"),
+    );
 }
 
 /// With continuation from a previous Mock run.
@@ -1248,10 +1305,12 @@ async fn test_with_mock_continuation() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_with_mock_continuation.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_with_mock_continuation.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_with_mock_continuation.json"),
+    );
 }
 
 /// Stream produces chunks before the final state.
@@ -1289,10 +1348,12 @@ async fn test_stream_yields_chunks_before_state() {
     );
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_stream_yields_chunks_before_state.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_stream_yields_chunks_before_state.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_stream_yields_chunks_before_state.json"),
+    );
 }
 
 /// Large seed value.
@@ -1322,10 +1383,12 @@ async fn test_large_seed_value() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_large_seed_value.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_large_seed_value.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_large_seed_value.json"),
+    );
 }
 
 /// Seed 0.
@@ -1355,8 +1418,10 @@ async fn test_seed_zero() {
     assert!(matches!(items.last(), Some(StreamItem::State(_))));
 
     let completion = normalize(aggregate(&items));
-    let expected: AgentCompletion = serde_json::from_str(
-        include_str!("../../../assets/agent/completions/client_tests/test_seed_zero.json")
-    ).unwrap();
-    assert_eq!(completion, expected);
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_seed_zero.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_seed_zero.json"),
+    );
 }

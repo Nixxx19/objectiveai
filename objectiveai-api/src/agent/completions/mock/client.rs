@@ -187,7 +187,10 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                             reasoning: Some(reasoning_text.clone()),
                             ..Default::default()
                         })],
-                        ..Default::default()
+                        object: Default::default(),
+                        usage: None,
+                        upstream: objectiveai::agent::Upstream::Mock,
+                        error: None,
                     });
                 }
 
@@ -226,7 +229,10 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                                     },
                                     ..Default::default()
                                 })],
-                                ..Default::default()
+                                object: Default::default(),
+                                usage: None,
+                                upstream: objectiveai::agent::Upstream::Mock,
+                                error: None,
                             });
                         }
                     }
@@ -285,7 +291,10 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                                         },
                                         ..Default::default()
                                     })],
-                                    ..Default::default()
+                                    object: Default::default(),
+                                    usage: None,
+                                    upstream: objectiveai::agent::Upstream::Mock,
+                                    error: None,
                                 });
                             }
                         }
@@ -299,11 +308,14 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 yield StreamItem::Chunk(AgentCompletionChunk {
                     id: id.clone(),
                     created,
+                    messages: Vec::new(),
+                    object: Default::default(),
                     usage: Some(objectiveai::agent::completions::response::Usage {
                         is_byok,
                         ..Default::default()
                     }),
-                    ..Default::default()
+                    upstream: objectiveai::agent::Upstream::Mock,
+                    error: None,
                 });
 
                 // --- Yield final state ---

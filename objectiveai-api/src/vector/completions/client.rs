@@ -867,7 +867,7 @@ where
                 Ok((stream, aggregate, continuation)) => (stream, aggregate, continuation),
                 Err(e) => {
                     yield Self::llm_create_streaming_vector_error(
-                        id.clone(), indexer.get(flat_ensemble_index), e, created, ensemble.clone(),
+                        id.clone(), indexer.get(flat_ensemble_index), e, agent.inner.base().upstream(), created, ensemble.clone(),
                     );
                     return;
                 }
@@ -1222,6 +1222,7 @@ where
         id: String,
         completion_index: u64,
         error: agent::completions::Error,
+        upstream: objectiveai::agent::Upstream,
         created: u64,
         ensemble: String,
     ) -> objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
@@ -1232,6 +1233,7 @@ where
                     index: completion_index,
                     inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
                         error: Some(objectiveai::error::ResponseError::from(&error)),
+                        upstream,
                         ..Default::default()
                     },
                 },

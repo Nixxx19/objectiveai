@@ -165,9 +165,11 @@ fn normalize(mut vc: VectorCompletion) -> VectorCompletion {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_SNAPSHOTS").as_deref() == Ok("1") {
+    if std::env::var("UPDATE_VECTOR_COMPLETION_SNAPSHOTS").as_deref() == Ok("1") {
         std::fs::write(path, json).unwrap();
         eprintln!("Updated snapshot: {path}");
+        let written = std::fs::read_to_string(path).unwrap();
+        assert_eq!(json, written.trim_end());
     } else {
         assert_eq!(json, expected.trim_end());
     }

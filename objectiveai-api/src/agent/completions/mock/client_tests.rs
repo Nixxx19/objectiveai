@@ -153,7 +153,7 @@ async fn test_no_tools_no_response_format_seed_42() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -185,7 +185,7 @@ async fn test_no_tools_no_response_format_seed_123() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -217,7 +217,7 @@ async fn test_no_tools_no_response_format_seed_1() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -249,7 +249,7 @@ async fn test_no_tools_no_response_format_seed_2() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -347,7 +347,7 @@ async fn test_json_object_response_format() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -387,7 +387,7 @@ async fn test_json_schema_response_format() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -419,7 +419,7 @@ async fn test_text_response_format() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -475,7 +475,7 @@ async fn test_with_mcp_tools() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -527,7 +527,7 @@ async fn test_required_tool_call() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -622,7 +622,7 @@ async fn test_multiple_mcp_tools() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -690,7 +690,7 @@ async fn test_invention_tools_only() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -742,7 +742,7 @@ async fn test_mcp_and_invention_no_response_format() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
@@ -807,7 +807,7 @@ async fn test_mcp_invention_and_response_format() {
             })],
             object: Object::AgentCompletion,
             usage: Usage { is_byok: false, ..Default::default() },
-            upstream: Default::default(),
+            upstream: objectiveai::agent::Upstream::Mock,
             error: None,
         }
     );
