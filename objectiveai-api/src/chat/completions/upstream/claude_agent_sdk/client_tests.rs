@@ -36,9 +36,6 @@ fn vector_request(
         seed: None,
         stream: None,
         tools: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     }
 }
 

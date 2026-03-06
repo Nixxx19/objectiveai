@@ -872,9 +872,6 @@ where
             seed: request.seed.map(|s| per_agent_seed(s, &primary_id)),
             stream: Some(false),
             mcp_server_authorization: None,
-            backoff_max_elapsed_time: None,
-            first_chunk_timeout: None,
-            other_chunk_timeout: None,
         });
 
         // Call the agent completions client, yielding each chunk immediately

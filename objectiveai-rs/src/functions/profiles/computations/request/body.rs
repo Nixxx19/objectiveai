@@ -39,11 +39,4 @@ pub struct FunctionRemoteRequestBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mcp_server_authorization: Option<IndexMap<String, String>>,
 
-    // retry config
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub backoff_max_elapsed_time: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub first_chunk_timeout: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub other_chunk_timeout: Option<u64>,
 }

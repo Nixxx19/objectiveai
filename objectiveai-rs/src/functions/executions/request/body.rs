@@ -74,14 +74,4 @@ pub struct FunctionRemoteProfileRemoteRequestBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
 
-    // --- Retry configuration ---
-    /// Maximum elapsed time (ms) for exponential backoff retries.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub backoff_max_elapsed_time: Option<u64>,
-    /// Timeout (ms) for receiving the first chunk of a streaming response.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub first_chunk_timeout: Option<u64>,
-    /// Timeout (ms) between subsequent chunks of a streaming response.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub other_chunk_timeout: Option<u64>,
 }

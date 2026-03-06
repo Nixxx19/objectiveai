@@ -519,9 +519,6 @@ mod tests {
                     provider: None,
                     seed: None,
                     stream: None,
-                    backoff_max_elapsed_time: None,
-                    first_chunk_timeout: None,
-                    other_chunk_timeout: None,
                 },
             },
         });
@@ -584,9 +581,6 @@ mod tests {
                     provider: None,
                     seed: None,
                     stream: None,
-                    backoff_max_elapsed_time: None,
-                    first_chunk_timeout: None,
-                    other_chunk_timeout: None,
                 },
             },
         });
@@ -643,9 +637,6 @@ mod tests {
                     provider: None,
                     seed: None,
                     stream: Some(true),
-                    backoff_max_elapsed_time: None,
-                    first_chunk_timeout: None,
-                    other_chunk_timeout: None,
                 },
             },
         });
@@ -824,9 +815,6 @@ mod tests {
                     provider: None,
                     seed: None,
                     stream: None,
-                    backoff_max_elapsed_time: None,
-                    first_chunk_timeout: None,
-                    other_chunk_timeout: None,
                 },
             },
         });
@@ -930,9 +918,6 @@ mod tests {
                     provider: None,
                     seed: None,
                     stream: None,
-                    backoff_max_elapsed_time: None,
-                    first_chunk_timeout: None,
-                    other_chunk_timeout: None,
                 },
             },
         });

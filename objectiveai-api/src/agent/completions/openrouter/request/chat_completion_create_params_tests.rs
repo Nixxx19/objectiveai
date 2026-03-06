@@ -61,9 +61,6 @@ fn test_no_tools_empty_params() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
@@ -164,9 +161,6 @@ fn test_invention_response_format_name_conflict() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let mut inv_params = indexmap::IndexMap::new();
@@ -278,9 +272,6 @@ fn test_top_logprobs_zero_omits_logprobs() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -353,9 +344,6 @@ fn test_multiple_invention_tools_no_conflicts() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let messages = vec![objectiveai::agent::completions::message::Message::User(
@@ -535,9 +523,6 @@ fn test_toolcall_not_required_uses_auto_choice() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -634,9 +619,6 @@ fn test_invention_tool_parameters_preserved() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let mut inv_params = indexmap::IndexMap::new();
@@ -767,9 +749,6 @@ fn test_agent_base_fields_passthrough() {
             seed: None,
             stream: None,
             mcp_server_authorization: None,
-            backoff_max_elapsed_time: None,
-            first_chunk_timeout: None,
-            other_chunk_timeout: None,
         };
 
     let messages = vec![
@@ -880,9 +859,6 @@ fn test_provider_merging_both_sides() {
             seed: None,
             stream: None,
             mcp_server_authorization: None,
-            backoff_max_elapsed_time: None,
-            first_chunk_timeout: None,
-            other_chunk_timeout: None,
         };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -985,9 +961,6 @@ fn test_per_agent_response_format_miss() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -1087,9 +1060,6 @@ fn test_json_schema_response_format_extracts_title() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let messages: Vec<objectiveai::agent::completions::message::Message> = vec![];
@@ -1192,9 +1162,6 @@ fn test_seed_passthrough() {
         seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let messages = vec![
@@ -1333,9 +1300,6 @@ fn test_toolcall_required_forces_function_choice() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
@@ -1431,9 +1395,6 @@ fn test_three_mcp_servers_fifteen_tools_all_unique() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     // Server 1: file operations
@@ -2026,9 +1987,6 @@ fn test_mcp_duplicate_name_across_servers_gets_url_suffix() {
         seed: Some(7),
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     // Server 1: knowledge base — has "search" (the duplicate)
@@ -2611,9 +2569,6 @@ fn test_mcp_tool_conflicts_with_invention_tool() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     // MCP server has a tool named "analyze"
@@ -2816,9 +2771,6 @@ fn test_mcp_tool_conflicts_with_response_format_tool() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     // MCP server also has a tool named "evaluate"
@@ -3025,9 +2977,6 @@ fn test_four_way_name_conflict_mcp_x2_invention_response_format() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     // MCP server 1 has "output"
@@ -3305,9 +3254,6 @@ fn test_continuation_assistant_message_appended() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let messages = vec![objectiveai::agent::completions::message::Message::User(
@@ -3423,9 +3369,6 @@ fn test_continuation_mixed_items() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     };
 
     let messages = vec![objectiveai::agent::completions::message::Message::User(

@@ -2479,10 +2479,6 @@ where
                         seed: request_base.seed,
                         stream: request_base.stream,
                         tools: ftp.tools,
-                        backoff_max_elapsed_time: request_base
-                            .backoff_max_elapsed_time,
-                        first_chunk_timeout: request_base.first_chunk_timeout,
-                        other_chunk_timeout: request_base.other_chunk_timeout,
                         responses: ftp.responses,
                     },
                 ),
@@ -2689,11 +2685,6 @@ where
                         tools: None,
                         parallel_tool_calls: None,
                         prediction: None,
-                        backoff_max_elapsed_time: request
-                            .base()
-                            .backoff_max_elapsed_time,
-                        first_chunk_timeout: request.base().first_chunk_timeout,
-                        other_chunk_timeout: request.base().other_chunk_timeout,
                     },
                 ),
             )

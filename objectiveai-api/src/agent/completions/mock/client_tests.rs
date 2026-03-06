@@ -38,9 +38,6 @@ fn default_params() -> AgentCompletionCreateParams {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     }
 }
 

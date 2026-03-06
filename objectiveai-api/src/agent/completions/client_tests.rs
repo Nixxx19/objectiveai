@@ -181,9 +181,6 @@ async fn test_basic_mock_agent_seed_42() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -217,9 +214,6 @@ async fn test_basic_mock_agent_seed_123() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -252,9 +246,6 @@ async fn test_deterministic_with_same_seed() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let client_a = make_client(77);
@@ -305,9 +296,6 @@ async fn test_different_seeds_differ() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let client_a = make_client(1);
@@ -366,9 +354,6 @@ async fn test_mock_agent_with_error() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let result = client
@@ -395,9 +380,6 @@ async fn test_with_single_user_message() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -440,9 +422,6 @@ async fn test_with_developer_and_user_messages() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -476,9 +455,6 @@ async fn test_json_object_response_format() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -520,9 +496,6 @@ async fn test_json_schema_response_format() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -556,9 +529,6 @@ async fn test_text_response_format() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -594,9 +564,6 @@ async fn test_grammar_response_format_rejected() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let result = client
@@ -620,9 +587,6 @@ async fn test_python_response_format_rejected() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let result = client
@@ -656,9 +620,6 @@ async fn test_required_tool_call_response_format() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -703,9 +664,6 @@ async fn test_optional_tool_call_response_format() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -766,9 +724,6 @@ async fn test_with_invention_tools() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -825,9 +780,6 @@ async fn test_invention_tools_with_tool_call_response_format() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -874,9 +826,6 @@ async fn test_invention_tool_returns_error() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -919,9 +868,6 @@ async fn test_multiple_user_messages() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -958,9 +904,6 @@ async fn test_mock_agent_error_false_succeeds() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -994,9 +937,6 @@ async fn test_final_item_is_mock_continuation() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -1044,9 +984,6 @@ async fn test_per_agent_response_format() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -1086,9 +1023,6 @@ async fn test_per_agent_response_format_unknown_id() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -1144,9 +1078,6 @@ async fn test_json_schema_nested_object() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -1185,9 +1116,6 @@ async fn test_fallback_agent_on_error() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -1229,9 +1157,6 @@ async fn test_all_agents_error() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let result = client
@@ -1268,9 +1193,6 @@ async fn test_multiple_fallback_agents() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -1306,9 +1228,6 @@ async fn test_with_mock_continuation() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let continuation = crate::agent::completions::Continuation::Mock {
@@ -1350,9 +1269,6 @@ async fn test_stream_yields_chunks_before_state() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -1394,9 +1310,6 @@ async fn test_large_seed_value() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
@@ -1430,9 +1343,6 @@ async fn test_seed_zero() {
         seed: None,
         stream: None,
         mcp_server_authorization: None,
-        backoff_max_elapsed_time: None,
-        first_chunk_timeout: None,
-        other_chunk_timeout: None,
     });
 
     let stream = client
