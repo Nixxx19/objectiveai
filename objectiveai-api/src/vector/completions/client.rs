@@ -939,11 +939,10 @@ where
                                 vote
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
-                                model: agent_id.clone(),
+                                agent: agent_id.clone(),
                                 ensemble_index: ensemble_index as u64,
                                 flat_ensemble_index: flat_ensemble_index as u64,
                                 prompt_id: prompt_id.clone(),
-                                tools_id: None,
                                 responses_ids: responses_ids.clone(),
                                 vote,
                                 weight,
@@ -1020,11 +1019,10 @@ where
                                                 retry_vote
                                             };
                                             votes.push(objectiveai::vector::completions::response::Vote {
-                                                model: agent_id.clone(),
+                                                agent: agent_id.clone(),
                                                 ensemble_index: ensemble_index as u64,
                                                 flat_ensemble_index: flat_ensemble_index as u64,
                                                 prompt_id: prompt_id.clone(),
-                                                tools_id: None,
                                                 responses_ids: responses_ids.clone(),
                                                 vote: retry_vote,
                                                 weight,
@@ -1044,11 +1042,10 @@ where
                                             vote
                                         };
                                         votes.push(objectiveai::vector::completions::response::Vote {
-                                            model: agent_id.clone(),
+                                            agent: agent_id.clone(),
                                             ensemble_index: ensemble_index as u64,
                                             flat_ensemble_index: flat_ensemble_index as u64,
                                             prompt_id: prompt_id.clone(),
-                                            tools_id: None,
                                             responses_ids: responses_ids.clone(),
                                             vote,
                                             weight,
@@ -1069,11 +1066,10 @@ where
                                 vote
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
-                                model: agent_id.clone(),
+                                agent: agent_id.clone(),
                                 ensemble_index: ensemble_index as u64,
                                 flat_ensemble_index: flat_ensemble_index as u64,
                                 prompt_id: prompt_id.clone(),
-                                tools_id: None,
                                 responses_ids: responses_ids.clone(),
                                 vote,
                                 weight,
@@ -1152,11 +1148,10 @@ where
                                                         retry_vote
                                                     };
                                                     votes.push(objectiveai::vector::completions::response::Vote {
-                                                        model: agent_id.clone(),
+                                                        agent: agent_id.clone(),
                                                         ensemble_index: ensemble_index as u64,
                                                         flat_ensemble_index: flat_ensemble_index as u64,
                                                         prompt_id: prompt_id.clone(),
-                                                        tools_id: None,
                                                         responses_ids: responses_ids.clone(),
                                                         vote: retry_vote,
                                                         weight,
@@ -1183,11 +1178,10 @@ where
                                 vote
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
-                                model: agent_id.clone(),
+                                agent: agent_id.clone(),
                                 ensemble_index: ensemble_index as u64,
                                 flat_ensemble_index: flat_ensemble_index as u64,
                                 prompt_id: prompt_id.clone(),
-                                tools_id: None,
                                 responses_ids: responses_ids.clone(),
                                 vote,
                                 weight,

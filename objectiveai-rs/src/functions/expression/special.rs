@@ -122,11 +122,10 @@ mod tests {
 
     fn make_vote() -> Vote {
         Vote {
-            model: "openai/gpt-4o".to_string(),
+            agent: "openai/gpt-4o".to_string(),
             ensemble_index: 0,
             flat_ensemble_index: 0,
             prompt_id: "p1".to_string(),
-            tools_id: None,
             responses_ids: vec!["r1".to_string(), "r2".to_string()],
             vote: vec![dec!(1), dec!(0)],
             weight: dec!(1),
