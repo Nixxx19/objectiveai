@@ -56,8 +56,10 @@ export default function Home() {
           limitedFunctions.map(async (fn): Promise<FeaturedFunction | null> => {
             try {
               const slug = `${fn.owner}/${fn.repository}`;
-              // Fetch full function details via SDK
-              const details = await Functions.retrieve(client, "github", fn.owner, fn.repository, fn.commit);
+              const controller = new AbortController();
+              const timeout = setTimeout(() => controller.abort(), 5000);
+              const details = await Functions.retrieve(client, "github", fn.owner, fn.repository, fn.commit, { signal: controller.signal });
+              clearTimeout(timeout);
 
               const category = deriveCategory(details);
               const name = deriveDisplayName(fn.repository);
