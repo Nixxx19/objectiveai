@@ -62,6 +62,7 @@ impl AgentBase {
             AgentBase::Mock(b) => b.id(),
         }
     }
+
 }
 
 /// A borrowed reference into an [`AgentBase`] variant.
@@ -119,6 +120,17 @@ impl<'a> AgentBaseRef<'a> {
         match self {
             AgentBaseRef::Openrouter(b) => b.top_logprobs,
             AgentBaseRef::ClaudeAgentSdk(_) | AgentBaseRef::Mock(_) => None,
+        }
+    }
+
+    pub fn merged_messages(
+        &self,
+        messages: Vec<super::completions::message::Message>,
+    ) -> Vec<super::completions::message::Message> {
+        match self {
+            AgentBaseRef::Openrouter(b) => b.merged_messages(messages),
+            AgentBaseRef::ClaudeAgentSdk(b) => b.merged_messages(messages),
+            AgentBaseRef::Mock(b) => b.merged_messages(messages),
         }
     }
 }

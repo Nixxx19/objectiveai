@@ -30,6 +30,14 @@ impl AgentBase {
         Ok(())
     }
 
+    /// Returns the messages as-is.
+    pub fn merged_messages(
+        &self,
+        messages: Vec<super::super::completions::message::Message>,
+    ) -> Vec<super::super::completions::message::Message> {
+        messages
+    }
+
     /// Computes the deterministic content-addressed ID.
     pub fn id(&self) -> String {
         let mut hasher = XxHash3_128::with_seed(0);
