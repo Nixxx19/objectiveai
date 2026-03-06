@@ -752,7 +752,7 @@ where
 
                 map.insert(
                     agent_id.clone(),
-                    Box::new(move |messages: &[Message]| -> Vec<Message> {
+                    Box::new(move |messages: Vec<Message>| -> Vec<Message> {
                         transform_messages_for_vector(
                             messages,
                             &responses,
@@ -1338,7 +1338,7 @@ fn make_rng(seed: Option<u64>) -> impl Rng {
 ///
 /// For instruction mode, also appends a key listing to the user message.
 fn transform_messages_for_vector(
-    messages: &[objectiveai::agent::completions::message::Message],
+    mut messages: Vec<objectiveai::agent::completions::message::Message>,
     responses: &[objectiveai::agent::completions::message::RichContent],
     pfx_indices: &[(String, usize)],
     output_mode: objectiveai::agent::OutputMode,
@@ -1346,8 +1346,6 @@ fn transform_messages_for_vector(
     use objectiveai::agent::completions::message::{
         Message, UserMessage, RichContent, RichContentPart,
     };
-
-    let mut messages = messages.to_vec();
 
     // Build response parts using into_parts_for_prompt
     let response_parts = super::vector_responses::into_parts_for_prompt(responses, pfx_indices);

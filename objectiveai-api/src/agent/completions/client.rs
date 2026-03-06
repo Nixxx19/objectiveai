@@ -7,7 +7,7 @@ use futures::StreamExt;
 /// Keyed by agent ID so each agent in an ensemble can receive different messages.
 pub type TransformMessages = HashMap<
     String,
-    Box<dyn Fn(&[objectiveai::agent::completions::message::Message]) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync>,
+    Box<dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync>,
 >;
 
 pub fn response_id(created: u64) -> String {
@@ -439,6 +439,7 @@ where
                                 move |items| super::Continuation::Openrouter {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                objectiveai::agent::AgentBaseRef::Openrouter(&or_agent.base),
                                 agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
@@ -456,6 +457,7 @@ where
                                 move |items| super::Continuation::ClaudeAgentSdk {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                objectiveai::agent::AgentBaseRef::ClaudeAgentSdk(&cas_agent.base),
                                 agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
@@ -473,6 +475,7 @@ where
                                 move |items| super::Continuation::Mock {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                objectiveai::agent::AgentBaseRef::Mock(&mock_agent.base),
                                 agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
@@ -529,7 +532,8 @@ where
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,
         wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT + Send + 'static,
-        transform_messages: Option<&(dyn Fn(&[objectiveai::agent::completions::message::Message]) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
+        agent_base: objectiveai::agent::AgentBaseRef<'_>,
+        transform_messages: Option<&(dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
     ) -> Result<
         Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
         super::Error,
@@ -541,10 +545,12 @@ where
         A: Send + Sync + Clone + 'static,
         CONT: Send + 'static,
     {
-        // --- Apply message transform if provided. ---
+        // --- Merge messages, prepare, and apply transform. ---
+        let mut messages = agent_base.merged_messages(params.messages.clone());
+        objectiveai::agent::completions::message::prompt::prepare(&mut messages);
         let messages = match transform_messages {
-            Some(f) => f(&params.messages),
-            None => params.messages.clone(),
+            Some(f) => f(messages),
+            None => messages,
         };
 
         // --- Create the initial upstream stream with timeout. ---
