@@ -282,46 +282,33 @@ impl PfxTree {
         }
     }
 
-    /// Generates regex patterns for matching response keys.
-    ///
-    /// Returns (pattern with backticks, pattern without backticks).
-    pub fn regex_patterns(&self, keys: &[(String, usize)]) -> (String, String) {
+    /// Generates a regex pattern for matching response keys (with backticks).
+    pub fn regex_pattern(&self, keys: &[(String, usize)]) -> String {
         let depth = self.depth();
-        let mut with_ticks = String::with_capacity(
+        let mut pattern = String::with_capacity(
             (keys.len() - 1) // '|' characters
                 + (keys.len() * depth * 3) // each key
                 + keys.len() * 2, // parentheses
         );
-        let mut without_ticks = String::with_capacity(
-            (keys.len() - 1) // for '|' characters
-                + keys.len() * (depth * 3 - 2) // each key stripped of ticks
-                + keys.len() * 2, // parentheses
-        );
         for (key, _) in keys {
-            if with_ticks.len() > 0 {
-                with_ticks.push('|');
-                without_ticks.push('|');
+            if pattern.len() > 0 {
+                pattern.push('|');
             }
-            with_ticks.push('(');
-            without_ticks.push('(');
-            with_ticks.push_str(key);
-            without_ticks.push_str(&key[1..key.len() - 1]); // strip ticks
-            with_ticks.push(')');
-            without_ticks.push(')');
+            pattern.push('(');
+            pattern.push_str(key);
+            pattern.push(')');
         }
-        (with_ticks, without_ticks)
+        pattern
     }
 }
 
-/// Prefix data for a specific LLM, including tree and regex patterns.
+/// Prefix data for a specific LLM, including tree and regex pattern.
 #[derive(Debug, Clone)]
 pub struct PfxData {
     /// The prefix tree for this LLM.
     pub pfx_tree: PfxTree,
     /// Regex pattern matching response keys with backticks.
     pub responses_key_pattern: String,
-    /// Regex pattern matching response keys without backticks.
-    pub responses_key_pattern_stripped: String,
     /// Whether to invert this LLM's vote distribution.
     pub invert_vote: bool,
 }

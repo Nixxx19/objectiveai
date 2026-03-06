@@ -3,6 +3,13 @@ use std::{collections::HashMap, pin::Pin, sync::Arc, time::Duration};
 use crate::ctx;
 use futures::StreamExt;
 
+/// A function that transforms messages before they are sent to an upstream.
+/// Keyed by agent ID so each agent in an ensemble can receive different messages.
+pub type TransformMessages = HashMap<
+    String,
+    Box<dyn Fn(&[objectiveai::agent::completions::message::Message]) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync>,
+>;
+
 pub fn response_id(created: u64) -> String {
     let uuid = uuid::Uuid::new_v4();
     format!("agtcpl-{}-{created}", uuid.simple())
@@ -126,6 +133,7 @@ where
             >,
         >,
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
+        transform_messages: Option<Arc<TransformMessages>>,
     ) -> Result<
         objectiveai::agent::completions::response::unary::AgentCompletion,
         super::Error,
@@ -134,7 +142,7 @@ where
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_handle_usage(ctx, params, continuation, invention_tools)
+            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, transform_messages)
             .await?;
         while let Some(item) = stream.next().await {
             match item {
@@ -161,6 +169,7 @@ where
             >,
         >,
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
+        transform_messages: Option<Arc<TransformMessages>>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -178,7 +187,7 @@ where
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let _ = tokio::spawn(async move {
             let stream = match self
-                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools)
+                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, transform_messages)
                 .await
             {
                 Ok(stream) => stream,
@@ -241,6 +250,7 @@ where
             >,
         >,
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
+        transform_messages: Option<Arc<TransformMessages>>,
     ) -> Result<
         impl futures::Stream<
             Item = super::StreamItem<
@@ -412,6 +422,10 @@ where
                     None => vec![None],
                 };
 
+                let agent_transform = transform_messages.as_ref().and_then(|tm| {
+                    tm.get(agent.id()).map(|f| f.as_ref())
+                });
+
                 for byok_attempt in &byok_attempts {
                     let err = match agent {
                         objectiveai::agent::Agent::Openrouter(or_agent) => {
@@ -425,6 +439,7 @@ where
                                 move |items| super::Continuation::Openrouter {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
                                 Err(e) => e,
@@ -441,6 +456,7 @@ where
                                 move |items| super::Continuation::ClaudeAgentSdk {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
                                 Err(e) => e,
@@ -457,6 +473,7 @@ where
                                 move |items| super::Continuation::Mock {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
                                 Err(e) => e,
@@ -512,6 +529,7 @@ where
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,
         wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT + Send + 'static,
+        transform_messages: Option<&(dyn Fn(&[objectiveai::agent::completions::message::Message]) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
     ) -> Result<
         Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
         super::Error,
@@ -523,6 +541,12 @@ where
         A: Send + Sync + Clone + 'static,
         CONT: Send + 'static,
     {
+        // --- Apply message transform if provided. ---
+        let messages = match transform_messages {
+            Some(f) => f(&params.messages),
+            None => params.messages.clone(),
+        };
+
         // --- Create the initial upstream stream with timeout. ---
         let cont_ref = if cont_items.is_empty() {
             None
@@ -534,7 +558,7 @@ where
             created,
             agent,
             params,
-            &params.messages,
+            &messages,
             mcp_connections,
             invention_tools,
             tool_names,
@@ -683,7 +707,7 @@ where
                         created,
                         &agent,
                         &params,
-                        &params.messages,
+                        &messages,
                         &mcp_connections,
                         invention_tools.as_deref(),
                         &tool_names,

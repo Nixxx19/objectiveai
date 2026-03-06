@@ -20,6 +20,24 @@ pub enum Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
     },
 }
 
+impl<OPENROUTER, CLAUDEAGENTSDK, MOCK> Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> {
+    pub fn push_user_message(&mut self, message: objectiveai::agent::completions::message::UserMessage) {
+        match self {
+            Self::Openrouter { items, .. } => items.push(ContinuationItem::UserMessage(message)),
+            Self::ClaudeAgentSdk { items, .. } => items.push(ContinuationItem::UserMessage(message)),
+            Self::Mock { items, .. } => items.push(ContinuationItem::UserMessage(message)),
+        }
+    }
+
+    pub fn push_tool_message(&mut self, message: objectiveai::agent::completions::message::ToolMessage) {
+        match self {
+            Self::Openrouter { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
+            Self::ClaudeAgentSdk { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
+            Self::Mock { items, .. } => items.push(ContinuationItem::ToolMessage(message)),
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub enum ContinuationItem<STATE> {
     State(STATE),

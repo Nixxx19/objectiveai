@@ -60,18 +60,17 @@ where
     pub async fn fetch_cache_vote(
         &self,
         ctx: ctx::Context<CTXEXT>,
-        model: &objectiveai::chat::completions::request::Model,
-        models: Option<&[objectiveai::chat::completions::request::Model]>,
-        messages: &[objectiveai::chat::completions::request::Message],
-        tools: Option<&[objectiveai::chat::completions::request::Tool]>,
-        responses: &[objectiveai::chat::completions::request::RichContent],
+        agent: &objectiveai::agent::completions::request::Agent,
+        agents: Option<&[objectiveai::agent::completions::request::Agent]>,
+        messages: &[objectiveai::agent::completions::message::Message],
+        responses: &[objectiveai::agent::completions::message::RichContent],
     ) -> Result<
         objectiveai::vector::completions::cache::response::CacheVote,
         objectiveai::error::ResponseError,
     > {
         let vote = self
             .cache_vote_fetcher
-            .fetch(ctx, model, models, messages, tools, responses)
+            .fetch(ctx, agent, agents, messages, responses)
             .await?;
         Ok(
             objectiveai::vector::completions::cache::response::CacheVote {

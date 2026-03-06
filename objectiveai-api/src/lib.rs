@@ -33,5 +33,5 @@ pub mod error;
 pub mod mcp;
 /// Utility types for streaming and choice indexing.
 pub mod util;
-// /// Vector completions for scoring and ranking responses.
-// pub mod vector;
+/// Vector completions for scoring and ranking responses.
+pub mod vector;

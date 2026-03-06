@@ -187,7 +187,7 @@ async fn test_basic_mock_agent_seed_42() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("create_streaming should succeed");
 
@@ -223,7 +223,7 @@ async fn test_basic_mock_agent_seed_123() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("create_streaming should succeed");
 
@@ -259,14 +259,14 @@ async fn test_deterministic_with_same_seed() {
 
     let client_a = make_client(77);
     let stream_a = client_a
-        .create_streaming(make_ctx(), params.clone(), None, None)
+        .create_streaming(make_ctx(), params.clone(), None, None, None)
         .await
         .unwrap();
     let items_a: Vec<_> = Box::pin(stream_a).collect().await;
 
     let client_b = make_client(77);
     let stream_b = client_b
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .unwrap();
     let items_b: Vec<_> = Box::pin(stream_b).collect().await;
@@ -312,14 +312,14 @@ async fn test_different_seeds_differ() {
 
     let client_a = make_client(1);
     let stream_a = client_a
-        .create_streaming(make_ctx(), params.clone(), None, None)
+        .create_streaming(make_ctx(), params.clone(), None, None, None)
         .await
         .unwrap();
     let items_a: Vec<_> = Box::pin(stream_a).collect().await;
 
     let client_b = make_client(2);
     let stream_b = client_b
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .unwrap();
     let items_b: Vec<_> = Box::pin(stream_b).collect().await;
@@ -372,7 +372,7 @@ async fn test_mock_agent_with_error() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await;
     assert!(result.is_err(), "error agent should fail");
 }
@@ -401,7 +401,7 @@ async fn test_with_single_user_message() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("should succeed with user message");
 
@@ -446,7 +446,7 @@ async fn test_with_developer_and_user_messages() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("should succeed with developer+user messages");
 
@@ -482,7 +482,7 @@ async fn test_json_object_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("JsonObject should succeed");
 
@@ -526,7 +526,7 @@ async fn test_json_schema_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("JsonSchema should succeed");
 
@@ -562,7 +562,7 @@ async fn test_text_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("Text should succeed");
 
@@ -600,7 +600,7 @@ async fn test_grammar_response_format_rejected() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await;
     assert!(result.is_err(), "Grammar should be rejected");
 }
@@ -626,7 +626,7 @@ async fn test_python_response_format_rejected() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await;
     assert!(result.is_err(), "Python should be rejected");
 }
@@ -662,7 +662,7 @@ async fn test_required_tool_call_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("required ToolCall should succeed");
 
@@ -709,7 +709,7 @@ async fn test_optional_tool_call_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("optional ToolCall should succeed");
 
@@ -772,7 +772,7 @@ async fn test_with_invention_tools() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv1, inv2]))
+        .create_streaming(make_ctx(), params, None, Some(vec![inv1, inv2]), None)
         .await
         .expect("should succeed with invention tools");
 
@@ -831,7 +831,7 @@ async fn test_invention_tools_with_tool_call_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv]))
+        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None)
         .await
         .expect("should succeed with invention tools and response format");
 
@@ -880,7 +880,7 @@ async fn test_invention_tool_returns_error() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, Some(vec![inv]))
+        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None)
         .await
         .expect("should succeed even with failing invention tool");
 
@@ -925,7 +925,7 @@ async fn test_multiple_user_messages() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("should succeed with multiple user messages");
 
@@ -964,7 +964,7 @@ async fn test_mock_agent_error_false_succeeds() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("error=false should succeed");
 
@@ -1000,7 +1000,7 @@ async fn test_final_item_is_mock_continuation() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .unwrap();
 
@@ -1050,7 +1050,7 @@ async fn test_per_agent_response_format() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("PerAgent response format should succeed");
 
@@ -1092,7 +1092,7 @@ async fn test_per_agent_response_format_unknown_id() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("PerAgent with unknown ID should succeed (no format applied)");
 
@@ -1150,7 +1150,7 @@ async fn test_json_schema_nested_object() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("nested JsonSchema should succeed");
 
@@ -1191,7 +1191,7 @@ async fn test_fallback_agent_on_error() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("fallback agent should succeed when primary errors");
 
@@ -1235,7 +1235,7 @@ async fn test_all_agents_error() {
     });
 
     let result = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await;
     assert!(result.is_err(), "all agents erroring should fail");
 }
@@ -1274,7 +1274,7 @@ async fn test_multiple_fallback_agents() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("third agent should succeed");
 
@@ -1320,7 +1320,7 @@ async fn test_with_mock_continuation() {
     };
 
     let stream = client
-        .create_streaming(make_ctx(), params, Some(continuation), None)
+        .create_streaming(make_ctx(), params, Some(continuation), None, None)
         .await
         .expect("should succeed with continuation");
 
@@ -1356,7 +1356,7 @@ async fn test_stream_yields_chunks_before_state() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .unwrap();
 
@@ -1400,7 +1400,7 @@ async fn test_large_seed_value() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("large seed should succeed");
 
@@ -1436,7 +1436,7 @@ async fn test_seed_zero() {
     });
 
     let stream = client
-        .create_streaming(make_ctx(), params, None, None)
+        .create_streaming(make_ctx(), params, None, None, None)
         .await
         .expect("seed 0 should succeed");
 
