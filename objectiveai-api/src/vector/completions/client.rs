@@ -970,12 +970,12 @@ where
                 }
             };
 
-            // Get the model that was actually used
-            let model = extract_model(&response);
+            // Get the agent ID that was actually used
+            let agent_id = extract_agent_id(&response);
             drop(response);
 
-            // Look up pfx data for the model
-            let pfx_data = vector_pfx_data.get(&model)
+            // Look up pfx data for the agent ID
+            let pfx_data = vector_pfx_data.get(&agent_id)
                 .or_else(|| vector_pfx_data.get(&primary_id));
 
             let mut votes = Vec::new();
@@ -998,7 +998,7 @@ where
                                 vote
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
-                                model: model.clone(),
+                                model: agent_id.clone(),
                                 ensemble_index: ensemble_index as u64,
                                 flat_ensemble_index: flat_ensemble_index as u64,
                                 prompt_id: prompt_id.clone(),
@@ -1013,7 +1013,7 @@ where
                             });
                         } else if let Some(mut cont) = continuation.take() {
                             // Retry via continuation — stream chunks immediately
-                            let model_pfx_indices = vector_pfx_indices.get(&model)
+                            let model_pfx_indices = vector_pfx_indices.get(&agent_id)
                                 .or_else(|| vector_pfx_indices.get(&primary_id))
                                 .unwrap();
                             let instruction_suffix = {
@@ -1080,7 +1080,7 @@ where
                                                 retry_vote
                                             };
                                             votes.push(objectiveai::vector::completions::response::Vote {
-                                                model: model.clone(),
+                                                model: agent_id.clone(),
                                                 ensemble_index: ensemble_index as u64,
                                                 flat_ensemble_index: flat_ensemble_index as u64,
                                                 prompt_id: prompt_id.clone(),
@@ -1105,7 +1105,7 @@ where
                                             vote
                                         };
                                         votes.push(objectiveai::vector::completions::response::Vote {
-                                            model: model.clone(),
+                                            model: agent_id.clone(),
                                             ensemble_index: ensemble_index as u64,
                                             flat_ensemble_index: flat_ensemble_index as u64,
                                             prompt_id: prompt_id.clone(),
@@ -1131,7 +1131,7 @@ where
                                 vote
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
-                                model: model.clone(),
+                                model: agent_id.clone(),
                                 ensemble_index: ensemble_index as u64,
                                 flat_ensemble_index: flat_ensemble_index as u64,
                                 prompt_id: prompt_id.clone(),
@@ -1197,8 +1197,8 @@ where
                                         let retry_response: objectiveai::agent::completions::response::unary::AgentCompletion = retry_agg.into();
                                         let (_, retry_logprobs, retry_tc_text) = extract_assistant_content(&retry_response);
                                         if let Some(tc_text) = retry_tc_text {
-                                            let retry_model = extract_model(&retry_response);
-                                            let retry_pfx = vector_pfx_data.get(&retry_model)
+                                            let retry_agent_id = extract_agent_id(&retry_response);
+                                            let retry_pfx = vector_pfx_data.get(&retry_agent_id)
                                                 .or_else(|| vector_pfx_data.get(&primary_id));
                                             if let Some(retry_pfx) = retry_pfx {
                                                 let (retry_count, retry_vote) = super::get_vote(
@@ -1215,7 +1215,7 @@ where
                                                         retry_vote
                                                     };
                                                     votes.push(objectiveai::vector::completions::response::Vote {
-                                                        model: model.clone(),
+                                                        model: agent_id.clone(),
                                                         ensemble_index: ensemble_index as u64,
                                                         flat_ensemble_index: flat_ensemble_index as u64,
                                                         prompt_id: prompt_id.clone(),
@@ -1247,7 +1247,7 @@ where
                                 vote
                             };
                             votes.push(objectiveai::vector::completions::response::Vote {
-                                model: model.clone(),
+                                model: agent_id.clone(),
                                 ensemble_index: ensemble_index as u64,
                                 flat_ensemble_index: flat_ensemble_index as u64,
                                 prompt_id: prompt_id.clone(),
@@ -1353,8 +1353,8 @@ fn extract_assistant_content(
     (text, logprobs, tool_call_text)
 }
 
-/// Extracts the model ID from the last assistant message in a response.
-fn extract_model(
+/// Extracts the agent ID from the last assistant message in a response.
+fn extract_agent_id(
     response: &objectiveai::agent::completions::response::unary::AgentCompletion,
 ) -> String {
     use objectiveai::agent::completions::response::unary::Message;
