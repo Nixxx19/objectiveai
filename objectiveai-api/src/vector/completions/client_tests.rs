@@ -2890,6 +2890,496 @@ async fn test_error_invalid_profile_all_zero_weights() {
     );
 }
 
+// ---------------------------------------------------------------------------
+// Logprobs tests
+// ---------------------------------------------------------------------------
+
+/// JsonSchema output mode with logprobs, 2 agents, 3 responses.
+#[tokio::test]
+async fn test_logprobs_json_schema_2_agents_seed_42() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Rate these options".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: Some(5),
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: Some(5),
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(6, 1),
+            Decimal::new(4, 1),
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Option A".to_string()),
+            RichContent::Text("Option B".to_string()),
+            RichContent::Text("Option C".to_string()),
+        ],
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    let result = normalize(aggregate(chunks));
+    assert_eq!(result.scores.len(), 3);
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_json_schema_2_agents_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/logprobs_json_schema_2_agents_seed_42.json"),
+    );
+}
+
+/// JsonSchema, 3 agents with unequal weights, 4 responses, high top_logprobs.
+#[tokio::test]
+async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Rank these candidates".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: Some(10),
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: Some(10),
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: Some(10),
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(5, 1),
+            Decimal::new(3, 1),
+            Decimal::new(2, 1),
+        ]),
+        seed: Some(77),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Candidate Alpha".to_string()),
+            RichContent::Text("Candidate Beta".to_string()),
+            RichContent::Text("Candidate Gamma".to_string()),
+            RichContent::Text("Candidate Delta".to_string()),
+        ],
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    let result = normalize(aggregate(chunks));
+    assert_eq!(result.scores.len(), 4);
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_json_schema_3_agents_unequal_seed_77.json"),
+        include_str!("../../../assets/vector/completions/client_tests/logprobs_json_schema_3_agents_unequal_seed_77.json"),
+    );
+}
+
+/// ToolCall output mode with logprobs, single agent.
+#[tokio::test]
+async fn test_logprobs_tool_call_single_agent_seed_55() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Pick the best tool".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::ToolCall,
+                        top_logprobs: Some(3),
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(55),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Hammer".to_string()),
+            RichContent::Text("Screwdriver".to_string()),
+        ],
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    let result = normalize(aggregate(chunks));
+    assert_eq!(result.scores.len(), 2);
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_tool_call_single_agent_seed_55.json"),
+        include_str!("../../../assets/vector/completions/client_tests/logprobs_tool_call_single_agent_seed_55.json"),
+    );
+}
+
+/// Error primary agent with healthy logprobs-enabled fallback.
+#[tokio::test]
+async fn test_logprobs_error_with_fallback_seed_99() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Score these".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::JsonSchema,
+                        top_logprobs: Some(8),
+                        error: Some(true),
+                    }),
+                    fallbacks: Some(vec![objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::JsonSchema,
+                        top_logprobs: Some(8),
+                        error: None,
+                    })]),
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(99),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Plan A".to_string()),
+            RichContent::Text("Plan B".to_string()),
+            RichContent::Text("Plan C".to_string()),
+        ],
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("fallback should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    let result = normalize(aggregate(chunks));
+    assert_eq!(result.scores.len(), 3);
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_error_with_fallback_seed_99.json"),
+        include_str!("../../../assets/vector/completions/client_tests/logprobs_error_with_fallback_seed_99.json"),
+    );
+}
+
+/// Both primary and fallback error — should produce error completion, no votes.
+#[tokio::test]
+async fn test_logprobs_all_errors_seed_42() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Evaluate".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::JsonSchema,
+                        top_logprobs: Some(5),
+                        error: Some(true),
+                    }),
+                    fallbacks: Some(vec![objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::ToolCall,
+                        top_logprobs: Some(3),
+                        error: Some(true),
+                    })]),
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("X".to_string()),
+            RichContent::Text("Y".to_string()),
+        ],
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed even with all errors");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    let result = normalize(aggregate(chunks));
+    // All agents errored — no votes produced.
+    assert_eq!(result.votes.len(), 0);
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_all_errors_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/logprobs_all_errors_seed_42.json"),
+    );
+}
+
+/// Instruction output mode with logprobs (rare combination).
+#[tokio::test]
+async fn test_logprobs_instruction_seed_33() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Which do you prefer?".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::Instruction,
+                        top_logprobs: Some(2),
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(33),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Cats".to_string()),
+            RichContent::Text("Dogs".to_string()),
+        ],
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("instruction with logprobs should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    let result = normalize(aggregate(chunks));
+    assert_eq!(result.scores.len(), 2);
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_instruction_seed_33.json"),
+        include_str!("../../../assets/vector/completions/client_tests/logprobs_instruction_seed_33.json"),
+    );
+}
+
+/// Mixed: response_format + tool_call + instruction agents, one with error+fallback.
+#[tokio::test]
+async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
+    let client = make_error_test_client();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Compare these designs".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    // JsonSchema agent with logprobs.
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: Some(6),
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    // ToolCall agent with logprobs.
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::ToolCall,
+                            top_logprobs: Some(4),
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    // Error primary, healthy instruction fallback with logprobs.
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            top_logprobs: Some(3),
+                            error: Some(true),
+                        }),
+                        fallbacks: Some(vec![objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            top_logprobs: Some(3),
+                            error: None,
+                        })]),
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(4, 1),
+            Decimal::new(4, 1),
+            Decimal::new(2, 1),
+        ]),
+        seed: Some(88),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Design Minimal".to_string()),
+            RichContent::Text("Design Ornate".to_string()),
+            RichContent::Text("Design Hybrid".to_string()),
+        ],
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("mixed modes with fallback should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    let result = normalize(aggregate(chunks));
+    assert_eq!(result.scores.len(), 3);
+    // 3 agents, but the error primary should have been replaced by its fallback.
+    assert!(result.completions.len() >= 3);
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/logprobs_mixed_modes_with_fallback_seed_88.json"),
+        include_str!("../../../assets/vector/completions/client_tests/logprobs_mixed_modes_with_fallback_seed_88.json"),
+    );
+}
+
 #[test]
 fn invert_and_l1_normalize_example() {
     use rust_decimal::dec;
