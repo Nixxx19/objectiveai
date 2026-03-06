@@ -52,8 +52,8 @@ impl Client {
         http_request.json(request).eventsource().unwrap()
     }
 
-    /// Processes the SSE EventSource into a stream of agent completion chunks,
-    /// followed by a final accumulated state.
+    /// Processes the SSE EventSource into a stream of agent completion chunks
+    /// (or typed errors), followed by a final accumulated state.
     fn create_streaming_stream(
         mut event_source: EventSource,
         id: String,
@@ -63,15 +63,18 @@ impl Client {
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
     ) -> impl Stream<
-        Item = StreamItem<
-            objectiveai::agent::completions::message::AssistantMessage,
+        Item = Result<
+            StreamItem<
+                objectiveai::agent::completions::message::AssistantMessage,
+            >,
+            super::Error,
         >,
     > + Send
     + 'static {
         async_stream::stream! {
             use objectiveai::agent::completions::message::AssistantMessage;
             use objectiveai::agent::completions::response::streaming::{
-                AgentCompletionChunk, AssistantResponseChunk, MessageChunk,
+                AssistantResponseChunk, MessageChunk,
             };
 
             let mut accumulated: Option<AssistantResponseChunk> = None;
@@ -124,41 +127,31 @@ impl Client {
                                     }
                                 }
 
-                                yield StreamItem::Chunk(downstream);
+                                yield Ok(StreamItem::Chunk(downstream));
                             }
                             Err(e) => {
-                                // Try to parse as a provider error JSON,
+                                // Try to parse as a provider error,
                                 // otherwise report as deserialization error.
-                                let error = match serde_json::from_str::<serde_json::Value>(&data) {
-                                    Ok(value) => {
-                                        let code = value
-                                            .pointer("/error/code")
-                                            .and_then(|c| c.as_u64())
-                                            .unwrap_or(500)
-                                            as u16;
-                                        objectiveai::error::ResponseError {
-                                            code,
-                                            message: serde_json::json!({
-                                                "kind": "provider_error",
-                                                "error": value,
-                                            }),
-                                        }
+                                let mut de2 =
+                                    serde_json::Deserializer::from_str(&data);
+                                match serde_path_to_error::deserialize::<
+                                    _,
+                                    super::OpenRouterProviderError,
+                                >(&mut de2)
+                                {
+                                    Ok(provider_error) => {
+                                        yield Err(
+                                            super::Error::OpenRouterProviderError(
+                                                provider_error,
+                                            ),
+                                        );
                                     }
                                     Err(_) => {
-                                        objectiveai::error::ResponseError {
-                                            code: 500,
-                                            message: serde_json::json!({
-                                                "kind": "deserialization",
-                                                "error": e.to_string(),
-                                            }),
-                                        }
+                                        yield Err(
+                                            super::Error::DeserializationError(e),
+                                        );
                                     }
-                                };
-                                yield StreamItem::Chunk(AgentCompletionChunk {
-                                    id: id.clone(),
-                                    error: Some(error),
-                                    ..Default::default()
-                                });
+                                }
                                 had_error = true;
                                 break;
                             }
@@ -183,36 +176,12 @@ impl Client {
                             }
                             Err(_) => serde_json::Value::Null,
                         };
-                        yield StreamItem::Chunk(AgentCompletionChunk {
-                            id: id.clone(),
-                            error: Some(
-                                objectiveai::error::ResponseError {
-                                    code: code.as_u16(),
-                                    message: serde_json::json!({
-                                        "kind": "bad_status",
-                                        "error": body,
-                                    }),
-                                },
-                            ),
-                            ..Default::default()
-                        });
+                        yield Err(super::Error::BadStatus { code, body });
                         had_error = true;
                         break;
                     }
                     Err(e) => {
-                        yield StreamItem::Chunk(AgentCompletionChunk {
-                            id: id.clone(),
-                            error: Some(
-                                objectiveai::error::ResponseError {
-                                    code: 500,
-                                    message: serde_json::json!({
-                                        "kind": "stream_error",
-                                        "error": e.to_string(),
-                                    }),
-                                },
-                            ),
-                            ..Default::default()
-                        });
+                        yield Err(super::Error::StreamError(e));
                         had_error = true;
                         break;
                     }
@@ -239,7 +208,7 @@ impl Client {
                         reasoning: None,
                     },
                 };
-                yield StreamItem::State(state);
+                yield Ok(StreamItem::State(state));
             }
         }
     }
@@ -250,6 +219,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
     type Stream = Pin<
         Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
     >;
+    type Error = super::Error;
 
     fn create(
         &self,
@@ -270,7 +240,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),
-            objectiveai::error::ResponseError,
+            Self::Error,
         >,
     > + Send
     + 'static {
@@ -315,9 +285,9 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                 })
                 .unwrap_or(0);
 
-            let stream = Self::create_streaming_stream(
+            let internal_stream = Self::create_streaming_stream(
                 event_source,
-                id,
+                id.clone(),
                 created,
                 agent.id.clone(),
                 index,
@@ -333,23 +303,41 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                 reasoning: None,
             };
 
-            // Await the first stream item. If it is an error chunk,
+            // Await the first stream item. If it is an error,
             // return Err so the caller never sees an error as the
             // first yielded item.
-            let mut stream = Box::pin(stream);
+            let mut stream = Box::pin(internal_stream);
             match stream.next().await {
-                Some(StreamItem::Chunk(chunk)) if chunk.error.is_some() => {
-                    return Err(chunk.error.unwrap());
+                Some(Err(e)) => {
+                    return Err(e);
                 }
-                Some(first) => {
+                Some(Ok(first)) => {
+                    // Map the remaining internal stream: typed errors become
+                    // error chunks for mid-stream delivery to the client.
+                    let id_for_stream = id.clone();
+                    let rest = stream.map(move |item| match item {
+                        Ok(si) => si,
+                        Err(e) => {
+                            use objectiveai::error::StatusError;
+                            StreamItem::Chunk(
+                                objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                                    id: id_for_stream.clone(),
+                                    error: Some(objectiveai::error::ResponseError {
+                                        code: e.status(),
+                                        message: e.message()
+                                            .unwrap_or(serde_json::Value::Null),
+                                    }),
+                                    ..Default::default()
+                                },
+                            )
+                        }
+                    });
                     let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
-                        Box::pin(StreamOnce::new(first).chain(stream));
+                        Box::pin(StreamOnce::new(first).chain(rest));
                     Ok((boxed, initial_state))
                 }
-                Some(StreamItem::State(_)) | None => {
-                    return Err(objectiveai::error::ResponseError::from(
-                        &super::Error::EmptyStream,
-                    ));
+                None => {
+                    return Err(super::Error::EmptyStream);
                 }
             }
         }

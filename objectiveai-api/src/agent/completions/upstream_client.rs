@@ -1,19 +1,30 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
+pub trait UpstreamError:
+    std::error::Error + objectiveai::error::StatusError + Send + Sync + 'static
+{
+}
+
+impl<T> UpstreamError for T where
+    T: std::error::Error + objectiveai::error::StatusError + Send + Sync + 'static
+{
+}
+
 /// The first stream item must never be an error chunk. If the upstream
 /// would fail before producing any non-error chunk, it must return
 /// `Err(...)` from `create` instead of yielding an error chunk into
 /// the stream.
 ///
-/// The stream must always contain at least one non-state chunk before
-/// the final state item. If the upstream produces no chunks at all,
-/// it must return `Err(...)` from `create` instead of an empty stream.
+/// The stream must never be empty. If the upstream produces no chunks
+/// at all, it must return `Err(...)` from `create` instead of an
+/// empty stream.
 pub trait UpstreamClient<AGENT> {
     type State: Send + Sync + 'static;
     type Stream: futures::Stream<Item = StreamItem<Self::State>>
         + Send
         + 'static;
+    type Error: UpstreamError;
     fn create(
         &self,
         // unique identifier for this completion
@@ -50,7 +61,7 @@ pub trait UpstreamClient<AGENT> {
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),
-            objectiveai::error::ResponseError,
+            Self::Error,
         >,
     > + Send
     + 'static;
@@ -61,6 +72,7 @@ pub struct UnimplementedUpstreamClient;
 impl<AGENT> UpstreamClient<AGENT> for UnimplementedUpstreamClient {
     type State = ();
     type Stream = futures::stream::Empty<StreamItem<Self::State>>;
+    type Error = objectiveai::error::ResponseError;
     fn create(
         &self,
         _id: &str,
@@ -80,7 +92,7 @@ impl<AGENT> UpstreamClient<AGENT> for UnimplementedUpstreamClient {
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),
-            objectiveai::error::ResponseError,
+            Self::Error,
         >,
     > + Send
     + 'static {

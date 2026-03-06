@@ -236,7 +236,7 @@ async fn test_grammar_response_format_rejected() {
         )
         .await;
     match result {
-        Err(e) => assert_eq!(e.code, 400),
+        Err(e) => assert_eq!(objectiveai::error::StatusError::status(&e), 400),
         Ok(_) => panic!("expected error"),
     }
 }
@@ -254,7 +254,7 @@ async fn test_python_response_format_rejected() {
         )
         .await;
     match result {
-        Err(e) => assert_eq!(e.code, 400),
+        Err(e) => assert_eq!(objectiveai::error::StatusError::status(&e), 400),
         Ok(_) => panic!("expected error"),
     }
 }

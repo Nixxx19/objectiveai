@@ -52,6 +52,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
     type Stream = Pin<
         Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
     >;
+    type Error = super::Error;
 
     fn create(
         &self,
@@ -72,7 +73,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),
-            objectiveai::error::ResponseError,
+            Self::Error,
         >,
     > + Send
     + 'static {
@@ -100,23 +101,21 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
             use objectiveai::agent::completions::request::ResponseFormat;
 
             if error {
-                return Err(objectiveai::error::ResponseError {
-                    code: 500,
-                    message: serde_json::json!("Expected error"),
-                });
+                return Err(super::Error::ExpectedError);
             }
 
             // Reject Grammar and Python response formats.
             if let Some(ref rf) = response_format {
                 match rf {
-                    ResponseFormat::Grammar { .. } | ResponseFormat::Python => {
-                        return Err(objectiveai::error::ResponseError {
-                            code: 400,
-                            message: serde_json::json!({
-                                "kind": "invalid_response_format",
-                                "error": "mock client does not support grammar or python response formats",
-                            }),
-                        });
+                    ResponseFormat::Grammar { .. } => {
+                        return Err(super::Error::UnsupportedResponseFormat(
+                            "grammar".into(),
+                        ));
+                    }
+                    ResponseFormat::Python => {
+                        return Err(super::Error::UnsupportedResponseFormat(
+                            "python".into(),
+                        ));
                     }
                     _ => {}
                 }

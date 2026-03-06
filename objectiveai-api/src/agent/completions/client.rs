@@ -411,7 +411,7 @@ where
                 let byok = match ctx.ext.get_byok(agent.base().upstream()).await {
                     Ok(b) => b,
                     Err(e) => {
-                        errors.push(super::Error::Upstream(e));
+                        errors.push(super::Error::Fetch(e));
                         continue;
                     }
                 };
@@ -439,6 +439,7 @@ where
                                 move |items| super::Continuation::Openrouter {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                |e| super::Error::UpstreamOpenrouter(Box::new(e)),
                                 objectiveai::agent::AgentBaseRef::Openrouter(&or_agent.base),
                                 agent_transform,
                             ).await {
@@ -457,6 +458,7 @@ where
                                 move |items| super::Continuation::ClaudeAgentSdk {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
                                 objectiveai::agent::AgentBaseRef::ClaudeAgentSdk(&cas_agent.base),
                                 agent_transform,
                             ).await {
@@ -475,6 +477,7 @@ where
                                 move |items| super::Continuation::Mock {
                                     items, agent: a, mcp_connections: c,
                                 },
+                                |e| super::Error::UpstreamMock(Box::new(e)),
                                 objectiveai::agent::AgentBaseRef::Mock(&mock_agent.base),
                                 agent_transform,
                             ).await {
@@ -532,6 +535,7 @@ where
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,
         wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT + Send + 'static,
+        map_upstream_err: impl Fn(U::Error) -> super::Error + Send + 'static,
         agent_base: objectiveai::agent::AgentBaseRef<'_>,
         transform_messages: Option<&(dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
     ) -> Result<
@@ -540,8 +544,6 @@ where
     >
     where
         U: super::UpstreamClient<A> + Send + Sync + 'static,
-        U::State: Send + Sync + 'static,
-        U::Stream: Send + 'static,
         A: Send + Sync + Clone + 'static,
         CONT: Send + 'static,
     {
@@ -577,7 +579,7 @@ where
             tokio::time::timeout(self.first_chunk_timeout, create_fut)
                 .await
                 .map_err(|_| super::Error::Timeout)?
-                .map_err(super::Error::Upstream)?;
+                .map_err(&map_upstream_err)?;
 
         // Success — take ownership of continuation items and build the stream.
         let mut continuation_items = std::mem::take(cont_items);

@@ -21,8 +21,14 @@ pub enum Error {
     #[error("{0}")]
     Fetch(objectiveai::error::ResponseError),
 
-    #[error("upstream error: {0}")]
-    Upstream(objectiveai::error::ResponseError),
+    #[error("upstream openrouter error: {0}")]
+    UpstreamOpenrouter(Box<dyn super::UpstreamError>),
+
+    #[error("upstream claude agent sdk error: {0}")]
+    UpstreamClaudeAgentSdk(Box<dyn super::UpstreamError>),
+
+    #[error("upstream mock error: {0}")]
+    UpstreamMock(Box<dyn super::UpstreamError>),
 
     #[error("no agents resolved")]
     NoAgentsResolved,
@@ -39,6 +45,7 @@ pub enum Error {
 
 impl objectiveai::error::StatusError for Error {
     fn status(&self) -> u16 {
+        use objectiveai::error::StatusError;
         match self {
             Self::InvalidAgent(_) => 400,
             Self::AgentNotFound(_) => 404,
@@ -46,7 +53,9 @@ impl objectiveai::error::StatusError for Error {
             Self::McpListTools { .. } => 502,
             Self::McpCallTool(_) => 502,
             Self::Fetch(e) => e.code,
-            Self::Upstream(e) => e.code,
+            Self::UpstreamOpenrouter(e)
+            | Self::UpstreamClaudeAgentSdk(e)
+            | Self::UpstreamMock(e) => e.status(),
             Self::NoAgentsResolved => 400,
             Self::MultipleErrors(errors) => {
                 errors.first().map(|e| e.status()).unwrap_or(500)
@@ -57,8 +66,12 @@ impl objectiveai::error::StatusError for Error {
     }
 
     fn message(&self) -> Option<serde_json::Value> {
+        use objectiveai::error::StatusError;
         match self {
-            Self::Fetch(e) | Self::Upstream(e) => Some(e.message.clone()),
+            Self::Fetch(e) => Some(e.message.clone()),
+            Self::UpstreamOpenrouter(e)
+            | Self::UpstreamClaudeAgentSdk(e)
+            | Self::UpstreamMock(e) => e.message(),
             _ => Some(serde_json::Value::String(self.to_string())),
         }
     }

@@ -80,6 +80,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
     type Stream = Pin<
         Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
     >;
+    type Error = super::Error;
 
     #[allow(unused_variables)]
     fn create(
@@ -101,7 +102,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),
-            objectiveai::error::ResponseError,
+            Self::Error,
         >,
     > + Send
     + 'static {
@@ -117,17 +118,13 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
 
         async move {
             if is_byok {
-                return Err(objectiveai::error::ResponseError::from(
-                    &super::Error::InvalidByok,
-                ));
+                return Err(super::Error::InvalidByok);
             }
 
-            validate_response_format(&agent.id, &params.response_format)
-                .map_err(|e| objectiveai::error::ResponseError::from(&e))?;
+            validate_response_format(&agent.id, &params.response_format)?;
 
             // Build prompt from messages + continuation (handles continuation validation).
-            let prompt = Prompt::new(&messages, continuation.as_deref())
-                .map_err(|e| objectiveai::error::ResponseError::from(&e))?;
+            let prompt = Prompt::new(&messages, continuation.as_deref())?;
 
             // Spawn invention server if invention tools are provided.
             let invention_server = if let Some(ref tools) = invention_tools {
@@ -149,8 +146,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 &mcp_connections,
                 invention_server.as_ref(),
                 client.user_agent.as_deref(),
-            )
-            .map_err(|e| objectiveai::error::ResponseError::from(&e))?;
+            )?;
 
             // Compute assistant_index from continuation.
             // State items carry a message_count (may be >1 since the SDK
@@ -184,9 +180,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 std::process::id()
             ));
             std::fs::write(&tmp_path, &js).map_err(|e| {
-                objectiveai::error::ResponseError::from(
-                    &super::Error::Io(e.to_string()),
-                )
+                super::Error::Io(e.to_string())
             })?;
 
             // Guard that removes the temp file on drop (handles early returns
@@ -209,9 +203,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                 cmd.env("CLAUDE_AGENT_SDK_PATH", sp);
             }
             let mut child = cmd.spawn().map_err(|e| {
-                objectiveai::error::ResponseError::from(
-                    &super::Error::Spawn(e.to_string()),
-                )
+                super::Error::Spawn(e.to_string())
             })?;
 
             // Collect stderr in background.
@@ -228,7 +220,8 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
             let reader = BufReader::new(stdout);
             let mut lines_stream = LinesStream::new(reader.lines());
 
-            let stream = async_stream::stream! {
+            let id_for_peek = id.clone();
+            let internal_stream = async_stream::stream! {
                 // Keep guards alive for the duration of the stream.
                 let _tmp_guard = tmp_guard;
                 let _invention_server_guard = invention_server;
@@ -246,14 +239,8 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                 .unwrap_or_default();
 
                             if !stderr_ctx.is_empty() {
-                                yield StreamItem::Chunk(
-                                    objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-                                        id: id.clone(),
-                                        error: Some(objectiveai::error::ResponseError::from(
-                                            &super::Error::Stderr(stderr_ctx.trim().to_owned()),
-                                        )),
-                                        ..Default::default()
-                                    },
+                                yield Err(
+                                    super::Error::Stderr(stderr_ctx.trim().to_owned()),
                                 );
                                 had_error = true;
                             }
@@ -261,14 +248,8 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                         }
                         Some(Err(e)) => {
                             let _ = child.kill().await;
-                            yield StreamItem::Chunk(
-                                objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-                                    id: id.clone(),
-                                    error: Some(objectiveai::error::ResponseError::from(
-                                        &super::Error::Io(e.to_string()),
-                                    )),
-                                    ..Default::default()
-                                },
+                            yield Err(
+                                super::Error::Io(e.to_string()),
                             );
                             had_error = true;
                             break;
@@ -312,19 +293,13 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                                         MessageChunk::Assistant(a) => a.finish_reason.is_some(),
                                         MessageChunk::Tool(_) => true,
                                     });
-                                    yield StreamItem::Chunk(chunk);
+                                    yield Ok(StreamItem::Chunk(chunk));
                                     if advances_index {
                                         msg_index += 1;
                                     }
                                 }
                                 Some(Err(e)) => {
-                                    yield StreamItem::Chunk(
-                                        objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-                                            id: id.clone(),
-                                            error: Some(objectiveai::error::ResponseError::from(&e)),
-                                            ..Default::default()
-                                        },
-                                    );
+                                    yield Err(e);
                                     had_error = true;
                                     break;
                                 }
@@ -338,30 +313,48 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
 
                 if !had_error {
                     // Yield final state with session_id and message count.
-                    yield StreamItem::State(super::State {
+                    yield Ok(StreamItem::State(super::State {
                         session_id: latest_session_id,
                         message_count: msg_index - assistant_index,
-                    });
+                    }));
                 }
             };
 
-            // Await the first stream item. If it is an error chunk,
+            // Await the first stream item. If it is an error,
             // return Err so the caller never sees an error as the
             // first yielded item.
-            let mut stream = Box::pin(stream);
+            let mut stream = Box::pin(internal_stream);
             match stream.next().await {
-                Some(StreamItem::Chunk(chunk)) if chunk.error.is_some() => {
-                    Err(chunk.error.unwrap())
+                Some(Err(e)) => {
+                    return Err(e);
                 }
-                Some(first) => {
+                Some(Ok(first)) => {
+                    // Map the remaining internal stream: typed errors become
+                    // error chunks for mid-stream delivery to the client.
+                    let id_for_stream = id_for_peek.clone();
+                    let rest = stream.map(move |item| match item {
+                        Ok(si) => si,
+                        Err(e) => {
+                            use objectiveai::error::StatusError;
+                            StreamItem::Chunk(
+                                objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                                    id: id_for_stream.clone(),
+                                    error: Some(objectiveai::error::ResponseError {
+                                        code: e.status(),
+                                        message: e.message()
+                                            .unwrap_or(serde_json::Value::Null),
+                                    }),
+                                    ..Default::default()
+                                },
+                            )
+                        }
+                    });
                     let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
-                        Box::pin(StreamOnce::new(first).chain(stream));
+                        Box::pin(StreamOnce::new(first).chain(rest));
                     Ok((boxed, initial_state))
                 }
-                Some(StreamItem::State(_)) | None => {
-                    Err(objectiveai::error::ResponseError::from(
-                        &super::Error::NoOutput,
-                    ))
+                None => {
+                    return Err(super::Error::NoOutput);
                 }
             }
         }
