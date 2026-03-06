@@ -768,10 +768,7 @@ where
                 let mut rng = make_rng(
                     request.seed.map(|s| per_agent_seed(s, &agent_id) as u64),
                 );
-                let top_logprobs = match a {
-                    objectiveai::agent::Agent::Openrouter(a) => a.base.top_logprobs,
-                    _ => None,
-                };
+                let top_logprobs = a.top_logprobs();
                 let pfx_tree = super::PfxTree::new(
                     &mut rng,
                     request_responses_len,

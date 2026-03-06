@@ -114,6 +114,13 @@ impl<'a> AgentBaseRef<'a> {
             AgentBaseRef::Mock(_) => None,
         }
     }
+
+    pub fn top_logprobs(&self) -> Option<u64> {
+        match self {
+            AgentBaseRef::Openrouter(b) => b.top_logprobs,
+            AgentBaseRef::ClaudeAgentSdk(_) | AgentBaseRef::Mock(_) => None,
+        }
+    }
 }
 
 /// A validated Agent with its computed content-addressed ID.
@@ -142,6 +149,10 @@ impl Agent {
             Agent::ClaudeAgentSdk(a) => AgentBaseRef::ClaudeAgentSdk(&a.base),
             Agent::Mock(a) => AgentBaseRef::Mock(&a.base),
         }
+    }
+
+    pub fn top_logprobs(&self) -> Option<u64> {
+        self.base().top_logprobs()
     }
 }
 
