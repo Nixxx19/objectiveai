@@ -859,7 +859,7 @@ where
         // Build the AgentCompletionCreateParams (messages are NOT modified here)
         let agent_params = Arc::new(objectiveai::agent::completions::request::AgentCompletionCreateParams {
             messages: request.messages.clone(),
-            provider: None,
+            provider: request.provider.clone(),
             agent: objectiveai::agent::completions::request::Agent::Provided(
                 agent.inner.base().to_owned(),
             ),
@@ -871,7 +871,7 @@ where
             response_format: response_format.clone(),
             seed: request.seed.map(|s| per_agent_seed(s, &primary_id)),
             stream: Some(false),
-            mcp_server_authorization: None,
+            mcp_server_authorization: request.mcp_server_authorization.clone(),
         });
 
         // Call the agent completions client, yielding each chunk immediately
@@ -905,17 +905,17 @@ where
         async_stream::stream! {
             // Stream the first call, yielding each chunk immediately while also aggregating
             let first_result = async {
-                let mut stream = self.agent_client.clone().create_streaming_handle_usage(
+                let stream = self.agent_client.clone().create_streaming_handle_usage(
                     ctx.clone(),
                     agent_params.clone(),
                     None,
                     None,
                     Some(transform_messages.clone()),
                 ).await?;
-                let mut aggregate: Option<
+                let aggregate: Option<
                     objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
                 > = None;
-                let mut continuation = None;
+                let continuation = None;
                 Ok::<_, agent::completions::Error>((stream, aggregate, continuation))
             }.await;
 
