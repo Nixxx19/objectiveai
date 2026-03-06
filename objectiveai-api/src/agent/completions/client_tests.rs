@@ -10,7 +10,7 @@ use objectiveai::agent::completions::request::{
     Agent as AgentParam, AgentCompletionCreateParams, ResponseFormat,
     ResponseFormatParam,
 };
-use objectiveai::agent::completions::response::unary::AgentCompletion;
+use objectiveai::agent::completions::response::unary::{AgentCompletion, Message as UnaryMessage};
 use objectiveai::agent::mock::AgentBase as MockAgentBase;
 
 use crate::agent::completions::upstream_client::UnimplementedUpstreamClient;
@@ -1416,5 +1416,352 @@ async fn test_seed_zero() {
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_seed_zero.json"),
         include_str!("../../../assets/agent/completions/client_tests/test_seed_zero.json"),
+    );
+}
+
+// ---------------------------------------------------------------------------
+// Logprobs helpers
+// ---------------------------------------------------------------------------
+
+/// Asserts that every assistant message with content also has logprobs whose
+/// tokens concatenate to reconstruct the content text.
+fn assert_completion_logprobs(completion: &AgentCompletion) {
+    for (i, msg) in completion.messages.iter().enumerate() {
+        let asst = match msg {
+            UnaryMessage::Assistant(a) => a,
+            _ => continue,
+        };
+        let content = match &asst.content {
+            Some(RichContent::Text(t)) => t.as_str(),
+            _ => continue,
+        };
+        let logprobs = match &asst.logprobs {
+            Some(lps) => lps,
+            None => panic!("message {i}: assistant has content but no logprobs"),
+        };
+        let content_lps = match &logprobs.content {
+            Some(lps) => lps,
+            None => panic!("message {i}: logprobs present but content logprobs missing"),
+        };
+        let reconstructed: String = content_lps.iter().map(|lp| lp.token.as_str()).collect();
+        assert_eq!(
+            reconstructed, content,
+            "message {i}: logprob tokens don't reconstruct content",
+        );
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Logprobs tests
+// ---------------------------------------------------------------------------
+
+/// Basic logprobs with plain text, no tools, no response format.
+#[tokio::test]
+async fn test_logprobs_basic_seed_42() {
+    let client = make_client();
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Tell me something".into()),
+            name: None,
+        })],
+        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
+            MockAgentBase {
+                top_logprobs: Some(5),
+                ..Default::default()
+            },
+        )),
+        agents: None,
+        provider: None,
+        response_format: None,
+        seed: Some(42),
+        stream: None,
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(make_ctx(), params, None, None, None)
+        .await
+        .expect("logprobs basic should succeed");
+
+    let items: Vec<_> = Box::pin(stream).collect().await;
+    let completion = normalize(aggregate(&items));
+    assert_completion_logprobs(&completion);
+
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_basic_seed_42.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_logprobs_basic_seed_42.json"),
+    );
+}
+
+/// Logprobs with nested json_schema response format.
+#[tokio::test]
+async fn test_logprobs_json_schema_nested() {
+    let client = make_client();
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![],
+        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
+            MockAgentBase {
+                top_logprobs: Some(10),
+                ..Default::default()
+            },
+        )),
+        agents: None,
+        provider: None,
+        response_format: Some(ResponseFormatParam::Single(ResponseFormat::JsonSchema {
+            schema: indexmap::indexmap! {
+                "type".into() => serde_json::json!("object"),
+                "properties".into() => serde_json::json!({
+                    "result": {
+                        "type": "object",
+                        "properties": {
+                            "label": {"type": "string"},
+                            "values": {
+                                "type": "array",
+                                "items": {"type": "number"},
+                            },
+                        },
+                    },
+                }),
+            },
+        })),
+        seed: Some(77),
+        stream: None,
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(make_ctx(), params, None, None, None)
+        .await
+        .expect("logprobs json_schema nested should succeed");
+
+    let items: Vec<_> = Box::pin(stream).collect().await;
+    let completion = normalize(aggregate(&items));
+    assert_completion_logprobs(&completion);
+
+    // The content should parse as valid JSON.
+    for msg in &completion.messages {
+        if let UnaryMessage::Assistant(asst) = msg {
+            if let Some(RichContent::Text(t)) = &asst.content {
+                serde_json::from_str::<serde_json::Value>(t)
+                    .expect("json_schema content should be valid JSON");
+            }
+        }
+    }
+
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_json_schema_nested.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_logprobs_json_schema_nested.json"),
+    );
+}
+
+/// Logprobs with invention tools — agent loop runs tool calls then content.
+#[tokio::test]
+async fn test_logprobs_with_invention_tools() {
+    let client = make_client();
+    let inv = objectiveai::functions::inventions::InventionTool {
+        name: "lookup",
+        description: "Look up a value",
+        parameters: indexmap::indexmap! {
+            "type".into() => serde_json::json!("object"),
+            "properties".into() => serde_json::json!({
+                "key": {"type": "string"},
+            }),
+        },
+        call: Arc::new(|_| Box::pin(async { Ok("found it".into()) })),
+    };
+
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Look up foo".into()),
+            name: None,
+        })],
+        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
+            MockAgentBase {
+                top_logprobs: Some(3),
+                ..Default::default()
+            },
+        )),
+        agents: None,
+        provider: None,
+        response_format: None,
+        seed: Some(88),
+        stream: None,
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(make_ctx(), params, None, Some(vec![inv]), None)
+        .await
+        .expect("logprobs with invention tools should succeed");
+
+    let items: Vec<_> = Box::pin(stream).collect().await;
+    let completion = normalize(aggregate(&items));
+
+    // Assistant messages with content should have logprobs; those with
+    // only tool_calls should not.
+    for msg in &completion.messages {
+        if let UnaryMessage::Assistant(asst) = msg {
+            if asst.content.is_some() {
+                assert!(asst.logprobs.is_some(), "content message missing logprobs");
+            }
+            if asst.tool_calls.is_some() && asst.content.is_none() {
+                assert!(asst.logprobs.is_none(), "tool_call-only message has logprobs");
+            }
+        }
+    }
+
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_with_invention_tools.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_logprobs_with_invention_tools.json"),
+    );
+}
+
+/// Logprobs survive through the continuation flow.
+#[tokio::test]
+async fn test_logprobs_with_continuation() {
+    let mock_base = MockAgentBase {
+        top_logprobs: Some(7),
+        ..Default::default()
+    };
+    let mock_agent = objectiveai::agent::mock::Agent::try_from(mock_base.clone()).unwrap();
+
+    let client = make_client();
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![],
+        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(mock_base)),
+        agents: None,
+        provider: None,
+        response_format: None,
+        seed: Some(42),
+        stream: None,
+        mcp_server_authorization: None,
+    });
+
+    let continuation = crate::agent::completions::Continuation::Mock {
+        items: vec![
+            crate::agent::completions::ContinuationItem::State(
+                crate::agent::completions::mock::State { tool_call_count: 3 },
+            ),
+        ],
+        agent: mock_agent,
+        mcp_connections: vec![],
+    };
+
+    let stream = client
+        .create_streaming(make_ctx(), params, Some(continuation), None, None)
+        .await
+        .expect("logprobs with continuation should succeed");
+
+    let items: Vec<_> = Box::pin(stream).collect().await;
+    let completion = normalize(aggregate(&items));
+    assert_completion_logprobs(&completion);
+
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_with_continuation.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_logprobs_with_continuation.json"),
+    );
+}
+
+/// Primary agent errors, fallback agent has logprobs enabled.
+#[tokio::test]
+async fn test_logprobs_fallback_agent() {
+    let client = make_client();
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![],
+        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
+            MockAgentBase {
+                error: Some(true),
+                ..Default::default()
+            },
+        )),
+        agents: Some(vec![AgentParam::Provided(
+            objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                top_logprobs: Some(12),
+                ..Default::default()
+            }),
+        )]),
+        provider: None,
+        response_format: None,
+        seed: Some(55),
+        stream: None,
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(make_ctx(), params, None, None, None)
+        .await
+        .expect("fallback with logprobs should succeed");
+
+    let items: Vec<_> = Box::pin(stream).collect().await;
+    let completion = normalize(aggregate(&items));
+    assert_completion_logprobs(&completion);
+
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_fallback_agent.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_logprobs_fallback_agent.json"),
+    );
+}
+
+/// Logprobs with PerAgent response format targeting mock agent's ID.
+#[tokio::test]
+async fn test_logprobs_per_agent_json_object() {
+    let mock_base = MockAgentBase {
+        top_logprobs: Some(4),
+        ..Default::default()
+    };
+    let agent_id = mock_base.id();
+
+    let client = make_client();
+    let mut per_agent = indexmap::IndexMap::new();
+    per_agent.insert(agent_id, ResponseFormat::JsonObject);
+
+    let params = Arc::new(AgentCompletionCreateParams {
+        messages: vec![Message::Developer(DeveloperMessage {
+            content: SimpleContent::Text("Respond with JSON".into()),
+            name: None,
+        })],
+        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(mock_base)),
+        agents: None,
+        provider: None,
+        response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
+        seed: Some(33),
+        stream: None,
+        mcp_server_authorization: None,
+    });
+
+    let stream = client
+        .create_streaming(make_ctx(), params, None, None, None)
+        .await
+        .expect("logprobs per-agent json_object should succeed");
+
+    let items: Vec<_> = Box::pin(stream).collect().await;
+    let completion = normalize(aggregate(&items));
+    assert_completion_logprobs(&completion);
+
+    // Content should be valid JSON.
+    for msg in &completion.messages {
+        if let UnaryMessage::Assistant(asst) = msg {
+            if let Some(RichContent::Text(t)) = &asst.content {
+                serde_json::from_str::<serde_json::Value>(t)
+                    .expect("per-agent json_object content should be valid JSON");
+            }
+        }
+    }
+
+    let json = serde_json::to_string_pretty(&completion).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/agent/completions/client_tests/test_logprobs_per_agent_json_object.json"),
+        include_str!("../../../assets/agent/completions/client_tests/test_logprobs_per_agent_json_object.json"),
     );
 }
