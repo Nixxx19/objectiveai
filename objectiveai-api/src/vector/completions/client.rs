@@ -405,6 +405,7 @@ where
 
         // create a vector of LLMs with useful info
         // only ones that may stream
+        let flat_ensemble_len = ensemble.agents.iter().map(|a| a.count as usize).sum::<usize>();
         let mut llms = ensemble
             .agents
             .into_iter()
@@ -561,6 +562,7 @@ where
                         agent,
                         ensemble_index,
                         flat_ensemble_index,
+                        flat_ensemble_len,
                         weight,
                         invert,
                         request.clone(),
@@ -687,6 +689,7 @@ where
         agent: objectiveai::agent::AgentWithFallbacksAndCount,
         ensemble_index: usize,
         flat_ensemble_index: usize,
+        flat_ensemble_len: usize,
         weight: Decimal,
         invert_vote: bool,
         request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
@@ -817,14 +820,13 @@ where
         });
 
         // Call the agent completions client, yielding each chunk immediately
-        let completion_index = indexer.get(flat_ensemble_index);
         let transform_messages = Arc::new(transform_messages);
 
         // Helper to wrap an agent chunk into a VectorCompletionChunk
         let wrap_agent_chunk = {
             let id = id.clone();
             let ensemble = ensemble.clone();
-            move |inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk| {
+            move |completion_index: u64, inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk| {
                 objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
                     id: id.clone(),
                     completions: vec![
@@ -865,7 +867,7 @@ where
                 Ok((stream, aggregate, continuation)) => (stream, aggregate, continuation),
                 Err(e) => {
                     yield Self::llm_create_streaming_vector_error(
-                        id.clone(), completion_index, e, created, ensemble.clone(),
+                        id.clone(), indexer.get(flat_ensemble_index), e, created, ensemble.clone(),
                     );
                     return;
                 }
@@ -875,7 +877,7 @@ where
                 match item {
                     agent::completions::StreamItem::Chunk(chunk) => {
                         // Yield immediately
-                        yield wrap_agent_chunk(chunk.clone());
+                        yield wrap_agent_chunk(indexer.get(flat_ensemble_index), chunk.clone());
                         // Also aggregate for vote extraction
                         match &mut aggregate {
                             Some(agg) => agg.push(&chunk),
@@ -947,7 +949,7 @@ where
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                completion_index: Some(completion_index),
+                                completion_index: Some(indexer.get(flat_ensemble_index)),
                             });
                         } else if let Some(mut cont) = continuation.take() {
                             // Retry via continuation — stream chunks immediately
@@ -991,7 +993,7 @@ where
                                     while let Some(item) = retry_stream.next().await {
                                         match item {
                                             agent::completions::StreamItem::Chunk(chunk) => {
-                                                yield wrap_agent_chunk(chunk.clone());
+                                                yield wrap_agent_chunk(indexer.get(flat_ensemble_index + flat_ensemble_len), chunk.clone());
                                                 match &mut retry_agg {
                                                     Some(agg) => agg.push(&chunk),
                                                     None => retry_agg = Some(chunk),
@@ -1028,7 +1030,7 @@ where
                                                 weight,
                                                 retry: None,
                                                 from_cache: None,
-                                                                completion_index: Some(completion_index),
+                                                completion_index: Some(indexer.get(flat_ensemble_index + flat_ensemble_len)),
                                             });
                                         }
                                     }
@@ -1052,7 +1054,7 @@ where
                                             weight,
                                             retry: None,
                                             from_cache: None,
-                                                        completion_index: Some(completion_index),
+                                            completion_index: Some(indexer.get(flat_ensemble_index)),
                                         });
                                     }
                                 }
@@ -1077,7 +1079,7 @@ where
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                completion_index: Some(completion_index),
+                                completion_index: Some(indexer.get(flat_ensemble_index)),
                             });
                         } else if let Some(mut cont) = continuation.take() {
                             // Retry with required: true — stream chunks immediately
@@ -1119,7 +1121,7 @@ where
                                     while let Some(item) = retry_stream.next().await {
                                         match item {
                                             agent::completions::StreamItem::Chunk(chunk) => {
-                                                yield wrap_agent_chunk(chunk.clone());
+                                                yield wrap_agent_chunk(indexer.get(flat_ensemble_index + flat_ensemble_len), chunk.clone());
                                                 match &mut retry_agg {
                                                     Some(agg) => agg.push(&chunk),
                                                     None => retry_agg = Some(chunk),
@@ -1160,7 +1162,7 @@ where
                                                         weight,
                                                         retry: None,
                                                         from_cache: None,
-                                                                                completion_index: Some(completion_index),
+                                                        completion_index: Some(indexer.get(flat_ensemble_index + flat_ensemble_len)),
                                                     });
                                                 }
                                             }
@@ -1191,7 +1193,7 @@ where
                                 weight,
                                 retry: None,
                                 from_cache: None,
-                                completion_index: Some(completion_index),
+                                completion_index: Some(indexer.get(flat_ensemble_index)),
                             });
                         }
                     }
