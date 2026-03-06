@@ -14,10 +14,6 @@ use super::State;
 pub struct Client {
     /// Delay before yielding each chunk.
     pub delay: Duration,
-    /// Optional maximum number of tool calls across all continuations.
-    /// When the counter reaches this limit, the mock will always respond
-    /// with content instead of a tool call.
-    pub max_tool_calls: Option<u32>,
 }
 
 /// Resolves the response format for this agent from the request params.
@@ -90,7 +86,6 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         let delay = self.delay;
         let cont_len = _continuation.map_or(0u64, |c| c.len() as u64);
         let seed = params.seed.map(|s| (s as u64).wrapping_add(cont_len));
-        let max_tool_calls = self.max_tool_calls;
         let prior_tool_call_count = _continuation
             .and_then(|items| {
                 items.iter().rev().find_map(|item| match item {
@@ -139,21 +134,17 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 .collect();
 
             // --- Tool call vs content ---
-            let mut tool_call_count = prior_tool_call_count;
-            let tools_exhausted = match max_tool_calls {
-                Some(max) => tool_call_count >= max,
-                None => false,
-            };
             let mock_response = resolve_mock_response(
                 &response_format,
-                if tools_exhausted { &[] } else { &tool_names },
+                &tool_names,
                 &tool_map,
                 top_logprobs,
                 &mut rng,
             );
-            if let MockResponse::ToolCalls(ref calls) = mock_response {
-                tool_call_count += calls.len() as u32;
-            }
+            let tool_call_count = prior_tool_call_count + match &mock_response {
+                MockResponse::ToolCalls(calls) => calls.len() as u32,
+                _ => 0,
+            };
 
             let state = State { tool_call_count };
 

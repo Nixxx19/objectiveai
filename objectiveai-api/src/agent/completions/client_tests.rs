@@ -59,9 +59,7 @@ impl crate::agent::completions::usage_handler::UsageHandler<ctx::DefaultContextE
 // Client constructor
 // ---------------------------------------------------------------------------
 
-fn make_client_with_tool_limit(
-    max_tool_calls: Option<u32>,
-) -> super::Client<
+fn make_client() -> super::Client<
     ctx::DefaultContextExt,
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
@@ -92,7 +90,6 @@ fn make_client_with_tool_limit(
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
         mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            max_tool_calls,
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -103,17 +100,6 @@ fn make_client_with_tool_limit(
         first_chunk_timeout: Duration::from_millis(1),
         other_chunk_timeout: Duration::from_millis(1),
     }
-}
-
-fn make_client() -> super::Client<
-    ctx::DefaultContextExt,
-    UnimplementedUpstreamClient,
-    UnimplementedUpstreamClient,
-    crate::agent::completions::mock::Client,
-    StubFetcher,
-    StubUsageHandler,
-> {
-    make_client_with_tool_limit(None)
 }
 
 fn make_ctx() -> ctx::Context<ctx::DefaultContextExt> {
@@ -727,7 +713,7 @@ async fn test_optional_tool_call_response_format() {
 /// With invention tools provided.
 #[tokio::test]
 async fn test_with_invention_tools() {
-    let client = make_client_with_tool_limit(Some(3));
+    let client = make_client();
     let inv1 = objectiveai::functions::inventions::InventionTool {
         name: "execute_code",
         description: "Execute code in a sandbox",
@@ -790,7 +776,7 @@ async fn test_with_invention_tools() {
 /// With invention tools and ToolCall response format.
 #[tokio::test]
 async fn test_invention_tools_with_tool_call_response_format() {
-    let client = make_client_with_tool_limit(Some(3));
+    let client = make_client();
     let inv = objectiveai::functions::inventions::InventionTool {
         name: "validate",
         description: "Validate data",
@@ -848,7 +834,7 @@ async fn test_invention_tools_with_tool_call_response_format() {
 /// Single invention tool that returns an error.
 #[tokio::test]
 async fn test_invention_tool_returns_error() {
-    let client = make_client_with_tool_limit(Some(3));
+    let client = make_client();
     let inv = objectiveai::functions::inventions::InventionTool {
         name: "failing_tool",
         description: "A tool that always fails",
