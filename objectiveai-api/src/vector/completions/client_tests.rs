@@ -4,7 +4,9 @@ use std::time::Duration;
 use futures::StreamExt;
 use rust_decimal::Decimal;
 
-use objectiveai::agent::completions::message::{Message, RichContent, UserMessage};
+use objectiveai::agent::completions::message::{
+    File as MessageFile, ImageUrl, Message, RichContent, RichContentPart, UserMessage, VideoUrl,
+};
 use objectiveai::agent::mock::{AgentBase as MockAgentBase, OutputMode as MockOutputMode, Upstream as MockUpstream};
 use objectiveai::vector::completions::response::unary::VectorCompletion;
 
@@ -1137,5 +1139,1260 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/many_responses_deep_prefix_tree_seed_42.json"),
         include_str!("../../../assets/vector/completions/client_tests/many_responses_deep_prefix_tree_seed_42.json"),
+    );
+}
+
+/// Single agent with json_schema output mode, seed 77.
+#[tokio::test]
+async fn test_json_schema_single_agent_seed_77() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(77),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Rate the following essays on clarity".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::JsonSchema,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(77),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Essay about climate change".to_string()),
+            RichContent::Text("Essay about artificial intelligence".to_string()),
+            RichContent::Text("Essay about space exploration".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/json_schema_single_agent_seed_77.json"),
+        include_str!("../../../assets/vector/completions/client_tests/json_schema_single_agent_seed_77.json"),
+    );
+}
+
+/// Single agent with tool_call output mode, seed 55.
+#[tokio::test]
+async fn test_tool_call_single_agent_seed_55() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(55),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Which logo design is most memorable?".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::ToolCall,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(55),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Minimalist wordmark".to_string()),
+            RichContent::Text("Abstract geometric icon".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/tool_call_single_agent_seed_55.json"),
+        include_str!("../../../assets/vector/completions/client_tests/tool_call_single_agent_seed_55.json"),
+    );
+}
+
+/// Single error agent — completion should contain an error, no votes.
+#[tokio::test]
+async fn test_error_agent_skipped_seed_42() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Evaluate these proposals".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::Instruction,
+                        error: Some(true),
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Proposal A".to_string()),
+            RichContent::Text("Proposal B".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/error_agent_skipped_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/error_agent_skipped_seed_42.json"),
+    );
+}
+
+/// Mixed output modes: instruction + json_schema + tool_call agents, seed 88.
+#[tokio::test]
+async fn test_mixed_output_modes_seed_88() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(88),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Compare these vacation destinations".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::ToolCall,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(4, 1),
+            Decimal::new(3, 1),
+            Decimal::new(3, 1),
+        ]),
+        seed: Some(88),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Kyoto, Japan".to_string()),
+            RichContent::Text("Reykjavik, Iceland".to_string()),
+            RichContent::Text("Patagonia, Argentina".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/mixed_output_modes_seed_88.json"),
+        include_str!("../../../assets/vector/completions/client_tests/mixed_output_modes_seed_88.json"),
+    );
+}
+
+/// Image responses with instruction mode, seed 33.
+#[tokio::test]
+async fn test_image_responses_instruction_seed_33() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(33),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Which painting has the best composition?".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::Instruction,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(33),
+        stream: None,
+        responses: vec![
+            RichContent::Parts(vec![
+                RichContentPart::ImageUrl {
+                    image_url: ImageUrl {
+                        url: "https://example.com/painting-a.jpg".to_string(),
+                        detail: None,
+                    },
+                },
+                RichContentPart::Text { text: "Sunset over mountains".to_string() },
+            ]),
+            RichContent::Parts(vec![
+                RichContentPart::ImageUrl {
+                    image_url: ImageUrl {
+                        url: "https://example.com/painting-b.jpg".to_string(),
+                        detail: None,
+                    },
+                },
+                RichContentPart::Text { text: "Abstract cubist portrait".to_string() },
+            ]),
+            RichContent::Parts(vec![
+                RichContentPart::ImageUrl {
+                    image_url: ImageUrl {
+                        url: "https://example.com/painting-c.jpg".to_string(),
+                        detail: None,
+                    },
+                },
+                RichContentPart::Text { text: "Watercolor garden scene".to_string() },
+            ]),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/image_responses_instruction_seed_33.json"),
+        include_str!("../../../assets/vector/completions/client_tests/image_responses_instruction_seed_33.json"),
+    );
+}
+
+/// Video and file responses with json_schema mode, seed 66.
+#[tokio::test]
+async fn test_video_and_file_responses_seed_66() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(66),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Parts(vec![
+                RichContentPart::Text { text: "Review these submissions and pick the best one".to_string() },
+                RichContentPart::VideoUrl {
+                    video_url: VideoUrl {
+                        url: "https://example.com/demo-reel.mp4".to_string(),
+                    },
+                },
+            ]),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::JsonSchema,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(66),
+        stream: None,
+        responses: vec![
+            RichContent::Parts(vec![
+                RichContentPart::VideoUrl {
+                    video_url: VideoUrl {
+                        url: "https://example.com/submission-1.mp4".to_string(),
+                    },
+                },
+                RichContentPart::Text { text: "30-second product demo".to_string() },
+            ]),
+            RichContent::Parts(vec![
+                RichContentPart::File {
+                    file: MessageFile {
+                        file_data: None,
+                        file_id: None,
+                        filename: Some("business-plan.pdf".to_string()),
+                        file_url: Some("https://example.com/business-plan.pdf".to_string()),
+                    },
+                },
+                RichContentPart::Text { text: "Written business plan".to_string() },
+            ]),
+            RichContent::Parts(vec![
+                RichContentPart::VideoUrl {
+                    video_url: VideoUrl {
+                        url: "https://example.com/submission-3.mp4".to_string(),
+                    },
+                },
+                RichContentPart::File {
+                    file: MessageFile {
+                        file_data: None,
+                        file_id: None,
+                        filename: Some("appendix.pdf".to_string()),
+                        file_url: Some("https://example.com/appendix.pdf".to_string()),
+                    },
+                },
+            ]),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/video_and_file_responses_seed_66.json"),
+        include_str!("../../../assets/vector/completions/client_tests/video_and_file_responses_seed_66.json"),
+    );
+}
+
+/// Three distinct agent definitions (instruction, json_schema, tool_call), seed 11.
+#[tokio::test]
+async fn test_three_different_agents_seed_11() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(11),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Parts(vec![
+                RichContentPart::Text { text: "Which dish looks the most appetizing?".to_string() },
+                RichContentPart::ImageUrl {
+                    image_url: ImageUrl {
+                        url: "https://example.com/menu-context.jpg".to_string(),
+                        detail: None,
+                    },
+                },
+            ]),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::ToolCall,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(5, 1),
+            Decimal::new(3, 1),
+            Decimal::new(2, 1),
+        ]),
+        seed: Some(11),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Truffle risotto".to_string()),
+            RichContent::Text("Seared tuna tataki".to_string()),
+            RichContent::Text("Wagyu beef carpaccio".to_string()),
+            RichContent::Text("Lobster thermidor".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/three_different_agents_seed_11.json"),
+        include_str!("../../../assets/vector/completions/client_tests/three_different_agents_seed_11.json"),
+    );
+}
+
+/// Json_schema mode with 8 responses, seed 22.
+#[tokio::test]
+async fn test_json_schema_many_responses_seed_22() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(22),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Rank these programming languages by expressiveness".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 2,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                        upstream: MockUpstream::Mock,
+                        output_mode: MockOutputMode::JsonSchema,
+                        error: None,
+                    }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(22),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Rust".to_string()),
+            RichContent::Text("Haskell".to_string()),
+            RichContent::Text("Python".to_string()),
+            RichContent::Text("Lisp".to_string()),
+            RichContent::Text("APL".to_string()),
+            RichContent::Text("Forth".to_string()),
+            RichContent::Text("Prolog".to_string()),
+            RichContent::Text("Smalltalk".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/json_schema_many_responses_seed_22.json"),
+        include_str!("../../../assets/vector/completions/client_tests/json_schema_many_responses_seed_22.json"),
+    );
+}
+
+/// Two tool_call agents with image message, seed 44.
+#[tokio::test]
+async fn test_tool_call_two_agents_seed_44() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(44),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Parts(vec![
+                RichContentPart::Text { text: "Which UI mockup should we go with?".to_string() },
+                RichContentPart::ImageUrl {
+                    image_url: ImageUrl {
+                        url: "https://example.com/current-design.png".to_string(),
+                        detail: None,
+                    },
+                },
+            ]),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::ToolCall,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::ToolCall,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(6, 1),
+            Decimal::new(4, 1),
+        ]),
+        seed: Some(44),
+        stream: None,
+        responses: vec![
+            RichContent::Parts(vec![
+                RichContentPart::ImageUrl {
+                    image_url: ImageUrl {
+                        url: "https://example.com/mockup-a.png".to_string(),
+                        detail: None,
+                    },
+                },
+                RichContentPart::Text { text: "Clean flat design".to_string() },
+            ]),
+            RichContent::Parts(vec![
+                RichContentPart::ImageUrl {
+                    image_url: ImageUrl {
+                        url: "https://example.com/mockup-b.png".to_string(),
+                        detail: None,
+                    },
+                },
+                RichContentPart::Text { text: "Skeuomorphic with gradients".to_string() },
+            ]),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/tool_call_two_agents_seed_44.json"),
+        include_str!("../../../assets/vector/completions/client_tests/tool_call_two_agents_seed_44.json"),
+    );
+}
+
+/// One error agent + two healthy agents (json_schema, instruction), seed 99.
+#[tokio::test]
+async fn test_error_and_healthy_agents_seed_99() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(99),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Parts(vec![
+                RichContentPart::Text { text: "Evaluate these architectural plans".to_string() },
+                RichContentPart::File {
+                    file: MessageFile {
+                        file_data: None,
+                        file_id: None,
+                        filename: Some("site-survey.pdf".to_string()),
+                        file_url: Some("https://example.com/site-survey.pdf".to_string()),
+                    },
+                },
+            ]),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: Some(true),
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::JsonSchema,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(3, 1),
+            Decimal::new(4, 1),
+            Decimal::new(3, 1),
+        ]),
+        seed: Some(99),
+        stream: None,
+        responses: vec![
+            RichContent::Parts(vec![
+                RichContentPart::File {
+                    file: MessageFile {
+                        file_data: None,
+                        file_id: None,
+                        filename: Some("plan-modern.pdf".to_string()),
+                        file_url: Some("https://example.com/plan-modern.pdf".to_string()),
+                    },
+                },
+                RichContentPart::Text { text: "Modern glass facade".to_string() },
+            ]),
+            RichContent::Parts(vec![
+                RichContentPart::File {
+                    file: MessageFile {
+                        file_data: None,
+                        file_id: None,
+                        filename: Some("plan-traditional.pdf".to_string()),
+                        file_url: Some("https://example.com/plan-traditional.pdf".to_string()),
+                    },
+                },
+                RichContentPart::Text { text: "Traditional brick and stone".to_string() },
+            ]),
+            RichContent::Text("Brutalist concrete monolith".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/error_and_healthy_agents_seed_99.json"),
+        include_str!("../../../assets/vector/completions/client_tests/error_and_healthy_agents_seed_99.json"),
     );
 }
