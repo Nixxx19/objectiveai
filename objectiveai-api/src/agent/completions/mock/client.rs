@@ -2,37 +2,22 @@
 
 use std::collections::HashMap;
 use std::pin::Pin;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicU32, Ordering};
 use std::time::Duration;
 use futures::Stream;
+use objectiveai::agent::completions::response::{Logprob, Logprobs};
 use rand::{Rng, SeedableRng};
 use super::super::{ContinuationItem, StreamItem, UpstreamClient, ResolvedTool};
+use super::State;
 
 /// Mock upstream client that generates random responses with configurable delay.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Client {
     /// Delay before yielding each chunk.
     pub delay: Duration,
-    /// Optional RNG seed for deterministic output.
-    pub seed: Option<u64>,
     /// Optional maximum number of tool calls across all continuations.
     /// When the counter reaches this limit, the mock will always respond
     /// with content instead of a tool call.
     pub max_tool_calls: Option<u32>,
-    /// Shared counter tracking how many tool calls have been made.
-    pub tool_call_count: Arc<AtomicU32>,
-}
-
-impl Clone for Client {
-    fn clone(&self) -> Self {
-        Self {
-            delay: self.delay,
-            seed: self.seed,
-            max_tool_calls: self.max_tool_calls,
-            tool_call_count: self.tool_call_count.clone(),
-        }
-    }
 }
 
 /// Resolves the response format for this agent from the request params.
@@ -57,17 +42,17 @@ struct MockToolCall {
 
 /// The outcome of the tool-vs-content dice roll.
 enum MockResponse {
-    /// Respond with text content, split across N chunks.
+    /// Respond with text content, chunked by logprob token boundaries.
     Content {
         text: String,
-        n_chunks: usize,
+        logprobs: Option<Vec<Logprob>>,
     },
     /// Respond with one or more parallel tool calls.
     ToolCalls(Vec<MockToolCall>),
 }
 
 impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
-    type State = ();
+    type State = State;
     type Stream = Pin<
         Box<dyn Stream<Item = StreamItem<Self::State>> + Send + 'static>,
     >;
@@ -79,7 +64,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         agent: &objectiveai::agent::mock::Agent,
         params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
         _messages: &[objectiveai::agent::completions::message::Message],
-        _mcp_connections: &[Arc<crate::mcp::Connection>],
+        _mcp_connections: &[std::sync::Arc<crate::mcp::Connection>],
         _invention_tools: Option<
             &[objectiveai::functions::inventions::InventionTool],
         >,
@@ -98,14 +83,22 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         let id = id.to_string();
         let agent_id = agent.id.clone();
         let error = agent.base.error == Some(true);
+        let top_logprobs = agent.base.top_logprobs;
         let response_format = resolve_response_format(&agent.id, params);
         let tool_names = tool_names.to_vec();
         let tool_map = tool_map.clone();
         let delay = self.delay;
         let cont_len = _continuation.map_or(0u64, |c| c.len() as u64);
-        let seed = self.seed.map(|s| s.wrapping_add(cont_len));
+        let seed = params.seed.map(|s| (s as u64).wrapping_add(cont_len));
         let max_tool_calls = self.max_tool_calls;
-        let tool_call_count = self.tool_call_count.clone();
+        let prior_tool_call_count = _continuation
+            .and_then(|items| {
+                items.iter().rev().find_map(|item| match item {
+                    ContinuationItem::State(s) => Some(s.tool_call_count),
+                    _ => None,
+                })
+            })
+            .unwrap_or(0);
         let is_byok = byok.is_some();
 
         async move {
@@ -146,19 +139,23 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 .collect();
 
             // --- Tool call vs content ---
+            let mut tool_call_count = prior_tool_call_count;
             let tools_exhausted = match max_tool_calls {
-                Some(max) => tool_call_count.load(Ordering::Relaxed) >= max,
+                Some(max) => tool_call_count >= max,
                 None => false,
             };
             let mock_response = resolve_mock_response(
                 &response_format,
                 if tools_exhausted { &[] } else { &tool_names },
                 &tool_map,
+                top_logprobs,
                 &mut rng,
             );
             if let MockResponse::ToolCalls(ref calls) = mock_response {
-                tool_call_count.fetch_add(calls.len() as u32, Ordering::Relaxed);
+                tool_call_count += calls.len() as u32;
             }
+
+            let state = State { tool_call_count };
 
             let stream = async_stream::stream! {
                 use objectiveai::agent::completions::message::{
@@ -196,19 +193,11 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
 
                 // --- Yield content or tool call chunks ---
                 match &mock_response {
-                    MockResponse::Content { text, n_chunks } => {
-                        let chunk_size = (text.len() + n_chunks - 1) / n_chunks;
-                        let parts: Vec<&str> = if text.is_empty() {
-                            vec![""]
-                        } else {
-                            text.as_bytes()
-                                .chunks(chunk_size.max(1))
-                                .map(|b| std::str::from_utf8(b).unwrap_or(""))
-                                .collect()
-                        };
+                    MockResponse::Content { text, logprobs } => {
+                        let chunks = chunk_by_logprobs(text, logprobs.as_deref(), &mut rng);
 
-                        for (i, part) in parts.iter().enumerate() {
-                            let is_last = i == parts.len() - 1;
+                        for (i, (chunk_text, chunk_logprobs)) in chunks.iter().enumerate() {
+                            let is_last = i == chunks.len() - 1;
                             if !delay.is_zero() {
                                 tokio::time::sleep(delay).await;
                             }
@@ -221,7 +210,11 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                                     agent: agent_id.clone(),
                                     model: "mock".into(),
                                     upstream_id: id.clone(),
-                                    content: Some(RichContent::Text(part.to_string())),
+                                    content: Some(RichContent::Text(chunk_text.clone())),
+                                    logprobs: chunk_logprobs.as_ref().map(|lps| Logprobs {
+                                        content: Some(lps.clone()),
+                                        refusal: None,
+                                    }),
                                     finish_reason: if is_last {
                                         Some(FinishReason::Stop)
                                     } else {
@@ -319,14 +312,59 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 });
 
                 // --- Yield final state ---
-                yield StreamItem::State(());
+                yield StreamItem::State(state);
             };
 
             let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
                 Box::pin(stream);
-            Ok((boxed, ()))
+            Ok((boxed, State { tool_call_count }))
         }
     }
+}
+
+/// Splits content into chunks aligned to logprob token boundaries.
+/// Each chunk consumes 1-5 logprob tokens. When logprobs is None,
+/// falls back to simple byte-based chunking.
+fn chunk_by_logprobs(
+    text: &str,
+    logprobs: Option<&[Logprob]>,
+    rng: &mut impl Rng,
+) -> Vec<(String, Option<Vec<Logprob>>)> {
+    let logprobs = match logprobs {
+        Some(lps) if !lps.is_empty() => lps,
+        _ => {
+            // No logprobs: simple chunking like before.
+            let n_chunks = rng.random_range(1u32..=5) as usize;
+            let chunk_size = (text.len() + n_chunks - 1) / n_chunks.max(1);
+            let parts: Vec<&str> = if text.is_empty() {
+                vec![""]
+            } else {
+                text.as_bytes()
+                    .chunks(chunk_size.max(1))
+                    .map(|b| std::str::from_utf8(b).unwrap_or(""))
+                    .collect()
+            };
+            return parts.into_iter().map(|p| (p.to_string(), None)).collect();
+        }
+    };
+
+    let mut chunks = Vec::new();
+    let mut pos = 0;
+
+    while pos < logprobs.len() {
+        let n_tokens = rng.random_range(1u32..=5) as usize;
+        let end = (pos + n_tokens).min(logprobs.len());
+        let chunk_lps = &logprobs[pos..end];
+        let chunk_text: String = chunk_lps.iter().map(|lp| lp.token.as_str()).collect();
+        chunks.push((chunk_text, Some(chunk_lps.to_vec())));
+        pos = end;
+    }
+
+    if chunks.is_empty() {
+        chunks.push((String::new(), Some(Vec::new())));
+    }
+
+    chunks
 }
 
 /// Decides whether to call a tool or respond with content, and generates the data.
@@ -334,6 +372,7 @@ fn resolve_mock_response(
     response_format: &Option<objectiveai::agent::completions::request::ResponseFormat>,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
+    top_logprobs: Option<u64>,
     rng: &mut impl Rng,
 ) -> MockResponse {
     use objectiveai::agent::completions::request::ResponseFormat;
@@ -394,44 +433,70 @@ fn resolve_mock_response(
     }
 
     // Respond as-is with content.
-    let text = generate_content_string(response_format, rng);
-    MockResponse::Content {
-        text,
-        n_chunks: rng.random_range(1u32..=5) as usize,
-    }
+    let (text, logprobs) = generate_content(response_format, top_logprobs, rng);
+    MockResponse::Content { text, logprobs }
 }
 
-/// Generates the content string for a respond-as-is case based on response format.
-fn generate_content_string(
+/// Generates content and optional logprobs based on response format and top_logprobs setting.
+fn generate_content(
     response_format: &Option<objectiveai::agent::completions::request::ResponseFormat>,
+    top_logprobs: Option<u64>,
     rng: &mut impl Rng,
-) -> String {
+) -> (String, Option<Vec<Logprob>>) {
     use objectiveai::agent::completions::request::ResponseFormat;
 
+    let permutations = match top_logprobs {
+        None | Some(0) => 1,
+        Some(n) => n as usize,
+    };
+    let yield_logprobs = top_logprobs.is_some_and(|n| n >= 1);
+
     match response_format {
-        Some(ResponseFormat::JsonObject) => "{}".into(),
-        Some(ResponseFormat::JsonSchema { schema }) | Some(ResponseFormat::ToolCall { schema, .. }) => {
-            generate_from_schema(schema, rng)
+        Some(ResponseFormat::JsonObject) => {
+            if yield_logprobs {
+                let serialized = vec!["{}".to_string(); permutations];
+                let (text, logprobs) = super::json_schema::generate_logprobs_from_serialized(&serialized, rng);
+                (text, Some(logprobs))
+            } else {
+                ("{}".into(), None)
+            }
         }
-        _ => random_string(rng, 10, 100),
+        Some(ResponseFormat::JsonSchema { schema }) | Some(ResponseFormat::ToolCall { schema, .. }) => {
+            generate_from_schema(schema, permutations, yield_logprobs, rng)
+        }
+        _ => {
+            // Plain text content.
+            let text = random_string(rng, 10, 100);
+            if yield_logprobs {
+                let serialized: Vec<String> = std::iter::once(text)
+                    .chain((1..permutations).map(|_| random_string(rng, 10, 100)))
+                    .collect();
+                let (text, logprobs) = super::json_schema::generate_logprobs_from_serialized(&serialized, rng);
+                (text, Some(logprobs))
+            } else {
+                (text, None)
+            }
+        }
     }
 }
 
-/// Generates a JSON string from an IndexMap schema, falling back to "{}".
+/// Generates content from an IndexMap schema, with optional logprobs.
 fn generate_from_schema(
     schema: &indexmap::IndexMap<String, serde_json::Value>,
+    permutations: usize,
+    yield_logprobs: bool,
     rng: &mut impl Rng,
-) -> String {
+) -> (String, Option<Vec<Logprob>>) {
     match serde_json::from_value::<super::json_schema::JsonSchema>(
         serde_json::Value::Object(
             schema.iter().map(|(k, v)| (k.clone(), v.clone())).collect(),
         ),
     ) {
         Ok(js) => {
-            let value = js.generate_from_rng(rng);
-            serde_json::to_string(&value).unwrap_or_else(|_| "{}".into())
+            let (text, logprobs) = js.generate_content_from_rng(rng, permutations);
+            (text, if yield_logprobs { Some(logprobs) } else { None })
         }
-        Err(_) => "{}".into(),
+        Err(_) => ("{}".into(), None),
     }
 }
 
@@ -448,6 +513,7 @@ fn random_string(rng: &mut impl Rng, min: usize, max: usize) -> String {
 }
 
 /// Generates tool call arguments by parsing the tool's parameter schema as JsonSchema.
+/// Tool calls never include logprobs.
 fn generate_tool_arguments(
     tool_map: &HashMap<String, ResolvedTool>,
     tool_name: &str,
@@ -483,17 +549,10 @@ fn generate_tool_arguments(
     match schema_value {
         Some(sv) => {
             match serde_json::from_value::<super::json_schema::JsonSchema>(sv) {
-                Ok(js) => {
-                    let value = js.generate_from_rng(rng);
-                    serde_json::to_string(&value).unwrap_or_else(|_| "{}".into())
-                }
+                Ok(js) => js.generate_content_from_rng(rng, 1).0,
                 Err(_) => "{}".into(),
             }
         }
         None => "{}".into(),
     }
 }
-
-#[cfg(test)]
-#[path = "client_tests.rs"]
-mod tests;

@@ -60,13 +60,12 @@ impl crate::agent::completions::usage_handler::UsageHandler<ctx::DefaultContextE
 // ---------------------------------------------------------------------------
 
 fn make_client_with_tool_limit(
-    seed: u64,
     max_tool_calls: Option<u32>,
 ) -> super::Client<
     ctx::DefaultContextExt,
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
-    crate::agent::completions::mock::client::Client,
+    crate::agent::completions::mock::Client,
     StubFetcher,
     StubUsageHandler,
 > {
@@ -91,11 +90,9 @@ fn make_client_with_tool_limit(
         usage_handler: Arc::new(StubUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(seed),
             max_tool_calls,
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -108,17 +105,15 @@ fn make_client_with_tool_limit(
     }
 }
 
-fn make_client(
-    seed: u64,
-) -> super::Client<
+fn make_client() -> super::Client<
     ctx::DefaultContextExt,
     UnimplementedUpstreamClient,
     UnimplementedUpstreamClient,
-    crate::agent::completions::mock::client::Client,
+    crate::agent::completions::mock::Client,
     StubFetcher,
     StubUsageHandler,
 > {
-    make_client_with_tool_limit(seed, None)
+    make_client_with_tool_limit(None)
 }
 
 fn make_ctx() -> ctx::Context<ctx::DefaultContextExt> {
@@ -163,7 +158,7 @@ fn normalize(mut c: AgentCompletion) -> AgentCompletion {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_AGENT_COMPLETION_SNAPSHOTS").as_deref() == Ok("1") {
+    if std::env::var("UPDATE_AGENT_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
         std::fs::write(path, json).unwrap();
         eprintln!("Updated snapshot: {path}");
         let written = std::fs::read_to_string(path).unwrap();
@@ -180,7 +175,7 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 /// Default mock agent, no error.
 #[tokio::test]
 async fn test_basic_mock_agent_seed_42() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -189,7 +184,7 @@ async fn test_basic_mock_agent_seed_42() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -215,7 +210,7 @@ async fn test_basic_mock_agent_seed_42() {
 /// Default mock agent with seed 123.
 #[tokio::test]
 async fn test_basic_mock_agent_seed_123() {
-    let client = make_client(123);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -224,7 +219,7 @@ async fn test_basic_mock_agent_seed_123() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(123),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -258,19 +253,19 @@ async fn test_deterministic_with_same_seed() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(77),
         stream: None,
         mcp_server_authorization: None,
     });
 
-    let client_a = make_client(77);
+    let client_a = make_client();
     let stream_a = client_a
         .create_streaming(make_ctx(), params.clone(), None, None, None)
         .await
         .unwrap();
     let items_a: Vec<_> = Box::pin(stream_a).collect().await;
 
-    let client_b = make_client(77);
+    let client_b = make_client();
     let stream_b = client_b
         .create_streaming(make_ctx(), params, None, None, None)
         .await
@@ -302,7 +297,7 @@ async fn test_deterministic_with_same_seed() {
 /// Different seeds produce different streams.
 #[tokio::test]
 async fn test_different_seeds_differ() {
-    let params = Arc::new(AgentCompletionCreateParams {
+    let params_a = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
             MockAgentBase::default(),
@@ -310,21 +305,33 @@ async fn test_different_seeds_differ() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(1),
+        stream: None,
+        mcp_server_authorization: None,
+    });
+    let params_b = Arc::new(AgentCompletionCreateParams {
+        messages: vec![],
+        agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
+            MockAgentBase::default(),
+        )),
+        agents: None,
+        provider: None,
+        response_format: None,
+        seed: Some(2),
         stream: None,
         mcp_server_authorization: None,
     });
 
-    let client_a = make_client(1);
+    let client_a = make_client();
     let stream_a = client_a
-        .create_streaming(make_ctx(), params.clone(), None, None, None)
+        .create_streaming(make_ctx(), params_a, None, None, None)
         .await
         .unwrap();
     let items_a: Vec<_> = Box::pin(stream_a).collect().await;
 
-    let client_b = make_client(2);
+    let client_b = make_client();
     let stream_b = client_b
-        .create_streaming(make_ctx(), params, None, None, None)
+        .create_streaming(make_ctx(), params_b, None, None, None)
         .await
         .unwrap();
     let items_b: Vec<_> = Box::pin(stream_b).collect().await;
@@ -360,7 +367,7 @@ async fn test_different_seeds_differ() {
 /// Mock agent with error=true should fail.
 #[tokio::test]
 async fn test_mock_agent_with_error() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -372,7 +379,7 @@ async fn test_mock_agent_with_error() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -386,7 +393,7 @@ async fn test_mock_agent_with_error() {
 /// Messages: single user message.
 #[tokio::test]
 async fn test_with_single_user_message() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Hello, world!".into()),
@@ -398,7 +405,7 @@ async fn test_with_single_user_message() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -424,7 +431,7 @@ async fn test_with_single_user_message() {
 /// Messages: developer + user messages.
 #[tokio::test]
 async fn test_with_developer_and_user_messages() {
-    let client = make_client(99);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![
             Message::Developer(DeveloperMessage {
@@ -442,7 +449,7 @@ async fn test_with_developer_and_user_messages() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(99),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -468,7 +475,7 @@ async fn test_with_developer_and_user_messages() {
 /// Response format: JsonObject.
 #[tokio::test]
 async fn test_json_object_response_format() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -477,7 +484,7 @@ async fn test_json_object_response_format() {
         agents: None,
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::JsonObject)),
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -503,7 +510,7 @@ async fn test_json_object_response_format() {
 /// Response format: JsonSchema with object schema.
 #[tokio::test]
 async fn test_json_schema_response_format() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -520,7 +527,7 @@ async fn test_json_schema_response_format() {
                 }),
             },
         })),
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -546,7 +553,7 @@ async fn test_json_schema_response_format() {
 /// Response format: Text.
 #[tokio::test]
 async fn test_text_response_format() {
-    let client = make_client(77);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -555,7 +562,7 @@ async fn test_text_response_format() {
         agents: None,
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::Text)),
-        seed: None,
+        seed: Some(77),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -581,7 +588,7 @@ async fn test_text_response_format() {
 /// Response format: Grammar should be rejected by mock client.
 #[tokio::test]
 async fn test_grammar_response_format_rejected() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -592,7 +599,7 @@ async fn test_grammar_response_format_rejected() {
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::Grammar {
             grammar: "root ::= 'hello'".into(),
         })),
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -606,7 +613,7 @@ async fn test_grammar_response_format_rejected() {
 /// Response format: Python should be rejected by mock client.
 #[tokio::test]
 async fn test_python_response_format_rejected() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -615,7 +622,7 @@ async fn test_python_response_format_rejected() {
         agents: None,
         provider: None,
         response_format: Some(ResponseFormatParam::Single(ResponseFormat::Python)),
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -629,7 +636,7 @@ async fn test_python_response_format_rejected() {
 /// Response format: ToolCall with required=true.
 #[tokio::test]
 async fn test_required_tool_call_response_format() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -648,7 +655,7 @@ async fn test_required_tool_call_response_format() {
             },
             required: Some(true),
         })),
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -674,7 +681,7 @@ async fn test_required_tool_call_response_format() {
 /// Response format: ToolCall with required=None (optional).
 #[tokio::test]
 async fn test_optional_tool_call_response_format() {
-    let client = make_client(200);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -694,7 +701,7 @@ async fn test_optional_tool_call_response_format() {
             },
             required: None,
         })),
-        seed: None,
+        seed: Some(200),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -720,7 +727,7 @@ async fn test_optional_tool_call_response_format() {
 /// With invention tools provided.
 #[tokio::test]
 async fn test_with_invention_tools() {
-    let client = make_client_with_tool_limit(88, Some(3));
+    let client = make_client_with_tool_limit(Some(3));
     let inv1 = objectiveai::functions::inventions::InventionTool {
         name: "execute_code",
         description: "Execute code in a sandbox",
@@ -756,7 +763,7 @@ async fn test_with_invention_tools() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(88),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -783,7 +790,7 @@ async fn test_with_invention_tools() {
 /// With invention tools and ToolCall response format.
 #[tokio::test]
 async fn test_invention_tools_with_tool_call_response_format() {
-    let client = make_client_with_tool_limit(150, Some(3));
+    let client = make_client_with_tool_limit(Some(3));
     let inv = objectiveai::functions::inventions::InventionTool {
         name: "validate",
         description: "Validate data",
@@ -814,7 +821,7 @@ async fn test_invention_tools_with_tool_call_response_format() {
             },
             required: None,
         })),
-        seed: None,
+        seed: Some(150),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -841,7 +848,7 @@ async fn test_invention_tools_with_tool_call_response_format() {
 /// Single invention tool that returns an error.
 #[tokio::test]
 async fn test_invention_tool_returns_error() {
-    let client = make_client_with_tool_limit(88, Some(3));
+    let client = make_client_with_tool_limit(Some(3));
     let inv = objectiveai::functions::inventions::InventionTool {
         name: "failing_tool",
         description: "A tool that always fails",
@@ -862,7 +869,7 @@ async fn test_invention_tool_returns_error() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(88),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -888,7 +895,7 @@ async fn test_invention_tool_returns_error() {
 /// Multiple user messages in a conversation.
 #[tokio::test]
 async fn test_multiple_user_messages() {
-    let client = make_client(55);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![
             Message::User(UserMessage {
@@ -906,7 +913,7 @@ async fn test_multiple_user_messages() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(55),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -932,7 +939,7 @@ async fn test_multiple_user_messages() {
 /// Mock agent with error=Some(false) should succeed (normalized to None by prepare).
 #[tokio::test]
 async fn test_mock_agent_error_false_succeeds() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -944,7 +951,7 @@ async fn test_mock_agent_error_false_succeeds() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -970,7 +977,7 @@ async fn test_mock_agent_error_false_succeeds() {
 /// Final stream item is always a Continuation::Mock.
 #[tokio::test]
 async fn test_final_item_is_mock_continuation() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -979,7 +986,7 @@ async fn test_final_item_is_mock_continuation() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1015,7 +1022,7 @@ async fn test_per_agent_response_format() {
     let mock_base = MockAgentBase::default();
     let agent_id = mock_base.id();
 
-    let client = make_client(42);
+    let client = make_client();
     let mut per_agent = indexmap::IndexMap::new();
     per_agent.insert(
         agent_id,
@@ -1028,7 +1035,7 @@ async fn test_per_agent_response_format() {
         agents: None,
         provider: None,
         response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1054,7 +1061,7 @@ async fn test_per_agent_response_format() {
 /// PerAgent response format with unknown agent ID (should fall back to no format).
 #[tokio::test]
 async fn test_per_agent_response_format_unknown_id() {
-    let client = make_client(42);
+    let client = make_client();
     let mut per_agent = indexmap::IndexMap::new();
     per_agent.insert(
         "nonexistent_agent_id_12345".into(),
@@ -1069,7 +1076,7 @@ async fn test_per_agent_response_format_unknown_id() {
         agents: None,
         provider: None,
         response_format: Some(ResponseFormatParam::PerAgent(per_agent)),
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1095,7 +1102,7 @@ async fn test_per_agent_response_format_unknown_id() {
 /// JsonSchema with nested object schema.
 #[tokio::test]
 async fn test_json_schema_nested_object() {
-    let client = make_client(99);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![Message::User(UserMessage {
             content: RichContent::Text("Generate a person".into()),
@@ -1126,7 +1133,7 @@ async fn test_json_schema_nested_object() {
                 }),
             },
         })),
-        seed: None,
+        seed: Some(99),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1152,7 +1159,7 @@ async fn test_json_schema_nested_object() {
 /// Fallback agents: primary errors, fallback succeeds.
 #[tokio::test]
 async fn test_fallback_agent_on_error() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -1166,7 +1173,7 @@ async fn test_fallback_agent_on_error() {
         )]),
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1192,7 +1199,7 @@ async fn test_fallback_agent_on_error() {
 /// Both primary and fallback agents error — should fail.
 #[tokio::test]
 async fn test_all_agents_error() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -1209,7 +1216,7 @@ async fn test_all_agents_error() {
         )]),
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1223,7 +1230,7 @@ async fn test_all_agents_error() {
 /// Multiple fallback agents — first two error, third succeeds.
 #[tokio::test]
 async fn test_multiple_fallback_agents() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -1245,7 +1252,7 @@ async fn test_multiple_fallback_agents() {
         ]),
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1273,7 +1280,7 @@ async fn test_multiple_fallback_agents() {
 async fn test_with_mock_continuation() {
     let mock_agent = objectiveai::agent::mock::Agent::try_from(MockAgentBase::default()).unwrap();
 
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -1282,14 +1289,14 @@ async fn test_with_mock_continuation() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
 
     let continuation = crate::agent::completions::Continuation::Mock {
         items: vec![
-            crate::agent::completions::ContinuationItem::State(()),
+            crate::agent::completions::ContinuationItem::State(crate::agent::completions::mock::State::default()),
         ],
         agent: mock_agent,
         mcp_connections: vec![],
@@ -1316,7 +1323,7 @@ async fn test_with_mock_continuation() {
 /// Stream produces chunks before the final state.
 #[tokio::test]
 async fn test_stream_yields_chunks_before_state() {
-    let client = make_client(42);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -1325,7 +1332,7 @@ async fn test_stream_yields_chunks_before_state() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(42),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1359,7 +1366,7 @@ async fn test_stream_yields_chunks_before_state() {
 /// Large seed value.
 #[tokio::test]
 async fn test_large_seed_value() {
-    let client = make_client(u64::MAX);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -1368,7 +1375,7 @@ async fn test_large_seed_value() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(u64::MAX as i64),
         stream: None,
         mcp_server_authorization: None,
     });
@@ -1394,7 +1401,7 @@ async fn test_large_seed_value() {
 /// Seed 0.
 #[tokio::test]
 async fn test_seed_zero() {
-    let client = make_client(0);
+    let client = make_client();
     let params = Arc::new(AgentCompletionCreateParams {
         messages: vec![],
         agent: AgentParam::Provided(objectiveai::agent::AgentBase::Mock(
@@ -1403,7 +1410,7 @@ async fn test_seed_zero() {
         agents: None,
         provider: None,
         response_format: None,
-        seed: None,
+        seed: Some(0),
         stream: None,
         mcp_server_authorization: None,
     });

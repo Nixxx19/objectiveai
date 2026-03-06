@@ -165,7 +165,7 @@ fn normalize(mut vc: VectorCompletion) -> VectorCompletion {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_VECTOR_COMPLETION_SNAPSHOTS").as_deref() == Ok("1") {
+    if std::env::var("UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
         std::fs::write(path, json).unwrap();
         eprintln!("Updated snapshot: {path}");
         let written = std::fs::read_to_string(path).unwrap();
@@ -203,11 +203,9 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -242,6 +240,7 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                     fallbacks: None,
@@ -305,11 +304,9 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -344,6 +341,7 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                     fallbacks: None,
@@ -408,11 +406,9 @@ async fn test_two_agents_equal_weights_seed_42() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -447,6 +443,7 @@ async fn test_two_agents_equal_weights_seed_42() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                     fallbacks: None,
@@ -510,11 +507,9 @@ async fn test_two_agents_unequal_weights_seed_42() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -550,6 +545,7 @@ async fn test_two_agents_unequal_weights_seed_42() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -559,6 +555,7 @@ async fn test_two_agents_unequal_weights_seed_42() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -624,11 +621,9 @@ async fn test_three_agents_4_responses_seed_99() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(99),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -663,6 +658,7 @@ async fn test_three_agents_4_responses_seed_99() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                     fallbacks: None,
@@ -728,11 +724,9 @@ async fn test_invert_vote_seed_42() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -767,6 +761,7 @@ async fn test_invert_vote_seed_42() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                     fallbacks: None,
@@ -834,11 +829,9 @@ async fn test_deterministic_same_seed() {
             usage_handler: Arc::new(StubAgentUsageHandler),
             openrouter: Arc::new(UnimplementedUpstreamClient),
             claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-            mock: Arc::new(crate::agent::completions::mock::client::Client {
+            mock: Arc::new(crate::agent::completions::mock::Client {
                 delay: Duration::ZERO,
-                seed: Some(42),
                 max_tool_calls: Some(0),
-                tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
             }),
             backoff_current_interval: Duration::ZERO,
             backoff_initial_interval: Duration::ZERO,
@@ -875,6 +868,7 @@ async fn test_deterministic_same_seed() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -918,7 +912,7 @@ async fn test_deterministic_same_seed() {
 /// Different seeds produce different results.
 #[tokio::test]
 async fn test_different_seeds_differ() {
-    let make_client = |seed: u64| {
+    let client = {
         let agent_client = Arc::new(crate::agent::completions::Client {
             mcp_client: Arc::new(crate::mcp::Client::new(
                 reqwest::Client::new(),
@@ -940,11 +934,9 @@ async fn test_different_seeds_differ() {
             usage_handler: Arc::new(StubAgentUsageHandler),
             openrouter: Arc::new(UnimplementedUpstreamClient),
             claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-            mock: Arc::new(crate::agent::completions::mock::client::Client {
+            mock: Arc::new(crate::agent::completions::mock::Client {
                 delay: Duration::ZERO,
-                seed: Some(seed),
                 max_tool_calls: Some(0),
-                tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
             }),
             backoff_current_interval: Duration::ZERO,
             backoff_initial_interval: Duration::ZERO,
@@ -981,6 +973,7 @@ async fn test_different_seeds_differ() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -1012,8 +1005,8 @@ async fn test_different_seeds_differ() {
         normalize(aggregate(chunks))
     };
 
-    let result1 = run(make_client(42), make_request(42)).await;
-    let result2 = run(make_client(99), make_request(99)).await;
+    let result1 = run(client.clone(), make_request(42)).await;
+    let result2 = run(client.clone(), make_request(99)).await;
 
     let json1 = serde_json::to_string_pretty(&result1).unwrap();
     let json2 = serde_json::to_string_pretty(&result2).unwrap();
@@ -1044,11 +1037,9 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -1086,6 +1077,7 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                     fallbacks: None,
@@ -1146,11 +1138,9 @@ async fn test_json_schema_single_agent_seed_77() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(77),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -1185,6 +1175,7 @@ async fn test_json_schema_single_agent_seed_77() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::JsonSchema,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,
@@ -1249,11 +1240,9 @@ async fn test_tool_call_single_agent_seed_55() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(55),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -1288,6 +1277,7 @@ async fn test_tool_call_single_agent_seed_55() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::ToolCall,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,
@@ -1351,11 +1341,9 @@ async fn test_error_agent_skipped_seed_42() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -1390,6 +1378,7 @@ async fn test_error_agent_skipped_seed_42() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::Instruction,
+                        top_logprobs: None,
                         error: Some(true),
                     }),
                     fallbacks: None,
@@ -1453,11 +1442,9 @@ async fn test_mixed_output_modes_seed_88() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(88),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -1493,6 +1480,7 @@ async fn test_mixed_output_modes_seed_88() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -1502,6 +1490,7 @@ async fn test_mixed_output_modes_seed_88() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -1511,6 +1500,7 @@ async fn test_mixed_output_modes_seed_88() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::ToolCall,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -1578,11 +1568,9 @@ async fn test_image_responses_instruction_seed_33() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(33),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -1617,6 +1605,7 @@ async fn test_image_responses_instruction_seed_33() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::Instruction,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,
@@ -1705,11 +1694,9 @@ async fn test_video_and_file_responses_seed_66() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(66),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -1751,6 +1738,7 @@ async fn test_video_and_file_responses_seed_66() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::JsonSchema,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,
@@ -1846,11 +1834,9 @@ async fn test_three_different_agents_seed_11() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(11),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -1894,6 +1880,7 @@ async fn test_three_different_agents_seed_11() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -1903,6 +1890,7 @@ async fn test_three_different_agents_seed_11() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -1912,6 +1900,7 @@ async fn test_three_different_agents_seed_11() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::ToolCall,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -1980,11 +1969,9 @@ async fn test_json_schema_many_responses_seed_22() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(22),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -2019,6 +2006,7 @@ async fn test_json_schema_many_responses_seed_22() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::JsonSchema,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,
@@ -2088,11 +2076,9 @@ async fn test_tool_call_two_agents_seed_44() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(44),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -2136,6 +2122,7 @@ async fn test_tool_call_two_agents_seed_44() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::ToolCall,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2145,6 +2132,7 @@ async fn test_tool_call_two_agents_seed_44() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::ToolCall,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2226,11 +2214,9 @@ async fn test_error_and_healthy_agents_seed_99() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(99),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -2276,6 +2262,7 @@ async fn test_error_and_healthy_agents_seed_99() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: Some(true),
                         }),
                         fallbacks: None,
@@ -2285,6 +2272,7 @@ async fn test_error_and_healthy_agents_seed_99() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2294,6 +2282,7 @@ async fn test_error_and_healthy_agents_seed_99() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2381,11 +2370,9 @@ async fn test_only_final_chunk_has_usage() {
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -2420,6 +2407,7 @@ async fn test_only_final_chunk_has_usage() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::Instruction,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,
@@ -2468,7 +2456,7 @@ fn make_error_test_client() -> Arc<
         ctx::DefaultContextExt,
         UnimplementedUpstreamClient,
         UnimplementedUpstreamClient,
-        crate::agent::completions::mock::client::Client,
+        crate::agent::completions::mock::Client,
         StubAgentFetcher,
         StubAgentUsageHandler,
         StubEnsembleFetcher,
@@ -2498,11 +2486,9 @@ fn make_error_test_client() -> Arc<
         usage_handler: Arc::new(StubAgentUsageHandler),
         openrouter: Arc::new(UnimplementedUpstreamClient),
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
-        mock: Arc::new(crate::agent::completions::mock::client::Client {
+        mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
-            seed: Some(42),
             max_tool_calls: Some(0),
-            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -2543,6 +2529,7 @@ async fn test_error_zero_responses() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::Instruction,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,
@@ -2592,6 +2579,7 @@ async fn test_error_one_response() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::JsonSchema,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,
@@ -2644,6 +2632,7 @@ async fn test_error_invalid_ensemble_all_count_zero() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2653,6 +2642,7 @@ async fn test_error_invalid_ensemble_all_count_zero() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::ToolCall,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2750,6 +2740,7 @@ async fn test_error_invalid_ensemble_profile_length_mismatch() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2759,6 +2750,7 @@ async fn test_error_invalid_ensemble_profile_length_mismatch() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::JsonSchema,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2813,6 +2805,7 @@ async fn test_error_invalid_ensemble_conflicting_invert() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2823,6 +2816,7 @@ async fn test_error_invalid_ensemble_conflicting_invert() {
                         inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                             upstream: MockUpstream::Mock,
                             output_mode: MockOutputMode::Instruction,
+                            top_logprobs: None,
                             error: None,
                         }),
                         fallbacks: None,
@@ -2883,6 +2877,7 @@ async fn test_error_invalid_profile_all_zero_weights() {
                     inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
                         upstream: MockUpstream::Mock,
                         output_mode: MockOutputMode::ToolCall,
+                        top_logprobs: None,
                         error: None,
                     }),
                     fallbacks: None,

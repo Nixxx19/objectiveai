@@ -13,3 +13,6 @@ pub use continuation::*;
 pub use error::*;
 pub use upstream_client::*;
 pub use tool::*;
+
+#[cfg(test)]
+mod client_tests;
