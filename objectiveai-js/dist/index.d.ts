@@ -318,6 +318,11 @@ declare const ChatCompletionSchema$1: z.ZodObject<{
         cost_multiplier: z.ZodNumber;
         is_byok: z.ZodBoolean;
     }, z.core.$strip>;
+    upstream: z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>;
     provider: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 type ChatCompletion$1 = z.infer<typeof ChatCompletionSchema$1>;
@@ -336,6 +341,11 @@ declare const OtherChunkTimeoutSchema: z.ZodUInt32;
 type OtherChunkTimeout = z.infer<typeof OtherChunkTimeoutSchema>;
 declare const OtherChunkTimeoutJsonSchema: JSONSchema;
 declare const ChatCompletionCreateParamsBaseSchema: z.ZodObject<{
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         role: z.ZodLiteral<"developer">;
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -1293,6 +1303,11 @@ declare const StreamTrueSchema: z.ZodLiteral<true>;
 type StreamTrue = z.infer<typeof StreamTrueSchema>;
 declare const StreamTrueJsonSchema: JSONSchema;
 declare const ChatCompletionCreateParamsStreamingSchema: z.ZodObject<{
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         role: z.ZodLiteral<"developer">;
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -2251,6 +2266,11 @@ declare const StreamFalseSchema: z.ZodLiteral<false>;
 type StreamFalse = z.infer<typeof StreamFalseSchema>;
 declare const StreamFalseJsonSchema: JSONSchema;
 declare const ChatCompletionCreateParamsNonStreamingSchema: z.ZodObject<{
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         role: z.ZodLiteral<"developer">;
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -3209,6 +3229,11 @@ declare const StreamSchema: z.ZodBoolean;
 type Stream = z.infer<typeof StreamSchema>;
 declare const StreamJsonSchema: JSONSchema;
 declare const ChatCompletionCreateParamsSchema: z.ZodObject<{
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         role: z.ZodLiteral<"developer">;
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -4253,6 +4278,11 @@ declare const ChatCompletionChunkSchema$1: z.ZodObject<{
         cost_multiplier: z.ZodNumber;
         is_byok: z.ZodBoolean;
     }, z.core.$strip>>;
+    upstream: z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>;
     provider: z.ZodOptional<z.ZodString>;
 }, z.core.$strip>;
 declare const ChatCompletionChunkJsonSchema$1: JSONSchema;
@@ -9874,8 +9904,29 @@ declare namespace index$p {
   export { type index$p_FinishReason as FinishReason, index$p_FinishReasonJsonSchema as FinishReasonJsonSchema, index$p_FinishReasonSchema as FinishReasonSchema, index$p_Logprob as Logprob, index$p_LogprobJsonSchema as LogprobJsonSchema, index$p_LogprobSchema as LogprobSchema, index$p_Logprobs as Logprobs, index$p_LogprobsJsonSchema as LogprobsJsonSchema, index$p_LogprobsSchema as LogprobsSchema, index$p_ResponseImage as ResponseImage, type index$p_ResponseImageImageUrl as ResponseImageImageUrl, index$p_ResponseImageImageUrlJsonSchema as ResponseImageImageUrlJsonSchema, index$p_ResponseImageImageUrlSchema as ResponseImageImageUrlSchema, index$p_ResponseImageJsonSchema as ResponseImageJsonSchema, index$p_ResponseImageSchema as ResponseImageSchema, type index$p_Role as Role, index$p_RoleJsonSchema as RoleJsonSchema, index$p_RoleSchema as RoleSchema, index$r as Streaming, type index$p_TopLogprob as TopLogprob, index$p_TopLogprobJsonSchema as TopLogprobJsonSchema, index$p_TopLogprobSchema as TopLogprobSchema, index$q as Unary, Usage$1 as Usage, index$p_UsageCompletionTokensDetails as UsageCompletionTokensDetails, index$p_UsageCompletionTokensDetailsJsonSchema as UsageCompletionTokensDetailsJsonSchema, index$p_UsageCompletionTokensDetailsSchema as UsageCompletionTokensDetailsSchema, index$p_UsageCostDetails as UsageCostDetails, index$p_UsageCostDetailsJsonSchema as UsageCostDetailsJsonSchema, index$p_UsageCostDetailsSchema as UsageCostDetailsSchema, UsageJsonSchema$1 as UsageJsonSchema, index$p_UsagePromptTokensDetails as UsagePromptTokensDetails, index$p_UsagePromptTokensDetailsJsonSchema as UsagePromptTokensDetailsJsonSchema, index$p_UsagePromptTokensDetailsSchema as UsagePromptTokensDetailsSchema, UsageSchema$1 as UsageSchema };
 }
 
+declare const UpstreamSchema: z.ZodEnum<{
+    unknown: "unknown";
+    open_router: "open_router";
+    claude_agent_sdk: "claude_agent_sdk";
+}>;
+type Upstream = z.infer<typeof UpstreamSchema>;
+declare const UpstreamJsonSchema: JSONSchema;
+declare const UpstreamsSchema: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+    unknown: "unknown";
+    open_router: "open_router";
+    claude_agent_sdk: "claude_agent_sdk";
+}>>>>;
+type Upstreams = z.infer<typeof UpstreamsSchema>;
+declare const UpstreamsJsonSchema: JSONSchema;
+
+type index$o_Upstream = Upstream;
+declare const index$o_UpstreamJsonSchema: typeof UpstreamJsonSchema;
+declare const index$o_UpstreamSchema: typeof UpstreamSchema;
+type index$o_Upstreams = Upstreams;
+declare const index$o_UpstreamsJsonSchema: typeof UpstreamsJsonSchema;
+declare const index$o_UpstreamsSchema: typeof UpstreamsSchema;
 declare namespace index$o {
-  export { index$s as Request, index$p as Response, create$3 as create };
+  export { index$s as Request, index$p as Response, type index$o_Upstream as Upstream, index$o_UpstreamJsonSchema as UpstreamJsonSchema, index$o_UpstreamSchema as UpstreamSchema, type index$o_Upstreams as Upstreams, index$o_UpstreamsJsonSchema as UpstreamsJsonSchema, index$o_UpstreamsSchema as UpstreamsSchema, create$3 as create };
 }
 
 declare namespace index$n {
@@ -14962,6 +15013,11 @@ declare const FunctionExecutionChunkSchema$1: z.ZodObject<{
                 cost_multiplier: z.ZodNumber;
                 is_byok: z.ZodBoolean;
             }, z.core.$strip>>;
+            upstream: z.ZodEnum<{
+                unknown: "unknown";
+                open_router: "open_router";
+                claude_agent_sdk: "claude_agent_sdk";
+            }>;
             provider: z.ZodOptional<z.ZodString>;
             index: z.ZodUInt32;
             error: z.ZodOptional<z.ZodObject<{
@@ -15105,6 +15161,11 @@ declare const FunctionExecutionChunkSchema$1: z.ZodObject<{
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         error: z.ZodOptional<z.ZodObject<{
             code: z.ZodUInt32;
@@ -15254,6 +15315,11 @@ declare const FunctionExecutionSchema$1: z.ZodObject<{
                 cost_multiplier: z.ZodNumber;
                 is_byok: z.ZodBoolean;
             }, z.core.$strip>;
+            upstream: z.ZodEnum<{
+                unknown: "unknown";
+                open_router: "open_router";
+                claude_agent_sdk: "claude_agent_sdk";
+            }>;
             provider: z.ZodOptional<z.ZodString>;
             index: z.ZodUInt32;
             error: z.ZodOptional<z.ZodObject<{
@@ -15396,6 +15462,11 @@ declare const FunctionExecutionSchema$1: z.ZodObject<{
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         error: z.ZodNullable<z.ZodObject<{
             code: z.ZodUInt32;
@@ -20203,6 +20274,11 @@ declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileBaseSchema
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -20977,6 +21053,11 @@ declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreamingS
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -21752,6 +21833,11 @@ declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreami
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -22527,6 +22613,11 @@ declare const FunctionExecutionCreateParamsRemoteFunctionRemoteProfileSchema: z.
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -23302,6 +23393,11 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileBaseSchema
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -24821,6 +24917,11 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreamingS
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -26341,6 +26442,11 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreami
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -27861,6 +27967,11 @@ declare const FunctionExecutionCreateParamsRemoteFunctionInlineProfileSchema: z.
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -29381,6 +29492,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileBaseSchema
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -31296,6 +31412,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreamingS
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -33212,6 +33333,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreami
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -35128,6 +35254,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionRemoteProfileSchema: z.
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -37044,6 +37175,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileBaseSchema
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -39704,6 +39840,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileStreamingS
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -42365,6 +42506,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreami
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -45026,6 +45172,11 @@ declare const FunctionExecutionCreateParamsInlineFunctionInlineProfileSchema: z.
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     strategy: z.ZodNullable<z.ZodOptional<z.ZodDiscriminatedUnion<[z.ZodObject<{
         type: z.ZodLiteral<"default">;
     }, z.core.$strip>, z.ZodObject<{
@@ -57818,6 +57969,11 @@ declare const ReasoningSummaryChunkSchema: z.ZodObject<{
         cost_multiplier: z.ZodNumber;
         is_byok: z.ZodBoolean;
     }, z.core.$strip>>;
+    upstream: z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>;
     provider: z.ZodOptional<z.ZodString>;
     error: z.ZodOptional<z.ZodObject<{
         code: z.ZodUInt32;
@@ -57926,6 +58082,11 @@ declare const TaskChunkSchema: z.ZodUnion<readonly [z.ZodType<FunctionExecutionT
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         index: z.ZodUInt32;
         error: z.ZodOptional<z.ZodObject<{
@@ -58076,6 +58237,11 @@ declare const VectorCompletionTaskChunkSchema: z.ZodObject<{
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         index: z.ZodUInt32;
         error: z.ZodOptional<z.ZodObject<{
@@ -58250,6 +58416,11 @@ declare const ReasoningSummarySchema: z.ZodObject<{
         cost_multiplier: z.ZodNumber;
         is_byok: z.ZodBoolean;
     }, z.core.$strip>;
+    upstream: z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>;
     provider: z.ZodOptional<z.ZodString>;
     error: z.ZodNullable<z.ZodObject<{
         code: z.ZodUInt32;
@@ -58354,6 +58525,11 @@ declare const TaskSchema$1: z.ZodUnion<readonly [z.ZodType<FunctionExecutionTask
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         index: z.ZodUInt32;
         error: z.ZodOptional<z.ZodObject<{
@@ -58499,6 +58675,11 @@ declare const VectorCompletionTaskSchema$1: z.ZodObject<{
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         index: z.ZodUInt32;
         error: z.ZodOptional<z.ZodObject<{
@@ -58678,6 +58859,11 @@ declare const ChatCompletionChunkSchema: z.ZodObject<{
         cost_multiplier: z.ZodNumber;
         is_byok: z.ZodBoolean;
     }, z.core.$strip>>;
+    upstream: z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>;
     provider: z.ZodOptional<z.ZodString>;
     index: z.ZodUInt32;
     error: z.ZodOptional<z.ZodObject<{
@@ -58787,6 +58973,11 @@ declare const VectorCompletionChunkSchema: z.ZodObject<{
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         index: z.ZodUInt32;
         error: z.ZodOptional<z.ZodObject<{
@@ -58937,6 +59128,11 @@ declare const ChatCompletionSchema: z.ZodObject<{
         cost_multiplier: z.ZodNumber;
         is_byok: z.ZodBoolean;
     }, z.core.$strip>;
+    upstream: z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>;
     provider: z.ZodOptional<z.ZodString>;
     index: z.ZodUInt32;
     error: z.ZodOptional<z.ZodObject<{
@@ -59041,6 +59237,11 @@ declare const VectorCompletionSchema: z.ZodObject<{
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         index: z.ZodUInt32;
         error: z.ZodOptional<z.ZodObject<{
@@ -62756,6 +62957,11 @@ declare const FunctionProfileComputationChunkSchema: z.ZodObject<{
                     cost_multiplier: z.ZodNumber;
                     is_byok: z.ZodBoolean;
                 }, z.core.$strip>>;
+                upstream: z.ZodEnum<{
+                    unknown: "unknown";
+                    open_router: "open_router";
+                    claude_agent_sdk: "claude_agent_sdk";
+                }>;
                 provider: z.ZodOptional<z.ZodString>;
                 index: z.ZodUInt32;
                 error: z.ZodOptional<z.ZodObject<{
@@ -62899,6 +63105,11 @@ declare const FunctionProfileComputationChunkSchema: z.ZodObject<{
                 cost_multiplier: z.ZodNumber;
                 is_byok: z.ZodBoolean;
             }, z.core.$strip>>;
+            upstream: z.ZodEnum<{
+                unknown: "unknown";
+                open_router: "open_router";
+                claude_agent_sdk: "claude_agent_sdk";
+            }>;
             provider: z.ZodOptional<z.ZodString>;
             error: z.ZodOptional<z.ZodObject<{
                 code: z.ZodUInt32;
@@ -63826,6 +64037,11 @@ declare const FunctionProfileComputationSchema: z.ZodObject<{
                     cost_multiplier: z.ZodNumber;
                     is_byok: z.ZodBoolean;
                 }, z.core.$strip>;
+                upstream: z.ZodEnum<{
+                    unknown: "unknown";
+                    open_router: "open_router";
+                    claude_agent_sdk: "claude_agent_sdk";
+                }>;
                 provider: z.ZodOptional<z.ZodString>;
                 index: z.ZodUInt32;
                 error: z.ZodOptional<z.ZodObject<{
@@ -63968,6 +64184,11 @@ declare const FunctionProfileComputationSchema: z.ZodObject<{
                 cost_multiplier: z.ZodNumber;
                 is_byok: z.ZodBoolean;
             }, z.core.$strip>;
+            upstream: z.ZodEnum<{
+                unknown: "unknown";
+                open_router: "open_router";
+                claude_agent_sdk: "claude_agent_sdk";
+            }>;
             provider: z.ZodOptional<z.ZodString>;
             error: z.ZodNullable<z.ZodObject<{
                 code: z.ZodUInt32;
@@ -64802,6 +65023,11 @@ declare const FunctionProfileComputationCreateParamsRemoteFunctionBaseSchema: z.
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     max_retries: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     n: z.ZodUInt32;
     dataset: z.ZodArray<z.ZodObject<{
@@ -65583,6 +65809,11 @@ declare const FunctionProfileComputationCreateParamsRemoteFunctionStreamingSchem
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     max_retries: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     n: z.ZodUInt32;
     dataset: z.ZodArray<z.ZodObject<{
@@ -66365,6 +66596,11 @@ declare const FunctionProfileComputationCreateParamsRemoteFunctionNonStreamingSc
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     max_retries: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     n: z.ZodUInt32;
     dataset: z.ZodArray<z.ZodObject<{
@@ -67147,6 +67383,11 @@ declare const FunctionProfileComputationCreateParamsRemoteFunctionSchema: z.ZodO
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     max_retries: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     n: z.ZodUInt32;
     dataset: z.ZodArray<z.ZodObject<{
@@ -67929,6 +68170,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionBaseSchema: z.
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     max_retries: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     n: z.ZodUInt32;
     dataset: z.ZodArray<z.ZodObject<{
@@ -69851,6 +70097,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionStreamingSchem
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     max_retries: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     n: z.ZodUInt32;
     dataset: z.ZodArray<z.ZodObject<{
@@ -71774,6 +72025,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionNonStreamingSc
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     max_retries: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     n: z.ZodUInt32;
     dataset: z.ZodArray<z.ZodObject<{
@@ -73697,6 +73953,11 @@ declare const FunctionProfileComputationCreateParamsInlineFunctionSchema: z.ZodO
     retry_token: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     max_retries: z.ZodNullable<z.ZodOptional<z.ZodUInt32>>;
     n: z.ZodUInt32;
     dataset: z.ZodArray<z.ZodObject<{
@@ -75823,6 +76084,11 @@ declare const FunctionExecutionChunkSchema: z.ZodObject<{
                 cost_multiplier: z.ZodNumber;
                 is_byok: z.ZodBoolean;
             }, z.core.$strip>>;
+            upstream: z.ZodEnum<{
+                unknown: "unknown";
+                open_router: "open_router";
+                claude_agent_sdk: "claude_agent_sdk";
+            }>;
             provider: z.ZodOptional<z.ZodString>;
             index: z.ZodUInt32;
             error: z.ZodOptional<z.ZodObject<{
@@ -75966,6 +76232,11 @@ declare const FunctionExecutionChunkSchema: z.ZodObject<{
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         error: z.ZodOptional<z.ZodObject<{
             code: z.ZodUInt32;
@@ -76122,6 +76393,11 @@ declare const FunctionExecutionSchema: z.ZodObject<{
                 cost_multiplier: z.ZodNumber;
                 is_byok: z.ZodBoolean;
             }, z.core.$strip>;
+            upstream: z.ZodEnum<{
+                unknown: "unknown";
+                open_router: "open_router";
+                claude_agent_sdk: "claude_agent_sdk";
+            }>;
             provider: z.ZodOptional<z.ZodString>;
             index: z.ZodUInt32;
             error: z.ZodOptional<z.ZodObject<{
@@ -76264,6 +76540,11 @@ declare const FunctionExecutionSchema: z.ZodObject<{
             cost_multiplier: z.ZodNumber;
             is_byok: z.ZodBoolean;
         }, z.core.$strip>;
+        upstream: z.ZodEnum<{
+            unknown: "unknown";
+            open_router: "open_router";
+            claude_agent_sdk: "claude_agent_sdk";
+        }>;
         provider: z.ZodOptional<z.ZodString>;
         error: z.ZodNullable<z.ZodObject<{
             code: z.ZodUInt32;
@@ -85290,6 +85571,11 @@ declare const VectorCompletionCreateParamsBaseSchema: z.ZodObject<{
     retry: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         role: z.ZodLiteral<"developer">;
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -86260,6 +86546,11 @@ declare const VectorCompletionCreateParamsStreamingSchema: z.ZodObject<{
     retry: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         role: z.ZodLiteral<"developer">;
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -87231,6 +87522,11 @@ declare const VectorCompletionCreateParamsNonStreamingSchema: z.ZodObject<{
     retry: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         role: z.ZodLiteral<"developer">;
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
@@ -88202,6 +88498,11 @@ declare const VectorCompletionCreateParamsSchema: z.ZodObject<{
     retry: z.ZodNullable<z.ZodOptional<z.ZodString>>;
     from_cache: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
     from_rng: z.ZodNullable<z.ZodOptional<z.ZodBoolean>>;
+    upstreams: z.ZodNullable<z.ZodOptional<z.ZodArray<z.ZodEnum<{
+        unknown: "unknown";
+        open_router: "open_router";
+        claude_agent_sdk: "claude_agent_sdk";
+    }>>>>;
     messages: z.ZodArray<z.ZodDiscriminatedUnion<[z.ZodObject<{
         role: z.ZodLiteral<"developer">;
         content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodObject<{
