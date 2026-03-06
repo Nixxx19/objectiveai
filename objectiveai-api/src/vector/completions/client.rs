@@ -877,129 +877,193 @@ where
             other_chunk_timeout: None,
         });
 
-        // Call the agent completions client, capturing the continuation for potential retry
+        // Call the agent completions client, yielding each chunk immediately
         let completion_index = indexer.get(flat_ensemble_index);
         let transform_messages = Arc::new(transform_messages);
-        let first_result = async {
-            let mut stream = self.agent_client.clone().create_streaming_handle_usage(
-                ctx.clone(),
-                agent_params.clone(),
-                None,
-                None,
-                Some(transform_messages.clone()),
-            ).await?;
-            let mut aggregate: Option<
-                objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
-            > = None;
-            let mut continuation = None;
+
+        // Helper to wrap an agent chunk into a VectorCompletionChunk
+        let wrap_agent_chunk = {
+            let id = id.clone();
+            let ensemble = ensemble.clone();
+            move |inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk| {
+                objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
+                    id: id.clone(),
+                    completions: vec![
+                        objectiveai::vector::completions::response::streaming::AgentCompletionChunk {
+                            index: completion_index,
+                            inner,
+                        },
+                    ],
+                    votes: Vec::new(),
+                    scores: Vec::new(),
+                    weights: Vec::new(),
+                    created,
+                    ensemble: ensemble.clone(),
+                    object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
+                    usage: None,
+                }
+            }
+        };
+
+        async_stream::stream! {
+            // Stream the first call, yielding each chunk immediately while also aggregating
+            let first_result = async {
+                let mut stream = self.agent_client.clone().create_streaming_handle_usage(
+                    ctx.clone(),
+                    agent_params.clone(),
+                    None,
+                    None,
+                    Some(transform_messages.clone()),
+                ).await?;
+                let mut aggregate: Option<
+                    objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+                > = None;
+                let mut continuation = None;
+                Ok::<_, agent::completions::Error>((stream, aggregate, continuation))
+            }.await;
+
+            let (mut stream, mut aggregate, mut continuation) = match first_result {
+                Ok((stream, aggregate, continuation)) => (stream, aggregate, continuation),
+                Err(e) => {
+                    yield Self::llm_create_streaming_vector_error(
+                        id.clone(), completion_index, e, created, ensemble.clone(),
+                    );
+                    return;
+                }
+            };
+
             while let Some(item) = stream.next().await {
                 match item {
-                    agent::completions::StreamItem::Chunk(chunk) => match &mut aggregate {
-                        Some(agg) => agg.push(&chunk),
-                        None => aggregate = Some(chunk),
-                    },
+                    agent::completions::StreamItem::Chunk(chunk) => {
+                        // Yield immediately
+                        yield wrap_agent_chunk(chunk.clone());
+                        // Also aggregate for vote extraction
+                        match &mut aggregate {
+                            Some(agg) => agg.push(&chunk),
+                            None => aggregate = Some(chunk),
+                        }
+                    }
                     agent::completions::StreamItem::State(cont) => {
                         continuation = Some(cont);
                     }
                 }
             }
-            let response: objectiveai::agent::completions::response::unary::AgentCompletion =
-                aggregate.unwrap().into();
-            Ok::<_, agent::completions::Error>((response, continuation))
-        }.await;
-        match first_result {
-            Ok((response, continuation)) => {
-                // Extract text and logprobs from the last assistant message
-                let (text, logprobs, tool_call_text) = extract_assistant_content(&response);
+            drop(stream);
 
-                // Determine which text to use for vote extraction based on output mode
-                let vote_text = match output_mode {
-                    objectiveai::agent::OutputMode::ToolCall => {
-                        // For tool_call mode: prefer tool call arguments if the tool name matches
-                        tool_call_text.as_deref().unwrap_or(text.as_deref().unwrap_or(""))
-                    }
-                    _ => {
-                        text.as_deref().unwrap_or("")
-                    }
+            // Convert aggregate to unary for vote extraction
+            let response: objectiveai::agent::completions::response::unary::AgentCompletion =
+                match aggregate {
+                    Some(agg) => agg.into(),
+                    None => return,
                 };
 
-                // Get the model that was actually used
-                let model = extract_model(&response);
+            // Extract text and logprobs from the last assistant message
+            let (text, logprobs, tool_call_text) = extract_assistant_content(&response);
 
-                // Look up pfx data for the model
-                let pfx_data = vector_pfx_data.get(&model)
-                    .or_else(|| vector_pfx_data.get(&primary_id));
+            // Determine which text to use for vote extraction based on output mode
+            let vote_text = match output_mode {
+                objectiveai::agent::OutputMode::ToolCall => {
+                    tool_call_text.as_deref().unwrap_or(text.as_deref().unwrap_or(""))
+                }
+                _ => {
+                    text.as_deref().unwrap_or("")
+                }
+            };
 
-                let mut votes = Vec::new();
+            // Get the model that was actually used
+            let model = extract_model(&response);
+            drop(response);
 
-                if let Some(pfx_data) = pfx_data {
-                    let (match_count, vote) = super::get_vote(
-                        pfx_data.pfx_tree.clone(),
-                        &pfx_data.responses_key_pattern,
-                        request_responses_len,
-                        vote_text,
-                        logprobs.as_ref(),
-                    );
+            // Look up pfx data for the model
+            let pfx_data = vector_pfx_data.get(&model)
+                .or_else(|| vector_pfx_data.get(&primary_id));
 
-                    match output_mode {
-                        objectiveai::agent::OutputMode::Instruction => {
-                            if match_count == 1 {
-                                // Single match - use vote directly
-                                let vote = if invert_vote {
-                                    invert_and_l1_normalize(vote)
-                                } else {
-                                    vote
-                                };
-                                votes.push(objectiveai::vector::completions::response::Vote {
-                                    model: model.clone(),
-                                    ensemble_index: ensemble_index as u64,
-                                    flat_ensemble_index: flat_ensemble_index as u64,
-                                    prompt_id: prompt_id.clone(),
-                                    tools_id: None,
-                                    responses_ids: responses_ids.clone(),
-                                    vote,
-                                    weight,
-                                    retry: None,
-                                    from_cache: None,
-                                    from_rng: None,
-                                    completion_index: Some(completion_index),
-                                });
-                            } else if let Some(mut cont) = continuation {
-                                // Retry: append correction user message to continuation
-                                let model_pfx_indices = vector_pfx_indices.get(&model)
-                                    .or_else(|| vector_pfx_indices.get(&primary_id))
-                                    .unwrap();
-                                let instruction_suffix = {
-                                    let mut text = String::from("Output one response key including backticks:\n- ");
-                                    text.push_str(
-                                        &model_pfx_indices.iter()
-                                            .map(|(key, _)| key.clone())
-                                            .collect::<Vec<_>>()
-                                            .join("\n- "),
-                                    );
-                                    text
-                                };
-                                let retry_message = format!(
-                                    "Your response included {} response keys.\n\n{}",
-                                    match_count,
-                                    &instruction_suffix,
+            let mut votes = Vec::new();
+
+            if let Some(pfx_data) = pfx_data {
+                let (match_count, vote) = super::get_vote(
+                    pfx_data.pfx_tree.clone(),
+                    &pfx_data.responses_key_pattern,
+                    request_responses_len,
+                    vote_text,
+                    logprobs.as_ref(),
+                );
+
+                match output_mode {
+                    objectiveai::agent::OutputMode::Instruction => {
+                        if match_count == 1 {
+                            let vote = if invert_vote {
+                                invert_and_l1_normalize(vote)
+                            } else {
+                                vote
+                            };
+                            votes.push(objectiveai::vector::completions::response::Vote {
+                                model: model.clone(),
+                                ensemble_index: ensemble_index as u64,
+                                flat_ensemble_index: flat_ensemble_index as u64,
+                                prompt_id: prompt_id.clone(),
+                                tools_id: None,
+                                responses_ids: responses_ids.clone(),
+                                vote,
+                                weight,
+                                retry: None,
+                                from_cache: None,
+                                from_rng: None,
+                                completion_index: Some(completion_index),
+                            });
+                        } else if let Some(mut cont) = continuation.take() {
+                            // Retry via continuation — stream chunks immediately
+                            let model_pfx_indices = vector_pfx_indices.get(&model)
+                                .or_else(|| vector_pfx_indices.get(&primary_id))
+                                .unwrap();
+                            let instruction_suffix = {
+                                let mut text = String::from("Output one response key including backticks:\n- ");
+                                text.push_str(
+                                    &model_pfx_indices.iter()
+                                        .map(|(key, _)| key.clone())
+                                        .collect::<Vec<_>>()
+                                        .join("\n- "),
                                 );
+                                text
+                            };
+                            let retry_message = format!(
+                                "Your response included {} response keys.\n\n{}",
+                                match_count,
+                                &instruction_suffix,
+                            );
 
-                                cont.push_user_message(
-                                    UserMessage {
-                                        content: RichContent::Text(retry_message),
-                                        name: None,
-                                    },
-                                );
+                            cont.push_user_message(
+                                UserMessage {
+                                    content: RichContent::Text(retry_message),
+                                    name: None,
+                                },
+                            );
 
-                                match self.agent_client.clone().create_unary_handle_usage(
-                                    ctx.clone(),
-                                    agent_params.clone(),
-                                    Some(cont),
-                                    None,
-                                    Some(transform_messages.clone()),
-                                ).await {
-                                    Ok(retry_response) => {
+                            match self.agent_client.clone().create_streaming_handle_usage(
+                                ctx.clone(),
+                                agent_params.clone(),
+                                Some(cont),
+                                None,
+                                Some(transform_messages.clone()),
+                            ).await {
+                                Ok(mut retry_stream) => {
+                                    let mut retry_agg: Option<
+                                        objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+                                    > = None;
+                                    while let Some(item) = retry_stream.next().await {
+                                        match item {
+                                            agent::completions::StreamItem::Chunk(chunk) => {
+                                                yield wrap_agent_chunk(chunk.clone());
+                                                match &mut retry_agg {
+                                                    Some(agg) => agg.push(&chunk),
+                                                    None => retry_agg = Some(chunk),
+                                                }
+                                            }
+                                            agent::completions::StreamItem::State(_) => {}
+                                        }
+                                    }
+                                    if let Some(retry_agg) = retry_agg {
+                                        let retry_response: objectiveai::agent::completions::response::unary::AgentCompletion = retry_agg.into();
                                         let (retry_text, retry_logprobs, _) = extract_assistant_content(&retry_response);
                                         let retry_vote_text = retry_text.as_deref().unwrap_or("");
                                         let (retry_count, retry_vote) = super::get_vote(
@@ -1030,91 +1094,107 @@ where
                                                 completion_index: Some(completion_index),
                                             });
                                         }
-                                        // count == 0 → no vote for this LLM (skip)
                                     }
-                                    Err(_) => {
-                                        // Retry failed, use original vote if we had multi-match
-                                        if match_count > 1 {
-                                            let vote = if invert_vote {
-                                                invert_and_l1_normalize(vote)
-                                            } else {
-                                                vote
-                                            };
-                                            votes.push(objectiveai::vector::completions::response::Vote {
-                                                model: model.clone(),
-                                                ensemble_index: ensemble_index as u64,
-                                                flat_ensemble_index: flat_ensemble_index as u64,
-                                                prompt_id: prompt_id.clone(),
-                                                tools_id: None,
-                                                responses_ids: responses_ids.clone(),
-                                                vote,
-                                                weight,
-                                                retry: None,
-                                                from_cache: None,
-                                                from_rng: None,
-                                                completion_index: Some(completion_index),
-                                            });
-                                        }
+                                }
+                                Err(_) => {
+                                    // Retry failed, use original vote if we had multi-match
+                                    if match_count > 1 {
+                                        let vote = if invert_vote {
+                                            invert_and_l1_normalize(vote)
+                                        } else {
+                                            vote
+                                        };
+                                        votes.push(objectiveai::vector::completions::response::Vote {
+                                            model: model.clone(),
+                                            ensemble_index: ensemble_index as u64,
+                                            flat_ensemble_index: flat_ensemble_index as u64,
+                                            prompt_id: prompt_id.clone(),
+                                            tools_id: None,
+                                            responses_ids: responses_ids.clone(),
+                                            vote,
+                                            weight,
+                                            retry: None,
+                                            from_cache: None,
+                                            from_rng: None,
+                                            completion_index: Some(completion_index),
+                                        });
                                     }
                                 }
                             }
                         }
-                        objectiveai::agent::OutputMode::ToolCall => {
-                            if tool_call_text.is_some() && match_count > 0 {
-                                // Got a tool call with valid response key
-                                let vote = if invert_vote {
-                                    invert_and_l1_normalize(vote)
-                                } else {
-                                    vote
-                                };
-                                votes.push(objectiveai::vector::completions::response::Vote {
-                                    model: model.clone(),
-                                    ensemble_index: ensemble_index as u64,
-                                    flat_ensemble_index: flat_ensemble_index as u64,
-                                    prompt_id: prompt_id.clone(),
-                                    tools_id: None,
-                                    responses_ids: responses_ids.clone(),
-                                    vote,
-                                    weight,
-                                    retry: None,
-                                    from_cache: None,
-                                    from_rng: None,
-                                    completion_index: Some(completion_index),
-                                });
-                            } else if let Some(mut cont) = continuation {
-                                // No tool call or no match - retry with required: true via continuation
-                                let mut retry_rf = indexmap::IndexMap::new();
-                                for (agent_id, pfx_indices) in &vector_pfx_indices {
-                                    let keys: Vec<String> = pfx_indices.iter().map(|(k, _)| k.clone()).collect();
-                                    let think = synthetic_reasoning;
-                                    retry_rf.insert(
-                                        agent_id.clone(),
-                                        super::ResponseKey::tool_required(keys, think),
-                                    );
-                                }
-
-                                cont.push_user_message(
-                                    UserMessage {
-                                        content: RichContent::Text(
-                                            "Use the response_key tool to select a response.".to_string(),
-                                        ),
-                                        name: None,
-                                    },
+                    }
+                    objectiveai::agent::OutputMode::ToolCall => {
+                        if tool_call_text.is_some() && match_count > 0 {
+                            let vote = if invert_vote {
+                                invert_and_l1_normalize(vote)
+                            } else {
+                                vote
+                            };
+                            votes.push(objectiveai::vector::completions::response::Vote {
+                                model: model.clone(),
+                                ensemble_index: ensemble_index as u64,
+                                flat_ensemble_index: flat_ensemble_index as u64,
+                                prompt_id: prompt_id.clone(),
+                                tools_id: None,
+                                responses_ids: responses_ids.clone(),
+                                vote,
+                                weight,
+                                retry: None,
+                                from_cache: None,
+                                from_rng: None,
+                                completion_index: Some(completion_index),
+                            });
+                        } else if let Some(mut cont) = continuation.take() {
+                            // Retry with required: true — stream chunks immediately
+                            let mut retry_rf = indexmap::IndexMap::new();
+                            for (agent_id, pfx_indices) in &vector_pfx_indices {
+                                let keys: Vec<String> = pfx_indices.iter().map(|(k, _)| k.clone()).collect();
+                                let think = synthetic_reasoning;
+                                retry_rf.insert(
+                                    agent_id.clone(),
+                                    super::ResponseKey::tool_required(keys, think),
                                 );
+                            }
 
-                                let retry_params = Arc::new(objectiveai::agent::completions::request::AgentCompletionCreateParams {
-                                    response_format: Some(objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(retry_rf)),
-                                    ..(*agent_params).clone()
-                                });
+                            cont.push_user_message(
+                                UserMessage {
+                                    content: RichContent::Text(
+                                        "Use the response_key tool to select a response.".to_string(),
+                                    ),
+                                    name: None,
+                                },
+                            );
 
-                                match self.agent_client.clone().create_unary_handle_usage(
-                                    ctx.clone(),
-                                    retry_params,
-                                    Some(cont),
-                                    None,
-                                    Some(transform_messages.clone()),
-                                ).await {
-                                    Ok(retry_response) => {
+                            let retry_params = Arc::new(objectiveai::agent::completions::request::AgentCompletionCreateParams {
+                                response_format: Some(objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(retry_rf)),
+                                ..(*agent_params).clone()
+                            });
+
+                            match self.agent_client.clone().create_streaming_handle_usage(
+                                ctx.clone(),
+                                retry_params,
+                                Some(cont),
+                                None,
+                                Some(transform_messages.clone()),
+                            ).await {
+                                Ok(mut retry_stream) => {
+                                    let mut retry_agg: Option<
+                                        objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+                                    > = None;
+                                    while let Some(item) = retry_stream.next().await {
+                                        match item {
+                                            agent::completions::StreamItem::Chunk(chunk) => {
+                                                yield wrap_agent_chunk(chunk.clone());
+                                                match &mut retry_agg {
+                                                    Some(agg) => agg.push(&chunk),
+                                                    None => retry_agg = Some(chunk),
+                                                }
+                                            }
+                                            agent::completions::StreamItem::State(_) => {}
+                                        }
+                                    }
+                                    if let Some(retry_agg) = retry_agg {
+                                        let retry_response: objectiveai::agent::completions::response::unary::AgentCompletion = retry_agg.into();
                                         let (_, retry_logprobs, retry_tc_text) = extract_assistant_content(&retry_response);
                                         if let Some(tc_text) = retry_tc_text {
                                             let retry_model = extract_model(&retry_response);
@@ -1152,48 +1232,44 @@ where
                                             }
                                         }
                                     }
-                                    Err(_) => {
-                                        // No vote for this LLM
-                                    }
+                                }
+                                Err(_) => {
+                                    // No vote for this LLM
                                 }
                             }
                         }
-                        objectiveai::agent::OutputMode::JsonSchema => {
-                            // For JSON schema mode, the response is already structured
-                            if match_count > 0 {
-                                let vote = if invert_vote {
-                                    invert_and_l1_normalize(vote)
-                                } else {
-                                    vote
-                                };
-                                votes.push(objectiveai::vector::completions::response::Vote {
-                                    model: model.clone(),
-                                    ensemble_index: ensemble_index as u64,
-                                    flat_ensemble_index: flat_ensemble_index as u64,
-                                    prompt_id: prompt_id.clone(),
-                                    tools_id: None,
-                                    responses_ids: responses_ids.clone(),
-                                    vote,
-                                    weight,
-                                    retry: None,
-                                    from_cache: None,
-                                    from_rng: None,
-                                    completion_index: Some(completion_index),
-                                });
-                            }
+                    }
+                    objectiveai::agent::OutputMode::JsonSchema => {
+                        if match_count > 0 {
+                            let vote = if invert_vote {
+                                invert_and_l1_normalize(vote)
+                            } else {
+                                vote
+                            };
+                            votes.push(objectiveai::vector::completions::response::Vote {
+                                model: model.clone(),
+                                ensemble_index: ensemble_index as u64,
+                                flat_ensemble_index: flat_ensemble_index as u64,
+                                prompt_id: prompt_id.clone(),
+                                tools_id: None,
+                                responses_ids: responses_ids.clone(),
+                                vote,
+                                weight,
+                                retry: None,
+                                from_cache: None,
+                                from_rng: None,
+                                completion_index: Some(completion_index),
+                            });
                         }
                     }
                 }
+            }
 
-                // Build the vector completion chunk
-                let chunk = objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
+            // Yield a final chunk with just the votes (completions already yielded)
+            if !votes.is_empty() {
+                yield objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
                     id: id.clone(),
-                    completions: vec![
-                        objectiveai::vector::completions::response::streaming::AgentCompletionChunk {
-                            index: completion_index,
-                            inner: agent_completion_to_chunk(response),
-                        },
-                    ],
+                    completions: Vec::new(),
                     votes,
                     scores: Vec::new(),
                     weights: Vec::new(),
@@ -1202,19 +1278,8 @@ where
                     object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
                     usage: None,
                 };
-
-                StreamOnce::new(chunk).boxed()
             }
-            Err(e) => {
-                Self::llm_create_streaming_vector_error(
-                    id,
-                    completion_index,
-                    e,
-                    created,
-                    ensemble,
-                ).boxed()
-            }
-        }
+        }.boxed()
     }
 
     /// Creates an error response chunk for a failed LLM completion.
@@ -1224,32 +1289,26 @@ where
         error: agent::completions::Error,
         created: u64,
         ensemble: String,
-    ) -> impl Stream<Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk>
-    + Send
-    + Unpin
-    + 'static
-    {
-        StreamOnce::new(
-            objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
-                id,
-                completions: vec![
-                    objectiveai::vector::completions::response::streaming::AgentCompletionChunk {
-                        index: completion_index,
-                        inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-                            error: Some(objectiveai::error::ResponseError::from(&error)),
-                            ..Default::default()
-                        },
+    ) -> objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
+        objectiveai::vector::completions::response::streaming::VectorCompletionChunk {
+            id,
+            completions: vec![
+                objectiveai::vector::completions::response::streaming::AgentCompletionChunk {
+                    index: completion_index,
+                    inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                        error: Some(objectiveai::error::ResponseError::from(&error)),
+                        ..Default::default()
                     },
-                ],
-                votes: Vec::new(),
-                scores: Vec::new(),
-                weights: Vec::new(),
-                created,
-                ensemble,
-                object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
-                usage: None,
-            }
-        )
+                },
+            ],
+            votes: Vec::new(),
+            scores: Vec::new(),
+            weights: Vec::new(),
+            created,
+            ensemble,
+            object: objectiveai::vector::completions::response::streaming::Object::VectorCompletionChunk,
+            usage: None,
+        }
     }
 }
 
@@ -1341,17 +1400,6 @@ fn make_rng(seed: Option<u64>) -> impl Rng {
         Some(seed) => rand::rngs::StdRng::seed_from_u64(seed),
         None => rand::rngs::StdRng::from_os_rng(),
     }
-}
-
-/// Converts a unary AgentCompletion back into a streaming AgentCompletionChunk.
-///
-/// Uses JSON round-trip since the types are structurally equivalent but lack
-/// reverse `From` impls.
-fn agent_completion_to_chunk(
-    response: objectiveai::agent::completions::response::unary::AgentCompletion,
-) -> objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
-    let json = serde_json::to_value(&response).unwrap();
-    serde_json::from_value(json).unwrap()
 }
 
 /// Transforms messages for vector voting by appending response options to the
