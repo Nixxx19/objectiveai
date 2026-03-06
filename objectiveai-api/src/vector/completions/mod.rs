@@ -23,3 +23,6 @@ pub use error::*;
 pub use get_vote::*;
 pub use pfx::*;
 pub use response_key::*;
+
+#[cfg(test)]
+mod client_tests;

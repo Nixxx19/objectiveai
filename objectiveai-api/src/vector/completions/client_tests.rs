@@ -1,80 +1,67 @@
-//! Tests for the vector completion client.
-//!
-//! These tests mirror the style of `functions::executions::client_tests` and
-//! set `from_rng: true` on all requests so that no upstream LLM calls are
-//! performed. They assert that the response **shape** is correct, while
-//! allowing the actual numeric values (scores/weights) to be random.
+use std::sync::Arc;
+use std::time::Duration;
 
-use crate::{chat, ctx, ensemble, ensemble_llm, vector};
 use futures::StreamExt;
 use rust_decimal::Decimal;
-use std::sync::Arc;
 
-// ============================================================================
-// Mock Types
-// ============================================================================
+use objectiveai::agent::completions::message::{Message, RichContent, UserMessage};
+use objectiveai::agent::mock::{AgentBase as MockAgentBase, OutputMode as MockOutputMode, Upstream as MockUpstream};
+use objectiveai::vector::completions::response::unary::VectorCompletion;
 
-/// Mock context extension that provides no BYOK keys.
-#[derive(Debug, Clone)]
-struct MockContextExt;
+use crate::agent::completions::UnimplementedUpstreamClient;
+use crate::ctx;
 
-#[async_trait::async_trait]
-impl ctx::ContextExt for MockContextExt {
-    async fn get_byok(
-        &self,
-        _upstream: chat::completions::upstream::Upstream,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
-        Ok(None)
-    }
-}
+// ---------------------------------------------------------------------------
+// Stubs — never actually called since we always provide inline mock agents.
+// ---------------------------------------------------------------------------
 
-/// Mock ensemble LLM fetcher that always returns None.
-#[derive(Debug, Clone)]
-struct MockEnsembleLlmFetcher;
+struct StubAgentFetcher;
 
 #[async_trait::async_trait]
-impl ensemble_llm::fetcher::Fetcher<MockContextExt> for MockEnsembleLlmFetcher {
+impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubAgentFetcher {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
         _id: &str,
     ) -> Result<
-        Option<(objectiveai::ensemble_llm::EnsembleLlm, u64)>,
+        Option<(objectiveai::agent::Agent, u64)>,
         objectiveai::error::ResponseError,
     > {
-        Ok(None)
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub agent fetcher should not be called"),
+        })
     }
 }
 
-/// Mock ensemble fetcher that always returns None.
-#[derive(Debug, Clone)]
-struct MockEnsembleFetcher;
+struct StubEnsembleFetcher;
 
 #[async_trait::async_trait]
-impl ensemble::fetcher::Fetcher<MockContextExt> for MockEnsembleFetcher {
+impl crate::ensemble::fetcher::Fetcher<ctx::DefaultContextExt> for StubEnsembleFetcher {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
         _id: &str,
     ) -> Result<
         Option<(objectiveai::ensemble::Ensemble, u64)>,
         objectiveai::error::ResponseError,
     > {
-        Ok(None)
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub ensemble fetcher should not be called"),
+        })
     }
 }
 
-/// Mock completion votes fetcher that returns None.
-#[derive(Debug, Clone)]
-struct MockCompletionVotesFetcher;
+struct StubCompletionVotesFetcher;
 
 #[async_trait::async_trait]
-impl vector::completions::completion_votes_fetcher::Fetcher<MockContextExt>
-    for MockCompletionVotesFetcher
+impl super::completion_votes_fetcher::Fetcher<ctx::DefaultContextExt>
+    for StubCompletionVotesFetcher
 {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
         _id: &str,
     ) -> Result<
         Option<Vec<objectiveai::vector::completions::response::Vote>>,
@@ -84,22 +71,19 @@ impl vector::completions::completion_votes_fetcher::Fetcher<MockContextExt>
     }
 }
 
-/// Mock cache vote fetcher that returns None.
-#[derive(Debug, Clone)]
-struct MockCacheVoteFetcher;
+struct StubCacheVoteFetcher;
 
 #[async_trait::async_trait]
-impl vector::completions::cache_vote_fetcher::Fetcher<MockContextExt>
-    for MockCacheVoteFetcher
+impl super::cache_vote_fetcher::Fetcher<ctx::DefaultContextExt>
+    for StubCacheVoteFetcher
 {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
-        _model: &objectiveai::chat::completions::request::Model,
-        _models: Option<&[objectiveai::chat::completions::request::Model]>,
-        _messages: &[objectiveai::chat::completions::request::Message],
-        _tools: Option<&[objectiveai::chat::completions::request::Tool]>,
-        _responses: &[objectiveai::chat::completions::request::RichContent],
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _agent: &objectiveai::agent::completions::request::Agent,
+        _agents: Option<&[objectiveai::agent::completions::request::Agent]>,
+        _messages: &[objectiveai::agent::completions::message::Message],
+        _responses: &[objectiveai::agent::completions::message::RichContent],
     ) -> Result<
         Option<objectiveai::vector::completions::response::Vote>,
         objectiveai::error::ResponseError,
@@ -108,288 +92,1050 @@ impl vector::completions::cache_vote_fetcher::Fetcher<MockContextExt>
     }
 }
 
-/// Mock chat completions usage handler that does nothing.
-#[derive(Debug, Clone)]
-struct MockChatUsageHandler;
+struct StubAgentUsageHandler;
 
-#[async_trait::async_trait]
-impl chat::completions::usage_handler::UsageHandler<MockContextExt>
-    for MockChatUsageHandler
+impl crate::agent::completions::usage_handler::UsageHandler<ctx::DefaultContextExt>
+    for StubAgentUsageHandler
 {
-    async fn handle_usage(
+    fn handle_usage(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
-        _request: Option<
-            Arc<objectiveai::chat::completions::request::ChatCompletionCreateParams>,
-        >,
-        _response: objectiveai::chat::completions::response::unary::ChatCompletion,
-    ) {
-        // Do nothing
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _request: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
+        _response: objectiveai::agent::completions::response::unary::AgentCompletion,
+    ) -> impl std::future::Future<Output = ()> + Send + 'static {
+        async {}
     }
 }
 
-/// Mock vector completions usage handler that does nothing.
-#[derive(Debug, Clone)]
-struct MockVectorUsageHandler;
+struct StubVectorUsageHandler;
 
 #[async_trait::async_trait]
-impl vector::completions::usage_handler::UsageHandler<MockContextExt>
-    for MockVectorUsageHandler
+impl super::usage_handler::UsageHandler<ctx::DefaultContextExt>
+    for StubVectorUsageHandler
 {
     async fn handle_usage(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
-        _request: Arc<
-            objectiveai::vector::completions::request::VectorCompletionCreateParams,
-        >,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
         _response: objectiveai::vector::completions::response::unary::VectorCompletion,
     ) {
-        // Do nothing
     }
 }
 
-// ============================================================================
-// Type Aliases
-// ============================================================================
+// ---------------------------------------------------------------------------
+// Snapshot helpers
+// ---------------------------------------------------------------------------
 
-type TestChatClient = chat::completions::Client<
-    MockContextExt,
-    MockEnsembleLlmFetcher,
-    MockChatUsageHandler,
->;
-
-type TestVectorClient = vector::completions::Client<
-    MockContextExt,
-    MockEnsembleLlmFetcher,
-    MockChatUsageHandler,
-    MockEnsembleFetcher,
-    MockCompletionVotesFetcher,
-    MockCacheVoteFetcher,
-    MockVectorUsageHandler,
->;
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/// Creates a test context with mock extension.
-fn create_test_context() -> ctx::Context<MockContextExt> {
-    ctx::Context::new(Arc::new(MockContextExt), Decimal::ONE)
+fn aggregate(
+    chunks: Vec<objectiveai::vector::completions::response::streaming::VectorCompletionChunk>,
+) -> VectorCompletion {
+    let mut agg: Option<
+        objectiveai::vector::completions::response::streaming::VectorCompletionChunk,
+    > = None;
+    for chunk in &chunks {
+        match &mut agg {
+            Some(a) => a.push(chunk),
+            None => agg = Some(chunk.clone()),
+        }
+    }
+    agg.expect("stream should have at least one chunk").into()
 }
 
-/// Creates a test chat completions client with mock dependencies.
-fn create_test_chat_client() -> Arc<TestChatClient> {
-    let ensemble_llm_fetcher = Arc::new(
-        ensemble_llm::fetcher::CachingFetcher::new(Arc::new(
-            MockEnsembleLlmFetcher,
+fn normalize(mut vc: VectorCompletion) -> VectorCompletion {
+    vc.id = String::new();
+    vc.created = 0;
+    for completion in &mut vc.completions {
+        completion.inner.id = String::new();
+        completion.inner.created = 0;
+        for msg in &mut completion.inner.messages {
+            if let objectiveai::agent::completions::response::unary::Message::Assistant(asst) = msg
+            {
+                asst.upstream_id = String::new();
+                asst.created = 0;
+            }
+        }
+    }
+    for vote in &mut vc.votes {
+        vote.prompt_id = String::new();
+        vote.responses_ids = Vec::new();
+    }
+    vc
+}
+
+fn assert_snapshot(json: &str, path: &str, expected: &str) {
+    if std::env::var("UPDATE_SNAPSHOTS").as_deref() == Ok("1") {
+        std::fs::write(path, json).unwrap();
+        eprintln!("Updated snapshot: {path}");
+    } else {
+        assert_eq!(json, expected.trim_end());
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Tests
+// ---------------------------------------------------------------------------
+
+/// Single mock agent, 2 responses, instruction mode, seed 42.
+#[tokio::test]
+async fn test_single_agent_2_responses_instruction_seed_42() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
         )),
-    );
-    let usage_handler = Arc::new(MockChatUsageHandler);
-
-    // Create OpenRouter client with dummy values (won't be used since from_rng=true)
-    let openrouter_client = chat::completions::upstream::openrouter::Client::new(
-        reqwest::Client::new(),
-        "https://openrouter.ai/api/v1".to_string(),
-        "dummy-api-key".to_string(),
-        None, // user_agent
-        None, // project_id
-    );
-
-    let upstream_client = chat::completions::upstream::Client::new(
-        openrouter_client.into(),
-        usage_handler.clone(),
-    );
-
-    Arc::new(chat::completions::Client::new(
-        ensemble_llm_fetcher,
-        upstream_client,
-        usage_handler,
-    ))
-}
-
-/// Creates a test vector completions client with mock dependencies.
-fn create_test_vector_client(
-    chat_client: Arc<TestChatClient>,
-) -> Arc<TestVectorClient> {
-    let ensemble_llm_fetcher = Arc::new(
-        ensemble_llm::fetcher::CachingFetcher::new(Arc::new(
-            MockEnsembleLlmFetcher,
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
         )),
-    );
-    let ensemble_fetcher = Arc::new(ensemble::fetcher::CachingFetcher::new(
-        Arc::new(MockEnsembleFetcher),
-    ));
-    let completion_votes_fetcher = Arc::new(
-        vector::completions::completion_votes_fetcher::CachingFetcher::new(
-            Arc::new(MockCompletionVotesFetcher),
-        ),
-    );
-    let cache_vote_fetcher = Arc::new(
-        vector::completions::cache_vote_fetcher::CachingFetcher::new(
-            Arc::new(MockCacheVoteFetcher),
-        ),
-    );
-    let usage_handler = Arc::new(MockVectorUsageHandler);
-
-    Arc::new(vector::completions::Client::new(
-        chat_client,
-        ensemble_llm_fetcher,
-        completion_votes_fetcher,
-        cache_vote_fetcher,
-        ensemble_fetcher,
-        usage_handler,
-    ))
-}
-
-/// Creates a simple inline ensemble with two LLMs.
-fn create_simple_ensemble(
-) -> objectiveai::vector::completions::request::Ensemble {
-    objectiveai::vector::completions::request::Ensemble::Provided(
-        objectiveai::ensemble::EnsembleBase {
-            llms: vec![
-                objectiveai::ensemble_llm::EnsembleLlmBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::ensemble_llm::EnsembleLlm {
-                        id: "test-llm-1".to_string(),
-                        base: objectiveai::ensemble_llm::EnsembleLlmBase {
-                            model: "openai/gpt-4o".to_string(),
-                            ..Default::default()
-                        },
-                    },
-                    fallbacks: None,
-                },
-                objectiveai::ensemble_llm::EnsembleLlmBaseWithFallbacksAndCount {
-                    count: 1,
-                    inner: objectiveai::ensemble_llm::EnsembleLlm {
-                        id: "test-llm-2".to_string(),
-                        base: objectiveai::ensemble_llm::EnsembleLlmBase {
-                            model: "anthropic/claude-3-5-sonnet".to_string(),
-                            ..Default::default()
-                        },
-                    },
-                    fallbacks: None,
-                },
-            ],
-        },
-    )
-}
-
-/// Creates a basic vector completion request body with `from_rng: true`.
-fn create_base_request(
-) -> objectiveai::vector::completions::request::VectorCompletionCreateParams
-{
-    use objectiveai::chat::completions::request::{
-        message::Message, message::Role, RichContent,
-    };
-
-    objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
         retry: None,
         from_cache: None,
-        from_rng: Some(true),
-        messages: vec![Message {
-            role: Role::User,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Which is better?".to_string()),
             name: None,
-            content: vec![RichContent::Text(
-                "Pick the best option".to_string(),
-            )],
-        }],
+        })],
         provider: None,
-        ensemble: create_simple_ensemble(),
-        // Two LLM configs ⇒ profile has length 2
-        profile: vec![Decimal::new(5, 1), Decimal::new(5, 1)],
-        seed: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
         stream: None,
-        tools: None,
         responses: vec![
-            RichContent::Text("Option A".to_string()),
-            RichContent::Text("Option B".to_string()),
-            RichContent::Text("Option C".to_string()),
+            RichContent::Text("Response A".to_string()),
+            RichContent::Text("Response B".to_string()),
         ],
+        mcp_server_authorization: None,
         backoff_max_elapsed_time: None,
         first_chunk_timeout: None,
         other_chunk_timeout: None,
-    }
-}
+    });
 
-// ============================================================================
-// Tests
-// ============================================================================
-
-#[tokio::test]
-async fn test_vector_completion_unary_from_rng_shape() {
-    let chat_client = create_test_chat_client();
-    let vector_client = create_test_vector_client(chat_client);
-    let ctx = create_test_context();
-
-    let request =
-        Arc::new(create_base_request().clone()); // unary path will clone again
-
-    let result = vector_client
-        .clone()
-        .create_unary_handle_usage(ctx, request)
-        .await;
-
-    let response = result.expect("vector completion unary request should succeed");
-
-    // We expect exactly as many scores as there are responses
-    assert_eq!(
-        response.scores.len(),
-        3,
-        "scores length should match responses length"
-    );
-    assert_eq!(
-        response.weights.len(),
-        3,
-        "weights length should match responses length"
-    );
-    assert!(
-        !response.votes.is_empty(),
-        "from_rng=true should produce at least one vote"
-    );
-}
-
-#[tokio::test]
-async fn test_vector_completion_streaming_from_rng_shape() {
-    let chat_client = create_test_chat_client();
-    let vector_client = create_test_vector_client(chat_client);
-    let ctx = create_test_context();
-
-    let mut request = create_base_request();
-    request.stream = Some(true);
-    let request = Arc::new(request);
-
-    let mut stream = vector_client
-        .clone()
-        .create_streaming_handle_usage(ctx, request)
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
         .await
-        .expect("streaming vector completion request should succeed");
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
 
-    let mut last_chunk: Option<
-        objectiveai::vector::completions::response::streaming::VectorCompletionChunk,
-    > = None;
-
-    while let Some(chunk) = stream.next().await {
-        // intermediate chunks may not yet have votes/scores/weights populated
-        assert_eq!(chunk.scores.len(), chunk.weights.len());
-        last_chunk = Some(chunk);
-    }
-
-    let last_chunk =
-        last_chunk.expect("streaming response should include at least one chunk");
-
-    assert_eq!(
-        last_chunk.scores.len(),
-        3,
-        "final scores length should match responses length"
-    );
-    assert_eq!(
-        last_chunk.weights.len(),
-        3,
-        "final weights length should match responses length"
-    );
-    assert!(
-        !last_chunk.votes.is_empty(),
-        "from_rng=true should produce at least one vote in the final chunk"
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/single_agent_2_responses_instruction_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/single_agent_2_responses_instruction_seed_42.json"),
     );
 }
 
+/// Single mock agent, 3 responses, instruction mode, seed 42.
+#[tokio::test]
+async fn test_single_agent_3_responses_instruction_seed_42() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Which is best?".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Alpha".to_string()),
+            RichContent::Text("Beta".to_string()),
+            RichContent::Text("Gamma".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/single_agent_3_responses_instruction_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/single_agent_3_responses_instruction_seed_42.json"),
+    );
+}
+
+/// Two mock agents with equal weights, seed 42.
+#[tokio::test]
+async fn test_two_agents_equal_weights_seed_42() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Pick one".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 2,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Option 1".to_string()),
+            RichContent::Text("Option 2".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/two_agents_equal_weights_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/two_agents_equal_weights_seed_42.json"),
+    );
+}
+
+/// Two different mock agent definitions with unequal weights (0.8 / 0.2), seed 42.
+#[tokio::test]
+async fn test_two_agents_unequal_weights_seed_42() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Pick one".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                    objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    },
+                ],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::new(8, 1),
+            Decimal::new(2, 1),
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Option 1".to_string()),
+            RichContent::Text("Option 2".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/two_agents_unequal_weights_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/two_agents_unequal_weights_seed_42.json"),
+    );
+}
+
+/// Three agents (via count=3), 4 responses, seed 99.
+#[tokio::test]
+async fn test_three_agents_4_responses_seed_99() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(99),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Rank these".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 3,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(99),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Red".to_string()),
+            RichContent::Text("Green".to_string()),
+            RichContent::Text("Blue".to_string()),
+            RichContent::Text("Yellow".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/three_agents_4_responses_seed_99.json"),
+        include_str!("../../../assets/vector/completions/client_tests/three_agents_4_responses_seed_99.json"),
+    );
+}
+
+/// Invert vote with single agent, seed 42.
+#[tokio::test]
+async fn test_invert_vote_seed_42() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Which is worse?".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Entries(vec![
+            objectiveai::vector::completions::request::ProfileEntry {
+                weight: Decimal::ONE,
+                invert: Some(true),
+            },
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses: vec![
+            RichContent::Text("Bad option".to_string()),
+            RichContent::Text("Worse option".to_string()),
+        ],
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/invert_vote_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/invert_vote_seed_42.json"),
+    );
+}
+
+/// Same seed produces same result (deterministic).
+#[tokio::test]
+async fn test_deterministic_same_seed() {
+    let make_client = || {
+        let agent_client = Arc::new(crate::agent::completions::Client {
+            mcp_client: Arc::new(crate::mcp::Client::new(
+                reqwest::Client::new(),
+                None,
+                None,
+                None,
+                Duration::ZERO,
+                Duration::ZERO,
+                Duration::ZERO,
+                0.0,
+                1.0,
+                Duration::ZERO,
+                Duration::ZERO,
+                Duration::from_millis(1),
+            )),
+            agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+                Arc::new(StubAgentFetcher),
+            )),
+            usage_handler: Arc::new(StubAgentUsageHandler),
+            openrouter: Arc::new(UnimplementedUpstreamClient),
+            claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+            mock: Arc::new(crate::agent::completions::mock::client::Client {
+                delay: Duration::ZERO,
+                seed: Some(42),
+                max_tool_calls: Some(0),
+                tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+            }),
+            backoff_current_interval: Duration::ZERO,
+            backoff_initial_interval: Duration::ZERO,
+            backoff_randomization_factor: 0.0,
+            backoff_multiplier: 1.0,
+            backoff_max_interval: Duration::ZERO,
+            backoff_max_elapsed_time: Duration::ZERO,
+            first_chunk_timeout: Duration::from_millis(1),
+            other_chunk_timeout: Duration::from_millis(1),
+        });
+        Arc::new(super::Client {
+            agent_client,
+            ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+                Arc::new(StubEnsembleFetcher),
+            )),
+            completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+            cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+            usage_handler: Arc::new(StubVectorUsageHandler),
+        })
+    };
+    let make_request = || {
+        Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+            retry: None,
+            from_cache: None,
+            from_rng: None,
+            messages: vec![Message::User(UserMessage {
+                content: RichContent::Text("Pick one".to_string()),
+                name: None,
+            })],
+            provider: None,
+            ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+                objectiveai::ensemble::EnsembleBase {
+                    agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 2,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    }],
+                },
+            ),
+            profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+                Decimal::ONE,
+            ]),
+            seed: Some(42),
+            stream: None,
+            responses: vec![
+                RichContent::Text("A".to_string()),
+                RichContent::Text("B".to_string()),
+                RichContent::Text("C".to_string()),
+            ],
+            mcp_server_authorization: None,
+            backoff_max_elapsed_time: None,
+            first_chunk_timeout: None,
+            other_chunk_timeout: None,
+        })
+    };
+
+    let run = |client: Arc<super::Client<_, _, _, _, _, _, _, _, _, _>>, request| async move {
+        let stream = client
+            .create_streaming(
+                ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+                request,
+            )
+            .await
+            .expect("should succeed");
+        let chunks: Vec<_> = Box::pin(stream).collect().await;
+        normalize(aggregate(chunks))
+    };
+
+    let result1 = run(make_client(), make_request()).await;
+    let result2 = run(make_client(), make_request()).await;
+
+    let json1 = serde_json::to_string_pretty(&result1).unwrap();
+    let json2 = serde_json::to_string_pretty(&result2).unwrap();
+    assert_eq!(json1, json2, "same seed should produce identical results");
+}
+
+/// Different seeds produce different results.
+#[tokio::test]
+async fn test_different_seeds_differ() {
+    let make_client = |seed: u64| {
+        let agent_client = Arc::new(crate::agent::completions::Client {
+            mcp_client: Arc::new(crate::mcp::Client::new(
+                reqwest::Client::new(),
+                None,
+                None,
+                None,
+                Duration::ZERO,
+                Duration::ZERO,
+                Duration::ZERO,
+                0.0,
+                1.0,
+                Duration::ZERO,
+                Duration::ZERO,
+                Duration::from_millis(1),
+            )),
+            agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+                Arc::new(StubAgentFetcher),
+            )),
+            usage_handler: Arc::new(StubAgentUsageHandler),
+            openrouter: Arc::new(UnimplementedUpstreamClient),
+            claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+            mock: Arc::new(crate::agent::completions::mock::client::Client {
+                delay: Duration::ZERO,
+                seed: Some(seed),
+                max_tool_calls: Some(0),
+                tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+            }),
+            backoff_current_interval: Duration::ZERO,
+            backoff_initial_interval: Duration::ZERO,
+            backoff_randomization_factor: 0.0,
+            backoff_multiplier: 1.0,
+            backoff_max_interval: Duration::ZERO,
+            backoff_max_elapsed_time: Duration::ZERO,
+            first_chunk_timeout: Duration::from_millis(1),
+            other_chunk_timeout: Duration::from_millis(1),
+        });
+        Arc::new(super::Client {
+            agent_client,
+            ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+                Arc::new(StubEnsembleFetcher),
+            )),
+            completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+            cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+            usage_handler: Arc::new(StubVectorUsageHandler),
+        })
+    };
+    let make_request = |seed: i64| {
+        Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+            retry: None,
+            from_cache: None,
+            from_rng: None,
+            messages: vec![Message::User(UserMessage {
+                content: RichContent::Text("Pick one".to_string()),
+                name: None,
+            })],
+            provider: None,
+            ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+                objectiveai::ensemble::EnsembleBase {
+                    agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                        count: 1,
+                        inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                        fallbacks: None,
+                    }],
+                },
+            ),
+            profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+                Decimal::ONE,
+            ]),
+            seed: Some(seed),
+            stream: None,
+            responses: vec![
+                RichContent::Text("A".to_string()),
+                RichContent::Text("B".to_string()),
+            ],
+            mcp_server_authorization: None,
+            backoff_max_elapsed_time: None,
+            first_chunk_timeout: None,
+            other_chunk_timeout: None,
+        })
+    };
+
+    let run = |client: Arc<super::Client<_, _, _, _, _, _, _, _, _, _>>, request| async move {
+        let stream = client
+            .create_streaming(
+                ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+                request,
+            )
+            .await
+            .expect("should succeed");
+        let chunks: Vec<_> = Box::pin(stream).collect().await;
+        normalize(aggregate(chunks))
+    };
+
+    let result1 = run(make_client(42), make_request(42)).await;
+    let result2 = run(make_client(99), make_request(99)).await;
+
+    let json1 = serde_json::to_string_pretty(&result1).unwrap();
+    let json2 = serde_json::to_string_pretty(&result2).unwrap();
+    assert_ne!(json1, json2, "different seeds should produce different results");
+}
+
+/// Many responses (25) to test deep prefix tree, seed 42.
+#[tokio::test]
+async fn test_many_responses_deep_prefix_tree_seed_42() {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
+            reqwest::Client::new(),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::client::Client {
+            delay: Duration::ZERO,
+            seed: Some(42),
+            max_tool_calls: Some(0),
+            tool_call_count: Arc::new(std::sync::atomic::AtomicU32::new(0)),
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let client = Arc::new(super::Client {
+        agent_client,
+        ensemble_fetcher: Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+            Arc::new(StubEnsembleFetcher),
+        )),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let responses: Vec<RichContent> = (0..25)
+        .map(|i| RichContent::Text(format!("Response {}", i)))
+        .collect();
+    let request = Arc::new(objectiveai::vector::completions::request::VectorCompletionCreateParams {
+        retry: None,
+        from_cache: None,
+        from_rng: None,
+        messages: vec![Message::User(UserMessage {
+            content: RichContent::Text("Pick the best".to_string()),
+            name: None,
+        })],
+        provider: None,
+        ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
+            objectiveai::ensemble::EnsembleBase {
+                agents: vec![objectiveai::agent::AgentBaseWithFallbacksAndCount {
+                    count: 1,
+                    inner: objectiveai::agent::AgentBase::Mock(MockAgentBase {
+                            upstream: MockUpstream::Mock,
+                            output_mode: MockOutputMode::Instruction,
+                            error: None,
+                        }),
+                    fallbacks: None,
+                }],
+            },
+        ),
+        profile: objectiveai::vector::completions::request::Profile::Weights(vec![
+            Decimal::ONE,
+        ]),
+        seed: Some(42),
+        stream: None,
+        responses,
+        mcp_server_authorization: None,
+        backoff_max_elapsed_time: None,
+        first_chunk_timeout: None,
+        other_chunk_timeout: None,
+    });
+
+    let stream = client
+        .create_streaming(
+            ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE),
+            request,
+        )
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    let result = normalize(aggregate(chunks));
+
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/vector/completions/client_tests/many_responses_deep_prefix_tree_seed_42.json"),
+        include_str!("../../../assets/vector/completions/client_tests/many_responses_deep_prefix_tree_seed_42.json"),
+    );
+}
