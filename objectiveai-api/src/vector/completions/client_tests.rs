@@ -2915,3 +2915,20 @@ async fn test_error_invalid_profile_all_zero_weights() {
         "unexpected error: {msg}"
     );
 }
+
+#[test]
+fn invert_and_l1_normalize_example() {
+    use rust_decimal::dec;
+    let v = vec![dec!(0.75), dec!(0.25), dec!(0.0)];
+    let out = super::invert_and_l1_normalize(v);
+    assert_eq!(out, vec![dec!(0.125), dec!(0.375), dec!(0.5)]);
+}
+
+#[test]
+fn invert_and_l1_normalize_uniform_when_all_ones() {
+    use rust_decimal::dec;
+    let v = vec![dec!(1.0), dec!(1.0), dec!(1.0), dec!(1.0)];
+    // invert -> all zeros -> uniform
+    let out = super::invert_and_l1_normalize(v);
+    assert_eq!(out, vec![dec!(0.25), dec!(0.25), dec!(0.25), dec!(0.25)]);
+}

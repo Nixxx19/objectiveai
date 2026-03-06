@@ -70,6 +70,9 @@ pub mod response;
 
 pub use ensemble::*;
 
+#[cfg(test)]
+mod ensemble_tests;
+
 #[cfg(feature = "http")]
 mod http;
 

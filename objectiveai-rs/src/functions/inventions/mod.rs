@@ -11,3 +11,6 @@ pub use schema::*;
 pub use schema_tool::*;
 pub use state::*;
 pub use tool::*;
+
+#[cfg(test)]
+mod path_tests;

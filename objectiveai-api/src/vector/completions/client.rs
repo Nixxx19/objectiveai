@@ -15,7 +15,7 @@ pub fn response_id(created: u64) -> String {
     format!("vctcpl-{}-{}", uuid.simple(), created)
 }
 
-fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
+pub(super) fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
     if xs.is_empty() {
         return xs;
     }
@@ -35,28 +35,6 @@ fn invert_and_l1_normalize(mut xs: Vec<Decimal>) -> Vec<Decimal> {
     }
     xs
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use rust_decimal::dec;
-
-    #[test]
-    fn invert_and_l1_normalize_example() {
-        let v = vec![dec!(0.75), dec!(0.25), dec!(0.0)];
-        let out = invert_and_l1_normalize(v);
-        assert_eq!(out, vec![dec!(0.125), dec!(0.375), dec!(0.5)]);
-    }
-
-    #[test]
-    fn invert_and_l1_normalize_uniform_when_all_ones() {
-        let v = vec![dec!(1.0), dec!(1.0), dec!(1.0), dec!(1.0)];
-        // invert -> all zeros -> uniform
-        let out = invert_and_l1_normalize(v);
-        assert_eq!(out, vec![dec!(0.25), dec!(0.25), dec!(0.25), dec!(0.25)]);
-    }
-}
-
 /// Client for creating vector completions.
 ///
 /// Orchestrates multiple LLM agent completions to vote on response options,

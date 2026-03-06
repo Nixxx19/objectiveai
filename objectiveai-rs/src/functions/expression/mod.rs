@@ -39,3 +39,10 @@ pub use runtime::*;
 pub use special::{FromSpecial, Special};
 pub(crate) use special::impl_from_special_unsupported;
 pub use starlark::{FromStarlarkValue, ToStarlarkValue};
+
+#[cfg(test)]
+mod expression_tests;
+#[cfg(test)]
+mod special_tests;
+#[cfg(test)]
+mod starlark_tests;
