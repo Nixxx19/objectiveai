@@ -119,7 +119,8 @@ impl<'a> AgentBaseRef<'a> {
     pub fn top_logprobs(&self) -> Option<u64> {
         match self {
             AgentBaseRef::Openrouter(b) => b.top_logprobs,
-            AgentBaseRef::ClaudeAgentSdk(_) | AgentBaseRef::Mock(_) => None,
+            AgentBaseRef::ClaudeAgentSdk(_) => None,
+            AgentBaseRef::Mock(b) => b.top_logprobs,
         }
     }
 

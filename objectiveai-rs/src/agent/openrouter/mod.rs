@@ -13,3 +13,6 @@ pub use reasoning::*;
 pub use stop::*;
 pub use upstream::*;
 pub use verbosity::*;
+
+#[cfg(test)]
+mod merged_messages_tests;

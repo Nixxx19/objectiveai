@@ -12,6 +12,12 @@ pub struct AgentBase {
     /// The output mode for vector completions. Ignored for agent completions.
     pub output_mode: super::OutputMode,
 
+    /// Number of top log probabilities to return (2-20).
+    ///
+    /// **Vector completions only.** Ignored for agent completions.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub top_logprobs: Option<u64>,
+
     /// If true, the mock client will return an error instead of a response.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<bool>,
@@ -20,6 +26,10 @@ pub struct AgentBase {
 impl AgentBase {
     /// Normalizes the configuration for deterministic ID computation.
     pub fn prepare(&mut self) {
+        self.top_logprobs = match self.top_logprobs {
+            Some(0) | Some(1) => None,
+            other => other,
+        };
         if self.error == Some(false) {
             self.error = None;
         }
@@ -27,6 +37,11 @@ impl AgentBase {
 
     /// Validates the configuration.
     pub fn validate(&self) -> Result<(), String> {
+        if let Some(top_logprobs) = self.top_logprobs
+            && top_logprobs > 20
+        {
+            return Err("`top_logprobs` must be at most 20".to_string());
+        }
         Ok(())
     }
 
