@@ -543,7 +543,6 @@ where
             let mut aggregate: Option<
                 objectiveai::functions::executions::response::streaming::FunctionExecutionChunk,
             > = None;
-            let mut any_usage = false;
             let stream = match self
                 .clone()
                 .create_streaming(ctx.clone(), request.clone())
@@ -557,7 +556,6 @@ where
             };
             futures::pin_mut!(stream);
             while let Some(chunk) = stream.next().await {
-                any_usage |= chunk.any_usage();
                 match &mut aggregate {
                     Some(aggregate) => aggregate.push(&chunk),
                     None => aggregate = Some(chunk.clone()),
@@ -566,9 +564,11 @@ where
             }
             drop(stream);
             drop(tx);
-            if any_usage {
+            let response: objectiveai::functions::executions::response::unary::FunctionExecution =
+                aggregate.unwrap().into();
+            if response.usage.any_usage() {
                 self.usage_handler
-                    .handle_usage(ctx, request, aggregate.unwrap().into())
+                    .handle_usage(ctx, request, response)
                     .await;
             }
         });

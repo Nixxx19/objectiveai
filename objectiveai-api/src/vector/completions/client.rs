@@ -162,14 +162,7 @@ where
             drop(tx);
             let response: objectiveai::vector::completions::response::unary::VectorCompletion =
                 aggregate.unwrap().into();
-            let all_retry_or_cached_or_rng = request
-                .retry
-                .as_deref()
-                .is_some_and(|id| id == response.id.as_str())
-                || response.id.is_empty();
-            let any_ok_completions =
-                response.completions.iter().any(|c| c.inner.error.is_none());
-            if any_ok_completions && !all_retry_or_cached_or_rng {
+            if response.usage.any_usage() {
                 self.usage_handler
                     .handle_usage(ctx, request, response)
                     .await;

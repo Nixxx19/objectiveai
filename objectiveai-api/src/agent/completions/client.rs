@@ -199,14 +199,10 @@ where
             let mut aggregate: Option<
                 objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
             > = None;
-            let mut error = false;
             futures::pin_mut!(stream);
             while let Some(item) = stream.next().await {
                 match &item {
                     super::StreamItem::Chunk(chunk) => {
-                        if chunk.error.is_some() {
-                            error = true;
-                        }
                         match &mut aggregate {
                             Some(agg) => agg.push(chunk),
                             None => aggregate = Some(chunk.clone()),
@@ -218,12 +214,12 @@ where
             }
             drop(stream);
             drop(tx);
-            if !error {
-                if let Some(agg) = aggregate {
-                    self.usage_handler
-                        .handle_usage(ctx, params, agg.into())
-                        .await;
-                }
+            let response: objectiveai::agent::completions::response::unary::AgentCompletion =
+                aggregate.unwrap().into();
+            if response.usage.any_usage() {
+                self.usage_handler
+                    .handle_usage(ctx, params, response)
+                    .await;
             }
         });
         let mut stream =
