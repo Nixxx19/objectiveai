@@ -7,7 +7,7 @@ import { createPublicClient } from "../../lib/client";
 import { deriveCategory, deriveDisplayName } from "../../lib/objectiveai";
 import { NAV_HEIGHT_CALCULATION_DELAY_MS, STICKY_BAR_HEIGHT, STICKY_SEARCH_OVERLAP } from "../../lib/constants";
 import { useResponsive } from "../../hooks/useResponsive";
-import { ErrorAlert, EmptyState, SkeletonCard } from "../../components/ui";
+import { ErrorAlert, EmptyState } from "../../components/ui";
 
 // Function item type for UI
 interface FunctionItem {
@@ -28,7 +28,8 @@ const LOAD_MORE_COUNT = 6;
 
 export default function FunctionsPage() {
   const [functions, setFunctions] = useState<FunctionItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isListLoading, setIsListLoading] = useState(true);
+  const [detailsLoaded, setDetailsLoaded] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -40,12 +41,16 @@ export default function FunctionsPage() {
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
   const searchRef = useRef<HTMLDivElement>(null);
 
-  // Fetch functions from API
+  // Fetch functions from API — progressive loading
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchFunctions() {
       try {
-        setIsLoading(true);
+        setIsListLoading(true);
+        setDetailsLoaded(false);
         setError(null);
+        setFunctions([]);
 
         // Get all functions via SDK
         const client = createPublicClient();
@@ -60,46 +65,67 @@ export default function FunctionsPage() {
           }
         }
 
-        // Fetch details for each unique function (gracefully skip any that 404)
-        const results = await Promise.all(
-          Array.from(uniqueFunctions.values()).map(async (fn): Promise<FunctionItem | null> => {
-            try {
-              const slug = `${fn.owner}/${fn.repository}`;
+        if (cancelled) return;
+        setIsListLoading(false);
 
-              const details = await Functions.retrieve(client, "github", fn.owner, fn.repository, fn.commit);
+        // Fire all detail fetches concurrently — update state as each resolves
+        const entries = Array.from(uniqueFunctions.values());
+        let settled = 0;
 
-              const category = deriveCategory(details);
+        entries.forEach((fn) => {
+          const controller = new AbortController();
+          const timeout = setTimeout(() => controller.abort(), 5000);
+
+          Functions.retrieve(client, "github", fn.owner, fn.repository, fn.commit, { signal: controller.signal })
+            .then((details) => {
+              clearTimeout(timeout);
+              if (cancelled) return;
+
               const name = deriveDisplayName(fn.repository);
-
               const tags = fn.repository.split("-").filter((t: string) => t.length > 2);
               if (details.type === "vector.function") tags.push("ranking");
               else tags.push("scoring");
 
-              return {
-                slug,
+              const item: FunctionItem = {
+                slug: `${fn.owner}/${fn.repository}`,
                 owner: fn.owner,
                 repository: fn.repository,
                 commit: fn.commit,
                 name,
                 description: details.description || `${name} function`,
-                category,
+                category: deriveCategory(details),
                 tags,
               };
-            } catch {
-              return null;
-            }
-          })
-        );
 
-        setFunctions(results.filter((item): item is FunctionItem => item !== null));
+              setFunctions(prev => [...prev, item]);
+            })
+            .catch(() => {
+              clearTimeout(timeout);
+              // Skip functions that fail to load
+            })
+            .finally(() => {
+              settled++;
+              if (settled === entries.length && !cancelled) {
+                setDetailsLoaded(true);
+              }
+            });
+        });
+
+        // Edge case: no functions to fetch details for
+        if (entries.length === 0) {
+          setDetailsLoaded(true);
+        }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to load functions");
-      } finally {
-        setIsLoading(false);
+        if (!cancelled) {
+          setError(err instanceof Error ? err.message : "Failed to load functions");
+          setIsListLoading(false);
+          setDetailsLoaded(true);
+        }
       }
     }
 
     fetchFunctions();
+    return () => { cancelled = true; };
   }, []);
 
   // Load pinned functions from localStorage
@@ -287,8 +313,37 @@ export default function FunctionsPage() {
             flexDirection: 'column',
             width: '100%',
           }}>
-            {/* Only render grid when we have results */}
-            {!isLoading && !error && visibleFunctions.length > 0 && (
+            {/* Skeleton grid while list is loading */}
+            {isListLoading && (
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: isMobile
+                  ? '1fr'
+                  : isTablet
+                    ? 'repeat(2, 1fr)'
+                    : filtersOpen
+                      ? 'repeat(2, 1fr)'
+                      : 'repeat(3, 1fr)',
+                gap: isMobile ? '12px' : '16px',
+              }}>
+                {Array.from({ length: INITIAL_VISIBLE_COUNT }).map((_, i) => (
+                  <div key={i} className="card" style={{
+                    padding: '16px',
+                    height: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '8px',
+                  }}>
+                    <div style={{ width: '60px', height: '20px', background: 'var(--border)', borderRadius: '10px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    <div style={{ width: '80%', height: '18px', background: 'var(--border)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                    <div style={{ width: '100%', height: '32px', background: 'var(--border)', borderRadius: '4px', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Function cards — render progressively as details arrive */}
+            {!isListLoading && !error && visibleFunctions.length > 0 && (
             <>
               <div style={{
                 display: 'grid',
@@ -399,29 +454,11 @@ export default function FunctionsPage() {
             </>
             )}
 
-            {isLoading && (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile
-                  ? '1fr'
-                  : isTablet
-                    ? 'repeat(2, 1fr)'
-                    : filtersOpen
-                      ? 'repeat(2, 1fr)'
-                      : 'repeat(3, 1fr)',
-                gap: isMobile ? '12px' : '16px',
-              }}>
-                {Array.from({ length: 9 }).map((_, i) => (
-                  <SkeletonCard key={i} />
-                ))}
-              </div>
-            )}
-
-            {error && !isLoading && (
+            {error && !isListLoading && (
               <ErrorAlert title="Failed to load functions" message={error} />
             )}
 
-            {!isLoading && !error && filteredFunctions.length === 0 && (
+            {!isListLoading && !error && detailsLoaded && filteredFunctions.length === 0 && (
               <EmptyState message="No functions found matching your criteria" />
             )}
           </div>
