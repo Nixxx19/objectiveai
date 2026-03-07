@@ -133,6 +133,7 @@ where
             >,
         >,
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
+        invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
     ) -> Result<
         objectiveai::agent::completions::response::unary::AgentCompletion,
@@ -142,7 +143,7 @@ where
             objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
         > = None;
         let mut stream = self
-            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, transform_messages)
+            .create_streaming_handle_usage(ctx, params, continuation, invention_tools, invention_done, transform_messages)
             .await?;
         while let Some(item) = stream.next().await {
             match item {
@@ -169,6 +170,7 @@ where
             >,
         >,
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
+        invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
     ) -> Result<
         impl futures::Stream<
@@ -187,7 +189,7 @@ where
         let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
         let _ = tokio::spawn(async move {
             let stream = match self
-                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, transform_messages)
+                .create_streaming(ctx.clone(), params.clone(), continuation, invention_tools, invention_done, transform_messages)
                 .await
             {
                 Ok(stream) => stream,
@@ -246,6 +248,7 @@ where
             >,
         >,
         invention_tools: Option<Vec<objectiveai::functions::inventions::InventionTool>>,
+        invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<Arc<TransformMessages>>,
     ) -> Result<
         impl futures::Stream<
@@ -437,6 +440,7 @@ where
                                 },
                                 |e| super::Error::UpstreamOpenrouter(Box::new(e)),
                                 objectiveai::agent::AgentBaseRef::Openrouter(&or_agent.base),
+                                invention_done.clone(),
                                 agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
@@ -456,6 +460,7 @@ where
                                 },
                                 |e| super::Error::UpstreamClaudeAgentSdk(Box::new(e)),
                                 objectiveai::agent::AgentBaseRef::ClaudeAgentSdk(&cas_agent.base),
+                                invention_done.clone(),
                                 agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
@@ -475,6 +480,7 @@ where
                                 },
                                 |e| super::Error::UpstreamMock(Box::new(e)),
                                 objectiveai::agent::AgentBaseRef::Mock(&mock_agent.base),
+                                invention_done.clone(),
                                 agent_transform,
                             ).await {
                                 Ok(stream) => return Ok(stream),
@@ -533,6 +539,7 @@ where
         wrap_continuation: impl FnOnce(Vec<super::ContinuationItem<U::State>>) -> CONT + Send + 'static,
         map_upstream_err: impl Fn(U::Error) -> super::Error + Send + 'static,
         agent_base: objectiveai::agent::AgentBaseRef<'_>,
+        invention_done: Option<Arc<dyn Fn() -> bool + Send + Sync>>,
         transform_messages: Option<&(dyn Fn(Vec<objectiveai::agent::completions::message::Message>) -> Vec<objectiveai::agent::completions::message::Message> + Send + Sync)>,
     ) -> Result<
         Pin<Box<dyn futures::Stream<Item = super::StreamItem<CONT>> + Send>>,
@@ -570,6 +577,7 @@ where
             cont_ref,
             byok,
             cost_multiplier,
+            true,
         );
         let (initial_stream, _state) =
             tokio::time::timeout(self.first_chunk_timeout, create_fut)
@@ -671,6 +679,7 @@ where
                     continuation_items.push(super::ContinuationItem::State(state));
                 }
 
+                let mut any_invention_tool_called = false;
                 for (call_id, call_name, call_args) in &callable {
                     match tool_map.get(call_name) {
                         Some(super::tool::ResolvedTool::Mcp { connection, tool }) => {
@@ -705,6 +714,7 @@ where
                             }
                         }
                         Some(super::tool::ResolvedTool::InventionTool(inv)) => {
+                            any_invention_tool_called = true;
                             let args: serde_json::Value = serde_json::from_str(call_args)
                                 .unwrap_or(serde_json::Value::Object(Default::default()));
                             let content = match (inv.call)(args).await {
@@ -732,6 +742,14 @@ where
                     break;
                 }
 
+                // When invention_done signals completion, disable tools so the
+                // model responds with content and the loop terminates naturally.
+                let tools_enabled = if any_invention_tool_called {
+                    !invention_done.as_ref().is_some_and(|f| f())
+                } else {
+                    true
+                };
+
                 // Reset aggregate so the next iteration doesn't carry
                 // old tool calls forward from the previous response.
                 aggregate = None;
@@ -750,6 +768,7 @@ where
                         Some(&continuation_items),
                         byok.as_deref(),
                         cost_multiplier,
+                        tools_enabled,
                     )
                     .await
                 {

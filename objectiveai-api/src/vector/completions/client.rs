@@ -825,6 +825,7 @@ where
                     agent_params.clone(),
                     None,
                     None,
+                    None,
                     Some(transform_messages.clone()),
                 ).await?;
                 let aggregate: Option<
@@ -954,6 +955,7 @@ where
                                 agent_params.clone(),
                                 Some(cont),
                                 None,
+                                None,
                                 Some(transform_messages.clone()),
                             ).await {
                                 Ok(mut retry_stream) => {
@@ -1078,6 +1080,7 @@ where
                                 ctx.clone(),
                                 retry_params,
                                 Some(cont),
+                                None,
                                 None,
                                 Some(transform_messages.clone()),
                             ).await {

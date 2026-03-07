@@ -99,6 +99,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
         continuation: Option<&[ContinuationItem<Self::State>]>,
         byok: Option<&str>,
         cost_multiplier: rust_decimal::Decimal,
+        _tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),

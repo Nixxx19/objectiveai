@@ -84,6 +84,7 @@ async fn run_mock(
             None,
             None,
             rust_decimal::Decimal::ONE,
+            true,
         )
         .await
     {
@@ -247,7 +248,7 @@ async fn test_grammar_response_format_rejected() {
     let result = client
         .create(
             "test", 1000, &agent, &params, &[], &[], None, &[],
-            &HashMap::new(), None, None, rust_decimal::Decimal::ONE,
+            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true,
         )
         .await;
     match result {
@@ -265,7 +266,7 @@ async fn test_python_response_format_rejected() {
     let result = client
         .create(
             "test", 1000, &agent, &params, &[], &[], None, &[],
-            &HashMap::new(), None, None, rust_decimal::Decimal::ONE,
+            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true,
         )
         .await;
     match result {
@@ -596,6 +597,7 @@ async fn collect_assistant_chunks(
             None,
             None,
             rust_decimal::Decimal::ONE,
+            true,
         )
         .await
         .expect("create failed");

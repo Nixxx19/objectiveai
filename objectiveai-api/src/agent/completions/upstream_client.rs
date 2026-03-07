@@ -58,6 +58,8 @@ pub trait UpstreamClient<AGENT> {
         byok: Option<&str>,
         // cost multiplier for usage reporting
         cost_multiplier: rust_decimal::Decimal,
+        // when false, the model should not be allowed to call tools
+        tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),
@@ -89,6 +91,7 @@ impl<AGENT> UpstreamClient<AGENT> for UnimplementedUpstreamClient {
         _continuation: Option<&[super::ContinuationItem<Self::State>]>,
         _byok: Option<&str>,
         _cost_multiplier: rust_decimal::Decimal,
+        _tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
             (Self::Stream, Self::State),
