@@ -1087,3 +1087,54 @@ async fn test_tools_not_allowed_no_tool_calls_generated() {
         }
     }
 }
+
+#[tokio::test]
+async fn test_invention_agent_without_invention_tools() {
+    let client = default_client();
+    let agent = Agent::try_from(AgentBase {
+        invention: Some(true),
+        ..Default::default()
+    })
+    .unwrap();
+    let params = default_params_with_seed(42);
+
+    let result = client
+        .create(
+            "test", 1000, &agent, &params, &[], &[], None, &[],
+            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, true,
+        )
+        .await;
+    match result {
+        Err(super::Error::InventionAgentWithoutInventionTools) => {}
+        Err(e) => panic!("expected InventionAgentWithoutInventionTools, got {e}"),
+        Ok(_) => panic!("expected error"),
+    }
+}
+
+#[tokio::test]
+async fn test_invention_agent_with_invention_tools_ok() {
+    let agent = Agent::try_from(AgentBase {
+        invention: Some(true),
+        ..Default::default()
+    })
+    .unwrap();
+    let params = default_params_with_seed(42);
+    let inv = make_invention_tool("execute_code", indexmap::indexmap! {
+        "type".into() => serde_json::json!("object"),
+        "properties".into() => serde_json::json!({
+            "code": {"type": "string"},
+        }),
+    });
+    let inv2 = inv.clone();
+    let (tool_names, tool_map) = resolve_tools(&[], &[], Some(&[inv]), None);
+
+    // With invention tools provided, should succeed.
+    let client = default_client();
+    let result = client
+        .create(
+            "test", 1000, &agent, &params, &[], &[], Some(&[inv2]),
+            &tool_names, &tool_map, None, None, rust_decimal::Decimal::ONE, true,
+        )
+        .await;
+    assert!(result.is_ok(), "invention agent with tools should succeed");
+}

@@ -8,6 +8,9 @@ pub enum Error {
 
     #[error("tools not allowed but response format requires a tool call")]
     ToolsNotAllowedWithRequiredToolCall,
+
+    #[error("invention agent requires invention tools")]
+    InventionAgentWithoutInventionTools,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -16,6 +19,7 @@ impl objectiveai::error::StatusError for Error {
             Self::ExpectedError => 500,
             Self::UnsupportedResponseFormat(_) => 400,
             Self::ToolsNotAllowedWithRequiredToolCall => 400,
+            Self::InventionAgentWithoutInventionTools => 400,
         }
     }
 

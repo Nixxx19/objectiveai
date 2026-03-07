@@ -79,6 +79,8 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
     > + Send
     + 'static {
         let tools_enabled = _tools_enabled;
+        let invention = agent.base.invention == Some(true);
+        let has_invention_tools = _invention_tools.is_some_and(|t| !t.is_empty());
         let id = id.to_string();
         let agent_id = agent.id.clone();
         let error = agent.base.error == Some(true);
@@ -120,6 +122,10 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
 
             if error {
                 return Err(super::Error::ExpectedError);
+            }
+
+            if invention && !has_invention_tools {
+                return Err(super::Error::InventionAgentWithoutInventionTools);
             }
 
             // Reject Grammar and Python response formats.
