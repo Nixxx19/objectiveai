@@ -1,9 +1,9 @@
-mod alpha_scalar;
-mod alpha_scalar_branch;
-mod alpha_scalar_leaf;
-mod alpha_vector;
-mod alpha_vector_branch;
-mod alpha_vector_leaf;
+pub(super) mod alpha_scalar;
+pub(super) mod alpha_scalar_branch;
+pub(super) mod alpha_scalar_leaf;
+pub(super) mod alpha_vector;
+pub(super) mod alpha_vector_branch;
+pub(super) mod alpha_vector_leaf;
 mod route;
 
 pub use route::*;

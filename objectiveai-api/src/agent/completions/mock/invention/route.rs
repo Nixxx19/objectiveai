@@ -54,3 +54,124 @@ pub enum InventionStep {
     DescriptionVectorLeaf,
     DescriptionVectorBranch,
 }
+
+impl InventionStep {
+    /// Discover which invention step we're in from tool names and prompt.
+    ///
+    /// This performs layer-1 (tool names) and layer-2 (schema tool names)
+    /// discovery. For steps that require layer-3 (tool invocation), this
+    /// returns a partially-resolved step that the caller must refine by
+    /// calling invention tools.
+    ///
+    /// `prompt` is the user-facing prompt text (from messages or continuation).
+    pub fn discover(tool_names: &[String], prompt: &str) -> Option<Self> {
+        let has = |name: &str| tool_names.iter().any(|t| t == name);
+
+        // Step 1: Essay — WriteEssay present, WriteInputSchema absent
+        if has("WriteEssay") && !has("WriteInputSchema") {
+            return Some(if prompt.contains("Scalar Function") {
+                Self::EssayScalar
+            } else {
+                Self::EssayVector
+            });
+        }
+
+        // Step 2: InputSchema — WriteInputSchema present
+        if has("WriteInputSchema") {
+            return Some(
+                if has("ReadObjectInputSchemaJsonSchema") {
+                    Self::InputSchemaScalar
+                } else {
+                    Self::InputSchemaVector
+                },
+            );
+        }
+
+        // Step 3: EssayTasks — WriteEssayTasks present, AppendTask absent
+        if has("WriteEssayTasks") && !has("AppendTask") {
+            // Scalar vs vector requires calling ReadInputSchema (layer 3).
+            // Return scalar as default — caller refines via `refine_with_input_schema`.
+            return Some(Self::EssayTasksScalar);
+        }
+
+        // Step 4: Tasks — AppendTask present
+        if has("AppendTask") {
+            return Some(if has("ReadMessagesJsonSchema") {
+                // Leaf
+                if tool_names.iter().any(|t| t.contains("AlphaScalar")) {
+                    Self::TasksScalarLeaf
+                } else {
+                    Self::TasksVectorLeaf
+                }
+            } else if has("ReadInputValueJsonSchema") {
+                // Branch
+                if tool_names.iter().any(|t| t.contains("AlphaScalarPlaceholder")) {
+                    Self::TasksScalarBranch
+                } else {
+                    Self::TasksVectorBranch
+                }
+            } else {
+                // Fallback — shouldn't happen
+                Self::TasksScalarLeaf
+            });
+        }
+
+        // Step 5: Description — WriteDescription present
+        if has("WriteDescription") {
+            // Requires layer-3 discovery. Return scalar leaf as default.
+            return Some(Self::DescriptionScalarLeaf);
+        }
+
+        None
+    }
+
+    /// Refine an EssayTasks or Description step using the input schema JSON
+    /// returned by calling `ReadInputSchema`.
+    ///
+    /// If the schema has an `items` field, it's a vector function.
+    pub fn refine_with_input_schema(self, input_schema_json: &str) -> Self {
+        let is_vector = serde_json::from_str::<serde_json::Value>(input_schema_json)
+            .ok()
+            .and_then(|v| v.get("items").cloned())
+            .is_some();
+
+        match self {
+            Self::EssayTasksScalar if is_vector => Self::EssayTasksVector,
+            Self::DescriptionScalarLeaf if is_vector => Self::DescriptionVectorLeaf,
+            Self::DescriptionScalarBranch if is_vector => Self::DescriptionVectorBranch,
+            other => other,
+        }
+    }
+
+    /// Refine a Description step using the task JSON returned by calling
+    /// `ReadTask(0)`.
+    ///
+    /// If the task contains `"placeholder"` in its keys, it's a branch.
+    pub fn refine_with_task(self, task_json: &str) -> Self {
+        let is_branch = task_json.contains("placeholder");
+
+        match self {
+            Self::DescriptionScalarLeaf if is_branch => Self::DescriptionScalarBranch,
+            Self::DescriptionVectorLeaf if is_branch => Self::DescriptionVectorBranch,
+            other => other,
+        }
+    }
+
+    /// Whether this step needs the input schema for generating tool calls
+    /// (tasks and essay_tasks steps).
+    pub fn needs_input_schema(self) -> bool {
+        matches!(
+            self,
+            Self::EssayTasksScalar
+                | Self::EssayTasksVector
+                | Self::TasksScalarLeaf
+                | Self::TasksScalarBranch
+                | Self::TasksVectorLeaf
+                | Self::TasksVectorBranch
+                | Self::DescriptionScalarLeaf
+                | Self::DescriptionScalarBranch
+                | Self::DescriptionVectorLeaf
+                | Self::DescriptionVectorBranch
+        )
+    }
+}
