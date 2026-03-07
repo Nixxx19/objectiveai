@@ -991,3 +991,127 @@ async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
         include_str!("../../../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
     );
 }
+
+// ---------------------------------------------------------------------------
+// Super branch tests (branch functions whose tasks are branch functions)
+// ---------------------------------------------------------------------------
+
+/// mock-18: Scalar super branch, 2 scalar branch sub-functions, seed 42.
+#[tokio::test]
+async fn test_mock_18_scalar_super_branch_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-18",
+        "mock-18",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Hello world".into()),
+            "subject".into() => Input::String("greeting".into()),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_18_scalar_super_branch_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_18_scalar_super_branch_seed_42.json"),
+    );
+}
+
+/// mock-19: Scalar super branch with skip (thorough=false), seed 42.
+#[tokio::test]
+async fn test_mock_19_scalar_super_branch_skip_false_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-19",
+        "mock-19",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Test input".into()),
+            "subject".into() => Input::String("testing".into()),
+            "thorough".into() => Input::Boolean(false),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_false_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_false_seed_42.json"),
+    );
+}
+
+/// mock-19: Scalar super branch with skip (thorough=true), seed 42.
+#[tokio::test]
+async fn test_mock_19_scalar_super_branch_skip_true_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-19",
+        "mock-19",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Test input".into()),
+            "subject".into() => Input::String("testing".into()),
+            "thorough".into() => Input::Boolean(true),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_true_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_19_scalar_super_branch_skip_true_seed_42.json"),
+    );
+}
+
+/// mock-20: Vector super branch, 2 vector branch sub-functions, seed 42.
+#[tokio::test]
+async fn test_mock_20_vector_super_branch_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-20",
+        "mock-20",
+        Input::Object(indexmap::indexmap! {
+            "items".into() => Input::Array(vec![
+                Input::String("Alpha".into()),
+                Input::String("Beta".into()),
+                Input::String("Gamma".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_20_vector_super_branch_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_20_vector_super_branch_seed_42.json"),
+    );
+}
+
+/// mock-21: Vector super branch with context, 3 vector branch sub-functions, seed 42.
+#[tokio::test]
+async fn test_mock_21_vector_super_branch_context_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-21",
+        "mock-21",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "text".into() => Input::String("rank these options".into()),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("One".into()),
+                Input::String("Two".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
+    );
+}

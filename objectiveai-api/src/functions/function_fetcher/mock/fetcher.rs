@@ -44,6 +44,10 @@ where
             "mock-15" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-15.json")),
             "mock-16" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-16.json")),
             "mock-17" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-17.json")),
+            "mock-18" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-18.json")),
+            "mock-19" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-19.json")),
+            "mock-20" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-20.json")),
+            "mock-21" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-21.json")),
             _ => return Ok(None),
         };
         let inner: objectiveai::functions::FullRemoteFunction =
