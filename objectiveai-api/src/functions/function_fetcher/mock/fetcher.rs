@@ -48,6 +48,16 @@ where
             "mock-19" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-19.json")),
             "mock-20" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-20.json")),
             "mock-21" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-21.json")),
+            "mock-err-1" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-1.json")),
+            "mock-err-2" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-2.json")),
+            "mock-err-3" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-3.json")),
+            "mock-err-4" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-4.json")),
+            "mock-err-5" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-5.json")),
+            "mock-err-6" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-6.json")),
+            "mock-err-7" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-7.json")),
+            "mock-err-8" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-8.json")),
+            "mock-err-9" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-9.json")),
+            "mock-err-10" => include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/function_fetcher/mock/mock-err-10.json")),
             _ => return Ok(None),
         };
         let inner: objectiveai::functions::FullRemoteFunction =

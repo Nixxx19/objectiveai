@@ -8,11 +8,13 @@ use rust_decimal::Decimal;
 
 use objectiveai::functions::executions::request::{
     FunctionRemoteProfileRemoteRequestBody, FunctionRemoteProfileRemoteRequestPath, Request,
+    Strategy,
 };
 use objectiveai::functions::executions::response::streaming::FunctionExecutionChunk;
 use objectiveai::functions::executions::response::unary::FunctionExecution;
 use objectiveai::functions::expression::Input;
 use objectiveai::functions::Remote;
+use objectiveai::error::StatusError;
 
 use crate::agent::completions::UnimplementedUpstreamClient;
 use crate::ctx;
@@ -1113,5 +1115,591 @@ async fn test_mock_21_vector_super_branch_context_seed_42() {
         &json,
         concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
         include_str!("../../../assets/functions/executions/client_tests/mock_21_vector_super_branch_context_seed_42.json"),
+    );
+}
+
+// ===========================================================================
+// Error tests
+// ===========================================================================
+
+/// Helper: create a request with custom body fields.
+fn make_request_with_body(
+    function_repo: &str,
+    profile_repo: &str,
+    body: FunctionRemoteProfileRemoteRequestBody,
+) -> Arc<Request> {
+    Arc::new(Request::FunctionRemoteProfileRemote {
+        path: FunctionRemoteProfileRemoteRequestPath {
+            fremote: Remote::Mock,
+            fowner: "mock".to_string(),
+            frepository: function_repo.to_string(),
+            fcommit: Some("mock".to_string()),
+            premote: Remote::Mock,
+            powner: "mock".to_string(),
+            prepository: profile_repo.to_string(),
+            pcommit: Some("mock".to_string()),
+        },
+        body,
+    })
+}
+
+/// Helper: expect create_streaming to return Err with a specific status code.
+async fn expect_err(client: &Arc<TestClient>, request: Arc<Request>, expected_status: u16) -> super::Error {
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    match client.clone().create_streaming(ctx, request).await {
+        Ok(_) => panic!("expected create_streaming to fail, but it succeeded"),
+        Err(err) => {
+            assert_eq!(err.status(), expected_status, "error: {err}");
+            err
+        }
+    }
+}
+
+/// Helper: run execution and return the aggregated result (for tests where
+/// the stream succeeds but the response contains error fields).
+async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<Request>) -> FunctionExecution {
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let stream = client
+        .clone()
+        .create_streaming(ctx, request)
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    aggregate(chunks)
+}
+
+// ---------------------------------------------------------------------------
+// 1. Pre-Execution Errors
+// ---------------------------------------------------------------------------
+
+/// 1.1: InvalidRetryToken — garbage retry_token string.
+#[tokio::test]
+async fn test_error_1_1_invalid_retry_token() {
+    let client = make_client();
+    let request = make_request_with_body(
+        "mock-1",
+        "mock-1",
+        FunctionRemoteProfileRemoteRequestBody {
+            retry_token: Some("not-a-valid-retry-token!!!".to_string()),
+            from_cache: None,
+            reasoning: None,
+            strategy: None,
+            input: Input::Object(indexmap::indexmap! {
+                "text".into() => Input::String("test".into()),
+            }),
+            provider: None,
+            seed: Some(42),
+            stream: None,
+            mcp_server_authorization: None,
+        },
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidRetryToken), "expected InvalidRetryToken, got: {err}");
+}
+
+/// 1.3: InvalidFunctionForStrategy — scalar function with Swiss strategy.
+#[tokio::test]
+async fn test_error_1_3_scalar_function_swiss_strategy() {
+    let client = make_client();
+    let request = make_request_with_body(
+        "mock-1",
+        "mock-1",
+        FunctionRemoteProfileRemoteRequestBody {
+            retry_token: None,
+            from_cache: None,
+            reasoning: None,
+            strategy: Some(Strategy::SwissSystem { pool: None, rounds: None }),
+            input: Input::Object(indexmap::indexmap! {
+                "text".into() => Input::String("test".into()),
+            }),
+            provider: None,
+            seed: Some(42),
+            stream: None,
+            mcp_server_authorization: None,
+        },
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidFunctionForStrategy(_)), "expected InvalidFunctionForStrategy, got: {err}");
+}
+
+/// 1.4: InvalidStrategy — Swiss strategy with pool=1.
+#[tokio::test]
+async fn test_error_1_4_invalid_strategy_pool() {
+    let client = make_client();
+    let request = make_request_with_body(
+        "mock-4",
+        "mock-4",
+        FunctionRemoteProfileRemoteRequestBody {
+            retry_token: None,
+            from_cache: None,
+            reasoning: None,
+            strategy: Some(Strategy::SwissSystem { pool: Some(1), rounds: Some(3) }),
+            input: Input::Object(indexmap::indexmap! {
+                "items".into() => Input::Array(vec![
+                    Input::String("A".into()),
+                    Input::String("B".into()),
+                    Input::String("C".into()),
+                ]),
+            }),
+            provider: None,
+            seed: Some(42),
+            stream: None,
+            mcp_server_authorization: None,
+        },
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidStrategy(_)), "expected InvalidStrategy, got: {err}");
+}
+
+// ---------------------------------------------------------------------------
+// 2. Flat Task Profile Fetch Errors
+// ---------------------------------------------------------------------------
+
+/// 2.1: FunctionNotFound — non-existent mock function repository.
+#[tokio::test]
+async fn test_error_2_1_function_not_found() {
+    let client = make_client();
+    let request = make_request("mock-nonexistent", "mock-1", Input::Object(indexmap::indexmap! {}), 42);
+    let err = expect_err(&client, request, 404).await;
+    assert!(matches!(err, super::Error::FunctionNotFound), "expected FunctionNotFound, got: {err}");
+}
+
+/// 2.3: ProfileNotFound — non-existent mock profile repository.
+#[tokio::test]
+async fn test_error_2_3_profile_not_found() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-nonexistent",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 404).await;
+    assert!(matches!(err, super::Error::ProfileNotFound), "expected ProfileNotFound, got: {err}");
+}
+
+/// 2.5: InputSchemaMismatch — wrong input shape for mock-1.
+#[tokio::test]
+async fn test_error_2_5_input_schema_mismatch() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-1",
+        Input::Object(indexmap::indexmap! {
+            "wrong_field".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InputSchemaMismatch), "expected InputSchemaMismatch, got: {err}");
+}
+
+/// 2.6: InvalidProfile — tasks length mismatch (2 task profiles for 1-task function).
+#[tokio::test]
+async fn test_error_2_6_tasks_length_mismatch() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-err-11",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
+}
+
+/// 2.7: InvalidProfile — weights length mismatch (2 weights for 1-task function).
+#[tokio::test]
+async fn test_error_2_7_weights_length_mismatch() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-err-12",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
+}
+
+/// 2.8: InvalidProfile — placeholder for function task.
+#[tokio::test]
+async fn test_error_2_8_placeholder_for_function_task() {
+    let client = make_client();
+    let request = make_request(
+        "mock-9",
+        "mock-err-13",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+            "subject".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
+}
+
+/// 2.9: InvalidProfile — Remote profile for VC task.
+#[tokio::test]
+async fn test_error_2_9_remote_for_vc_task() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-err-14",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidProfile(_)), "expected InvalidProfile, got: {err}");
+}
+
+/// 2.17: InvalidAppExpression — task expression references missing key.
+#[tokio::test]
+async fn test_error_2_17_bad_task_expression() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-8",
+        "mock-err-8",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidAppExpression(_)), "expected InvalidAppExpression, got: {err}");
+}
+
+/// 2.19: FetchEnsemble — string ensemble ID hits StubEnsembleFetcher (returns 501).
+#[tokio::test]
+async fn test_error_2_19_fetch_ensemble() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-err-15",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 501).await;
+    assert!(matches!(err, super::Error::FetchEnsemble(_)), "expected FetchEnsemble, got: {err}");
+}
+
+/// 2.20: InvalidEnsemble — 1 agent but 2 profile weights.
+#[tokio::test]
+async fn test_error_2_20_invalid_ensemble() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-err-16",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InvalidEnsemble(_)), "expected InvalidEnsemble, got: {err}");
+}
+
+/// 2.21: Recursive FunctionNotFound — branch references mock-999.
+#[tokio::test]
+async fn test_error_2_21_recursive_function_not_found() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-9",
+        "mock-err-9",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 404).await;
+    assert!(matches!(err, super::Error::FunctionNotFound), "expected FunctionNotFound, got: {err}");
+}
+
+/// 2.22: Recursive ProfileNotFound — tasks profile references mock-999.
+#[tokio::test]
+async fn test_error_2_22_recursive_profile_not_found() {
+    let client = make_client();
+    let request = make_request(
+        "mock-9",
+        "mock-err-17",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+            "subject".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 404).await;
+    assert!(matches!(err, super::Error::ProfileNotFound), "expected ProfileNotFound, got: {err}");
+}
+
+/// 2.23: Recursive InputSchemaMismatch — wrong input for sub-function.
+#[tokio::test]
+async fn test_error_2_23_recursive_input_schema_mismatch() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-10",
+        "mock-err-10",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let err = expect_err(&client, request, 400).await;
+    assert!(matches!(err, super::Error::InputSchemaMismatch), "expected InputSchemaMismatch, got: {err}");
+}
+
+// ---------------------------------------------------------------------------
+// 3. Vector Completion Errors (execution-time)
+// ---------------------------------------------------------------------------
+
+/// 3.1: All agents error — VC agents fail, completions have error finish_reason,
+/// output is fallback uniform → weighted sum to 0.5.
+#[tokio::test]
+async fn test_error_3_1_all_agents_error() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-err-18",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let result = run_execution_allow_error(&client, request).await;
+    assert_eq!(result.tasks.len(), 1);
+    match &result.tasks[0] {
+        objectiveai::functions::executions::response::unary::Task::VectorCompletion(vt) => {
+            // The task itself should not have an error (VC "succeeds" with fallback).
+            assert!(vt.error.is_none(), "expected no task-level error, got: {:?}", vt.error);
+            assert!(!vt.inner.completions.is_empty(), "expected at least one completion");
+            for completion in &vt.inner.completions {
+                // Each agent completion should have an error set.
+                assert!(
+                    completion.inner.error.is_some(),
+                    "expected error on agent completion, got None",
+                );
+            }
+        }
+        other => panic!("expected VectorCompletion task, got: {other:?}"),
+    }
+    // Output is the fallback weighted sum of uniform distribution.
+    assert!(
+        matches!(&result.output, objectiveai::functions::expression::TaskOutputOwned::Scalar(s) if *s == rust_decimal::dec!(0.5)),
+        "expected Scalar(0.5) fallback, got: {:?}",
+        result.output,
+    );
+}
+
+// ---------------------------------------------------------------------------
+// 4. Task Output Expression Errors (execution-time)
+// ---------------------------------------------------------------------------
+
+/// 4.1: Output expression evaluation fails (references nonexistent field).
+#[tokio::test]
+async fn test_error_4_1_output_expression_fails() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-1",
+        "mock-err-1",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let result = run_execution_allow_error(&client, request).await;
+    assert!(result.error.is_some(), "expected error on response");
+    assert!(
+        matches!(result.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
+        "expected Err output, got: {:?}",
+        result.output,
+    );
+}
+
+/// 4.2: Scalar output out of range (returns -1.0).
+#[tokio::test]
+async fn test_error_4_2_scalar_output_out_of_range() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-2",
+        "mock-err-2",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let result = run_execution_allow_error(&client, request).await;
+    assert!(result.error.is_some(), "expected error on response");
+    assert!(
+        matches!(result.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
+        "expected Err output, got: {:?}",
+        result.output,
+    );
+}
+
+/// 4.3: Scalar function got vector output.
+#[tokio::test]
+async fn test_error_4_3_scalar_got_vector() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-3",
+        "mock-err-3",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let result = run_execution_allow_error(&client, request).await;
+    assert!(result.error.is_some(), "expected error on response");
+    assert!(
+        matches!(result.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
+        "expected Err output, got: {:?}",
+        result.output,
+    );
+}
+
+/// 4.4: Vector output bad sum (scores doubled).
+#[tokio::test]
+async fn test_error_4_4_vector_output_bad_sum() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-4",
+        "mock-err-4",
+        Input::Object(indexmap::indexmap! {
+            "items".into() => Input::Array(vec![
+                Input::String("A".into()),
+                Input::String("B".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = run_execution_allow_error(&client, request).await;
+    assert!(result.error.is_some(), "expected error on response");
+    assert!(
+        matches!(result.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
+        "expected Err output, got: {:?}",
+        result.output,
+    );
+}
+
+/// 4.5: Vector function got scalar output.
+#[tokio::test]
+async fn test_error_4_5_vector_got_scalar() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-5",
+        "mock-err-5",
+        Input::Object(indexmap::indexmap! {
+            "items".into() => Input::Array(vec![
+                Input::String("A".into()),
+                Input::String("B".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = run_execution_allow_error(&client, request).await;
+    assert!(result.error.is_some(), "expected error on response");
+    assert!(
+        matches!(result.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
+        "expected Err output, got: {:?}",
+        result.output,
+    );
+}
+
+/// 4.6: Output returns nested list (Vectors variant).
+#[tokio::test]
+async fn test_error_4_6_output_vectors_variant() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-6",
+        "mock-err-6",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let result = run_execution_allow_error(&client, request).await;
+    assert!(result.error.is_some(), "expected error on response");
+    assert!(
+        matches!(result.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
+        "expected Err output, got: {:?}",
+        result.output,
+    );
+}
+
+/// 4.7: Output expression returns None (Err value).
+#[tokio::test]
+async fn test_error_4_7_output_returns_none() {
+    let client = make_client();
+    let request = make_request(
+        "mock-err-7",
+        "mock-err-7",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("test".into()),
+        }),
+        42,
+    );
+    let result = run_execution_allow_error(&client, request).await;
+    assert!(result.error.is_some(), "expected error on response");
+    assert!(
+        matches!(result.output, objectiveai::functions::expression::TaskOutputOwned::Err(_)),
+        "expected Err output, got: {:?}",
+        result.output,
+    );
+}
+
+// ---------------------------------------------------------------------------
+// 6. Reasoning Errors
+// ---------------------------------------------------------------------------
+
+/// 6.1: Reasoning agent error — mock agent with error=true.
+#[tokio::test]
+async fn test_error_6_1_reasoning_agent_error() {
+    let client = make_client();
+    let request = make_request_with_body(
+        "mock-1",
+        "mock-1",
+        FunctionRemoteProfileRemoteRequestBody {
+            retry_token: None,
+            from_cache: None,
+            reasoning: Some(objectiveai::functions::executions::request::Reasoning {
+                agent: objectiveai::agent::completions::request::Agent::Provided(
+                    objectiveai::agent::AgentBase::Mock(objectiveai::agent::mock::AgentBase {
+                        upstream: objectiveai::agent::mock::Upstream::Mock,
+                        output_mode: objectiveai::agent::mock::OutputMode::Instruction,
+                        top_logprobs: None,
+                        error: Some(true),
+                    }),
+                ),
+                agents: None,
+            }),
+            strategy: None,
+            input: Input::Object(indexmap::indexmap! {
+                "text".into() => Input::String("test".into()),
+            }),
+            provider: None,
+            seed: Some(42),
+            stream: None,
+            mcp_server_authorization: None,
+        },
+    );
+    // The stream succeeds but the reasoning chunk will have an error.
+    let result = run_execution_allow_error(&client, request).await;
+    // The execution itself should succeed (output is valid).
+    // The reasoning should have an error.
+    assert!(
+        result.reasoning.as_ref().is_some_and(|r| r.error.is_some()),
+        "expected reasoning error, got: {:?}",
+        result.reasoning,
     );
 }
