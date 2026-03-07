@@ -26,7 +26,7 @@ pub struct AssistantResponse {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<String>,
     /// Upstream usage for this assistant response (set by upstream clients).
-    pub upstream_usage: response::UpstreamUsage,
+    pub usage: response::UpstreamUsage,
 }
 
 impl From<response::streaming::AssistantResponseChunk> for AssistantResponse {
@@ -47,7 +47,7 @@ impl From<response::streaming::AssistantResponseChunk> for AssistantResponse {
             service_tier,
             system_fingerprint,
             provider,
-            upstream_usage,
+            usage,
         }: response::streaming::AssistantResponseChunk,
     ) -> Self {
         Self {
@@ -68,7 +68,7 @@ impl From<response::streaming::AssistantResponseChunk> for AssistantResponse {
             service_tier,
             system_fingerprint,
             provider,
-            upstream_usage: upstream_usage.unwrap_or_default(),
+            usage: usage.unwrap_or_default(),
         }
     }
 }

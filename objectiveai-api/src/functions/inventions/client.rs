@@ -117,7 +117,7 @@ where
             drop(tx);
             if let Some(aggregate) = aggregate {
                 if aggregate.usage.as_ref().is_some_and(
-                    objectiveai::vector::completions::response::Usage::any_usage,
+                    objectiveai::agent::completions::response::Usage::any_usage,
                 ) {
                     self.usage_handler
                         .handle_usage(ctx, request, aggregate.into())

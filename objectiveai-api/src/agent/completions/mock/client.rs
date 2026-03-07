@@ -309,10 +309,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                     created,
                     messages: Vec::new(),
                     object: Default::default(),
-                    usage: Some(objectiveai::agent::completions::response::Usage {
-                        is_byok,
-                        ..Default::default()
-                    }),
+                    usage: Some(objectiveai::agent::completions::response::Usage::default()),
                     upstream: objectiveai::agent::Upstream::Mock,
                     error: None,
                 });

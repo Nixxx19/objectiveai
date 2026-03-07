@@ -35,7 +35,7 @@ impl Usage {
         self,
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
-    ) -> objectiveai::agent::completions::response::Usage {
+    ) -> objectiveai::agent::completions::response::UpstreamUsage {
         let upstream_inference_cost = self.cost.unwrap_or_default();
         let upstream_upstream_inference_cost = self
             .cost_details
@@ -56,7 +56,7 @@ impl Usage {
         } else {
             (total_cost, None, total_cost)
         };
-        objectiveai::agent::completions::response::Usage {
+        objectiveai::agent::completions::response::UpstreamUsage {
             completion_tokens: self.completion_tokens,
             prompt_tokens: self.prompt_tokens,
             total_tokens: self.total_tokens,

@@ -93,6 +93,9 @@ impl ChatCompletionChunk {
                 service_tier: self.service_tier,
                 system_fingerprint: self.system_fingerprint,
                 provider: self.provider,
+                usage: self
+                    .usage
+                    .map(|usage| usage.into_downstream(is_byok, cost_multiplier)),
             },
         );
 
@@ -101,9 +104,7 @@ impl ChatCompletionChunk {
             created,
             messages: vec![message],
             object: Default::default(),
-            usage: self
-                .usage
-                .map(|usage| usage.into_downstream(is_byok, cost_multiplier)),
+            usage: None,
             upstream: objectiveai::agent::Upstream::Openrouter,
             error: None,
         }

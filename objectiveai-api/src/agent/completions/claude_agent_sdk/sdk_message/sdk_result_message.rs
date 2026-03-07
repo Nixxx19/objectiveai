@@ -149,7 +149,7 @@ impl SDKResultMessage {
             (total_cost, None, total_cost)
         };
 
-        let downstream_usage = objectiveai::agent::completions::response::Usage {
+        let downstream_usage = objectiveai::agent::completions::response::UpstreamUsage {
             completion_tokens,
             prompt_tokens,
             total_tokens,
@@ -167,7 +167,11 @@ impl SDKResultMessage {
             created,
             messages: vec![],
             object: Default::default(),
-            usage: Some(downstream_usage),
+            usage: {
+                let mut u = objectiveai::agent::completions::response::Usage::default();
+                u.push_upstream_usage(&downstream_usage);
+                Some(u)
+            },
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error,
         }

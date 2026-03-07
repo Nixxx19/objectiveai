@@ -981,7 +981,7 @@ where
 
             // track usage
             let mut usage =
-                objectiveai::vector::completions::response::Usage::default();
+                objectiveai::agent::completions::response::Usage::default();
 
             // track retry token index
             let mut retry_token_indices = Vec::new();
@@ -1412,7 +1412,7 @@ where
                     while let Some(chunk) = reasoning_stream.next().await {
                         // collect usage
                         if let Some(chunk_usage) = &chunk.inner.usage {
-                            usage.push_agent_completion_usage(chunk_usage);
+                            usage.push(chunk_usage);
                         }
 
                         // yield chunk
@@ -1633,10 +1633,10 @@ where
                         // collect usage
                         if let Some(chunk_usage) = &chunk.inner.usage {
                             if let Some(usage) = &mut final_chunk.usage {
-                                usage.push_agent_completion_usage(chunk_usage);
+                                usage.push(chunk_usage);
                             } else {
-                                let mut usage = objectiveai::vector::completions::response::Usage::default();
-                                usage.push_agent_completion_usage(chunk_usage);
+                                let mut usage = objectiveai::agent::completions::response::Usage::default();
+                                usage.push(chunk_usage);
                                 final_chunk.usage = Some(usage);
                             }
                         }
@@ -2227,7 +2227,7 @@ where
 
         // track usage
         let mut usage =
-            objectiveai::vector::completions::response::Usage::default();
+            objectiveai::agent::completions::response::Usage::default();
 
         // identifiers
         let function =

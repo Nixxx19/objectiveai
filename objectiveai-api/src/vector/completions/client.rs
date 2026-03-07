@@ -514,7 +514,7 @@ where
 
         // track usage
         let mut usage =
-            objectiveai::vector::completions::response::Usage::default();
+            objectiveai::agent::completions::response::Usage::default();
 
         // track scores and weights
         let mut weights = vec![Decimal::ZERO; request_responses_len];
@@ -614,7 +614,7 @@ where
                 for completion in &chunk.completions
                 {
                     if let Some(completion_usage) = &completion.inner.usage {
-                        usage.push_agent_completion_usage(&completion_usage);
+                        usage.push(&completion_usage);
                     }
                 }
 
