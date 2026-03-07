@@ -2161,7 +2161,7 @@ async fn test_tool_call_two_agents_seed_44() {
     let chunks: Vec<_> = Box::pin(stream).collect().await;
     assert!(!chunks.is_empty(), "should have at least one chunk");
     let result = normalize(aggregate(chunks));
-    assert_eq!(result.completions.len(), 4);
+    assert_eq!(result.completions.len(), 3);
     assert_eq!(result.votes.len(), 2);
 
     let json = serde_json::to_string_pretty(&result).unwrap();

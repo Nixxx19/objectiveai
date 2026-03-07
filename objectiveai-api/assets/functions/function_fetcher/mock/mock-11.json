@@ -1,0 +1,41 @@
+{
+  "type": "alpha.scalar.branch.function",
+  "description": "Scalar branch with skip condition on one sub-function.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string"
+      },
+      "include_sentiment": {
+        "type": "boolean"
+      }
+    },
+    "required": ["text"]
+  },
+  "tasks": [
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-1",
+      "commit": "mock",
+      "input": {
+        "$starlark": "input"
+      }
+    },
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-6",
+      "commit": "mock",
+      "skip": {
+        "$starlark": "not input.get('include_sentiment', False)"
+      },
+      "input": {
+        "$starlark": "{'subject': input['text'], 'body': input['text']}"
+      }
+    }
+  ]
+}

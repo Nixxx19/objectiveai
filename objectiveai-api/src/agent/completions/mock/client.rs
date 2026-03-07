@@ -86,7 +86,23 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         let tool_map = tool_map.clone();
         let delay = self.delay;
         let cont_len = _continuation.map_or(0u64, |c| c.len() as u64);
-        let seed = params.seed.map(|s| (s as u64).wrapping_add(cont_len));
+        let seed = params.seed.map(|s| {
+            use std::hash::Hasher;
+            let mut hasher = twox_hash::XxHash3_64::with_seed(s as u64);
+            hasher.write(&cont_len.to_le_bytes());
+            // Hash messages (prompt_id-style) for differentiation across tasks
+            {
+                let mut prompt = _messages.to_vec();
+                objectiveai::agent::completions::message::prompt::prepare(&mut prompt);
+                let pid = objectiveai::agent::completions::message::prompt::id(&prompt);
+                hasher.write(pid.as_bytes());
+            }
+            // Hash tool names for differentiation across tool configurations
+            for tn in &tool_names {
+                hasher.write(tn.as_bytes());
+            }
+            hasher.finish()
+        });
         let prior_tool_call_count = _continuation
             .and_then(|items| {
                 items.iter().rev().find_map(|item| match item {

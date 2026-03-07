@@ -1,0 +1,41 @@
+{
+  "type": "alpha.scalar.leaf.function",
+  "description": "Multi-task scalar with two vector completion tasks and a skip condition.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string"
+      },
+      "include_sentiment": {
+        "type": "boolean"
+      }
+    },
+    "required": ["text"]
+  },
+  "tasks": [
+    {
+      "type": "vector.completion",
+      "messages": {
+        "$starlark": "[{'role': 'user', 'content': [{'type': 'text', 'text': 'Is this spam? ' + input['text']}]}]"
+      },
+      "responses": [
+        [{"type": "text", "text": "Spam"}],
+        [{"type": "text", "text": "Not spam"}]
+      ]
+    },
+    {
+      "type": "vector.completion",
+      "skip": {
+        "$starlark": "not input.get('include_sentiment', False)"
+      },
+      "messages": {
+        "$starlark": "[{'role': 'user', 'content': [{'type': 'text', 'text': 'Sentiment: ' + input['text']}]}]"
+      },
+      "responses": [
+        [{"type": "text", "text": "Positive"}],
+        [{"type": "text", "text": "Negative"}]
+      ]
+    }
+  ]
+}

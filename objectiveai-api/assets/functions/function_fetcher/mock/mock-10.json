@@ -1,0 +1,45 @@
+{
+  "type": "alpha.scalar.branch.function",
+  "description": "Scalar branch combining binary, 5-way, and importance classifiers.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string"
+      }
+    },
+    "required": ["text"]
+  },
+  "tasks": [
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-1",
+      "commit": "mock",
+      "input": {
+        "$starlark": "input"
+      }
+    },
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-3",
+      "commit": "mock",
+      "input": {
+        "$starlark": "input"
+      }
+    },
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-6",
+      "commit": "mock",
+      "input": {
+        "$starlark": "{'subject': input['text'], 'body': input['text']}"
+      }
+    }
+  ]
+}

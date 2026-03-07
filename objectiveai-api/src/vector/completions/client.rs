@@ -692,7 +692,7 @@ where
             ) {
                 let agent_id = a.id().to_string();
                 let mut rng = make_rng(
-                    request.seed.map(|s| per_agent_seed(s, &agent_id) as u64),
+                    request.seed.map(|s| per_agent_seed(s, &agent_id, flat_ensemble_index, &prompt_id, &responses_ids) as u64),
                 );
                 let top_logprobs = a.top_logprobs();
                 let pfx_tree = super::PfxTree::new(
@@ -792,7 +792,7 @@ where
                     .collect()
             }),
             response_format: response_format.clone(),
-            seed: request.seed.map(|s| per_agent_seed(s, &primary_id)),
+            seed: request.seed.map(|s| per_agent_seed(s, &primary_id, flat_ensemble_index, &prompt_id, &responses_ids)),
             stream: Some(false),
             mcp_server_authorization: request.mcp_server_authorization.clone(),
         });
@@ -1294,12 +1294,26 @@ fn rich_content_to_string(
     }
 }
 
-/// Computes a per-agent seed by hashing the base seed with the agent ID.
+/// Computes a per-agent seed by hashing the base seed with the agent ID,
+/// flat ensemble index, prompt ID, and response IDs.
 ///
-/// This ensures each agent in an ensemble gets a different but deterministic seed.
-fn per_agent_seed(seed: i64, agent_id: &str) -> i64 {
+/// This ensures each agent in an ensemble gets a different but deterministic
+/// seed, and different vector completion tasks (with different prompts or
+/// responses) also get different seeds for the same agent.
+fn per_agent_seed(
+    seed: i64,
+    agent_id: &str,
+    flat_ensemble_index: usize,
+    prompt_id: &str,
+    responses_ids: &[String],
+) -> i64 {
     let mut hasher = twox_hash::XxHash3_64::with_seed(seed as u64);
     hasher.write(agent_id.as_bytes());
+    hasher.write(&(flat_ensemble_index as u64).to_le_bytes());
+    hasher.write(prompt_id.as_bytes());
+    for rid in responses_ids {
+        hasher.write(rid.as_bytes());
+    }
     hasher.finish() as i64
 }
 

@@ -1,79 +1,74 @@
-//! Tests for the function execution client.
-//!
-//! These tests use mock implementations of all fetcher traits and set
-//! Uses mock clients to avoid network traffic.
+//! Tests for function execution client.
 
-use crate::{chat, ctx, ensemble, ensemble_llm, functions, vector};
-use futures::StreamExt;
-use indexmap::IndexMap;
-use rust_decimal::Decimal;
 use std::sync::Arc;
+use std::time::Duration;
 
-// ============================================================================
-// Mock Types
-// ============================================================================
+use futures::StreamExt;
+use rust_decimal::Decimal;
 
-/// Mock context extension that provides no BYOK keys.
-#[derive(Debug, Clone)]
-struct MockContextExt;
+use objectiveai::functions::executions::request::{
+    FunctionRemoteProfileRemoteRequestBody, FunctionRemoteProfileRemoteRequestPath, Request,
+};
+use objectiveai::functions::executions::response::streaming::FunctionExecutionChunk;
+use objectiveai::functions::executions::response::unary::FunctionExecution;
+use objectiveai::functions::expression::Input;
+use objectiveai::functions::Remote;
+
+use crate::agent::completions::UnimplementedUpstreamClient;
+use crate::ctx;
+use crate::functions;
+
+// ---------------------------------------------------------------------------
+// Stubs
+// ---------------------------------------------------------------------------
+
+struct StubAgentFetcher;
 
 #[async_trait::async_trait]
-impl ctx::ContextExt for MockContextExt {
-    async fn get_byok(
-        &self,
-        _upstream: objectiveai::upstream::Upstream,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError> {
-        Ok(None)
-    }
-}
-
-/// Mock ensemble LLM fetcher that always returns None.
-#[derive(Debug, Clone)]
-struct MockEnsembleLlmFetcher;
-
-#[async_trait::async_trait]
-impl ensemble_llm::fetcher::Fetcher<MockContextExt> for MockEnsembleLlmFetcher {
+impl crate::agent::fetcher::Fetcher<ctx::DefaultContextExt> for StubAgentFetcher {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
         _id: &str,
     ) -> Result<
-        Option<(objectiveai::ensemble_llm::EnsembleLlm, u64)>,
+        Option<(objectiveai::agent::Agent, u64)>,
         objectiveai::error::ResponseError,
     > {
-        Ok(None)
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub agent fetcher should not be called"),
+        })
     }
 }
 
-/// Mock ensemble fetcher that always returns None.
-#[derive(Debug, Clone)]
-struct MockEnsembleFetcher;
+struct StubEnsembleFetcher;
 
 #[async_trait::async_trait]
-impl ensemble::fetcher::Fetcher<MockContextExt> for MockEnsembleFetcher {
+impl crate::ensemble::fetcher::Fetcher<ctx::DefaultContextExt> for StubEnsembleFetcher {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
         _id: &str,
     ) -> Result<
         Option<(objectiveai::ensemble::Ensemble, u64)>,
         objectiveai::error::ResponseError,
     > {
-        Ok(None)
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub ensemble fetcher should not be called"),
+        })
     }
 }
 
-/// Mock completion votes fetcher that returns None.
-#[derive(Debug, Clone)]
-struct MockCompletionVotesFetcher;
+struct StubCompletionVotesFetcher;
 
 #[async_trait::async_trait]
-impl vector::completions::completion_votes_fetcher::Fetcher<MockContextExt>
-    for MockCompletionVotesFetcher
+impl crate::vector::completions::completion_votes_fetcher::Fetcher<ctx::DefaultContextExt>
+    for StubCompletionVotesFetcher
 {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
         _id: &str,
     ) -> Result<
         Option<Vec<objectiveai::vector::completions::response::Vote>>,
@@ -83,22 +78,19 @@ impl vector::completions::completion_votes_fetcher::Fetcher<MockContextExt>
     }
 }
 
-/// Mock cache vote fetcher that returns None.
-#[derive(Debug, Clone)]
-struct MockCacheVoteFetcher;
+struct StubCacheVoteFetcher;
 
 #[async_trait::async_trait]
-impl vector::completions::cache_vote_fetcher::Fetcher<MockContextExt>
-    for MockCacheVoteFetcher
+impl crate::vector::completions::cache_vote_fetcher::Fetcher<ctx::DefaultContextExt>
+    for StubCacheVoteFetcher
 {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
-        _model: &objectiveai::chat::completions::request::Model,
-        _models: Option<&[objectiveai::chat::completions::request::Model]>,
-        _messages: &[objectiveai::chat::completions::request::Message],
-        _tools: Option<&[objectiveai::chat::completions::request::Tool]>,
-        _responses: &[objectiveai::chat::completions::request::RichContent],
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _agent: &objectiveai::agent::completions::request::Agent,
+        _agents: Option<&[objectiveai::agent::completions::request::Agent]>,
+        _messages: &[objectiveai::agent::completions::message::Message],
+        _responses: &[objectiveai::agent::completions::message::RichContent],
     ) -> Result<
         Option<objectiveai::vector::completions::response::Vote>,
         objectiveai::error::ResponseError,
@@ -107,39 +99,77 @@ impl vector::completions::cache_vote_fetcher::Fetcher<MockContextExt>
     }
 }
 
-/// Mock function fetcher that always returns None.
-#[derive(Debug, Clone)]
-struct MockFunctionFetcher;
+struct StubAgentUsageHandler;
+
+impl crate::agent::completions::usage_handler::UsageHandler<ctx::DefaultContextExt>
+    for StubAgentUsageHandler
+{
+    fn handle_usage(
+        &self,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _request: Arc<objectiveai::agent::completions::request::AgentCompletionCreateParams>,
+        _response: objectiveai::agent::completions::response::unary::AgentCompletion,
+    ) -> impl std::future::Future<Output = ()> + Send + 'static {
+        async {}
+    }
+}
+
+struct StubVectorUsageHandler;
 
 #[async_trait::async_trait]
-impl functions::function_fetcher::Fetcher<MockContextExt>
-    for MockFunctionFetcher
+impl crate::vector::completions::usage_handler::UsageHandler<ctx::DefaultContextExt>
+    for StubVectorUsageHandler
 {
+    async fn handle_usage(
+        &self,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _request: Arc<objectiveai::vector::completions::request::VectorCompletionCreateParams>,
+        _response: objectiveai::vector::completions::response::unary::VectorCompletion,
+    ) {
+    }
+}
+
+struct StubFunctionUsageHandler;
+
+#[async_trait::async_trait]
+impl super::usage_handler::UsageHandler<ctx::DefaultContextExt> for StubFunctionUsageHandler {
+    async fn handle_usage(
+        &self,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _request: Arc<Request>,
+        _response: FunctionExecution,
+    ) {
+    }
+}
+
+struct StubFunctionGithubFetcher;
+
+#[async_trait::async_trait]
+impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt> for StubFunctionGithubFetcher {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
         _owner: &str,
         _repository: &str,
         _commit: Option<&str>,
     ) -> Result<
-        Option<objectiveai::functions::response::GetFunction>,
+        Option<functions::function_fetcher::FullGetFunction>,
         objectiveai::error::ResponseError,
     > {
-        Ok(None)
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub github function fetcher should not be called"),
+        })
     }
 }
 
-/// Mock profile fetcher that always returns None.
-#[derive(Debug, Clone)]
-struct MockProfileFetcher;
+struct StubProfileGithubFetcher;
 
 #[async_trait::async_trait]
-impl functions::profile_fetcher::Fetcher<MockContextExt>
-    for MockProfileFetcher
-{
+impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt> for StubProfileGithubFetcher {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
         _owner: &str,
         _repository: &str,
         _commit: Option<&str>,
@@ -147,799 +177,817 @@ impl functions::profile_fetcher::Fetcher<MockContextExt>
         Option<objectiveai::functions::profiles::response::GetProfile>,
         objectiveai::error::ResponseError,
     > {
-        Ok(None)
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub github profile fetcher should not be called"),
+        })
     }
 }
 
-/// Mock chat completions usage handler that does nothing.
-#[derive(Debug, Clone)]
-struct MockChatUsageHandler;
+struct StubFilesystemFetcher;
 
 #[async_trait::async_trait]
-impl chat::completions::usage_handler::UsageHandler<MockContextExt>
-    for MockChatUsageHandler
-{
-    async fn handle_usage(
+impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt> for StubFilesystemFetcher {
+    async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
-        _request: Option<
-            Arc<objectiveai::chat::completions::request::ChatCompletionCreateParams>,
-        >,
-        _response: objectiveai::chat::completions::response::unary::ChatCompletion,
-    ) {
-        // Do nothing
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _owner: &str,
+        _repository: &str,
+        _commit: Option<&str>,
+    ) -> Result<
+        Option<functions::function_fetcher::FullGetFunction>,
+        objectiveai::error::ResponseError,
+    > {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub filesystem function fetcher should not be called"),
+        })
     }
 }
 
-/// Mock vector completions usage handler that does nothing.
-#[derive(Debug, Clone)]
-struct MockVectorUsageHandler;
+struct StubFilesystemProfileFetcher;
 
 #[async_trait::async_trait]
-impl vector::completions::usage_handler::UsageHandler<MockContextExt>
-    for MockVectorUsageHandler
+impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
+    for StubFilesystemProfileFetcher
 {
-    async fn handle_usage(
+    async fn fetch(
         &self,
-        _ctx: ctx::Context<MockContextExt>,
-        _request: Arc<
-            objectiveai::vector::completions::request::VectorCompletionCreateParams,
-        >,
-        _response: objectiveai::vector::completions::response::unary::VectorCompletion,
-    ) {
-        // Do nothing
+        _ctx: ctx::Context<ctx::DefaultContextExt>,
+        _owner: &str,
+        _repository: &str,
+        _commit: Option<&str>,
+    ) -> Result<
+        Option<objectiveai::functions::profiles::response::GetProfile>,
+        objectiveai::error::ResponseError,
+    > {
+        Err(objectiveai::error::ResponseError {
+            code: 501,
+            message: serde_json::json!("stub filesystem profile fetcher should not be called"),
+        })
     }
 }
 
-/// Mock function execution usage handler that does nothing.
-#[derive(Debug, Clone)]
-struct MockFunctionUsageHandler;
+// ---------------------------------------------------------------------------
+// Client construction
+// ---------------------------------------------------------------------------
 
-#[async_trait::async_trait]
-impl super::usage_handler::UsageHandler<MockContextExt>
-    for MockFunctionUsageHandler
-{
-    async fn handle_usage(
-        &self,
-        _ctx: ctx::Context<MockContextExt>,
-        _request: Arc<objectiveai::functions::executions::request::Request>,
-        _response: objectiveai::functions::executions::response::unary::FunctionExecution,
-    ) {
-        // Do nothing
-    }
-}
-
-// ============================================================================
-// Type Aliases
-// ============================================================================
-
-type TestChatClient = chat::completions::Client<
-    MockContextExt,
-    MockEnsembleLlmFetcher,
-    MockChatUsageHandler,
+type TestClient = super::Client<
+    ctx::DefaultContextExt,
+    UnimplementedUpstreamClient,
+    UnimplementedUpstreamClient,
+    crate::agent::completions::mock::Client,
+    StubAgentFetcher,
+    StubAgentUsageHandler,
+    StubEnsembleFetcher,
+    StubCompletionVotesFetcher,
+    StubCacheVoteFetcher,
+    StubVectorUsageHandler,
+    StubFunctionGithubFetcher,
+    StubFilesystemFetcher,
+    functions::function_fetcher::mock::MockFetcher,
+    StubProfileGithubFetcher,
+    StubFilesystemProfileFetcher,
+    functions::profile_fetcher::mock::MockFetcher,
+    StubFunctionUsageHandler,
 >;
 
-type TestVectorClient = vector::completions::Client<
-    MockContextExt,
-    MockEnsembleLlmFetcher,
-    MockChatUsageHandler,
-    MockEnsembleFetcher,
-    MockCompletionVotesFetcher,
-    MockCacheVoteFetcher,
-    MockVectorUsageHandler,
->;
-
-type TestFunctionClient = super::Client<
-    MockContextExt,
-    MockEnsembleLlmFetcher,
-    MockChatUsageHandler,
-    MockEnsembleFetcher,
-    MockCompletionVotesFetcher,
-    MockCacheVoteFetcher,
-    MockVectorUsageHandler,
-    MockFunctionFetcher,
-    MockFunctionFetcher,
-    MockProfileFetcher,
-    MockProfileFetcher,
-    MockFunctionUsageHandler,
->;
-
-// ============================================================================
-// Helper Functions
-// ============================================================================
-
-/// Creates a test context with mock extension.
-fn create_test_context() -> ctx::Context<MockContextExt> {
-    ctx::Context::new(Arc::new(MockContextExt), Decimal::ONE)
-}
-
-/// Creates a test chat completions client with mock dependencies.
-fn create_test_chat_client() -> Arc<TestChatClient> {
-    let ensemble_llm_fetcher =
-        Arc::new(ensemble_llm::fetcher::CachingFetcher::new(Arc::new(
-            MockEnsembleLlmFetcher,
-        )));
-    let usage_handler = Arc::new(MockChatUsageHandler);
-
-    // Create OpenRouter client with dummy values
-    let openrouter_client =
-        chat::completions::upstream::openrouter::Client::new(
+fn make_client() -> Arc<TestClient> {
+    let agent_client = Arc::new(crate::agent::completions::Client {
+        mcp_client: Arc::new(crate::mcp::Client::new(
             reqwest::Client::new(),
-            "https://openrouter.ai/api/v1".to_string(),
-            "dummy-api-key".to_string(),
-            None, // user_agent
-            None, // x_title
-            None, // referer
-        );
-    let upstream_client =
-        chat::completions::upstream::Client::new(Some(openrouter_client), None);
-
-    Arc::new(chat::completions::Client::new(
-        ensemble_llm_fetcher,
-        usage_handler,
-        upstream_client,
-        std::time::Duration::from_millis(500),
-        std::time::Duration::from_millis(500),
-        0.5,
-        1.5,
-        std::time::Duration::from_secs(60),
-        std::time::Duration::from_secs(300),
-    ))
-}
-
-/// Creates a test vector completions client with mock dependencies.
-fn create_test_vector_client(
-    chat_client: Arc<TestChatClient>,
-) -> Arc<TestVectorClient> {
-    let ensemble_fetcher = Arc::new(ensemble::fetcher::CachingFetcher::new(
-        Arc::new(MockEnsembleFetcher),
+            None,
+            None,
+            None,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::ZERO,
+            0.0,
+            1.0,
+            Duration::ZERO,
+            Duration::ZERO,
+            Duration::from_millis(1),
+        )),
+        agent_fetcher: Arc::new(crate::agent::fetcher::CachingFetcher::new(
+            Arc::new(StubAgentFetcher),
+        )),
+        usage_handler: Arc::new(StubAgentUsageHandler),
+        openrouter: Arc::new(UnimplementedUpstreamClient),
+        claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
+        mock: Arc::new(crate::agent::completions::mock::Client {
+            delay: Duration::ZERO,
+        }),
+        backoff_current_interval: Duration::ZERO,
+        backoff_initial_interval: Duration::ZERO,
+        backoff_randomization_factor: 0.0,
+        backoff_multiplier: 1.0,
+        backoff_max_interval: Duration::ZERO,
+        backoff_max_elapsed_time: Duration::ZERO,
+        first_chunk_timeout: Duration::from_millis(1),
+        other_chunk_timeout: Duration::from_millis(1),
+    });
+    let ensemble_fetcher = Arc::new(crate::ensemble::fetcher::CachingFetcher::new(
+        Arc::new(StubEnsembleFetcher),
     ));
-    let completion_votes_fetcher = Arc::new(MockCompletionVotesFetcher);
-    let cache_vote_fetcher = Arc::new(MockCacheVoteFetcher);
-    let usage_handler = Arc::new(MockVectorUsageHandler);
-
-    Arc::new(vector::completions::Client::new(
-        chat_client,
-        ensemble_fetcher,
-        completion_votes_fetcher,
-        cache_vote_fetcher,
-        usage_handler,
-    ))
-}
-
-/// Creates a test function execution client with mock dependencies.
-fn create_test_function_client(
-    chat_client: Arc<TestChatClient>,
-    vector_client: Arc<TestVectorClient>,
-) -> Arc<TestFunctionClient> {
-    let ensemble_fetcher = Arc::new(ensemble::fetcher::CachingFetcher::new(
-        Arc::new(MockEnsembleFetcher),
+    let vector_client = Arc::new(crate::vector::completions::Client {
+        agent_client: agent_client.clone(),
+        ensemble_fetcher: ensemble_fetcher.clone(),
+        completion_votes_fetcher: Arc::new(StubCompletionVotesFetcher),
+        cache_vote_fetcher: Arc::new(StubCacheVoteFetcher),
+        usage_handler: Arc::new(StubVectorUsageHandler),
+    });
+    let function_fetcher = Arc::new(functions::function_fetcher::FetcherRouter::new(
+        Arc::new(StubFunctionGithubFetcher),
+        Arc::new(StubFilesystemFetcher),
+        Arc::new(functions::function_fetcher::mock::MockFetcher),
     ));
-    let function_fetcher =
-        Arc::new(functions::function_fetcher::FetcherRouter::new(
-            Arc::new(MockFunctionFetcher),
-            Arc::new(MockFunctionFetcher),
-        ));
-    let profile_fetcher =
-        Arc::new(functions::profile_fetcher::FetcherRouter::new(
-            Arc::new(MockProfileFetcher),
-            Arc::new(MockProfileFetcher),
-        ));
-    let usage_handler = Arc::new(MockFunctionUsageHandler);
-
+    let profile_fetcher = Arc::new(functions::profile_fetcher::FetcherRouter::new(
+        Arc::new(StubProfileGithubFetcher),
+        Arc::new(StubFilesystemProfileFetcher),
+        Arc::new(functions::profile_fetcher::mock::MockFetcher),
+    ));
     Arc::new(super::Client::new(
-        chat_client,
+        agent_client,
         ensemble_fetcher,
         vector_client,
         function_fetcher,
         profile_fetcher,
-        usage_handler,
+        Arc::new(StubFunctionUsageHandler),
     ))
 }
 
-/// Creates a simple inline ensemble with a single LLM.
-fn create_simple_ensemble()
--> objectiveai::vector::completions::request::Ensemble {
-    objectiveai::vector::completions::request::Ensemble::Provided(
-        objectiveai::ensemble::EnsembleBase {
-            llms: vec![objectiveai::ensemble_llm::EnsembleLlmBaseWithFallbacksAndCount {
-                count: 1,
-                inner: objectiveai::ensemble_llm::EnsembleLlmBase {
-                    model: "openai/gpt-4o".to_string(),
-                    ..Default::default()
-                },
-                fallbacks: None,
-            }],
+fn make_request(
+    function_repo: &str,
+    profile_repo: &str,
+    input: Input,
+    seed: i64,
+) -> Arc<Request> {
+    Arc::new(Request::FunctionRemoteProfileRemote {
+        path: FunctionRemoteProfileRemoteRequestPath {
+            fremote: Remote::Mock,
+            fowner: "mock".to_string(),
+            frepository: function_repo.to_string(),
+            fcommit: Some("mock".to_string()),
+            premote: Remote::Mock,
+            powner: "mock".to_string(),
+            prepository: profile_repo.to_string(),
+            pcommit: Some("mock".to_string()),
         },
-    )
-}
-
-/// Creates an empty Input object.
-fn empty_input() -> objectiveai::functions::expression::Input {
-    objectiveai::functions::expression::Input::Object(IndexMap::new())
-}
-
-/// Creates a simple inline vector function with one vector completion task.
-fn create_simple_vector_function() -> objectiveai::functions::InlineFunction {
-    objectiveai::functions::InlineFunction::Vector {
-        tasks: vec![objectiveai::functions::TaskExpression::VectorCompletion(
-            objectiveai::functions::VectorCompletionTaskExpression {
-                skip: None,
-                map: None,
-                messages: objectiveai::functions::expression::WithExpression::Value(vec![
-                    objectiveai::functions::expression::WithExpression::Value(
-                        objectiveai::chat::completions::request::MessageExpression::User(
-                            objectiveai::chat::completions::request::UserMessageExpression {
-                                content: objectiveai::functions::expression::WithExpression::Value(
-                                    objectiveai::chat::completions::request::RichContentExpression::Text(
-                                        "Which is better?".to_string(),
-                                    ),
-                                ),
-                                name: None,
-                            },
-                        ),
-                    ),
-                ]),
-                tools: None,
-                responses: objectiveai::functions::expression::WithExpression::Value(vec![
-                    objectiveai::functions::expression::WithExpression::Value(
-                        objectiveai::chat::completions::request::RichContentExpression::Text(
-                            "Option A".to_string(),
-                        ),
-                    ),
-                    objectiveai::functions::expression::WithExpression::Value(
-                        objectiveai::chat::completions::request::RichContentExpression::Text(
-                            "Option B".to_string(),
-                        ),
-                    ),
-                ]),
-                output: objectiveai::functions::expression::Expression::Starlark(
-                    "output['scores']".to_string(),
-                ),
-            },
-        )],
-        input_split: None,
-        input_merge: None,
-    }
-}
-
-/// Creates a simple inline profile for a function with one vector completion task.
-fn create_simple_profile() -> objectiveai::functions::InlineProfile {
-    objectiveai::functions::InlineProfile::Tasks(objectiveai::functions::InlineTasksProfile {
-        tasks: vec![objectiveai::functions::TaskProfile::Inline(
-            objectiveai::functions::InlineProfile::Auto(
-                objectiveai::functions::InlineAutoProfile {
-                    ensemble: create_simple_ensemble(),
-                    profile:
-                        objectiveai::vector::completions::request::Profile::Weights(
-                            vec![Decimal::ONE],
-                        ),
-                },
-            ),
-        )],
-        profile: objectiveai::vector::completions::request::Profile::Weights(
-            vec![Decimal::ONE],
-        ),
+        body: FunctionRemoteProfileRemoteRequestBody {
+            retry_token: None,
+            from_cache: None,
+            reasoning: None,
+            strategy: None,
+            input,
+            provider: None,
+            seed: Some(seed),
+            stream: None,
+            mcp_server_authorization: None,
+        },
     })
 }
 
-/// Creates a simple inline scalar function with one vector completion task.
-fn create_simple_scalar_function() -> objectiveai::functions::InlineFunction {
-    objectiveai::functions::InlineFunction::Scalar {
-        tasks: vec![objectiveai::functions::TaskExpression::VectorCompletion(
-            objectiveai::functions::VectorCompletionTaskExpression {
-                skip: None,
-                map: None,
-                messages: objectiveai::functions::expression::WithExpression::Value(vec![
-                    objectiveai::functions::expression::WithExpression::Value(
-                        objectiveai::chat::completions::request::MessageExpression::User(
-                            objectiveai::chat::completions::request::UserMessageExpression {
-                                content: objectiveai::functions::expression::WithExpression::Value(
-                                    objectiveai::chat::completions::request::RichContentExpression::Text(
-                                        "Rate this on a scale of 0 to 1".to_string(),
-                                    ),
-                                ),
-                                name: None,
-                            },
-                        ),
-                    ),
-                ]),
-                tools: None,
-                responses: objectiveai::functions::expression::WithExpression::Value(vec![
-                    objectiveai::functions::expression::WithExpression::Value(
-                        objectiveai::chat::completions::request::RichContentExpression::Text(
-                            "Good".to_string(),
-                        ),
-                    ),
-                    objectiveai::functions::expression::WithExpression::Value(
-                        objectiveai::chat::completions::request::RichContentExpression::Text(
-                            "Bad".to_string(),
-                        ),
-                    ),
-                ]),
-                // For scalar functions, we take the first score as the output
-                output: objectiveai::functions::expression::Expression::Starlark(
-                    "output['scores'][0]".to_string(),
-                ),
-            },
-        )],
+// ---------------------------------------------------------------------------
+// Streaming + aggregation helpers
+// ---------------------------------------------------------------------------
+
+fn aggregate(chunks: Vec<FunctionExecutionChunk>) -> FunctionExecution {
+    let mut agg: Option<FunctionExecutionChunk> = None;
+    for chunk in &chunks {
+        match &mut agg {
+            Some(a) => a.push(chunk),
+            None => agg = Some(chunk.clone()),
+        }
+    }
+    FunctionExecution::from(agg.expect("stream should have at least one chunk"))
+}
+
+async fn run_execution(client: &Arc<TestClient>, request: Arc<Request>) -> FunctionExecution {
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let stream = client
+        .clone()
+        .create_streaming(ctx, request)
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect().await;
+    assert!(!chunks.is_empty(), "should have at least one chunk");
+    aggregate(chunks)
+}
+
+// ---------------------------------------------------------------------------
+// Snapshot helpers
+// ---------------------------------------------------------------------------
+
+fn normalize(mut fe: FunctionExecution) -> FunctionExecution {
+    normalize_fe(&mut fe);
+    fe
+}
+
+fn normalize_fe(fe: &mut FunctionExecution) {
+    fe.id = String::new();
+    fe.created = 0;
+    fe.retry_token = None;
+    for task in &mut fe.tasks {
+        match task {
+            objectiveai::functions::executions::response::unary::Task::VectorCompletion(vt) => {
+                normalize_vc(&mut vt.inner);
+            }
+            objectiveai::functions::executions::response::unary::Task::FunctionExecution(ft) => {
+                normalize_fe(&mut ft.inner);
+            }
+        }
     }
 }
 
-/// Creates a simple inline scalar profile.
-fn create_simple_scalar_profile() -> objectiveai::functions::InlineProfile {
-    objectiveai::functions::InlineProfile::Tasks(objectiveai::functions::InlineTasksProfile {
-        tasks: vec![objectiveai::functions::TaskProfile::Inline(
-            objectiveai::functions::InlineProfile::Auto(
-                objectiveai::functions::InlineAutoProfile {
-                    ensemble: create_simple_ensemble(),
-                    profile:
-                        objectiveai::vector::completions::request::Profile::Weights(
-                            vec![Decimal::ONE],
-                        ),
-                },
-            ),
-        )],
-        profile: objectiveai::vector::completions::request::Profile::Weights(
-            vec![Decimal::ONE],
-        ),
-    })
+fn normalize_vc(
+    vc: &mut objectiveai::vector::completions::response::unary::VectorCompletion,
+) {
+    vc.id = String::new();
+    vc.created = 0;
+    for completion in &mut vc.completions {
+        completion.inner.id = String::new();
+        completion.inner.created = 0;
+        for msg in &mut completion.inner.messages {
+            if let objectiveai::agent::completions::response::unary::Message::Assistant(asst) = msg
+            {
+                asst.upstream_id = String::new();
+                asst.created = 0;
+            }
+        }
+    }
+    for vote in &mut vc.votes {
+        vote.prompt_id = String::new();
+        vote.responses_ids = Vec::new();
+    }
 }
 
-// ============================================================================
+fn assert_snapshot(json: &str, path: &str, expected: &str) {
+    if std::env::var("UPDATE_FUNCTIONS_EXECUTIONS_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
+        std::fs::write(path, json).unwrap();
+        eprintln!("Updated snapshot: {path}");
+        let written = std::fs::read_to_string(path).unwrap();
+        assert_eq!(json, written.trim_end());
+    } else {
+        assert_eq!(json, expected.trim_end());
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Tests
-// ============================================================================
+// ---------------------------------------------------------------------------
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+/// mock-1: Simple scalar leaf, single task, binary classification, seed 42.
+#[tokio::test]
+async fn test_mock_1_scalar_leaf_binary_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-1",
+        "mock-1",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Hello world".into()),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_1_scalar_leaf_binary_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_1_scalar_leaf_binary_seed_42.json"),
+    );
+}
 
-    /// Tests that a simple vector function execution produces valid output.
-    #[tokio::test]
-    async fn test_vector_function_execution_with_rng() {
-        let chat_client = create_test_chat_client();
-        let vector_client = create_test_vector_client(chat_client.clone());
-        let function_client =
-            create_test_function_client(chat_client, vector_client);
+/// mock-2: Multi-task scalar with skip condition (include_sentiment=false), seed 42.
+#[tokio::test]
+async fn test_mock_2_scalar_skip_false_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-2",
+        "mock-2",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Buy cheap watches now!!!".into()),
+            "include_sentiment".into() => Input::Boolean(false),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_2_scalar_skip_false_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_2_scalar_skip_false_seed_42.json"),
+    );
+}
 
-        let ctx = create_test_context();
+/// mock-2: Multi-task scalar with skip condition (include_sentiment=true), seed 42.
+#[tokio::test]
+async fn test_mock_2_scalar_skip_true_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-2",
+        "mock-2",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("I love this product!".into()),
+            "include_sentiment".into() => Input::Boolean(true),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_2_scalar_skip_true_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_2_scalar_skip_true_seed_42.json"),
+    );
+}
 
-        let request = Arc::new(objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
-            body: objectiveai::functions::executions::request::FunctionInlineProfileInlineRequestBody {
-                function: create_simple_vector_function(),
-                profile: create_simple_profile(),
-                base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
-                    retry_token: None,
-                    from_cache: None,
-                    upstreams: None,
-                    reasoning: None,
-                    strategy: None,
-                    input: empty_input(),
-                    provider: None,
-                    seed: None,
-                    stream: None,
-                },
-            },
-        });
+/// mock-3: 5-way classification scalar, seed 42.
+#[tokio::test]
+async fn test_mock_3_scalar_5way_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-3",
+        "mock-3",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("The food was amazing".into()),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_3_scalar_5way_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_3_scalar_5way_seed_42.json"),
+    );
+}
 
-        let result = function_client
-            .create_unary_handle_usage(ctx, request)
-            .await;
+/// mock-4: Simple vector ranker with 3 items, seed 42.
+#[tokio::test]
+async fn test_mock_4_vector_ranker_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-4",
+        "mock-4",
+        Input::Object(indexmap::indexmap! {
+            "items".into() => Input::Array(vec![
+                Input::String("Apple".into()),
+                Input::String("Banana".into()),
+                Input::String("Cherry".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_4_vector_ranker_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_4_vector_ranker_seed_42.json"),
+    );
+}
 
-        assert!(
-            result.is_ok(),
-            "Function execution should succeed: {:?}",
-            result.err()
-        );
+/// mock-5: Vector ranker with context and multiple tasks, seed 42.
+#[tokio::test]
+async fn test_mock_5_vector_context_multi_task_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-5",
+        "mock-5",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "query".into() => Input::String("best fruit".into()),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("Apple".into()),
+                Input::String("Banana".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_5_vector_context_multi_task_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_5_vector_context_multi_task_seed_42.json"),
+    );
+}
 
-        let response = result.unwrap();
+/// mock-6: Scalar with system message and multi-part user content, seed 42.
+#[tokio::test]
+async fn test_mock_6_scalar_system_message_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-6",
+        "mock-6",
+        Input::Object(indexmap::indexmap! {
+            "subject".into() => Input::String("Meeting tomorrow".into()),
+            "body".into() => Input::String("Don't forget the meeting at 3pm.".into()),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_6_scalar_system_message_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_6_scalar_system_message_seed_42.json"),
+    );
+}
 
-        // Verify the output is a vector that sums to approximately 1
-        match &response.output {
-            objectiveai::functions::expression::FunctionOutput::Vector(
-                scores,
-            ) => {
-                assert_eq!(
-                    scores.len(),
-                    2,
-                    "Should have 2 scores for 2 responses"
-                );
-                let sum: Decimal = scores.iter().cloned().sum();
-                assert!(
-                    sum >= Decimal::new(99, 2) && sum <= Decimal::new(101, 2),
-                    "Scores should sum to approximately 1, got {}",
-                    sum
-                );
-            }
-            other => panic!("Expected vector output, got {:?}", other),
-        }
-    }
+// ---------------------------------------------------------------------------
+// Vector leaf with 5 tasks
+// ---------------------------------------------------------------------------
 
-    /// Tests that a simple scalar function execution produces valid output.
-    #[tokio::test]
-    async fn test_scalar_function_execution_with_rng() {
-        let chat_client = create_test_chat_client();
-        let vector_client = create_test_vector_client(chat_client.clone());
-        let function_client =
-            create_test_function_client(chat_client, vector_client);
+/// mock-7: Vector ranker with 5 scoring criteria, seed 42.
+#[tokio::test]
+async fn test_mock_7_vector_5_criteria_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-7",
+        "mock-7",
+        Input::Object(indexmap::indexmap! {
+            "items".into() => Input::Array(vec![
+                Input::String("Option A".into()),
+                Input::String("Option B".into()),
+                Input::String("Option C".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_7_vector_5_criteria_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_7_vector_5_criteria_seed_42.json"),
+    );
+}
 
-        let ctx = create_test_context();
+/// mock-8: Vector ranker with context, 5 tasks, skip conditions (strict=false), seed 42.
+#[tokio::test]
+async fn test_mock_8_vector_context_skip_false_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-8",
+        "mock-8",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "query".into() => Input::String("best answer".into()),
+                "strict".into() => Input::Boolean(false),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("Answer 1".into()),
+                Input::String("Answer 2".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_8_vector_context_skip_false_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_8_vector_context_skip_false_seed_42.json"),
+    );
+}
 
-        let request = Arc::new(objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
-            body: objectiveai::functions::executions::request::FunctionInlineProfileInlineRequestBody {
-                function: create_simple_scalar_function(),
-                profile: create_simple_scalar_profile(),
-                base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
-                    retry_token: None,
-                    from_cache: None,
-                    upstreams: None,
-                    reasoning: None,
-                    strategy: None,
-                    input: empty_input(),
-                    provider: None,
-                    seed: None,
-                    stream: None,
-                },
-            },
-        });
+/// mock-8: Vector ranker with context, 5 tasks, skip conditions (strict=true), seed 42.
+#[tokio::test]
+async fn test_mock_8_vector_context_skip_true_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-8",
+        "mock-8",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "query".into() => Input::String("best answer".into()),
+                "strict".into() => Input::Boolean(true),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("Answer 1".into()),
+                Input::String("Answer 2".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_8_vector_context_skip_true_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_8_vector_context_skip_true_seed_42.json"),
+    );
+}
 
-        let result = function_client
-            .create_unary_handle_usage(ctx, request)
-            .await;
+// ---------------------------------------------------------------------------
+// Scalar branch functions
+// ---------------------------------------------------------------------------
 
-        assert!(
-            result.is_ok(),
-            "Function execution should succeed: {:?}",
-            result.err()
-        );
+/// mock-9: Scalar branch combining spam + importance classifiers, seed 42.
+#[tokio::test]
+async fn test_mock_9_scalar_branch_2_tasks_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-9",
+        "mock-9",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Important project update".into()),
+            "subject".into() => Input::String("Project update".into()),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_9_scalar_branch_2_tasks_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_9_scalar_branch_2_tasks_seed_42.json"),
+    );
+}
 
-        let response = result.unwrap();
+/// mock-10: Scalar branch combining binary, 5-way, importance (one agent errors), seed 42.
+#[tokio::test]
+async fn test_mock_10_scalar_branch_3_tasks_error_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-10",
+        "mock-10",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Great service!".into()),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_10_scalar_branch_3_tasks_error_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_10_scalar_branch_3_tasks_error_seed_42.json"),
+    );
+}
 
-        // Verify the output is a scalar between 0 and 1
-        match &response.output {
-            objectiveai::functions::expression::FunctionOutput::Scalar(
-                score,
-            ) => {
-                assert!(
-                    *score >= Decimal::ZERO && *score <= Decimal::ONE,
-                    "Scalar score should be between 0 and 1, got {}",
-                    score
-                );
-            }
-            other => panic!("Expected scalar output, got {:?}", other),
-        }
-    }
+/// mock-11: Scalar branch with skip condition (include_sentiment=false), seed 42.
+#[tokio::test]
+async fn test_mock_11_scalar_branch_skip_false_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-11",
+        "mock-11",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Check this out".into()),
+            "include_sentiment".into() => Input::Boolean(false),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_11_scalar_branch_skip_false_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_false_seed_42.json"),
+    );
+}
 
-    /// Tests streaming function execution.
-    #[tokio::test]
-    async fn test_streaming_function_execution_with_rng() {
-        let chat_client = create_test_chat_client();
-        let vector_client = create_test_vector_client(chat_client.clone());
-        let function_client =
-            create_test_function_client(chat_client, vector_client);
+/// mock-11: Scalar branch with skip condition (include_sentiment=true), seed 42.
+#[tokio::test]
+async fn test_mock_11_scalar_branch_skip_true_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-11",
+        "mock-11",
+        Input::Object(indexmap::indexmap! {
+            "text".into() => Input::String("Check this out".into()),
+            "include_sentiment".into() => Input::Boolean(true),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_11_scalar_branch_skip_true_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_11_scalar_branch_skip_true_seed_42.json"),
+    );
+}
 
-        let ctx = create_test_context();
+// ---------------------------------------------------------------------------
+// Vector branch functions
+// ---------------------------------------------------------------------------
 
-        let request = Arc::new(objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
-            body: objectiveai::functions::executions::request::FunctionInlineProfileInlineRequestBody {
-                function: create_simple_vector_function(),
-                profile: create_simple_profile(),
-                base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
-                    retry_token: None,
-                    from_cache: None,
-                    upstreams: None,
-                    reasoning: None,
-                    strategy: None,
-                    input: empty_input(),
-                    provider: None,
-                    seed: None,
-                    stream: Some(true),
-                },
-            },
-        });
+/// mock-12: Vector branch with two vector sub-function rankers, seed 42.
+#[tokio::test]
+async fn test_mock_12_vector_branch_2_vector_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-12",
+        "mock-12",
+        Input::Object(indexmap::indexmap! {
+            "items".into() => Input::Array(vec![
+                Input::String("Red".into()),
+                Input::String("Blue".into()),
+                Input::String("Green".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_12_vector_branch_2_vector_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_12_vector_branch_2_vector_seed_42.json"),
+    );
+}
 
-        let stream_result = function_client
-            .clone()
-            .create_streaming_handle_usage(ctx, request)
-            .await;
+/// mock-13: Vector branch mixing scalar and vector sub-functions, seed 42.
+#[tokio::test]
+async fn test_mock_13_vector_branch_mixed_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-13",
+        "mock-13",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "query".into() => Input::String("favorite color".into()),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("Red".into()),
+                Input::String("Blue".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_13_vector_branch_mixed_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_13_vector_branch_mixed_seed_42.json"),
+    );
+}
 
-        assert!(
-            stream_result.is_ok(),
-            "Streaming should start: {:?}",
-            stream_result.err()
-        );
+/// mock-14: Vector branch with skip on sub-function (include_quality=false), seed 42.
+#[tokio::test]
+async fn test_mock_14_vector_branch_skip_false_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-14",
+        "mock-14",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "query".into() => Input::String("rank these".into()),
+                "include_quality".into() => Input::Boolean(false),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("X".into()),
+                Input::String("Y".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_14_vector_branch_skip_false_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_14_vector_branch_skip_false_seed_42.json"),
+    );
+}
 
-        let mut stream = stream_result.unwrap();
-        let mut chunks = Vec::new();
+/// mock-14: Vector branch with skip on sub-function (include_quality=true), seed 42.
+#[tokio::test]
+async fn test_mock_14_vector_branch_skip_true_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-14",
+        "mock-14",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "query".into() => Input::String("rank these".into()),
+                "include_quality".into() => Input::Boolean(true),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("X".into()),
+                Input::String("Y".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_14_vector_branch_skip_true_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_14_vector_branch_skip_true_seed_42.json"),
+    );
+}
 
-        while let Some(chunk) = stream.next().await {
-            chunks.push(chunk);
-        }
+/// mock-15: Vector branch with 3 vector sub-functions and high logprobs, seed 42.
+#[tokio::test]
+async fn test_mock_15_vector_branch_3_vector_logprobs_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-15",
+        "mock-15",
+        Input::Object(indexmap::indexmap! {
+            "items".into() => Input::Array(vec![
+                Input::String("Alpha".into()),
+                Input::String("Beta".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_15_vector_branch_3_vector_logprobs_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_15_vector_branch_3_vector_logprobs_seed_42.json"),
+    );
+}
 
-        assert!(!chunks.is_empty(), "Should receive at least one chunk");
+/// mock-16: Vector branch with 4 tasks, error agent, logprobs, seed 42.
+#[tokio::test]
+async fn test_mock_16_vector_branch_4_tasks_error_logprobs_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-16",
+        "mock-16",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "text".into() => Input::String("Evaluate these options".into()),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("First".into()),
+                Input::String("Second".into()),
+                Input::String("Third".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_16_vector_branch_4_tasks_error_logprobs_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_16_vector_branch_4_tasks_error_logprobs_seed_42.json"),
+    );
+}
 
-        // Aggregate chunks to get final response
-        let mut aggregate = chunks[0].clone();
-        for chunk in chunks.iter().skip(1) {
-            aggregate.push(chunk);
-        }
+/// mock-17: Vector branch with mixed tasks, skip conditions (deep=false), seed 42.
+#[tokio::test]
+async fn test_mock_17_vector_branch_mixed_skip_false_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-17",
+        "mock-17",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "query".into() => Input::String("compare these".into()),
+                "deep".into() => Input::Boolean(false),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("Foo".into()),
+                Input::String("Bar".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_false_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_false_seed_42.json"),
+    );
+}
 
-        let response: objectiveai::functions::executions::response::unary::FunctionExecution =
-            aggregate.into();
-
-        // Verify the output
-        match &response.output {
-            objectiveai::functions::expression::FunctionOutput::Vector(
-                scores,
-            ) => {
-                assert_eq!(scores.len(), 2, "Should have 2 scores");
-            }
-            other => panic!("Expected vector output, got {:?}", other),
-        }
-    }
-
-    /// Tests that multiple vector completion tasks are combined correctly.
-    #[tokio::test]
-    async fn test_multi_task_function_execution_with_rng() {
-        let chat_client = create_test_chat_client();
-        let vector_client = create_test_vector_client(chat_client.clone());
-        let function_client =
-            create_test_function_client(chat_client, vector_client);
-
-        let ctx = create_test_context();
-
-        // Create a function with two tasks
-        let function = objectiveai::functions::InlineFunction::Vector {
-            tasks: vec![
-                objectiveai::functions::TaskExpression::VectorCompletion(
-                    objectiveai::functions::VectorCompletionTaskExpression {
-                        skip: None,
-                        map: None,
-                        messages: objectiveai::functions::expression::WithExpression::Value(vec![
-                            objectiveai::functions::expression::WithExpression::Value(
-                                objectiveai::chat::completions::request::MessageExpression::User(
-                                    objectiveai::chat::completions::request::UserMessageExpression {
-                                        content: objectiveai::functions::expression::WithExpression::Value(
-                                            objectiveai::chat::completions::request::RichContentExpression::Text(
-                                                "Task 1: Which is better?".to_string(),
-                                            ),
-                                        ),
-                                        name: None,
-                                    },
-                                ),
-                            ),
-                        ]),
-                        tools: None,
-                        responses: objectiveai::functions::expression::WithExpression::Value(vec![
-                            objectiveai::functions::expression::WithExpression::Value(
-                                objectiveai::chat::completions::request::RichContentExpression::Text(
-                                    "A".to_string(),
-                                ),
-                            ),
-                            objectiveai::functions::expression::WithExpression::Value(
-                                objectiveai::chat::completions::request::RichContentExpression::Text(
-                                    "B".to_string(),
-                                ),
-                            ),
-                        ]),
-                        output: objectiveai::functions::expression::Expression::Starlark(
-                            "output['scores']".to_string(),
-                        ),
-                            },
-                ),
-                objectiveai::functions::TaskExpression::VectorCompletion(
-                    objectiveai::functions::VectorCompletionTaskExpression {
-                        skip: None,
-                        map: None,
-                        messages: objectiveai::functions::expression::WithExpression::Value(vec![
-                            objectiveai::functions::expression::WithExpression::Value(
-                                objectiveai::chat::completions::request::MessageExpression::User(
-                                    objectiveai::chat::completions::request::UserMessageExpression {
-                                        content: objectiveai::functions::expression::WithExpression::Value(
-                                            objectiveai::chat::completions::request::RichContentExpression::Text(
-                                                "Task 2: Which is better?".to_string(),
-                                            ),
-                                        ),
-                                        name: None,
-                                    },
-                                ),
-                            ),
-                        ]),
-                        tools: None,
-                        responses: objectiveai::functions::expression::WithExpression::Value(vec![
-                            objectiveai::functions::expression::WithExpression::Value(
-                                objectiveai::chat::completions::request::RichContentExpression::Text(
-                                    "A".to_string(),
-                                ),
-                            ),
-                            objectiveai::functions::expression::WithExpression::Value(
-                                objectiveai::chat::completions::request::RichContentExpression::Text(
-                                    "B".to_string(),
-                                ),
-                            ),
-                        ]),
-                        output: objectiveai::functions::expression::Expression::Starlark(
-                            "output['scores']".to_string(),
-                        ),
-                            },
-                ),
-            ],
-            input_split: None,
-            input_merge: None,
-        };
-
-        // Create a profile with equal weights for both tasks
-        let profile = objectiveai::functions::InlineProfile::Tasks(objectiveai::functions::InlineTasksProfile {
-            tasks: vec![
-                objectiveai::functions::TaskProfile::Inline(
-                    objectiveai::functions::InlineProfile::Auto(
-                        objectiveai::functions::InlineAutoProfile {
-                            ensemble: create_simple_ensemble(),
-                            profile: objectiveai::vector::completions::request::Profile::Weights(
-                                vec![Decimal::ONE],
-                            ),
-                        },
-                    ),
-                ),
-                objectiveai::functions::TaskProfile::Inline(
-                    objectiveai::functions::InlineProfile::Auto(
-                        objectiveai::functions::InlineAutoProfile {
-                            ensemble: create_simple_ensemble(),
-                            profile: objectiveai::vector::completions::request::Profile::Weights(
-                                vec![Decimal::ONE],
-                            ),
-                        },
-                    ),
-                ),
-            ],
-            profile: objectiveai::vector::completions::request::Profile::Weights(
-                vec![Decimal::new(5, 1), Decimal::new(5, 1)],
-            ), // 0.5, 0.5
-        });
-
-        let request = Arc::new(objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
-            body: objectiveai::functions::executions::request::FunctionInlineProfileInlineRequestBody {
-                function,
-                profile,
-                base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
-                    retry_token: None,
-                    from_cache: None,
-                    upstreams: None,
-                    reasoning: None,
-                    strategy: None,
-                    input: empty_input(),
-                    provider: None,
-                    seed: None,
-                    stream: None,
-                },
-            },
-        });
-
-        let result = function_client
-            .create_unary_handle_usage(ctx, request)
-            .await;
-
-        assert!(
-            result.is_ok(),
-            "Multi-task function should succeed: {:?}",
-            result.err()
-        );
-
-        let response = result.unwrap();
-
-        // Verify the output is a valid vector
-        match &response.output {
-            objectiveai::functions::expression::FunctionOutput::Vector(
-                scores,
-            ) => {
-                assert_eq!(scores.len(), 2, "Should have 2 scores");
-                let sum: Decimal = scores.iter().cloned().sum();
-                assert!(
-                    sum >= Decimal::new(99, 2) && sum <= Decimal::new(101, 2),
-                    "Scores should sum to approximately 1, got {}",
-                    sum
-                );
-            }
-            other => panic!("Expected vector output, got {:?}", other),
-        }
-    }
-
-    /// Tests function execution with a multi-LLM ensemble.
-    #[tokio::test]
-    async fn test_multi_llm_ensemble_with_rng() {
-        let chat_client = create_test_chat_client();
-        let vector_client = create_test_vector_client(chat_client.clone());
-        let function_client =
-            create_test_function_client(chat_client, vector_client);
-
-        let ctx = create_test_context();
-
-        // Create an ensemble with multiple LLMs
-        let ensemble = objectiveai::vector::completions::request::Ensemble::Provided(
-            objectiveai::ensemble::EnsembleBase {
-                llms: vec![
-                    objectiveai::ensemble_llm::EnsembleLlmBaseWithFallbacksAndCount {
-                        count: 2,
-                        inner: objectiveai::ensemble_llm::EnsembleLlmBase {
-                            model: "openai/gpt-4o".to_string(),
-                            ..Default::default()
-                        },
-                        fallbacks: None,
-                    },
-                    objectiveai::ensemble_llm::EnsembleLlmBaseWithFallbacksAndCount {
-                        count: 1,
-                        inner: objectiveai::ensemble_llm::EnsembleLlmBase {
-                            model: "anthropic/claude-3-5-sonnet".to_string(),
-                            ..Default::default()
-                        },
-                        fallbacks: None,
-                    },
-                ],
-            },
-        );
-
-        let profile = objectiveai::functions::InlineProfile::Tasks(objectiveai::functions::InlineTasksProfile {
-            tasks: vec![objectiveai::functions::TaskProfile::Inline(
-                objectiveai::functions::InlineProfile::Auto(
-                    objectiveai::functions::InlineAutoProfile {
-                        ensemble,
-                        // Profile weights are per-LLM-config, not per-instance
-                        // We have 2 distinct LLM configs (gpt-4o and claude)
-                        profile: objectiveai::vector::completions::request::Profile::Weights(
-                            vec![
-                                Decimal::new(6, 1), // 0.6 for gpt-4o (covers both instances)
-                                Decimal::new(4, 1), // 0.4 for claude
-                            ],
-                        ),
-                    },
-                ),
-            )],
-            profile: objectiveai::vector::completions::request::Profile::Weights(
-                vec![Decimal::ONE],
-            ),
-        });
-
-        let request = Arc::new(objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
-            body: objectiveai::functions::executions::request::FunctionInlineProfileInlineRequestBody {
-                function: create_simple_vector_function(),
-                profile,
-                base: objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody {
-                    retry_token: None,
-                    from_cache: None,
-                    upstreams: None,
-                    reasoning: None,
-                    strategy: None,
-                    input: empty_input(),
-                    provider: None,
-                    seed: None,
-                    stream: None,
-                },
-            },
-        });
-
-        let result = function_client
-            .create_unary_handle_usage(ctx, request)
-            .await;
-
-        assert!(
-            result.is_ok(),
-            "Multi-LLM ensemble should succeed: {:?}",
-            result.err()
-        );
-
-        let response = result.unwrap();
-
-        // Verify the output
-        match &response.output {
-            objectiveai::functions::expression::FunctionOutput::Vector(
-                scores,
-            ) => {
-                assert_eq!(scores.len(), 2, "Should have 2 scores");
-            }
-            other => panic!("Expected vector output, got {:?}", other),
-        }
-
-        // Verify we got a valid response with tasks
-        assert_eq!(response.tasks.len(), 1, "Should have 1 task");
-    }
+/// mock-17: Vector branch with mixed tasks, skip conditions (deep=true), seed 42.
+#[tokio::test]
+async fn test_mock_17_vector_branch_mixed_skip_true_seed_42() {
+    let client = make_client();
+    let request = make_request(
+        "mock-17",
+        "mock-17",
+        Input::Object(indexmap::indexmap! {
+            "context".into() => Input::Object(indexmap::indexmap! {
+                "query".into() => Input::String("compare these".into()),
+                "deep".into() => Input::Boolean(true),
+            }),
+            "items".into() => Input::Array(vec![
+                Input::String("Foo".into()),
+                Input::String("Bar".into()),
+            ]),
+        }),
+        42,
+    );
+    let result = normalize(run_execution(&client, request).await);
+    let json = serde_json::to_string_pretty(&result).unwrap();
+    assert_snapshot(
+        &json,
+        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
+        include_str!("../../../assets/functions/executions/client_tests/mock_17_vector_branch_mixed_skip_true_seed_42.json"),
+    );
 }
