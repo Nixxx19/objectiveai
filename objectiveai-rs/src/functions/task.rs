@@ -7,15 +7,15 @@
 //! # Output Expressions
 //!
 //! Each task has an `output` expression that transforms its raw result into a
-//! [`FunctionOutput`](super::expression::FunctionOutput). The expression receives
+//! [`TaskOutputOwned`](super::expression::TaskOutputOwned). The expression receives
 //! an `output` parameter that is one of four variants:
 //!
-//! - `Function(FunctionOutput)` - for non-mapped function tasks
-//! - `MapFunction(Vec<FunctionOutput>)` - for mapped function tasks
-//! - `VectorCompletion(VectorCompletionOutput)` - for non-mapped vector completion tasks
-//! - `MapVectorCompletion(Vec<VectorCompletionOutput>)` - for mapped vector completion tasks
+//! - `Scalar(Decimal)` - a single score
+//! - `Vector(Vec<Decimal>)` - a vector of scores
+//! - `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)
+//! - `Err(Value)` - an error
 //!
-//! The expression must return a `FunctionOutput` valid for the parent function's type:
+//! The expression must return a `TaskOutputOwned` valid for the parent function's type:
 //! - **Scalar functions**: must return `Scalar(value)` where value is in [0, 1]
 //! - **Vector functions**: must return `Vector(values)` where values sum to ~1 and match the expected length
 //!
@@ -140,7 +140,7 @@ impl Task {
         input: &super::expression::Input,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         match self {
@@ -191,13 +191,13 @@ pub struct ScalarFunctionTaskExpression {
 
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` which is one of 4 variants depending on task type:
-    /// - `Function(FunctionOutput)` - for non-mapped function tasks
-    /// - `MapFunction(Vec<FunctionOutput>)` - for mapped function tasks
-    /// - `VectorCompletion(VectorCompletionOutput)` - for non-mapped vector completion tasks
-    /// - `MapVectorCompletion(Vec<VectorCompletionOutput>)` - for mapped vector completion tasks
+    /// Receives `output` which is one of 4 variants:
+    /// - `Scalar(Decimal)` - a single score
+    /// - `Vector(Vec<Decimal>)` - a vector of scores
+    /// - `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)
+    /// - `Err(Value)` - an error
     ///
-    /// The expression must return a `FunctionOutput` that is valid for the parent function's type:
+    /// The expression must return a `TaskOutputOwned` that is valid for the parent function's type:
     /// - For scalar functions: must return `Scalar(value)` where value is in [0, 1]
     /// - For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length
     ///
@@ -244,8 +244,8 @@ pub struct ScalarFunctionTask {
     pub input: super::expression::Input,
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` as `Function(FunctionOutput)` containing the nested function's result.
-    /// Must return a `FunctionOutput` valid for the parent function's type (scalar or vector).
+    /// Receives `output` as the nested function's result (Scalar or Vector).
+    /// Must return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).
     /// See [`ScalarFunctionTaskExpression::output`] for full documentation.
     pub output: super::expression::Expression,
 }
@@ -260,7 +260,7 @@ impl ScalarFunctionTask {
         input: &super::expression::Input,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -302,13 +302,13 @@ pub struct VectorFunctionTaskExpression {
 
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` which is one of 4 variants depending on task type:
-    /// - `Function(FunctionOutput)` - for non-mapped function tasks
-    /// - `MapFunction(Vec<FunctionOutput>)` - for mapped function tasks
-    /// - `VectorCompletion(VectorCompletionOutput)` - for non-mapped vector completion tasks
-    /// - `MapVectorCompletion(Vec<VectorCompletionOutput>)` - for mapped vector completion tasks
+    /// Receives `output` which is one of 4 variants:
+    /// - `Scalar(Decimal)` - a single score
+    /// - `Vector(Vec<Decimal>)` - a vector of scores
+    /// - `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)
+    /// - `Err(Value)` - an error
     ///
-    /// The expression must return a `FunctionOutput` that is valid for the parent function's type:
+    /// The expression must return a `TaskOutputOwned` that is valid for the parent function's type:
     /// - For scalar functions: must return `Scalar(value)` where value is in [0, 1]
     /// - For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length
     ///
@@ -355,8 +355,8 @@ pub struct VectorFunctionTask {
     pub input: super::expression::Input,
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` as `Function(FunctionOutput)` containing the nested function's result.
-    /// Must return a `FunctionOutput` valid for the parent function's type (scalar or vector).
+    /// Receives `output` as the nested function's result (Scalar or Vector).
+    /// Must return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).
     /// See [`VectorFunctionTaskExpression::output`] for full documentation.
     pub output: super::expression::Expression,
 }
@@ -371,7 +371,7 @@ impl VectorFunctionTask {
         input: &super::expression::Input,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -418,10 +418,9 @@ pub struct VectorCompletionTaskExpression {
 
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` as `VectorCompletion(VectorCompletionOutput)` containing
-    /// the completion result with `votes`, `scores`, and `weights` fields.
+    /// Receives `output` as the task's raw result (typically `Vector(scores)`).
     ///
-    /// The expression must return a `FunctionOutput` that is valid for the parent function's type:
+    /// The expression must return a `TaskOutputOwned` that is valid for the parent function's type:
     /// - For scalar functions: must return `Scalar(value)` where value is in [0, 1]
     /// - For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length
     ///
@@ -486,9 +485,8 @@ pub struct VectorCompletionTask {
     pub responses: Vec<agent::completions::message::RichContent>,
     /// Expression to transform the task result into a valid function output.
     ///
-    /// Receives `output` as `VectorCompletion(VectorCompletionOutput)` containing
-    /// the completion result with `votes`, `scores`, and `weights` fields.
-    /// Must return a `FunctionOutput` valid for the parent function's type (scalar or vector).
+    /// Receives `output` as the task's raw result (typically `Vector(scores)`).
+    /// Must return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).
     /// See [`VectorCompletionTaskExpression::output`] for full documentation.
     pub output: super::expression::Expression,
 }
@@ -499,7 +497,7 @@ impl VectorCompletionTask {
         input: &super::expression::Input,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -537,7 +535,7 @@ pub struct PlaceholderScalarFunctionTaskExpression {
         super::expression::WithExpression<super::expression::InputExpression>,
 
     /// Expression to transform the fixed 0.5 output.
-    /// Receives: `input`, `output` as `Function(FunctionOutput::Scalar(0.5))`.
+    /// Receives: `input`, `output` as `Scalar(0.5)`.
     pub output: super::expression::Expression,
 }
 
@@ -558,7 +556,7 @@ impl PlaceholderScalarFunctionTaskExpression {
 
 /// A compiled placeholder scalar function task.
 ///
-/// Always produces `FunctionOutput::Scalar(0.5)` before the output expression
+/// Always produces `Scalar(0.5)` before the output expression
 /// is applied.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlaceholderScalarFunctionTask {
@@ -576,7 +574,7 @@ impl PlaceholderScalarFunctionTask {
         input: &super::expression::Input,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =
@@ -626,7 +624,7 @@ pub struct PlaceholderVectorFunctionTaskExpression {
         super::expression::WithExpression<super::expression::InputExpression>,
 
     /// Expression to transform the equalized vector output.
-    /// Receives: `input`, `output` as `Function(FunctionOutput::Vector(equalized))`.
+    /// Receives: `input`, `output` as `Vector(equalized)`.
     pub output: super::expression::Expression,
 }
 
@@ -650,7 +648,7 @@ impl PlaceholderVectorFunctionTaskExpression {
 
 /// A compiled placeholder vector function task.
 ///
-/// Always produces `FunctionOutput::Vector(vec![1/N; output_length])` before
+/// Always produces `Vector(vec![1/N; output_length])` before
 /// the output expression is applied.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PlaceholderVectorFunctionTask {
@@ -674,7 +672,7 @@ impl PlaceholderVectorFunctionTask {
         input: &super::expression::Input,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
-        super::expression::FunctionOutput,
+        super::expression::TaskOutputOwned,
         super::expression::ExpressionError,
     > {
         let params =

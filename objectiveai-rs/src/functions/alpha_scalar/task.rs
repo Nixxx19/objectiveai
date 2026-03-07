@@ -215,7 +215,7 @@ impl VectorCompletionTaskExpression {
                     .collect(),
             ),
             output: functions::expression::Expression::Special(
-                functions::expression::Special::VectorCompletionScoresWeightedSum,
+                functions::expression::Special::TaskOutputWeightedSum,
             ),
         }
     }

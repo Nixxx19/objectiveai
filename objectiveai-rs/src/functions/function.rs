@@ -3,18 +3,18 @@
 //! # Output Computation
 //!
 //! Functions do **not** have a top-level output expression. Instead, each task has its
-//! own `output` expression that transforms its raw result into a [`FunctionOutput`].
+//! own `output` expression that transforms its raw result into a [`TaskOutputOwned`].
 //! The function's final output is computed as a **weighted average** of all task outputs
 //! using profile weights.
 //!
 //! - If a function has only 1 task, that task's output becomes the function's output directly
 //! - If a function has multiple tasks, each task's output is weighted and averaged
 //!
-//! Each task's `output` expression must return a valid `FunctionOutput` for the function's type:
+//! Each task's `output` expression must return a valid `TaskOutputOwned` for the function's type:
 //! - **Scalar functions**: each task must return `Scalar(value)` where value is in [0, 1]
 //! - **Vector functions**: each task must return `Vector(values)` where values sum to ~1
 //!
-//! [`FunctionOutput`]: super::expression::FunctionOutput
+//! [`TaskOutputOwned`]: super::expression::TaskOutputOwned
 
 use serde::{Deserialize, Serialize};
 
@@ -22,7 +22,7 @@ use serde::{Deserialize, Serialize};
 ///
 /// Functions are composable scoring pipelines that transform structured input
 /// into scores. Each task has an `output` expression that transforms its raw result
-/// into a `FunctionOutput`. The function's final output is the weighted average of
+/// into a `TaskOutputOwned`. The function's final output is the weighted average of
 /// all task outputs using profile weights.
 ///
 /// Use [`compile_tasks`](Self::compile_tasks) to preview how task expressions resolve

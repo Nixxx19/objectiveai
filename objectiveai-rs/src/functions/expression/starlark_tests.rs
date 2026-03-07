@@ -10,8 +10,8 @@ use crate::agent::completions::message::{
     UserMessageExpression, VideoUrl,
 };
 use crate::functions::expression::{
-    FunctionOutput, Input, InputExpression, Params, ParamsOwned,
-    TaskOutputOwned, VectorCompletionOutput, WithExpression,
+    Input, InputExpression, Params, ParamsOwned,
+    TaskOutputOwned, WithExpression,
 };
 use indexmap::IndexMap;
 use rust_decimal::dec;
@@ -343,8 +343,7 @@ fn test_map_in_list_comprehension() {
 #[test]
 fn test_output_scalar() {
     let input = empty_input();
-    let output =
-        TaskOutputOwned::Function(FunctionOutput::Scalar(dec!(0.75)));
+    let output = TaskOutputOwned::Scalar(dec!(0.75));
     let params = make_params_with_output(input, output);
 
     let result: f64 = starlark_eval("output", &params).unwrap();
@@ -354,11 +353,11 @@ fn test_output_scalar() {
 #[test]
 fn test_output_vector() {
     let input = empty_input();
-    let output = TaskOutputOwned::Function(FunctionOutput::Vector(vec![
+    let output = TaskOutputOwned::Vector(vec![
         dec!(0.1),
         dec!(0.2),
         dec!(0.7),
-    ]));
+    ]);
     let params = make_params_with_output(input, output);
 
     let result: i64 = starlark_eval("len(output)", &params).unwrap();
@@ -366,23 +365,16 @@ fn test_output_vector() {
 }
 
 #[test]
-fn test_output_vector_completion_scores() {
+fn test_output_vector_scores() {
     let input = empty_input();
-    let output =
-        TaskOutputOwned::VectorCompletion(VectorCompletionOutput {
-            votes: vec![],
-            scores: vec![dec!(0.25), dec!(0.25), dec!(0.5)],
-            weights: vec![dec!(1.0), dec!(1.0), dec!(2.0)],
-        });
+    let output = TaskOutputOwned::Vector(
+        vec![dec!(0.25), dec!(0.25), dec!(0.5)],
+    );
     let params = make_params_with_output(input, output);
 
     let result: i64 =
-        starlark_eval("len(output['scores'])", &params).unwrap();
+        starlark_eval("len(output)", &params).unwrap();
     assert_eq!(result, 3);
-
-    let result2: i64 =
-        starlark_eval("len(output['weights'])", &params).unwrap();
-    assert_eq!(result2, 3);
 }
 
 #[test]
@@ -397,8 +389,7 @@ fn test_output_none() {
 #[test]
 fn test_output_not_none() {
     let input = obj(vec![("threshold", Input::Number(0.5))]);
-    let output =
-        TaskOutputOwned::Function(FunctionOutput::Scalar(dec!(0.7)));
+    let output = TaskOutputOwned::Scalar(dec!(0.7));
     let params = make_params_with_output(input, output);
 
     let result: bool = starlark_eval("output != None", &params).unwrap();
@@ -410,16 +401,13 @@ fn test_output_not_none() {
 #[test]
 fn test_full_params_all_fields() {
     let input = obj(vec![("base_score", Input::Number(0.5))]);
-    let output =
-        TaskOutputOwned::VectorCompletion(VectorCompletionOutput {
-            votes: vec![],
-            scores: vec![dec!(0.3), dec!(0.7)],
-            weights: vec![dec!(1.0), dec!(1.0)],
-        });
+    let output = TaskOutputOwned::Vector(
+        vec![dec!(0.3), dec!(0.7)],
+    );
     let params = make_full_params(input, output, 1);
 
     let result: i64 =
-        starlark_eval("len(output['scores'])", &params).unwrap();
+        starlark_eval("len(output)", &params).unwrap();
     assert_eq!(result, 2);
 
     let result2: i64 = starlark_eval("map", &params).unwrap();
@@ -436,8 +424,7 @@ fn test_full_params_complex_expression() {
             Input::String("c".to_string()),
         ]),
     )]);
-    let output =
-        TaskOutputOwned::Function(FunctionOutput::Scalar(dec!(0.5)));
+    let output = TaskOutputOwned::Scalar(dec!(0.5));
     let params = make_full_params(input, output, 1);
 
     let result: String =
@@ -451,10 +438,10 @@ fn test_full_params_complex_expression() {
 #[test]
 fn test_map_function_outputs() {
     let input = empty_input();
-    let output = TaskOutputOwned::MapFunction(vec![
-        FunctionOutput::Scalar(dec!(0.1)),
-        FunctionOutput::Scalar(dec!(0.5)),
-        FunctionOutput::Scalar(dec!(0.9)),
+    let output = TaskOutputOwned::Vector(vec![
+        dec!(0.1),
+        dec!(0.5),
+        dec!(0.9),
     ]);
     let params = make_params_with_output(input, output);
 
@@ -463,28 +450,20 @@ fn test_map_function_outputs() {
 }
 
 #[test]
-fn test_map_vector_completion_outputs() {
+fn test_map_vector_outputs() {
     let input = empty_input();
-    let output = TaskOutputOwned::MapVectorCompletion(vec![
-        VectorCompletionOutput {
-            votes: vec![],
-            scores: vec![dec!(0.5), dec!(0.5)],
-            weights: vec![dec!(1.0), dec!(1.0)],
-        },
-        VectorCompletionOutput {
-            votes: vec![],
-            scores: vec![dec!(0.3), dec!(0.7)],
-            weights: vec![dec!(0.5), dec!(0.5)],
-        },
+    let output = TaskOutputOwned::Vectors(vec![
+        vec![dec!(0.5), dec!(0.5)],
+        vec![dec!(0.3), dec!(0.7)],
     ]);
     let params = make_params_with_output(input, output);
 
     let result: i64 =
-        starlark_eval("len(output[0]['scores'])", &params).unwrap();
+        starlark_eval("len(output[0])", &params).unwrap();
     assert_eq!(result, 2);
 
     let result2: i64 =
-        starlark_eval("len(output[1]['weights'])", &params).unwrap();
+        starlark_eval("len(output[1])", &params).unwrap();
     assert_eq!(result2, 2);
 }
 
@@ -604,10 +583,10 @@ fn test_average_from_input() {
 #[test]
 fn test_average_mapped_outputs() {
     let input = empty_input();
-    let output = TaskOutputOwned::MapFunction(vec![
-        FunctionOutput::Scalar(dec!(0.2)),
-        FunctionOutput::Scalar(dec!(0.4)),
-        FunctionOutput::Scalar(dec!(0.6)),
+    let output = TaskOutputOwned::Vector(vec![
+        dec!(0.2),
+        dec!(0.4),
+        dec!(0.6),
     ]);
     let params = make_params_with_output(input, output);
 
@@ -849,39 +828,39 @@ fn test_starlark_input_expression_object() {
 }
 
 #[test]
-fn test_starlark_function_output_scalar() {
+fn test_starlark_task_output_scalar() {
     let params = make_params(empty_input());
     assert_starlark_deep_eq(
         "0.5",
         &params,
-        &FunctionOutput::Scalar(dec!(0.5)),
+        &TaskOutputOwned::Scalar(dec!(0.5)),
     );
 }
 
 #[test]
-fn test_starlark_function_output_scalar_int() {
+fn test_starlark_task_output_scalar_int() {
     let params = make_params(empty_input());
-    assert_starlark_deep_eq("1", &params, &FunctionOutput::Scalar(dec!(1)));
+    assert_starlark_deep_eq("1", &params, &TaskOutputOwned::Scalar(dec!(1)));
 }
 
 #[test]
-fn test_starlark_function_output_vector() {
+fn test_starlark_task_output_vector() {
     let params = make_params(empty_input());
     assert_starlark_deep_eq(
         "[0.25, 0.75]",
         &params,
-        &FunctionOutput::Vector(vec![dec!(0.25), dec!(0.75)]),
+        &TaskOutputOwned::Vector(vec![dec!(0.25), dec!(0.75)]),
     );
 }
 
 #[test]
-fn test_starlark_function_output_err() {
+fn test_starlark_task_output_err() {
     let params = make_params(empty_input());
     let err_val = serde_json::json!({"error": "bad"});
     assert_starlark_deep_eq(
         "{\"error\": \"bad\"}",
         &params,
-        &FunctionOutput::Err(err_val),
+        &TaskOutputOwned::Err(err_val),
     );
 }
 

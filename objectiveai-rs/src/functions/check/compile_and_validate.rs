@@ -7,8 +7,7 @@ use rust_decimal::Decimal;
 
 use crate::agent::completions::message::{Message, RichContent, SimpleContent};
 use crate::functions::expression::{
-    FunctionOutput, Params, ParamsRef, TaskOutput, TaskOutputOwned,
-    VectorCompletionOutput,
+    Params, ParamsRef, TaskOutput, TaskOutputOwned,
 };
 use crate::functions::{
     CompiledTask, Function, RemoteFunction, Task, VectorCompletionTask,
@@ -270,14 +269,14 @@ fn validate_output_expression(
     Ok(())
 }
 
-/// Validates a `FunctionOutput` against the expected parent function type.
+/// Validates a `TaskOutputOwned` against the expected parent function type.
 fn validate_function_output(
     location: &str,
     function_type: &FunctionType,
-    result: &FunctionOutput,
+    result: &TaskOutputOwned,
 ) -> Result<(), String> {
     match (function_type, result) {
-        (FunctionType::Scalar, FunctionOutput::Scalar(s)) => {
+        (FunctionType::Scalar, TaskOutputOwned::Scalar(s)) => {
             if *s < Decimal::new(-1, 2) || *s > Decimal::new(101, 2) {
                 return Err(format!(
                     "CV12: {}: output expression produced scalar {} which is outside \
@@ -286,7 +285,7 @@ fn validate_function_output(
                 ));
             }
         }
-        (FunctionType::Scalar, FunctionOutput::Vector(v)) => {
+        (FunctionType::Scalar, TaskOutputOwned::Vector(v)) => {
             return Err(format!(
                 "CV13: {}: output expression produced a vector of length {} but \
                  parent is a scalar function (expected a scalar value)",
@@ -294,7 +293,7 @@ fn validate_function_output(
                 v.len()
             ));
         }
-        (FunctionType::Vector { output_length }, FunctionOutput::Vector(v)) => {
+        (FunctionType::Vector { output_length }, TaskOutputOwned::Vector(v)) => {
             if v.len() as u64 != *output_length {
                 return Err(format!(
                     "CV14: {}: output expression produced a vector of length {} but \
@@ -313,18 +312,26 @@ fn validate_function_output(
                 ));
             }
         }
-        (FunctionType::Vector { .. }, FunctionOutput::Scalar(s)) => {
+        (FunctionType::Vector { .. }, TaskOutputOwned::Scalar(s)) => {
             return Err(format!(
                 "CV16: {}: output expression produced scalar {} but parent is a \
                  vector function (expected a vector)",
                 location, s
             ));
         }
-        (_, FunctionOutput::Err(e)) => {
+        (_, TaskOutputOwned::Err(e)) => {
             return Err(format!(
                 "CV17: {}: output expression produced an error: {}",
                 location,
                 serde_json::to_string(e).unwrap_or_default()
+            ));
+        }
+        (_, TaskOutputOwned::Vectors(vecs)) => {
+            return Err(format!(
+                "CV17: {}: output expression produced Vectors({} sub-vectors) \
+                 which is not valid as a final function output",
+                location,
+                vecs.len()
             ));
         }
     }
@@ -494,56 +501,39 @@ fn random_task_output<'a>(
 ) -> TaskOutput<'a> {
     match shape {
         OutputShape::VectorCompletion(n) => TaskOutput::Owned(
-            TaskOutputOwned::VectorCompletion(random_vc_output(*n, rng)),
+            TaskOutputOwned::Vector(random_scores(*n, rng)),
         ),
-        OutputShape::Scalar => TaskOutput::Owned(TaskOutputOwned::Function(
-            random_scalar_output(rng),
-        )),
-        OutputShape::Vector(n) => TaskOutput::Owned(TaskOutputOwned::Function(
-            random_vector_output(*n, rng),
-        )),
+        OutputShape::Scalar => {
+            let v: f64 = rng.random_range(0.01..0.99);
+            TaskOutput::Owned(TaskOutputOwned::Scalar(
+                Decimal::from_f64_retain(v).unwrap_or(Decimal::new(5, 1)),
+            ))
+        }
+        OutputShape::Vector(n) => TaskOutput::Owned(
+            TaskOutputOwned::Vector(random_scores(*n as usize, rng)),
+        ),
         OutputShape::MapVectorCompletion(sizes) => {
-            let outputs =
-                sizes.iter().map(|&n| random_vc_output(n, rng)).collect();
-            TaskOutput::Owned(TaskOutputOwned::MapVectorCompletion(outputs))
+            let outputs: Vec<Vec<Decimal>> =
+                sizes.iter().map(|&n| random_scores(n, rng)).collect();
+            TaskOutput::Owned(TaskOutputOwned::Vectors(outputs))
         }
         OutputShape::MapScalar(count) => {
-            let outputs =
-                (0..*count).map(|_| random_scalar_output(rng)).collect();
-            TaskOutput::Owned(TaskOutputOwned::MapFunction(outputs))
+            let scalars: Vec<Decimal> = (0..*count)
+                .map(|_| {
+                    let v: f64 = rng.random_range(0.01..0.99);
+                    Decimal::from_f64_retain(v)
+                        .unwrap_or(Decimal::new(5, 1))
+                })
+                .collect();
+            TaskOutput::Owned(TaskOutputOwned::Vector(scalars))
         }
         OutputShape::MapVector(lengths) => {
-            let outputs = lengths
+            let outputs: Vec<Vec<Decimal>> = lengths
                 .iter()
-                .map(|&n| random_vector_output(n, rng))
+                .map(|&n| random_scores(n as usize, rng))
                 .collect();
-            TaskOutput::Owned(TaskOutputOwned::MapFunction(outputs))
+            TaskOutput::Owned(TaskOutputOwned::Vectors(outputs))
         }
-    }
-}
-
-/// Random scalar output in [0, 1].
-fn random_scalar_output(rng: &mut impl Rng) -> FunctionOutput {
-    let v: f64 = rng.random_range(0.01..0.99);
-    FunctionOutput::Scalar(
-        Decimal::from_f64_retain(v).unwrap_or(Decimal::new(5, 1)),
-    )
-}
-
-/// Random vector output of length `n` summing to ~1.
-fn random_vector_output(n: u64, rng: &mut impl Rng) -> FunctionOutput {
-    let scores = random_scores(n as usize, rng);
-    FunctionOutput::Vector(scores)
-}
-
-/// Random vector completion output with `n` responses.
-fn random_vc_output(n: usize, rng: &mut impl Rng) -> VectorCompletionOutput {
-    let scores = random_scores(n, rng);
-    let weights = random_scores(n, rng);
-    VectorCompletionOutput {
-        votes: Vec::new(),
-        scores,
-        weights,
     }
 }
 

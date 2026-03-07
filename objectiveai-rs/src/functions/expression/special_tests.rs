@@ -1,26 +1,10 @@
 use super::*;
 use crate::functions::expression::{
-    ExpressionError, FunctionOutput, Input, InputExpression, Params,
-    ParamsOwned, TaskOutputOwned, VectorCompletionOutput,
+    ExpressionError, Input, InputExpression, Params,
+    ParamsOwned, TaskOutputOwned,
 };
-use crate::vector::completions::response::Vote;
 use indexmap::IndexMap;
 use rust_decimal::dec;
-
-fn make_vote() -> Vote {
-    Vote {
-        agent: "openai/gpt-4o".to_string(),
-        ensemble_index: 0,
-        flat_ensemble_index: 0,
-        prompt_id: "p1".to_string(),
-        responses_ids: vec!["r1".to_string(), "r2".to_string()],
-        vote: vec![dec!(1), dec!(0)],
-        weight: dec!(1),
-        retry: None,
-        from_cache: None,
-        completion_index: None,
-    }
-}
 
 // ── Special::Input ──────────────────────────────────────────────────
 
@@ -96,13 +80,13 @@ fn special_input_fails_for_bool() {
 }
 
 #[test]
-fn special_input_fails_for_function_output() {
+fn special_input_fails_for_task_output() {
     let params = Params::Owned(ParamsOwned {
         input: Input::String("hello".to_string()),
         output: None,
         map: None,
     });
-    let result = FunctionOutput::from_special(&Special::Input, &params);
+    let result = TaskOutputOwned::from_special(&Special::Input, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
@@ -112,29 +96,27 @@ fn special_input_fails_for_function_output() {
 fn special_output_returns_scalar() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::Function(FunctionOutput::Scalar(
-            dec!(0.75),
-        ))),
+        output: Some(TaskOutputOwned::Scalar(dec!(0.75))),
         map: None,
     });
     let result =
-        FunctionOutput::from_special(&Special::Output, &params).unwrap();
-    assert!(matches!(result, FunctionOutput::Scalar(d) if d == dec!(0.75)));
+        TaskOutputOwned::from_special(&Special::Output, &params).unwrap();
+    assert!(matches!(result, TaskOutputOwned::Scalar(d) if d == dec!(0.75)));
 }
 
 #[test]
 fn special_output_returns_vector() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::Function(FunctionOutput::Vector(
+        output: Some(TaskOutputOwned::Vector(
             vec![dec!(0.3), dec!(0.7)],
-        ))),
+        )),
         map: None,
     });
     let result =
-        FunctionOutput::from_special(&Special::Output, &params).unwrap();
+        TaskOutputOwned::from_special(&Special::Output, &params).unwrap();
     match result {
-        FunctionOutput::Vector(v) => {
+        TaskOutputOwned::Vector(v) => {
             assert_eq!(v, vec![dec!(0.3), dec!(0.7)])
         }
         other => panic!("expected Vector, got {:?}", other),
@@ -147,9 +129,7 @@ fn special_output_returns_vector() {
 fn special_output_fails_for_input() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::Function(FunctionOutput::Scalar(
-            dec!(0.5),
-        ))),
+        output: Some(TaskOutputOwned::Scalar(dec!(0.5))),
         map: None,
     });
     let result = Input::from_special(&Special::Output, &params);
@@ -160,33 +140,31 @@ fn special_output_fails_for_input() {
 fn special_output_fails_for_u64() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::Function(FunctionOutput::Scalar(
-            dec!(0.5),
-        ))),
+        output: Some(TaskOutputOwned::Scalar(dec!(0.5))),
         map: None,
     });
     let result = u64::from_special(&Special::Output, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
-// ── Special::L1NormalizedFunctionOutput ──────────────────────────────
+// ── Special::TaskOutputL1Normalized ──────────────────────────────
 
 #[test]
 fn special_l1_norm_normalizes_vector() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::Function(FunctionOutput::Vector(
+        output: Some(TaskOutputOwned::Vector(
             vec![dec!(2), dec!(3), dec!(5)],
-        ))),
+        )),
         map: None,
     });
-    let result = FunctionOutput::from_special(
-        &Special::L1NormalizedFunctionOutput,
+    let result = TaskOutputOwned::from_special(
+        &Special::TaskOutputL1Normalized,
         &params,
     )
     .unwrap();
     match result {
-        FunctionOutput::Vector(v) => {
+        TaskOutputOwned::Vector(v) => {
             assert_eq!(v, vec![dec!(0.2), dec!(0.3), dec!(0.5)]);
         }
         other => panic!("expected Vector, got {:?}", other),
@@ -194,41 +172,39 @@ fn special_l1_norm_normalizes_vector() {
 }
 
 #[test]
-fn special_l1_norm_normalizes_map_scalars() {
+fn special_l1_norm_normalizes_mapped_scalars_as_vector() {
+    // Mapped scalars are now represented as Vector
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::MapFunction(vec![
-            FunctionOutput::Scalar(dec!(1)),
-            FunctionOutput::Scalar(dec!(3)),
-        ])),
+        output: Some(TaskOutputOwned::Vector(
+            vec![dec!(1), dec!(3)],
+        )),
         map: None,
     });
-    let result = FunctionOutput::from_special(
-        &Special::L1NormalizedFunctionOutput,
+    let result = TaskOutputOwned::from_special(
+        &Special::TaskOutputL1Normalized,
         &params,
     )
     .unwrap();
     match result {
-        FunctionOutput::Vector(v) => {
+        TaskOutputOwned::Vector(v) => {
             assert_eq!(v, vec![dec!(0.25), dec!(0.75)]);
         }
         other => panic!("expected Vector, got {:?}", other),
     }
 }
 
-// ── Special::L1NormalizedFunctionOutput failures ─────────────────────
+// ── Special::TaskOutputL1Normalized failures ─────────────────────
 
 #[test]
 fn special_l1_norm_fails_for_input() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::Function(FunctionOutput::Vector(
-            vec![dec!(1)],
-        ))),
+        output: Some(TaskOutputOwned::Vector(vec![dec!(1)])),
         map: None,
     });
     let result =
-        Input::from_special(&Special::L1NormalizedFunctionOutput, &params);
+        Input::from_special(&Special::TaskOutputL1Normalized, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
@@ -236,13 +212,11 @@ fn special_l1_norm_fails_for_input() {
 fn special_l1_norm_fails_for_string() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::Function(FunctionOutput::Vector(
-            vec![dec!(1)],
-        ))),
+        output: Some(TaskOutputOwned::Vector(vec![dec!(1)])),
         map: None,
     });
     let result =
-        String::from_special(&Special::L1NormalizedFunctionOutput, &params);
+        String::from_special(&Special::TaskOutputL1Normalized, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
@@ -574,28 +548,21 @@ fn special_merge_fails_for_non_object_elements() {
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
-// ── Special::VectorCompletionScores ──────────────────────────────────
+// ── Special::Output (was VectorCompletionScores) ──────────────────────
 
 #[test]
-fn special_vc_scores_returns_scores() {
+fn special_output_returns_scores_vector() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::VectorCompletion(
-            VectorCompletionOutput {
-                votes: vec![make_vote()],
-                scores: vec![dec!(0.6), dec!(0.4)],
-                weights: vec![dec!(1), dec!(0)],
-            },
+        output: Some(TaskOutputOwned::Vector(
+            vec![dec!(0.6), dec!(0.4)],
         )),
         map: None,
     });
-    let result = FunctionOutput::from_special(
-        &Special::VectorCompletionScores,
-        &params,
-    )
-    .unwrap();
+    let result =
+        TaskOutputOwned::from_special(&Special::Output, &params).unwrap();
     match result {
-        FunctionOutput::Vector(v) => {
+        TaskOutputOwned::Vector(v) => {
             assert_eq!(v, vec![dec!(0.6), dec!(0.4)])
         }
         other => panic!("expected Vector, got {:?}", other),
@@ -603,144 +570,119 @@ fn special_vc_scores_returns_scores() {
 }
 
 #[test]
-fn special_vc_scores_returns_three_scores() {
+fn special_output_returns_three_scores() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::VectorCompletion(
-            VectorCompletionOutput {
-                votes: vec![make_vote()],
-                scores: vec![dec!(0.2), dec!(0.3), dec!(0.5)],
-                weights: vec![dec!(1), dec!(0), dec!(0)],
-            },
+        output: Some(TaskOutputOwned::Vector(
+            vec![dec!(0.2), dec!(0.3), dec!(0.5)],
         )),
         map: None,
     });
-    let result = FunctionOutput::from_special(
-        &Special::VectorCompletionScores,
-        &params,
-    )
-    .unwrap();
+    let result =
+        TaskOutputOwned::from_special(&Special::Output, &params).unwrap();
     match result {
-        FunctionOutput::Vector(v) => {
+        TaskOutputOwned::Vector(v) => {
             assert_eq!(v, vec![dec!(0.2), dec!(0.3), dec!(0.5)])
         }
         other => panic!("expected Vector, got {:?}", other),
     }
 }
 
-// ── Special::VectorCompletionScores failures ────────────────────────
+// ── Special::Output failures ────────────────────────────────────────
 
 #[test]
-fn special_vc_scores_fails_for_input() {
+fn special_output_fails_for_input_type() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::VectorCompletion(
-            VectorCompletionOutput {
-                votes: vec![make_vote()],
-                scores: vec![dec!(0.5), dec!(0.5)],
-                weights: vec![dec!(1), dec!(0)],
-            },
+        output: Some(TaskOutputOwned::Vector(
+            vec![dec!(0.5), dec!(0.5)],
         )),
         map: None,
     });
     let result =
-        Input::from_special(&Special::VectorCompletionScores, &params);
+        Input::from_special(&Special::Output, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
 #[test]
-fn special_vc_scores_fails_for_no_output() {
+fn special_output_fails_for_no_output() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
         output: None,
         map: None,
     });
-    let result = FunctionOutput::from_special(
-        &Special::VectorCompletionScores,
-        &params,
-    );
+    let result =
+        TaskOutputOwned::from_special(&Special::Output, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
-// ── Special::VectorCompletionScoresWeightedSum ───────────────────────
+// ── Special::TaskOutputWeightedSum ───────────────────────────────────
 
 #[test]
-fn special_vc_weighted_sum_two_scores() {
+fn special_weighted_sum_two_scores() {
     // scores=[0.6, 0.4], weights=[0/1, 1/1]=[0, 1]
     // weighted_sum = 0.6*0 + 0.4*1 = 0.4
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::VectorCompletion(
-            VectorCompletionOutput {
-                votes: vec![make_vote()],
-                scores: vec![dec!(0.6), dec!(0.4)],
-                weights: vec![dec!(1), dec!(0)],
-            },
+        output: Some(TaskOutputOwned::Vector(
+            vec![dec!(0.6), dec!(0.4)],
         )),
         map: None,
     });
-    let result = FunctionOutput::from_special(
-        &Special::VectorCompletionScoresWeightedSum,
+    let result = TaskOutputOwned::from_special(
+        &Special::TaskOutputWeightedSum,
         &params,
     )
     .unwrap();
-    assert!(matches!(result, FunctionOutput::Scalar(d) if d == dec!(0.4)));
+    assert!(matches!(result, TaskOutputOwned::Scalar(d) if d == dec!(0.4)));
 }
 
 #[test]
-fn special_vc_weighted_sum_three_scores() {
+fn special_weighted_sum_three_scores() {
     // scores=[0.2, 0.3, 0.5], weights=[0/2, 1/2, 2/2]=[0, 0.5, 1]
     // weighted_sum = 0.2*0 + 0.3*0.5 + 0.5*1 = 0 + 0.15 + 0.5 = 0.65
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::VectorCompletion(
-            VectorCompletionOutput {
-                votes: vec![make_vote()],
-                scores: vec![dec!(0.2), dec!(0.3), dec!(0.5)],
-                weights: vec![dec!(1), dec!(0), dec!(0)],
-            },
+        output: Some(TaskOutputOwned::Vector(
+            vec![dec!(0.2), dec!(0.3), dec!(0.5)],
         )),
         map: None,
     });
-    let result = FunctionOutput::from_special(
-        &Special::VectorCompletionScoresWeightedSum,
+    let result = TaskOutputOwned::from_special(
+        &Special::TaskOutputWeightedSum,
         &params,
     )
     .unwrap();
-    assert!(matches!(result, FunctionOutput::Scalar(d) if d == dec!(0.65)));
+    assert!(matches!(result, TaskOutputOwned::Scalar(d) if d == dec!(0.65)));
 }
 
-// ── Special::VectorCompletionScoresWeightedSum failures ──────────────
+// ── Special::TaskOutputWeightedSum failures ──────────────────────────
 
 #[test]
-fn special_vc_weighted_sum_fails_for_input() {
+fn special_weighted_sum_fails_for_input() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
-        output: Some(TaskOutputOwned::VectorCompletion(
-            VectorCompletionOutput {
-                votes: vec![make_vote()],
-                scores: vec![dec!(0.5), dec!(0.5)],
-                weights: vec![dec!(1), dec!(0)],
-            },
+        output: Some(TaskOutputOwned::Vector(
+            vec![dec!(0.5), dec!(0.5)],
         )),
         map: None,
     });
     let result = Input::from_special(
-        &Special::VectorCompletionScoresWeightedSum,
+        &Special::TaskOutputWeightedSum,
         &params,
     );
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
 #[test]
-fn special_vc_weighted_sum_fails_for_no_output() {
+fn special_weighted_sum_fails_for_no_output() {
     let params = Params::Owned(ParamsOwned {
         input: Input::Boolean(true),
         output: None,
         map: None,
     });
-    let result = FunctionOutput::from_special(
-        &Special::VectorCompletionScoresWeightedSum,
+    let result = TaskOutputOwned::from_special(
+        &Special::TaskOutputWeightedSum,
         &params,
     );
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));

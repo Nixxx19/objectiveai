@@ -6,8 +6,8 @@ use crate::agent::completions::message::{
     SimpleContentPartExpression, VideoUrl,
 };
 use crate::functions::expression::{
-    ExpressionError, FunctionOutput, Input, InputExpression, Params,
-    ParamsOwned,
+    ExpressionError, Input, InputExpression, Params,
+    ParamsOwned, TaskOutputOwned,
 };
 use indexmap::IndexMap;
 
@@ -328,18 +328,18 @@ fn expression_outputs_assistant_tool_call_types() {
 }
 
 #[test]
-fn expression_outputs_function_output_scalar_and_vector() {
+fn expression_outputs_task_output_scalar_and_vector() {
     let params = empty_params();
 
-    let scalar: FunctionOutput = starlark_one("0.75", &params);
+    let scalar: TaskOutputOwned = starlark_one("0.75", &params);
     match scalar {
-        FunctionOutput::Scalar(_) => {}
-        other => panic!("expected FunctionOutput::Scalar, got {:?}", other),
+        TaskOutputOwned::Scalar(_) => {}
+        other => panic!("expected TaskOutputOwned::Scalar, got {:?}", other),
     }
 
-    let vector: FunctionOutput = starlark_one("[0.1, 0.2, 0.7]", &params);
+    let vector: TaskOutputOwned = starlark_one("[0.1, 0.2, 0.7]", &params);
     match vector {
-        FunctionOutput::Vector(v) => assert_eq!(v.len(), 3),
-        other => panic!("expected FunctionOutput::Vector, got {:?}", other),
+        TaskOutputOwned::Vector(v) => assert_eq!(v.len(), 3),
+        other => panic!("expected TaskOutputOwned::Vector, got {:?}", other),
     }
 }

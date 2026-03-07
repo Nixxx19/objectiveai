@@ -756,7 +756,7 @@ fn rejects_single_permutation_integer() {
 // (QI01). But we also need the generate loop to succeed, which means the
 // compiled input must match the placeholder's schema, and the scalar output
 // must be valid. Since scalar tasks with map: None produce
-// FunctionOutput::Scalar in a vector parent (CV16), AW21 for scalar
+// TaskOutputOwned::Scalar in a vector parent (CV16), AW21 for scalar
 // placeholders is unreachable with children=None. We test it indirectly
 // by showing the composition check (AW08) catches single scalar placeholders.
 //

@@ -28,7 +28,7 @@ use crate::functions::check::example_inputs;
 /// - No `map` on leaf tasks
 /// - Vector fields (output_length, input_split, input_merge) are hardcoded Special expressions
 /// - Input schema structurally enforces `{items, context?}`
-/// - Output expression is hardcoded (`VectorCompletionScores`)
+/// - Output expression is hardcoded (`Output`)
 ///
 /// This checker validates the remaining runtime concerns.
 pub fn check_alpha_leaf_vector_function(

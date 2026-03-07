@@ -19,7 +19,7 @@
 use rust_decimal::Decimal;
 
 use crate::functions::expression::{
-    FunctionOutput, Input, TaskOutput, TaskOutputOwned, VectorCompletionOutput,
+    Input, TaskOutput, TaskOutputOwned,
 };
 use crate::functions::Task;
 
@@ -83,23 +83,20 @@ fn systematic_vector(k: usize, len: usize) -> Vec<Decimal> {
 /// high value while others get a minimal value, with the background scaling as
 /// 1/len so that the focused element can reach near 1.0 after normalization
 /// regardless of the number of elements.
-fn systematic_map_scalar(k: usize, len: usize) -> Vec<FunctionOutput> {
+fn systematic_map_scalar(k: usize, len: usize) -> Vec<Decimal> {
     if len == 0 {
         return vec![];
     }
     if len == 1 {
         let v = k as f64 / 999.0;
-        return vec![FunctionOutput::Scalar(
+        return vec![
             Decimal::from_f64_retain(v).unwrap_or(Decimal::ZERO),
-        )];
+        ];
     }
 
     // Trial 0: all zeros — tests expressions that assume non-zero sums
     if k == 0 {
-        return vec![
-            FunctionOutput::Scalar(Decimal::ZERO);
-            len
-        ];
+        return vec![Decimal::ZERO; len];
     }
 
     let k = k - 1;
@@ -120,22 +117,14 @@ fn systematic_map_scalar(k: usize, len: usize) -> Vec<FunctionOutput> {
     (0..len)
         .map(|i| {
             let v = if i == focus { focus_value } else { background };
-            FunctionOutput::Scalar(
-                Decimal::from_f64_retain(v).unwrap_or(Decimal::ZERO),
-            )
+            Decimal::from_f64_retain(v).unwrap_or(Decimal::ZERO)
         })
         .collect()
 }
 
-/// Generates a systematic VectorCompletionOutput with `n` scores.
-fn systematic_vc_output(k: usize, n: usize) -> VectorCompletionOutput {
-    let scores = systematic_vector(k, n);
-    let weights = systematic_vector(k, n);
-    VectorCompletionOutput {
-        votes: Vec::new(),
-        scores,
-        weights,
-    }
+/// Generates a systematic scores vector with `n` elements.
+fn systematic_vc_scores(k: usize, n: usize) -> Vec<Decimal> {
+    systematic_vector(k, n)
 }
 
 // ---------------------------------------------------------------------------
@@ -168,12 +157,10 @@ pub(crate) fn check_scalar_distribution(
     for k in 0..TRIALS {
         let mock_output = match shape {
             ScalarOutputShape::Scalar => TaskOutput::Owned(
-                TaskOutputOwned::Function(FunctionOutput::Scalar(
-                    systematic_scalar(k),
-                )),
+                TaskOutputOwned::Scalar(systematic_scalar(k)),
             ),
             ScalarOutputShape::VectorCompletion(n) => TaskOutput::Owned(
-                TaskOutputOwned::VectorCompletion(systematic_vc_output(k, *n)),
+                TaskOutputOwned::Vector(systematic_vc_scores(k, *n)),
             ),
         };
 
@@ -186,7 +173,7 @@ pub(crate) fn check_scalar_distribution(
         })?;
 
         let value = match result {
-            FunctionOutput::Scalar(s) => s,
+            TaskOutputOwned::Scalar(s) => s,
             _ => {
                 // Type mismatch is caught by CV validation; skip here
                 return Ok(());
@@ -269,15 +256,15 @@ pub(crate) fn check_vector_distribution(
     for k in 0..TRIALS {
         let mock_output = match shape {
             VectorOutputShape::MapScalar(len) => TaskOutput::Owned(
-                TaskOutputOwned::MapFunction(systematic_map_scalar(k, *len)),
+                TaskOutputOwned::Vector(systematic_map_scalar(k, *len)),
             ),
             VectorOutputShape::Vector(n) => TaskOutput::Owned(
-                TaskOutputOwned::Function(FunctionOutput::Vector(
+                TaskOutputOwned::Vector(
                     systematic_vector(k, *n as usize),
-                )),
+                ),
             ),
             VectorOutputShape::VectorCompletion(n) => TaskOutput::Owned(
-                TaskOutputOwned::VectorCompletion(systematic_vc_output(k, *n)),
+                TaskOutputOwned::Vector(systematic_vc_scores(k, *n)),
             ),
         };
 
@@ -301,7 +288,7 @@ pub(crate) fn check_vector_distribution(
         })?;
 
         let values = match result {
-            FunctionOutput::Vector(v) => v,
+            TaskOutputOwned::Vector(v) => v,
             _ => {
                 // Type mismatch is caught by CV validation; skip here
                 return Ok(());

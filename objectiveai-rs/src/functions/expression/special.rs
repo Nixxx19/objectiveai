@@ -10,20 +10,17 @@ pub enum Special {
     Input,
     /// Returns the params output as-is.
     Output,
-    /// L1-normalizes vector output. If output is `Function(Vector)` or
-    /// `MapFunction(Vec<Scalar>)`, returns L1-normalized `FunctionOutput::Vector`.
-    /// Otherwise returns the output as-is.
-    L1NormalizedFunctionOutput,
+    /// L1-normalizes the output. Scalar/Err pass through.
+    /// Vector: L1 normalize. Vectors: L1 normalize each.
+    TaskOutputL1Normalized,
+    /// Weighted sum of the output. Vector → Scalar. Vectors → Vector.
+    TaskOutputWeightedSum,
     /// Returns the length of input['items'] as u64
     InputItemsOutputLength,
     /// Splits an input containing items and optionally context into multiple inputs
     InputItemsOptionalContextSplit,
     /// Merges multiple inputs containing items and optionally context into a single input
     InputItemsOptionalContextMerge,
-    /// Returns the scores from vector completion output, otherwise returns the output as-is.
-    VectorCompletionScores,
-    /// Returns the scores from vector completion output, summed, each multiplied by a corresponding weight, the first weighted at 0, the final weighted at 1, and the rest weighted evenly in between, otherwise returns the output as-is.
-    VectorCompletionScoresWeightedSum,
 }
 
 /// Trait for types that can be produced from a [`Special`] expression variant.

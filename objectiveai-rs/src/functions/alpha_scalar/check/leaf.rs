@@ -22,7 +22,7 @@ use crate::functions::check::example_inputs;
 /// The alpha type system already guarantees:
 /// - All tasks are `vector.completion` (no function/placeholder tasks)
 /// - No `map` on any task
-/// - Output expression is hardcoded (`VectorCompletionScoresWeightedSum`)
+/// - Output expression is hardcoded (`TaskOutputWeightedSum`)
 ///
 /// This checker validates the remaining runtime concerns.
 pub fn check_alpha_leaf_scalar_function(

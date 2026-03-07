@@ -146,7 +146,7 @@ impl ScalarFunctionTaskExpression {
                     self.input,
                 ),
             output: functions::expression::Expression::Special(
-                functions::expression::Special::L1NormalizedFunctionOutput,
+                functions::expression::Special::TaskOutputL1Normalized,
             ),
         }
     }
@@ -210,7 +210,7 @@ impl PlaceholderScalarFunctionTaskExpression {
                     self.input,
                 ),
             output: functions::expression::Expression::Special(
-                functions::expression::Special::L1NormalizedFunctionOutput,
+                functions::expression::Special::TaskOutputL1Normalized,
             ),
         }
     }
@@ -343,7 +343,7 @@ impl VectorCompletionTaskExpression {
                 self.responses,
             ),
             output: functions::expression::Expression::Special(
-                functions::expression::Special::VectorCompletionScores,
+                functions::expression::Special::Output,
             ),
         }
     }
