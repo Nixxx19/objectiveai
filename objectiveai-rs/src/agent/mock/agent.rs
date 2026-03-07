@@ -21,6 +21,11 @@ pub struct AgentBase {
     /// If true, the mock client will return an error instead of a response.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub error: Option<bool>,
+
+    /// If true, this mock agent supports invention tool calling.
+    /// Incompatible with output modes other than `instruction`.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub invention: Option<bool>,
 }
 
 impl AgentBase {
@@ -33,6 +38,9 @@ impl AgentBase {
         if self.error == Some(false) {
             self.error = None;
         }
+        if self.invention == Some(false) {
+            self.invention = None;
+        }
     }
 
     /// Validates the configuration.
@@ -41,6 +49,14 @@ impl AgentBase {
             && top_logprobs > 20
         {
             return Err("`top_logprobs` must be at most 20".to_string());
+        }
+        if self.invention == Some(true)
+            && self.output_mode != super::OutputMode::Instruction
+        {
+            return Err(
+                "`invention` is only compatible with `instruction` output mode"
+                    .to_string(),
+            );
         }
         Ok(())
     }

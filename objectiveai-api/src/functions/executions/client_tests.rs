@@ -1701,6 +1701,7 @@ async fn test_error_6_1_reasoning_agent_error() {
                         output_mode: objectiveai::agent::mock::OutputMode::Instruction,
                         top_logprobs: None,
                         error: Some(true),
+                        invention: None,
                     }),
                 ),
                 agents: None,
