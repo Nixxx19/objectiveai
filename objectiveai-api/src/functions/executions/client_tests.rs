@@ -364,6 +364,28 @@ fn aggregate(chunks: Vec<FunctionExecutionChunk>) -> FunctionExecution {
     FunctionExecution::from(agg.expect("stream should have at least one chunk"))
 }
 
+fn assert_chunk_invariants(chunks: &[FunctionExecutionChunk]) {
+    assert!(!chunks.is_empty(), "stream must not be empty");
+    for (i, chunk) in chunks.iter().enumerate() {
+        assert!(
+            chunk.tasks.len() <= 1,
+            "chunk {i} has {} tasks, expected at most 1",
+            chunk.tasks.len(),
+        );
+        if i < chunks.len() - 1 {
+            assert!(
+                chunk.usage.is_none(),
+                "chunk {i} (non-final) has usage, expected None",
+            );
+        } else {
+            assert!(
+                chunk.usage.is_some(),
+                "final chunk {i} has no usage, expected Some",
+            );
+        }
+    }
+}
+
 async fn run_execution(client: &Arc<TestClient>, request: Arc<Request>) -> FunctionExecution {
     let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
     let stream = client
@@ -372,7 +394,7 @@ async fn run_execution(client: &Arc<TestClient>, request: Arc<Request>) -> Funct
         .await
         .expect("create_streaming should succeed");
     let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert!(!chunks.is_empty(), "should have at least one chunk");
+    assert_chunk_invariants(&chunks);
     aggregate(chunks)
 }
 
@@ -1165,7 +1187,7 @@ async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<Reques
         .await
         .expect("create_streaming should succeed");
     let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert!(!chunks.is_empty(), "should have at least one chunk");
+    assert_chunk_invariants(&chunks);
     aggregate(chunks)
 }
 

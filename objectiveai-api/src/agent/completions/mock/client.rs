@@ -300,20 +300,6 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                     }
                 }
 
-                // --- Yield usage chunk ---
-                if !delay.is_zero() {
-                    tokio::time::sleep(delay).await;
-                }
-                yield StreamItem::Chunk(AgentCompletionChunk {
-                    id: id.clone(),
-                    created,
-                    messages: Vec::new(),
-                    object: Default::default(),
-                    usage: Some(objectiveai::agent::completions::response::Usage::default()),
-                    upstream: objectiveai::agent::Upstream::Mock,
-                    error: None,
-                });
-
                 // --- Yield final state ---
                 yield StreamItem::State(state);
             };

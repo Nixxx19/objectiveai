@@ -599,20 +599,37 @@ where
             let mut aggregate: Option<
                 objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
             > = None;
+            let mut usage =
+                objectiveai::agent::completions::response::Usage::default();
             let mut stream: Pin<Box<dyn futures::Stream<Item = super::StreamItem<U::State>> + Send>> =
                 Box::pin(initial_stream);
             loop {
                 let mut current_state: Option<U::State> = None;
                 let mut had_error = false;
+                let mut pending_chunk: Option<
+                    objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+                > = None;
 
                 loop {
                     match tokio::time::timeout(other_chunk_timeout, stream.next()).await {
                         Ok(Some(super::StreamItem::Chunk(chunk))) => {
+                            // Import usage from assistant response chunks.
+                            for msg in &chunk.messages {
+                                if let objectiveai::agent::completions::response::streaming::MessageChunk::Assistant(asst) = msg {
+                                    if let Some(upstream_usage) = &asst.usage {
+                                        usage.push_upstream_usage(upstream_usage);
+                                    }
+                                }
+                            }
                             match &mut aggregate {
                                 Some(agg) => agg.push(&chunk),
                                 None => aggregate = Some(chunk.clone()),
                             }
-                            yield super::StreamItem::Chunk(chunk);
+                            // Yield the previous pending chunk (without usage),
+                            // buffer the current one.
+                            if let Some(prev) = pending_chunk.replace(chunk) {
+                                yield super::StreamItem::Chunk(prev);
+                            }
                         }
                         Ok(Some(super::StreamItem::State(state))) => {
                             current_state = Some(state);
@@ -624,6 +641,20 @@ where
                             break;
                         }
                     }
+                }
+
+                // Yield the last buffered chunk (with usage if this is the final iteration).
+                if let Some(mut last) = pending_chunk.take() {
+                    if !had_error {
+                        if let Some(ref agg) = aggregate {
+                            let callable = extract_callable_tool_calls(agg, &tool_map);
+                            if callable.is_empty() {
+                                // Final iteration — attach aggregated usage.
+                                last.usage = Some(usage.clone());
+                            }
+                        }
+                    }
+                    yield super::StreamItem::Chunk(last);
                 }
 
                 if had_error {

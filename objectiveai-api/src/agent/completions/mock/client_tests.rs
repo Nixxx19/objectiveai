@@ -97,6 +97,21 @@ async fn run_mock(
     while let Some(item) = stream.next().await {
         match item {
             crate::agent::completions::upstream_client::StreamItem::Chunk(chunk) => {
+                // Assert no usage anywhere.
+                assert!(chunk.usage.is_none(), "chunk should not have usage");
+                for msg in &chunk.messages {
+                    if let MessageChunk::Assistant(asst) = msg {
+                        assert!(asst.usage.is_none(), "assistant response chunk should not have usage");
+                    }
+                }
+                // Assert exactly one assistant response chunk with index 0.
+                assert_eq!(chunk.messages.len(), 1, "chunk should have exactly 1 message");
+                match &chunk.messages[0] {
+                    MessageChunk::Assistant(asst) => {
+                        assert_eq!(asst.index, 0, "assistant response chunk index should be 0");
+                    }
+                    other => panic!("expected Assistant message chunk, got {other:?}"),
+                }
                 match &mut accumulated {
                     Some(acc) => acc.push(&chunk),
                     None => accumulated = Some(chunk),
@@ -590,10 +605,17 @@ async fn collect_assistant_chunks(
 
     while let Some(item) = stream.next().await {
         if let crate::agent::completions::upstream_client::StreamItem::Chunk(chunk) = item {
-            for msg in &chunk.messages {
-                if let MessageChunk::Assistant(asst) = msg {
+            // Assert no usage anywhere.
+            assert!(chunk.usage.is_none(), "chunk should not have usage");
+            // Assert exactly one assistant response chunk with index 0.
+            assert_eq!(chunk.messages.len(), 1, "chunk should have exactly 1 message");
+            match &chunk.messages[0] {
+                MessageChunk::Assistant(asst) => {
+                    assert_eq!(asst.index, 0, "assistant response chunk index should be 0");
+                    assert!(asst.usage.is_none(), "assistant response chunk should not have usage");
                     chunks.push(asst.clone());
                 }
+                other => panic!("expected Assistant message chunk, got {other:?}"),
             }
         }
     }

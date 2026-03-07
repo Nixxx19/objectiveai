@@ -457,8 +457,6 @@ fn test_result_success_byok() {
                     upstream_upstream_inference_cost: Decimal::ZERO,
                 }),
                 total_cost: Decimal::from_str("0.075").unwrap(),
-                cost_multiplier: Decimal::from_str("1.5").unwrap(),
-                is_byok: true,
             }),
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
