@@ -99,9 +99,12 @@ impl SDKResultMessage {
         self,
         id: String,
         created: u64,
+        agent: String,
+        assistant_index: u64,
         is_byok: bool,
         cost_multiplier: rust_decimal::Decimal,
     ) -> objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+        let upstream_id = self.session_id().to_string();
         let (total_cost_usd, usage, error) = match &self {
             SDKResultMessage::Success(s) => (s.total_cost_usd, &s.usage, None),
             SDKResultMessage::Error(e) => (
@@ -165,13 +168,20 @@ impl SDKResultMessage {
         objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id,
             created,
-            messages: vec![],
+            messages: vec![
+                objectiveai::agent::completions::response::streaming::MessageChunk::Assistant(
+                    objectiveai::agent::completions::response::streaming::AssistantResponseChunk {
+                        index: assistant_index,
+                        created,
+                        agent,
+                        upstream_id,
+                        usage: Some(downstream_usage),
+                        ..Default::default()
+                    },
+                ),
+            ],
             object: Default::default(),
-            usage: {
-                let mut u = objectiveai::agent::completions::response::Usage::default();
-                u.push_upstream_usage(&downstream_usage);
-                Some(u)
-            },
+            usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error,
         }

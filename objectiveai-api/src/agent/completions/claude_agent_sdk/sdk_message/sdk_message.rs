@@ -63,7 +63,7 @@ impl SDKMessage {
                 msg.into_downstream(id, created, assistant_index).map(Ok)
             }
             Self::ResultMessage(msg) => {
-                Some(Ok(msg.into_downstream(id, created, is_byok, cost_multiplier)))
+                Some(Ok(msg.into_downstream(id, created, agent, assistant_index, is_byok, cost_multiplier)))
             }
             Self::RateLimitEvent(_) => Some(Err(super::super::Error::RateLimit)),
             // All other variants are ignored.

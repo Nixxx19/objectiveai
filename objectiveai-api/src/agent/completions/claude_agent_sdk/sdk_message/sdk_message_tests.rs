@@ -435,29 +435,42 @@ fn test_result_success_byok() {
         Some(Ok(objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
             id: "id-10".to_string(),
             created: 10000,
-            messages: vec![],
+            messages: vec![
+                objectiveai::agent::completions::response::streaming::MessageChunk::Assistant(
+                    objectiveai::agent::completions::response::streaming::AssistantResponseChunk {
+                        index: 0,
+                        created: 10000,
+                        agent: "a".to_string(),
+                        upstream_id: "sess-10".to_string(),
+                        usage: Some(objectiveai::agent::completions::response::UpstreamUsage {
+                            // prompt = input(2000) + cache_creation(1000) + cache_read(5000) = 8000
+                            prompt_tokens: 8000,
+                            completion_tokens: 800,
+                            total_tokens: 8800,
+                            completion_tokens_details: None,
+                            prompt_tokens_details: Some(objectiveai::agent::completions::response::PromptTokensDetails {
+                                audio_tokens: None,
+                                cached_tokens: Some(5000),
+                                cache_write_tokens: Some(1000),
+                                video_tokens: None,
+                            }),
+                            // upstream = 0.05, upstream_upstream = 0, total = 0.05 * 1.5 = 0.075
+                            // byok cost = 0.075 - 0.05 = 0.025
+                            cost: Decimal::from_str("0.025").unwrap(),
+                            cost_details: Some(objectiveai::agent::completions::response::CostDetails {
+                                upstream_inference_cost: Decimal::from_str("0.05").unwrap(),
+                                upstream_upstream_inference_cost: Decimal::ZERO,
+                            }),
+                            total_cost: Decimal::from_str("0.075").unwrap(),
+                            cost_multiplier: Decimal::from_str("1.5").unwrap(),
+                            is_byok: true,
+                        }),
+                        ..Default::default()
+                    },
+                ),
+            ],
             object: Default::default(),
-            usage: Some(objectiveai::agent::completions::response::Usage {
-                // prompt = input(2000) + cache_creation(1000) + cache_read(5000) = 8000
-                prompt_tokens: 8000,
-                completion_tokens: 800,
-                total_tokens: 8800,
-                completion_tokens_details: None,
-                prompt_tokens_details: Some(objectiveai::agent::completions::response::PromptTokensDetails {
-                    audio_tokens: None,
-                    cached_tokens: Some(5000),
-                    cache_write_tokens: Some(1000),
-                    video_tokens: None,
-                }),
-                // upstream = 0.05, upstream_upstream = 0, total = 0.05 * 1.5 = 0.075
-                // byok cost = 0.075 - 0.05 = 0.025
-                cost: Decimal::from_str("0.025").unwrap(),
-                cost_details: Some(objectiveai::agent::completions::response::CostDetails {
-                    upstream_inference_cost: Decimal::from_str("0.05").unwrap(),
-                    upstream_upstream_inference_cost: Decimal::ZERO,
-                }),
-                total_cost: Decimal::from_str("0.075").unwrap(),
-            }),
+            usage: None,
             upstream: objectiveai::agent::Upstream::ClaudeAgentSdk,
             error: None,
         }))
