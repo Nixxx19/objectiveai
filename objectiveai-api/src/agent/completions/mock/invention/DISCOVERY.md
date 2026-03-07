@@ -1,7 +1,15 @@
 # Mock Invention Step Discovery
 
-How to determine which `InventionStep` variant we're in, given only the
-invention tool names (and optionally the prompt text).
+How to determine which `InventionStep` variant we're in, given the
+invention tool names, schema tool names, prompt text, and the ability
+to call invention tools and inspect their return values.
+
+## Discovery layers
+
+1. **Tool names** — which invention tools are present determines the step.
+2. **Schema tool names** — `Read*JsonSchema` tools differ by route at some steps.
+3. **Tool invocation** — calling read tools (`ReadInputSchema`, `ReadTask`, etc.)
+   and inspecting their output reveals the route when tool names are ambiguous.
 
 ## Tool name conventions
 
@@ -30,12 +38,12 @@ Note: schema tools may have transitive `$ref` dependencies that add extra
 `Read*JsonSchema` tools. Discovery should match on the primary schema tool
 names listed above rather than trying to enumerate all transitive deps.
 
-## Step detection (by tool names)
+## Step detection
 
 ### 1. WriteEssay present, WriteInputSchema absent → Essay step
 
 - **Scalar vs Vector**: Cannot distinguish from tools alone. Both get
-  `[ReadSpec, WriteEssay]`. Must inspect prompt for "Scalar Function" vs
+  `[ReadSpec, WriteEssay]`. Inspect prompt for "Scalar Function" vs
   "Vector Function".
 
 ### 2. WriteInputSchema present → InputSchema step
@@ -46,13 +54,18 @@ names listed above rather than trying to enumerate all transitive deps.
 ### 3. WriteEssayTasks present, AppendTask absent → EssayTasks step
 
 - Tools: `[ReadSpec, ReadEssay, ReadInputSchema, WriteEssayTasks]`
-- Identical across all 4 routes. Cannot distinguish scalar/vector or
-  leaf/branch from tools or prompt.
+- Tool names and prompt are identical across all 4 routes.
+- **Scalar vs Vector**: Call `ReadInputSchema` and inspect the JSON.
+  `ScalarFunctionInputSchema` serializes as a plain JSON Schema object
+  (`"type": "object"` at root). `VectorFunctionInputSchema` has
+  `input_split` and `input_merge` fields alongside the schema.
+- **Leaf vs Branch**: Unknown at this step. Tasks have not been written
+  yet, and the depth parameter (which determines leaf vs branch) is only
+  in the spec string, not in a structured tool output.
 
 ### 4. AppendTask present → Tasks step
 
-This is the most differentiable step. Presence of specific schema tools
-determines the exact route:
+Fully distinguishable via schema tool names:
 
 - **Scalar Leaf**: `ReadAlphaScalarVectorCompletionTaskExpressionJsonSchema`
   present. Also has `ReadMessagesJsonSchema`, `ReadVectorResponsesJsonSchema`.
@@ -74,7 +87,13 @@ Simplified decision tree for Tasks step:
 
 - Tools: `[ReadSpec, ReadEssay, ReadInputSchema, ReadEssayTasks, ReadTask,
   ReadTasksLength, WriteDescription]`
-- Identical across all 4 routes. Cannot distinguish.
+- Tool names and prompt are identical across all 4 routes.
+- **Scalar vs Vector**: Call `ReadInputSchema` (same technique as EssayTasks).
+- **Leaf vs Branch**: Call `ReadTask` with index 0. Leaf tasks serialize as
+  `VectorCompletion` task expressions (contain `messages`, `responses` fields).
+  Branch tasks serialize as `Placeholder` function task expressions (contain
+  a nested function reference / `input` field). The JSON structure is
+  unambiguous.
 
 ### 6. Readme step
 
@@ -86,9 +105,9 @@ client will never see this step.
 
 | Step        | Key tool(s)            | Scalar vs Vector          | Leaf vs Branch               |
 |-------------|------------------------|---------------------------|------------------------------|
-| Essay       | WriteEssay             | Prompt only               | N/A                          |
+| Essay       | WriteEssay             | Prompt inspection         | N/A                          |
 | InputSchema | WriteInputSchema       | Schema tool name          | N/A                          |
-| EssayTasks  | WriteEssayTasks        | Indistinguishable         | Indistinguishable            |
+| EssayTasks  | WriteEssayTasks        | Call ReadInputSchema      | Unknown (tasks not written)  |
 | Tasks       | AppendTask             | Schema tool name          | Schema tool name             |
-| Description | WriteDescription       | Indistinguishable         | Indistinguishable            |
+| Description | WriteDescription       | Call ReadInputSchema      | Call ReadTask(0)             |
 | Readme      | (none)                 | N/A                       | N/A                          |
