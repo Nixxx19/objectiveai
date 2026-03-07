@@ -1,6 +1,7 @@
 //! Request body types for function executions.
 
 use crate::{agent, functions};
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 
 /// Request body for inline Function with inline Profile.
@@ -71,4 +72,8 @@ pub struct FunctionRemoteProfileRemoteRequestBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
 
+    // --- MCP server authorization ---
+    /// Map from MCP server URL to authorization header value.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mcp_server_authorization: Option<IndexMap<String, String>>,
 }

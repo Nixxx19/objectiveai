@@ -303,13 +303,10 @@ pub struct VectorCompletionFlatTaskProfile {
     /// The profile for the vector completion (weights and optional per-LLM invert flags).
     pub profile: objectiveai::vector::completions::request::Profile,
     /// The compiled messages for the vector completion.
-    pub messages: Vec<objectiveai::chat::completions::request::Message>,
-    /// Optional tools for the vector completion (read-only context).
-    pub tools: Option<Vec<objectiveai::chat::completions::request::Tool>>,
-    /// The compiled response options the LLMs will vote on.
-    pub responses: Vec<objectiveai::chat::completions::request::RichContent>,
-    /// Expression to transform the raw VectorCompletionOutput into a FunctionOutput.
-    /// Receives: `output` (the raw VectorCompletionOutput).
+    pub messages: Vec<objectiveai::agent::completions::message::Message>,
+    /// The compiled response options the agents will vote on.
+    pub responses: Vec<objectiveai::agent::completions::message::RichContent>,
+    /// Expression to transform the raw task output into a TaskOutputOwned.
     pub output: objectiveai::functions::expression::Expression,
     /// Whether to invert the compiled output after applying `output`.
     pub invert_output: bool,
@@ -1293,26 +1290,14 @@ where
     Ok(super::VectorCompletionFlatTaskProfile {
         path,
         ensemble: objectiveai::ensemble::EnsembleBase {
-            llms: ensemble
-                .llms
+            agents: ensemble
+                .agents
                 .into_iter()
-                .map(|llm| {
-                    objectiveai::ensemble_llm::EnsembleLlmBaseWithFallbacksAndCount {
-                        count: llm.count,
-                        inner: llm.inner.base,
-                        fallbacks: llm.fallbacks.map(|fallbacks| {
-                            fallbacks
-                                .into_iter()
-                                .map(|fallback| fallback.base)
-                                .collect()
-                        }),
-                    }
-                })
+                .map(|agent| agent.into_base())
                 .collect(),
         },
         profile,
         messages: task.messages,
-        tools: task.tools,
         responses: task.responses,
         output: task.output,
         invert_output,

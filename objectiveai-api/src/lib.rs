@@ -27,8 +27,8 @@ pub mod ensemble;
 pub mod agent;
 /// Error response handling and conversion.
 pub mod error;
-// /// Function execution, profile management, and computations.
-// pub mod functions;
+/// Function execution, profile management, and computations.
+pub mod functions;
 /// MCP (Model Context Protocol) types.
 pub mod mcp;
 /// Utility types for streaming and choice indexing.

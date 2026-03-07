@@ -164,6 +164,14 @@ impl Agent {
         }
     }
 
+    pub fn into_base(self) -> AgentBase {
+        match self {
+            Agent::Openrouter(a) => AgentBase::Openrouter(a.base),
+            Agent::ClaudeAgentSdk(a) => AgentBase::ClaudeAgentSdk(a.base),
+            Agent::Mock(a) => AgentBase::Mock(a.base),
+        }
+    }
+
     pub fn top_logprobs(&self) -> Option<u64> {
         self.base().top_logprobs()
     }
@@ -229,6 +237,20 @@ impl AgentWithFallbacksAndCount {
                 full_id
             }
             None => self.inner.id().to_owned(),
+        }
+    }
+
+    /// Converts to a base variant, stripping the computed IDs.
+    pub fn into_base(self) -> AgentBaseWithFallbacksAndCount {
+        AgentBaseWithFallbacksAndCount {
+            count: self.count,
+            inner: self.inner.into_base(),
+            fallbacks: self.fallbacks.map(|fallbacks| {
+                fallbacks
+                    .into_iter()
+                    .map(|fallback| fallback.into_base())
+                    .collect()
+            }),
         }
     }
 
