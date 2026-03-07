@@ -608,20 +608,18 @@ where
     CompletionIndex(u64),
 }
 
-/// Builds `AgentCompletionCreateParams` from the invention request and step prompt.
+/// Builds `AgentCompletionCreateParams` from the invention request.
+///
+/// The `messages` field is only populated for the very first step (when no
+/// continuation exists). For all subsequent steps and retries the prompt is
+/// pushed as a user message onto the continuation so that the upstream sees
+/// one continuous conversation.
 fn build_agent_params(
     request: &objectiveai::functions::inventions::request::FunctionInventionCreateParams,
-    prompt: &str,
+    messages: Vec<objectiveai::agent::completions::message::Message>,
 ) -> objectiveai::agent::completions::request::AgentCompletionCreateParams {
     objectiveai::agent::completions::request::AgentCompletionCreateParams {
-        messages: vec![objectiveai::agent::completions::message::Message::User(
-            objectiveai::agent::completions::message::UserMessage {
-                content: objectiveai::agent::completions::message::RichContent::Text(
-                    prompt.to_string(),
-                ),
-                name: None,
-            },
-        )],
+        messages,
         provider: request.provider.clone(),
         agent: request.agent.clone(),
         agents: request.agents.clone(),
@@ -629,6 +627,16 @@ fn build_agent_params(
         seed: request.seed,
         stream: Some(true),
         mcp_server_authorization: request.mcp_server_authorization.clone(),
+    }
+}
+
+/// Creates a user message from a prompt string.
+fn user_message(prompt: &str) -> objectiveai::agent::completions::message::UserMessage {
+    objectiveai::agent::completions::message::UserMessage {
+        content: objectiveai::agent::completions::message::RichContent::Text(
+            prompt.to_string(),
+        ),
+        name: None,
     }
 }
 
@@ -678,7 +686,22 @@ where
         let validate_for_done = validate.clone();
         let max_step_retries = request.max_step_retries.unwrap_or(3);
 
-        let agent_params = Arc::new(build_agent_params(&request, &prompt));
+        // The messages array on the request is fixed after the very first
+        // step. If we have a continuation (i.e. this is not the first step),
+        // the prompt goes as a user message on the continuation and the
+        // request messages are empty. If no continuation exists (first step),
+        // the prompt goes into the request messages.
+        let agent_params = if let Some(ref mut cont) = continuation {
+            cont.push_user_message(user_message(&prompt));
+            Arc::new(build_agent_params(&request, vec![]))
+        } else {
+            Arc::new(build_agent_params(
+                &request,
+                vec![objectiveai::agent::completions::message::Message::User(
+                    user_message(&prompt),
+                )],
+            ))
+        };
 
         // The agent completions loop handles tool calling internally via
         // invention_done. When validate returns Ok, invention_done fires,
@@ -689,7 +712,7 @@ where
         let stream_result = agent_client
             .create_streaming(
                 ctx.clone(),
-                agent_params,
+                agent_params.clone(),
                 continuation.take(),
                 Some(tools.clone()),
                 Some(invention_done),
@@ -748,32 +771,38 @@ where
         }
 
         // If validate still fails after the agent loop ended, start a new
-        // agent completion with a new user message prompting the model to
-        // try again. The continuation carries forward the conversation.
+        // agent completion with a retry prompt on the continuation. The
+        // retry prompt includes the validation error, matching the pattern
+        // from objectiveai-cli: prompt + "\n\n" + error + "\n\nPlease try again."
         let mut retries = 0u32;
-        while validate().is_err() && retries < max_step_retries {
+        loop {
+            let validation_error = match validate() {
+                Ok(()) => break,
+                Err(e) => e,
+            };
+            if retries >= max_step_retries {
+                break;
+            }
             retries += 1;
+
+            let retry_prompt = format!(
+                "{}\n\nThe following error occurred: {}\n\nPlease try again.",
+                prompt, validation_error,
+            );
+
             if let Some(ref mut cont) = continuation {
-                cont.push_user_message(
-                    objectiveai::agent::completions::message::UserMessage {
-                        content: objectiveai::agent::completions::message::RichContent::Text(
-                            prompt.clone(),
-                        ),
-                        name: None,
-                    },
-                );
+                cont.push_user_message(user_message(&retry_prompt));
             }
 
             completion_index += 1;
 
             let validate_for_done = validate.clone();
             let invention_done = Arc::new(move || validate_for_done().is_ok());
-            let agent_params = Arc::new(build_agent_params(&request, &prompt));
 
             let stream_result = agent_client
                 .create_streaming(
                     ctx.clone(),
-                    agent_params,
+                    agent_params.clone(),
                     continuation.take(),
                     Some(tools.clone()),
                     Some(invention_done),
