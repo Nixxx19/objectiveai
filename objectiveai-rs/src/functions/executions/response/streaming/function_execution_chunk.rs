@@ -1,4 +1,4 @@
-use crate::{error, functions, vector};
+use crate::{agent, error, functions};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -20,7 +20,7 @@ pub struct FunctionExecutionChunk {
     pub profile: Option<String>,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<vector::completions::response::Usage>,
+    pub usage: Option<agent::completions::response::Usage>,
 }
 
 impl FunctionExecutionChunk {
@@ -35,7 +35,7 @@ impl FunctionExecutionChunk {
     pub fn any_usage(&self) -> bool {
         self.usage
             .as_ref()
-            .is_some_and(vector::completions::response::Usage::any_usage)
+            .is_some_and(agent::completions::response::Usage::any_usage)
     }
 
     pub fn push(

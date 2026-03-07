@@ -1,9 +1,8 @@
 //! Complete function execution response.
 
 use crate::{
-    error,
+    agent, error,
     functions::{self, executions::response},
-    vector,
 };
 use serde::{Deserialize, Serialize};
 
@@ -33,7 +32,7 @@ pub struct FunctionExecution {
     /// Object type identifier.
     pub object: super::Object,
     /// Aggregated token and cost usage.
-    pub usage: vector::completions::response::Usage,
+    pub usage: agent::completions::response::Usage,
 }
 
 impl FunctionExecution {

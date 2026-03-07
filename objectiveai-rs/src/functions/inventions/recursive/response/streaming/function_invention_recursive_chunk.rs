@@ -1,4 +1,4 @@
-use crate::vector;
+use crate::agent;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -10,7 +10,7 @@ pub struct FunctionInventionRecursiveChunk {
     pub created: u64,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<vector::completions::response::Usage>,
+    pub usage: Option<agent::completions::response::Usage>,
 }
 
 impl FunctionInventionRecursiveChunk {

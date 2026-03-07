@@ -1,5 +1,5 @@
 use crate::functions::inventions::recursive::response;
-use crate::vector;
+use crate::agent;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -9,7 +9,7 @@ pub struct FunctionInventionRecursive {
     pub inventions_errors: bool,
     pub created: u64,
     pub object: super::Object,
-    pub usage: vector::completions::response::Usage,
+    pub usage: agent::completions::response::Usage,
 }
 
 impl From<response::streaming::FunctionInventionRecursiveChunk>

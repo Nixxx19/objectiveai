@@ -1,6 +1,6 @@
 //! Unary (non-streaming) vector completion response.
 
-use crate::vector::completions::response;
+use crate::{agent, vector::completions::response};
 use serde::{Deserialize, Serialize};
 
 /// A complete vector completion response (non-streaming).
@@ -28,7 +28,7 @@ pub struct VectorCompletion {
     /// Object type identifier (`"vector.completion"`).
     pub object: super::Object,
     /// Aggregated token and cost usage across all completions.
-    pub usage: response::Usage,
+    pub usage: agent::completions::response::Usage,
 }
 
 impl VectorCompletion {
@@ -52,7 +52,7 @@ impl VectorCompletion {
             created: 0,
             ensemble: String::new(),
             object: super::Object::default(),
-            usage: response::Usage::default(),
+            usage: agent::completions::response::Usage::default(),
         }
     }
 }

@@ -1,6 +1,6 @@
 use crate::{
+    agent,
     functions::{self, profiles::computations::response},
-    vector,
 };
 use serde::{Deserialize, Serialize};
 
@@ -15,7 +15,7 @@ pub struct FunctionProfileComputation {
     pub created: u64,
     pub function: Option<String>,
     pub object: super::Object,
-    pub usage: vector::completions::response::Usage,
+    pub usage: agent::completions::response::Usage,
 }
 
 impl FunctionProfileComputation {

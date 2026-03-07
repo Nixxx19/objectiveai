@@ -1,6 +1,6 @@
 use crate::{
+    agent,
     functions::{self, profiles::computations::response},
-    vector,
 };
 use serde::{Deserialize, Serialize};
 
@@ -20,14 +20,14 @@ pub struct FunctionProfileComputationChunk {
     pub function: Option<String>,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<vector::completions::response::Usage>,
+    pub usage: Option<agent::completions::response::Usage>,
 }
 
 impl FunctionProfileComputationChunk {
     pub fn any_usage(&self) -> bool {
         self.usage
             .as_ref()
-            .is_some_and(vector::completions::response::Usage::any_usage)
+            .is_some_and(agent::completions::response::Usage::any_usage)
     }
 
     pub fn push(

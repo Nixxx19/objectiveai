@@ -1,4 +1,4 @@
-use crate::{error, functions, vector};
+use crate::{agent, error, functions};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -14,7 +14,7 @@ pub struct FunctionInventionChunk {
     pub created: u64,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<vector::completions::response::Usage>,
+    pub usage: Option<agent::completions::response::Usage>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<error::ResponseError>,
 }

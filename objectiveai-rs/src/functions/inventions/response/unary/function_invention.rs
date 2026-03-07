@@ -1,5 +1,5 @@
 use crate::functions::inventions::response;
-use crate::{error, functions, vector};
+use crate::{agent, error, functions};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -10,7 +10,7 @@ pub struct FunctionInvention {
     pub function: Option<functions::AlphaRemoteFunction>,
     pub created: u64,
     pub object: super::Object,
-    pub usage: vector::completions::response::Usage,
+    pub usage: agent::completions::response::Usage,
     pub error: Option<error::ResponseError>,
 }
 

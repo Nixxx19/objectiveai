@@ -1,6 +1,6 @@
 //! Streaming vector completion chunk.
 
-use crate::vector::completions::response;
+use crate::{agent, vector::completions::response};
 use serde::{Deserialize, Serialize};
 
 /// A chunk in a streaming vector completion response.
@@ -27,7 +27,7 @@ pub struct VectorCompletionChunk {
     pub object: super::Object,
     /// Aggregated usage statistics. Typically present only in the final chunk.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<response::Usage>,
+    pub usage: Option<agent::completions::response::Usage>,
 }
 
 impl VectorCompletionChunk {

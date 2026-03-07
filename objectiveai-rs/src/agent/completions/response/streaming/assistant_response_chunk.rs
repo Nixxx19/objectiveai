@@ -33,6 +33,9 @@ pub struct AssistantResponseChunk {
     pub system_fingerprint: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<String>,
+    /// Upstream usage for this assistant response (set by upstream clients).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub upstream_usage: Option<response::UpstreamUsage>,
 }
 
 impl AssistantResponseChunk {
@@ -52,6 +55,7 @@ impl AssistantResponseChunk {
             service_tier,
             system_fingerprint,
             provider,
+            upstream_usage,
             ..
         }: &AssistantResponseChunk,
     ) {
@@ -90,6 +94,15 @@ impl AssistantResponseChunk {
         }
         if self.provider.is_none() {
             self.provider = provider.clone();
+        }
+        match (&mut self.upstream_usage, upstream_usage) {
+            (Some(self_usage), Some(other_usage)) => {
+                self_usage.push(other_usage);
+            }
+            (None, Some(other_usage)) => {
+                self.upstream_usage = Some(other_usage.clone());
+            }
+            _ => {}
         }
     }
 
