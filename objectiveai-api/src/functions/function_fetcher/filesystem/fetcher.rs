@@ -30,7 +30,7 @@ where
         repository: &str,
         commit: Option<&str>,
     ) -> Result<
-        Option<objectiveai::functions::response::GetFunction>,
+        Option<super::super::FullGetFunction>,
         objectiveai::error::ResponseError,
     > {
         let repo_path = self.base_dir.join(owner).join(repository);
@@ -52,8 +52,8 @@ where
             }
         };
 
-        // Parse as RemoteFunction
-        let function: objectiveai::functions::RemoteFunction =
+        // Parse as FullRemoteFunction (supports both alpha and standard types)
+        let function: objectiveai::functions::FullRemoteFunction =
             serde_json::from_str(&content).map_err(|e| {
                 response_error(400, format!("Failed to parse function.json: {}", e))
             })?;
@@ -64,7 +64,7 @@ where
             None => resolve_head(&repo_path).unwrap_or_else(|_| "HEAD".to_string()),
         };
 
-        Ok(Some(objectiveai::functions::response::GetFunction {
+        Ok(Some(super::super::FullGetFunction {
             remote: objectiveai::functions::Remote::Filesystem,
             owner: owner.to_string(),
             repository: repository.to_string(),

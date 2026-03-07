@@ -18,7 +18,7 @@ pub trait Fetcher<CTXEXT> {
         repository: &str,
         commit: Option<&str>,
     ) -> Result<
-        Option<objectiveai::functions::response::GetFunction>,
+        Option<super::FullGetFunction>,
         objectiveai::error::ResponseError,
     >;
 }

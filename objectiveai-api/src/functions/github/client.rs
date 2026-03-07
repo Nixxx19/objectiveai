@@ -1,4 +1,4 @@
-use crate::ctx;
+use crate::{ctx, functions};
 use futures::FutureExt;
 use std::sync::Arc;
 
@@ -38,7 +38,7 @@ impl Client {
         repository: &str,
         commit: Option<&str>,
     ) -> Result<
-        Option<objectiveai::functions::response::GetFunction>,
+        Option<functions::function_fetcher::FullGetFunction>,
         objectiveai::error::ResponseError,
     >
     where
@@ -79,7 +79,7 @@ impl Client {
             .clone();
         match shared.await.unwrap() {
             Ok(Some(inner)) => {
-                Ok(Some(objectiveai::functions::response::GetFunction {
+                Ok(Some(functions::function_fetcher::FullGetFunction {
                     remote: objectiveai::functions::Remote::Github,
                     owner: owner.to_owned(),
                     repository: repository.to_owned(),
@@ -97,9 +97,9 @@ impl Client {
         owner: &str,
         repository: &str,
         commit: &str,
-    ) -> Result<Option<objectiveai::functions::RemoteFunction>, super::Error>
+    ) -> Result<Option<objectiveai::functions::FullRemoteFunction>, super::Error>
     {
-        self.fetch_file::<objectiveai::functions::RemoteFunction>(
+        self.fetch_file::<objectiveai::functions::FullRemoteFunction>(
             owner,
             repository,
             commit,

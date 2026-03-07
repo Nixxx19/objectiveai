@@ -22,6 +22,8 @@ impl<G, F> FetcherRouter<G, F> {
 
 impl<G, F> FetcherRouter<G, F> {
     /// Dispatches a Function fetch to the appropriate sub-fetcher based on the remote.
+    ///
+    /// Alpha function types are transpiled to standard function types before returning.
     pub async fn fetch<CTXEXT>(
         &self,
         ctx: ctx::Context<CTXEXT>,
@@ -38,15 +40,16 @@ impl<G, F> FetcherRouter<G, F> {
         G: super::Fetcher<CTXEXT> + Send + Sync + 'static,
         F: super::Fetcher<CTXEXT> + Send + Sync + 'static,
     {
-        match remote {
+        let full = match remote {
             objectiveai::functions::Remote::Github => {
-                self.github.fetch(ctx, owner, repository, commit).await
+                self.github.fetch(ctx, owner, repository, commit).await?
             }
             objectiveai::functions::Remote::Filesystem => {
                 self.filesystem
                     .fetch(ctx, owner, repository, commit)
-                    .await
+                    .await?
             }
-        }
+        };
+        Ok(full.map(|f| f.transpile()))
     }
 }

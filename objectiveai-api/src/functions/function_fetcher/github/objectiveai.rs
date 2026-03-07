@@ -30,7 +30,7 @@ where
         repository: &str,
         commit: Option<&str>,
     ) -> Result<
-        Option<objectiveai::functions::response::GetFunction>,
+        Option<super::super::FullGetFunction>,
         objectiveai::error::ResponseError,
     > {
         // Resolve commit (use latest_commit_cache if commit is None)
@@ -72,7 +72,7 @@ where
                                     ))
                                     .or_insert_with(|| {
                                         let (tx, rx) = tokio::sync::oneshot::channel();
-                                        let _ = tx.send(Ok(Some(function.inner)));
+                                        let _ = tx.send(Ok(Some(objectiveai::functions::FullRemoteFunction::Standard(function.inner))));
                                         rx.shared()
                                     });
                                 Ok(Some(commit))
@@ -119,7 +119,7 @@ where
                     )
                     .await
                     {
-                        Ok(function) => Ok(Some(function.inner)),
+                        Ok(function) => Ok(Some(objectiveai::functions::FullRemoteFunction::Standard(function.inner))),
                         Err(e) if e.status() == 404 => Ok(None),
                         Err(e) => {
                             Err(objectiveai::error::ResponseError::from(&e))
@@ -132,7 +132,7 @@ where
             .clone();
         match shared.await.unwrap() {
             Ok(Some(inner)) => {
-                Ok(Some(objectiveai::functions::response::GetFunction {
+                Ok(Some(super::super::FullGetFunction {
                     remote: objectiveai::functions::Remote::Github,
                     owner: owner.to_owned(),
                     repository: repository.to_owned(),

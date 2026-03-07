@@ -69,7 +69,7 @@ pub struct Context<CTXEXT> {
             Shared<
                 tokio::sync::oneshot::Receiver<
                     Result<
-                        Option<objectiveai::functions::RemoteFunction>,
+                        Option<objectiveai::functions::FullRemoteFunction>,
                         objectiveai::error::ResponseError,
                     >,
                 >,

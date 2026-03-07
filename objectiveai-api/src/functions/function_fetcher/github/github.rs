@@ -26,7 +26,7 @@ where
         repository: &str,
         commit: Option<&str>,
     ) -> Result<
-        Option<objectiveai::functions::response::GetFunction>,
+        Option<super::super::FullGetFunction>,
         objectiveai::error::ResponseError,
     > {
         self.client
