@@ -29,6 +29,9 @@ pub enum Error {
 
     #[error("no output from subprocess")]
     NoOutput,
+
+    #[error("Claude Agent SDK does not support disabling tools")]
+    ToolsNotAllowed,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -39,6 +42,7 @@ impl objectiveai::error::StatusError for Error {
             Self::InvalidByok => 400,
             Self::InvalidMessages(_) => 400,
             Self::UnsupportedResponseFormat => 400,
+            Self::ToolsNotAllowed => 400,
             Self::Spawn(_) => 500,
             Self::Io(_) => 500,
             Self::Json(_) => 500,

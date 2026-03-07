@@ -245,6 +245,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         >,
     > + Send
     + 'static {
+        let tools_enabled = _tools_enabled;
         let id = id.to_string();
         let agent = agent.clone();
         let params = params.clone();
@@ -257,6 +258,19 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         let byok = byok.map(String::from);
 
         async move {
+            // Reject required tool call when tools are not allowed.
+            if !tools_enabled {
+                use objectiveai::agent::completions::request::{ResponseFormat, ResponseFormatParam};
+                let resolved_rf = match params.response_format.as_ref() {
+                    Some(ResponseFormatParam::Single(rf)) => Some(rf),
+                    Some(ResponseFormatParam::PerAgent(map)) => map.get(&agent.id),
+                    None => None,
+                };
+                if let Some(ResponseFormat::ToolCall { required: Some(true), .. }) = resolved_rf {
+                    return Err(super::Error::ToolsNotAllowedWithRequiredToolCall);
+                }
+            }
+
             let request =
                 super::request::ChatCompletionCreateParams::new(
                     &agent,
@@ -265,6 +279,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                     continuation.as_deref(),
                     &tool_names,
                     &tool_map,
+                    tools_enabled,
                 );
 
             let api_key = byok.as_deref().unwrap_or(&client.api_key);

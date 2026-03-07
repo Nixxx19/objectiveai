@@ -5,6 +5,9 @@ pub enum Error {
 
     #[error("unsupported response format: {0}")]
     UnsupportedResponseFormat(String),
+
+    #[error("tools not allowed but response format requires a tool call")]
+    ToolsNotAllowedWithRequiredToolCall,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -12,6 +15,7 @@ impl objectiveai::error::StatusError for Error {
         match self {
             Self::ExpectedError => 500,
             Self::UnsupportedResponseFormat(_) => 400,
+            Self::ToolsNotAllowedWithRequiredToolCall => 400,
         }
     }
 

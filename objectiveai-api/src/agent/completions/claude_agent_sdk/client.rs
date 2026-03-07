@@ -107,6 +107,8 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
         >,
     > + Send
     + 'static {
+        let tools_enabled = _tools_enabled;
+        let has_tools = !tool_names.is_empty();
         let is_byok = byok.is_some();
         let id = id.to_string();
         let agent = agent.clone();
@@ -120,6 +122,10 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
         async move {
             if is_byok {
                 return Err(super::Error::InvalidByok);
+            }
+
+            if !tools_enabled && has_tools {
+                return Err(super::Error::ToolsNotAllowed);
             }
 
             validate_response_format(&agent.id, &params.response_format)?;

@@ -39,6 +39,10 @@ pub enum Error {
     /// The upstream produced no chunks.
     #[error("empty stream")]
     EmptyStream,
+
+    /// Tools are not allowed but response format requires a tool call.
+    #[error("tools not allowed but response format requires a tool call")]
+    ToolsNotAllowedWithRequiredToolCall,
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -56,6 +60,7 @@ impl objectiveai::error::StatusError for Error {
             }
             Self::StreamError(_) => 500,
             Self::EmptyStream => 500,
+            Self::ToolsNotAllowedWithRequiredToolCall => 400,
         }
     }
 
@@ -87,6 +92,10 @@ impl objectiveai::error::StatusError for Error {
                 Self::EmptyStream => serde_json::json!({
                     "kind": "empty_stream",
                     "error": "received an empty stream",
+                }),
+                Self::ToolsNotAllowedWithRequiredToolCall => serde_json::json!({
+                    "kind": "tools_not_allowed",
+                    "error": "tools not allowed but response format requires a tool call",
                 }),
             },
         }))

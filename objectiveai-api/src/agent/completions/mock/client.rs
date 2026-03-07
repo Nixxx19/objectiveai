@@ -78,6 +78,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         >,
     > + Send
     + 'static {
+        let tools_enabled = _tools_enabled;
         let id = id.to_string();
         let agent_id = agent.id.clone();
         let error = agent.base.error == Some(true);
@@ -138,6 +139,13 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 }
             }
 
+            // Reject required tool call when tools are not allowed.
+            if !tools_enabled {
+                if let Some(ResponseFormat::ToolCall { required: Some(true), .. }) = &response_format {
+                    return Err(super::Error::ToolsNotAllowedWithRequiredToolCall);
+                }
+            }
+
             let mut rng = match seed {
                 Some(s) => rand::rngs::StdRng::seed_from_u64(s),
                 None => rand::rngs::StdRng::from_os_rng(),
@@ -150,9 +158,10 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 .collect();
 
             // --- Tool call vs content ---
+            let effective_tool_names = if tools_enabled { &tool_names[..] } else { &[] };
             let mock_response = resolve_mock_response(
                 &response_format,
-                &tool_names,
+                effective_tool_names,
                 &tool_map,
                 top_logprobs,
                 &mut rng,

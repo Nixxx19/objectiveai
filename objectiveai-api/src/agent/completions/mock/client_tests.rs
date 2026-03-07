@@ -1005,3 +1005,85 @@ async fn test_logprobs_top_4_invention_mcp_response_format() {
         include_str!("../../../../assets/agent/completions/mock/client_tests/test_logprobs_top_4_invention_mcp_response_format.json"),
     );
 }
+
+#[tokio::test]
+async fn test_tools_not_allowed_with_required_tool_call() {
+    let client = default_client();
+    let agent = default_agent();
+    let params = params_with_response_format(42, ResponseFormat::ToolCall {
+        name: "my_tool".into(),
+        description: "a tool".into(),
+        schema: indexmap::IndexMap::new(),
+        required: Some(true),
+    });
+
+    let result = client
+        .create(
+            "test", 1000, &agent, &params, &[], &[], None, &[],
+            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, false,
+        )
+        .await;
+    match result {
+        Err(super::Error::ToolsNotAllowedWithRequiredToolCall) => {}
+        Err(e) => panic!("expected ToolsNotAllowedWithRequiredToolCall, got {e}"),
+        Ok(_) => panic!("expected error"),
+    }
+}
+
+#[tokio::test]
+async fn test_tools_not_allowed_with_optional_tool_call_ok() {
+    let client = default_client();
+    let agent = default_agent();
+    let params = params_with_response_format(42, ResponseFormat::ToolCall {
+        name: "my_tool".into(),
+        description: "a tool".into(),
+        schema: indexmap::IndexMap::new(),
+        required: None,
+    });
+
+    // Optional tool call should succeed even with tools_enabled = false.
+    let result = client
+        .create(
+            "test", 1000, &agent, &params, &[], &[], None, &[],
+            &HashMap::new(), None, None, rust_decimal::Decimal::ONE, false,
+        )
+        .await;
+    assert!(result.is_ok(), "optional tool call should succeed when tools disabled");
+}
+
+#[tokio::test]
+async fn test_tools_not_allowed_no_tool_calls_generated() {
+    let agent = default_agent();
+    let params = default_params_with_seed(42);
+    let client = default_client();
+
+    // Set up a tool that would normally be callable.
+    let mut tool_map = HashMap::new();
+    tool_map.insert("my_tool".into(), ResolvedTool::ResponseFormat {
+        description: "test tool".into(),
+        schema: indexmap::IndexMap::new(),
+    });
+    let tool_names = vec!["my_tool".into()];
+
+    let (stream, _state) = client
+        .create(
+            "test", 1000, &agent, &params, &[], &[], None, &tool_names,
+            &tool_map, None, None, rust_decimal::Decimal::ONE, false,
+        )
+        .await
+        .expect("create should succeed");
+
+    let mut stream: std::pin::Pin<Box<dyn futures::Stream<Item = _> + Send>> = stream;
+    while let Some(item) = stream.next().await {
+        if let crate::agent::completions::upstream_client::StreamItem::Chunk(chunk) = item {
+            for msg in &chunk.messages {
+                if let MessageChunk::Assistant(asst) = msg {
+                    assert!(
+                        asst.tool_calls.is_none(),
+                        "should not generate tool calls when tools_enabled = false"
+                    );
+                }
+            }
+        }
+    }
+}

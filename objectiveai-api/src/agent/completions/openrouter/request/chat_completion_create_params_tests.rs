@@ -27,7 +27,36 @@ fn build_params(
     );
     ChatCompletionCreateParams::new(
         agent, params, messages, continuation,
-        &tool_names, &tool_map,
+        &tool_names, &tool_map, true,
+    )
+}
+
+/// Like `build_params` but with explicit `tools_enabled` control.
+fn build_params_with_tools_enabled(
+    agent: &objectiveai::agent::openrouter::Agent,
+    params: &objectiveai::agent::completions::request::AgentCompletionCreateParams,
+    messages: &[objectiveai::agent::completions::message::Message],
+    continuation: Option<&[crate::agent::completions::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
+    mcp_connections: &[Arc<crate::mcp::Connection>],
+    mcp_tools: &[Arc<Vec<crate::mcp::tool::Tool>>],
+    invention_tools: Option<&[objectiveai::functions::inventions::InventionTool]>,
+    tools_enabled: bool,
+) -> ChatCompletionCreateParams {
+    let resolved_rf = params.response_format.as_ref().and_then(|rfp| {
+        match rfp {
+            objectiveai::agent::completions::request::ResponseFormatParam::Single(rf) => Some(rf.clone()),
+            objectiveai::agent::completions::request::ResponseFormatParam::PerAgent(map) => map.get(&agent.id).cloned(),
+        }
+    });
+    let (tool_names, tool_map) = crate::agent::completions::tool::resolve_tools(
+        mcp_connections,
+        mcp_tools,
+        invention_tools,
+        resolved_rf.as_ref(),
+    );
+    ChatCompletionCreateParams::new(
+        agent, params, messages, continuation,
+        &tool_names, &tool_map, tools_enabled,
     )
 }
 
@@ -3510,4 +3539,84 @@ fn test_continuation_mixed_items() {
     };
 
     assert_eq!(result, expected);
+}
+
+#[test]
+fn test_tools_disabled_sets_tool_choice_none() {
+    let agent = objectiveai::agent::openrouter::Agent::try_from(
+        objectiveai::agent::openrouter::AgentBase {
+            model: "test-model".into(),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+
+    // Use an optional ToolCall response format so tools get resolved but
+    // it's not required (required would be rejected earlier in the client).
+    let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
+        messages: vec![],
+        agent: objectiveai::agent::completions::request::Agent::Id("test".into()),
+        provider: None,
+        agents: None,
+        response_format: Some(
+            objectiveai::agent::completions::request::ResponseFormatParam::Single(
+                objectiveai::agent::completions::request::ResponseFormat::ToolCall {
+                    name: "my_tool".into(),
+                    description: "a tool".into(),
+                    schema: indexmap::IndexMap::new(),
+                    required: None,
+                },
+            ),
+        ),
+        seed: None,
+        stream: None,
+        mcp_server_authorization: None,
+    };
+
+    let result = build_params_with_tools_enabled(
+        &agent, &params, &[], None, &[], &[], None, false,
+    );
+
+    // tool_choice should be None (the enum variant meaning "none"),
+    // not Auto or Function.
+    assert_eq!(
+        result.tool_choice,
+        Some(super::tool_choice::ToolChoice::None),
+        "tools_enabled=false should set tool_choice to none",
+    );
+    // Tools should still be present in the request.
+    assert!(
+        result.tools.is_some(),
+        "tools should still be included when tools_enabled=false",
+    );
+}
+
+#[test]
+fn test_tools_disabled_no_tools_no_tool_choice() {
+    let agent = objectiveai::agent::openrouter::Agent::try_from(
+        objectiveai::agent::openrouter::AgentBase {
+            model: "test-model".into(),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+
+    let params = objectiveai::agent::completions::request::AgentCompletionCreateParams {
+        messages: vec![],
+        agent: objectiveai::agent::completions::request::Agent::Id("test".into()),
+        provider: None,
+        agents: None,
+        response_format: None,
+        seed: None,
+        stream: None,
+        mcp_server_authorization: None,
+    };
+
+    let result = build_params_with_tools_enabled(
+        &agent, &params, &[], None, &[], &[], None, false,
+    );
+
+    // No tools means no tool_choice at all.
+    assert_eq!(result.tool_choice, None);
+    assert!(result.tools.is_none());
 }

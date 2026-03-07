@@ -103,6 +103,7 @@ impl ChatCompletionCreateParams {
         continuation: Option<&[crate::agent::completions::ContinuationItem<objectiveai::agent::completions::message::AssistantMessage>]>,
         tool_names: &[String],
         tool_map: &HashMap<String, crate::agent::completions::tool::ResolvedTool>,
+        tools_enabled: bool,
     ) -> Self {
         use crate::agent::completions::ContinuationItem;
         use objectiveai::agent::completions::message::Message;
@@ -165,7 +166,16 @@ impl ChatCompletionCreateParams {
             .collect();
 
         // --- Step 4: Determine tool_choice ---
-        let (tools, tool_choice) = if final_tools.is_empty() {
+        let (tools, tool_choice) = if !tools_enabled {
+            // When tools are disabled, send tool_choice: none.
+            // Still include tool definitions so the model knows what
+            // exists, but it is not allowed to call them.
+            if final_tools.is_empty() {
+                (None, None)
+            } else {
+                (Some(final_tools), Some(super::tool_choice::ToolChoice::None))
+            }
+        } else if final_tools.is_empty() {
             (None, None)
         } else if let Some((ref name, required)) = response_format_tool_required {
             let choice = if required == Some(true) {
