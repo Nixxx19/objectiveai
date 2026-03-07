@@ -316,8 +316,10 @@ pub struct Client<
     VUSG,
     FFNG,
     FFNF,
+    FFNM,
     FPFLG,
     FPFLF,
+    FPFLM,
     FUSG,
 > {
     /// Agent completions client for reasoning summaries.
@@ -342,10 +344,10 @@ pub struct Client<
     >,
     /// Fetcher for Function definitions.
     pub function_fetcher:
-        Arc<functions::function_fetcher::FetcherRouter<FFNG, FFNF>>,
+        Arc<functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>>,
     /// Fetcher for Profile definitions.
     pub profile_fetcher:
-        Arc<functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF>>,
+        Arc<functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF, FPFLM>>,
     /// Handler for recording usage after execution.
     pub usage_handler: Arc<FUSG>,
 }
@@ -363,8 +365,10 @@ impl<
     VUSG,
     FFNG,
     FFNF,
+    FFNM,
     FPFLG,
     FPFLF,
+    FPFLM,
     FUSG,
 >
     Client<
@@ -380,8 +384,10 @@ impl<
         VUSG,
         FFNG,
         FFNF,
+        FFNM,
         FPFLG,
         FPFLF,
+        FPFLM,
         FUSG,
     >
 {
@@ -406,10 +412,10 @@ impl<
             >,
         >,
         function_fetcher: Arc<
-            functions::function_fetcher::FetcherRouter<FFNG, FFNF>,
+            functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>,
         >,
         profile_fetcher: Arc<
-            functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF>,
+            functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF, FPFLM>,
         >,
         usage_handler: Arc<FUSG>,
     ) -> Self {
@@ -437,8 +443,10 @@ impl<
     VUSG,
     FFNG,
     FFNF,
+    FFNM,
     FPFLG,
     FPFLF,
+    FPFLM,
     FUSG,
 >
     Client<
@@ -454,8 +462,10 @@ impl<
         VUSG,
         FFNG,
         FFNF,
+        FFNM,
         FPFLG,
         FPFLF,
+        FPFLM,
         FUSG,
     >
 where
@@ -483,8 +493,10 @@ where
         + 'static,
     FFNG: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FFNF: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNM: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FPFLG: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FPFLF: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FPFLM: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     /// Executes a Function and returns the complete response.
@@ -585,8 +597,10 @@ impl<
     VUSG,
     FFNG,
     FFNF,
+    FFNM,
     FPFLG,
     FPFLF,
+    FPFLM,
     FUSG,
 >
     Client<
@@ -602,8 +616,10 @@ impl<
         VUSG,
         FFNG,
         FFNF,
+        FFNM,
         FPFLG,
         FPFLF,
+        FPFLM,
         FUSG,
     >
 where
@@ -631,8 +647,10 @@ where
         + 'static,
     FFNG: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FFNF: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNM: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FPFLG: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FPFLF: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FPFLM: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FUSG: Send + Sync + 'static,
 {
     /// Executes a Function with streaming output.

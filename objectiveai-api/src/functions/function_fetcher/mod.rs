@@ -3,6 +3,7 @@
 mod fetcher;
 pub mod filesystem;
 pub mod github;
+pub mod mock;
 mod response;
 mod router;
 

@@ -7,19 +7,19 @@ use std::sync::Arc;
 ///
 /// Provides methods to list Profiles, retrieve Profile definitions,
 /// and get Profile usage statistics.
-pub struct Client<CTXEXT, G, F, RTRVL> {
+pub struct Client<CTXEXT, G, F, M, RTRVL> {
     /// Router for Profile definition fetching.
-    pub profile_fetcher: Arc<crate::functions::profile_fetcher::FetcherRouter<G, F>>,
+    pub profile_fetcher: Arc<crate::functions::profile_fetcher::FetcherRouter<G, F, M>>,
     /// Client for listing Profiles and getting usage statistics.
     pub retrieval_client: Arc<RTRVL>,
     /// Phantom data for context extension type.
     pub _ctx_ext: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<CTXEXT, G, F, RTRVL> Client<CTXEXT, G, F, RTRVL> {
+impl<CTXEXT, G, F, M, RTRVL> Client<CTXEXT, G, F, M, RTRVL> {
     /// Creates a new Profile client.
     pub fn new(
-        profile_fetcher: Arc<crate::functions::profile_fetcher::FetcherRouter<G, F>>,
+        profile_fetcher: Arc<crate::functions::profile_fetcher::FetcherRouter<G, F, M>>,
         retrieval_client: Arc<RTRVL>,
     ) -> Self {
         Self {
@@ -30,11 +30,12 @@ impl<CTXEXT, G, F, RTRVL> Client<CTXEXT, G, F, RTRVL> {
     }
 }
 
-impl<CTXEXT, G, F, RTRVL> Client<CTXEXT, G, F, RTRVL>
+impl<CTXEXT, G, F, M, RTRVL> Client<CTXEXT, G, F, M, RTRVL>
 where
     CTXEXT: Send + Sync + 'static,
     G: crate::functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     F: crate::functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    M: crate::functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     RTRVL: super::retrieval_client::Client<CTXEXT> + Send + Sync + 'static,
 {
     /// Lists all available Profiles.

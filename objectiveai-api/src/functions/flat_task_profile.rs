@@ -452,10 +452,12 @@ pub async fn get_flat_task_profile<CTXEXT>(
         super::function_fetcher::FetcherRouter<
             impl super::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
             impl super::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+            impl super::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
         >,
     >,
     profile_fetcher: Arc<
         super::profile_fetcher::FetcherRouter<
+            impl super::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
             impl super::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
             impl super::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
         >,

@@ -11,6 +11,8 @@ pub enum Remote {
     Github,
     /// Local filesystem.
     Filesystem,
+    /// Mock (for testing).
+    Mock,
 }
 
 impl Remote {
@@ -26,6 +28,9 @@ impl Remote {
                     repository, owner, repository, commit
                 )
             }
+            Remote::Mock => {
+                format!("[{}](mock://{}/{}) ({})", repository, owner, repository, commit)
+            }
         }
     }
 }
@@ -35,6 +40,7 @@ impl fmt::Display for Remote {
         match self {
             Remote::Github => write!(f, "github"),
             Remote::Filesystem => write!(f, "filesystem"),
+            Remote::Mock => write!(f, "mock"),
         }
     }
 }
