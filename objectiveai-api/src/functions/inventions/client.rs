@@ -6,20 +6,15 @@ use std::{
     time,
 };
 
-type Tool = objectiveai::upstream::Tool;
 type FunctionInventionChunk =
     objectiveai::functions::inventions::response::streaming::FunctionInventionChunk;
+type InventionAgentCompletionChunk =
+    objectiveai::functions::inventions::response::streaming::AgentCompletionChunk;
 type Object = objectiveai::functions::inventions::response::streaming::Object;
 type Params = objectiveai::functions::inventions::Params;
 type State = objectiveai::functions::inventions::State;
 
 use objectiveai::functions::inventions::InventionState;
-
-/// Output from a single step — either a streamable chunk or the final upstream state.
-enum StepOutput {
-    Chunk(FunctionInventionChunk),
-    UpstreamState(Option<serde_json::Value>),
-}
 
 /// Generates a unique response ID for Function inventions.
 pub fn invention_response_id(created: u64) -> String {
@@ -35,28 +30,65 @@ pub fn invention_response_id(created: u64) -> String {
 ///
 /// Orchestrates the multi-step invention flow: essay, input schema,
 /// essay tasks, tasks, description, and readme generation.
-pub struct Client<CTXEXT, IUSG> {
-    pub upstream_client: super::upstream::Client,
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG> {
+    pub agent_client: Arc<
+        crate::agent::completions::Client<
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
+        >,
+    >,
     pub usage_handler: Arc<IUSG>,
-    _ctxext: std::marker::PhantomData<CTXEXT>,
 }
 
-impl<CTXEXT, IUSG> Client<CTXEXT, IUSG> {
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
+{
     pub fn new(
-        upstream_client: super::upstream::Client,
+        agent_client: Arc<
+            crate::agent::completions::Client<
+                CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
+            >,
+        >,
         usage_handler: Arc<IUSG>,
     ) -> Self {
         Self {
-            upstream_client,
+            agent_client,
             usage_handler,
-            _ctxext: std::marker::PhantomData,
         }
     }
 }
 
-impl<CTXEXT, IUSG> Client<CTXEXT, IUSG>
+type Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> =
+    crate::agent::completions::Continuation<
+        <OPENROUTER as crate::agent::completions::UpstreamClient<
+            objectiveai::agent::openrouter::Agent,
+        >>::State,
+        <CLAUDEAGENTSDK as crate::agent::completions::UpstreamClient<
+            objectiveai::agent::claude_agent_sdk::Agent,
+        >>::State,
+        <MOCK as crate::agent::completions::UpstreamClient<
+            objectiveai::agent::mock::Agent,
+        >>::State,
+    >;
+
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
 where
-    CTXEXT: Send + Sync + 'static,
+    CTXEXT: ctx::ContextExt + Send + Sync + 'static,
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
+        + Send
+        + Sync
+        + 'static,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
+            objectiveai::agent::claude_agent_sdk::Agent,
+        > + Send
+        + Sync
+        + 'static,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>
+        + Send
+        + Sync
+        + 'static,
+    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     IUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_unary_handle_usage(
@@ -138,7 +170,7 @@ where
 
     pub async fn create_streaming(
         self: Arc<Self>,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT>,
         request: Arc<
             objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         >,
@@ -152,21 +184,21 @@ where
             .as_secs();
         let id = invention_response_id(created);
         let state = request.state.clone().route();
-        let upstream_client = self.upstream_client.clone();
+        let agent_client = self.agent_client.clone();
 
         let stream: Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>> =
             match state {
                 State::AlphaScalarBranch(s) => {
-                    run_all_steps(s, upstream_client, request, id, created)
+                    run_all_steps(s, agent_client, ctx, request, id, created)
                 }
                 State::AlphaScalarLeaf(s) => {
-                    run_all_steps(s, upstream_client, request, id, created)
+                    run_all_steps(s, agent_client, ctx, request, id, created)
                 }
                 State::AlphaVectorBranch(s) => {
-                    run_all_steps(s, upstream_client, request, id, created)
+                    run_all_steps(s, agent_client, ctx, request, id, created)
                 }
                 State::AlphaVectorLeaf(s) => {
-                    run_all_steps(s, upstream_client, request, id, created)
+                    run_all_steps(s, agent_client, ctx, request, id, created)
                 }
             };
 
@@ -178,19 +210,66 @@ where
 // Step orchestration
 // ---------------------------------------------------------------------------
 
-fn run_all_steps<T: InventionState>(
+fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>(
     state_val: T,
-    upstream_client: super::upstream::Client,
+    agent_client: Arc<
+        crate::agent::completions::Client<
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
+        >,
+    >,
+    ctx: ctx::Context<CTXEXT>,
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     id: String,
     created: u64,
-) -> Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>> {
+) -> Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>>
+where
+    T: InventionState,
+    CTXEXT: ctx::ContextExt + Send + Sync + 'static,
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
+        + Send
+        + Sync
+        + 'static,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
+            objectiveai::agent::claude_agent_sdk::Agent,
+        > + Send
+        + Sync
+        + 'static,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>
+        + Send
+        + Sync
+        + 'static,
+    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
+{
     Box::pin(async_stream::stream! {
         let state = Arc::new(Mutex::new(state_val));
         let params = T::params(&state);
         let is_scalar = T::is_scalar();
         let object = T::object();
         let tasks_str = tasks_str(&params);
+
+        let state_chunk = |state: &Arc<Mutex<T>>, id: &str, created, object| {
+            FunctionInventionChunk {
+                id: id.to_string(),
+                completions: vec![],
+                state: Some(state.lock().unwrap().clone().into_state()),
+                function: None,
+                created,
+                object,
+                usage: None,
+                error: None,
+            }
+        };
+
+        // Continuation carried between steps.
+        let mut continuation: Option<
+            Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK>,
+        > = None;
+        // Completion index incremented across all steps.
+        let mut completion_index: u64 = 0;
+
+        // Initial state
+        yield state_chunk(&state, &id, created, object);
 
         // Step 1: Essay
         let essay_prompt = if is_scalar {
@@ -215,39 +294,21 @@ fn run_all_steps<T: InventionState>(
                 Read the Spec first.",
             )
         };
-        let mut upstream_state: Option<serde_json::Value> = None;
-        let state_chunk = |state: &Arc<Mutex<T>>, id: &str, created, object| {
-            FunctionInventionChunk {
-                id: id.to_string(),
-                completions: vec![],
-                state: Some(state.lock().unwrap().clone().into_state()),
-                function: None,
-                created,
-                object,
-                usage: None,
-                error: None,
-            }
-        };
-
-        // Initial state
-        yield state_chunk(&state, &id, created, object);
-
-        // Step 1: Essay
+        let mut errored = false;
         let mut step = run_step(
-            upstream_client.clone(), request.clone(),
+            agent_client.clone(), ctx.clone(), request.clone(),
             essay_prompt, T::essay_tools(&state),
             Arc::new({ let s = state.clone(); move || T::validate_essay(&s) }),
-            id.clone(), created, object, upstream_state,
+            id.clone(), created, object, continuation.take(), completion_index,
         );
-        let mut errored = false;
-        upstream_state = None;
         while let Some(output) = step.next().await {
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
                     yield chunk;
                 }
-                StepOutput::UpstreamState(s) => { upstream_state = s; }
+                StepOutput::Continuation(c) => { continuation = Some(c); }
+                StepOutput::CompletionIndex(i) => { completion_index = i; }
             }
         }
         if errored { return; }
@@ -267,21 +328,21 @@ fn run_all_steps<T: InventionState>(
             If handling multimodal content, use `type`: `image`, `audio`, `video`, or `file` depending. \
             Multimodal types exist in addition to common primitives (e.g. `string`, `array`, etc)".to_string()
         };
+        errored = false;
         let mut step = run_step(
-            upstream_client.clone(), request.clone(),
+            agent_client.clone(), ctx.clone(), request.clone(),
             input_schema_prompt, T::input_schema_tools(&state),
             Arc::new({ let s = state.clone(); move || T::validate_input_schema(&s) }),
-            id.clone(), created, object, upstream_state,
+            id.clone(), created, object, continuation.take(), completion_index,
         );
-        errored = false;
-        upstream_state = None;
         while let Some(output) = step.next().await {
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
                     yield chunk;
                 }
-                StepOutput::UpstreamState(s) => { upstream_state = s; }
+                StepOutput::Continuation(c) => { continuation = Some(c); }
+                StepOutput::CompletionIndex(i) => { completion_index = i; }
             }
         }
         if errored { return; }
@@ -295,21 +356,21 @@ fn run_all_steps<T: InventionState>(
             which will go into the function's `tasks` array. There should be {tasks_str} tasks. \
             Read the Spec and Essay first.",
         );
+        errored = false;
         let mut step = run_step(
-            upstream_client.clone(), request.clone(),
+            agent_client.clone(), ctx.clone(), request.clone(),
             essay_tasks_prompt, T::essay_tasks_tools(&state),
             Arc::new({ let s = state.clone(); move || T::validate_essay_tasks(&s) }),
-            id.clone(), created, object, upstream_state,
+            id.clone(), created, object, continuation.take(), completion_index,
         );
-        errored = false;
-        upstream_state = None;
         while let Some(output) = step.next().await {
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
                     yield chunk;
                 }
-                StepOutput::UpstreamState(s) => { upstream_state = s; }
+                StepOutput::Continuation(c) => { continuation = Some(c); }
+                StepOutput::CompletionIndex(i) => { completion_index = i; }
             }
         }
         if errored { return; }
@@ -480,21 +541,21 @@ fn run_all_steps<T: InventionState>(
                 2. Re-read the Spec. It is the universal source of truth — never contradict it.",
             )
         };
+        errored = false;
         let mut step = run_step(
-            upstream_client.clone(), request.clone(),
+            agent_client.clone(), ctx.clone(), request.clone(),
             tasks_prompt, T::tasks_tools(&state),
             Arc::new({ let s = state.clone(); move || T::validate_function(&s) }),
-            id.clone(), created, object, upstream_state,
+            id.clone(), created, object, continuation.take(), completion_index,
         );
-        errored = false;
-        upstream_state = None;
         while let Some(output) = step.next().await {
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
                     yield chunk;
                 }
-                StepOutput::UpstreamState(s) => { upstream_state = s; }
+                StepOutput::Continuation(c) => { continuation = Some(c); }
+                StepOutput::CompletionIndex(i) => { completion_index = i; }
             }
         }
         if errored { return; }
@@ -505,20 +566,21 @@ fn run_all_steps<T: InventionState>(
             "Create a 1-paragraph description of the Function you've invented. \
             The description should be concise (max 350 bytes) and summarize the \
             function's purpose. Read the Spec, Essay, and Tasks first.".to_string();
+        errored = false;
         let mut step = run_step(
-            upstream_client.clone(), request.clone(),
+            agent_client.clone(), ctx.clone(), request.clone(),
             description_prompt, T::description_tools(&state),
             Arc::new({ let s = state.clone(); move || T::validate_description(&s) }),
-            id.clone(), created, object, upstream_state,
+            id.clone(), created, object, continuation.take(), completion_index,
         );
-        errored = false;
         while let Some(output) = step.next().await {
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
                     yield chunk;
                 }
-                StepOutput::UpstreamState(_) => {}
+                StepOutput::Continuation(_) => {}
+                StepOutput::CompletionIndex(_) => {}
             }
         }
         if errored { return; }
@@ -534,31 +596,193 @@ fn run_all_steps<T: InventionState>(
 // Single step runner — streams chunks as they arrive
 // ---------------------------------------------------------------------------
 
-fn run_step(
-    upstream_client: super::upstream::Client,
+/// Output from a single step.
+enum StepOutput<OPENROUTER, CLAUDEAGENTSDK, MOCK>
+where
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent>,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>,
+{
+    Chunk(FunctionInventionChunk),
+    Continuation(Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK>),
+    CompletionIndex(u64),
+}
+
+/// Builds `AgentCompletionCreateParams` from the invention request and step prompt.
+fn build_agent_params(
+    request: &objectiveai::functions::inventions::request::FunctionInventionCreateParams,
+    prompt: &str,
+) -> objectiveai::agent::completions::request::AgentCompletionCreateParams {
+    objectiveai::agent::completions::request::AgentCompletionCreateParams {
+        messages: vec![objectiveai::agent::completions::message::Message::User(
+            objectiveai::agent::completions::message::UserMessage {
+                content: objectiveai::agent::completions::message::RichContent::Text(
+                    prompt.to_string(),
+                ),
+                name: None,
+            },
+        )],
+        provider: request.provider.clone(),
+        agent: request.agent.clone(),
+        agents: request.agents.clone(),
+        response_format: None,
+        seed: request.seed,
+        stream: Some(true),
+        mcp_server_authorization: request.mcp_server_authorization.clone(),
+    }
+}
+
+fn run_step<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>(
+    agent_client: Arc<
+        crate::agent::completions::Client<
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
+        >,
+    >,
+    ctx: ctx::Context<CTXEXT>,
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     prompt: String,
-    tools: Vec<Tool>,
+    tools: Vec<objectiveai::functions::inventions::InventionTool>,
     validate: Arc<dyn Fn() -> Result<(), String> + Send + Sync>,
     id: String,
     created: u64,
     object: Object,
-    initial_upstream_state: Option<serde_json::Value>,
-) -> Pin<Box<dyn Stream<Item = StepOutput> + Send>> {
+    initial_continuation: Option<Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK>>,
+    initial_completion_index: u64,
+) -> Pin<
+    Box<
+        dyn Stream<Item = StepOutput<OPENROUTER, CLAUDEAGENTSDK, MOCK>>
+            + Send,
+    >,
+>
+where
+    CTXEXT: ctx::ContextExt + Send + Sync + 'static,
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
+        + Send
+        + Sync
+        + 'static,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<
+            objectiveai::agent::claude_agent_sdk::Agent,
+        > + Send
+        + Sync
+        + 'static,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent>
+        + Send
+        + Sync
+        + 'static,
+    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
+{
     Box::pin(async_stream::stream! {
-        let mut upstream_state: Option<serde_json::Value> = initial_upstream_state;
+        let mut continuation = initial_continuation;
+        let mut completion_index = initial_completion_index;
+        let validate_for_done = validate.clone();
+        let max_step_retries = request.max_step_retries.unwrap_or(3);
 
-        loop {
-            let (stream, new_state) = match upstream_client
+        let agent_params = Arc::new(build_agent_params(&request, &prompt));
+
+        // The agent completions loop handles tool calling internally via
+        // invention_done. When validate returns Ok, invention_done fires,
+        // tools_enabled becomes false, and the model produces a final
+        // content-only response that ends the loop naturally.
+        let invention_done = Arc::new(move || validate_for_done().is_ok());
+
+        let stream_result = agent_client
+            .create_streaming(
+                ctx.clone(),
+                agent_params,
+                continuation.take(),
+                Some(tools.clone()),
+                Some(invention_done),
+                None,
+            )
+            .await;
+
+        let stream = match stream_result {
+            Ok(stream) => stream,
+            Err(e) => {
+                yield StepOutput::Chunk(FunctionInventionChunk {
+                    id: id.clone(),
+                    completions: vec![],
+                    state: None,
+                    function: None,
+                    created,
+                    object,
+                    usage: None,
+                    error: Some(objectiveai::error::ResponseError {
+                        code: {
+                            use objectiveai::error::StatusError;
+                            e.status()
+                        },
+                        message: {
+                            use objectiveai::error::StatusError;
+                            e.message().unwrap_or(serde_json::Value::Null)
+                        },
+                    }),
+                });
+                return;
+            }
+        };
+
+        futures::pin_mut!(stream);
+        while let Some(item) = stream.next().await {
+            match item {
+                crate::agent::completions::StreamItem::Chunk(chunk) => {
+                    yield StepOutput::Chunk(FunctionInventionChunk {
+                        id: id.clone(),
+                        completions: vec![InventionAgentCompletionChunk {
+                            index: completion_index,
+                            inner: chunk,
+                        }],
+                        state: None,
+                        function: None,
+                        created,
+                        object,
+                        usage: None,
+                        error: None,
+                    });
+                }
+                crate::agent::completions::StreamItem::State(cont) => {
+                    continuation = Some(cont);
+                }
+            }
+        }
+
+        // If validate still fails after the agent loop ended, start a new
+        // agent completion with a new user message prompting the model to
+        // try again. The continuation carries forward the conversation.
+        let mut retries = 0u32;
+        while validate().is_err() && retries < max_step_retries {
+            retries += 1;
+            if let Some(ref mut cont) = continuation {
+                cont.push_user_message(
+                    objectiveai::agent::completions::message::UserMessage {
+                        content: objectiveai::agent::completions::message::RichContent::Text(
+                            prompt.clone(),
+                        ),
+                        name: None,
+                    },
+                );
+            }
+
+            completion_index += 1;
+
+            let validate_for_done = validate.clone();
+            let invention_done = Arc::new(move || validate_for_done().is_ok());
+            let agent_params = Arc::new(build_agent_params(&request, &prompt));
+
+            let stream_result = agent_client
                 .create_streaming(
-                    request.clone(),
-                    prompt.clone(),
-                    tools.clone(),
-                    upstream_state,
+                    ctx.clone(),
+                    agent_params,
+                    continuation.take(),
+                    Some(tools.clone()),
+                    Some(invention_done),
+                    None,
                 )
-                .await
-            {
-                Ok(result) => result,
+                .await;
+
+            let stream = match stream_result {
+                Ok(stream) => stream,
                 Err(e) => {
                     yield StepOutput::Chunk(FunctionInventionChunk {
                         id: id.clone(),
@@ -568,33 +792,51 @@ fn run_step(
                         created,
                         object,
                         usage: None,
-                        error: Some(objectiveai::error::ResponseError::from(&e)),
+                        error: Some(objectiveai::error::ResponseError {
+                            code: {
+                                use objectiveai::error::StatusError;
+                                e.status()
+                            },
+                            message: {
+                                use objectiveai::error::StatusError;
+                                e.message().unwrap_or(serde_json::Value::Null)
+                            },
+                        }),
                     });
                     return;
                 }
             };
 
-            upstream_state = Some(new_state);
-
             futures::pin_mut!(stream);
-            while let Some(completion_chunk) = stream.next().await {
-                yield StepOutput::Chunk(FunctionInventionChunk {
-                    id: id.clone(),
-                    completions: vec![completion_chunk],
-                    state: None,
-                    function: None,
-                    created,
-                    object,
-                    usage: None,
-                    error: None,
-                });
-            }
-
-            if validate().is_ok() {
-                break;
+            while let Some(item) = stream.next().await {
+                match item {
+                    crate::agent::completions::StreamItem::Chunk(chunk) => {
+                        yield StepOutput::Chunk(FunctionInventionChunk {
+                            id: id.clone(),
+                            completions: vec![InventionAgentCompletionChunk {
+                                index: completion_index,
+                                inner: chunk,
+                            }],
+                            state: None,
+                            function: None,
+                            created,
+                            object,
+                            usage: None,
+                            error: None,
+                        });
+                    }
+                    crate::agent::completions::StreamItem::State(cont) => {
+                        continuation = Some(cont);
+                    }
+                }
             }
         }
-        yield StepOutput::UpstreamState(upstream_state);
+
+        // Yield final continuation and completion index for the next step.
+        if let Some(cont) = continuation {
+            yield StepOutput::Continuation(cont);
+        }
+        yield StepOutput::CompletionIndex(completion_index + 1);
     })
 }
 
