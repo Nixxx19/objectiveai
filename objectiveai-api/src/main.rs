@@ -19,6 +19,7 @@ use objectiveai_api::{
     auth, chat, ctx, ensemble, ensemble_llm,
     error::ResponseErrorExt,
     functions::{self, profiles::computations::Client},
+    github,
     util::StreamOnce,
     vector,
 };
@@ -208,7 +209,7 @@ async fn main() {
         ));
 
     // GitHub Client
-    let github_client = Arc::new(functions::github::Client::new(
+    let github_client = Arc::new(github::Client::new(
         reqwest::Client::new(),
         github_pat,
         user_agent,

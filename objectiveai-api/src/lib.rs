@@ -29,6 +29,8 @@ pub mod agent;
 pub mod error;
 /// Function execution, profile management, and computations.
 pub mod functions;
+/// GitHub API client for fetching functions and profiles.
+pub mod github;
 /// MCP (Model Context Protocol) types.
 pub mod mcp;
 /// Utility types for streaming and choice indexing.
