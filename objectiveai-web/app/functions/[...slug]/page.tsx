@@ -19,7 +19,8 @@ import { compileFunctionInputSplit, type FunctionConfig } from "../../../lib/was
 import { Functions, EnsembleLlm } from "objectiveai";
 import { ObjectiveAIFetchError } from "objectiveai";
 import { SkeletonFunctionDetails } from "../../../components/ui";
-
+import { FunctionTree } from "@objectiveai/function-tree";
+import "@objectiveai/function-tree/styles";
 interface FunctionDetails {
   owner: string;
   repository: string;
@@ -112,6 +113,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   const [runError, setRunError] = useState<string | null>(null);
   const [modelNames, setModelNames] = useState<Record<string, string>>({});
   const [showAllModels, setShowAllModels] = useState(false);
+  const [showTree, setShowTree] = useState(true);
   const [expandedVotes, setExpandedVotes] = useState<Set<number>>(new Set());
 
   // Demo mode: when enabled, uses RNG votes (free, simulated). When disabled, uses real LLM inference.
@@ -812,7 +814,6 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           gridTemplateColumns: "1fr 1fr",
           gap: isMobile ? "16px" : "32px",
           alignItems: isMobile ? "stretch" : "start",
-          maxWidth: "900px",
         }}>
           {/* Left - Input */}
           <div className="card" style={{ padding: isMobile ? "16px" : undefined }}>
@@ -1322,6 +1323,49 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             )}
           </div>
         </div>
+
+        {/* Execution Tree */}
+        {(results || isRunning) && !runError && (
+          <div style={{ marginTop: isMobile ? "16px" : "32px" }}>
+            <button
+              onClick={() => setShowTree((v) => !v)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: "8px 0",
+                cursor: "pointer",
+                fontSize: "13px",
+                color: "var(--text-muted)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span style={{
+                transform: showTree ? "rotate(90deg)" : "rotate(0deg)",
+                transition: "transform 0.15s ease",
+                display: "inline-block",
+                fontSize: "10px",
+              }}>
+                ▶
+              </span>
+              Execution Tree
+            </button>
+            {showTree && (
+              <FunctionTree
+                data={results ? {
+                  output: results.output,
+                  tasks: results.tasks as any,
+                  function: functionDetails ? `${functionDetails.owner}/${functionDetails.repository}` : undefined,
+                  reasoning: results.reasoning,
+                } : null}
+                modelNames={modelNames}
+                height={isMobile ? 300 : 450}
+                config={{ theme: "auto" }}
+              />
+            )}
+          </div>
+        )}
 
       </div>
     </div>

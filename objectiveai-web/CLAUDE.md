@@ -6,6 +6,15 @@ Guidelines for working with the ObjectiveAI SDK in this project.
 
 **Only work within `objectiveai-web/` unless explicitly instructed otherwise.** This is Maya's frontend workspace. Backend, API, SDK, and other directories are off-limits unless the user specifically directs you there.
 
+## Branch Safety
+
+**Before starting any work, check the current git branch.** Maya's work belongs on web/UI-only branches (e.g., `web-fixes`, `website-updates`). Never commit to branches that contain Ronald's backend work (e.g., `remote-github`, `fixes`, `main`).
+
+- Run `git branch --show-current` and review recent commits to confirm the branch is web-only
+- If the branch has backend/API/SDK commits (Rust, API server, SDK dist rebuilds), **stop and ask Maya before proceeding**
+- When creating new work, prefer creating a fresh branch from `main` rather than building on an existing mixed branch
+- If unsure whether a branch is safe to work on, ask — don't guess
+
 ## Team Context
 
 **Maya Gore** - COO & Co-Founder. Handles UI/UX, creative direction, and frontend work. This is her workspace.
