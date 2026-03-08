@@ -240,6 +240,8 @@ async fn main() {
         .join(".objectiveai")
         .join("functions");
 
+    let filesystem_client = Arc::new(filesystem::Client::new(filesystem_base_dir));
+
     // Function Fetcher (routes to GitHub or Filesystem based on Remote)
     let function_fetcher =
         Arc::new(functions::function_fetcher::FetcherRouter::new(
@@ -248,7 +250,7 @@ async fn main() {
             )),
             Arc::new(
                 functions::function_fetcher::filesystem::FilesystemFetcher::new(
-                    filesystem_base_dir.clone(),
+                    filesystem_client.clone(),
                 ),
             ),
         ));
@@ -261,7 +263,7 @@ async fn main() {
             )),
             Arc::new(
                 functions::profile_fetcher::filesystem::FilesystemFetcher::new(
-                    filesystem_base_dir,
+                    filesystem_client,
                 ),
             ),
         ));

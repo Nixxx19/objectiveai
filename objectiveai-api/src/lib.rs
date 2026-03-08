@@ -27,6 +27,8 @@ pub mod ensemble;
 pub mod agent;
 /// Error response handling and conversion.
 pub mod error;
+/// Local filesystem client for reading from git repositories.
+pub mod filesystem;
 /// Function execution, profile management, and computations.
 pub mod functions;
 /// GitHub API client for fetching functions and profiles.
