@@ -41,8 +41,6 @@ pub async fn tasks_tool_call(
                 "responses": { "$starlark": responses_expr },
             }).to_string()
         }
-        "CheckFunction" | "ReadSpec" | "ReadEssay" | "ReadInputSchema"
-        | "ReadEssayTasks" | "ReadTasksLength" => "{}".to_string(),
         "DeleteTask" | "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()
         }

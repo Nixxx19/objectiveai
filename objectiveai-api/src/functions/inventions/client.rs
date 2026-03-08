@@ -195,6 +195,28 @@ where
         };
         params.validate().map_err(super::Error::InvalidState)?;
 
+        // Validate depth matches variant.
+        let is_leaf = matches!(
+            &request.state,
+            objectiveai::functions::inventions::state::ParamsState::AlphaScalarLeaf(_)
+            | objectiveai::functions::inventions::state::ParamsState::AlphaVectorLeaf(_)
+        );
+        let is_branch = matches!(
+            &request.state,
+            objectiveai::functions::inventions::state::ParamsState::AlphaScalarBranch(_)
+            | objectiveai::functions::inventions::state::ParamsState::AlphaVectorBranch(_)
+        );
+        if is_leaf && params.depth > 0 {
+            return Err(super::Error::InvalidState(
+                format!("leaf state requires depth=0, got depth={}", params.depth),
+            ));
+        }
+        if is_branch && params.depth == 0 {
+            return Err(super::Error::InvalidState(
+                "branch state requires depth>0, got depth=0".to_string(),
+            ));
+        }
+
         // Pre-flight: validate remote, token, and name.
         self.check_preflight(&request).await?;
 

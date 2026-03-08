@@ -128,6 +128,48 @@ impl JsonSchema for EssayTasksObject {
 }
 
 #[derive(Deserialize)]
+pub struct TasksLengthObject {
+    pub tasks_length: u64,
+}
+
+impl JsonSchema for TasksLengthObject {
+    fn json_schema() -> serde_json::Map<String, serde_json::Value> {
+        let mut tasks_length_prop = serde_json::Map::with_capacity(1);
+        tasks_length_prop.insert(
+            "type".to_string(),
+            serde_json::Value::String("integer".to_string()),
+        );
+
+        let mut properties = serde_json::Map::with_capacity(1);
+        properties.insert(
+            "tasks_length".to_string(),
+            serde_json::Value::Object(tasks_length_prop),
+        );
+
+        let mut map = serde_json::Map::with_capacity(4);
+        map.insert(
+            "type".to_string(),
+            serde_json::Value::String("object".to_string()),
+        );
+        map.insert(
+            "properties".to_string(),
+            serde_json::Value::Object(properties),
+        );
+        map.insert(
+            "required".to_string(),
+            serde_json::Value::Array(vec![serde_json::Value::String(
+                "tasks_length".to_string(),
+            )]),
+        );
+        map.insert(
+            "additionalProperties".to_string(),
+            serde_json::Value::Bool(false),
+        );
+        map
+    }
+}
+
+#[derive(Deserialize)]
 pub struct DescriptionObject {
     pub description: String,
 }

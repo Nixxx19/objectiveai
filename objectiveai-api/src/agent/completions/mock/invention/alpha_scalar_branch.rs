@@ -26,8 +26,6 @@ pub async fn tasks_tool_call(
             let task = random_placeholder_scalar_task(&field_schemas, rng);
             task.to_string()
         }
-        "CheckFunction" | "ReadSpec" | "ReadEssay" | "ReadInputSchema"
-        | "ReadEssayTasks" | "ReadTasksLength" => "{}".to_string(),
         "DeleteTask" | "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()
         }

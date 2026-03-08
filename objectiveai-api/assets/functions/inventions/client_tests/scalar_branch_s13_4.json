@@ -245,14 +245,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "SXwmmxS0mKaFbMT9DbAvUG8Im8MQHNzvMhepH0X2JECYWy3BPmJWnd npf05umUIUVzoHp1hLAPPvEFfPG0YctT6n48kuXkv1WVxnDblUitHsxMAAi2LIRKhveOTJGrv1OBWc2Ndh5y25nNf1gPyYqsjqtSb7Gqx XsZc SfMh92tMyFHpFaZfNcKQcpIydNTYT2MELLV46rNakYc6D2NAR9KJI7qYVFJTTWIbqSOiXUhJnTnGOIW1pjGV0fThcKIc8SLx234c4ByAz GtYsjgPZE5rY4HtEK2c7dDROkfZH4ugHZJw mPZo4cG5rMTJAgJTCRPO CjFqsmqRrYkdrHHK3j5qqAlAkY39acaocluCq7yamUnxy np q9dKn9wYQPaOKm1da1W3tTpHsBrTut2cTYtTe1H3dLOPE37fhHNyuvlg38WYD JKHCjNmOCLYJXUpn5e82R52M6easkFzMJAcCKbgTMB8TREtZE22sHNKNbMgkkeWlwXU",
+          "reasoning": "3bJqgxnqwRMWFadDGavMu4HWSPni6j53xCFb99n4BTPNVejsWaCbdjTqUWsR9SA5pGuXed7j3OgzfjVWSSr7wWCjiEfuCYYdKyeeHj7Z0JkuPiDG4GQWZJY8iiv Jc5y6SA7ltFvIYQ96ewZkHTC4kVwUdJfzHIYuO GWg1zIjhff2X6eR4qhNA2EjGkTifRCrDHP3rDE i8x2DHRNCJboz 9MfDii7pur55o7Ra5yVLntKCvhgYkJC3ZMWNJHnCKzXyZvHnzC1Jmix8OX5uQwJTUvdPGi2inCdH S7dllfNifgWUKiwrA9NPWNt3NrXHeY4GtwRukP92fSTBkBqp6EGFxqiJIpXmJbmBlTpNQBqfvsdD4BN9F1KAVI0QIoC9McR8wpOMhjjLFRMI5UKmw8cr5wQ8YqfS6LISUA6vrRbxh0VEw6gysFcg5dgS3fKy4 6t NGHugatMeuIedzOCWtC0i wlnkYPlWeqQP6IFAvU7yF527i5SAZ2hwoiXT2w9QS4i4BAzMs6x3PWsdYesECx1sLwYkPhdAyJGKq59StqFfL7PYMwExBjEQicbM61ybbkH9PGFBY4AIARmTHJLj4i59LLCmYvd2Y2gIXUtVHFE3uNb3kkmuD8wMCiPbkk9d06Z4p",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_17430792459461169359",
+              "id": "call_mock_16646456428778050494",
               "function": {
-                "name": "ReadAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema",
-                "arguments": "{}"
+                "name": "AppendTask",
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-351\",\"spec\":\"G 6hSPE6SrKiZkxGrZezSmacFge7ASFd054MdkvJ5F10zxGH1C3xGUJJpjCd752NQhCsA9drqLN9xHnC9lD8K gNMR7mTuledilHrS3h9TeQc2vBDxd5A0Gp JWe9v59HF6uEjz0mr nCaJKGz06i16mZRIuDqqxQOXK\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"entries\"]},\"input\":{\"$starlark\":\"{'entries': input['entries']}\"}}"
               }
             }
           ],
@@ -273,8 +273,8 @@
         {
           "role": "tool",
           "index": 10,
-          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"placeholder.alpha.scalar.function\"\n    },\n    \"name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the placeholder function.\"\n    },\n    \"spec\": {\n      \"type\": \"string\",\n      \"description\": \"The specification of the placeholder function.\"\n    },\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"object\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the object input.\"\n        },\n        \"properties\": {\n          \"type\": \"object\",\n          \"additionalProperties\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The properties of the object input.\"\n        },\n        \"required\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The required properties of the object input.\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"properties\"\n      ],\n      \"description\": \"The input schema for the placeholder scalar function.\"\n    },\n    \"skip\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`.\"\n    },\n    \"input\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to the input for the placeholder scalar function. Receives: `input`.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"name\",\n    \"spec\",\n    \"input_schema\",\n    \"input\"\n  ],\n  \"description\": \"A placeholder alpha scalar function task expression. Always outputs 0.5.\"\n}\n",
-          "tool_call_id": "call_mock_17430792459461169359"
+          "content": "1",
+          "tool_call_id": "call_mock_16646456428778050494"
         },
         {
           "role": "assistant",
@@ -283,46 +283,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_14719901519730250380",
-              "function": {
-                "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-271\",\"spec\":\"Vz8wWPRI0Havf5L3s2uIHaO0ecXw1fL8RfVyM5oABHntwPGWP0WSuxCp2a06xtnp2p2AGFu44DNrnZMVOzadHJejwyratMQS1p5YS8WlIaOCz18Lc8gX2vhNRk8QUCT3PlE\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"entries\"]},\"input\":{\"$starlark\":\"{'entries': input['entries']}\"}}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 12,
-          "content": "1",
-          "tool_call_id": "call_mock_14719901519730250380"
-        },
-        {
-          "role": "assistant",
-          "index": 13,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "XQqF8WsVbVPszIBHRTtnuBYpEbOpAo4hdOKHFzbXDVBqN58TM37fXXYEnY1s7ezCflCi8KQUhKp11monmDDl6Bg9P1izM4mUF0IyodZMkKOMTNuVzN4RFvoa1i6iIa0dIBuOcupfixeaJl2g8WJqaOVOS4xbyYwQc",
+          "reasoning": "fgoQDdmP1MFImgLvxDIDUpJIlDOtiZSeOfyodwCB6 n YhXiIGtuXfsFhBE2H5fwvAyMSPKBsrvYHMt3 aDGNOsh804MOD2HXP UQjHXzymjVSLBSeKp8vUfbRQOvJ0MfeJgtaGM4eGsBxgCHSK9B8yYOUrYwB38AIxLkKA01fFakBPGQ12tjQarYBpVOnr5EVtG2TPvxMef9mNOscXT08G7pLS1g2ihQ7K2QuIvBKpEkEHc5xgIX64Y6Df4HrAVXIClcKPRZjpODKIhPZeUMBcWbLS05g3wTwBb3vgKJXEE72cLqmTq6iZotA7z1qqDNQV2oP5sGG7 7ib 6alxp4HroPG8nw5WiMP9CiVHeVCGuuaOKEmWuZYnJPUNhe0Yane2YCdZ9CjZ0gNafaKz FSsLJamdV4 QMX sC9zTcAj6Tqctuhag28E4wS5p504C0rXEyhE5QKYLY2EkRob8Kh",
           "tool_calls": null,
-          "content": "l3xZYNjlmy",
+          "content": "BbSQm7vDt4EAWOlJCLIbPXR9kc 2HGZnInyidbTt2rEFLMqiugbwnoLQfDk 8Qq",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -353,6 +316,44 @@
       "id": "",
       "created": 0,
       "messages": [
+        {
+          "role": "assistant",
+          "index": 12,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "3sVd2wMKvhShzsgB5rwpJHkV7boJLpIXYTgTtXHQrtQqKXlXjrMN4RH4isHFFjkJIZ1cGwAIKgC7rTTctiMhKSr",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_15594303829332549028",
+              "function": {
+                "name": "ReadSpec",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 13,
+          "content": "Test function spec for mock invention.",
+          "tool_call_id": "call_mock_15594303829332549028"
+        },
         {
           "role": "assistant",
           "index": 14,
@@ -473,8 +474,8 @@
         "max_branch_width": 1,
         "min_leaf_width": 1,
         "max_leaf_width": 1,
-        "name": "sub-function-271",
-        "spec": "Vz8wWPRI0Havf5L3s2uIHaO0ecXw1fL8RfVyM5oABHntwPGWP0WSuxCp2a06xtnp2p2AGFu44DNrnZMVOzadHJejwyratMQS1p5YS8WlIaOCz18Lc8gX2vhNRk8QUCT3PlE",
+        "name": "sub-function-351",
+        "spec": "G 6hSPE6SrKiZkxGrZezSmacFge7ASFd054MdkvJ5F10zxGH1C3xGUJJpjCd752NQhCsA9drqLN9xHnC9lD8K gNMR7mTuledilHrS3h9TeQc2vBDxd5A0Gp JWe9v59HF6uEjz0mr nCaJKGz06i16mZRIuDqqxQOXK",
         "input_schema": {
           "properties": {
             "entries": {
@@ -493,6 +494,7 @@
         }
       }
     ],
+    "tasks_length": 1,
     "description": "JT piML6Ovm3TSVOvvyrsuljPsgCMSVDPznJ6qKGo4ar0zkEykkRj1okYymWLGXJbkAVhk9A4k2OxlsGmurfBfL7igz834UPbwf lH5BTvKY9G",
     "readme": "# sb-min-1\n\nJT piML6Ovm3TSVOvvyrsuljPsgCMSVDPznJ6qKGo4ar0zkEykkRj1okYymWLGXJbkAVhk9A4k2OxlsGmurfBfL7igz834UPbwf lH5BTvKY9G\n"
   },
@@ -534,8 +536,8 @@
         "max_branch_width": 1,
         "min_leaf_width": 1,
         "max_leaf_width": 1,
-        "name": "sub-function-271",
-        "spec": "Vz8wWPRI0Havf5L3s2uIHaO0ecXw1fL8RfVyM5oABHntwPGWP0WSuxCp2a06xtnp2p2AGFu44DNrnZMVOzadHJejwyratMQS1p5YS8WlIaOCz18Lc8gX2vhNRk8QUCT3PlE",
+        "name": "sub-function-351",
+        "spec": "G 6hSPE6SrKiZkxGrZezSmacFge7ASFd054MdkvJ5F10zxGH1C3xGUJJpjCd752NQhCsA9drqLN9xHnC9lD8K gNMR7mTuledilHrS3h9TeQc2vBDxd5A0Gp JWe9v59HF6uEjz0mr nCaJKGz06i16mZRIuDqqxQOXK",
         "input_schema": {
           "properties": {
             "entries": {

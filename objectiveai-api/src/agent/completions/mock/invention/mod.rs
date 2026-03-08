@@ -192,14 +192,17 @@ pub fn extract_task_count_range(prompt: &str) -> (u32, u32) {
             }
         }
     }
-    // Try "Create N "
-    if let Some(idx) = prompt.find("Create ") {
-        let rest = &prompt[idx + 7..];
+    // Try "Create N " — find the first occurrence where N is a digit.
+    let mut search_from = 0;
+    while let Some(idx) = prompt[search_from..].find("Create ") {
+        let abs_idx = search_from + idx;
+        let rest = &prompt[abs_idx + 7..];
         if let Some(n_str) = rest.split_whitespace().next() {
             if let Ok(n) = n_str.parse::<u32>() {
                 return (n, n);
             }
         }
+        search_from = abs_idx + 7;
     }
     // Fallback
     (3, 5)

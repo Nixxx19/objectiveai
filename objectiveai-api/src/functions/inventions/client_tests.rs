@@ -307,6 +307,7 @@ macro_rules! invention_test_10x {
                         input_schema: None,
                         essay_tasks: None,
                         tasks: None,
+                        tasks_length: None,
                         description: None,
                         readme: None,
                     }),
@@ -442,6 +443,7 @@ macro_rules! invention_test_10x_schema {
                         input_schema: Some($schema),
                         essay_tasks: None,
                         tasks: None,
+                        tasks_length: None,
                         description: None,
                         readme: None,
                     }),
@@ -1081,7 +1083,7 @@ async fn test_zero_leaf_width_rejected() {
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("bad-zero", 0, 3, 5, 0, 0),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None,
         }),
         1,
     );
@@ -1097,7 +1099,7 @@ async fn test_zero_branch_width_rejected() {
         ParamsState::AlphaScalarBranch(AlphaScalarBranchState {
             params: params("bad-zero-branch", 1, 0, 0, 3, 5),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None,
         }),
         2,
     );
@@ -1113,7 +1115,7 @@ async fn test_min_greater_than_max_rejected() {
         ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
             params: params("bad-inverted", 0, 5, 3, 5, 3),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None,
         }),
         3,
     );

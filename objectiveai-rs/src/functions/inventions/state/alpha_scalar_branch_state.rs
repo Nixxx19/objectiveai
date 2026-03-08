@@ -16,6 +16,8 @@ pub struct AlphaScalarBranchState {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tasks: Option<Vec<functions::alpha_scalar::BranchTaskExpression>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub tasks_length: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub readme: Option<String>,
@@ -511,8 +513,85 @@ impl AlphaScalarBranchState {
         )
     }
 
+    pub fn read_predicted_tasks_length_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+            "ReadPredictedTasksLength",
+            "Read Predicted Tasks Length",
+            {
+                let state = Arc::clone(this);
+                move |_| {
+                    let state = state.lock().unwrap();
+                    match state.tasks_length {
+                        Some(n) => Ok(n.to_string()),
+                        None => Err("Predicted tasks length has not been set".to_string()),
+                    }
+                }
+            },
+        )
+    }
+
+    pub fn edit_predicted_tasks_length_tool(
+        this: &Arc<Mutex<Self>>,
+    ) -> crate::functions::inventions::InventionTool {
+        crate::functions::inventions::InventionTool::new_sync::<crate::functions::inventions::schema::TasksLengthObject>(
+            "EditPredictedTasksLength",
+            "Edit Predicted Tasks Length",
+            {
+                let state = Arc::clone(this);
+                move |args| {
+                    let args_str = match serde_json::to_string(&args) {
+                        Ok(s) => s,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e
+                            ));
+                        }
+                    };
+                    let parsed = match serde_path_to_error::deserialize::<
+                        _,
+                        crate::functions::inventions::schema::TasksLengthObject,
+                    >(
+                        &mut serde_json::Deserializer::from_str(&args_str),
+                    ) {
+                        Ok(o) => o,
+                        Err(e) => {
+                            return Err(format!(
+                                "Invalid argument: {}",
+                                e,
+                            ));
+                        }
+                    };
+                    let mut guard = state.lock().unwrap();
+                    let min = guard.params.min_branch_width;
+                    let max = guard.params.max_branch_width;
+                    if parsed.tasks_length < min || parsed.tasks_length > max {
+                        return Err(format!(
+                            "Tasks length {} is outside allowed range [{}, {}]",
+                            parsed.tasks_length, min, max,
+                        ));
+                    }
+                    guard.tasks_length = Some(parsed.tasks_length);
+                    Ok("Ok".to_string())
+                }
+            },
+        )
+    }
+
     pub fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String> {
         let state = this.lock().unwrap();
+        let tasks_length = state.tasks_length.ok_or_else(|| {
+            "Tasks length has not been set".to_string()
+        })?;
+        let actual_len = state.tasks.as_ref().map(|t| t.len()).unwrap_or(0) as u64;
+        if tasks_length != actual_len {
+            return Err(format!(
+                "Tasks length {} does not match actual tasks length {}",
+                tasks_length, actual_len,
+            ));
+        }
         let function = functions::alpha_scalar::RemoteFunction::Branch {
             description: "placeholder".to_string(),
             input_schema: state.input_schema.clone().ok_or_else(|| {
@@ -686,6 +765,8 @@ impl super::InventionState for AlphaScalarBranchState {
             Self::append_task_tool(this), Self::delete_task_tool(this),
             Self::read_task_tool(this), Self::read_tasks_length_tool(this),
             Self::check_function_tool(this),
+            Self::read_predicted_tasks_length_tool(this),
+            Self::edit_predicted_tasks_length_tool(this),
         ];
         tools.extend(crate::functions::inventions::schema_tools(&["AlphaScalarPlaceholderScalarFunctionTaskExpression", "InputValue"]));
         tools

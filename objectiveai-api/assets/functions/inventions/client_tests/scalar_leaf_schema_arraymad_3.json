@@ -206,13 +206,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "QeAsMLH DLQJW2xODhKS6vNwNSRYh2HLADyE97jnZdZAs he87OaH612Gpn4Wh5FS72MHSHubvbUwJNU4y7an04kZxfdBwuwZiwfraqfwjKexIEIa9BBGQYo2ru 9gW6M5NFuo0isp4l2Vcq0qpPtFVZJIl7JjYkBNxVJog4V4EIefbpQZb7dOSdG EWHB8CeHgjysS9qSHHw6gRjprlbOJwxnV",
+          "reasoning": "ilOnLVrWmLX1Yv1XgJ0XV4Z8xtmZun8lwtTwIllhX8HC gKHyqpfBuSmLtFjIsu5X9MNSJe6m9DfdKH2dFe0dIJdeIrRDHYkleGoI894h8PKsw85ro2Y5G3kXvh8lnGtqXVe hz8GwzvL9ydCpgmIls3P1GAUTmdl0dk5O7ONZmill1oKc1prCCI5c2H0bAhJw4km2dDk88jyYjeOCcUJyJ6KNSM1ZtDfGtkKn pVF18GxrKD8XU2Iqn5iDYjEyiPyMSRrF fDlJLB0Z4m3kHNycWJTaPtCQtakhed0S6owJf4ylSZxOtYUhXl0 EmKXW94hRih6eVsDMjaLJXruOUwpZYiXEmpXBZEV 89OR3zwfNnAtfz6LBqnQo7VtSlfadNgb5OzOnjQiYhCfNxs323KbFpwzYyQ8CqlPTASNsa0OV7f4nN9sBKktXEqlBrHBVX1bJUz0H zrUOeI8j24vB865OhcfkpqSMv1OvD Mu3EjsW5zoYEMw9pU5AtTpeFtzApfvw0l1UDXJQUxmJBXhPuHMXDOiSvSG0nr97XghDEGwc4wjJ0",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8637883357285089980",
+              "id": "call_mock_10309627838477779370",
               "function": {
-                "name": "ReadAudioRichContentPartSchema",
+                "name": "ReadRichContentPartSchema",
                 "arguments": "{}"
               }
             }
@@ -234,8 +234,8 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"input_audio\"\n    },\n    \"input_audio\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"data\": {\n          \"type\": \"string\",\n          \"description\": \"Base64 encoded audio data.\"\n        },\n        \"format\": {\n          \"enum\": [\n            \"wav\",\n            \"mp3\"\n          ],\n          \"description\": \"The format of the encoded audio data.\"\n        }\n      },\n      \"required\": [\n        \"data\",\n        \"format\"\n      ],\n      \"description\": \"The audio data and its format.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"input_audio\"\n  ],\n  \"description\": \"An audio rich content part.\"\n}\n",
-          "tool_call_id": "call_mock_8637883357285089980"
+          "content": "{\n  \"anyOf\": [\n    {\n      \"$ref\": \"TextRichContentPart\",\n      \"description\": \"A text rich content part.\"\n    },\n    {\n      \"$ref\": \"ImageRichContentPart\",\n      \"description\": \"An image rich content part.\"\n    },\n    {\n      \"$ref\": \"AudioRichContentPart\",\n      \"description\": \"An audio rich content part.\"\n    },\n    {\n      \"$ref\": \"VideoRichContentPart\",\n      \"description\": \"A video rich content part.\"\n    },\n    {\n      \"$ref\": \"FileRichContentPart\",\n      \"description\": \"A file rich content part.\"\n    }\n  ],\n  \"description\": \"A rich content part.\"\n}\n",
+          "tool_call_id": "call_mock_10309627838477779370"
         },
         {
           "role": "assistant",
@@ -244,14 +244,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "ht xsimOmZneJeYgsno3wIUxooHpucvQo5eBrLQDwpgDkgN0LLYl1WeR1Kn3nQdBsua cfpTQ9r6RlUmWq0kPSDX0HrDljSGejTj3XoBPug7G5P86LndOhwoHuBnL5M1ZH 33Lxiyp4yjU6DNV1aBFGMSvkrxTUhCNL3R sWmKYZ3KmMXoC5I2ag1t4LBxCtXofmxjZ7HOXgKKrCIr",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_7346099752000749913",
+              "id": "call_mock_6222582546991366805",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"75TIPLJO1 0sb6BE 5BwFeOpmrrR\"}],[{\"type\":\"text\",\"text\":\"QFBiVDtU5J9bYhJgWli1\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"wGCwOOHrDuWxFNL\"}],[{\"type\":\"text\",\"text\":\"5JjmrkfbFatqSE2JmH5aPmUglgRzm\"}],[{\"type\":\"text\",\"text\":\"mzS7gD Avud3wTo7hOaDb7DQQ8\"}],[{\"type\":\"text\",\"text\":\"a3LevVpAgfNdnwFsYg a\"}],[{\"type\":\"text\",\"text\":\"NNtDFKaZSBWo\"}]]}"
               }
             }
           ],
@@ -273,7 +272,7 @@
           "role": "tool",
           "index": 11,
           "content": "1",
-          "tool_call_id": "call_mock_7346099752000749913"
+          "tool_call_id": "call_mock_6222582546991366805"
         },
         {
           "role": "assistant",
@@ -282,9 +281,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "dEMEwAwXexTtPITsFSUpGXT lzhjgus2lDJvoDHfYGjld HEi05uhKibcOV5EYRF1ThPXGlUUhBAzeACVFnCL2mhFJvOMURYOYEkCvvY06dEvBxfODm0b2ROldWmb7oAHmesFfkPg3DkvIIGw6ISwcwmqnpsBCj 2tCraSRJ9AY5UjZzLFPvrFZXcAsl9eudOFqLENLtFKrqJFQxDNcs2nZEOi0X22d lwQXmtfFcXbXhIFX2v3rPNwo8q90avfHepzPLKeePVjS3GZ9V1fSS8ffa5kRtZRhqG9yzaKdSG3hYROOuUHobsPwuEQTHevCBqjY8EqrQPe0uEUj5H6 yiiwefpvQIGeOHIgtKtiA9rTRklOFnTlTpMNYJU3kIDkGX2Uj8FHKWpGo4VH7bVHbwvY uSQq2Bnl78u4xjLThSdcslM3dv8pLB7zpqWM4Qs0gkn6M5iPXxVwCXZg7gXfaDkH9gcVdBQPeBScS7QFV72yA4HoC2cgrFMWYgNItzWiisDL5cZA 7ykMyyQ9BU8DufWxG8veh2L11xeZnnrbrg8zjmTJ8jb1g4TSNBEEkXNthsoWM9rZY9moCWdTqr9YKm5P4dz D2UAtFvj7ZvBBNccJ4jfvpWBUe16hk5RgBaZ5GhXZl2wRJ0IyB9i6BDSduXRmC9TtVCQZ2Z6KJKcFFdwVvU4G9aY3dPuwX3GKsCDF",
+          "reasoning": "ezNtFhzcH91QZBC4VtyjYcSRsu4NLEabCVC0zTstrCerXbyON3EfOaxK Vz3tD8Hy2Rsi28vtcstrr8o8Jqghs52w0x9gEZHXntGOjkfYRH52EvuRH OW59pxKHjUUYPmGv2r5Bglt4Ni2qlkD3OwN1kyVg5GtQMDrYtzjE68IeKZY03arZY8tskW7SINaQLuesTuyzuAfnMr pScWzTHihtWKCc8",
           "tool_calls": null,
-          "content": "BzV2wdg7bld8tPPSx",
+          "content": "oWtSUEidPKTs7sBZES1Yo6Yd6JpQmg7a3MzHpKkJ FKipRbYYUnGKueCsfrxKftOHCUhTHmadVm9gYwgXrL3HfD",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -505,18 +504,37 @@
           [
             {
               "type": "text",
-              "text": "75TIPLJO1 0sb6BE 5BwFeOpmrrR"
+              "text": "wGCwOOHrDuWxFNL"
             }
           ],
           [
             {
               "type": "text",
-              "text": "QFBiVDtU5J9bYhJgWli1"
+              "text": "5JjmrkfbFatqSE2JmH5aPmUglgRzm"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "mzS7gD Avud3wTo7hOaDb7DQQ8"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "a3LevVpAgfNdnwFsYg a"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "NNtDFKaZSBWo"
             }
           ]
         ]
       }
     ],
+    "tasks_length": 1,
     "description": "YEGYHuDvOk4q3BjR8HdzKFeugJEo10zRq7xGPlzYQRkQwTK4FCEd0uR2bNqRKADKm",
     "readme": "# sl-arr-mad\n\nYEGYHuDvOk4q3BjR8HdzKFeugJEo10zRq7xGPlzYQRkQwTK4FCEd0uR2bNqRKADKm\n"
   },
@@ -590,13 +608,31 @@
           [
             {
               "type": "text",
-              "text": "75TIPLJO1 0sb6BE 5BwFeOpmrrR"
+              "text": "wGCwOOHrDuWxFNL"
             }
           ],
           [
             {
               "type": "text",
-              "text": "QFBiVDtU5J9bYhJgWli1"
+              "text": "5JjmrkfbFatqSE2JmH5aPmUglgRzm"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "mzS7gD Avud3wTo7hOaDb7DQQ8"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "a3LevVpAgfNdnwFsYg a"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "NNtDFKaZSBWo"
             }
           ]
         ]

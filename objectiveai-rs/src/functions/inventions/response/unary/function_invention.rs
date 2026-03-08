@@ -49,6 +49,7 @@ impl From<response::streaming::FunctionInventionChunk> for FunctionInvention {
                         input_schema: None,
                         essay_tasks: None,
                         tasks: None,
+                        tasks_length: None,
                         description: None,
                         readme: None,
                     },

@@ -96,6 +96,7 @@ impl ParamsState {
                         input_schema: s.input_schema,
                         essay_tasks: None,
                         tasks: None,
+                        tasks_length: None,
                         description: None,
                         readme: None,
                     })
@@ -106,6 +107,7 @@ impl ParamsState {
                         input_schema: s.input_schema,
                         essay_tasks: None,
                         tasks: None,
+                        tasks_length: None,
                         description: None,
                         readme: None,
                     })
@@ -119,6 +121,7 @@ impl ParamsState {
                         input_schema: s.input_schema,
                         essay_tasks: None,
                         tasks: None,
+                        tasks_length: None,
                         description: None,
                         readme: None,
                     })
@@ -129,6 +132,7 @@ impl ParamsState {
                         input_schema: s.input_schema,
                         essay_tasks: None,
                         tasks: None,
+                        tasks_length: None,
                         description: None,
                         readme: None,
                     })

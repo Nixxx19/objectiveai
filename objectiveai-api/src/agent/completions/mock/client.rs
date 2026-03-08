@@ -605,14 +605,17 @@ pub(super) fn generate_tool_arguments(
 }
 
 /// Calls an invention tool by name with the given JSON argument and returns
-/// the result string, or an empty string on error.
+/// the result string, or the error string on failure.
 async fn call_invention_tool(
     invention_tools: &[objectiveai::functions::inventions::InventionTool],
     name: &str,
     arg: serde_json::Value,
 ) -> String {
     match invention_tools.iter().find(|t| t.name == name) {
-        Some(t) => (t.call)(arg).await.unwrap_or_default(),
+        Some(t) => match (t.call)(arg).await {
+            Ok(s) => s,
+            Err(e) => e,
+        },
         None => String::new(),
     }
 }
@@ -684,6 +687,16 @@ async fn resolve_invention_response(
             let input_schema_json = call_invention_tool(
                 invention_tools, "ReadInputSchema", serde_json::Value::Null,
             ).await;
+            let predicted = call_invention_tool(
+                invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
+            ).await;
+            if predicted.parse::<u64>().is_err() {
+                let (min_tasks, _) = super::invention::extract_task_count_range(prompt);
+                call_invention_tool(
+                    invention_tools, "EditPredictedTasksLength",
+                    serde_json::json!({"tasks_length": min_tasks}),
+                ).await;
+            }
             super::invention::alpha_scalar_leaf::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
             ).await
@@ -692,6 +705,16 @@ async fn resolve_invention_response(
             let input_schema_json = call_invention_tool(
                 invention_tools, "ReadInputSchema", serde_json::Value::Null,
             ).await;
+            let predicted = call_invention_tool(
+                invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
+            ).await;
+            if predicted.parse::<u64>().is_err() {
+                let (min_tasks, _) = super::invention::extract_task_count_range(prompt);
+                call_invention_tool(
+                    invention_tools, "EditPredictedTasksLength",
+                    serde_json::json!({"tasks_length": min_tasks}),
+                ).await;
+            }
             super::invention::alpha_scalar_branch::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
             ).await
@@ -700,6 +723,16 @@ async fn resolve_invention_response(
             let input_schema_json = call_invention_tool(
                 invention_tools, "ReadInputSchema", serde_json::Value::Null,
             ).await;
+            let predicted = call_invention_tool(
+                invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
+            ).await;
+            if predicted.parse::<u64>().is_err() {
+                let (min_tasks, _) = super::invention::extract_task_count_range(prompt);
+                call_invention_tool(
+                    invention_tools, "EditPredictedTasksLength",
+                    serde_json::json!({"tasks_length": min_tasks}),
+                ).await;
+            }
             super::invention::alpha_vector_leaf::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
             ).await
@@ -708,6 +741,16 @@ async fn resolve_invention_response(
             let input_schema_json = call_invention_tool(
                 invention_tools, "ReadInputSchema", serde_json::Value::Null,
             ).await;
+            let predicted = call_invention_tool(
+                invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
+            ).await;
+            if predicted.parse::<u64>().is_err() {
+                let (min_tasks, _) = super::invention::extract_task_count_range(prompt);
+                call_invention_tool(
+                    invention_tools, "EditPredictedTasksLength",
+                    serde_json::json!({"tasks_length": min_tasks}),
+                ).await;
+            }
             let tasks_length_str = call_invention_tool(
                 invention_tools, "ReadTasksLength", serde_json::Value::Null,
             ).await;
