@@ -440,10 +440,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_9665910081129140449",
+              "id": "call_mock_34422462715758222",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [input['document'], {\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Rate the following: \\\" + str(input['count'])}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"34n1NxrFptqCj\"}],[{\"type\":\"text\",\"text\":\"MQ8zBtN6sKGsi0iUz2fAUNjaipVA5\"}],[{\"type\":\"text\",\"text\":\"gyiD76\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"up34n1NxrFptqCjQMQ8zBtN6sKGs\"}],[{\"type\":\"text\",\"text\":\"0iUz2fAUN\"}]]}"
               }
             }
           ],
@@ -465,7 +465,7 @@
           "role": "tool",
           "index": 20,
           "content": "1",
-          "tool_call_id": "call_mock_9665910081129140449"
+          "tool_call_id": "call_mock_34422462715758222"
         },
         {
           "role": "assistant",
@@ -614,25 +614,19 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [input['document'], {\"type\": \"text\", \"text\": \"Rate the following: \" + str(input['count'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "34n1NxrFptqCj"
+              "text": "up34n1NxrFptqCjQMQ8zBtN6sKGs"
             }
           ],
           [
             {
               "type": "text",
-              "text": "MQ8zBtN6sKGsi0iUz2fAUNjaipVA5"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "gyiD76"
+              "text": "0iUz2fAUN"
             }
           ]
         ]
@@ -668,25 +662,19 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [input['document'], {\"type\": \"text\", \"text\": \"Rate the following: \" + str(input['count'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "34n1NxrFptqCj"
+              "text": "up34n1NxrFptqCjQMQ8zBtN6sKGs"
             }
           ],
           [
             {
               "type": "text",
-              "text": "MQ8zBtN6sKGsi0iUz2fAUNjaipVA5"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "gyiD76"
+              "text": "0iUz2fAUN"
             }
           ]
         ]

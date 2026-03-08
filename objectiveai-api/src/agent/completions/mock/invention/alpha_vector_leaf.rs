@@ -22,28 +22,15 @@ pub async fn tasks_tool_call(
     let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
     let arguments = match tool_name {
         "AppendTask" => {
-            let item_fields = super::extract_vector_item_fields(input_schema_json);
-            let context_fields = super::extract_vector_context_fields(input_schema_json);
-
-            // Messages: use context fields if available, otherwise a static prompt
-            let messages_expr = if !context_fields.is_empty() {
-                super::build_messages_expr(&context_fields, rng)
+            // Messages: use context if available, otherwise str(input)
+            let messages_expr = if super::has_vector_context(input_schema_json) {
+                super::build_messages_expr("input['context']")
             } else {
-                // No context — use a static ranking prompt
-                let prompts = [
-                    "Rank the following items",
-                    "Which of the following is best?",
-                    "Order these by quality",
-                    "Compare and rank these",
-                ];
-                let prompt = prompts[rng.random_range(0..prompts.len())];
-                format!(
-                    r#"[{{"role": "user", "content": [{{"type": "text", "text": "{prompt}"}}]}}]"#,
-                )
+                super::build_messages_expr("input")
             };
 
-            // Responses: map items to content part arrays
-            let responses_expr = super::build_responses_expr(&item_fields, rng);
+            // Responses: str(item) + static multimodal parts
+            let responses_expr = super::build_responses_expr();
 
             serde_json::json!({
                 "type": "vector.completion",

@@ -286,10 +286,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_14625320721982182231",
+              "id": "call_mock_1733494113777836849",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Score this: \\\" + str(input['threshold'])}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"Q9X7OvqdB60FLprD0\"}],[{\"type\":\"text\",\"text\":\"7qmv8in3XIO97EKPn3Wg76AKcR3Bto Ow\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"fwQ9X7OvqdB60FLprD0X7qmv8in3XIO97EKPn3\"}],[{\"type\":\"text\",\"text\":\"g76AKcR3Bto OwvXCjcWO8BYev64kf9u\"}]]}"
               }
             }
           ],
@@ -311,7 +311,7 @@
           "role": "tool",
           "index": 12,
           "content": "1",
-          "tool_call_id": "call_mock_14625320721982182231"
+          "tool_call_id": "call_mock_1733494113777836849"
         },
         {
           "role": "assistant",
@@ -538,19 +538,19 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Score this: \" + str(input['threshold'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "Q9X7OvqdB60FLprD0"
+              "text": "fwQ9X7OvqdB60FLprD0X7qmv8in3XIO97EKPn3"
             }
           ],
           [
             {
               "type": "text",
-              "text": "7qmv8in3XIO97EKPn3Wg76AKcR3Bto Ow"
+              "text": "g76AKcR3Bto OwvXCjcWO8BYev64kf9u"
             }
           ]
         ]
@@ -586,19 +586,19 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Score this: \" + str(input['threshold'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "Q9X7OvqdB60FLprD0"
+              "text": "fwQ9X7OvqdB60FLprD0X7qmv8in3XIO97EKPn3"
             }
           ],
           [
             {
               "type": "text",
-              "text": "7qmv8in3XIO97EKPn3Wg76AKcR3Bto Ow"
+              "text": "g76AKcR3Bto OwvXCjcWO8BYev64kf9u"
             }
           ]
         ]

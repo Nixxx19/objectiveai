@@ -400,10 +400,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_17849051728620792748",
+              "id": "call_mock_985085708583127939",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [input['stream'], {\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Score this: \\\" + str(input['slug'])}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"vUTDndZ\"}],[{\"type\":\"text\",\"text\":\"RnSny1TYHSF3xb5NpSLwG54c\"}],[{\"type\":\"text\",\"text\":\"iX7aBKddiHhxQPczByvAtmvH6E1X8rB78Itbw\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"BdvUTDndZIRnSny1TYHSF3xb5NpSLwG54\"}],[{\"type\":\"text\",\"text\":\"4iX7aB\"}]]}"
               }
             }
           ],
@@ -425,7 +425,7 @@
           "role": "tool",
           "index": 18,
           "content": "1",
-          "tool_call_id": "call_mock_17849051728620792748"
+          "tool_call_id": "call_mock_985085708583127939"
         },
         {
           "role": "assistant",
@@ -581,25 +581,19 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [input['stream'], {\"type\": \"text\", \"text\": \"Score this: \" + str(input['slug'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "vUTDndZ"
+              "text": "BdvUTDndZIRnSny1TYHSF3xb5NpSLwG54"
             }
           ],
           [
             {
               "type": "text",
-              "text": "RnSny1TYHSF3xb5NpSLwG54c"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "iX7aBKddiHhxQPczByvAtmvH6E1X8rB78Itbw"
+              "text": "4iX7aB"
             }
           ]
         ]
@@ -641,25 +635,19 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [input['stream'], {\"type\": \"text\", \"text\": \"Score this: \" + str(input['slug'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "vUTDndZ"
+              "text": "BdvUTDndZIRnSny1TYHSF3xb5NpSLwG54"
             }
           ],
           [
             {
               "type": "text",
-              "text": "RnSny1TYHSF3xb5NpSLwG54c"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "iX7aBKddiHhxQPczByvAtmvH6E1X8rB78Itbw"
+              "text": "4iX7aB"
             }
           ]
         ]

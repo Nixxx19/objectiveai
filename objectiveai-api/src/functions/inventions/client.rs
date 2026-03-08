@@ -278,6 +278,8 @@ where
         > = None;
         // Completion index incremented across all steps.
         let mut completion_index: u64 = 0;
+        // Accumulated usage across all steps.
+        let mut accumulated_usage = objectiveai::agent::completions::response::Usage::default();
 
         // Initial state
         yield state_chunk(&state, &id, created, object);
@@ -316,6 +318,11 @@ where
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
+                    for c in &chunk.completions {
+                        if let Some(u) = &c.inner.usage {
+                            accumulated_usage.push(u);
+                        }
+                    }
                     yield chunk;
                 }
                 StepOutput::Continuation(c) => { continuation = Some(c); }
@@ -350,6 +357,11 @@ where
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
+                    for c in &chunk.completions {
+                        if let Some(u) = &c.inner.usage {
+                            accumulated_usage.push(u);
+                        }
+                    }
                     yield chunk;
                 }
                 StepOutput::Continuation(c) => { continuation = Some(c); }
@@ -378,6 +390,11 @@ where
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
+                    for c in &chunk.completions {
+                        if let Some(u) = &c.inner.usage {
+                            accumulated_usage.push(u);
+                        }
+                    }
                     yield chunk;
                 }
                 StepOutput::Continuation(c) => { continuation = Some(c); }
@@ -556,15 +573,18 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             tasks_prompt, T::tasks_tools(&state),
-            Arc::new({ let s = state.clone(); move || {
-                T::validate_function(&s)
-            }}),
+            Arc::new({ let s = state.clone(); move || T::validate_function(&s) }),
             id.clone(), created, object, continuation.take(), completion_index,
         );
         while let Some(output) = step.next().await {
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
+                    for c in &chunk.completions {
+                        if let Some(u) = &c.inner.usage {
+                            accumulated_usage.push(u);
+                        }
+                    }
                     yield chunk;
                 }
                 StepOutput::Continuation(c) => { continuation = Some(c); }
@@ -590,6 +610,11 @@ where
             match output {
                 StepOutput::Chunk(chunk) => {
                     errored = chunk.error.is_some();
+                    for c in &chunk.completions {
+                        if let Some(u) = &c.inner.usage {
+                            accumulated_usage.push(u);
+                        }
+                    }
                     yield chunk;
                 }
                 StepOutput::Continuation(_) => {}
@@ -615,7 +640,7 @@ where
             function,
             created,
             object,
-            usage: None,
+            usage: Some(accumulated_usage),
             error: None,
         };
     })

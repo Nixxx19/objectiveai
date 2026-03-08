@@ -287,10 +287,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_4071014592307107508",
+              "id": "call_mock_8833652028586817318",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Rate the following: \\\" + str(input['verified'])}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"19UM0s39hEw\"}],[{\"type\":\"text\",\"text\":\"Huz25hDxPFXUFG\"}],[{\"type\":\"text\",\"text\":\"NXZu744Bvwy9456\"}],[{\"type\":\"text\",\"text\":\"3c6qyOO9NEGw1dpr2qL\"}],[{\"type\":\"text\",\"text\":\"TQICKEAAZw9Tfi6\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"Wl19UM0s39hEwpHuz25hDxP\"}],[{\"type\":\"text\",\"text\":\"XUFGsNXZu744Bvwy9456z3\"}],[{\"type\":\"text\",\"text\":\"6qyOO9\"}]]}"
               }
             }
           ],
@@ -312,7 +312,7 @@
           "role": "tool",
           "index": 12,
           "content": "1",
-          "tool_call_id": "call_mock_4071014592307107508"
+          "tool_call_id": "call_mock_8833652028586817318"
         },
         {
           "role": "assistant",
@@ -453,37 +453,25 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Rate the following: \" + str(input['verified'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "19UM0s39hEw"
+              "text": "Wl19UM0s39hEwpHuz25hDxP"
             }
           ],
           [
             {
               "type": "text",
-              "text": "Huz25hDxPFXUFG"
+              "text": "XUFGsNXZu744Bvwy9456z3"
             }
           ],
           [
             {
               "type": "text",
-              "text": "NXZu744Bvwy9456"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "3c6qyOO9NEGw1dpr2qL"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "TQICKEAAZw9Tfi6"
+              "text": "6qyOO9"
             }
           ]
         ]
@@ -509,37 +497,25 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"Rate the following: \" + str(input['verified'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "19UM0s39hEw"
+              "text": "Wl19UM0s39hEwpHuz25hDxP"
             }
           ],
           [
             {
               "type": "text",
-              "text": "Huz25hDxPFXUFG"
+              "text": "XUFGsNXZu744Bvwy9456z3"
             }
           ],
           [
             {
               "type": "text",
-              "text": "NXZu744Bvwy9456"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "3c6qyOO9NEGw1dpr2qL"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "TQICKEAAZw9Tfi6"
+              "text": "6qyOO9"
             }
           ]
         ]

@@ -477,10 +477,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8352843303008969721",
+              "id": "call_mock_4150544217865781840",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"\\\" + str(input['recording'])}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"Pd4XgXgQR9BZ6fwB7\"}],[{\"type\":\"text\",\"text\":\"70DMs64\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"avPd4XgXgQR9\"}],[{\"type\":\"text\",\"text\":\"Z6fwB7d70DMs64KC7mv5\"}],[{\"type\":\"text\",\"text\":\"i7aGhH5mA8PZIn4QG3D\"}],[{\"type\":\"text\",\"text\":\"3h8nS4hi4vxamyEWOPvLL3nB1ns4BmtSDjtd\"}]]}"
               }
             }
           ],
@@ -502,7 +502,7 @@
           "role": "tool",
           "index": 22,
           "content": "1",
-          "tool_call_id": "call_mock_8352843303008969721"
+          "tool_call_id": "call_mock_4150544217865781840"
         },
         {
           "role": "assistant",
@@ -642,19 +642,31 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"\" + str(input['recording'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "Pd4XgXgQR9BZ6fwB7"
+              "text": "avPd4XgXgQR9"
             }
           ],
           [
             {
               "type": "text",
-              "text": "70DMs64"
+              "text": "Z6fwB7d70DMs64KC7mv5"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "i7aGhH5mA8PZIn4QG3D"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "3h8nS4hi4vxamyEWOPvLL3nB1ns4BmtSDjtd"
             }
           ]
         ]
@@ -680,19 +692,31 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"\" + str(input['recording'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "Pd4XgXgQR9BZ6fwB7"
+              "text": "avPd4XgXgQR9"
             }
           ],
           [
             {
               "type": "text",
-              "text": "70DMs64"
+              "text": "Z6fwB7d70DMs64KC7mv5"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "i7aGhH5mA8PZIn4QG3D"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "3h8nS4hi4vxamyEWOPvLL3nB1ns4BmtSDjtd"
             }
           ]
         ]

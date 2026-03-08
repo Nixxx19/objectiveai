@@ -363,10 +363,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_11611675951016390532",
+              "id": "call_mock_2280300987436824000",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"\\\" + str(input['language'])}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"ozfFDVyp3JWMQhrb4 s6zE7DDUnS5k\"}],[{\"type\":\"text\",\"text\":\"s13CUG33gGz9\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"gSozfFDVy\"}],[{\"type\":\"text\",\"text\":\"3JWMQhrb4 s6z\"}],[{\"type\":\"text\",\"text\":\"7DDUnS5kns13CUG33gGz9K\"}]]}"
               }
             }
           ],
@@ -388,7 +388,7 @@
           "role": "tool",
           "index": 16,
           "content": "1",
-          "tool_call_id": "call_mock_11611675951016390532"
+          "tool_call_id": "call_mock_2280300987436824000"
         },
         {
           "role": "assistant",
@@ -543,19 +543,25 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"\" + str(input['language'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "ozfFDVyp3JWMQhrb4 s6zE7DDUnS5k"
+              "text": "gSozfFDVy"
             }
           ],
           [
             {
               "type": "text",
-              "text": "s13CUG33gGz9"
+              "text": "3JWMQhrb4 s6z"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "7DDUnS5kns13CUG33gGz9K"
             }
           ]
         ]
@@ -596,19 +602,25 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"\" + str(input['language'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
             {
               "type": "text",
-              "text": "ozfFDVyp3JWMQhrb4 s6zE7DDUnS5k"
+              "text": "gSozfFDVy"
             }
           ],
           [
             {
               "type": "text",
-              "text": "s13CUG33gGz9"
+              "text": "3JWMQhrb4 s6z"
+            }
+          ],
+          [
+            {
+              "type": "text",
+              "text": "7DDUnS5kns13CUG33gGz9K"
             }
           ]
         ]
