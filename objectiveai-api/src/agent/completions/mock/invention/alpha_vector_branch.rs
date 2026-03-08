@@ -10,11 +10,12 @@ use crate::agent::completions::ResolvedTool;
 /// - `placeholder.alpha.scalar.function` — scores individual items (max 50% of tasks)
 ///
 /// The `input_schema_json` is the serialized `VectorFunctionInputSchema`
-/// obtained by calling `ReadInputSchema`.
+/// obtained by calling `ReadInputSchema`. It can be ANY valid vector input
+/// schema — items of any type, arbitrary depth, optional context, etc.
 ///
 /// `scalar_count` and `total_count` track how many scalar tasks have been
 /// appended so far, ensuring at most 50% are scalar.
-pub fn tasks_tool_call(
+pub async fn tasks_tool_call(
     input_schema_json: &str,
     scalar_count: u32,
     total_count: u32,
@@ -22,11 +23,12 @@ pub fn tasks_tool_call(
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng);
+    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
     let arguments = match tool_name {
         "AppendTask" => {
-            let item_fields = extract_item_fields(input_schema_json);
-            let has_context = has_context_field(input_schema_json);
+            // Parse the full input schema to extract items and context sub-schemas
+            let parsed = serde_json::from_str::<serde_json::Value>(input_schema_json)
+                .unwrap_or_else(|_| serde_json::json!({}));
 
             // Decide scalar vs vector. Scalar allowed if under 50% so far.
             let scalar_allowed = total_count == 0
@@ -34,19 +36,9 @@ pub fn tasks_tool_call(
             let use_scalar = scalar_allowed && rng.random_range(0u32..3) == 0; // ~33% chance
 
             if use_scalar {
-                let task = random_placeholder_scalar_task(
-                    &item_fields, has_context, rng,
-                );
-                serde_json::json!({
-                    "placeholder.alpha.scalar.function": task,
-                }).to_string()
+                random_placeholder_scalar_task(&parsed, rng).to_string()
             } else {
-                let task = random_placeholder_vector_task(
-                    &item_fields, has_context, rng,
-                );
-                serde_json::json!({
-                    "placeholder.alpha.vector.function": task,
-                }).to_string()
+                random_placeholder_vector_task(&parsed, rng).to_string()
             }
         }
         "CheckFunction" | "ReadSpec" | "ReadEssay" | "ReadInputSchema"
@@ -65,109 +57,111 @@ pub fn tasks_tool_call(
 }
 
 /// Generate a random placeholder vector function task expression.
+///
+/// The child vector function receives the parent's items (and optionally
+/// context). The child's input_schema mirrors the parent's structure with
+/// the actual types preserved.
 fn random_placeholder_vector_task(
-    item_fields: &[String],
-    has_context: bool,
+    parent_schema: &serde_json::Value,
     rng: &mut impl Rng,
 ) -> serde_json::Value {
     let name = format!("vector-sub-{}", rng.random_range(0u32..1000));
     let spec = random_string(rng, 50, 200);
 
-    // Child input schema mirrors parent structure (items + optional context)
-    let mut schema = serde_json::Map::new();
-    if !item_fields.is_empty() {
-        let mut item_props = serde_json::Map::new();
-        for f in item_fields {
-            item_props.insert(f.clone(), serde_json::json!({"type": "string"}));
-        }
-        schema.insert("items".into(), serde_json::json!({
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": item_props,
-                "required": item_fields,
-            }
-        }));
-    } else {
-        schema.insert("items".into(), serde_json::json!({
-            "type": "array",
-            "items": {"type": "string"}
-        }));
-    }
-    if has_context {
-        schema.insert("context".into(), serde_json::json!({
-            "properties": {"query": {"type": "string"}},
-            "required": ["query"],
-        }));
-    }
+    // Build child input_schema from parent's items and context
+    let mut child_schema = serde_json::Map::new();
 
-    // Input expression: pass through
-    let input_expr = "input";
+    // Items: copy from parent, ensure minItems >= 2
+    let items = parent_schema.get("items").cloned().unwrap_or_else(|| {
+        serde_json::json!({"type": "array", "minItems": 2, "items": {"type": "string"}})
+    });
+    let mut items_obj = items;
+    if let Some(obj) = items_obj.as_object_mut() {
+        obj.insert("minItems".into(), serde_json::json!(2));
+    }
+    child_schema.insert("items".into(), items_obj);
+
+    // Context: copy from parent if present
+    let mut input_expr = serde_json::Map::new();
+    input_expr.insert("items".into(), serde_json::json!({"$starlark": "input['items']"}));
+
+    if let Some(context) = parent_schema.get("context") {
+        child_schema.insert("context".into(), context.clone());
+        input_expr.insert("context".into(), serde_json::json!({"$starlark": "input['context']"}));
+    }
 
     serde_json::json!({
+        "type": "placeholder.alpha.vector.function",
         "name": name,
         "spec": spec,
-        "input_schema": schema,
-        "input": { "$starlark": input_expr },
+        "input_schema": child_schema,
+        "input": input_expr,
     })
 }
 
 /// Generate a random placeholder scalar function task expression.
-/// Scalar sub-functions in a vector branch score individual items via `map`.
+///
+/// Scalar sub-functions in a vector branch receive the full parent input
+/// (they are NOT mapped — `map: None` in transpile). Each scalar task
+/// scores a different aspect of the input.
+///
+/// The child's input_schema uses actual types from the parent schema.
 fn random_placeholder_scalar_task(
-    item_fields: &[String],
-    _has_context: bool,
+    parent_schema: &serde_json::Value,
     rng: &mut impl Rng,
 ) -> serde_json::Value {
     let name = format!("scalar-sub-{}", rng.random_range(0u32..1000));
     let spec = random_string(rng, 50, 200);
 
-    // Child input schema: the individual item
-    let child_schema = if !item_fields.is_empty() {
-        let mut props = serde_json::Map::new();
-        for f in item_fields {
-            props.insert(f.clone(), serde_json::json!({"type": "string"}));
+    // Strategy: derive the child schema from the parent's context or first item
+    let has_context = parent_schema.get("context").is_some();
+    let item_schema = parent_schema.get("items")
+        .and_then(|items| items.get("items"));
+
+    let (child_schema, input_expr) = if has_context && rng.random_range(0u32..2) == 0 {
+        // Use context as the scalar function's input
+        let context = parent_schema.get("context").unwrap();
+        let mut ctx = context.clone();
+        // Ensure it has type: object
+        if let Some(obj) = ctx.as_object_mut() {
+            if !obj.contains_key("type") {
+                obj.insert("type".into(), serde_json::json!("object"));
+            }
         }
-        serde_json::json!({
-            "properties": props,
-            "required": item_fields,
-        })
+        (ctx, "input['context']".to_string())
+    } else if let Some(item_s) = item_schema {
+        if item_s.get("type").and_then(|t| t.as_str()) == Some("object") {
+            // Items are objects — use the first item's schema as the child schema
+            let mut child = item_s.clone();
+            if let Some(obj) = child.as_object_mut() {
+                if !obj.contains_key("type") {
+                    obj.insert("type".into(), serde_json::json!("object"));
+                }
+            }
+            (child, "input['items'][0]".to_string())
+        } else {
+            // Items are simple types (string, image, etc.) — wrap in an object
+            let item_type_schema = item_s.clone();
+            (serde_json::json!({
+                "type": "object",
+                "properties": {"value": item_type_schema},
+                "required": ["value"],
+            }), "{'value': input['items'][0]}".to_string())
+        }
     } else {
-        serde_json::json!({
+        // Fallback
+        (serde_json::json!({
+            "type": "object",
             "properties": {"value": {"type": "string"}},
             "required": ["value"],
-        })
+        }), "{'value': str(input['items'][0])}".to_string())
     };
 
-    // Input expression: index into items with map
-    let input_expr = "input['items'][map]";
-
     serde_json::json!({
+        "type": "placeholder.alpha.scalar.function",
         "name": name,
         "spec": spec,
         "input_schema": child_schema,
         "input": { "$starlark": input_expr },
     })
-}
-
-/// Extract property names from the `items` schema within a VectorFunctionInputSchema.
-fn extract_item_fields(input_schema_json: &str) -> Vec<String> {
-    serde_json::from_str::<serde_json::Value>(input_schema_json)
-        .ok()
-        .and_then(|v| {
-            let items = v.get("items")?;
-            items.get("items")
-                .and_then(|inner| inner.get("properties"))
-                .and_then(|p| p.as_object())
-                .map(|o| o.keys().cloned().collect())
-        })
-        .unwrap_or_default()
-}
-
-/// Check if the VectorFunctionInputSchema has a `context` field.
-fn has_context_field(input_schema_json: &str) -> bool {
-    serde_json::from_str::<serde_json::Value>(input_schema_json)
-        .ok()
-        .and_then(|v| v.get("context").cloned())
-        .is_some()
 }

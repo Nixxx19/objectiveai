@@ -645,6 +645,18 @@ impl super::InventionState for AlphaVectorLeafState {
     fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String> {
         AlphaVectorLeafState::validate_function(this)
     }
+    fn build_function(this: &Arc<Mutex<Self>>) -> Option<crate::functions::FullRemoteFunction> {
+        let state = this.lock().unwrap();
+        Some(crate::functions::FullRemoteFunction::Alpha(
+            crate::functions::AlphaRemoteFunction::Vector(
+                crate::functions::alpha_vector::RemoteFunction::Leaf {
+                    description: state.description.clone()?,
+                    input_schema: state.input_schema.clone()?,
+                    tasks: state.tasks.clone()?,
+                },
+            ),
+        ))
+    }
 
     fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
         vec![

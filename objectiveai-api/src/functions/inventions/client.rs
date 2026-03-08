@@ -545,7 +545,9 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             tasks_prompt, T::tasks_tools(&state),
-            Arc::new({ let s = state.clone(); move || T::validate_function(&s) }),
+            Arc::new({ let s = state.clone(); move || {
+                T::validate_function(&s)
+            }}),
             id.clone(), created, object, continuation.take(), completion_index,
         );
         while let Some(output) = step.next().await {
@@ -588,7 +590,23 @@ where
 
         // Step 6: Readme (programmatic)
         T::write_readme(&state);
-        yield state_chunk(&state, &id, created, object);
+
+        // Final chunk: include the built function.
+        let (final_state, function) = {
+            let function = T::build_function(&state);
+            let s = state.lock().unwrap().clone().into_state();
+            (s, function)
+        };
+        yield FunctionInventionChunk {
+            id: id.to_string(),
+            completions: vec![],
+            state: Some(final_state),
+            function,
+            created,
+            object,
+            usage: None,
+            error: None,
+        };
     })
 }
 

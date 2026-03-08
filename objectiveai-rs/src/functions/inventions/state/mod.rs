@@ -37,6 +37,7 @@ pub trait InventionState: Clone + Send + 'static {
 
     fn tasks_tools(this: &Arc<Mutex<Self>>) -> Vec<super::InventionTool>;
     fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String>;
+    fn build_function(this: &Arc<Mutex<Self>>) -> Option<crate::functions::FullRemoteFunction>;
 
     fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<super::InventionTool>;
     fn validate_description(this: &Arc<Mutex<Self>>) -> Result<(), String>;

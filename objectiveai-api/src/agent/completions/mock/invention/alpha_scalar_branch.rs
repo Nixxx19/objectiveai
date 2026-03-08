@@ -10,22 +10,21 @@ use crate::agent::completions::ResolvedTool;
 /// and optional `skip`.
 ///
 /// The `input_schema_json` is the serialized parent `ScalarFunctionInputSchema`
-/// obtained by calling `ReadInputSchema`, used to derive realistic child
-/// input schemas and input expressions.
-pub fn tasks_tool_call(
+/// obtained by calling `ReadInputSchema`. It can be ANY valid ObjectInputSchema
+/// — arbitrary depth, types, constraints. The child schemas and input
+/// expressions are derived from the actual parent schema.
+pub async fn tasks_tool_call(
     input_schema_json: &str,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng);
+    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
     let arguments = match tool_name {
         "AppendTask" => {
-            let fields = super::extract_input_fields(input_schema_json);
-            let task = random_placeholder_scalar_task(&fields, rng);
-            serde_json::json!({
-                "placeholder.alpha.scalar.function": task,
-            }).to_string()
+            let field_schemas = super::extract_input_field_schemas(input_schema_json);
+            let task = random_placeholder_scalar_task(&field_schemas, rng);
+            task.to_string()
         }
         "CheckFunction" | "ReadSpec" | "ReadEssay" | "ReadInputSchema"
         | "ReadEssayTasks" | "ReadTasksLength" => "{}".to_string(),
@@ -43,43 +42,49 @@ pub fn tasks_tool_call(
 }
 
 /// Generate a random placeholder scalar function task expression.
+///
+/// The child's `input_schema` uses the actual types from the parent schema,
+/// and the `input` expression passes through matching fields.
 fn random_placeholder_scalar_task(
-    parent_fields: &[String],
+    parent_fields: &[(String, serde_json::Value)],
     rng: &mut impl Rng,
 ) -> serde_json::Value {
     let name = format!("sub-function-{}", rng.random_range(0u32..1000));
     let spec = random_string(rng, 50, 200);
 
-    // Child input schema: pick a subset of parent fields or pass through
+    // Child input schema: pick a subset of parent fields or pass through all
     let use_subset = parent_fields.len() > 1 && rng.random_range(0u32..2) == 0;
-    let child_fields: Vec<&String> = if use_subset {
+    let child_fields: Vec<&(String, serde_json::Value)> = if use_subset {
         let n = rng.random_range(1..parent_fields.len());
         parent_fields.iter().take(n).collect()
     } else {
         parent_fields.iter().collect()
     };
 
+    // Build properties using actual parent types
     let mut properties = serde_json::Map::new();
-    for f in &child_fields {
-        properties.insert(
-            (*f).clone(),
-            serde_json::json!({"type": "string"}),
-        );
+    for (name, schema) in &child_fields {
+        properties.insert(name.clone(), schema.clone());
     }
-    let required: Vec<&str> = child_fields.iter().map(|s| s.as_str()).collect();
+    let required: Vec<&str> = child_fields.iter().map(|(n, _)| n.as_str()).collect();
 
     // Input expression: pass through matching fields from parent
     let input_expr = if use_subset {
-        let field = child_fields[0];
-        format!("{{'{field}': input['{field}']}}")
+        // Build a dict literal with just the subset fields
+        let entries: Vec<String> = child_fields.iter()
+            .map(|(name, _)| format!("'{name}': input['{name}']"))
+            .collect();
+        format!("{{{}}}", entries.join(", "))
     } else {
         "input".to_string()
     };
 
     serde_json::json!({
+        "type": "placeholder.alpha.scalar.function",
         "name": name,
         "spec": spec,
         "input_schema": {
+            "type": "object",
             "properties": properties,
             "required": required,
         },

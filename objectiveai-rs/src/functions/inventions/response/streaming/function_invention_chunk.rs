@@ -10,7 +10,7 @@ pub struct FunctionInventionChunk {
     pub state: Option<functions::inventions::State>,
     // yielded at the end
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub function: Option<functions::AlphaRemoteFunction>,
+    pub function: Option<functions::FullRemoteFunction>,
     pub created: u64,
     pub object: super::Object,
     #[serde(skip_serializing_if = "Option::is_none")]

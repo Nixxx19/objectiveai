@@ -7,7 +7,7 @@ pub struct FunctionInvention {
     pub id: String,
     pub completions: Vec<super::AgentCompletion>,
     pub state: functions::inventions::State,
-    pub function: Option<functions::AlphaRemoteFunction>,
+    pub function: Option<functions::FullRemoteFunction>,
     pub created: u64,
     pub object: super::Object,
     pub usage: agent::completions::response::Usage,
