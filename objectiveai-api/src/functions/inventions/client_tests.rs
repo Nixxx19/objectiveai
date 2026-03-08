@@ -198,10 +198,22 @@ fn assert_chunk_invariants(chunks: &[FunctionInventionChunk]) {
                 chunk.usage.is_none(),
                 "chunk {i} (non-final) has usage, expected None",
             );
+            assert!(
+                chunk.function.is_none(),
+                "chunk {i} (non-final) has function, expected None",
+            );
         } else {
             assert!(
                 chunk.usage.is_some(),
                 "final chunk {i} has no usage, expected Some",
+            );
+            assert!(
+                chunk.function.is_some(),
+                "final chunk {i} has no function, expected Some",
+            );
+            assert!(
+                chunk.state.is_some(),
+                "final chunk {i} has no state, expected Some",
             );
         }
     }

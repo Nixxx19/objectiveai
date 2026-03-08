@@ -168,13 +168,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "QyxASk3LCcpOHMOTfPRqGjnhfZWIh1jEIc8FtF9Q97i GYDKCcmzyphV6Iu1cd6VYhvZ4g1tkCoiBx32UOJAeIcFXkA9Bglg0L6hD8nJqoR7vBzzBX6",
+          "reasoning": "KAxgrBgX7CusBVt7l965LxiOl9f2UbXoWvlqFKomfCdZsRA6F 8vE11kw3005vcl X2DJPMk5J5eeYXI SSEGCmCbbcwwoef4HjdA8HoF3b2Px1t7v9IIoT5d8nulFFFO8F2GxyYdVzmgVtI4ajGylE24 riE4g5V11EZrFiDZt6Ty4C1TEtA3C4E3mpoEMo5dlY5dd6rKhx7RvBpotG2uInc8OFL4srxgbbB4lw2QahLsyHc7L3dDqb20 ag0Ir",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_16625814685839059228",
+              "id": "call_mock_5613264480214181759",
               "function": {
-                "name": "ReadDeveloperMessageSchema",
+                "name": "ReadAlphaVectorVectorCompletionTaskExpressionSchema",
                 "arguments": "{}"
               }
             }
@@ -196,8 +196,8 @@
         {
           "role": "tool",
           "index": 7,
-          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"role\": {\n      \"const\": \"developer\"\n    },\n    \"content\": {\n      \"anyOf\": [\n        {\n          \"type\": \"string\",\n          \"description\": \"Plain text content.\"\n        },\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"SimpleContentPart\",\n            \"description\": \"A simple content part.\"\n          },\n          \"description\": \"An array of simple content parts.\"\n        }\n      ],\n      \"description\": \"Simple content.\"\n    },\n    \"name\": {\n      \"anyOf\": [\n        {\n          \"type\": \"string\",\n          \"description\": \"An optional name for the participant. Provides the model information to differentiate between participants of the same role.\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  },\n  \"required\": [\n    \"role\",\n    \"content\"\n  ],\n  \"description\": \"Developer-provided instructions that the model should follow, regardless of messages sent by the user.\"\n}\n",
-          "tool_call_id": "call_mock_16625814685839059228"
+          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"vector.completion\"\n    },\n    \"skip\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`.\"\n    },\n    \"messages\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to the chat messages. Receives: `input`.\"\n    },\n    \"responses\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to the response options for the vector completion. Receives: `input`.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"messages\",\n    \"responses\"\n  ],\n  \"description\": \"A vector completion task expression for an alpha vector leaf function.\"\n}\n",
+          "tool_call_id": "call_mock_5613264480214181759"
         },
         {
           "role": "assistant",
@@ -206,11 +206,11 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "SyNk83MLyy2Vq1cMAFRYsbwjtpGA01p0CktEQm9rafWPWGdCxYBDAVDqRm0dqettQPXDONo9Spj0sWG7PWbEPng3rrXBGAQepnpuX vwS23f26H9V9xYwam9AN1e6NbW4fGhbUup2XGud5RR33ANBtWwtTfK1cv0ClrrCTuJZ8viyBNb9ixIDUdxPak xNy0DHOdpEoLtTAyXlIeiHAYgxWdrtoxNVF0qBTqh8LtdOadzRS60zP34KxNkKkPP7dcuA3EswtLYUE7wvI2u8bMMuSqRqhHJi2NbGRziq2jzaOUuiZC5QTGQp Y9wTDZvUBPay2WQz4iprSc5ENm8f34 g7jXf4FjTd90TJdcRJup RjrQ3driT8viVMLIWF1f9GHeBg1hOOsKllJoUsFsLleI7Gua7mi7wjYTkz3t9xkHZJtlVJpxFwqDyw5Db",
+          "reasoning": "V7OD 89rX96tG8VaNmEoXcrFIRxqdXgqhGlylc3Lp46hyvzxZDaYhWq3NM6OtGgv5OIn5qbV0zr8OGumTpHIDrdoLBMwvaEevJ0yzXUc6 GHjKvz5zbzb7wk24Df8llKrqcF8oLMXBdSghfrTc01CRFPEywCnRDQ5KH ZIgx3YFZfVllKPUGt4RIN5Gub7 6FpJw8ooVUfnIGUBzjcOh5C lh6J27eGkxIWFPhSUpXJbLmg7D8UCOBCSNgptY7TLQUbj3mhmxg2komvJjD8O3c2oMnatEt4cYMXfdbFlqBvm8rX3Vs5Uo727kcOVoVmP1aojlObLocsY2j7828xeg12Z30osWt0EzDd eFCFmas3EyM5GrO 6IKdhqNmkJdGrWm0MdFxhpBkhGlffs2fXNHw9pd8Kgu7E8lnhBMta9c7Xqimp94IoFJ006C33TrGjxP5gQQZ81R6sKEjoQi3aPlMCyGk26P8PGHP3cCu5hpDO4yHfc3032xWoD6cLaYCagYTlfxGR4D5erkqWH7DerFKLxcgJy9TUm22hloUmdVmUE5djVcPnCn",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_3313684930097009796",
+              "id": "call_mock_2768032119356703722",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
@@ -235,7 +235,7 @@
           "role": "tool",
           "index": 9,
           "content": "1",
-          "tool_call_id": "call_mock_3313684930097009796"
+          "tool_call_id": "call_mock_2768032119356703722"
         },
         {
           "role": "assistant",
@@ -244,9 +244,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "cm9 XYwNBshvOcV k 6BlbESKXt iAI7kM1NkP9XbFMDp26agu k0oNRo7U02TYJkJ4IcXqEFvOSfQvsPedQ68c1YlcS8X8esUjMvkyaLQ1AgqlyjHItxVwtkcDs87Z5hjngWjCFtIxnGwt2g4nQlt4r3c0v55xTVvn5CW3ALEm28AjK4TTZFrGXyzXYGVq5n0oaMV9HpP4OLkdkIWUNUqwZmzDkydD gd6VqL9b9kLSFdAFIHVg1W6uk",
+          "reasoning": "xNHdsB59eVdqH8RoySFc91B77bGTmhQdL4WA7pdXwsKlVY5WymxqHBsebiWE7h6lhTqUWTRMsQVAUkyUEU6 5IcGKTyY3CL4Z7WKFmPcj1W3m51XdxCzrgItzkurQU9mvMx4NzvQrc6jogewpDRvpjDoIsoqoor8RKFWUkth29HPS5RihNK5os8 B0NpqMOUxRwgZJwIE4gTCLS1kedT3aZ2K6AMpJ8EnyWdePRGO lx9oauyQD0bY7FsMdKECHQ3FMMHRvK5ohQ1 YwjOGd3xLpIjdwZADjRN6ofClp4jHE8Z5NS3rftx1uw05d qc9OlykRUDIxcYTxHeTwhgZ4OXtGG0cCLkIuGnahD2DQjLzqe5fckiLGB5kKJSzPxl1O5IFPM4u2psAtgZ4FWy2LulIxwdj8Gx4CC3zvN ttTKCoUtqJ JMJtFYX2vtrYI0sD1YOMsMRvagCMUWoSdUY0766yY",
           "tool_calls": null,
-          "content": "KidSNG2puhIjZoNkXV6aDElnyZ",
+          "content": "kyQfEUlVgp5NS9hUG4hWvu8nciFlUtPLposzHI45ctdQgq",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -539,6 +539,7 @@
         }
       }
     ],
+    "tasks_length": 1,
     "description": "6W8OxDW5KkPygM4VeOGB 5fX0Bwb2ljlAiXXgFF93NMSgt8AkooHzGsP8QW0MvNdNBlb1pZmEK2ON9nyw2ZdNOCZv3yZ3aM08HohsXlkqAfpARbiGuo3K imreLqgTkVDEPLxkLDu9LG",
     "readme": "# vl-richctx\n\n6W8OxDW5KkPygM4VeOGB 5fX0Bwb2ljlAiXXgFF93NMSgt8AkooHzGsP8QW0MvNdNBlb1pZmEK2ON9nyw2ZdNOCZv3yZ3aM08HohsXlkqAfpARbiGuo3K imreLqgTkVDEPLxkLDu9LG\n"
   },

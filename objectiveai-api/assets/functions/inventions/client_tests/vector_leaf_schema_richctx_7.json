@@ -169,13 +169,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "cYvDRaNCHYkD99jBJE0q4Q7uDQtmMT91Lh2FcN1tr2mIwIIFz2hYGhEtSybuIo9EIpKYg7TI9AgQlW0CgUIM DlfM0yE77cCZLqvBzEcCvCGQ9eVAWoC ghU5oPx0XjFYLo3YHbI3dgZDx6cscswWnB4 McOuxKRWvUjE9vXGotl KfKdj11tzeDPjKosqXSDqjU315McL0YYl8ipWGyUYhTnrDTLT3tycAAKSvrdYLJqAtxhkc1WjfscnDeAUCDAQ1ahFZOY6O7C85SUWvN4zJwR9vFwGARasbAs5HUnLVpZhEfN4r 9QJLNL3lbUQra4FUzC7kEpEeZg0Fqb4iVGIlCRAcKQYCBt2J4bQBSX2d3w6DiHKA7NC6qXbOFDZ40Eb9zHmVAcD2",
+          "reasoning": "xwMlBMsIjvzASusnrDqRIgZAa31X5GsHzh1ZPo6ex40GtwGxXParV0ErkGR7aaI 6VWAF0uGGHPmOg0fn89 FFCGhWNZzuTYuSRbQWGEavAcfbQC59P7d diIqlNElhi6OyCF9 ElMVYmpopEOOV7mIMM5ftzBWCRgu2oLTfvS0LY0L5rYQxxrMNJtf9QVdPJHMIhi8rVwL5 Vba CVlKzVis8gBEUtrzQRx3KbeSHQNxi19MYWp9dONOEoHpbZmlXvSJb35sqIWJEjz3cJV4ovVvlzAZRLgzeutVVRQKnJKD9ZSLFUGnTfT1kQZc QBP iM2sy85ts3eODMPGg4KNjIcDzAUM3DChgVP02803QQoNhtzclH1CYYWpwGYB8j2jvVaUtrhLPidu8LA40fFc4LyyeWOZ3FKHYImSz18QEb2Uy",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_5279625881981379922",
+              "id": "call_mock_6755082108817022025",
               "function": {
-                "name": "ReadUserMessageSchema",
+                "name": "ReadMessageSchema",
                 "arguments": "{}"
               }
             }
@@ -197,8 +197,8 @@
         {
           "role": "tool",
           "index": 7,
-          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"role\": {\n      \"const\": \"user\"\n    },\n    \"content\": {\n      \"anyOf\": [\n        {\n          \"type\": \"string\",\n          \"description\": \"Plain text content.\"\n        },\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"RichContentPart\",\n            \"description\": \"A rich content part.\"\n          },\n          \"description\": \"An array of rich content parts.\"\n        }\n      ],\n      \"description\": \"Rich content.\"\n    },\n    \"name\": {\n      \"anyOf\": [\n        {\n          \"type\": \"string\",\n          \"description\": \"An optional name for the participant. Provides the model information to differentiate between participants of the same role.\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  },\n  \"required\": [\n    \"role\",\n    \"content\"\n  ],\n  \"description\": \"Messages sent by an end user, containing prompts or additional context information.\"\n}\n",
-          "tool_call_id": "call_mock_5279625881981379922"
+          "content": "{\n  \"anyOf\": [\n    {\n      \"$ref\": \"DeveloperMessage\",\n      \"description\": \"Developer-provided instructions that the model should follow, regardless of messages sent by the user.\"\n    },\n    {\n      \"$ref\": \"SystemMessage\",\n      \"description\": \"Developer-provided instructions that the model should follow, regardless of messages sent by the user.\"\n    },\n    {\n      \"$ref\": \"UserMessage\",\n      \"description\": \"Messages sent by an end user, containing prompts or additional context information.\"\n    },\n    {\n      \"$ref\": \"ToolMessage\",\n      \"description\": \"Messages sent by tools in response to tool calls made by the assistant.\"\n    },\n    {\n      \"$ref\": \"AssistantMessage\",\n      \"description\": \"Messages sent by the model in response to user messages.\"\n    }\n  ],\n  \"description\": \"A message exchanged in a chat conversation.\"\n}\n",
+          "tool_call_id": "call_mock_6755082108817022025"
         },
         {
           "role": "assistant",
@@ -207,49 +207,10 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "SZV8YPOsz3TaMttjINPeKYxCQhtEDkCG8f0wKFpyaMPKAEvXrbXqWwwxoEye GUP89gMDVSOid71GlLMTdQgKuXalpfnHYu3bRevz1eTXod16rx23Jp56DmnNHH1eAgDZpIZ7cmmcnj7gW 2rnUd8MotMK9gJUXVtGkKsMztCnqGWMFnGno1DjL9GD0bb4llHEC5wV9wxD8LgQlGsfTwmk",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_16741742675104941119",
-              "function": {
-                "name": "CheckFunction",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 9,
-          "content": "Error: Tasks have not been written",
-          "tool_call_id": "call_mock_16741742675104941119"
-        },
-        {
-          "role": "assistant",
-          "index": 10,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "DuP2JldpfCslatgybNRDU8PZE5EwlTTxMuXKPdKSHyEybYt21wVNCvONUAYsxobLDK7Mv Bhe0VpTwgndE52aFTFj1bKQ0KN99C7cIPwV6XKbf1M0JcnCTEmLlR8xSDYlHEsLUt5KHIVH0rWQ332y9zu9mnEyM nPwNy",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_123449021857040390",
+              "id": "call_mock_10931026885982025112",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
@@ -272,19 +233,20 @@
         },
         {
           "role": "tool",
-          "index": 11,
+          "index": 9,
           "content": "1",
-          "tool_call_id": "call_mock_123449021857040390"
+          "tool_call_id": "call_mock_10931026885982025112"
         },
         {
           "role": "assistant",
-          "index": 12,
+          "index": 10,
           "created": 0,
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "1XKDNB0elVcVCScP AiDNw8gBx qVJYJn6Jj5TLlwkBjrOYcgF8rGCLRKFYgej45IeMT2O2pNXNvQpOcQWrQJNtfzzxfjUz1E1cZ1xmCFZEr0eCMxmev vFeZ VETldaok3UCMOp2XZ v0k5mWhhXeBuMJqnaC3ZDilHiW5ls hi61NFymvPTvbwSs9wBfHtE8 naGh",
           "tool_calls": null,
-          "content": "UKR2wz4cDxcR6kwZpHLRs3MV8jkJYAeL0Qwj8EYeXkUw",
+          "content": "0F4mchbNzuFP1vAFhP",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -315,6 +277,44 @@
       "id": "",
       "created": 0,
       "messages": [
+        {
+          "role": "assistant",
+          "index": 11,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "aodpqxKmdmB2s1LH1zDkWsNIf sDeOCPTBasv2avUPcrSLukRLlSCi3OYrajb4JW8mGuGAXItmQzvv2Y0MpiIo1L2Kjb7n6x puk7LtAJjVDeLhdcdnmS iFAGHaixOrOln0loJjaq1UMPfdqnmSmrsyKBos5NbpC2UoJLJhuM0Gh34QliLtRQZuFfwqQD6eFXBFRjp",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_2978223788203235105",
+              "function": {
+                "name": "ReadEssay",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 12,
+          "content": "6zuQQXywrqi U8Hrbu9LEMg0OtedB7R0Qo3RSGHU8x5iMeEKLu0dBCPppgseVEg8moLV4I Tktgza1Fd5xvW749DJusQOgvEa0JIhHz SqIcwCDuY0xxoS6wAnxbNTG1lE6 ymbLZgZ LW6o2MhsZEah2sdFSTn1EpmhGxjPlhPlwCcrUQezM9hxDNQ2Qgwnvx6xnU4Y0ETrLtr7iq8AfLtvsc2S3wD Vfmavi9Ys7dwJl5NbHpAZS1Fo7pVkj0ahf8e3fEPjjFq8E51JRWHQGGsa3XLDvggEb2ODO2iXTTkVQIpQGViPjmadmMLBYCudDqm1OZc 0fTgGVtR4x3YMW6KLCesv43RHTRRYMswfWfeAkqkULCd2cTr9HG42jVtrFEUrRZC4fjXoybq6dKv9xU7wO4WfRr R8WD6drt0pTBSwnI7imm4eqrbxH9vIFJZRL2y0IYad4",
+          "tool_call_id": "call_mock_2978223788203235105"
+        },
         {
           "role": "assistant",
           "index": 13,
@@ -539,6 +539,7 @@
         }
       }
     ],
+    "tasks_length": 1,
     "description": "suWL3Y7jTgfUa MguuasCNoa7ukizoBgCTbeZVlhdgNWqvRPsgy4Z2K93rGLHvcXSpfotVildwjyLr LMEvWJETmkrJfFkt BfXnaU4UmSDlgpRveUPh1cCyZEF4e2DmafEuMGpqkXSZOYrmbM4oVptQPQ5FGrs2tFYpwZh Ou8vTxvQAgXtSqUCWSLimNZnrk5D6SVDeXdpmSEJJaNc d0tIhMJmKFx v4Lv8haQY3ZXHcdb5LZMOGHpImgf 1HffzU1lsw2CKjp5E5aPGLz3foZmUOS7kVbcf6U4sF7a3XY Ll2 GZU5kKbTLeIWp",
     "readme": "# vl-richctx\n\nsuWL3Y7jTgfUa MguuasCNoa7ukizoBgCTbeZVlhdgNWqvRPsgy4Z2K93rGLHvcXSpfotVildwjyLr LMEvWJETmkrJfFkt BfXnaU4UmSDlgpRveUPh1cCyZEF4e2DmafEuMGpqkXSZOYrmbM4oVptQPQ5FGrs2tFYpwZh Ou8vTxvQAgXtSqUCWSLimNZnrk5D6SVDeXdpmSEJJaNc d0tIhMJmKFx v4Lv8haQY3ZXHcdb5LZMOGHpImgf 1HffzU1lsw2CKjp5E5aPGLz3foZmUOS7kVbcf6U4sF7a3XY Ll2 GZU5kKbTLeIWp\n"
   },
