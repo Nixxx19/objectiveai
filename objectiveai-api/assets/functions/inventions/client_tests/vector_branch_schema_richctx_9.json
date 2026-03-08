@@ -129,14 +129,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "0wrkR9sxqQqlMqbFsu3A5hDERTN43JlvHgo7 hfzn74S1FlGJXh VE510nE4  Dj 1n5ARZtjLXkRHC2vzZ3JGVbb0no1oLfBZHpJkZgcHOaWYRc2wmp6KDmyW2oNxU60tOlV2F4mVhLMZO1s4UpSBJnFYHBrT16iPmItbtA00KIITAoillgMwnQV5NmpNZnqXgQ5bzKF6bWK9cawrZleULGaEqtbeq7TjfQA4WQ46XvYGZ9EsR4qZYeHgVce3UWIQCQsT4VO0OB5NAbCdREzCf3bv3RcPnEWADNoguugRqnv8XmJ8RsxM7h3m86iKrdNc2cnuTnlC3y0FishVfAZAIuoPeumd1uibgg4ldPqFVGZ41MotUaVeOnIQOw8hdWETHrEaVsd0SRzRQMtz8VDOp QBxAUhpTukv762IgpSsmkOfikIXjR902KRaIo3r vezunj7g FV5RG6h0YiERg8EBtffzUbfiAepy8jDP7AEHdS3NrrgxXoxNcOajg4z0T0tKi ZdVCPyoAExGP2JyS8DOUVN9ny",
+          "reasoning": "vV76qJhtlP75DjZm8cLw L51fSZbkIJYKy42ul8zqcx M9AOxASM0Ycjt2JBPePvI3Zi4lfGVr3RA49UgEG0LG6fof8wrBI8iJj Bq8AY0yW4EvbKgNEz3GhVUtb23S4tdkN 7XDgTDwWpvvrRenBvXKtxezelBc5RzHZwC9ZcTT DSBZ1IwbF tqwGUxiVkJNBF4wtiyoDgw1dVChvjrzuy4MyIDNNEFZTnsmiHAbrYGEUJpUinQi4aeUlKb6SlMV97Q lJukKX4d 4aLzlsiee6fvFMK9iyqZFB33yyg75Ww63iyTazUB7vLgZUMzAhCwtbXMUwORP0KDZWJHp69oAJh08OiPnkZcQqhdKmVnc78VsSWia1JBBAMdKExQb8VzCY2HG3k18jR3O4QDLAC9EpstK2vqtvaBxymcE5WIFfMAQi8OUren0Re0xUqDuenOT5Bzct03MenJWcbvM52dz4mY1c0P6lDvB VeDEw 8MuQnWcnPZzVgG2zHttL6ncZ7LgvWO9rKaB8UlEBUpu2jOhd FphBKBjqekoQoG6qEx8Cm BLxuZ1wJJseq3uTcLLvZJYzKsb8TNEhO9jgTI9w1haup8ouwRfVQ sZwrg",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_5903075375879464781",
+              "id": "call_mock_11082289314246524029",
               "function": {
-                "name": "ReadInputSchemaSchema",
-                "arguments": "{}"
+                "name": "WriteEssayTasks",
+                "arguments": "{\"essay_tasks\":\"QTdoqQWRNXJmZqZgHcY5Fuv1lN0FHXPjdla0Nn3Mv4DLIaPwJNi39KJjkFOti840riUnOGyfxU7Xf8gPeWRtCCaVkTsoZw9zU8rfAn0khK6T3pT2iFIgKEFwhLp7edwJdsKKMZmMlfjGJK1JgYN3PoV0X0OrGjbpIGlkksXY5Y8nQEnOb6K9q WIQ36ijE4qB1WhGx0pw4wZDY8hAOzkfkbHLNNWf49xL8Mxf9eYUOiYEzoNqmESiVLv6dnNqM4c4pe8iiWMd4451FpD3rmyBb9HGKZ\"}"
               }
             }
           ],
@@ -157,8 +157,8 @@
         {
           "role": "tool",
           "index": 6,
-          "content": "{\n  \"anyOf\": [\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"object\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the object input.\"\n        },\n        \"properties\": {\n          \"type\": \"object\",\n          \"additionalProperties\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The properties of the object input.\"\n        },\n        \"required\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The required properties of the object input.\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"properties\"\n      ],\n      \"description\": \"An object input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"array\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the array input.\"\n        },\n        \"minItems\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum number of items in the array input.\"\n        },\n        \"maxItems\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum number of items in the array input.\"\n        },\n        \"items\": {\n          \"$ref\": \"InputSchema\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"items\"\n      ],\n      \"description\": \"An array input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"string\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the string input.\"\n        },\n        \"enum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The enumeration of allowed string values.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A string input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"number\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the number input.\"\n        },\n        \"minimum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"number\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum allowed value for the number input.\"\n        },\n        \"maximum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"number\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum allowed value for the number input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A number input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"integer\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the integer input.\"\n        },\n        \"minimum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum allowed value for the integer input.\"\n        },\n        \"maximum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum allowed value for the integer input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An integer input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"boolean\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the boolean input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A boolean input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"image\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the image input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An image input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"audio\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the audio input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An audio input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"video\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the video input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A video input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"file\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the file input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A file input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"anyOf\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The possible schemas that the input can match.\"\n        }\n      },\n      \"required\": [\n        \"anyOf\"\n      ],\n      \"description\": \"A union of schemas - input must match at least one.\"\n    }\n  ],\n  \"description\": \"An input schema defining the structure of function inputs.\"\n}\n",
-          "tool_call_id": "call_mock_5903075375879464781"
+          "content": "Ok",
+          "tool_call_id": "call_mock_11082289314246524029"
         },
         {
           "role": "assistant",
@@ -167,9 +167,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "ngNByKzEFTpe vEr5BtAnPq9Ng4SJzFtcQGnwrhtXCncAVsouStlxkBBtg9cGgw7iythuZMn3hnWPF4XoH44AlJK78mYJZike5ploB5mIm30rmHZkluQk67KgcUt2gH5OH2Yb78wINInk4t x26oQyQET9dkPZHm9mtdYd817SczSahlHjbtOIyecoD5UWu1ohjTHmZTNNrgsuwgDVeiym1R0v59qB5vsFVOTI wR5ti59d7tujiK6Ir UTLqg93wAW76ShXFOO BwuV YKfH3CICu4iX40ydlNbGTU83t",
+          "reasoning": "NIQvQJbl1cmG59FTUSDkct3wSKcDeFJ5 co38W0v3hZGlL",
           "tool_calls": null,
-          "content": "bc99HxvZOOPvHRpMuVrwWElYRGikZEk9dsfmcwYkz9lfeI1Yd5ZT8Remp9GUCI1Dkwk5ksJEQZz4kk",
+          "content": "lUEO0g BshmHqbk4i8XPCj mNHnOyX",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -207,14 +207,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "bZkqL21Em2iFg1UyTYuiZ8ygFndF1OVcKPzTYzIwLRKqZZyOSxQ7b3NGkzI9PsFBcJT7Z7U 68HCvs6TjJnNbJsPjRST sO2d6mV7H8ZcR0DtUdFElVZy6Y4pp0v FUzFgGl70GUq2NWdYoIlxFDGy vogTnNtQ9cqliEYUHfOkYBcNWSK3CZqg N7RQT3",
+          "reasoning": "cwpAzilxUZvFVljhfyB1JSepMQEGGQJbOWmfWhjhjrCgA2uvjnIjDHRBVLMRoIyak6UHIL3BQ9IBlMK64ttg6hUlO2B0FUbLUViTt7U8IBGda6dio2MWgVcOOEIbolikvkck2B0 JHRwMRtvK0swQmaHf3FvLpTDDnl1KVREix4OyT3sibFdRmrEUz HJw5i3zWBp07AACNvYJy53oE1BJG90wTLmCkMVdKhZJcP4V",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_13695495973315523178",
+              "id": "call_mock_13952627570388294149",
               "function": {
-                "name": "WriteEssayTasks",
-                "arguments": "{\"essay_tasks\":\"TsEm4X26THnMgeQjlo7AJ2eDNqvGQfABso0OhvScSaxKhIISsL6VrUFyxAoola5ciwmwtbJo3j3LN3vQFJZlVmGGt2dL0xA arrFouFNT Yzc\"}"
+                "name": "ReadAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema",
+                "arguments": "{}"
               }
             }
           ],
@@ -235,8 +235,8 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "Ok",
-          "tool_call_id": "call_mock_13695495973315523178"
+          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"placeholder.alpha.scalar.function\"\n    },\n    \"name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the placeholder function.\"\n    },\n    \"spec\": {\n      \"type\": \"string\",\n      \"description\": \"The specification of the placeholder function.\"\n    },\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"object\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the object input.\"\n        },\n        \"properties\": {\n          \"type\": \"object\",\n          \"additionalProperties\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The properties of the object input.\"\n        },\n        \"required\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The required properties of the object input.\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"properties\"\n      ],\n      \"description\": \"The input schema for the placeholder scalar function.\"\n    },\n    \"skip\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`.\"\n    },\n    \"input\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to the input for the placeholder scalar function. Receives: `input`.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"name\",\n    \"spec\",\n    \"input_schema\",\n    \"input\"\n  ],\n  \"description\": \"A placeholder alpha scalar function task expression within a vector function. Always outputs 0.5.\"\n}\n",
+          "tool_call_id": "call_mock_13952627570388294149"
         },
         {
           "role": "assistant",
@@ -245,9 +245,198 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "4fae4ibrpzdP2L9dGBPpyyZuBhrDtDp09Z4yE9Ch9bst3blQMPZO86Svey5Z50rJvAipKQ5LhWAXsjLVb4ady9HGc0Rxg05juM1mM13iJ1cdKtTw9d3zCNT lw9OxzNHK7kXuQ6I5ifjcR7EW0FOvnZ0NJREKOl0o33v0PbYjkvOghTPkM8FKmxpjQHV4IEdMO2q2OtrckicqXaaefcTEgy3ogWUzzCXlYZAbWLlzEfCnRKyLov2nSIE05VEN5xCBclEts1exBHNFe17vESkUYAq3F egASSQGQle7djjC1ymu ViQUQ8l3bfXw6Y0bfTiGksCfi0ZH4kBFW56iTR451Fj8Nh8jKL8eFJrmV9Ln3gEsCGPFh qXM3gPN0LuUdZaNmQkc93rs0XZeEqPwwCp91v7NmV0dccCXTPgriF8WMyO0d1VpNTF0qsF94YpDMzM6rSPmFjFfZzoz12FLVeA",
+          "reasoning": "8zLSzvGgrwM7Izqp4jLBynaIhNtqy0lj8fDhqEH7c1sjXA3Y2chXWQXOgtUFCJfxd1nz qmLA266ZzXbLD9Yg4bvI1DXmdWbZXInbwKlG SXYCNi6q9lldzvL7hYRwcQXfORTppLCm4gyODpVQQn1nG0WMeWuqRc4DlRpwEaahUsRjn4j39XfuH9d577OGYDjwLVn8Wq2H2FmpRnNpTc8mwOhv6q4fdb9qFa2GM6iafwJW Z1WbANXJx5S62mRbnx5oH OtOmtlOggRfYzZ dTz3Tz1XRXuow7BVajUYwa3tbg1NbjkPqj4CWkqhnOdQo4 s7hmXNzrW9nCJ971n9JuzEQ8V5buyE7qlKlDM2yY",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_1200310329534490370",
+              "function": {
+                "name": "ReadInputSchemaSchema",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 11,
+          "content": "{\n  \"anyOf\": [\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"object\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the object input.\"\n        },\n        \"properties\": {\n          \"type\": \"object\",\n          \"additionalProperties\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The properties of the object input.\"\n        },\n        \"required\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The required properties of the object input.\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"properties\"\n      ],\n      \"description\": \"An object input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"array\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the array input.\"\n        },\n        \"minItems\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum number of items in the array input.\"\n        },\n        \"maxItems\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum number of items in the array input.\"\n        },\n        \"items\": {\n          \"$ref\": \"InputSchema\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"items\"\n      ],\n      \"description\": \"An array input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"string\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the string input.\"\n        },\n        \"enum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The enumeration of allowed string values.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A string input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"number\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the number input.\"\n        },\n        \"minimum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"number\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum allowed value for the number input.\"\n        },\n        \"maximum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"number\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum allowed value for the number input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A number input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"integer\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the integer input.\"\n        },\n        \"minimum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum allowed value for the integer input.\"\n        },\n        \"maximum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum allowed value for the integer input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An integer input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"boolean\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the boolean input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A boolean input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"image\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the image input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An image input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"audio\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the audio input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An audio input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"video\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the video input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A video input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"file\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the file input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A file input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"anyOf\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The possible schemas that the input can match.\"\n        }\n      },\n      \"required\": [\n        \"anyOf\"\n      ],\n      \"description\": \"A union of schemas - input must match at least one.\"\n    }\n  ],\n  \"description\": \"An input schema defining the structure of function inputs.\"\n}\n",
+          "tool_call_id": "call_mock_1200310329534490370"
+        },
+        {
+          "role": "assistant",
+          "index": 12,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "RiVESdqeQBdJ2ZGgbQY5xxSTKHI9QDWwezYgjbY2kal5mohCs3MpBUH0SwuJaQVMF9kEOq06oGPwhmo665kdPLp06AnLQ4iDADWQU0SW3SzQmyR6D0nTRZRNFUlC",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_12213270020529735437",
+              "function": {
+                "name": "ReadAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 13,
+          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"placeholder.alpha.vector.function\"\n    },\n    \"name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the placeholder function.\"\n    },\n    \"spec\": {\n      \"type\": \"string\",\n      \"description\": \"The specification of the placeholder function.\"\n    },\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"context\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"type\": {\n              \"const\": \"object\"\n            },\n            \"description\": {\n              \"anyOf\": [\n                {\n                  \"type\": \"string\"\n                },\n                {\n                  \"type\": \"null\"\n                }\n              ],\n              \"description\": \"The description of the object input.\"\n            },\n            \"properties\": {\n              \"type\": \"object\",\n              \"additionalProperties\": {\n                \"$ref\": \"InputSchema\"\n              },\n              \"description\": \"The properties of the object input.\"\n            },\n            \"required\": {\n              \"anyOf\": [\n                {\n                  \"type\": \"array\",\n                  \"items\": {\n                    \"type\": \"string\"\n                  }\n                },\n                {\n                  \"type\": \"null\"\n                }\n              ],\n              \"description\": \"The required properties of the object input.\"\n            }\n          },\n          \"required\": [\n            \"type\",\n            \"properties\"\n          ],\n          \"description\": \"The optional context input schema shared across all items.\"\n        },\n        \"items\": {\n          \"$ref\": \"InputSchema\",\n          \"description\": \"The input schema for each item.\"\n        }\n      },\n      \"required\": [\n        \"items\"\n      ],\n      \"description\": \"The input schema for the placeholder vector function.\"\n    },\n    \"skip\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`.\"\n    },\n    \"input\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"context\": {\n          \"$ref\": \"Expression\",\n          \"description\": \"An expression which evaluates to the context input. Receives: `input`.\"\n        },\n        \"items\": {\n          \"$ref\": \"Expression\",\n          \"description\": \"An expression which evaluates to the items input. Receives: `input`.\"\n        }\n      },\n      \"required\": [\n        \"items\"\n      ],\n      \"description\": \"The input expression for the placeholder vector function.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"name\",\n    \"spec\",\n    \"input_schema\",\n    \"input\"\n  ],\n  \"description\": \"A placeholder alpha vector function task expression. Always outputs an equalized vector.\"\n}\n",
+          "tool_call_id": "call_mock_12213270020529735437"
+        },
+        {
+          "role": "assistant",
+          "index": 14,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "k7wn5fNMg4TUrf1035h7ew5APIOgnC xQ cqNnHxlAI",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_8289177644921936684",
+              "function": {
+                "name": "ReadAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 15,
+          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"placeholder.alpha.vector.function\"\n    },\n    \"name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the placeholder function.\"\n    },\n    \"spec\": {\n      \"type\": \"string\",\n      \"description\": \"The specification of the placeholder function.\"\n    },\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"context\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"type\": {\n              \"const\": \"object\"\n            },\n            \"description\": {\n              \"anyOf\": [\n                {\n                  \"type\": \"string\"\n                },\n                {\n                  \"type\": \"null\"\n                }\n              ],\n              \"description\": \"The description of the object input.\"\n            },\n            \"properties\": {\n              \"type\": \"object\",\n              \"additionalProperties\": {\n                \"$ref\": \"InputSchema\"\n              },\n              \"description\": \"The properties of the object input.\"\n            },\n            \"required\": {\n              \"anyOf\": [\n                {\n                  \"type\": \"array\",\n                  \"items\": {\n                    \"type\": \"string\"\n                  }\n                },\n                {\n                  \"type\": \"null\"\n                }\n              ],\n              \"description\": \"The required properties of the object input.\"\n            }\n          },\n          \"required\": [\n            \"type\",\n            \"properties\"\n          ],\n          \"description\": \"The optional context input schema shared across all items.\"\n        },\n        \"items\": {\n          \"$ref\": \"InputSchema\",\n          \"description\": \"The input schema for each item.\"\n        }\n      },\n      \"required\": [\n        \"items\"\n      ],\n      \"description\": \"The input schema for the placeholder vector function.\"\n    },\n    \"skip\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`.\"\n    },\n    \"input\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"context\": {\n          \"$ref\": \"Expression\",\n          \"description\": \"An expression which evaluates to the context input. Receives: `input`.\"\n        },\n        \"items\": {\n          \"$ref\": \"Expression\",\n          \"description\": \"An expression which evaluates to the items input. Receives: `input`.\"\n        }\n      },\n      \"required\": [\n        \"items\"\n      ],\n      \"description\": \"The input expression for the placeholder vector function.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"name\",\n    \"spec\",\n    \"input_schema\",\n    \"input\"\n  ],\n  \"description\": \"A placeholder alpha vector function task expression. Always outputs an equalized vector.\"\n}\n",
+          "tool_call_id": "call_mock_8289177644921936684"
+        },
+        {
+          "role": "assistant",
+          "index": 16,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "JBZyt1xeJE0wDM9ps0ty0GBddssZySPYb7XN1Pbingg9CUNBERkgpsi9VKvO1X5I6QnLnpFpTACOx8J0DvQh4yCiXz654GKctPqV7lh WGe6wlflPtKROalVo2hMJRuNnddgQ53EaRE49H8wYOSUdlV8J6DGNS1VLPf88rLzYO38ZgvSD7r01g22HM8 NzXJequ2ipfO Swe6tjOi2zMRuWxjkZvdq5zAcuZGCdJDituofynqlXYPRLl61zYVjCBM2AKSrjyg1L6vTpC62dwqKsjes0gldYCethFHvSfqY lEYKxQMqv6l8EMg8OkdJBi8jAUJAvd14CfRsrrmZhUJlGN0bcl1BFq7RboTGcrsAEFWIxkmmSigKENOhbKWDTk60C5DEOtizBx810FpaENPBQ7cO0wvqugR7fQ",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_3504369981627589699",
+              "function": {
+                "name": "ReadInputSchemaSchema",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 17,
+          "content": "{\n  \"anyOf\": [\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"object\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the object input.\"\n        },\n        \"properties\": {\n          \"type\": \"object\",\n          \"additionalProperties\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The properties of the object input.\"\n        },\n        \"required\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The required properties of the object input.\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"properties\"\n      ],\n      \"description\": \"An object input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"array\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the array input.\"\n        },\n        \"minItems\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum number of items in the array input.\"\n        },\n        \"maxItems\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum number of items in the array input.\"\n        },\n        \"items\": {\n          \"$ref\": \"InputSchema\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"items\"\n      ],\n      \"description\": \"An array input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"string\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the string input.\"\n        },\n        \"enum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The enumeration of allowed string values.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A string input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"number\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the number input.\"\n        },\n        \"minimum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"number\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum allowed value for the number input.\"\n        },\n        \"maximum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"number\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum allowed value for the number input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A number input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"integer\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the integer input.\"\n        },\n        \"minimum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The minimum allowed value for the integer input.\"\n        },\n        \"maximum\": {\n          \"anyOf\": [\n            {\n              \"type\": \"integer\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The maximum allowed value for the integer input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An integer input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"boolean\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the boolean input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A boolean input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"image\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the image input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An image input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"audio\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the audio input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"An audio input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"video\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the video input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A video input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"file\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the file input.\"\n        }\n      },\n      \"required\": [\n        \"type\"\n      ],\n      \"description\": \"A file input schema.\"\n    },\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"anyOf\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The possible schemas that the input can match.\"\n        }\n      },\n      \"required\": [\n        \"anyOf\"\n      ],\n      \"description\": \"A union of schemas - input must match at least one.\"\n    }\n  ],\n  \"description\": \"An input schema defining the structure of function inputs.\"\n}\n",
+          "tool_call_id": "call_mock_3504369981627589699"
+        },
+        {
+          "role": "assistant",
+          "index": 18,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "bRXtrmp2FCqKo1JoSiiwEeDtSxglPgBHDTyizrVFwcfBYQz4mnWPPUINaErndzVkrSj9iyGzWCsyWz9Ybvcm2t1Y0Xsibp 4IenjqS9vjeBzjG8xd9vQdoSf7Ubo7qQYAImXolkjNwRKAbfv7aC8LZw3MTAFIY8Gx54pdwhZ2T tO4nuA3RB0g3SAFs0tlj5lyzXztrX2V3aysfBIDEPXlkCeXTpFlOAMcHdyIAhdePc8TTYf74I IPUHFWsFfwDBJO9ZXwDbhVHA0iCY12DfzT0vmxXb6fgungLWDE9KO56hCKmlp1wENxZ1PGyuW5vLBiqCdOlxr9492JtFDFV4eodVE3cL3akZE3OTItRHf7GfRsS0ann7ABQvQQ keHaC0Bpih7GUgSEAIOtLKpYTbOtc46dyTCmT",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_6956499633915603467",
+              "function": {
+                "name": "AppendTask",
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"name\":\"vector-sub-873\",\"spec\":\"PUuRunPj4TOnMzLvfWpOZDQCiqWAoexsA86UX0GN2NpRkzsT8sTDoGaYmC3mWye0i J CaMfq44oFZu3J26xW4DHWFGmO8Zrx92 sEBdu7G13C8e08e5VbmmGb\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"string\"}},\"context\":{\"properties\":{\"rubric\":{\"type\":\"object\",\"properties\":{\"dimensions\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"weight\":{\"type\":\"number\"},\"examples\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"}]}}},\"required\":[\"name\",\"weight\"]}},\"passing_threshold\":{\"type\":\"number\"}},\"required\":[\"dimensions\",\"passing_threshold\"]},\"evaluator\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"credentials\":{\"type\":\"array\",\"minItems\":0,\"maxItems\":2,\"items\":{\"type\":\"string\"}}},\"required\":[\"id\"]}]}},\"required\":[\"rubric\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 19,
+          "content": "1",
+          "tool_call_id": "call_mock_6956499633915603467"
+        },
+        {
+          "role": "assistant",
+          "index": 20,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
           "tool_calls": null,
-          "content": "z5bRwMZfJ66FV7i0hIGX7azhyCFuhjK easA43p5I4 BOdnm2HXt5NfnMuCh4z3rbgfFJelCrNbUq auEIg1OpgWyVfQLLAx",
+          "content": "WXW6TkoxSR8NQsjXPQs17rT99VGHLsHdXSQww3DM GdyuUJAJ4RTnqsj4ayYoox1V6natEOKL0rawFwYFFJH T94aX",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -280,247 +469,18 @@
       "messages": [
         {
           "role": "assistant",
-          "index": 11,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "AS43HlNK7NBDpEzOn1wiPnUgQoVRJ2IfIfOifpWHrrUmGgxTp8k2UuculSx3gHakl5QY",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_9394513094591194984",
-              "function": {
-                "name": "ReadEssayTasks",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 12,
-          "content": "TsEm4X26THnMgeQjlo7AJ2eDNqvGQfABso0OhvScSaxKhIISsL6VrUFyxAoola5ciwmwtbJo3j3LN3vQFJZlVmGGt2dL0xA arrFouFNT Yzc",
-          "tool_call_id": "call_mock_9394513094591194984"
-        },
-        {
-          "role": "assistant",
-          "index": 13,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "T3XI0i6nw3GsG8cemZQK3OuQTaWReBDyrJgxz3kzj0x5VDYFsrypUcSeSLZNkTyV6rgTGJN0EUg48MdTNj8B0EB3C9tXHpAipA72gFX8bnOUUYUb AENeZ3iRuuJqFxpeAGn WzkyPeDsfl8G3g2Oncc1aTBWk6eYGP6aGKeRi2teFdhv4MtLEiNqIts3FPWUP1me2xdPmYBMNg3UosoFsNOlarpGik6WlR0EfQglShC2YrKJKsMb5BQldrJNvM3IiuxEaprvLGVkZQVrjDjG6SvpPmgmbdPFbN6APWFhIphUhY5xY0TU9P9joE 5z66pp5S5cpWjrcAxWMlAJEslhAPJc0cNNZXfk3YOYiwsEJCzG08uhucSGlJfvZ8r DKDRZ40sV3y4qfROOdhCwCfbbDczs67yhOmxeuyN5QbFKHlP37rb",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_5345448339949536058",
-              "function": {
-                "name": "ReadAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 14,
-          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"placeholder.alpha.scalar.function\"\n    },\n    \"name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the placeholder function.\"\n    },\n    \"spec\": {\n      \"type\": \"string\",\n      \"description\": \"The specification of the placeholder function.\"\n    },\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"object\"\n        },\n        \"description\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The description of the object input.\"\n        },\n        \"properties\": {\n          \"type\": \"object\",\n          \"additionalProperties\": {\n            \"$ref\": \"InputSchema\"\n          },\n          \"description\": \"The properties of the object input.\"\n        },\n        \"required\": {\n          \"anyOf\": [\n            {\n              \"type\": \"array\",\n              \"items\": {\n                \"type\": \"string\"\n              }\n            },\n            {\n              \"type\": \"null\"\n            }\n          ],\n          \"description\": \"The required properties of the object input.\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"properties\"\n      ],\n      \"description\": \"The input schema for the placeholder scalar function.\"\n    },\n    \"skip\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`.\"\n    },\n    \"input\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to the input for the placeholder scalar function. Receives: `input`.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"name\",\n    \"spec\",\n    \"input_schema\",\n    \"input\"\n  ],\n  \"description\": \"A placeholder alpha scalar function task expression within a vector function. Always outputs 0.5.\"\n}\n",
-          "tool_call_id": "call_mock_5345448339949536058"
-        },
-        {
-          "role": "assistant",
-          "index": 15,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_594683164966765194",
-              "function": {
-                "name": "CheckFunction",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 16,
-          "content": "Error: Tasks have not been written",
-          "tool_call_id": "call_mock_594683164966765194"
-        },
-        {
-          "role": "assistant",
-          "index": 17,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_7091833771022490982",
-              "function": {
-                "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"name\":\"vector-sub-150\",\"spec\":\"fouCATlVac83TEtFc94YqFcUsqBtMaMjJuSlNgjJIlXvLURAJLERy4HXDV0 Ck6lDOzg2vjwc9J fpjYdjHUx3cpYSUgHawEV6uctdlmAx9okXKba2zwEASa1Axf2rHUmJ9qeP6rMBHbXYvzz6W93ErZ1VmwOF4cD1EgPlO60HUq0oxM4UdEFmS\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"string\"}},\"context\":{\"properties\":{\"rubric\":{\"type\":\"object\",\"properties\":{\"dimensions\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"weight\":{\"type\":\"number\"},\"examples\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"}]}}},\"required\":[\"name\",\"weight\"]}},\"passing_threshold\":{\"type\":\"number\"}},\"required\":[\"dimensions\",\"passing_threshold\"]},\"evaluator\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"credentials\":{\"type\":\"array\",\"minItems\":0,\"maxItems\":2,\"items\":{\"type\":\"string\"}}},\"required\":[\"id\"]}]}},\"required\":[\"rubric\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 18,
-          "content": "1",
-          "tool_call_id": "call_mock_7091833771022490982"
-        },
-        {
-          "role": "assistant",
-          "index": 19,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "FSftjcvBzcWMXq iS43xD4aY3hYiDgcyZNK708gvzHgFWAqYzm1FAtncFVr3EWca9v9TezLh4LDORINez2rAlwlSkNCve6EJt xb288l4DeeYT3D2B3qHtLGGN2Z0WkFFuOzM5lgc2f1hRkoishYNwNdWjSehmnW1mVsBZ7xOiFiSXWX5tAD nfB0EtulirlGYyEeu7CKVpGMEyx1sBKvz3YzKzEB5fvNGfOxY jMDbj4wdm0Gs2ocg5P6WY",
-          "tool_calls": null,
-          "content": "uqO1ETvDVIjx2BZ 8t",
-          "refusal": null,
-          "finish_reason": "stop",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        }
-      ],
-      "object": "agent.completion",
-      "usage": {
-        "completion_tokens": 0,
-        "prompt_tokens": 0,
-        "total_tokens": 0,
-        "cost": 0.0,
-        "total_cost": 0.0
-      },
-      "upstream": "mock",
-      "error": null
-    },
-    {
-      "index": 4,
-      "id": "",
-      "created": 0,
-      "messages": [
-        {
-          "role": "assistant",
-          "index": 20,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "dwq nMVWeCRL0rpJ4qzBtlJcVEuFT7pgWz7JGTKTdWYxWAQtb2r4csDX92rHgyAFeX5Z68tl19 gf3kkllYalUZkKWPONMkuC8ga0ASjucXvuAH2bfNpF1e8ktNiRjXmLl1OnAVOI1naAR4T9ZEuto2n6CEqcx92alknyjJlLCtGZHt6ZUCnniFZT2clGInPqldkdG2bvp0H88aIggS8NnYkOmMroKhYUMhFAjGEpi0Vnpei3yIQbJVjkeORL2hiz19nsQNOPPJH7u03Fyv0",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_7081513835122935779",
-              "function": {
-                "name": "ReadTask",
-                "arguments": "{\"index\":0}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
           "index": 21,
-          "content": "{\"type\":\"placeholder.alpha.vector.function\",\"depth\":0,\"min_branch_width\":1,\"max_branch_width\":2,\"min_leaf_width\":1,\"max_leaf_width\":2,\"name\":\"vector-sub-150\",\"spec\":\"fouCATlVac83TEtFc94YqFcUsqBtMaMjJuSlNgjJIlXvLURAJLERy4HXDV0 Ck6lDOzg2vjwc9J fpjYdjHUx3cpYSUgHawEV6uctdlmAx9okXKba2zwEASa1Axf2rHUmJ9qeP6rMBHbXYvzz6W93ErZ1VmwOF4cD1EgPlO60HUq0oxM4UdEFmS\",\"input_schema\":{\"context\":{\"properties\":{\"rubric\":{\"type\":\"object\",\"properties\":{\"dimensions\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"weight\":{\"type\":\"number\"},\"examples\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"}]}}},\"required\":[\"name\",\"weight\"]}},\"passing_threshold\":{\"type\":\"number\"}},\"required\":[\"dimensions\",\"passing_threshold\"]},\"evaluator\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"credentials\":{\"type\":\"array\",\"minItems\":0,\"maxItems\":2,\"items\":{\"type\":\"string\"}}},\"required\":[\"id\"]}]}},\"required\":[\"rubric\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"string\"}}},\"input\":{\"context\":{\"$starlark\":\"input['context']\"},\"items\":{\"$starlark\":\"input['items']\"}}}",
-          "tool_call_id": "call_mock_7081513835122935779"
-        },
-        {
-          "role": "assistant",
-          "index": 22,
           "created": 0,
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "4kigUiAQNn4ml1CiF3UlxtEo7wZjB9aJOfkJ6v7RW3oRIJN9o4llY fJP2qy0T4zw1PavAjKorbFk9tVYOWmGixqDDMNtejA jjkDYIXuHaecTBGKWXkhTSuVEGB04x8Wq 9ncL4t23kHXtEVKTV6uYeBu4yGYfHXDHjoTxbNV nGmrZ7MKdjqxxvpTMIj4JH9IVST5 w2svQGPSSrArVlwXFtvFGzezASiRdEG1bt4IVaboX9wRMGNLfrRuXX5JVi4tMm4Z4aTJrSuukWqeUd81ctB5gyoxDfLtmZ52s6H K8aMyF8nqxidz9WyFNA2K8eeCkk0t6TgEuRnKr8FRtR2Z2KgTXFfKKe6BUx7RnNCSyYVPIN0jBDi xd9AndU9yhwN6NbZKDl4CEm6v9Vf9cRnawpGZnDDNqm YNSRRL5h7s1oPLRG7WgJvjW6B4Rebba8wiO9bDGLCYpBQW0vwNz5xjAcMXgGi7OE04AZ8CrJUOeeXyCvH9mZ8ryv2 AOYFfuXcWm86C oqdysgxOhwk1uAjDPRmLAFfgHjROyf4RGIRGrprcZOiwZd8EpSMO46RiF94wOGytmtS4xdlOylY6z7Z9aKcapgoRHkCRaOY2A2YIwzM2pU",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_524833162271398356",
+              "id": "call_mock_2110517494089406163",
               "function": {
                 "name": "WriteDescription",
-                "arguments": "{\"description\":\"ofSgMqSZnzBGZSFFjZIV5HBkqtGWo1hhMRqsdze IsbLNY9T6YveHzLhT3GqjBguGsmkKYuSPjXdtyMVi6KJgAQMBKTkLlBkrFSG vFpU4zkR2rl9JK6oquT9Mf0aU4yC9VUUchlWMRTibXV6k5gj7IyjKei4SHnfCGdKa9Lu2z48lrCNn5M9v6AS7Xx1XgNgPMF OTi0tnVRfMQor2JpJHoCREwbqnGUfNc14WrA7OK7ceuWB6aPWgz9aLbZR6WdTkdwHKO4bQeFmQK 4kNEa8mhNJKB3adicizuuxPDpdQ9G90UpBvRNPa4bvSZXCBBp2tZfkD\"}"
+                "arguments": "{\"description\":\"zbbLjkknSUWqzXimkdItXdKb42iaqHHNKeXHuplPvpL1zDokEEwMKy keUCKb1gm6e3gAlOWf0vt4ryG1Lwg4ymTc2QUUPrpsafEgZL5ocfwc4HtXXHz6jWNa6OHdYgiEZSCtUgu0LFz VPFMT8HL46NQNoVqDVysGdoiahSB 3ksC0w9ajniInq1fsyUhJP2TZDirfqoPKqykiOkCY8vsvBoX8ztOGT67NfLnr3kWoamWD Kd ZZZEOFGu2d3Bm5tU3zWsl4MLi5SXhgpZyesOnSBgC5k9CmcyDA0qnj\"}"
               }
             }
           ],
@@ -540,20 +500,20 @@
         },
         {
           "role": "tool",
-          "index": 23,
+          "index": 22,
           "content": "Ok",
-          "tool_call_id": "call_mock_524833162271398356"
+          "tool_call_id": "call_mock_2110517494089406163"
         },
         {
           "role": "assistant",
-          "index": 24,
+          "index": 23,
           "created": 0,
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "VCaAmzHoWHZGQItJH1fZtj1dpv9Sx88Ox0TppyGG8e2T3CyVLEmlZaAbgXjDZo1IMk8eCmkfiFs0r71mzpvGCyFHSJd9OvhyuOgRaIpyFGDUSwWiLMOBM7WtCRj09GCmsG8M fRnwK5fG XyqhxPf17k SrsLsmcd3aY F4u5fRZRZrjSAsSc58awQWhMIkVGR1hFoLA3KZN8sio9XUNDXSGhds woHYnXpY8hiOzzpnKQPIJFS7mcilEJhMdj8rh vDijDStZhL5s4hC0MatZvVAYt34BVhBc6iYsWqKllyc60gVgW37J",
+          "reasoning": "HTrS5AZtEV21DrOU8leYly1n6Sfd13pQLP5jezBBahox 24KGlYqCXKJKLzvEOhqmRPCIxvj S72Zvloc7v4op2uWzsspV4RBh6k Wq2f NYIUp9TNBOAthZV5KT7oVKfXCFU tKHFV1aecQGzX9jFSQ3wSNGfvaIbo15iBxs9YuUqSNMGc5s otSeeGd0vba1EH2YG0C0O9ZcLF4ZB ALvF2Rzs  akHwAKnvB EVlS3sBU9KU2MuxIMPDdm1WKb4PSC4 VqFRZNWY0vmPvo8oNPSyN2V700e2KBpjP8st0sH6rQur6U5gmmN5z6oOnYvz05LdgAsqr6RrlDmXsTKGjzYD5qWUSCFj9hDf3hB1jeTvRjVAenusHnOWOBNHVOZiqhq0pKnZBjGoy6 b8nxJiZCFN6Pn58ZcoRmqxvb95wpICg681NuSgiXB85XKDCZnyhtBCxKn8E8JZL56TbvcKzGrhtZr  3KaGmnz8LxbosRoEJQCU270povbdOFQnbbVlL3nZDMur7E8dVzuocQEyrggySOO mlmC08Z5fdNEyDdCco1lk5h26N4zh5ggmRSvGiW4DUnQPf8vp",
           "tool_calls": null,
-          "content": "tXeg9xQdjj8uNPpfYi92Cr8zeY0f9R64iuyCMWv4BFmAdC0rvZp1O54aNZG6MAXitXto5yLlX",
+          "content": "JldjhiPE3QR72Hpq3U04KBUI6nu2nCjPxs95m9IYvWlTq9nWkHXSvs7soGtNtPY57cyX0IQY SHQ7hdKEzRRYpd5xfX",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -680,7 +640,7 @@
         }
       }
     },
-    "essay_tasks": "TsEm4X26THnMgeQjlo7AJ2eDNqvGQfABso0OhvScSaxKhIISsL6VrUFyxAoola5ciwmwtbJo3j3LN3vQFJZlVmGGt2dL0xA arrFouFNT Yzc",
+    "essay_tasks": "QTdoqQWRNXJmZqZgHcY5Fuv1lN0FHXPjdla0Nn3Mv4DLIaPwJNi39KJjkFOti840riUnOGyfxU7Xf8gPeWRtCCaVkTsoZw9zU8rfAn0khK6T3pT2iFIgKEFwhLp7edwJdsKKMZmMlfjGJK1JgYN3PoV0X0OrGjbpIGlkksXY5Y8nQEnOb6K9q WIQ36ijE4qB1WhGx0pw4wZDY8hAOzkfkbHLNNWf49xL8Mxf9eYUOiYEzoNqmESiVLv6dnNqM4c4pe8iiWMd4451FpD3rmyBb9HGKZ",
     "tasks": [
       {
         "type": "placeholder.alpha.vector.function",
@@ -689,8 +649,8 @@
         "max_branch_width": 2,
         "min_leaf_width": 1,
         "max_leaf_width": 2,
-        "name": "vector-sub-150",
-        "spec": "fouCATlVac83TEtFc94YqFcUsqBtMaMjJuSlNgjJIlXvLURAJLERy4HXDV0 Ck6lDOzg2vjwc9J fpjYdjHUx3cpYSUgHawEV6uctdlmAx9okXKba2zwEASa1Axf2rHUmJ9qeP6rMBHbXYvzz6W93ErZ1VmwOF4cD1EgPlO60HUq0oxM4UdEFmS",
+        "name": "vector-sub-873",
+        "spec": "PUuRunPj4TOnMzLvfWpOZDQCiqWAoexsA86UX0GN2NpRkzsT8sTDoGaYmC3mWye0i J CaMfq44oFZu3J26xW4DHWFGmO8Zrx92 sEBdu7G13C8e08e5VbmmGb",
         "input_schema": {
           "context": {
             "properties": {
@@ -791,12 +751,12 @@
         }
       }
     ],
-    "description": "ofSgMqSZnzBGZSFFjZIV5HBkqtGWo1hhMRqsdze IsbLNY9T6YveHzLhT3GqjBguGsmkKYuSPjXdtyMVi6KJgAQMBKTkLlBkrFSG vFpU4zkR2rl9JK6oquT9Mf0aU4yC9VUUchlWMRTibXV6k5gj7IyjKei4SHnfCGdKa9Lu2z48lrCNn5M9v6AS7Xx1XgNgPMF OTi0tnVRfMQor2JpJHoCREwbqnGUfNc14WrA7OK7ceuWB6aPWgz9aLbZR6WdTkdwHKO4bQeFmQK 4kNEa8mhNJKB3adicizuuxPDpdQ9G90UpBvRNPa4bvSZXCBBp2tZfkD",
-    "readme": "# vb-richctx\n\nofSgMqSZnzBGZSFFjZIV5HBkqtGWo1hhMRqsdze IsbLNY9T6YveHzLhT3GqjBguGsmkKYuSPjXdtyMVi6KJgAQMBKTkLlBkrFSG vFpU4zkR2rl9JK6oquT9Mf0aU4yC9VUUchlWMRTibXV6k5gj7IyjKei4SHnfCGdKa9Lu2z48lrCNn5M9v6AS7Xx1XgNgPMF OTi0tnVRfMQor2JpJHoCREwbqnGUfNc14WrA7OK7ceuWB6aPWgz9aLbZR6WdTkdwHKO4bQeFmQK 4kNEa8mhNJKB3adicizuuxPDpdQ9G90UpBvRNPa4bvSZXCBBp2tZfkD\n"
+    "description": "zbbLjkknSUWqzXimkdItXdKb42iaqHHNKeXHuplPvpL1zDokEEwMKy keUCKb1gm6e3gAlOWf0vt4ryG1Lwg4ymTc2QUUPrpsafEgZL5ocfwc4HtXXHz6jWNa6OHdYgiEZSCtUgu0LFz VPFMT8HL46NQNoVqDVysGdoiahSB 3ksC0w9ajniInq1fsyUhJP2TZDirfqoPKqykiOkCY8vsvBoX8ztOGT67NfLnr3kWoamWD Kd ZZZEOFGu2d3Bm5tU3zWsl4MLi5SXhgpZyesOnSBgC5k9CmcyDA0qnj",
+    "readme": "# vb-richctx\n\nzbbLjkknSUWqzXimkdItXdKb42iaqHHNKeXHuplPvpL1zDokEEwMKy keUCKb1gm6e3gAlOWf0vt4ryG1Lwg4ymTc2QUUPrpsafEgZL5ocfwc4HtXXHz6jWNa6OHdYgiEZSCtUgu0LFz VPFMT8HL46NQNoVqDVysGdoiahSB 3ksC0w9ajniInq1fsyUhJP2TZDirfqoPKqykiOkCY8vsvBoX8ztOGT67NfLnr3kWoamWD Kd ZZZEOFGu2d3Bm5tU3zWsl4MLi5SXhgpZyesOnSBgC5k9CmcyDA0qnj\n"
   },
   "function": {
     "type": "alpha.vector.branch.function",
-    "description": "ofSgMqSZnzBGZSFFjZIV5HBkqtGWo1hhMRqsdze IsbLNY9T6YveHzLhT3GqjBguGsmkKYuSPjXdtyMVi6KJgAQMBKTkLlBkrFSG vFpU4zkR2rl9JK6oquT9Mf0aU4yC9VUUchlWMRTibXV6k5gj7IyjKei4SHnfCGdKa9Lu2z48lrCNn5M9v6AS7Xx1XgNgPMF OTi0tnVRfMQor2JpJHoCREwbqnGUfNc14WrA7OK7ceuWB6aPWgz9aLbZR6WdTkdwHKO4bQeFmQK 4kNEa8mhNJKB3adicizuuxPDpdQ9G90UpBvRNPa4bvSZXCBBp2tZfkD",
+    "description": "zbbLjkknSUWqzXimkdItXdKb42iaqHHNKeXHuplPvpL1zDokEEwMKy keUCKb1gm6e3gAlOWf0vt4ryG1Lwg4ymTc2QUUPrpsafEgZL5ocfwc4HtXXHz6jWNa6OHdYgiEZSCtUgu0LFz VPFMT8HL46NQNoVqDVysGdoiahSB 3ksC0w9ajniInq1fsyUhJP2TZDirfqoPKqykiOkCY8vsvBoX8ztOGT67NfLnr3kWoamWD Kd ZZZEOFGu2d3Bm5tU3zWsl4MLi5SXhgpZyesOnSBgC5k9CmcyDA0qnj",
     "input_schema": {
       "context": {
         "properties": {
@@ -895,8 +855,8 @@
         "max_branch_width": 2,
         "min_leaf_width": 1,
         "max_leaf_width": 2,
-        "name": "vector-sub-150",
-        "spec": "fouCATlVac83TEtFc94YqFcUsqBtMaMjJuSlNgjJIlXvLURAJLERy4HXDV0 Ck6lDOzg2vjwc9J fpjYdjHUx3cpYSUgHawEV6uctdlmAx9okXKba2zwEASa1Axf2rHUmJ9qeP6rMBHbXYvzz6W93ErZ1VmwOF4cD1EgPlO60HUq0oxM4UdEFmS",
+        "name": "vector-sub-873",
+        "spec": "PUuRunPj4TOnMzLvfWpOZDQCiqWAoexsA86UX0GN2NpRkzsT8sTDoGaYmC3mWye0i J CaMfq44oFZu3J26xW4DHWFGmO8Zrx92 sEBdu7G13C8e08e5VbmmGb",
         "input_schema": {
           "context": {
             "properties": {

@@ -373,7 +373,12 @@ where
         // Initial state
         yield state_chunk(&state, &id, created, object);
 
+        let mut errored = false;
+
         // Step 1: Essay
+        let essay_validate = Arc::new({ let s = state.clone(); move || T::validate_essay(&s) });
+        if essay_validate().is_err() {
+        errored = false;
         let essay_prompt = if is_scalar {
             format!(
                 "You are an inventor creating a new ObjectiveAI Function. \
@@ -396,11 +401,10 @@ where
                 Read the Spec first.",
             )
         };
-        let mut errored = false;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             essay_prompt, T::essay_tools(&state),
-            Arc::new({ let s = state.clone(); move || T::validate_essay(&s) }),
+            essay_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
         while let Some(output) = step.next().await {
@@ -419,9 +423,12 @@ where
             }
         }
         if errored { return; }
+        }
         yield state_chunk(&state, &id, created, object);
 
         // Step 2: Input Schema
+        let input_schema_validate = Arc::new({ let s = state.clone(); move || T::validate_input_schema(&s) });
+        if input_schema_validate().is_err() {
         let input_schema_prompt = if is_scalar {
             "Create the InputSchema for your Scalar Function. \
             Ensure that it adheres to the specifications outlined in your Spec \
@@ -439,7 +446,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             input_schema_prompt, T::input_schema_tools(&state),
-            Arc::new({ let s = state.clone(); move || T::validate_input_schema(&s) }),
+            input_schema_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
         while let Some(output) = step.next().await {
@@ -458,9 +465,12 @@ where
             }
         }
         if errored { return; }
+        }
         yield state_chunk(&state, &id, created, object);
 
         // Step 3: Essay Tasks
+        let essay_tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_essay_tasks(&s) });
+        if essay_tasks_validate().is_err() {
         let essay_tasks_prompt = format!(
             "Write EssayTasks listing and describing the key tasks the Function must \
             perform in order to fulfill the quality and value evaluations defined within \
@@ -472,7 +482,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             essay_tasks_prompt, T::essay_tasks_tools(&state),
-            Arc::new({ let s = state.clone(); move || T::validate_essay_tasks(&s) }),
+            essay_tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
         while let Some(output) = step.next().await {
@@ -491,6 +501,7 @@ where
             }
         }
         if errored { return; }
+        }
         yield state_chunk(&state, &id, created, object);
 
         // Step 4: Tasks (Body)
@@ -658,11 +669,13 @@ where
                 2. Re-read the Spec. It is the universal source of truth — never contradict it.",
             )
         };
+        let tasks_validate = Arc::new({ let s = state.clone(); move || T::validate_function(&s) });
+        if tasks_validate().is_err() {
         errored = false;
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             tasks_prompt, T::tasks_tools(&state),
-            Arc::new({ let s = state.clone(); move || T::validate_function(&s) }),
+            tasks_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
         while let Some(output) = step.next().await {
@@ -681,9 +694,12 @@ where
             }
         }
         if errored { return; }
+        }
         yield state_chunk(&state, &id, created, object);
 
         // Step 5: Description
+        let description_validate = Arc::new({ let s = state.clone(); move || T::validate_description(&s) });
+        if description_validate().is_err() {
         let description_prompt =
             "Create a 1-paragraph description of the Function you've invented. \
             The description should be concise (max 350 bytes) and summarize the \
@@ -692,7 +708,7 @@ where
         let mut step = run_step(
             agent_client.clone(), ctx.clone(), request.clone(),
             description_prompt, T::description_tools(&state),
-            Arc::new({ let s = state.clone(); move || T::validate_description(&s) }),
+            description_validate,
             id.clone(), created, object, continuation.take(), completion_index,
         );
         while let Some(output) = step.next().await {
@@ -711,6 +727,7 @@ where
             }
         }
         if errored { return; }
+        }
         yield state_chunk(&state, &id, created, object);
 
         // Step 6: Readme (programmatic)
