@@ -15,8 +15,6 @@ pub struct FunctionInventionRecursiveCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub agents: Option<Vec<agent::completions::request::Agent>>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub top_logprobs: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,

@@ -145,7 +145,6 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreatePar
             },
         )),
         agents: None,
-        top_logprobs: None,
         seed: Some(seed),
         stream: Some(true),
         max_step_retries: Some(1),
