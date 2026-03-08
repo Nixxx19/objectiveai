@@ -178,6 +178,17 @@ where
         impl Stream<Item = FunctionInventionChunk> + Send + 'static,
         super::Error,
     > {
+        // Validate params before starting.
+        let params = match &request.state {
+            objectiveai::functions::inventions::state::ParamsState::AlphaScalarBranch(s) => &s.params,
+            objectiveai::functions::inventions::state::ParamsState::AlphaScalarLeaf(s) => &s.params,
+            objectiveai::functions::inventions::state::ParamsState::AlphaVectorBranch(s) => &s.params,
+            objectiveai::functions::inventions::state::ParamsState::AlphaVectorLeaf(s) => &s.params,
+            objectiveai::functions::inventions::state::ParamsState::AlphaScalar(s) => &s.params,
+            objectiveai::functions::inventions::state::ParamsState::AlphaVector(s) => &s.params,
+        };
+        params.validate().map_err(super::Error::InvalidState)?;
+
         let created = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
             .unwrap()

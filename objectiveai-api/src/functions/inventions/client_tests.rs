@@ -144,13 +144,13 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreatePar
     })
 }
 
-fn default_params(name: &str, depth: u64) -> Params {
+fn params(name: &str, depth: u64, min_b: u64, max_b: u64, min_l: u64, max_l: u64) -> Params {
     Params {
         depth,
-        min_branch_width: 3,
-        max_branch_width: 5,
-        min_leaf_width: 3,
-        max_leaf_width: 5,
+        min_branch_width: min_b,
+        max_branch_width: max_b,
+        min_leaf_width: min_l,
+        max_leaf_width: max_l,
         name: name.to_string(),
         spec: "Test function spec for mock invention.".to_string(),
     }
@@ -234,130 +234,252 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 }
 
 // ---------------------------------------------------------------------------
-// Tests
+// Test macro
 // ---------------------------------------------------------------------------
 
-/// Scalar leaf invention, seed 42.
-#[tokio::test]
-async fn test_scalar_leaf_seed_42() {
-    let client = make_client();
-    let request = make_request(
-        ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
-            params: default_params("test-scalar-leaf", 0),
-            essay: None,
-            input_schema: None,
-            essay_tasks: None,
-            tasks: None,
-            description: None,
-            readme: None,
-        }),
-        42,
-    );
-    let result = normalize(run_invention(&client, request).await);
-    let json = serde_json::to_string_pretty(&result).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/scalar_leaf_seed_42.json"),
-        include_str!("../../../assets/functions/inventions/client_tests/scalar_leaf_seed_42.json"),
-    );
+macro_rules! invention_test {
+    (
+        $test_name:ident,
+        $variant:ident, $state_ty:ident,
+        $name:expr, $depth:expr,
+        $min_b:expr, $max_b:expr, $min_l:expr, $max_l:expr,
+        $seed:expr,
+        $snapshot:expr
+    ) => {
+        #[tokio::test]
+        async fn $test_name() {
+            let client = make_client();
+            let request = make_request(
+                ParamsState::$variant($state_ty {
+                    params: params($name, $depth, $min_b, $max_b, $min_l, $max_l),
+                    essay: None,
+                    input_schema: None,
+                    essay_tasks: None,
+                    tasks: None,
+                    description: None,
+                    readme: None,
+                }),
+                $seed,
+            );
+            let result = normalize(run_invention(&client, request).await);
+            let json = serde_json::to_string_pretty(&result).unwrap();
+            assert_snapshot(
+                &json,
+                concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $snapshot),
+                include_str!(concat!("../../../assets/functions/inventions/client_tests/", $snapshot)),
+            );
+        }
+    };
 }
 
-/// Scalar branch invention, seed 42.
+// ---------------------------------------------------------------------------
+// Scalar Leaf tests (depth=0)
+// ---------------------------------------------------------------------------
+
+// Default widths (3-5), baseline
+invention_test!(test_scalar_leaf_s42,
+    AlphaScalarLeaf, AlphaScalarLeafState,
+    "sl-default", 0, 3, 5, 3, 5, 42,
+    "scalar_leaf_s42.json");
+
+// Minimum width: exactly 1 task
+invention_test!(test_scalar_leaf_s7,
+    AlphaScalarLeaf, AlphaScalarLeafState,
+    "sl-min-1", 0, 1, 1, 1, 1, 7,
+    "scalar_leaf_s7.json");
+
+// Narrow range: 2-3
+invention_test!(test_scalar_leaf_s1337,
+    AlphaScalarLeaf, AlphaScalarLeafState,
+    "sl-narrow", 0, 2, 3, 2, 3, 1337,
+    "scalar_leaf_s1337.json");
+
+// Large width: 10 tasks
+invention_test!(test_scalar_leaf_s999,
+    AlphaScalarLeaf, AlphaScalarLeafState,
+    "sl-wide-10", 0, 10, 10, 10, 10, 999,
+    "scalar_leaf_s999.json");
+
+// Asymmetric: narrow branch, wide leaf
+invention_test!(test_scalar_leaf_s314,
+    AlphaScalarLeaf, AlphaScalarLeafState,
+    "sl-asym", 0, 1, 2, 7, 10, 314,
+    "scalar_leaf_s314.json");
+
+// Wide range
+invention_test!(test_scalar_leaf_s8675309,
+    AlphaScalarLeaf, AlphaScalarLeafState,
+    "sl-range", 0, 1, 10, 1, 8, 8675309,
+    "scalar_leaf_s8675309.json");
+
+// ---------------------------------------------------------------------------
+// Scalar Branch tests (depth>=1)
+// ---------------------------------------------------------------------------
+
+// Default widths, depth 1
+invention_test!(test_scalar_branch_s42,
+    AlphaScalarBranch, AlphaScalarBranchState,
+    "sb-default", 1, 3, 5, 3, 5, 42,
+    "scalar_branch_s42.json");
+
+// Minimum width, depth 1
+invention_test!(test_scalar_branch_s13,
+    AlphaScalarBranch, AlphaScalarBranchState,
+    "sb-min-1", 1, 1, 1, 1, 1, 13,
+    "scalar_branch_s13.json");
+
+// Narrow: exactly 2 tasks
+invention_test!(test_scalar_branch_s2718,
+    AlphaScalarBranch, AlphaScalarBranchState,
+    "sb-narrow", 1, 2, 2, 2, 2, 2718,
+    "scalar_branch_s2718.json");
+
+// Large width, depth 2
+invention_test!(test_scalar_branch_s77777,
+    AlphaScalarBranch, AlphaScalarBranchState,
+    "sb-wide-d2", 2, 10, 10, 10, 10, 77777,
+    "scalar_branch_s77777.json");
+
+// Asymmetric: wide branch, narrow leaf
+invention_test!(test_scalar_branch_s555,
+    AlphaScalarBranch, AlphaScalarBranchState,
+    "sb-asym", 1, 8, 10, 1, 2, 555,
+    "scalar_branch_s555.json");
+
+// Deep depth 3, narrow
+invention_test!(test_scalar_branch_s161803,
+    AlphaScalarBranch, AlphaScalarBranchState,
+    "sb-deep", 3, 2, 3, 2, 3, 161803,
+    "scalar_branch_s161803.json");
+
+// ---------------------------------------------------------------------------
+// Vector Leaf tests (depth=0)
+// ---------------------------------------------------------------------------
+
+// Default widths
+invention_test!(test_vector_leaf_s42,
+    AlphaVectorLeaf, AlphaVectorLeafState,
+    "vl-default", 0, 3, 5, 3, 5, 42,
+    "vector_leaf_s42.json");
+
+// Minimum width
+invention_test!(test_vector_leaf_s23,
+    AlphaVectorLeaf, AlphaVectorLeafState,
+    "vl-min-1", 0, 1, 1, 1, 1, 23,
+    "vector_leaf_s23.json");
+
+// Narrow: exactly 2
+invention_test!(test_vector_leaf_s404,
+    AlphaVectorLeaf, AlphaVectorLeafState,
+    "vl-narrow", 0, 2, 2, 2, 2, 404,
+    "vector_leaf_s404.json");
+
+// Large width
+invention_test!(test_vector_leaf_s31415,
+    AlphaVectorLeaf, AlphaVectorLeafState,
+    "vl-wide-10", 0, 10, 10, 10, 10, 31415,
+    "vector_leaf_s31415.json");
+
+// Asymmetric
+invention_test!(test_vector_leaf_s65536,
+    AlphaVectorLeaf, AlphaVectorLeafState,
+    "vl-asym", 0, 2, 3, 6, 10, 65536,
+    "vector_leaf_s65536.json");
+
+// Wide range
+invention_test!(test_vector_leaf_s271828,
+    AlphaVectorLeaf, AlphaVectorLeafState,
+    "vl-range", 0, 1, 10, 1, 10, 271828,
+    "vector_leaf_s271828.json");
+
+// ---------------------------------------------------------------------------
+// Vector Branch tests (depth>=1)
+// ---------------------------------------------------------------------------
+
+// Default widths, depth 1
+invention_test!(test_vector_branch_s42,
+    AlphaVectorBranch, AlphaVectorBranchState,
+    "vb-default", 1, 3, 5, 3, 5, 42,
+    "vector_branch_s42.json");
+
+// Minimum width
+invention_test!(test_vector_branch_s71,
+    AlphaVectorBranch, AlphaVectorBranchState,
+    "vb-min-1", 1, 1, 1, 1, 1, 71,
+    "vector_branch_s71.json");
+
+// Narrow: exactly 2
+invention_test!(test_vector_branch_s12345,
+    AlphaVectorBranch, AlphaVectorBranchState,
+    "vb-narrow", 1, 2, 2, 2, 2, 12345,
+    "vector_branch_s12345.json");
+
+// Large width, depth 2
+invention_test!(test_vector_branch_s90210,
+    AlphaVectorBranch, AlphaVectorBranchState,
+    "vb-wide-d2", 2, 10, 10, 10, 10, 90210,
+    "vector_branch_s90210.json");
+
+// Asymmetric: narrow branch, wide leaf
+invention_test!(test_vector_branch_s1984,
+    AlphaVectorBranch, AlphaVectorBranchState,
+    "vb-asym", 1, 1, 2, 8, 10, 1984,
+    "vector_branch_s1984.json");
+
+// Deep depth 3
+invention_test!(test_vector_branch_s2025,
+    AlphaVectorBranch, AlphaVectorBranchState,
+    "vb-deep", 3, 2, 4, 2, 4, 2025,
+    "vector_branch_s2025.json");
+
+// ---------------------------------------------------------------------------
+// Validation error tests
+// ---------------------------------------------------------------------------
+
 #[tokio::test]
-async fn test_scalar_branch_seed_42() {
+async fn test_zero_leaf_width_rejected() {
     let client = make_client();
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let request = make_request(
+        ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("bad-zero", 0, 3, 5, 0, 0),
+            essay: None, input_schema: None, essay_tasks: None,
+            tasks: None, description: None, readme: None,
+        }),
+        1,
+    );
+    let result = client.create_streaming(ctx, request).await;
+    assert!(result.is_err(), "zero leaf width should be rejected");
+}
+
+#[tokio::test]
+async fn test_zero_branch_width_rejected() {
+    let client = make_client();
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
     let request = make_request(
         ParamsState::AlphaScalarBranch(AlphaScalarBranchState {
-            params: default_params("test-scalar-branch", 1),
-            essay: None,
-            input_schema: None,
-            essay_tasks: None,
-            tasks: None,
-            description: None,
-            readme: None,
+            params: params("bad-zero-branch", 1, 0, 0, 3, 5),
+            essay: None, input_schema: None, essay_tasks: None,
+            tasks: None, description: None, readme: None,
         }),
-        42,
+        2,
     );
-    let result = normalize(run_invention(&client, request).await);
-    let json = serde_json::to_string_pretty(&result).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/scalar_branch_seed_42.json"),
-        include_str!("../../../assets/functions/inventions/client_tests/scalar_branch_seed_42.json"),
-    );
+    let result = client.create_streaming(ctx, request).await;
+    assert!(result.is_err(), "zero branch width should be rejected");
 }
 
-/// Vector leaf invention, seed 42.
 #[tokio::test]
-async fn test_vector_leaf_seed_42() {
+async fn test_min_greater_than_max_rejected() {
     let client = make_client();
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
     let request = make_request(
         ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
-            params: default_params("test-vector-leaf", 0),
-            essay: None,
-            input_schema: None,
-            essay_tasks: None,
-            tasks: None,
-            description: None,
-            readme: None,
+            params: params("bad-inverted", 0, 5, 3, 5, 3),
+            essay: None, input_schema: None, essay_tasks: None,
+            tasks: None, description: None, readme: None,
         }),
-        42,
+        3,
     );
-    let result = normalize(run_invention(&client, request).await);
-    let json = serde_json::to_string_pretty(&result).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/vector_leaf_seed_42.json"),
-        include_str!("../../../assets/functions/inventions/client_tests/vector_leaf_seed_42.json"),
-    );
-}
-
-/// Vector branch invention, seed 42.
-#[tokio::test]
-async fn test_vector_branch_seed_42() {
-    let client = make_client();
-    let request = make_request(
-        ParamsState::AlphaVectorBranch(AlphaVectorBranchState {
-            params: default_params("test-vector-branch", 1),
-            essay: None,
-            input_schema: None,
-            essay_tasks: None,
-            tasks: None,
-            description: None,
-            readme: None,
-        }),
-        42,
-    );
-    let result = normalize(run_invention(&client, request).await);
-    let json = serde_json::to_string_pretty(&result).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/vector_branch_seed_42.json"),
-        include_str!("../../../assets/functions/inventions/client_tests/vector_branch_seed_42.json"),
-    );
-}
-
-/// Scalar leaf invention, different seed (99).
-#[tokio::test]
-async fn test_scalar_leaf_seed_99() {
-    let client = make_client();
-    let request = make_request(
-        ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
-            params: default_params("test-scalar-leaf-alt", 0),
-            essay: None,
-            input_schema: None,
-            essay_tasks: None,
-            tasks: None,
-            description: None,
-            readme: None,
-        }),
-        99,
-    );
-    let result = normalize(run_invention(&client, request).await);
-    let json = serde_json::to_string_pretty(&result).unwrap();
-    assert_snapshot(
-        &json,
-        concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/scalar_leaf_seed_99.json"),
-        include_str!("../../../assets/functions/inventions/client_tests/scalar_leaf_seed_99.json"),
-    );
+    let result = client.create_streaming(ctx, request).await;
+    assert!(result.is_err(), "min > max should be rejected");
 }

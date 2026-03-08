@@ -30,9 +30,13 @@ pub async fn tasks_tool_call(
             let parsed = serde_json::from_str::<serde_json::Value>(input_schema_json)
                 .unwrap_or_else(|_| serde_json::json!({}));
 
-            // Decide scalar vs vector. Scalar allowed if under 50% so far.
-            let scalar_allowed = total_count == 0
-                || (scalar_count as f64 / (total_count + 1) as f64) < 0.5;
+            // Decide scalar vs vector. Scalar is only allowed if:
+            // - There's already at least one vector task (a branch with a single
+            //   scalar task is invalid per AW08).
+            // - Under 50% of tasks would be scalar after adding this one.
+            let has_vector = total_count > scalar_count;
+            let scalar_allowed = has_vector
+                && (scalar_count as f64 / (total_count + 1) as f64) < 0.5;
             let use_scalar = scalar_allowed && rng.random_range(0u32..3) == 0; // ~33% chance
 
             if use_scalar {
