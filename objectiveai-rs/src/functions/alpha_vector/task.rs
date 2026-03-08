@@ -204,7 +204,9 @@ impl PlaceholderScalarFunctionTaskExpression {
                     self.input_schema,
                 ),
             skip: self.skip,
-            map: None,
+            map: Some(functions::expression::Expression::Special(
+                functions::expression::Special::InputItemsOutputLength,
+            )),
             input:
                 super::expression::scalar_function_input_expression::transpile(
                     self.input,
