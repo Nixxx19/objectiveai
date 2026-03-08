@@ -4,3 +4,6 @@ pub mod usage_handler;
 
 pub use client::*;
 pub use error::*;
+
+#[cfg(test)]
+mod client_tests;

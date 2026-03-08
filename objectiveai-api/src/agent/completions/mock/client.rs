@@ -196,7 +196,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 .collect();
 
             // --- Tool call vs content ---
-            let mock_response = if invention {
+            let mock_response = if invention && tools_enabled {
                 resolve_invention_response(
                     &tool_names,
                     &tool_map,
