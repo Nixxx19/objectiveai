@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use rand::Rng;
-use super::super::client::{MockToolCall, generate_tool_arguments, random_string};
+use super::super::client::{MockToolCall, random_string};
 use crate::agent::completions::ResolvedTool;
 
 /// Generate a mock tool call for the tasks step of a vector branch function.
@@ -22,8 +22,8 @@ pub fn tasks_tool_call(
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = &tool_names[rng.random_range(0..tool_names.len())];
-    let arguments = match tool_name.as_str() {
+    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng);
+    let arguments = match tool_name {
         "AppendTask" => {
             let item_fields = extract_item_fields(input_schema_json);
             let has_context = has_context_field(input_schema_json);
@@ -54,10 +54,10 @@ pub fn tasks_tool_call(
         "DeleteTask" | "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()
         }
-        _ => generate_tool_arguments(tool_map, tool_name, rng),
+        _ => "{}".to_string(),
     };
     MockToolCall {
-        tool_name: tool_name.clone(),
+        tool_name: tool_name.to_string(),
         call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
         arguments,
         n_deltas: rng.random_range(1u32..=5) as usize,

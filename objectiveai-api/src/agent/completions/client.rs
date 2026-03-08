@@ -719,7 +719,9 @@ where
                                 .unwrap_or(serde_json::Value::Object(Default::default()));
                             let content = match (inv.call)(args).await {
                                 Ok(text) => text,
-                                Err(text) => format!("Error: {text}"),
+                                Err(text) => {
+                                    format!("Error: {text}")
+                                }
                             };
                             let tool_msg = ToolMessage {
                                 content: RichContent::Text(content),

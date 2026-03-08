@@ -8,6 +8,31 @@ mod route;
 
 pub use route::*;
 
+/// Pick an invention tool with weighted selection.
+///
+/// 50% chance: return the key write tool for this step.
+/// 50% chance: pick randomly from `tool_names`, re-rolling non-invention tools.
+pub(super) fn pick_invention_tool<'a>(
+    key_tool: &str,
+    tool_names: &'a [String],
+    tool_map: &std::collections::HashMap<String, crate::agent::completions::ResolvedTool>,
+    rng: &mut impl rand::Rng,
+) -> &'a str {
+    // 50% chance: return the key tool
+    if rng.random_range(0u32..2) == 0 {
+        if let Some(t) = tool_names.iter().find(|t| t.as_str() == key_tool) {
+            return t.as_str();
+        }
+    }
+    // 50% chance: pick randomly, re-rolling non-invention tools
+    loop {
+        let name = &tool_names[rng.random_range(0..tool_names.len())];
+        if matches!(tool_map.get(name.as_str()), Some(crate::agent::completions::ResolvedTool::InventionTool(_))) {
+            return name.as_str();
+        }
+    }
+}
+
 /// Generate a mock tool call for the description step (shared across all routes).
 ///
 /// Tools: `[ReadSpec, ReadEssay, ReadInputSchema, ReadEssayTasks, ReadTask,
@@ -17,10 +42,10 @@ pub fn description_tool_call(
     tool_map: &std::collections::HashMap<String, crate::agent::completions::ResolvedTool>,
     rng: &mut impl rand::Rng,
 ) -> super::client::MockToolCall {
-    use super::client::{MockToolCall, generate_tool_arguments, random_string};
+    use super::client::{MockToolCall, random_string};
 
-    let tool_name = &tool_names[rng.random_range(0..tool_names.len())];
-    let arguments = match tool_name.as_str() {
+    let tool_name = pick_invention_tool("WriteDescription", tool_names, tool_map, rng);
+    let arguments = match tool_name {
         "WriteDescription" => {
             let description = random_string(rng, 50, 350);
             serde_json::json!({ "description": description }).to_string()
@@ -30,10 +55,10 @@ pub fn description_tool_call(
         "ReadTask" => {
             serde_json::json!({ "index": rng.random_range(0u32..5) }).to_string()
         }
-        _ => generate_tool_arguments(tool_map, tool_name, rng),
+        _ => "{}".to_string(),
     };
     MockToolCall {
-        tool_name: tool_name.clone(),
+        tool_name: tool_name.to_string(),
         call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
         arguments,
         n_deltas: rng.random_range(1u32..=5) as usize,

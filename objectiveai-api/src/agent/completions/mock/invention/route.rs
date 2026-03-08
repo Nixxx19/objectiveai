@@ -23,7 +23,7 @@ pub enum InventionStep {
     EssayVector,
 
     // Step 2: Input Schema
-    // Schema tool names differ: ReadObjectInputSchemaJsonSchema (scalar)
+    // Schema tool names differ: ReadObjectInputSchemaSchema (scalar)
     // vs ReadAlphaVectorFunctionInputSchemaJsonSchema (vector).
     InputSchemaScalar,
     InputSchemaVector,
@@ -79,7 +79,7 @@ impl InventionStep {
         // Step 2: InputSchema — WriteInputSchema present
         if has("WriteInputSchema") {
             return Some(
-                if has("ReadObjectInputSchemaJsonSchema") {
+                if has("ReadObjectInputSchemaSchema") {
                     Self::InputSchemaScalar
                 } else {
                     Self::InputSchemaVector
@@ -96,14 +96,14 @@ impl InventionStep {
 
         // Step 4: Tasks — AppendTask present
         if has("AppendTask") {
-            return Some(if has("ReadMessagesJsonSchema") {
+            return Some(if has("ReadMessagesSchema") {
                 // Leaf
                 if tool_names.iter().any(|t| t.contains("AlphaScalar")) {
                     Self::TasksScalarLeaf
                 } else {
                     Self::TasksVectorLeaf
                 }
-            } else if has("ReadInputValueJsonSchema") {
+            } else if has("ReadInputValueSchema") {
                 // Branch
                 if tool_names.iter().any(|t| t.contains("AlphaScalarPlaceholder")) {
                     Self::TasksScalarBranch
