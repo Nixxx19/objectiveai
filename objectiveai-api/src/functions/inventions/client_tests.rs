@@ -237,37 +237,138 @@ fn assert_snapshot(json: &str, path: &str, expected: &str) {
 // Test macro
 // ---------------------------------------------------------------------------
 
-macro_rules! invention_test {
+/// Generates 10 snapshot tests (seeds 0–9), all under a module named
+/// `$test_name`. `$base` is the snapshot filename base (e.g. `"scalar_leaf_s42"`),
+/// producing files `scalar_leaf_s42_0.json` through `scalar_leaf_s42_9.json`.
+macro_rules! invention_test_10x {
     (
         $test_name:ident,
         $variant:ident, $state_ty:ident,
         $name:expr, $depth:expr,
         $min_b:expr, $max_b:expr, $min_l:expr, $max_l:expr,
-        $seed:expr,
-        $snapshot:expr
+        $base_seed:expr,
+        $base:expr
     ) => {
-        #[tokio::test]
-        async fn $test_name() {
-            let client = make_client();
-            let request = make_request(
-                ParamsState::$variant($state_ty {
-                    params: params($name, $depth, $min_b, $max_b, $min_l, $max_l),
-                    essay: None,
-                    input_schema: None,
-                    essay_tasks: None,
-                    tasks: None,
-                    description: None,
-                    readme: None,
-                }),
-                $seed,
-            );
-            let result = normalize(run_invention(&client, request).await);
-            let json = serde_json::to_string_pretty(&result).unwrap();
-            assert_snapshot(
-                &json,
-                concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $snapshot),
-                include_str!(concat!("../../../assets/functions/inventions/client_tests/", $snapshot)),
-            );
+        mod $test_name {
+            use super::*;
+
+            fn make_state(seed_offset: i64) -> (ParamsState, i64) {
+                (
+                    ParamsState::$variant($state_ty {
+                        params: params($name, $depth, $min_b, $max_b, $min_l, $max_l),
+                        essay: None,
+                        input_schema: None,
+                        essay_tasks: None,
+                        tasks: None,
+                        description: None,
+                        readme: None,
+                    }),
+                    ($base_seed as i64) + seed_offset,
+                )
+            }
+
+            fn run_snapshot(offset: i64, path: &str, expected: &str) {
+                let rt = tokio::runtime::Runtime::new().unwrap();
+                rt.block_on(async {
+                    let client = make_client();
+                    let (state, seed) = make_state(offset);
+                    let request = make_request(state, seed);
+                    let result = normalize(run_invention(&client, request).await);
+                    assert!(result.function.is_some(), "seed {seed}: function should be built");
+                    let json = serde_json::to_string_pretty(&result).unwrap();
+                    assert_snapshot(&json, path, expected);
+                });
+            }
+
+            #[test]
+            fn seed_0() {
+                run_snapshot(
+                    0,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_0.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_0.json")),
+                );
+            }
+
+            #[test]
+            fn seed_1() {
+                run_snapshot(
+                    1,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_1.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_1.json")),
+                );
+            }
+
+            #[test]
+            fn seed_2() {
+                run_snapshot(
+                    2,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_2.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_2.json")),
+                );
+            }
+
+            #[test]
+            fn seed_3() {
+                run_snapshot(
+                    3,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_3.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_3.json")),
+                );
+            }
+
+            #[test]
+            fn seed_4() {
+                run_snapshot(
+                    4,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_4.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_4.json")),
+                );
+            }
+
+            #[test]
+            fn seed_5() {
+                run_snapshot(
+                    5,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_5.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_5.json")),
+                );
+            }
+
+            #[test]
+            fn seed_6() {
+                run_snapshot(
+                    6,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_6.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_6.json")),
+                );
+            }
+
+            #[test]
+            fn seed_7() {
+                run_snapshot(
+                    7,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_7.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_7.json")),
+                );
+            }
+
+            #[test]
+            fn seed_8() {
+                run_snapshot(
+                    8,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_8.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_8.json")),
+                );
+            }
+
+            #[test]
+            fn seed_9() {
+                run_snapshot(
+                    9,
+                    concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/client_tests/", $base, "_9.json"),
+                    include_str!(concat!("../../../assets/functions/inventions/client_tests/", $base, "_9.json")),
+                );
+            }
         }
     };
 }
@@ -277,160 +378,160 @@ macro_rules! invention_test {
 // ---------------------------------------------------------------------------
 
 // Default widths (3-5), baseline
-invention_test!(test_scalar_leaf_s42,
+invention_test_10x!(test_scalar_leaf_s42,
     AlphaScalarLeaf, AlphaScalarLeafState,
     "sl-default", 0, 3, 5, 3, 5, 42,
-    "scalar_leaf_s42.json");
+    "scalar_leaf_s42");
 
 // Minimum width: exactly 1 task
-invention_test!(test_scalar_leaf_s7,
+invention_test_10x!(test_scalar_leaf_s7,
     AlphaScalarLeaf, AlphaScalarLeafState,
     "sl-min-1", 0, 1, 1, 1, 1, 7,
-    "scalar_leaf_s7.json");
+    "scalar_leaf_s7");
 
 // Narrow range: 2-3
-invention_test!(test_scalar_leaf_s1337,
+invention_test_10x!(test_scalar_leaf_s1337,
     AlphaScalarLeaf, AlphaScalarLeafState,
     "sl-narrow", 0, 2, 3, 2, 3, 1337,
-    "scalar_leaf_s1337.json");
+    "scalar_leaf_s1337");
 
 // Large width: 10 tasks
-invention_test!(test_scalar_leaf_s999,
+invention_test_10x!(test_scalar_leaf_s999,
     AlphaScalarLeaf, AlphaScalarLeafState,
     "sl-wide-10", 0, 10, 10, 10, 10, 999,
-    "scalar_leaf_s999.json");
+    "scalar_leaf_s999");
 
 // Asymmetric: narrow branch, wide leaf
-invention_test!(test_scalar_leaf_s314,
+invention_test_10x!(test_scalar_leaf_s314,
     AlphaScalarLeaf, AlphaScalarLeafState,
     "sl-asym", 0, 1, 2, 7, 10, 314,
-    "scalar_leaf_s314.json");
+    "scalar_leaf_s314");
 
 // Wide range
-invention_test!(test_scalar_leaf_s8675309,
+invention_test_10x!(test_scalar_leaf_s8675309,
     AlphaScalarLeaf, AlphaScalarLeafState,
     "sl-range", 0, 1, 10, 1, 8, 8675309,
-    "scalar_leaf_s8675309.json");
+    "scalar_leaf_s8675309");
 
 // ---------------------------------------------------------------------------
 // Scalar Branch tests (depth>=1)
 // ---------------------------------------------------------------------------
 
 // Default widths, depth 1
-invention_test!(test_scalar_branch_s42,
+invention_test_10x!(test_scalar_branch_s42,
     AlphaScalarBranch, AlphaScalarBranchState,
     "sb-default", 1, 3, 5, 3, 5, 42,
-    "scalar_branch_s42.json");
+    "scalar_branch_s42");
 
 // Minimum width, depth 1
-invention_test!(test_scalar_branch_s13,
+invention_test_10x!(test_scalar_branch_s13,
     AlphaScalarBranch, AlphaScalarBranchState,
     "sb-min-1", 1, 1, 1, 1, 1, 13,
-    "scalar_branch_s13.json");
+    "scalar_branch_s13");
 
 // Narrow: exactly 2 tasks
-invention_test!(test_scalar_branch_s2718,
+invention_test_10x!(test_scalar_branch_s2718,
     AlphaScalarBranch, AlphaScalarBranchState,
     "sb-narrow", 1, 2, 2, 2, 2, 2718,
-    "scalar_branch_s2718.json");
+    "scalar_branch_s2718");
 
 // Large width, depth 2
-invention_test!(test_scalar_branch_s77777,
+invention_test_10x!(test_scalar_branch_s77777,
     AlphaScalarBranch, AlphaScalarBranchState,
     "sb-wide-d2", 2, 10, 10, 10, 10, 77777,
-    "scalar_branch_s77777.json");
+    "scalar_branch_s77777");
 
 // Asymmetric: wide branch, narrow leaf
-invention_test!(test_scalar_branch_s555,
+invention_test_10x!(test_scalar_branch_s555,
     AlphaScalarBranch, AlphaScalarBranchState,
     "sb-asym", 1, 8, 10, 1, 2, 555,
-    "scalar_branch_s555.json");
+    "scalar_branch_s555");
 
 // Deep depth 3, narrow
-invention_test!(test_scalar_branch_s161803,
+invention_test_10x!(test_scalar_branch_s161803,
     AlphaScalarBranch, AlphaScalarBranchState,
     "sb-deep", 3, 2, 3, 2, 3, 161803,
-    "scalar_branch_s161803.json");
+    "scalar_branch_s161803");
 
 // ---------------------------------------------------------------------------
 // Vector Leaf tests (depth=0)
 // ---------------------------------------------------------------------------
 
 // Default widths
-invention_test!(test_vector_leaf_s42,
+invention_test_10x!(test_vector_leaf_s42,
     AlphaVectorLeaf, AlphaVectorLeafState,
     "vl-default", 0, 3, 5, 3, 5, 42,
-    "vector_leaf_s42.json");
+    "vector_leaf_s42");
 
 // Minimum width
-invention_test!(test_vector_leaf_s23,
+invention_test_10x!(test_vector_leaf_s23,
     AlphaVectorLeaf, AlphaVectorLeafState,
     "vl-min-1", 0, 1, 1, 1, 1, 23,
-    "vector_leaf_s23.json");
+    "vector_leaf_s23");
 
 // Narrow: exactly 2
-invention_test!(test_vector_leaf_s404,
+invention_test_10x!(test_vector_leaf_s404,
     AlphaVectorLeaf, AlphaVectorLeafState,
     "vl-narrow", 0, 2, 2, 2, 2, 404,
-    "vector_leaf_s404.json");
+    "vector_leaf_s404");
 
 // Large width
-invention_test!(test_vector_leaf_s31415,
+invention_test_10x!(test_vector_leaf_s31415,
     AlphaVectorLeaf, AlphaVectorLeafState,
     "vl-wide-10", 0, 10, 10, 10, 10, 31415,
-    "vector_leaf_s31415.json");
+    "vector_leaf_s31415");
 
 // Asymmetric
-invention_test!(test_vector_leaf_s65536,
+invention_test_10x!(test_vector_leaf_s65536,
     AlphaVectorLeaf, AlphaVectorLeafState,
     "vl-asym", 0, 2, 3, 6, 10, 65536,
-    "vector_leaf_s65536.json");
+    "vector_leaf_s65536");
 
 // Wide range
-invention_test!(test_vector_leaf_s271828,
+invention_test_10x!(test_vector_leaf_s271828,
     AlphaVectorLeaf, AlphaVectorLeafState,
     "vl-range", 0, 1, 10, 1, 10, 271828,
-    "vector_leaf_s271828.json");
+    "vector_leaf_s271828");
 
 // ---------------------------------------------------------------------------
 // Vector Branch tests (depth>=1)
 // ---------------------------------------------------------------------------
 
 // Default widths, depth 1
-invention_test!(test_vector_branch_s42,
+invention_test_10x!(test_vector_branch_s42,
     AlphaVectorBranch, AlphaVectorBranchState,
     "vb-default", 1, 3, 5, 3, 5, 42,
-    "vector_branch_s42.json");
+    "vector_branch_s42");
 
 // Minimum width
-invention_test!(test_vector_branch_s71,
+invention_test_10x!(test_vector_branch_s71,
     AlphaVectorBranch, AlphaVectorBranchState,
     "vb-min-1", 1, 1, 1, 1, 1, 71,
-    "vector_branch_s71.json");
+    "vector_branch_s71");
 
 // Narrow: exactly 2
-invention_test!(test_vector_branch_s12345,
+invention_test_10x!(test_vector_branch_s12345,
     AlphaVectorBranch, AlphaVectorBranchState,
     "vb-narrow", 1, 2, 2, 2, 2, 12345,
-    "vector_branch_s12345.json");
+    "vector_branch_s12345");
 
 // Large width, depth 2
-invention_test!(test_vector_branch_s90210,
+invention_test_10x!(test_vector_branch_s90210,
     AlphaVectorBranch, AlphaVectorBranchState,
     "vb-wide-d2", 2, 10, 10, 10, 10, 90210,
-    "vector_branch_s90210.json");
+    "vector_branch_s90210");
 
 // Asymmetric: narrow branch, wide leaf
-invention_test!(test_vector_branch_s1984,
+invention_test_10x!(test_vector_branch_s1984,
     AlphaVectorBranch, AlphaVectorBranchState,
     "vb-asym", 1, 1, 2, 8, 10, 1984,
-    "vector_branch_s1984.json");
+    "vector_branch_s1984");
 
 // Deep depth 3
-invention_test!(test_vector_branch_s2025,
+invention_test_10x!(test_vector_branch_s2025,
     AlphaVectorBranch, AlphaVectorBranchState,
     "vb-deep", 3, 2, 4, 2, 4, 2025,
-    "vector_branch_s2025.json");
+    "vector_branch_s2025");
 
 // ---------------------------------------------------------------------------
 // Validation error tests

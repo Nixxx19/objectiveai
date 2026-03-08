@@ -12,7 +12,7 @@ const PROPERTY_NAMES: &[&[&str]] = &[
     // Text content
     &["text", "content", "body", "message", "summary", "description", "title", "headline", "caption", "excerpt"],
     // Identifiers
-    &["name", "label", "id", "slug", "key", "code", "tag", "category", "type", "kind"],
+    &["name", "label", "id", "slug", "key", "code", "tag", "category", "kind"],
     // Queries / prompts
     &["query", "prompt", "question", "topic", "subject", "criteria", "instruction"],
     // Metadata
