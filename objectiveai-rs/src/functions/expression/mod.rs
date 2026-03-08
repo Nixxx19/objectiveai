@@ -46,3 +46,5 @@ mod expression_tests;
 mod special_tests;
 #[cfg(test)]
 mod starlark_tests;
+#[cfg(test)]
+mod input_tests;

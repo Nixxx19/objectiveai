@@ -21,6 +21,14 @@ pub struct VectorFunctionInputSchema {
 }
 
 impl VectorFunctionInputSchema {
+    /// Returns which media modalities are present in context and/or items.
+    pub fn modalities(&self) -> functions::expression::Modalities {
+        let ctx = self.context.as_ref()
+            .map(|c| c.modalities())
+            .unwrap_or_default();
+        ctx.merge(self.items.modalities())
+    }
+
     pub fn transpile(self) -> functions::expression::InputSchema {
         functions::expression::InputSchema::Object(
             functions::expression::ObjectInputSchema {

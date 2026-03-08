@@ -516,6 +516,21 @@ pub enum InputSchema {
 }
 
 impl InputSchema {
+    /// Returns which media modalities are present anywhere in this schema.
+    pub fn modalities(&self) -> Modalities {
+        match self {
+            InputSchema::Image(_) => Modalities { image: true, ..Modalities::default() },
+            InputSchema::Audio(_) => Modalities { audio: true, ..Modalities::default() },
+            InputSchema::Video(_) => Modalities { video: true, ..Modalities::default() },
+            InputSchema::File(_) => Modalities { file: true, ..Modalities::default() },
+            InputSchema::Object(s) => s.modalities(),
+            InputSchema::Array(s) => s.modalities(),
+            InputSchema::AnyOf(s) => s.modalities(),
+            InputSchema::String(_) | InputSchema::Integer(_)
+            | InputSchema::Number(_) | InputSchema::Boolean(_) => Modalities::default(),
+        }
+    }
+
     /// Validates that an input value conforms to this schema.
     pub fn validate_input(&self, input: &Input) -> bool {
         match self {
@@ -739,6 +754,27 @@ impl Serialize for InputSchema {
     }
 }
 
+/// Which media modalities are present in a schema.
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+pub struct Modalities {
+    pub image: bool,
+    pub audio: bool,
+    pub video: bool,
+    pub file: bool,
+}
+
+impl Modalities {
+    /// Merge two `Modalities` (union).
+    pub fn merge(self, other: Self) -> Self {
+        Self {
+            image: self.image || other.image,
+            audio: self.audio || other.audio,
+            video: self.video || other.video,
+            file: self.file || other.file,
+        }
+    }
+}
+
 /// Schema for a union of possible types - input must match at least one.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
@@ -748,6 +784,11 @@ pub struct AnyOfInputSchema {
 }
 
 impl AnyOfInputSchema {
+    /// Returns which media modalities are present in any variant.
+    pub fn modalities(&self) -> Modalities {
+        self.any_of.iter().fold(Modalities::default(), |acc, s| acc.merge(s.modalities()))
+    }
+
     /// Validates that an input matches at least one schema in the union.
     pub fn validate_input(&self, input: &Input) -> bool {
         self.any_of
@@ -771,6 +812,11 @@ pub struct ObjectInputSchema {
 }
 
 impl ObjectInputSchema {
+    /// Returns which media modalities are present in any property.
+    pub fn modalities(&self) -> Modalities {
+        self.properties.values().fold(Modalities::default(), |acc, s| acc.merge(s.modalities()))
+    }
+
     /// Validates that an input is an object matching this schema.
     pub fn validate_input(&self, input: &Input) -> bool {
         match input {
@@ -806,6 +852,11 @@ pub struct ArrayInputSchema {
 }
 
 impl ArrayInputSchema {
+    /// Returns which media modalities are present in the item schema.
+    pub fn modalities(&self) -> Modalities {
+        self.items.modalities()
+    }
+
     /// Validates that an input is an array matching this schema.
     pub fn validate_input(&self, input: &Input) -> bool {
         match input {
