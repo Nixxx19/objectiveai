@@ -169,6 +169,10 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           type: details.type as "scalar.function" | "vector.function",
           inputSchema: (details as { input_schema?: Record<string, unknown> }).input_schema || null,
         });
+
+        // Only show default profiles (Nano first as cheapest/fastest)
+        setAvailableProfiles(DEFAULT_PROFILES);
+        setSelectedProfileIndex(0);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : "Failed to load function");
       } finally {
