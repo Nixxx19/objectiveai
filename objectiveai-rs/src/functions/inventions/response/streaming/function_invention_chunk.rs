@@ -10,6 +10,8 @@ pub struct FunctionInventionChunk {
     pub state: Option<functions::inventions::State>,
     // yielded at the end
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub path: Option<functions::RemoteFunctionPath>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub function: Option<functions::FullRemoteFunction>,
     pub created: u64,
     pub object: super::Object,
@@ -25,6 +27,7 @@ impl FunctionInventionChunk {
         FunctionInventionChunk {
             completions,
             state,
+            path,
             function,
             usage,
             error,
@@ -34,6 +37,9 @@ impl FunctionInventionChunk {
         self.push_completions(completions);
         if let Some(state) = state {
             self.state = Some(state.clone());
+        }
+        if let Some(path) = path {
+            self.path = Some(path.clone());
         }
         if let Some(function) = function {
             self.function = Some(function.clone());
