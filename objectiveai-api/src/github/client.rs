@@ -428,6 +428,96 @@ impl Client {
         }
     }
 
+    /// Checks whether a GitHub repository exists.
+    pub async fn repository_exists(
+        &self,
+        token: &str,
+        owner: &str,
+        repository: &str,
+    ) -> Result<bool, super::Error> {
+        backoff::future::retry(self.backoff.clone(), || async {
+            let response = self
+                .http_client
+                .get(format!(
+                    "https://api.github.com/repos/{}/{}",
+                    owner, repository,
+                ))
+                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header("accept", "application/vnd.github+json")
+                .header("user-agent", "objectiveai")
+                .send()
+                .await
+                .map_err(|e| backoff::Error::transient(super::Error::RequestError(e)))?;
+            let code = response.status();
+            if code.is_success() {
+                Ok(true)
+            } else if code == reqwest::StatusCode::NOT_FOUND {
+                Ok(false)
+            } else {
+                match response.text().await {
+                    Ok(text) => Err(backoff::Error::transient(super::Error::BadStatus {
+                        code,
+                        body: serde_json::from_str::<serde_json::Value>(&text)
+                            .unwrap_or(serde_json::Value::String(text)),
+                    })),
+                    Err(_) => Err(backoff::Error::transient(super::Error::BadStatus {
+                        code,
+                        body: serde_json::Value::Null,
+                    })),
+                }
+            }
+        })
+        .await
+    }
+
+    /// Validates that a GitHub token is valid and has the required permissions
+    /// for repository operations (create, push, edit descriptions).
+    ///
+    /// Returns the scopes the token has. Errors if the token is invalid.
+    /// The caller should check for the `repo` scope.
+    pub async fn validate_token(
+        &self,
+        token: &str,
+    ) -> Result<Vec<String>, super::Error> {
+        backoff::future::retry(self.backoff.clone(), || async {
+            let response = self
+                .http_client
+                .get("https://api.github.com/user")
+                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header("accept", "application/vnd.github+json")
+                .header("user-agent", "objectiveai")
+                .send()
+                .await
+                .map_err(|e| backoff::Error::transient(super::Error::RequestError(e)))?;
+            let code = response.status();
+            if code.is_success() {
+                let scopes = response
+                    .headers()
+                    .get("x-oauth-scopes")
+                    .and_then(|v| v.to_str().ok())
+                    .unwrap_or("")
+                    .split(',')
+                    .map(|s| s.trim().to_string())
+                    .filter(|s| !s.is_empty())
+                    .collect();
+                Ok(scopes)
+            } else {
+                match response.text().await {
+                    Ok(text) => Err(backoff::Error::permanent(super::Error::BadStatus {
+                        code,
+                        body: serde_json::from_str::<serde_json::Value>(&text)
+                            .unwrap_or(serde_json::Value::String(text)),
+                    })),
+                    Err(_) => Err(backoff::Error::permanent(super::Error::BadStatus {
+                        code,
+                        body: serde_json::Value::Null,
+                    })),
+                }
+            }
+        })
+        .await
+    }
+
     fn request_headers(
         &self,
         mut http_request: reqwest::RequestBuilder,

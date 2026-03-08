@@ -128,13 +128,30 @@ fn make_client() -> Arc<TestClient> {
         first_chunk_timeout: Duration::from_millis(1),
         other_chunk_timeout: Duration::from_millis(1),
     });
-    Arc::new(super::Client::new(agent_client, Arc::new(StubInventionUsageHandler)))
+    let github_client = Arc::new(crate::github::Client::new(
+        reqwest::Client::new(),
+        None,
+        None,
+        None,
+        None,
+        backoff::ExponentialBackoff::default(),
+    ));
+    let filesystem_client = Arc::new(crate::filesystem::Client::new(
+        std::path::PathBuf::from("/tmp/objectiveai-test"),
+    ));
+    Arc::new(super::Client::new(
+        agent_client,
+        github_client,
+        filesystem_client,
+        Arc::new(StubInventionUsageHandler),
+    ))
 }
 
 fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreateParams> {
     Arc::new(FunctionInventionCreateParams {
         remote: None,
         name: None,
+        overwrite: None,
         github_token: None,
         state,
         provider: None,

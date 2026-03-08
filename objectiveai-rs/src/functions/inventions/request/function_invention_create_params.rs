@@ -9,6 +9,8 @@ pub struct FunctionInventionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub overwrite: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub github_token: Option<String>,
     pub state: functions::inventions::ParamsState,
     #[serde(skip_serializing_if = "Option::is_none")]

@@ -9,6 +9,21 @@ pub enum Error {
     /// The invention state is invalid.
     #[error("invalid state: {0}")]
     InvalidState(String),
+    /// The name already exists and overwrite is not enabled.
+    #[error("name already exists: {0}")]
+    NameAlreadyExists(String),
+    /// GitHub token is missing when remote is GitHub.
+    #[error("github token required")]
+    GithubTokenRequired,
+    /// GitHub token validation failed.
+    #[error("github token error: {0}")]
+    GithubToken(#[from] crate::github::Error),
+    /// GitHub token lacks required permissions.
+    #[error("github token missing permissions: {0}")]
+    GithubTokenMissingPermissions(String),
+    /// Filesystem error.
+    #[error("filesystem error: {0}")]
+    Filesystem(#[from] crate::filesystem::Error),
 }
 
 impl StatusError for Error {
@@ -16,6 +31,11 @@ impl StatusError for Error {
         match self {
             Error::AgentCompletions(e) => e.status(),
             Error::InvalidState(_) => 400,
+            Error::NameAlreadyExists(_) => 409,
+            Error::GithubTokenRequired => 400,
+            Error::GithubToken(e) => e.status(),
+            Error::GithubTokenMissingPermissions(_) => 403,
+            Error::Filesystem(e) => e.status(),
         }
     }
 
@@ -28,6 +48,26 @@ impl StatusError for Error {
             Error::InvalidState(msg) => serde_json::json!({
                 "kind": "invalid_state",
                 "error": msg,
+            }),
+            Error::NameAlreadyExists(name) => serde_json::json!({
+                "kind": "name_already_exists",
+                "error": format!("Repository '{}' already exists. Set overwrite to true to allow this.", name),
+            }),
+            Error::GithubTokenRequired => serde_json::json!({
+                "kind": "github_token_required",
+                "error": "A github_token is required when remote is GitHub.",
+            }),
+            Error::GithubToken(e) => serde_json::json!({
+                "kind": "github_token",
+                "error": e.message(),
+            }),
+            Error::GithubTokenMissingPermissions(msg) => serde_json::json!({
+                "kind": "github_token_missing_permissions",
+                "error": msg,
+            }),
+            Error::Filesystem(e) => serde_json::json!({
+                "kind": "filesystem",
+                "error": e.message(),
             }),
         };
         Some(serde_json::json!({

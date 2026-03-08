@@ -36,6 +36,8 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG> 
             CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
         >,
     >,
+    pub github_client: Arc<crate::github::Client>,
+    pub filesystem_client: Arc<crate::filesystem::Client>,
     pub usage_handler: Arc<IUSG>,
 }
 
@@ -48,10 +50,14 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
                 CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
             >,
         >,
+        github_client: Arc<crate::github::Client>,
+        filesystem_client: Arc<crate::filesystem::Client>,
         usage_handler: Arc<IUSG>,
     ) -> Self {
         Self {
             agent_client,
+            github_client,
+            filesystem_client,
             usage_handler,
         }
     }
@@ -189,6 +195,9 @@ where
         };
         params.validate().map_err(super::Error::InvalidState)?;
 
+        // Pre-flight: validate remote, token, and name.
+        self.check_preflight(&request).await?;
+
         let created = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
             .unwrap()
@@ -214,6 +223,86 @@ where
             };
 
         Ok(stream)
+    }
+
+    /// Pre-flight checks before starting the invention flow.
+    ///
+    /// - If remote is GitHub: validates that `github_token` is present, valid,
+    ///   and has permissions to create repos, push, and edit descriptions.
+    /// - If `name` is set and `overwrite` is not true: checks that the name
+    ///   doesn't already exist on the target remote.
+    async fn check_preflight(
+        &self,
+        request: &objectiveai::functions::inventions::request::FunctionInventionCreateParams,
+    ) -> Result<(), super::Error> {
+        let remote = match &request.remote {
+            Some(r) => r,
+            None => return Ok(()),
+        };
+
+        // GitHub remote: validate token exists and has required permissions.
+        if matches!(remote, objectiveai::functions::Remote::Github) {
+            let token = request
+                .github_token
+                .as_deref()
+                .ok_or(super::Error::GithubTokenRequired)?;
+
+            let scopes = self.github_client.validate_token(token).await?;
+
+            // The `repo` scope grants create, push, and description edit.
+            // Fine-grained tokens use different headers, so also accept
+            // an empty scopes list (fine-grained tokens don't return
+            // x-oauth-scopes). Classic tokens must have `repo`.
+            if !scopes.is_empty() && !scopes.iter().any(|s| s == "repo" || s == "public_repo") {
+                return Err(super::Error::GithubTokenMissingPermissions(
+                    format!(
+                        "Token must have 'repo' or 'public_repo' scope. Found: [{}]",
+                        scopes.join(", "),
+                    ),
+                ));
+            }
+        }
+
+        // Check name existence (skip if overwrite is true).
+        if request.overwrite == Some(true) {
+            return Ok(());
+        }
+
+        if let Some(name) = &request.name {
+            let exists = match remote {
+                objectiveai::functions::Remote::Github => {
+                    let token = request.github_token.as_deref().unwrap_or("");
+                    // For GitHub, owner is the authenticated user. We use
+                    // the name as the repository name. The caller is expected
+                    // to provide owner/name or just name. For now we check
+                    // if the name contains '/' to split owner/repo.
+                    let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
+                        (o, r)
+                    } else {
+                        // Cannot check without owner; skip.
+                        return Ok(());
+                    };
+                    self.github_client
+                        .repository_exists(token, owner, repo)
+                        .await?
+                }
+                objectiveai::functions::Remote::Filesystem => {
+                    let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
+                        (o, r)
+                    } else {
+                        return Ok(());
+                    };
+                    self.filesystem_client.repository_exists(owner, repo)
+                }
+                objectiveai::functions::Remote::Mock => false,
+            };
+
+            if exists {
+                return Err(super::Error::NameAlreadyExists(name.clone()));
+            }
+        }
+
+        Ok(())
     }
 }
 

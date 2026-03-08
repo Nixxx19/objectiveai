@@ -19,6 +19,12 @@ impl Client {
         self.base_dir.join(owner).join(repository)
     }
 
+    /// Checks whether a repository exists on the filesystem as an initialized git repository.
+    pub fn repository_exists(&self, owner: &str, repository: &str) -> bool {
+        let repo_path = self.repo_path(owner, repository);
+        git2::Repository::open(&repo_path).is_ok()
+    }
+
     /// Resolves the HEAD commit SHA for a repository.
     pub fn resolve_head(&self, owner: &str, repository: &str) -> Result<String, super::Error> {
         let repo_path = self.repo_path(owner, repository);
