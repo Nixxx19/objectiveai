@@ -74,10 +74,13 @@ pub async fn description_tool_call(
 // ---------------------------------------------------------------------------
 // Static multimodal content parts for Starlark expressions.
 //
-// Every vector completion task includes all 4 media types as static content
-// parts. This guarantees modality coverage (AS20/AV18) regardless of what
-// the input schema declares, without needing to walk or classify the schema.
+// Leaf tasks include static content parts matching the modalities declared
+// in the relevant portion of the input schema. This guarantees modality
+// coverage (AS20/AV18) while only emitting the parts that the validator
+// actually expects.
 // ---------------------------------------------------------------------------
+
+use objectiveai::functions::expression::Modalities;
 
 const STATIC_IMAGE: &str =
     r#"{"type": "image_url", "image_url": {"url": "https://example.com/test.png"}}"#;
@@ -88,46 +91,64 @@ const STATIC_VIDEO: &str =
 const STATIC_FILE: &str =
     r#"{"type": "file", "file": {"file_data": "dGVzdA=="}}"#;
 
+/// Collect static multimodal part strings matching the given modalities.
+fn static_media_parts(m: &Modalities) -> Vec<&'static str> {
+    let mut parts = Vec::new();
+    if m.image { parts.push(STATIC_IMAGE); }
+    if m.audio { parts.push(STATIC_AUDIO); }
+    if m.video { parts.push(STATIC_VIDEO); }
+    if m.file { parts.push(STATIC_FILE); }
+    parts
+}
+
 /// Build a Starlark messages expression for a vector completion task.
 ///
 /// Stringifies the entire input (or sub-path) as a text content part and
-/// includes all 4 static multimodal content parts for modality coverage.
-fn build_messages_expr(input_expr: &str) -> String {
+/// includes static multimodal content parts matching the given modalities.
+fn build_messages_expr(input_expr: &str, modalities: &Modalities) -> String {
     let text_part = format!(
         r#"{{"type": "text", "text": str({input_expr})}}"#,
     );
-    let content = [
-        text_part.as_str(),
-        STATIC_IMAGE,
-        STATIC_AUDIO,
-        STATIC_VIDEO,
-        STATIC_FILE,
-    ].join(", ");
+    let media = static_media_parts(modalities);
+    let all_parts: Vec<&str> = std::iter::once(text_part.as_str()).chain(media).collect();
+    let content = all_parts.join(", ");
     format!(r#"[{{"role": "user", "content": [{content}]}}]"#)
 }
 
 /// Build a Starlark responses expression for a vector leaf function.
 ///
-/// Stringifies each item as a text content part and includes all 4 static
-/// multimodal content parts for modality coverage.
-fn build_responses_expr() -> String {
+/// Stringifies each item as a text content part and includes static
+/// multimodal content parts matching the given modalities.
+fn build_responses_expr(modalities: &Modalities) -> String {
     let text_part = r#"{"type": "text", "text": str(item)}"#;
-    let content = [
-        text_part,
-        STATIC_IMAGE,
-        STATIC_AUDIO,
-        STATIC_VIDEO,
-        STATIC_FILE,
-    ].join(", ");
+    let media = static_media_parts(modalities);
+    let all_parts: Vec<&str> = std::iter::once(text_part).chain(media).collect();
+    let content = all_parts.join(", ");
     format!("[[{content}] for item in input['items']]")
 }
 
-/// Check whether a VectorFunctionInputSchema JSON string has a context object.
-fn has_vector_context(input_schema_json: &str) -> bool {
-    serde_json::from_str::<serde_json::Value>(input_schema_json)
-        .ok()
-        .and_then(|v| v.get("context").cloned())
-        .is_some()
+/// Parse a VectorFunctionInputSchema from JSON and return (context_modalities, items_modalities, has_context).
+fn parse_vector_schema(input_schema_json: &str) -> (Modalities, Modalities, bool) {
+    use objectiveai::functions::alpha_vector::expression::VectorFunctionInputSchema;
+    match serde_json::from_str::<VectorFunctionInputSchema>(input_schema_json) {
+        Ok(schema) => {
+            let ctx_mod = schema.context.as_ref()
+                .map(|c| c.modalities())
+                .unwrap_or_default();
+            let items_mod = schema.items.modalities();
+            let has_ctx = schema.context.is_some();
+            (ctx_mod, items_mod, has_ctx)
+        }
+        Err(_) => (Modalities::default(), Modalities::default(), false),
+    }
+}
+
+/// Parse a ScalarFunctionInputSchema (ObjectInputSchema) from JSON and return its modalities.
+fn parse_scalar_schema(input_schema_json: &str) -> Modalities {
+    use objectiveai::functions::expression::ObjectInputSchema;
+    serde_json::from_str::<ObjectInputSchema>(input_schema_json)
+        .map(|s| s.modalities())
+        .unwrap_or_default()
 }
 
 /// Extract required field names with their full JSON schemas from a serialized

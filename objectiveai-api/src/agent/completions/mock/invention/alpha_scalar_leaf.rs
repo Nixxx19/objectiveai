@@ -21,8 +21,8 @@ pub async fn tasks_tool_call(
     let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
     let arguments = match tool_name {
         "AppendTask" => {
-            let _ = input_schema_json; // schema not needed; messages use str(input) + static media
-            let messages_expr = super::build_messages_expr("input");
+            let modalities = super::parse_scalar_schema(input_schema_json);
+            let messages_expr = super::build_messages_expr("input", &modalities);
             let n_responses = rng.random_range(2u32..=5) as usize;
             let responses: Vec<serde_json::Value> = (0..n_responses)
                 .map(|_| {

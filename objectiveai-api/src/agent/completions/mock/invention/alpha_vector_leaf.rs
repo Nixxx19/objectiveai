@@ -22,15 +22,18 @@ pub async fn tasks_tool_call(
     let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
     let arguments = match tool_name {
         "AppendTask" => {
-            // Messages: use context if available, otherwise str(input)
-            let messages_expr = if super::has_vector_context(input_schema_json) {
-                super::build_messages_expr("input['context']")
+            let (ctx_modalities, items_modalities, has_context) =
+                super::parse_vector_schema(input_schema_json);
+
+            // Messages: use context modalities if context exists, otherwise static
+            let messages_expr = if has_context {
+                super::build_messages_expr("input['context']", &ctx_modalities)
             } else {
-                super::build_messages_expr("input")
+                super::build_messages_expr("input", &objectiveai::functions::expression::Modalities::default())
             };
 
-            // Responses: str(item) + static multimodal parts
-            let responses_expr = super::build_responses_expr();
+            // Responses: use items modalities
+            let responses_expr = super::build_responses_expr(&items_modalities);
 
             serde_json::json!({
                 "type": "vector.completion",
