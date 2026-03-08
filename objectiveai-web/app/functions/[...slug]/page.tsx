@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createPublicClient } from "../../../lib/client";
 import { deriveDisplayName, DEV_EXECUTION_OPTIONS } from "../../../lib/objectiveai";
 import { PINNED_COLOR_ANIMATION_MS } from "../../../lib/constants";
+import { DEFAULT_PROFILES } from "../../../lib/profiles";
 import { loadReasoningModels } from "../../../lib/reasoning-models";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import { useObjectiveAI } from "../../../hooks/useObjectiveAI";
@@ -17,6 +18,8 @@ import { simplifySplitItems, toDisplayItem, getDisplayMode } from "../../../lib/
 import { compileFunctionInputSplit, type FunctionConfig } from "../../../lib/wasm-validation";
 import { Functions, EnsembleLlm } from "objectiveai";
 import { ObjectiveAIFetchError } from "objectiveai";
+import { FunctionTree } from "@objectiveai/function-tree";
+import "@objectiveai/function-tree/styles";
 interface FunctionDetails {
   owner: string;
   repository: string;
@@ -48,7 +51,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   const slugKey = `${owner}/${repository}`;
 
   const [functionDetails, setFunctionDetails] = useState<FunctionDetails | null>(null);
-  const [availableProfiles, setAvailableProfiles] = useState<{ owner: string; repository: string; commit: string }[]>([]);
+  const [availableProfiles, setAvailableProfiles] = useState<{ owner: string; repository: string; commit: string | null }[]>([]);
   const [selectedProfileIndex, setSelectedProfileIndex] = useState(0);
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -103,6 +106,7 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   const [runError, setRunError] = useState<string | null>(null);
   const [modelNames, setModelNames] = useState<Record<string, string>>({});
   const [showAllModels, setShowAllModels] = useState(false);
+  const [showTree, setShowTree] = useState(true);
   const [expandedVotes, setExpandedVotes] = useState<Set<number>>(new Set());
 
   // Demo mode: when enabled, uses RNG votes (free, simulated). When disabled, uses real LLM inference.
@@ -1331,6 +1335,50 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
             )}
           </div>
         </div>
+
+        {/* Execution Tree */}
+        {(results || isRunning) && !runError && (
+          <div style={{ marginTop: isMobile ? "16px" : "32px" }}>
+            <button
+              onClick={() => setShowTree((v) => !v)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: "8px 0",
+                cursor: "pointer",
+                fontSize: "13px",
+                color: "var(--text-muted)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span style={{
+                transform: showTree ? "rotate(90deg)" : "rotate(0deg)",
+                transition: "transform 0.15s ease",
+                display: "inline-block",
+                fontSize: "10px",
+              }}>
+                ▶
+              </span>
+              Execution Tree
+            </button>
+            {showTree && (
+              <FunctionTree
+                data={results ? {
+                  output: results.output,
+                  tasks: results.tasks as any,
+                  function: functionDetails ? `${functionDetails.owner}/${functionDetails.repository}` : undefined,
+                  reasoning: results.reasoning,
+                } : null}
+                modelNames={modelNames}
+                height={isMobile ? 300 : 450}
+                config={{ theme: "auto" }}
+              />
+            )}
+          </div>
+        )}
+
       </div>
     </div>
   );
