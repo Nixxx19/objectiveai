@@ -261,18 +261,28 @@ export class TreeRenderer {
       const isSelected = node.id === selectedId;
       const isHovered = node.id === hoveredId;
 
-      // Node background
-      this.drawRoundedRect(
-        x, y, node.width, node.height,
-        params.cornerRadius,
-        theme.nodeBg,
-        isSelected
-          ? theme.nodeSelectedBorder
-          : isHovered
-            ? theme.accent
-            : theme.nodeBorder,
-        isSelected || isHovered ? 2 : 1
-      );
+      // Node background (dashed border for structural/pending nodes with no execution data)
+      const isStructural = node.state === "pending" &&
+        ((node.data.kind === "vector-completion" && node.data.voteCount === 0 && node.data.scores === null) ||
+         (node.data.kind === "function" && node.data.output === null && node.data.profileId === null));
+      const borderColor = isSelected
+        ? theme.nodeSelectedBorder
+        : isHovered
+          ? theme.accent
+          : theme.nodeBorder;
+      const borderWidth = isSelected || isHovered ? 2 : 1;
+
+      if (isStructural && !isSelected && !isHovered) {
+        this.drawRoundedRectDashed(
+          x, y, node.width, node.height,
+          params.cornerRadius, theme.nodeBg, borderColor, borderWidth, [4, 3]
+        );
+      } else {
+        this.drawRoundedRect(
+          x, y, node.width, node.height,
+          params.cornerRadius, theme.nodeBg, borderColor, borderWidth
+        );
+      }
 
       // Kind-specific rendering
       switch (node.data.kind) {
@@ -317,7 +327,7 @@ export class TreeRenderer {
       ctx.fillText(label, x + padding + 4, y + 22, node.width - padding * 2);
     }
 
-    // Output score
+    // Output score or structural info
     if (data.output !== null && params.showScoreBars) {
       const outputStr = typeof data.output === "number"
         ? `${(data.output * 100).toFixed(1)}%`
@@ -328,13 +338,18 @@ export class TreeRenderer {
         ? scoreColor(data.output)
         : theme.textSecondary;
       ctx.fillText(outputStr, x + padding + 4, y + 42, node.width - padding * 2);
+    } else if (data.ownerRepo && params.showLabels) {
+      ctx.font = theme.fontSmall;
+      ctx.fillStyle = theme.textSecondary;
+      ctx.fillText(data.ownerRepo, x + padding + 4, y + 42, node.width - padding * 2);
     }
 
-    // Task count
+    // Task count + function type
     if (params.showLabels) {
       ctx.font = theme.fontSmall;
       ctx.fillStyle = theme.textSecondary;
-      ctx.fillText(`${data.taskCount} tasks`, x + padding + 4, y + 60, node.width - padding * 2);
+      const typeLabel = data.functionType ? `${data.functionType} · ` : "";
+      ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 60, node.width - padding * 2);
     }
   }
 
@@ -374,12 +389,16 @@ export class TreeRenderer {
       this.drawRoundedRectFill(x + padding, barY, barWidth * maxScore, barHeight, 3);
     }
 
-    // Vote count / status
+    // Vote count / status / structural info
     if (params.showLabels) {
       ctx.font = theme.fontSmall;
       if (data.voteCount > 0) {
         ctx.fillStyle = theme.textSecondary;
         ctx.fillText(`${data.voteCount} LLMs`, x + padding, y + 56, node.width - padding * 2);
+      } else if (data.responseCount != null && data.responseCount > 0) {
+        // Structural mode: show response count
+        ctx.fillStyle = theme.textSecondary;
+        ctx.fillText(`${data.responseCount} responses`, x + padding, y + 56, node.width - padding * 2);
       } else if (node.state === "pending") {
         ctx.fillStyle = theme.nodeBorder;
         ctx.fillText("Pending", x + padding, y + 56, node.width - padding * 2);
@@ -436,6 +455,26 @@ export class TreeRenderer {
     ctx.strokeStyle = stroke;
     ctx.lineWidth = lineWidth;
     ctx.stroke();
+  }
+
+  private drawRoundedRectDashed(
+    x: number, y: number, w: number, h: number,
+    r: number,
+    fill: string,
+    stroke: string,
+    lineWidth: number,
+    dash: number[]
+  ): void {
+    const ctx = this.ctx;
+    ctx.beginPath();
+    ctx.roundRect(x, y, w, h, r);
+    ctx.fillStyle = fill;
+    ctx.fill();
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = lineWidth;
+    ctx.setLineDash(dash);
+    ctx.stroke();
+    ctx.setLineDash([]);
   }
 
   private drawRoundedRectFill(

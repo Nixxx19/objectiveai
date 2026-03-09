@@ -20,6 +20,10 @@ export interface FunctionNodeData {
   swissRound: number | null;
   /** Swiss system pool index (null if not a Swiss execution). */
   swissPoolIndex: number | null;
+  /** Structural mode: "owner/repo" for nested function tasks. */
+  ownerRepo?: string | null;
+  /** Structural mode: function type ("scalar" or "vector"). */
+  functionType?: "scalar" | "vector" | null;
 }
 
 /** Data payload for a vector completion task node. */
@@ -35,6 +39,8 @@ export interface VectorCompletionNodeData {
   /** Raw completion data for DetailPanel display. */
   completions: InputCompletion[] | null;
   error: string | null;
+  /** Structural mode: number of response options (null if expression-based). */
+  responseCount?: number | null;
 }
 
 export type TreeNodeData =
@@ -62,10 +68,14 @@ export interface TreeNode {
   data: TreeNodeData;
 }
 
-/** Result of building a tree from execution data. */
+/** Tree rendering mode. */
+export type TreeMode = "structural" | "execution";
+
+/** Result of building a tree from execution or definition data. */
 export interface TreeData {
   nodes: Map<string, TreeNode>;
   rootId: string;
+  mode: TreeMode;
 }
 
 // -- Input Data Types (duck-typed, no SDK import) ---------------------------
@@ -136,6 +146,39 @@ export interface InputFunctionExecution {
   } | null;
 }
 
+// -- Structural Input Types (duck-typed function definition) ----------------
+
+/** A single task from a function definition (before execution). */
+export interface InputTaskDefinition {
+  type:
+    | "vector.completion"
+    | "scalar.function"
+    | "vector.function"
+    | "placeholder.scalar.function"
+    | "placeholder.vector.function";
+  /** For vector.completion: the response options array. */
+  responses?: unknown[];
+  /** For vector.completion: the prompt messages. */
+  messages?: unknown[];
+  /** For function tasks: repository owner. */
+  owner?: string;
+  /** For function tasks: repository name. */
+  repository?: string;
+  /** For function tasks: commit SHA. */
+  commit?: string;
+  /** Skip expression (any truthy value means task can be skipped). */
+  skip?: unknown;
+  /** Index into input_maps for mapped execution. */
+  map?: number | null;
+}
+
+/** A function definition (from function.json). */
+export interface InputFunctionDefinition {
+  type: "scalar.function" | "vector.function";
+  description?: string;
+  tasks: InputTaskDefinition[];
+}
+
 // -- Configuration ----------------------------------------------------------
 
 export interface FunctionTreeConfig {
@@ -183,6 +226,10 @@ export const NODE_SIZES: Record<TreeNodeKind, { width: number; height: number }>
 export interface FunctionTreeProps {
   /** The function execution data (streaming or complete). Null before execution. */
   data: InputFunctionExecution | null;
+  /** Function definition for structural mode (renders task hierarchy before execution). */
+  definition?: InputFunctionDefinition | null;
+  /** Resolved sub-function definitions for recursive structural tree. Key: "owner/repo". */
+  resolvedSubFunctions?: Map<string, InputFunctionDefinition>;
   /** Resolved model names: { [22-char-id]: "openai/gpt-4o" }. */
   modelNames?: Record<string, string>;
   /** Response labels per task: { [taskPath]: ["Option A", "Option B", ...] }. */

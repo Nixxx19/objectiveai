@@ -48,6 +48,12 @@ function FunctionDetails({ data }: { data: FunctionNodeData }): React.ReactEleme
       {data.functionId && (
         <DetailRow label="Function" value={data.functionId} />
       )}
+      {data.ownerRepo && (
+        <DetailRow label="Source" value={data.ownerRepo} />
+      )}
+      {data.functionType && (
+        <DetailRow label="Type" value={data.functionType} />
+      )}
       {data.profileId && (
         <DetailRow label="Profile" value={data.profileId} />
       )}
@@ -86,6 +92,9 @@ function VectorCompletionDetails({
   return (
     <div className="ft-detail-body">
       <DetailRow label="Task Index" value={data.taskPath.join(" > ")} />
+      {data.responseCount != null && (
+        <DetailRow label="Responses" value={String(data.responseCount)} />
+      )}
       <DetailRow label="LLMs" value={String(data.voteCount)} />
       {data.scores && data.scores.length > 0 && (
         <div className="ft-detail-scores">

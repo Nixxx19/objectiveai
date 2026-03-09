@@ -11,6 +11,8 @@ import { DetailPanel } from "./DetailPanel";
  */
 export function FunctionTree({
   data,
+  definition,
+  resolvedSubFunctions,
   modelNames,
   responseLabels,
   config,
@@ -39,6 +41,8 @@ export function FunctionTree({
     deselect,
   } = useEngine({
     data,
+    definition,
+    resolvedSubFunctions,
     modelNames,
     responseLabels,
     config,
@@ -100,7 +104,7 @@ export function FunctionTree({
         />
       )}
 
-      {!data && (
+      {!data && !definition && (
         <div className="ft-empty">
           <span className="ft-empty-text">
             Execute a function to see the tree

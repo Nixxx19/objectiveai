@@ -10,6 +10,7 @@ export { FunctionTreeEngine } from "./core/engine";
 
 // Data transformation
 export { buildTree } from "./core/tree-data";
+export { buildStructuralTree } from "./core/structural-tree-data";
 
 // Layout
 export { layoutTree, treeBounds } from "./core/layout";
@@ -24,11 +25,14 @@ export type {
   TreeNodeState,
   TreeNodeData,
   TreeData,
+  TreeMode,
   FunctionNodeData,
   VectorCompletionNodeData,
   FunctionTreeConfig,
   FunctionTreeProps,
   InputFunctionExecution,
+  InputFunctionDefinition,
+  InputTaskDefinition,
   InputTask,
   InputVectorCompletionTask,
   InputFunctionExecutionTask,

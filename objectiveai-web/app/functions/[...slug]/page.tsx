@@ -20,7 +20,9 @@ import { Functions, EnsembleLlm } from "objectiveai";
 import { ObjectiveAIFetchError } from "objectiveai";
 import { SkeletonFunctionDetails } from "../../../components/ui";
 import { FunctionTree } from "@objectiveai/function-tree";
+import type { InputFunctionDefinition } from "@objectiveai/function-tree";
 import "@objectiveai/function-tree/styles";
+import { useResolvedSubFunctions } from "../../../hooks/useResolvedSubFunctions";
 interface FunctionDetails {
   owner: string;
   repository: string;
@@ -113,8 +115,9 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   const [runError, setRunError] = useState<string | null>(null);
   const [modelNames, setModelNames] = useState<Record<string, string>>({});
   const [showAllModels, setShowAllModels] = useState(false);
-  const [showTree, setShowTree] = useState(true);
   const [expandedVotes, setExpandedVotes] = useState<Set<number>>(new Set());
+  const [rawDefinition, setRawDefinition] = useState<InputFunctionDefinition | null>(null);
+  const [showDetailedResults, setShowDetailedResults] = useState(false);
 
   // Demo mode: when enabled, uses RNG votes (free, simulated). When disabled, uses real LLM inference.
   const [demoMode, setDemoMode] = useState(true);
@@ -151,6 +154,9 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           type: details.type as "scalar.function" | "vector.function",
           inputSchema: (details as { input_schema?: Record<string, unknown> }).input_schema || null,
         });
+
+        // Store raw definition for structural tree
+        setRawDefinition(details as unknown as InputFunctionDefinition);
 
         // Try to get available profiles (separately, so function loads even if no profiles exist)
         let functionProfiles: Array<{ owner: string; repository: string; commit: string; label: string; description: string }> = [];
@@ -224,6 +230,9 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
       setReasoningModel(config.default_model);
     });
   }, []);
+
+  // Resolve sub-function definitions for structural tree
+  const resolvedSubFunctions = useResolvedSubFunctions(rawDefinition);
 
   // Toggle save state
   const toggleSave = () => {
@@ -742,26 +751,51 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   return (
     <div className="page">
       <div className="container">
-        {/* Breadcrumb Row with Pin */}
+        {/* Compact Header */}
         <div style={{
           display: "flex",
           justifyContent: "space-between",
-          alignItems: "baseline",
-          marginBottom: "20px",
-          fontSize: "14px",
+          alignItems: "center",
+          marginBottom: "12px",
+          gap: "16px",
+          flexWrap: "wrap",
         }}>
-          <nav style={{
-            display: "flex",
-            gap: "8px",
-            color: "var(--text-muted)",
-            flexWrap: "wrap",
-          }}>
-            <Link href="/functions" style={{ color: "var(--accent)", textDecoration: "none" }}>
-              Functions
-            </Link>
-            <span>/</span>
-            <span>{functionDetails.name}</span>
-          </nav>
+          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", minWidth: 0 }}>
+            <nav style={{
+              display: "flex",
+              gap: "6px",
+              color: "var(--text-muted)",
+              fontSize: "13px",
+              flexShrink: 0,
+            }}>
+              <Link href="/functions" style={{ color: "var(--accent)", textDecoration: "none" }}>
+                Functions
+              </Link>
+              <span>/</span>
+            </nav>
+            <h1 style={{
+              fontSize: isMobile ? "18px" : "22px",
+              fontWeight: 700,
+              margin: 0,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}>
+              {functionDetails.name}
+            </h1>
+            <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+              <span className="tag" style={{ display: "inline-block", fontSize: "11px", padding: "2px 8px" }}>{functionDetails.category}</span>
+              <span style={{
+                fontSize: "11px",
+                padding: "2px 8px",
+                background: "var(--border)",
+                borderRadius: "10px",
+                color: "var(--text-muted)",
+              }}>
+                {functionDetails.owner}/{functionDetails.repository}
+              </span>
+            </div>
+          </div>
           <button
             onClick={toggleSave}
             style={{
@@ -769,300 +803,258 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
               border: "none",
               padding: 0,
               cursor: "pointer",
-              fontSize: "inherit",
+              fontSize: "13px",
               color: showPinnedColor ? "var(--accent)" : "var(--text-muted)",
               opacity: 0.7,
               transition: showPinnedColor ? "color 0.15s ease-in" : "color 0.5s ease-out",
+              flexShrink: 0,
             }}
           >
-            {isSaved ? "Pinned Function" : "Pin Function"}
+            {isSaved ? "Pinned" : "Pin"}
           </button>
         </div>
 
-        {/* Header */}
-        <div style={{ marginBottom: isMobile ? "20px" : "28px" }}>
-          <h1 className="heading2" style={{ marginBottom: "4px" }}>
-            {functionDetails.name}
-          </h1>
-          <p style={{
-            fontSize: isMobile ? "15px" : "17px",
-            color: "var(--text-muted)",
-            maxWidth: "700px",
-            lineHeight: 1.6,
-            marginBottom: "8px",
-          }}>
-            {functionDetails.description}
-          </p>
-          <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
-            <span className="tag" style={{ display: "inline-block" }}>{functionDetails.category}</span>
-            <span style={{
-              fontSize: "12px",
-              padding: "4px 12px",
-              background: "var(--border)",
-              borderRadius: "12px",
-              color: "var(--text-muted)",
-            }}>
-              {functionDetails.owner}/{functionDetails.repository}
-            </span>
-          </div>
-        </div>
+        {/* Description - subtle subtitle */}
+        <p style={{
+          fontSize: "14px",
+          color: "var(--text-muted)",
+          marginBottom: isMobile ? "12px" : "16px",
+          lineHeight: 1.5,
+          maxWidth: "700px",
+        }}>
+          {functionDetails.description}
+        </p>
 
-        {/* Main Layout */}
+        {/* Main Layout: Tree (70%) + Input Sidebar (30%) */}
         <div style={{
           display: isMobile ? "flex" : "grid",
           flexDirection: "column",
-          gridTemplateColumns: "1fr 1fr",
-          gap: isMobile ? "16px" : "32px",
+          gridTemplateColumns: "7fr 3fr",
+          gap: isMobile ? "16px" : "24px",
           alignItems: isMobile ? "stretch" : "start",
         }}>
-          {/* Left - Input */}
-          <div className="card" style={{ padding: isMobile ? "16px" : undefined }}>
-            <h3 style={{
-              fontSize: isMobile ? "11px" : "12px",
-              fontWeight: 600,
-              marginBottom: isMobile ? "16px" : "24px",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              color: "var(--text-muted)",
-            }}>
-              Input
-            </h3>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "24px" }}>
-              {renderInputFields()}
-            </div>
-
-            <div style={{ marginTop: isMobile ? "16px" : "24px" }}>
-              <label style={{
-                display: "block",
-                fontSize: "14px",
-                fontWeight: 600,
-                marginBottom: "8px",
-                color: "var(--text)",
-              }}>
-                Profile
-                <span style={{
-                  fontWeight: 400,
-                  color: "var(--text-muted)",
-                  marginLeft: "8px",
-                }}>
-                  Learned weights for this function
-                </span>
-              </label>
-              <select
-                className="select"
-                value={selectedProfileIndex}
-                onChange={(e) => setSelectedProfileIndex(parseInt(e.target.value, 10))}
-                style={{
-                  width: "100%",
-                  padding: isMobile ? "10px 12px" : "12px 16px",
-                  fontSize: isMobile ? "14px" : "15px",
-                  background: "var(--page-bg)",
-                  border: "1px solid var(--border)",
-                  borderRadius: "8px",
-                  color: "var(--text)",
-                  cursor: "pointer",
-                }}
-              >
-                {availableProfiles.map((profile, idx) => (
-                  <option key={`${profile.owner}/${profile.repository}`} value={idx}>
-                    {profile.label} — {profile.description}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Reasoning Options */}
-            <div style={{
-              marginTop: isMobile ? "16px" : "24px",
-              padding: isMobile ? "12px" : "16px",
-              background: "var(--page-bg)",
-              borderRadius: isMobile ? "10px" : "12px",
-              border: "1px solid var(--border)",
-            }}>
-              <label style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
-              }}>
-                <input
-                  type="checkbox"
-                  checked={reasoningEnabled}
-                  onChange={(e) => setReasoningEnabled(e.target.checked)}
-                  style={{
-                    width: "18px",
-                    height: "18px",
-                    accentColor: "var(--accent)",
-                    cursor: "pointer",
-                  }}
-                />
-                <span style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--text)",
-                }}>
-                  Enable Reasoning
-                </span>
-              </label>
-
-              {reasoningEnabled && (
-                <div style={{ marginTop: "12px" }}>
-                  <select
-                    className="select"
-                    value={reasoningModel}
-                    onChange={(e) => setReasoningModel(e.target.value)}
-                    style={{
-                      width: "100%",
-                      padding: isMobile ? "10px 12px" : "12px 16px",
-                      fontSize: isMobile ? "14px" : "15px",
-                    }}
-                  >
-                    {reasoningModels.map((option) => (
-                      <option key={option.value} value={option.value}>
-                        {option.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <p style={{
-                fontSize: "12px",
-                color: "var(--text-muted)",
-                marginTop: "10px",
-                lineHeight: 1.4,
-              }}>
-                {reasoningEnabled
-                  ? "AI will explain the result. Cost: ~$0.0001-0.001 per execution."
-                  : "Generate an AI explanation of the result."}
-              </p>
-            </div>
-
-            {/* Demo Mode Toggle */}
-            <div style={{
-              marginTop: isMobile ? "16px" : "20px",
-              padding: "12px 16px",
-              background: "var(--bg-secondary)",
-              borderRadius: "8px",
-              border: "1px solid var(--border)",
-            }}>
-              <label style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                cursor: "pointer",
-              }}>
-                <input
-                  type="checkbox"
-                  checked={demoMode}
-                  onChange={(e) => setDemoMode(e.target.checked)}
-                  style={{
-                    width: "18px",
-                    height: "18px",
-                    accentColor: "var(--accent)",
-                    cursor: "pointer",
-                  }}
-                />
-                <span style={{
-                  fontSize: "14px",
-                  fontWeight: 600,
-                  color: "var(--text)",
-                }}>
-                  Demo Mode
-                </span>
-              </label>
-              <p style={{
-                fontSize: "12px",
-                color: "var(--text-muted)",
-                marginTop: "8px",
-                lineHeight: 1.4,
-              }}>
-                {demoMode
-                  ? "Simulated results (free, instant). Scores are generated via RNG."
-                  : "Real LLM inference. Costs credits per execution."}
-              </p>
-            </div>
-
-            <button
-              className="pillBtn"
-              onClick={handleRun}
-              disabled={isRunning}
-              style={{
-                width: "100%",
-                marginTop: isMobile ? "20px" : "32px",
-                padding: isMobile ? "12px 16px" : undefined,
-                opacity: isRunning ? 0.7 : 1,
-              }}
-            >
-              {isRunning ? "Running..." : "Execute"}
-            </button>
+          {/* Left — Function Tree (always visible) */}
+          <div style={{ minHeight: isMobile ? 300 : 400 }}>
+            <FunctionTree
+              data={results ? {
+                output: results.output,
+                tasks: results.tasks as any,
+                function: functionDetails ? `${functionDetails.owner}/${functionDetails.repository}` : undefined,
+                reasoning: results.reasoning,
+              } : null}
+              definition={rawDefinition}
+              resolvedSubFunctions={resolvedSubFunctions}
+              modelNames={modelNames}
+              height={isMobile ? 300 : "min(calc(100vh - 250px), 600px)"}
+              config={{ theme: "auto" }}
+            />
           </div>
 
-          {/* Right - Results */}
-          <div className="card" style={{ padding: isMobile ? "16px" : undefined }}>
-            <h3 style={{
-              fontSize: isMobile ? "11px" : "12px",
-              fontWeight: 600,
-              marginBottom: isMobile ? "16px" : "24px",
-              textTransform: "uppercase",
-              letterSpacing: "0.05em",
-              color: "var(--text-muted)",
-            }}>
-              Output
-            </h3>
-
-            {!results && !isRunning && !runError && (
-              <div style={{
-                textAlign: "center",
-                padding: isMobile ? "40px 16px" : "60px 20px",
+          {/* Right — Input Panel + Output Summary */}
+          <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "20px" }}>
+            {/* Input Section */}
+            <div className="card" style={{ padding: isMobile ? "12px" : "16px" }}>
+              <h3 style={{
+                fontSize: "11px",
+                fontWeight: 600,
+                marginBottom: "12px",
+                textTransform: "uppercase",
+                letterSpacing: "0.05em",
                 color: "var(--text-muted)",
               }}>
-                <p style={{ marginBottom: "8px", fontSize: "24px" }}>—</p>
-                <p style={{ fontSize: "14px" }}>Run the function to see results</p>
+                Input
+              </h3>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                {renderInputFields()}
               </div>
-            )}
 
-            {isRunning && (
+              <div style={{ marginTop: "12px" }}>
+                <label style={{
+                  display: "block",
+                  fontSize: "13px",
+                  fontWeight: 600,
+                  marginBottom: "6px",
+                  color: "var(--text)",
+                }}>
+                  Profile
+                </label>
+                <select
+                  className="select"
+                  value={selectedProfileIndex}
+                  onChange={(e) => setSelectedProfileIndex(parseInt(e.target.value, 10))}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    fontSize: "13px",
+                    background: "var(--page-bg)",
+                    border: "1px solid var(--border)",
+                    borderRadius: "8px",
+                    color: "var(--text)",
+                    cursor: "pointer",
+                  }}
+                >
+                  {availableProfiles.map((profile, idx) => (
+                    <option key={`${profile.owner}/${profile.repository}`} value={idx}>
+                      {profile.label} — {profile.description}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Compact options row */}
               <div style={{
-                textAlign: "center",
-                padding: isMobile ? "40px 16px" : "60px 20px",
-                color: "var(--text-muted)",
+                marginTop: "12px",
+                display: "flex",
+                gap: "12px",
+                flexWrap: "wrap",
               }}>
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  color: "var(--text-muted)",
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={demoMode}
+                    onChange={(e) => setDemoMode(e.target.checked)}
+                    style={{ width: "14px", height: "14px", accentColor: "var(--accent)" }}
+                  />
+                  Demo
+                </label>
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  cursor: "pointer",
+                  fontSize: "12px",
+                  color: "var(--text-muted)",
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={reasoningEnabled}
+                    onChange={(e) => setReasoningEnabled(e.target.checked)}
+                    style={{ width: "14px", height: "14px", accentColor: "var(--accent)" }}
+                  />
+                  Reasoning
+                </label>
+              </div>
+
+              {reasoningEnabled && (
+                <select
+                  className="select"
+                  value={reasoningModel}
+                  onChange={(e) => setReasoningModel(e.target.value)}
+                  style={{
+                    width: "100%",
+                    marginTop: "8px",
+                    padding: "8px 12px",
+                    fontSize: "13px",
+                  }}
+                >
+                  {reasoningModels.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              )}
+
+              <button
+                className="pillBtn"
+                onClick={handleRun}
+                disabled={isRunning}
+                style={{
+                  width: "100%",
+                  marginTop: "16px",
+                  padding: "10px 16px",
+                  opacity: isRunning ? 0.7 : 1,
+                }}
+              >
+                {isRunning ? "Running..." : "Execute"}
+              </button>
+            </div>
+
+            {/* Output Summary (appears after execution) */}
+            {isRunning && (
+              <div className="card" style={{ padding: "16px", textAlign: "center" }}>
                 <div style={{
-                  width: "40px",
-                  height: "40px",
+                  width: "32px",
+                  height: "32px",
                   border: "3px solid var(--border)",
                   borderTopColor: "var(--accent)",
                   borderRadius: "50%",
-                  margin: "0 auto 16px",
+                  margin: "0 auto 12px",
                   animation: "spin 1s linear infinite",
                 }} />
-                <p style={{ fontSize: "14px" }}>Processing...</p>
+                <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Processing...</p>
               </div>
             )}
 
             {runError && !isRunning && !results && (
-              <div style={{
-                textAlign: "center",
-                padding: isMobile ? "40px 16px" : "60px 20px",
-              }}>
-                <p style={{ color: "var(--color-error)", marginBottom: "8px" }}>
+              <div className="card" style={{ padding: "16px" }}>
+                <p style={{ color: "var(--color-error)", fontSize: "13px", marginBottom: "4px" }}>
                   {runError.includes("401") ? "Not authenticated" : "Execution failed"}
                 </p>
-                <p style={{ fontSize: "14px", color: "var(--text-muted)" }}>
+                <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
                   {runError.includes("401")
-                    ? "API key missing or invalid. Contact admin to set up access."
+                    ? "API key missing or invalid."
                     : runError}
                 </p>
               </div>
             )}
 
             {results && !isRunning && (
-              <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "24px" }}>
+              <div className="card" style={{ padding: isMobile ? "12px" : "16px" }}>
+                <h3 style={{
+                  fontSize: "11px",
+                  fontWeight: 600,
+                  marginBottom: "12px",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  color: "var(--text-muted)",
+                }}>
+                  Output
+                </h3>
                 {renderResults()}
+              </div>
+            )}
+          </div>
+        </div>
 
-                {/* Model Breakdown - minimal style matching mockup */}
+        {/* Detailed Results (collapsible, below main layout) */}
+        {results && !isRunning && (
+          <div style={{ marginTop: isMobile ? "16px" : "24px" }}>
+            <button
+              onClick={() => setShowDetailedResults((v) => !v)}
+              style={{
+                background: "none",
+                border: "none",
+                padding: "8px 0",
+                cursor: "pointer",
+                fontSize: "13px",
+                color: "var(--text-muted)",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px",
+              }}
+            >
+              <span style={{
+                transform: showDetailedResults ? "rotate(90deg)" : "rotate(0deg)",
+                transition: "transform 0.15s ease",
+                display: "inline-block",
+                fontSize: "10px",
+              }}>
+                ▶
+              </span>
+              Detailed Results
+            </button>
+            {showDetailedResults && (
+              <div className="card" style={{ padding: isMobile ? "12px" : "16px", marginTop: "8px" }}>
+                {/* Model Breakdown */}
                 {results.tasks && Array.isArray(results.tasks) && results.tasks.length > 0 && results.tasks[0]?.votes && results.tasks[0].votes.length > 0 && (
                   <div>
                     {(() => {
@@ -1320,49 +1312,6 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
                 )}
 
               </div>
-            )}
-          </div>
-        </div>
-
-        {/* Execution Tree */}
-        {(results || isRunning) && !runError && (
-          <div style={{ marginTop: isMobile ? "16px" : "32px" }}>
-            <button
-              onClick={() => setShowTree((v) => !v)}
-              style={{
-                background: "none",
-                border: "none",
-                padding: "8px 0",
-                cursor: "pointer",
-                fontSize: "13px",
-                color: "var(--text-muted)",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <span style={{
-                transform: showTree ? "rotate(90deg)" : "rotate(0deg)",
-                transition: "transform 0.15s ease",
-                display: "inline-block",
-                fontSize: "10px",
-              }}>
-                ▶
-              </span>
-              Execution Tree
-            </button>
-            {showTree && (
-              <FunctionTree
-                data={results ? {
-                  output: results.output,
-                  tasks: results.tasks as any,
-                  function: functionDetails ? `${functionDetails.owner}/${functionDetails.repository}` : undefined,
-                  reasoning: results.reasoning,
-                } : null}
-                modelNames={modelNames}
-                height={isMobile ? 300 : 450}
-                config={{ theme: "auto" }}
-              />
             )}
           </div>
         )}

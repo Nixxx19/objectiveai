@@ -3,9 +3,11 @@ import type {
   TreeData,
   FunctionTreeConfig,
   InputFunctionExecution,
+  InputFunctionDefinition,
 } from "../types";
 import { DEFAULT_CONFIG } from "../types";
 import { buildTree } from "./tree-data";
+import { buildStructuralTree } from "./structural-tree-data";
 import { layoutTree, treeBounds } from "./layout";
 import { Viewport } from "./viewport";
 import { TreeRenderer, resolveTheme, type RenderTheme } from "./renderer";
@@ -101,6 +103,33 @@ export class FunctionTreeEngine {
     }
 
     // Debounce layout during rapid streaming (max 3/sec)
+    this.treeData = newTree;
+    this.scheduleLayout();
+  }
+
+  /** Set a function definition for structural mode (shows task hierarchy before execution). */
+  setDefinition(
+    definition: InputFunctionDefinition | null,
+    label?: string,
+    resolvedSubFunctions?: Map<string, InputFunctionDefinition>,
+  ): void {
+    if (this.destroyed) return;
+
+    const newTree = buildStructuralTree(definition, label, resolvedSubFunctions);
+
+    if (!newTree) {
+      // Only clear if we don't already have execution data
+      if (this.treeData?.mode !== "execution") {
+        this.treeData = null;
+        this.prevNodes = null;
+        this.requestRender();
+      }
+      return;
+    }
+
+    // Don't overwrite execution data with structural data
+    if (this.treeData?.mode === "execution") return;
+
     this.treeData = newTree;
     this.scheduleLayout();
   }

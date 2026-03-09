@@ -8,6 +8,7 @@ import type {
   InputFunctionExecutionTask,
 } from "../types";
 import { NODE_SIZES as SIZES } from "../types";
+import { nodeId } from "./node-id";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -24,10 +25,6 @@ function isFunctionExecutionTask(
   task: InputTask
 ): task is InputFunctionExecutionTask {
   return "tasks" in task && Array.isArray((task as InputFunctionExecutionTask).tasks);
-}
-
-function nodeId(prefix: string, path: number[]): string {
-  return path.length > 0 ? `${prefix}-${path.join("-")}` : prefix;
 }
 
 function taskState(
@@ -108,7 +105,7 @@ export function buildTree(
     }
   }
 
-  return { nodes, rootId };
+  return { nodes, rootId, mode: "execution" as const };
 }
 
 function processTask(

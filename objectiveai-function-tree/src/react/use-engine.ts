@@ -1,9 +1,17 @@
 import { useRef, useEffect, useCallback } from "react";
 import { FunctionTreeEngine } from "../core/engine";
-import type { FunctionTreeConfig, InputFunctionExecution, TreeNode } from "../types";
+import type {
+  FunctionTreeConfig,
+  InputFunctionExecution,
+  InputFunctionDefinition,
+  TreeNode,
+} from "../types";
 
 interface UseEngineOptions {
   data: InputFunctionExecution | null;
+  definition?: InputFunctionDefinition | null;
+  definitionLabel?: string;
+  resolvedSubFunctions?: Map<string, InputFunctionDefinition>;
   modelNames?: Record<string, string>;
   responseLabels?: Record<string, string[]>;
   config?: Partial<FunctionTreeConfig>;
@@ -69,6 +77,17 @@ export function useEngine(options: UseEngineOptions): UseEngineResult {
     observer.observe(container);
     return () => observer.disconnect();
   }, []);
+
+  // Sync definition to engine (structural mode)
+  useEffect(() => {
+    const engine = engineRef.current;
+    if (!engine) return;
+    engine.setDefinition(
+      options.definition ?? null,
+      options.definitionLabel,
+      options.resolvedSubFunctions,
+    );
+  }, [options.definition, options.definitionLabel, options.resolvedSubFunctions]);
 
   // Sync data to engine
   useEffect(() => {
