@@ -315,18 +315,27 @@ where
         // Stream the single-level invention, wrapping each chunk.
         let mut final_state: Option<objectiveai::functions::inventions::State> = None;
         let mut final_path: Option<objectiveai::functions::RemoteFunctionPath> = None;
+        let mut saved_function: Option<objectiveai::functions::FullRemoteFunction> = None;
         let mut had_error = false;
 
         futures::pin_mut!(stream);
-        while let Some(chunk) = stream.next().await {
+        while let Some(mut chunk) = stream.next().await {
             if chunk.state.is_some() {
                 final_state = chunk.state.clone();
             }
             if chunk.path.is_some() {
                 final_path = chunk.path.clone();
             }
+            if chunk.function.is_some() {
+                saved_function = chunk.function.clone();
+            }
             if chunk.error.is_some() {
                 had_error = true;
+            }
+            // For branch states, strip the function from the chunk so we
+            // only yield it once — after placeholder replacement.
+            if final_state.as_ref().is_some_and(|s| !s.placeholder_children().is_empty()) {
+                chunk.function = None;
             }
             yield RecursiveChunk {
                 id: id.clone(),
@@ -406,15 +415,64 @@ where
         }
 
         // All children are done. Replace placeholders on the root state
-        // and re-publish the updated function.
+        // and re-publish the updated function. If anything fails, fall back
+        // to the original (pre-replacement) function so exactly 1 function
+        // is yielded per invention.
         if child_paths.is_empty() || final_path.is_none() {
+            // No child paths or no original path — yield the saved function.
+            yield RecursiveChunk {
+                id: id.clone(),
+                inventions: vec![RecursiveInventionChunk {
+                    index: choice_indexer.get(native_index),
+                    inner: FunctionInventionChunk {
+                        id: id.clone(),
+                        completions: vec![],
+                        state: Some(state),
+                        path: final_path,
+                        function: saved_function,
+                        created,
+                        object: object.into(),
+                        usage: None,
+                        error: None,
+                    },
+                }],
+                inventions_errors: None,
+                created,
+                object,
+                usage: None,
+            };
             return;
         }
 
         state.replace_placeholders(&child_paths);
+        state.write_readme();
         let function = match state.build_function() {
             Some(f) => f,
-            None => return,
+            None => {
+                // Build failed — yield the saved (pre-replacement) function.
+                yield RecursiveChunk {
+                    id: id.clone(),
+                    inventions: vec![RecursiveInventionChunk {
+                        index: choice_indexer.get(native_index),
+                        inner: FunctionInventionChunk {
+                            id: id.clone(),
+                            completions: vec![],
+                            state: Some(state),
+                            path: final_path,
+                            function: saved_function,
+                            created,
+                            object: object.into(),
+                            usage: None,
+                            error: None,
+                        },
+                    }],
+                    inventions_errors: None,
+                    created,
+                    object,
+                    usage: None,
+                };
+                return;
+            }
         };
 
         let name = state.name();
@@ -444,8 +502,24 @@ where
             objectiveai::functions::Remote::Mock => (None, None),
         };
 
-        // Yield a final chunk with the updated state, function, and path.
-        let inventions_errors = if publish_error.is_some() { Some(true) } else { None };
+        // Yield the post-replacement function. On publish failure, fall back
+        // to the saved function and original path.
+        let (final_function, final_path, inventions_errors, error) = if let Some(publish_error) = publish_error {
+            (
+                saved_function,
+                final_path,
+                Some(true),
+                Some(objectiveai::error::ResponseError {
+                    code: 500,
+                    message: serde_json::json!({
+                        "kind": "publish",
+                        "error": publish_error,
+                    }),
+                }),
+            )
+        } else {
+            (Some(function), updated_path, None, None)
+        };
         yield RecursiveChunk {
             id: id.clone(),
             inventions: vec![RecursiveInventionChunk {
@@ -454,18 +528,12 @@ where
                     id: id.clone(),
                     completions: vec![],
                     state: Some(state),
-                    path: updated_path,
-                    function: Some(function),
+                    path: final_path,
+                    function: final_function,
                     created,
                     object: object.into(),
                     usage: None,
-                    error: publish_error.map(|msg| objectiveai::error::ResponseError {
-                        code: 500,
-                        message: serde_json::json!({
-                            "kind": "publish",
-                            "error": msg,
-                        }),
-                    }),
+                    error,
                 },
             }],
             inventions_errors,
