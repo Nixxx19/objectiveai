@@ -935,7 +935,7 @@ fn publish_filesystem(
         .collect();
 
     let commit = filesystem_client
-        .publish(owner, repo, &file_refs, "Publish function")
+        .publish(owner, repo, &file_refs, &format!("publish {}", name))
         .map_err(|e| e.to_string())?;
 
     Ok(objectiveai::functions::RemoteFunctionPath {
@@ -990,6 +990,7 @@ async fn publish_github(
     let base_dir = filesystem_client.base_dir.clone();
     let commit_author_name = filesystem_client.commit_author_name.clone();
     let commit_author_email = filesystem_client.commit_author_email.clone();
+    let commit_message = format!("Publish {}", name);
     let files_owned: Vec<(String, String)> = files.iter()
         .map(|(n, c)| (n.to_string(), c.clone()))
         .collect();
@@ -998,6 +999,7 @@ async fn publish_github(
         publish_github_git(
             &base_dir, &token_owned, &owner_clone, &repo_clone,
             exists, &files_owned, &commit_author_name, &commit_author_email,
+            &commit_message,
         )
     })
     .await
@@ -1030,6 +1032,7 @@ fn publish_github_git(
     files: &[(String, String)],
     commit_author_name: &str,
     commit_author_email: &str,
+    commit_message: &str,
 ) -> Result<String, String> {
     let repo_path = base_dir.join(owner).join(repo);
     std::fs::create_dir_all(&repo_path).map_err(|e| e.to_string())?;
@@ -1113,7 +1116,7 @@ fn publish_github_git(
     let parent = git_repo.head().ok().and_then(|h| h.peel_to_commit().ok());
     let parents: Vec<&git2::Commit> = parent.iter().collect();
     let commit_oid = git_repo.commit(
-        Some("HEAD"), &sig, &sig, "Publish function", &tree, &parents,
+        Some("HEAD"), &sig, &sig, commit_message, &tree, &parents,
     ).map_err(|e| e.to_string())?;
 
     // Push using credentials callback (token stays in memory only).
