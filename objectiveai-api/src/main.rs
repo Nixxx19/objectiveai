@@ -240,7 +240,11 @@ async fn main() {
         .join(".objectiveai")
         .join("functions");
 
-    let filesystem_client = Arc::new(filesystem::Client::new(filesystem_base_dir));
+    let filesystem_client = Arc::new(filesystem::Client::new(
+        filesystem_base_dir,
+        "ObjectiveAI".to_string(),
+        "noreply@objective-ai.io".to_string(),
+    ));
 
     // Function Fetcher (routes to GitHub or Filesystem based on Remote)
     let function_fetcher =

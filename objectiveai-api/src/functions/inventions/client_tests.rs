@@ -138,6 +138,8 @@ fn make_client() -> Arc<TestClient> {
     ));
     let filesystem_client = Arc::new(crate::filesystem::Client::new(
         std::path::PathBuf::from("/tmp/objectiveai-test"),
+        "ObjectiveAI".to_string(),
+        "noreply@objective-ai.io".to_string(),
     ));
     Arc::new(super::Client::new(
         agent_client,

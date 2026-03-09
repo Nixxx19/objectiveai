@@ -7,11 +7,13 @@ use std::path::{Path, PathBuf};
 #[derive(Debug, Clone)]
 pub struct Client {
     pub base_dir: PathBuf,
+    pub commit_author_name: String,
+    pub commit_author_email: String,
 }
 
 impl Client {
-    pub fn new(base_dir: PathBuf) -> Self {
-        Self { base_dir }
+    pub fn new(base_dir: PathBuf, commit_author_name: String, commit_author_email: String) -> Self {
+        Self { base_dir, commit_author_name, commit_author_email }
     }
 
     /// Returns the repository path for the given owner and repository.
@@ -97,6 +99,76 @@ impl Client {
         let mut de = serde_json::Deserializer::from_str(&content);
         let value = serde_path_to_error::deserialize(&mut de)?;
         Ok(Some((value, resolved_commit)))
+    }
+
+    /// Publishes invention files to a local git repository.
+    ///
+    /// Handles any initial state: creates the directory if needed, initializes
+    /// or resets the git repository, writes files, and commits.
+    ///
+    /// Returns the commit SHA on success.
+    pub fn publish(
+        &self,
+        owner: &str,
+        repository: &str,
+        files: &[(&str, &str)],
+        commit_message: &str,
+    ) -> Result<String, super::Error> {
+        let repo_path = self.repo_path(owner, repository);
+
+        // Create directory recursively if needed.
+        std::fs::create_dir_all(&repo_path)?;
+
+        // Open or initialize the git repository.
+        let repo = match git2::Repository::open(&repo_path) {
+            Ok(repo) => {
+                // Reset working tree to clean state.
+                let mut checkout = git2::build::CheckoutBuilder::new();
+                checkout.force();
+                checkout.remove_untracked(true);
+                if let Ok(head) = repo.head() {
+                    if let Ok(commit) = head.peel_to_commit() {
+                        repo.reset(
+                            commit.as_object(),
+                            git2::ResetType::Hard,
+                            Some(&mut checkout),
+                        )?;
+                    }
+                }
+                repo
+            }
+            Err(_) => git2::Repository::init(&repo_path)?,
+        };
+
+        // Write files to the working tree.
+        for (name, content) in files {
+            let file_path = repo_path.join(name);
+            std::fs::write(&file_path, content)?;
+        }
+
+        // Stage all files.
+        let mut index = repo.index()?;
+        for (name, _) in files {
+            index.add_path(Path::new(name))?;
+        }
+        index.write()?;
+        let tree_oid = index.write_tree()?;
+        let tree = repo.find_tree(tree_oid)?;
+
+        // Create commit.
+        let sig = git2::Signature::now(&self.commit_author_name, &self.commit_author_email)?;
+        let parent = repo.head().ok().and_then(|h| h.peel_to_commit().ok());
+        let parents: Vec<&git2::Commit> = parent.iter().collect();
+        let commit_oid = repo.commit(
+            Some("HEAD"),
+            &sig,
+            &sig,
+            commit_message,
+            &tree,
+            &parents,
+        )?;
+
+        Ok(commit_oid.to_string())
     }
 }
 

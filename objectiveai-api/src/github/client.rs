@@ -518,6 +518,148 @@ impl Client {
         .await
     }
 
+    /// Returns the authenticated user's login name.
+    pub async fn get_authenticated_user(
+        &self,
+        token: &str,
+    ) -> Result<String, super::Error> {
+        backoff::future::retry(self.backoff.clone(), || async {
+            let response = self
+                .http_client
+                .get("https://api.github.com/user")
+                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header("accept", "application/vnd.github+json")
+                .header("user-agent", "objectiveai")
+                .send()
+                .await
+                .map_err(|e| backoff::Error::transient(super::Error::RequestError(e)))?;
+            let code = response.status();
+            if code.is_success() {
+                let body: serde_json::Value = response
+                    .json()
+                    .await
+                    .map_err(|e| backoff::Error::transient(super::Error::ResponseError(e)))?;
+                let login = body["login"]
+                    .as_str()
+                    .ok_or_else(|| backoff::Error::permanent(super::Error::BadStatus {
+                        code,
+                        body: body.clone(),
+                    }))?
+                    .to_string();
+                Ok(login)
+            } else {
+                match response.text().await {
+                    Ok(text) => Err(backoff::Error::permanent(super::Error::BadStatus {
+                        code,
+                        body: serde_json::from_str::<serde_json::Value>(&text)
+                            .unwrap_or(serde_json::Value::String(text)),
+                    })),
+                    Err(_) => Err(backoff::Error::permanent(super::Error::BadStatus {
+                        code,
+                        body: serde_json::Value::Null,
+                    })),
+                }
+            }
+        })
+        .await
+    }
+
+    /// Creates a new GitHub repository under the authenticated user.
+    ///
+    /// Returns the clone URL (e.g. `https://github.com/owner/repo.git`).
+    pub async fn create_repository(
+        &self,
+        token: &str,
+        name: &str,
+        description: &str,
+    ) -> Result<String, super::Error> {
+        backoff::future::retry(self.backoff.clone(), || async {
+            let response = self
+                .http_client
+                .post("https://api.github.com/user/repos")
+                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header("accept", "application/vnd.github+json")
+                .header("user-agent", "objectiveai")
+                .json(&serde_json::json!({
+                    "name": name,
+                    "description": description,
+                    "auto_init": false,
+                }))
+                .send()
+                .await
+                .map_err(|e| backoff::Error::transient(super::Error::RequestError(e)))?;
+            let code = response.status();
+            if code.is_success() {
+                let body: serde_json::Value = response
+                    .json()
+                    .await
+                    .map_err(|e| backoff::Error::transient(super::Error::ResponseError(e)))?;
+                let clone_url = body["clone_url"]
+                    .as_str()
+                    .unwrap_or("")
+                    .to_string();
+                Ok(clone_url)
+            } else {
+                match response.text().await {
+                    Ok(text) => Err(backoff::Error::transient(super::Error::BadStatus {
+                        code,
+                        body: serde_json::from_str::<serde_json::Value>(&text)
+                            .unwrap_or(serde_json::Value::String(text)),
+                    })),
+                    Err(_) => Err(backoff::Error::transient(super::Error::BadStatus {
+                        code,
+                        body: serde_json::Value::Null,
+                    })),
+                }
+            }
+        })
+        .await
+    }
+
+    /// Updates the description of a GitHub repository.
+    pub async fn update_description(
+        &self,
+        token: &str,
+        owner: &str,
+        repository: &str,
+        description: &str,
+    ) -> Result<(), super::Error> {
+        backoff::future::retry(self.backoff.clone(), || async {
+            let response = self
+                .http_client
+                .patch(format!(
+                    "https://api.github.com/repos/{}/{}",
+                    owner, repository,
+                ))
+                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header("accept", "application/vnd.github+json")
+                .header("user-agent", "objectiveai")
+                .json(&serde_json::json!({
+                    "description": description,
+                }))
+                .send()
+                .await
+                .map_err(|e| backoff::Error::transient(super::Error::RequestError(e)))?;
+            let code = response.status();
+            if code.is_success() {
+                Ok(())
+            } else {
+                match response.text().await {
+                    Ok(text) => Err(backoff::Error::transient(super::Error::BadStatus {
+                        code,
+                        body: serde_json::from_str::<serde_json::Value>(&text)
+                            .unwrap_or(serde_json::Value::String(text)),
+                    })),
+                    Err(_) => Err(backoff::Error::transient(super::Error::BadStatus {
+                        code,
+                        body: serde_json::Value::Null,
+                    })),
+                }
+            }
+        })
+        .await
+    }
+
     fn request_headers(
         &self,
         mut http_request: reqwest::RequestBuilder,

@@ -227,20 +227,22 @@ where
         let id = invention_response_id(created);
         let state = request.state.clone().route();
         let agent_client = self.agent_client.clone();
+        let github_client = self.github_client.clone();
+        let filesystem_client = self.filesystem_client.clone();
 
         let stream: Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>> =
             match state {
                 State::AlphaScalarBranch(s) => {
-                    run_all_steps(s, agent_client, ctx, request, id, created)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created)
                 }
                 State::AlphaScalarLeaf(s) => {
-                    run_all_steps(s, agent_client, ctx, request, id, created)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created)
                 }
                 State::AlphaVectorBranch(s) => {
-                    run_all_steps(s, agent_client, ctx, request, id, created)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created)
                 }
                 State::AlphaVectorLeaf(s) => {
-                    run_all_steps(s, agent_client, ctx, request, id, created)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created)
                 }
             };
 
@@ -339,6 +341,8 @@ fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>(
             CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
         >,
     >,
+    github_client: Arc<crate::github::Client>,
+    filesystem_client: Arc<crate::filesystem::Client>,
     ctx: ctx::Context<CTXEXT>,
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     id: String,
@@ -762,18 +766,330 @@ where
             let s = state.lock().unwrap().clone().into_state();
             (s, function)
         };
+
+        // Publish the function if remote is set and build succeeded.
+        let (path, publish_error) = if function.is_some() {
+            if let Some(remote) = &request.remote {
+                let publish_files = extract_publish_files(&final_state, function.as_ref().unwrap());
+                let params_name = T::params(&state).name;
+                let name = request.name.as_deref()
+                    .unwrap_or(&params_name);
+                let description = extract_description(&final_state);
+                match remote {
+                    objectiveai::functions::Remote::Filesystem => {
+                        match publish_filesystem(
+                            &filesystem_client, name, &publish_files,
+                        ) {
+                            Ok(path) => (Some(path), None),
+                            Err(e) => (None, Some(e.to_string())),
+                        }
+                    }
+                    objectiveai::functions::Remote::Github => {
+                        let token = request.github_token.as_deref().unwrap_or("");
+                        match publish_github(
+                            &github_client, &filesystem_client, token, name,
+                            &description, &publish_files,
+                        ).await {
+                            Ok(path) => (Some(path), None),
+                            Err(e) => (None, Some(e.to_string())),
+                        }
+                    }
+                    objectiveai::functions::Remote::Mock => (None, None),
+                }
+            } else {
+                (None, None)
+            }
+        } else {
+            (None, None)
+        };
+
         yield FunctionInventionChunk {
             id: id.to_string(),
             completions: vec![],
             state: Some(final_state),
-            path: None,
+            path,
             function,
             created,
             object,
             usage: Some(accumulated_usage),
-            error: None,
+            error: publish_error.map(|msg| objectiveai::error::ResponseError {
+                code: 500,
+                message: serde_json::json!({
+                    "kind": "publish",
+                    "error": msg,
+                }),
+            }),
         };
     })
+}
+
+// ---------------------------------------------------------------------------
+// Publishing helpers
+// ---------------------------------------------------------------------------
+
+/// Extracts the files to publish from the final invention state.
+fn extract_publish_files(
+    state: &objectiveai::functions::inventions::State,
+    function: &objectiveai::functions::FullRemoteFunction,
+) -> Vec<(&'static str, String)> {
+    use objectiveai::functions::inventions::State;
+
+    macro_rules! state_fields {
+        ($s:expr) => {{
+            let params_json = serde_json::to_string_pretty(&$s.params)
+                .unwrap_or_default();
+            let essay = $s.essay.clone().unwrap_or_default();
+            let essay_tasks = $s.essay_tasks.clone().unwrap_or_default();
+            let readme = $s.readme.clone().unwrap_or_default();
+            (params_json, essay, essay_tasks, readme)
+        }};
+    }
+
+    let (params_json, essay, essay_tasks, readme) = match state {
+        State::AlphaScalarBranch(s) => state_fields!(s),
+        State::AlphaScalarLeaf(s) => state_fields!(s),
+        State::AlphaVectorBranch(s) => state_fields!(s),
+        State::AlphaVectorLeaf(s) => state_fields!(s),
+    };
+
+    let function_json = serde_json::to_string_pretty(function)
+        .unwrap_or_default();
+
+    vec![
+        ("function.json", function_json),
+        ("parameters.json", params_json),
+        ("ESSAY.md", essay),
+        ("ESSAY_TASKS.md", essay_tasks),
+        ("README.md", readme),
+    ]
+}
+
+/// Extracts the description from the final invention state.
+fn extract_description(state: &objectiveai::functions::inventions::State) -> String {
+    use objectiveai::functions::inventions::State;
+    match state {
+        State::AlphaScalarBranch(s) => s.description.clone().unwrap_or_default(),
+        State::AlphaScalarLeaf(s) => s.description.clone().unwrap_or_default(),
+        State::AlphaVectorBranch(s) => s.description.clone().unwrap_or_default(),
+        State::AlphaVectorLeaf(s) => s.description.clone().unwrap_or_default(),
+    }
+}
+
+/// Publishes to the local filesystem.
+///
+/// `name` is `"owner/repository"`. Creates/resets the git repo, writes files,
+/// and commits.
+fn publish_filesystem(
+    filesystem_client: &crate::filesystem::Client,
+    name: &str,
+    files: &[(&'static str, String)],
+) -> Result<objectiveai::functions::RemoteFunctionPath, String> {
+    let (owner, repo) = name.split_once('/')
+        .ok_or_else(|| format!("name must be 'owner/repository', got '{}'", name))?;
+
+    let file_refs: Vec<(&str, &str)> = files.iter()
+        .map(|(n, c)| (*n, c.as_str()))
+        .collect();
+
+    let commit = filesystem_client
+        .publish(owner, repo, &file_refs, "Publish function")
+        .map_err(|e| e.to_string())?;
+
+    Ok(objectiveai::functions::RemoteFunctionPath {
+        remote: objectiveai::functions::Remote::Filesystem,
+        owner: owner.to_string(),
+        repository: repo.to_string(),
+        commit,
+    })
+}
+
+/// Publishes to GitHub.
+///
+/// Creates the repo if needed, writes files locally, commits, pushes,
+/// and updates the repository description.
+async fn publish_github(
+    github_client: &crate::github::Client,
+    filesystem_client: &crate::filesystem::Client,
+    token: &str,
+    name: &str,
+    description: &str,
+    files: &[(&'static str, String)],
+) -> Result<objectiveai::functions::RemoteFunctionPath, String> {
+    // Parse owner/repo or just repo name.
+    let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
+        (o.to_string(), r.to_string())
+    } else {
+        // Get authenticated user as owner.
+        let user = github_client
+            .get_authenticated_user(token)
+            .await
+            .map_err(|e| e.to_string())?;
+        (user, name.to_string())
+    };
+
+    // Create repository if it doesn't exist.
+    let exists = github_client
+        .repository_exists(token, &owner, &repo)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    if !exists {
+        github_client
+            .create_repository(token, &repo, description)
+            .await
+            .map_err(|e| e.to_string())?;
+    }
+
+    // All git2 operations in a sync block (git2 types are !Send).
+    let token_owned = token.to_string();
+    let owner_clone = owner.clone();
+    let repo_clone = repo.clone();
+    let base_dir = filesystem_client.base_dir.clone();
+    let commit_author_name = filesystem_client.commit_author_name.clone();
+    let commit_author_email = filesystem_client.commit_author_email.clone();
+    let files_owned: Vec<(String, String)> = files.iter()
+        .map(|(n, c)| (n.to_string(), c.clone()))
+        .collect();
+
+    let commit_sha = tokio::task::spawn_blocking(move || {
+        publish_github_git(
+            &base_dir, &token_owned, &owner_clone, &repo_clone,
+            exists, &files_owned, &commit_author_name, &commit_author_email,
+        )
+    })
+    .await
+    .map_err(|e| e.to_string())?
+    .map_err(|e| e.to_string())?;
+
+    // Update repository description.
+    let _ = github_client
+        .update_description(token, &owner, &repo, description)
+        .await;
+
+    Ok(objectiveai::functions::RemoteFunctionPath {
+        remote: objectiveai::functions::Remote::Github,
+        owner,
+        repository: repo,
+        commit: commit_sha,
+    })
+}
+
+/// Synchronous git2 operations for GitHub publishing.
+///
+/// Initializes/opens the local repo, sets the remote, fetches if existing,
+/// writes files, commits, and pushes.
+fn publish_github_git(
+    base_dir: &std::path::Path,
+    token: &str,
+    owner: &str,
+    repo: &str,
+    exists: bool,
+    files: &[(String, String)],
+    commit_author_name: &str,
+    commit_author_email: &str,
+) -> Result<String, String> {
+    let repo_path = base_dir.join(owner).join(repo);
+    std::fs::create_dir_all(&repo_path).map_err(|e| e.to_string())?;
+
+    let git_repo = match git2::Repository::open(&repo_path) {
+        Ok(r) => r,
+        Err(_) => git2::Repository::init(&repo_path).map_err(|e| e.to_string())?,
+    };
+
+    // Set or update remote URL (never includes the token).
+    let clean_url = format!("https://github.com/{}/{}.git", owner, repo);
+    match git_repo.find_remote("origin") {
+        Ok(_) => {
+            git_repo.remote_set_url("origin", &clean_url)
+                .map_err(|e| e.to_string())?;
+        }
+        Err(_) => {
+            git_repo.remote("origin", &clean_url)
+                .map_err(|e| e.to_string())?;
+        }
+    }
+
+    // Fetch from remote if repo existed (may have content).
+    if exists {
+        let mut callbacks = git2::RemoteCallbacks::new();
+        callbacks.credentials(|_url, _username_from_url, _allowed_types| {
+            git2::Cred::userpass_plaintext("x-access-token", token)
+        });
+        let mut fetch_options = git2::FetchOptions::new();
+        fetch_options.remote_callbacks(callbacks);
+
+        let mut remote = git_repo.find_remote("origin").map_err(|e| e.to_string())?;
+        let _ = remote.fetch(&["main"], Some(&mut fetch_options), None);
+
+        // Need fresh callbacks for second fetch (consumed by first).
+        let mut callbacks = git2::RemoteCallbacks::new();
+        callbacks.credentials(|_url, _username_from_url, _allowed_types| {
+            git2::Cred::userpass_plaintext("x-access-token", token)
+        });
+        let mut fetch_options = git2::FetchOptions::new();
+        fetch_options.remote_callbacks(callbacks);
+        let _ = remote.fetch(&["master"], Some(&mut fetch_options), None);
+
+        // Reset to remote HEAD if it has commits.
+        for branch in &["refs/remotes/origin/main", "refs/remotes/origin/master"] {
+            if let Ok(reference) = git_repo.find_reference(branch) {
+                if let Ok(commit) = reference.peel_to_commit() {
+                    let mut checkout = git2::build::CheckoutBuilder::new();
+                    checkout.force();
+                    checkout.remove_untracked(true);
+                    let _ = git_repo.reset(
+                        commit.as_object(),
+                        git2::ResetType::Hard,
+                        Some(&mut checkout),
+                    );
+                    let local_branch = branch.replace("refs/remotes/origin/", "");
+                    let _ = git_repo.set_head(
+                        &format!("refs/heads/{}", local_branch),
+                    );
+                    break;
+                }
+            }
+        }
+    }
+
+    // Write files.
+    for (name, content) in files {
+        std::fs::write(repo_path.join(name), content).map_err(|e| e.to_string())?;
+    }
+
+    // Stage and commit.
+    let mut index = git_repo.index().map_err(|e| e.to_string())?;
+    for (name, _) in files {
+        index.add_path(std::path::Path::new(name)).map_err(|e| e.to_string())?;
+    }
+    index.write().map_err(|e| e.to_string())?;
+    let tree_oid = index.write_tree().map_err(|e| e.to_string())?;
+    let tree = git_repo.find_tree(tree_oid).map_err(|e| e.to_string())?;
+    let sig = git2::Signature::now(commit_author_name, commit_author_email)
+        .map_err(|e| e.to_string())?;
+    let parent = git_repo.head().ok().and_then(|h| h.peel_to_commit().ok());
+    let parents: Vec<&git2::Commit> = parent.iter().collect();
+    let commit_oid = git_repo.commit(
+        Some("HEAD"), &sig, &sig, "Publish function", &tree, &parents,
+    ).map_err(|e| e.to_string())?;
+
+    // Push using credentials callback (token stays in memory only).
+    let mut remote = git_repo.find_remote("origin").map_err(|e| e.to_string())?;
+    let head_ref = git_repo.head().map_err(|e| e.to_string())?;
+    let branch_name = head_ref.shorthand().unwrap_or("main");
+    let refspec = format!("refs/heads/{}:refs/heads/{}", branch_name, branch_name);
+
+    let mut callbacks = git2::RemoteCallbacks::new();
+    callbacks.credentials(|_url, _username_from_url, _allowed_types| {
+        git2::Cred::userpass_plaintext("x-access-token", token)
+    });
+    let mut push_options = git2::PushOptions::new();
+    push_options.remote_callbacks(callbacks);
+
+    remote.push(&[&refspec], Some(&mut push_options))
+        .map_err(|e| e.to_string())?;
+
+    Ok(commit_oid.to_string())
 }
 
 // ---------------------------------------------------------------------------
