@@ -80,48 +80,6 @@ where
     IUSG: crate::functions::inventions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     RIUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
-    pub async fn create_streaming(
-        self: Arc<Self>,
-        ctx: ctx::Context<CTXEXT>,
-        request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
-    ) -> Result<
-        impl Stream<Item = RecursiveChunk> + Send + 'static,
-        super::Error,
-    > {
-        let created = time::SystemTime::now()
-            .duration_since(time::UNIX_EPOCH)
-            .unwrap()
-            .as_secs();
-        let id = recursive_invention_response_id(created);
-
-        let is_scalar = match &request.state {
-            objectiveai::functions::inventions::state::ParamsState::AlphaScalarBranch(_)
-            | objectiveai::functions::inventions::state::ParamsState::AlphaScalarLeaf(_)
-            | objectiveai::functions::inventions::state::ParamsState::AlphaScalar(_) => true,
-            _ => false,
-        };
-        let object = if is_scalar {
-            RecursiveObject::AlphaScalarFunctionInventionRecursiveChunk
-        } else {
-            RecursiveObject::AlphaVectorFunctionInventionRecursiveChunk
-        };
-
-        let choice_indexer = Arc::new(ChoiceIndexer::new(0));
-
-        let stream = run_recursive(
-            self.invention_client.clone(),
-            ctx,
-            request,
-            id.clone(),
-            created,
-            object,
-            choice_indexer,
-            0, // native index for root
-        );
-
-        Ok(stream)
-    }
-
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
@@ -176,6 +134,82 @@ where
             Some(Err(e)) => Err(e),
             None => unreachable!(),
         }
+    }
+
+    pub async fn create_streaming(
+        self: Arc<Self>,
+        ctx: ctx::Context<CTXEXT>,
+        request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
+    ) -> Result<
+        impl Stream<Item = RecursiveChunk> + Send + 'static,
+        super::Error,
+    > {
+        let created = time::SystemTime::now()
+            .duration_since(time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let id = recursive_invention_response_id(created);
+
+        let is_scalar = match &request.state {
+            objectiveai::functions::inventions::state::ParamsState::AlphaScalarBranch(_)
+            | objectiveai::functions::inventions::state::ParamsState::AlphaScalarLeaf(_)
+            | objectiveai::functions::inventions::state::ParamsState::AlphaScalar(_) => true,
+            _ => false,
+        };
+        let object = if is_scalar {
+            RecursiveObject::AlphaScalarFunctionInventionRecursiveChunk
+        } else {
+            RecursiveObject::AlphaVectorFunctionInventionRecursiveChunk
+        };
+
+        let choice_indexer = Arc::new(ChoiceIndexer::new(0));
+
+        let inner = run_recursive(
+            self.invention_client.clone(),
+            ctx,
+            request,
+            id.clone(),
+            created,
+            object,
+            choice_indexer,
+            0, // native index for root
+        );
+
+        // Wrap the inner stream to:
+        // 1. Accumulate usage from all invention chunks.
+        // 2. Make inventions_errors sticky (once true, always true).
+        // 3. Emit a terminal chunk with total usage and empty inventions.
+        let stream: Pin<Box<dyn Stream<Item = RecursiveChunk> + Send>> =
+            Box::pin(async_stream::stream! {
+                let mut accumulated_usage =
+                    objectiveai::agent::completions::response::Usage::default();
+                let mut had_errors = false;
+                futures::pin_mut!(inner);
+                while let Some(mut chunk) = inner.next().await {
+                    for inv in &chunk.inventions {
+                        if let Some(u) = &inv.inner.usage {
+                            accumulated_usage.push(u);
+                        }
+                    }
+                    if chunk.inventions_errors == Some(true) {
+                        had_errors = true;
+                    }
+                    if had_errors {
+                        chunk.inventions_errors = Some(true);
+                    }
+                    yield chunk;
+                }
+                yield RecursiveChunk {
+                    id,
+                    inventions: vec![],
+                    inventions_errors: if had_errors { Some(true) } else { None },
+                    created,
+                    object,
+                    usage: Some(accumulated_usage),
+                };
+            });
+
+        Ok(stream)
     }
 }
 
