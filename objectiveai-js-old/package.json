@@ -1,0 +1,65 @@
+{
+  "name": "objectiveai",
+  "version": "1.4.0",
+  "description": "SDK for the ObjectiveAI API.",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ObjectiveAI/objectiveai.git"
+  },
+  "type": "module",
+  "scripts": {
+    "build": "shx rm -f .schema-cache.json && shx rm -rf dist && node ./scripts/install-wasm.cjs && npx tsx scripts/precompute-schemas.ts && tsup && shx rm -f dist/*.d.mts && shx rm -f dist/*.d.cts && shx rm -f .schema-cache.json",
+    "test": "node test/test-cjs.cjs && node test/test-esm.mjs && vitest run",
+    "start": "node dist/index.js"
+  },
+  "author": {
+    "name": "ObjectiveAI",
+    "email": "admin@objective-ai.io",
+    "url": "https://objective-ai.io"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "dependencies": {
+    "zod": "^4.3.5"
+  },
+  "devDependencies": {
+    "rimraf": "^6.1.2",
+    "shx": "^0.4.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.18"
+  },
+  "keywords": [
+    "llm",
+    "ai",
+    "api",
+    "client",
+    "sdk",
+    "prompt",
+    "prompt engineering",
+    "machine learning",
+    "ml",
+    "objectiveai",
+    "objective ai",
+    "objective",
+    "confidence",
+    "confidence score",
+    "rank",
+    "score"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ]
+}
