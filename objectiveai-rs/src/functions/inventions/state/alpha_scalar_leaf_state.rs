@@ -669,17 +669,33 @@ impl AlphaScalarLeafState {
         }
     }
 
-    pub fn write_readme(this: &Arc<Mutex<Self>>) {
-        let mut state = this.lock().unwrap();
-        let description = match state.description.as_deref() {
+    pub fn write_readme(&mut self) {
+        let description = match self.description.as_deref() {
             Some(description) => description,
             None => return,
         };
-        state.readme = Some(super::readme::readme(
-            &state.params.name,
+        self.readme = Some(super::readme::readme(
+            &self.params.name,
             description,
             Vec::new(),
         ));
+    }
+
+    pub fn replace_placeholders(
+        &mut self,
+        _paths: &[crate::functions::RemoteFunctionPath],
+    ) {}
+
+    pub fn build_function(&self) -> Option<crate::functions::FullRemoteFunction> {
+        Some(crate::functions::FullRemoteFunction::Alpha(
+            crate::functions::AlphaRemoteFunction::Scalar(
+                crate::functions::alpha_scalar::RemoteFunction::Leaf {
+                    description: self.description.clone()?,
+                    input_schema: self.input_schema.clone()?,
+                    tasks: self.tasks.clone()?,
+                },
+            ),
+        ))
     }
 }
 
@@ -739,16 +755,7 @@ impl super::InventionState for AlphaScalarLeafState {
         AlphaScalarLeafState::validate_function(this)
     }
     fn build_function(this: &Arc<Mutex<Self>>) -> Option<crate::functions::FullRemoteFunction> {
-        let state = this.lock().unwrap();
-        Some(crate::functions::FullRemoteFunction::Alpha(
-            crate::functions::AlphaRemoteFunction::Scalar(
-                crate::functions::alpha_scalar::RemoteFunction::Leaf {
-                    description: state.description.clone()?,
-                    input_schema: state.input_schema.clone()?,
-                    tasks: state.tasks.clone()?,
-                },
-            ),
-        ))
+        this.lock().unwrap().build_function()
     }
 
     fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
@@ -764,11 +771,13 @@ impl super::InventionState for AlphaScalarLeafState {
     }
 
     fn write_readme(this: &Arc<Mutex<Self>>) {
-        AlphaScalarLeafState::write_readme(this)
+        this.lock().unwrap().write_readme();
     }
 
     fn replace_placeholders(
-        _this: &Arc<Mutex<Self>>,
-        _paths: &[crate::functions::RemoteFunctionPath],
-    ) {}
+        this: &Arc<Mutex<Self>>,
+        paths: &[crate::functions::RemoteFunctionPath],
+    ) {
+        this.lock().unwrap().replace_placeholders(paths);
+    }
 }

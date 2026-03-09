@@ -711,27 +711,76 @@ impl AlphaVectorBranchState {
         }
     }
 
-    pub fn write_readme(this: &Arc<Mutex<Self>>) {
-        let mut state = this.lock().unwrap();
-        let description = match state.description.as_deref() {
+    pub fn write_readme(&mut self) {
+        let description = match self.description.as_deref() {
             Some(description) => description,
             None => return,
         };
         let mut sub_functions = Vec::with_capacity(
-            state.tasks.as_ref().map(|tasks| tasks.len()).unwrap_or(0),
+            self.tasks.as_ref().map(|tasks| tasks.len()).unwrap_or(0),
         );
-        if let Some(tasks) = &state.tasks {
+        if let Some(tasks) = &self.tasks {
             for task in tasks {
                 if let Some(url) = task.url() {
                     sub_functions.push(url);
                 }
             }
         }
-        state.readme = Some(super::readme::readme(
-            &state.params.name,
+        self.readme = Some(super::readme::readme(
+            &self.params.name,
             description,
             sub_functions,
         ));
+    }
+
+    pub fn replace_placeholders(
+        &mut self,
+        paths: &[crate::functions::RemoteFunctionPath],
+    ) {
+        let tasks = match self.tasks.take() {
+            Some(tasks) => tasks,
+            None => return,
+        };
+        self.tasks = Some(
+            tasks
+                .into_iter()
+                .map(|task| match task {
+                    functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                        match paths.iter().find(|p| {
+                            p.repository == t.params.name
+                        }) {
+                            Some(path) => functions::alpha_vector::BranchTaskExpression::ScalarFunction(
+                                t.replace(path),
+                            ),
+                            None => functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t),
+                        }
+                    }
+                    functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t) => {
+                        match paths.iter().find(|p| {
+                            p.repository == t.params.name
+                        }) {
+                            Some(path) => functions::alpha_vector::BranchTaskExpression::VectorFunction(
+                                t.replace(path),
+                            ),
+                            None => functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t),
+                        }
+                    }
+                    other => other,
+                })
+                .collect(),
+        );
+    }
+
+    pub fn build_function(&self) -> Option<crate::functions::FullRemoteFunction> {
+        Some(crate::functions::FullRemoteFunction::Alpha(
+            crate::functions::AlphaRemoteFunction::Vector(
+                crate::functions::alpha_vector::RemoteFunction::Branch {
+                    description: self.description.clone()?,
+                    input_schema: self.input_schema.clone()?,
+                    tasks: self.tasks.clone()?,
+                },
+            ),
+        ))
     }
 }
 
@@ -791,16 +840,7 @@ impl super::InventionState for AlphaVectorBranchState {
         AlphaVectorBranchState::validate_function(this)
     }
     fn build_function(this: &Arc<Mutex<Self>>) -> Option<crate::functions::FullRemoteFunction> {
-        let state = this.lock().unwrap();
-        Some(crate::functions::FullRemoteFunction::Alpha(
-            crate::functions::AlphaRemoteFunction::Vector(
-                crate::functions::alpha_vector::RemoteFunction::Branch {
-                    description: state.description.clone()?,
-                    input_schema: state.input_schema.clone()?,
-                    tasks: state.tasks.clone()?,
-                },
-            ),
-        ))
+        this.lock().unwrap().build_function()
     }
 
     fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
@@ -816,45 +856,13 @@ impl super::InventionState for AlphaVectorBranchState {
     }
 
     fn write_readme(this: &Arc<Mutex<Self>>) {
-        AlphaVectorBranchState::write_readme(this)
+        this.lock().unwrap().write_readme();
     }
 
     fn replace_placeholders(
         this: &Arc<Mutex<Self>>,
         paths: &[crate::functions::RemoteFunctionPath],
     ) {
-        let mut state = this.lock().unwrap();
-        let tasks = match state.tasks.take() {
-            Some(tasks) => tasks,
-            None => return,
-        };
-        state.tasks = Some(
-            tasks
-                .into_iter()
-                .map(|task| match task {
-                    functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t) => {
-                        match paths.iter().find(|p| {
-                            p.repository == t.params.name
-                        }) {
-                            Some(path) => functions::alpha_vector::BranchTaskExpression::ScalarFunction(
-                                t.replace(path),
-                            ),
-                            None => functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t),
-                        }
-                    }
-                    functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t) => {
-                        match paths.iter().find(|p| {
-                            p.repository == t.params.name
-                        }) {
-                            Some(path) => functions::alpha_vector::BranchTaskExpression::VectorFunction(
-                                t.replace(path),
-                            ),
-                            None => functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t),
-                        }
-                    }
-                    other => other,
-                })
-                .collect(),
-        );
+        this.lock().unwrap().replace_placeholders(paths);
     }
 }

@@ -120,59 +120,10 @@ impl State {
         paths: &[crate::functions::RemoteFunctionPath],
     ) {
         match self {
-            State::AlphaScalarLeaf(_) | State::AlphaVectorLeaf(_) => {}
-            State::AlphaScalarBranch(s) => {
-                let tasks = match s.tasks.take() {
-                    Some(tasks) => tasks,
-                    None => return,
-                };
-                s.tasks = Some(
-                    tasks
-                        .into_iter()
-                        .map(|task| match task {
-                            crate::functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t) => {
-                                match paths.iter().find(|p| p.repository == t.params.name) {
-                                    Some(path) => crate::functions::alpha_scalar::BranchTaskExpression::ScalarFunction(
-                                        t.replace(path),
-                                    ),
-                                    None => crate::functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t),
-                                }
-                            }
-                            other => other,
-                        })
-                        .collect(),
-                );
-            }
-            State::AlphaVectorBranch(s) => {
-                let tasks = match s.tasks.take() {
-                    Some(tasks) => tasks,
-                    None => return,
-                };
-                s.tasks = Some(
-                    tasks
-                        .into_iter()
-                        .map(|task| match task {
-                            crate::functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t) => {
-                                match paths.iter().find(|p| p.repository == t.params.name) {
-                                    Some(path) => crate::functions::alpha_vector::BranchTaskExpression::ScalarFunction(
-                                        t.replace(path),
-                                    ),
-                                    None => crate::functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t),
-                                }
-                            }
-                            crate::functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t) => {
-                                match paths.iter().find(|p| p.repository == t.params.name) {
-                                    Some(path) => crate::functions::alpha_vector::BranchTaskExpression::VectorFunction(
-                                        t.replace(path),
-                                    ),
-                                    None => crate::functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t),
-                                }
-                            }
-                            other => other,
-                        })
-                        .collect(),
-                );
-            }
+            State::AlphaScalarBranch(s) => s.replace_placeholders(paths),
+            State::AlphaScalarLeaf(s) => s.replace_placeholders(paths),
+            State::AlphaVectorBranch(s) => s.replace_placeholders(paths),
+            State::AlphaVectorLeaf(s) => s.replace_placeholders(paths),
         }
     }
 
@@ -180,42 +131,20 @@ impl State {
     /// Returns `None` if required fields are missing.
     pub fn build_function(&self) -> Option<crate::functions::FullRemoteFunction> {
         match self {
-            State::AlphaScalarBranch(s) => Some(crate::functions::FullRemoteFunction::Alpha(
-                crate::functions::AlphaRemoteFunction::Scalar(
-                    crate::functions::alpha_scalar::RemoteFunction::Branch {
-                        description: s.description.clone()?,
-                        input_schema: s.input_schema.clone()?,
-                        tasks: s.tasks.clone()?,
-                    },
-                ),
-            )),
-            State::AlphaScalarLeaf(s) => Some(crate::functions::FullRemoteFunction::Alpha(
-                crate::functions::AlphaRemoteFunction::Scalar(
-                    crate::functions::alpha_scalar::RemoteFunction::Leaf {
-                        description: s.description.clone()?,
-                        input_schema: s.input_schema.clone()?,
-                        tasks: s.tasks.clone()?,
-                    },
-                ),
-            )),
-            State::AlphaVectorBranch(s) => Some(crate::functions::FullRemoteFunction::Alpha(
-                crate::functions::AlphaRemoteFunction::Vector(
-                    crate::functions::alpha_vector::RemoteFunction::Branch {
-                        description: s.description.clone()?,
-                        input_schema: s.input_schema.clone()?,
-                        tasks: s.tasks.clone()?,
-                    },
-                ),
-            )),
-            State::AlphaVectorLeaf(s) => Some(crate::functions::FullRemoteFunction::Alpha(
-                crate::functions::AlphaRemoteFunction::Vector(
-                    crate::functions::alpha_vector::RemoteFunction::Leaf {
-                        description: s.description.clone()?,
-                        input_schema: s.input_schema.clone()?,
-                        tasks: s.tasks.clone()?,
-                    },
-                ),
-            )),
+            State::AlphaScalarBranch(s) => s.build_function(),
+            State::AlphaScalarLeaf(s) => s.build_function(),
+            State::AlphaVectorBranch(s) => s.build_function(),
+            State::AlphaVectorLeaf(s) => s.build_function(),
+        }
+    }
+
+    /// Regenerates the README from the current state (description + sub-function URLs).
+    pub fn write_readme(&mut self) {
+        match self {
+            State::AlphaScalarBranch(s) => s.write_readme(),
+            State::AlphaScalarLeaf(s) => s.write_readme(),
+            State::AlphaVectorBranch(s) => s.write_readme(),
+            State::AlphaVectorLeaf(s) => s.write_readme(),
         }
     }
 

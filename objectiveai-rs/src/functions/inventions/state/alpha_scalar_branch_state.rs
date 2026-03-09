@@ -704,27 +704,66 @@ impl AlphaScalarBranchState {
         }
     }
 
-    pub fn write_readme(this: &Arc<Mutex<Self>>) {
-        let mut state = this.lock().unwrap();
-        let description = match state.description.as_deref() {
+    pub fn write_readme(&mut self) {
+        let description = match self.description.as_deref() {
             Some(description) => description,
             None => return,
         };
         let mut sub_functions = Vec::with_capacity(
-            state.tasks.as_ref().map(|tasks| tasks.len()).unwrap_or(0),
+            self.tasks.as_ref().map(|tasks| tasks.len()).unwrap_or(0),
         );
-        if let Some(tasks) = &state.tasks {
+        if let Some(tasks) = &self.tasks {
             for task in tasks {
                 if let Some(url) = task.url() {
                     sub_functions.push(url);
                 }
             }
         }
-        state.readme = Some(super::readme::readme(
-            &state.params.name,
+        self.readme = Some(super::readme::readme(
+            &self.params.name,
             description,
             sub_functions,
         ));
+    }
+
+    pub fn replace_placeholders(
+        &mut self,
+        paths: &[crate::functions::RemoteFunctionPath],
+    ) {
+        let tasks = match self.tasks.take() {
+            Some(tasks) => tasks,
+            None => return,
+        };
+        self.tasks = Some(
+            tasks
+                .into_iter()
+                .map(|task| match task {
+                    functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                        match paths.iter().find(|p| {
+                            p.repository == t.params.name
+                        }) {
+                            Some(path) => functions::alpha_scalar::BranchTaskExpression::ScalarFunction(
+                                t.replace(path),
+                            ),
+                            None => functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t),
+                        }
+                    }
+                    other => other,
+                })
+                .collect(),
+        );
+    }
+
+    pub fn build_function(&self) -> Option<crate::functions::FullRemoteFunction> {
+        Some(crate::functions::FullRemoteFunction::Alpha(
+            crate::functions::AlphaRemoteFunction::Scalar(
+                crate::functions::alpha_scalar::RemoteFunction::Branch {
+                    description: self.description.clone()?,
+                    input_schema: self.input_schema.clone()?,
+                    tasks: self.tasks.clone()?,
+                },
+            ),
+        ))
     }
 }
 
@@ -784,16 +823,7 @@ impl super::InventionState for AlphaScalarBranchState {
         AlphaScalarBranchState::validate_function(this)
     }
     fn build_function(this: &Arc<Mutex<Self>>) -> Option<crate::functions::FullRemoteFunction> {
-        let state = this.lock().unwrap();
-        Some(crate::functions::FullRemoteFunction::Alpha(
-            crate::functions::AlphaRemoteFunction::Scalar(
-                crate::functions::alpha_scalar::RemoteFunction::Branch {
-                    description: state.description.clone()?,
-                    input_schema: state.input_schema.clone()?,
-                    tasks: state.tasks.clone()?,
-                },
-            ),
-        ))
+        this.lock().unwrap().build_function()
     }
 
     fn description_tools(this: &Arc<Mutex<Self>>) -> Vec<crate::functions::inventions::InventionTool> {
@@ -809,35 +839,13 @@ impl super::InventionState for AlphaScalarBranchState {
     }
 
     fn write_readme(this: &Arc<Mutex<Self>>) {
-        AlphaScalarBranchState::write_readme(this)
+        this.lock().unwrap().write_readme();
     }
 
     fn replace_placeholders(
         this: &Arc<Mutex<Self>>,
         paths: &[crate::functions::RemoteFunctionPath],
     ) {
-        let mut state = this.lock().unwrap();
-        let tasks = match state.tasks.take() {
-            Some(tasks) => tasks,
-            None => return,
-        };
-        state.tasks = Some(
-            tasks
-                .into_iter()
-                .map(|task| match task {
-                    functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t) => {
-                        match paths.iter().find(|p| {
-                            p.repository == t.params.name
-                        }) {
-                            Some(path) => functions::alpha_scalar::BranchTaskExpression::ScalarFunction(
-                                t.replace(path),
-                            ),
-                            None => functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t),
-                        }
-                    }
-                    other => other,
-                })
-                .collect(),
-        );
+        this.lock().unwrap().replace_placeholders(paths);
     }
 }
