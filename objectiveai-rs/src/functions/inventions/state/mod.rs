@@ -102,6 +102,168 @@ pub enum State {
     AlphaVectorLeaf(AlphaVectorLeafState),
 }
 
+impl State {
+    /// Returns a reference to the params name.
+    pub fn name(&self) -> &str {
+        match self {
+            State::AlphaScalarBranch(s) => &s.params.name,
+            State::AlphaScalarLeaf(s) => &s.params.name,
+            State::AlphaVectorBranch(s) => &s.params.name,
+            State::AlphaVectorLeaf(s) => &s.params.name,
+        }
+    }
+
+    /// Replaces placeholder tasks with real function tasks using the given paths.
+    /// Matches by `repository == name`. No-op for leaf states.
+    pub fn replace_placeholders(
+        &mut self,
+        paths: &[crate::functions::RemoteFunctionPath],
+    ) {
+        match self {
+            State::AlphaScalarLeaf(_) | State::AlphaVectorLeaf(_) => {}
+            State::AlphaScalarBranch(s) => {
+                let tasks = match s.tasks.take() {
+                    Some(tasks) => tasks,
+                    None => return,
+                };
+                s.tasks = Some(
+                    tasks
+                        .into_iter()
+                        .map(|task| match task {
+                            crate::functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                                match paths.iter().find(|p| p.repository == t.params.name) {
+                                    Some(path) => crate::functions::alpha_scalar::BranchTaskExpression::ScalarFunction(
+                                        t.replace(path),
+                                    ),
+                                    None => crate::functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t),
+                                }
+                            }
+                            other => other,
+                        })
+                        .collect(),
+                );
+            }
+            State::AlphaVectorBranch(s) => {
+                let tasks = match s.tasks.take() {
+                    Some(tasks) => tasks,
+                    None => return,
+                };
+                s.tasks = Some(
+                    tasks
+                        .into_iter()
+                        .map(|task| match task {
+                            crate::functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                                match paths.iter().find(|p| p.repository == t.params.name) {
+                                    Some(path) => crate::functions::alpha_vector::BranchTaskExpression::ScalarFunction(
+                                        t.replace(path),
+                                    ),
+                                    None => crate::functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t),
+                                }
+                            }
+                            crate::functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t) => {
+                                match paths.iter().find(|p| p.repository == t.params.name) {
+                                    Some(path) => crate::functions::alpha_vector::BranchTaskExpression::VectorFunction(
+                                        t.replace(path),
+                                    ),
+                                    None => crate::functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t),
+                                }
+                            }
+                            other => other,
+                        })
+                        .collect(),
+                );
+            }
+        }
+    }
+
+    /// Builds the `FullRemoteFunction` from the current state.
+    /// Returns `None` if required fields are missing.
+    pub fn build_function(&self) -> Option<crate::functions::FullRemoteFunction> {
+        match self {
+            State::AlphaScalarBranch(s) => Some(crate::functions::FullRemoteFunction::Alpha(
+                crate::functions::AlphaRemoteFunction::Scalar(
+                    crate::functions::alpha_scalar::RemoteFunction::Branch {
+                        description: s.description.clone()?,
+                        input_schema: s.input_schema.clone()?,
+                        tasks: s.tasks.clone()?,
+                    },
+                ),
+            )),
+            State::AlphaScalarLeaf(s) => Some(crate::functions::FullRemoteFunction::Alpha(
+                crate::functions::AlphaRemoteFunction::Scalar(
+                    crate::functions::alpha_scalar::RemoteFunction::Leaf {
+                        description: s.description.clone()?,
+                        input_schema: s.input_schema.clone()?,
+                        tasks: s.tasks.clone()?,
+                    },
+                ),
+            )),
+            State::AlphaVectorBranch(s) => Some(crate::functions::FullRemoteFunction::Alpha(
+                crate::functions::AlphaRemoteFunction::Vector(
+                    crate::functions::alpha_vector::RemoteFunction::Branch {
+                        description: s.description.clone()?,
+                        input_schema: s.input_schema.clone()?,
+                        tasks: s.tasks.clone()?,
+                    },
+                ),
+            )),
+            State::AlphaVectorLeaf(s) => Some(crate::functions::FullRemoteFunction::Alpha(
+                crate::functions::AlphaRemoteFunction::Vector(
+                    crate::functions::alpha_vector::RemoteFunction::Leaf {
+                        description: s.description.clone()?,
+                        input_schema: s.input_schema.clone()?,
+                        tasks: s.tasks.clone()?,
+                    },
+                ),
+            )),
+        }
+    }
+
+    /// Extracts child `ParamsState` values from placeholder tasks in branch states.
+    /// Returns an empty vec for leaf states.
+    pub fn placeholder_children(&self) -> Vec<ParamsState> {
+        match self {
+            State::AlphaScalarLeaf(_) | State::AlphaVectorLeaf(_) => vec![],
+            State::AlphaScalarBranch(s) => {
+                let tasks = match &s.tasks {
+                    Some(tasks) => tasks,
+                    None => return vec![],
+                };
+                tasks.iter().filter_map(|task| match task {
+                    crate::functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                        Some(ParamsState::AlphaScalar(AlphaScalarState {
+                            params: t.params.clone(),
+                            input_schema: Some(t.input_schema.clone()),
+                        }))
+                    }
+                    _ => None,
+                }).collect()
+            }
+            State::AlphaVectorBranch(s) => {
+                let tasks = match &s.tasks {
+                    Some(tasks) => tasks,
+                    None => return vec![],
+                };
+                tasks.iter().filter_map(|task| match task {
+                    crate::functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                        Some(ParamsState::AlphaScalar(AlphaScalarState {
+                            params: t.params.clone(),
+                            input_schema: Some(t.input_schema.clone()),
+                        }))
+                    }
+                    crate::functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t) => {
+                        Some(ParamsState::AlphaVector(AlphaVectorState {
+                            params: t.params.clone(),
+                            input_schema: Some(t.input_schema.clone()),
+                        }))
+                    }
+                    _ => None,
+                }).collect()
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "type")]
 pub enum ParamsState {

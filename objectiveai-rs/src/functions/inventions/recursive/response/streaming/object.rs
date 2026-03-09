@@ -7,3 +7,16 @@ pub enum Object {
     #[serde(rename = "alpha.vector.function.invention.recursive.chunk")]
     AlphaVectorFunctionInventionRecursiveChunk,
 }
+
+impl From<Object> for crate::functions::inventions::response::streaming::Object {
+    fn from(object: Object) -> Self {
+        match object {
+            Object::AlphaScalarFunctionInventionRecursiveChunk => {
+                Self::AlphaScalarFunctionInventionChunk
+            }
+            Object::AlphaVectorFunctionInventionRecursiveChunk => {
+                Self::AlphaVectorFunctionInventionChunk
+            }
+        }
+    }
+}

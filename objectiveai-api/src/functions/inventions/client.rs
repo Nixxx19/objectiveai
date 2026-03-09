@@ -871,7 +871,7 @@ where
 // ---------------------------------------------------------------------------
 
 /// Extracts the files to publish from the final invention state.
-fn extract_publish_files(
+pub(crate) fn extract_publish_files(
     state: &objectiveai::functions::inventions::State,
     function: &objectiveai::functions::FullRemoteFunction,
 ) -> Vec<(&'static str, String)> {
@@ -908,7 +908,7 @@ fn extract_publish_files(
 }
 
 /// Extracts the description from the final invention state.
-fn extract_description(state: &objectiveai::functions::inventions::State) -> String {
+pub(crate) fn extract_description(state: &objectiveai::functions::inventions::State) -> String {
     use objectiveai::functions::inventions::State;
     match state {
         State::AlphaScalarBranch(s) => s.description.clone().unwrap_or_default(),
@@ -922,7 +922,7 @@ fn extract_description(state: &objectiveai::functions::inventions::State) -> Str
 ///
 /// `name` is `"owner/repository"`. Creates/resets the git repo, writes files,
 /// and commits.
-fn publish_filesystem(
+pub(crate) fn publish_filesystem(
     filesystem_client: &crate::filesystem::Client,
     name: &str,
     files: &[(&'static str, String)],
@@ -950,7 +950,7 @@ fn publish_filesystem(
 ///
 /// Creates the repo if needed, writes files locally, commits, pushes,
 /// and updates the repository description.
-async fn publish_github(
+pub(crate) async fn publish_github(
     github_client: &crate::github::Client,
     filesystem_client: &crate::filesystem::Client,
     token: &str,
