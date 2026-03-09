@@ -1160,3 +1160,59 @@ async fn test_completed_state_generates_no_completions() {
         result.completions.len(),
     );
 }
+
+// ---------------------------------------------------------------------------
+// Remote/name mismatch tests
+// ---------------------------------------------------------------------------
+
+#[tokio::test]
+async fn test_remote_without_name_rejected() {
+    let client = make_client();
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let request = Arc::new(FunctionInventionCreateParams {
+        remote: Some(objectiveai::functions::Remote::Filesystem),
+        name: None,
+        overwrite: None,
+        github_token: None,
+        state: ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("test", 0, 3, 5, 3, 5),
+            essay: None, input_schema: None, essay_tasks: None,
+            tasks: None, tasks_length: None, description: None, readme: None,
+        }),
+        provider: None,
+        agent: AgentParam::Provided(AgentBase::Mock(Default::default())),
+        agents: None,
+        seed: Some(1),
+        stream: Some(true),
+        max_step_retries: Some(1),
+        mcp_server_authorization: None,
+    });
+    let result = client.create_streaming(ctx, request).await;
+    assert!(result.is_err(), "remote without name should be rejected");
+}
+
+#[tokio::test]
+async fn test_name_without_remote_rejected() {
+    let client = make_client();
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let request = Arc::new(FunctionInventionCreateParams {
+        remote: None,
+        name: Some("owner/repo".to_string()),
+        overwrite: None,
+        github_token: None,
+        state: ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("test", 0, 3, 5, 3, 5),
+            essay: None, input_schema: None, essay_tasks: None,
+            tasks: None, tasks_length: None, description: None, readme: None,
+        }),
+        provider: None,
+        agent: AgentParam::Provided(AgentBase::Mock(Default::default())),
+        agents: None,
+        seed: Some(1),
+        stream: Some(true),
+        max_step_retries: Some(1),
+        mcp_server_authorization: None,
+    });
+    let result = client.create_streaming(ctx, request).await;
+    assert!(result.is_err(), "name without remote should be rejected");
+}

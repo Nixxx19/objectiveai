@@ -263,6 +263,17 @@ where
         &self,
         request: &objectiveai::functions::inventions::request::FunctionInventionCreateParams,
     ) -> Result<(), super::Error> {
+        // remote and name must both be provided or both be absent.
+        match (&request.remote, &request.name) {
+            (Some(_), None) => return Err(super::Error::RemoteNameMismatch(
+                "remote is set but name is missing".to_string(),
+            )),
+            (None, Some(_)) => return Err(super::Error::RemoteNameMismatch(
+                "name is set but remote is missing".to_string(),
+            )),
+            _ => {}
+        }
+
         let remote = match &request.remote {
             Some(r) => r,
             None => return Ok(()),
