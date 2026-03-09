@@ -47,7 +47,6 @@ fn random_placeholder_scalar_task(
     parent_fields: &[(String, serde_json::Value)],
     rng: &mut impl Rng,
 ) -> serde_json::Value {
-    let name = format!("sub-function-{}", rng.random_range(0u32..1000));
     let spec = random_string(rng, 50, 200);
 
     // Child input schema: pick a subset of parent fields or pass through all
@@ -79,7 +78,6 @@ fn random_placeholder_scalar_task(
 
     serde_json::json!({
         "type": "placeholder.alpha.scalar.function",
-        "name": name,
         "spec": spec,
         "input_schema": {
             "type": "object",

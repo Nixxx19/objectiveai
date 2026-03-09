@@ -49,6 +49,7 @@ pub enum PartialPlaceholderBranchTaskExpression {
 impl PartialPlaceholderBranchTaskExpression {
     pub fn complete(
         self,
+        name: String,
         depth: u64,
         min_branch_width: u64,
         max_branch_width: u64,
@@ -60,6 +61,7 @@ impl PartialPlaceholderBranchTaskExpression {
                 task,
             ) => BranchTaskExpression::PlaceholderScalarFunction(
                 task.complete(
+                    name,
                     depth,
                     min_branch_width,
                     max_branch_width,
@@ -157,7 +159,6 @@ impl PlaceholderScalarFunctionTaskExpression {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PartialPlaceholderScalarFunctionTaskExpression {
-    pub name: String,
     pub spec: String,
     pub input_schema: super::expression::ScalarFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -168,6 +169,7 @@ pub struct PartialPlaceholderScalarFunctionTaskExpression {
 impl PartialPlaceholderScalarFunctionTaskExpression {
     pub fn complete(
         self,
+        name: String,
         depth: u64,
         min_branch_width: u64,
         max_branch_width: u64,
@@ -181,7 +183,7 @@ impl PartialPlaceholderScalarFunctionTaskExpression {
                 max_branch_width,
                 min_leaf_width,
                 max_leaf_width,
-                name: self.name,
+                name,
                 spec: self.spec,
             },
             input_schema: self.input_schema,

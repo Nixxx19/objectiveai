@@ -67,7 +67,6 @@ fn random_placeholder_vector_task(
     parent_schema: &serde_json::Value,
     rng: &mut impl Rng,
 ) -> serde_json::Value {
-    let name = format!("vector-sub-{}", rng.random_range(0u32..1000));
     let spec = random_string(rng, 50, 200);
 
     // Build child input_schema from parent's items and context
@@ -94,7 +93,6 @@ fn random_placeholder_vector_task(
 
     serde_json::json!({
         "type": "placeholder.alpha.vector.function",
-        "name": name,
         "spec": spec,
         "input_schema": child_schema,
         "input": input_expr,
@@ -112,7 +110,6 @@ fn random_placeholder_scalar_task(
     parent_schema: &serde_json::Value,
     rng: &mut impl Rng,
 ) -> serde_json::Value {
-    let name = format!("scalar-sub-{}", rng.random_range(0u32..1000));
     let spec = random_string(rng, 50, 200);
 
     // Derive the child schema from the item type in the parent's items array
@@ -149,7 +146,6 @@ fn random_placeholder_scalar_task(
 
     serde_json::json!({
         "type": "placeholder.alpha.scalar.function",
-        "name": name,
         "spec": spec,
         "input_schema": child_schema,
         "input": { "$starlark": input_expr },

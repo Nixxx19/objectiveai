@@ -19,6 +19,45 @@ use std::sync::{Arc, Mutex};
 
 use serde::{Deserialize, Serialize};
 
+/// Constructs a child name by appending the task index to the parent's path.
+///
+/// Splits `parent_name` by `-`, takes the last segment, and tries to decode
+/// it as a base62 path. If successful, pushes `task_index` and re-encodes.
+/// If not, appends a new `-` segment with just the index encoded.
+fn child_name(parent_name: &str, task_index: usize) -> String {
+    if let Some((prefix, last)) = parent_name.rsplit_once('-') {
+        if let Ok(mut path) = super::path::b62_to_path::<u64>(last) {
+            path.push(task_index as u64);
+            if let Ok(b62) = super::path::path_to_b62(&path) {
+                return format!("{}-{}", prefix, b62);
+            }
+        }
+    }
+    // Couldn't parse existing path segment — start a new one.
+    let path = [task_index as u64];
+    let b62 = super::path::path_to_b62(&path).unwrap_or_else(|_| format!("{}", task_index));
+    format!("{}-{}", parent_name, b62)
+}
+
+/// Fixes a task name after reindexing (e.g. after a delete).
+///
+/// Tries to parse the last `-` segment as a base62 path. If successful,
+/// pops the last element and pushes `new_index`. If parsing fails, leaves
+/// the name unchanged.
+fn reindex_name(name: &mut String, new_index: usize) {
+    if let Some((prefix, last)) = name.rsplit_once('-') {
+        if let Ok(mut path) = super::path::b62_to_path::<u64>(last) {
+            if !path.is_empty() {
+                path.pop();
+                path.push(new_index as u64);
+                if let Ok(b62) = super::path::path_to_b62(&path) {
+                    *name = format!("{}-{}", prefix, b62);
+                }
+            }
+        }
+    }
+}
+
 /// Abstracts over the 4 routed state variants for invention step orchestration.
 pub trait InventionState: Clone + Send + 'static {
     fn params(this: &Arc<Mutex<Self>>) -> Params;

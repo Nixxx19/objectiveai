@@ -385,6 +385,18 @@ impl AlphaVectorBranchState {
                         Some(tasks) => {
                             if index < tasks.len() {
                                 tasks.remove(index);
+                                // Reindex names on placeholder tasks after deletion.
+                                for (i, task) in tasks.iter_mut().enumerate() {
+                                    match task {
+                                        functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                                            super::reindex_name(&mut t.params.name, i);
+                                        }
+                                        functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t) => {
+                                            super::reindex_name(&mut t.params.name, i);
+                                        }
+                                        _ => {}
+                                    }
+                                }
                                 Ok(tasks.len().to_string())
                             } else {
                                 Err("Index out of bounds".to_string())
@@ -460,7 +472,10 @@ impl AlphaVectorBranchState {
                         },
                     }
                     let mut state = state.lock().unwrap();
+                    let task_index = state.tasks.as_ref().map_or(0, |t| t.len());
+                    let child_name = super::child_name(&state.params.name, task_index);
                     let task = task.complete(
+                        child_name,
                         state.params.depth - 1,
                         state.params.min_branch_width,
                         state.params.max_branch_width,
