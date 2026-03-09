@@ -38,6 +38,7 @@ ENV NEXT_PUBLIC_SONARLY_INGEST_POINT=${NEXT_PUBLIC_SONARLY_INGEST_POINT}
 WORKDIR /root
 COPY package.json ./
 COPY objectiveai-js/ objectiveai-js/
+COPY objectiveai-function-tree/ objectiveai-function-tree/
 COPY objectiveai-web/package.json objectiveai-web/
 RUN npm install --include=dev
 # Build workspace
