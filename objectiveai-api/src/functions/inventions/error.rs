@@ -21,9 +21,9 @@ pub enum Error {
     /// GitHub token lacks required permissions.
     #[error("github token missing permissions: {0}")]
     GithubTokenMissingPermissions(String),
-    /// remote and name must both be set or both be absent.
-    #[error("remote/name mismatch: {0}")]
-    RemoteNameMismatch(String),
+    /// The name is invalid (too long or would exceed limits with child paths).
+    #[error("invalid name: {0}")]
+    InvalidName(String),
     /// Filesystem error.
     #[error("filesystem error: {0}")]
     Filesystem(#[from] crate::filesystem::Error),
@@ -38,7 +38,7 @@ impl StatusError for Error {
             Error::GithubTokenRequired => 400,
             Error::GithubToken(e) => e.status(),
             Error::GithubTokenMissingPermissions(_) => 403,
-            Error::RemoteNameMismatch(_) => 400,
+            Error::InvalidName(_) => 400,
             Error::Filesystem(e) => e.status(),
         }
     }
@@ -69,8 +69,8 @@ impl StatusError for Error {
                 "kind": "github_token_missing_permissions",
                 "error": msg,
             }),
-            Error::RemoteNameMismatch(msg) => serde_json::json!({
-                "kind": "remote_name_mismatch",
+            Error::InvalidName(msg) => serde_json::json!({
+                "kind": "invalid_name",
                 "error": msg,
             }),
             Error::Filesystem(e) => serde_json::json!({

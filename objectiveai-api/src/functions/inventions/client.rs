@@ -22,6 +22,40 @@ pub fn invention_response_id(created: u64) -> String {
     format!("fncinv-{}-{}", uuid.simple(), created)
 }
 
+/// Maximum total name length in bytes.
+const MAX_NAME_LEN: usize = 100;
+/// Maximum name length when no valid path segment exists.
+/// Leaves room for `-` (1 byte) + base62 path segment (up to 22 bytes).
+const MAX_NAME_LEN_WITHOUT_PATH: usize = 77;
+
+/// Validates the invention name length constraints.
+///
+/// - Must be at most 100 bytes total.
+/// - If the name does not already contain a valid base62 path segment
+///   (the part after the last `-`), it must be at most 77 bytes to leave
+///   room for child path segments (`-` + up to 22 bytes of base62).
+fn validate_name(name: &str) -> Result<(), super::Error> {
+    let len = name.len();
+    if len > MAX_NAME_LEN {
+        return Err(super::Error::InvalidName(format!(
+            "name is {} bytes, maximum is {}",
+            len, MAX_NAME_LEN,
+        )));
+    }
+    let has_valid_path = name
+        .rsplit_once('-')
+        .and_then(|(_, last)| objectiveai::functions::inventions::path::b62_to_path::<u64>(last).ok())
+        .is_some();
+    if !has_valid_path && len > MAX_NAME_LEN_WITHOUT_PATH {
+        return Err(super::Error::InvalidName(format!(
+            "name is {} bytes without a path segment, maximum is {} \
+             (must leave room for child path `-` + up to 22 bytes)",
+            len, MAX_NAME_LEN_WITHOUT_PATH,
+        )));
+    }
+    Ok(())
+}
+
 // ---------------------------------------------------------------------------
 // Client
 // ---------------------------------------------------------------------------
@@ -197,6 +231,7 @@ where
             objectiveai::functions::inventions::state::ParamsState::AlphaVector(s) => &s.params,
         };
         params.validate().map_err(super::Error::InvalidState)?;
+        validate_name(&params.name)?;
 
         // Validate depth matches variant.
         let is_leaf = matches!(
@@ -221,7 +256,7 @@ where
         }
 
         // Pre-flight: validate remote, token, and name.
-        self.check_preflight(&request).await?;
+        self.check_preflight(&request, &params.name).await?;
 
         let created = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
@@ -257,23 +292,13 @@ where
     ///
     /// - If remote is GitHub: validates that `github_token` is present, valid,
     ///   and has permissions to create repos, push, and edit descriptions.
-    /// - If `name` is set and `overwrite` is not true: checks that the name
-    ///   doesn't already exist on the target remote.
+    /// - If `overwrite` is not true: checks that the name doesn't already
+    ///   exist on the target remote.
     async fn check_preflight(
         &self,
         request: &objectiveai::functions::inventions::request::FunctionInventionCreateParams,
+        name: &str,
     ) -> Result<(), super::Error> {
-        // remote and name must both be provided or both be absent.
-        match (&request.remote, &request.name) {
-            (Some(_), None) => return Err(super::Error::RemoteNameMismatch(
-                "remote is set but name is missing".to_string(),
-            )),
-            (None, Some(_)) => return Err(super::Error::RemoteNameMismatch(
-                "name is set but remote is missing".to_string(),
-            )),
-            _ => {}
-        }
-
         let remote = match &request.remote {
             Some(r) => r,
             None => return Ok(()),
@@ -307,38 +332,32 @@ where
             return Ok(());
         }
 
-        if let Some(name) = &request.name {
-            let exists = match remote {
-                objectiveai::functions::Remote::Github => {
-                    let token = request.github_token.as_deref().unwrap_or("");
-                    // For GitHub, owner is the authenticated user. We use
-                    // the name as the repository name. The caller is expected
-                    // to provide owner/name or just name. For now we check
-                    // if the name contains '/' to split owner/repo.
-                    let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
-                        (o, r)
-                    } else {
-                        // Cannot check without owner; skip.
-                        return Ok(());
-                    };
-                    self.github_client
-                        .repository_exists(token, owner, repo)
-                        .await?
-                }
-                objectiveai::functions::Remote::Filesystem => {
-                    let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
-                        (o, r)
-                    } else {
-                        return Ok(());
-                    };
-                    self.filesystem_client.repository_exists(owner, repo)
-                }
-                objectiveai::functions::Remote::Mock => false,
-            };
-
-            if exists {
-                return Err(super::Error::NameAlreadyExists(name.clone()));
+        let exists = match remote {
+            objectiveai::functions::Remote::Github => {
+                let token = request.github_token.as_deref().unwrap_or("");
+                let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
+                    (o, r)
+                } else {
+                    // Cannot check without owner; skip.
+                    return Ok(());
+                };
+                self.github_client
+                    .repository_exists(token, owner, repo)
+                    .await?
             }
+            objectiveai::functions::Remote::Filesystem => {
+                let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
+                    (o, r)
+                } else {
+                    return Ok(());
+                };
+                self.filesystem_client.repository_exists(owner, repo)
+            }
+            objectiveai::functions::Remote::Mock => false,
+        };
+
+        if exists {
+            return Err(super::Error::NameAlreadyExists(name.to_string()));
         }
 
         Ok(())
@@ -792,9 +811,7 @@ where
         let (path, publish_error) = if function.is_some() {
             if let Some(remote) = &request.remote {
                 let publish_files = extract_publish_files(&final_state, function.as_ref().unwrap());
-                let params_name = T::params(&state).name;
-                let name = request.name.as_deref()
-                    .unwrap_or(&params_name);
+                let name = &T::params(&state).name;
                 let description = extract_description(&final_state);
                 match remote {
                     objectiveai::functions::Remote::Filesystem => {
