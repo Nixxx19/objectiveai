@@ -19,7 +19,7 @@ use objectiveai::functions::inventions::InventionState;
 /// Generates a unique response ID for Function inventions.
 pub fn invention_response_id(created: u64) -> String {
     let uuid = uuid::Uuid::new_v4();
-    format!("fncinv-{}-{}", uuid.simple(), created)
+    format!("fninv1-{}-{}", uuid.simple(), created)
 }
 
 /// Maximum total name length in bytes.

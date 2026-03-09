@@ -18,7 +18,7 @@ type RecursiveObject =
 /// Generates a unique response ID for recursive Function inventions.
 pub fn recursive_invention_response_id(created: u64) -> String {
     let uuid = uuid::Uuid::new_v4();
-    format!("fncinvrec-{}-{}", uuid.simple(), created)
+    format!("fninvr-{}-{}", uuid.simple(), created)
 }
 
 // ---------------------------------------------------------------------------
