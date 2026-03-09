@@ -1,6 +1,5 @@
 mod client;
 mod error;
-pub mod recursive;
 pub mod usage_handler;
 
 pub use client::*;
