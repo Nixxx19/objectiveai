@@ -364,10 +364,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_13934725890079593465",
+              "id": "call_mock_4606110093823333971",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-361\",\"spec\":\"GNqnjyZYb1XEg1R2deAsMMCCHGYNb52pD7EuhqN bH5 yEZ432lWmoluKebkR wEDZt8qZfDb0gDaeLEIWjiBXf7JRl4u5F2QhyokHWc13po\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"file\",\"categories\"]},\"input\":{\"$starlark\":\"input\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"yGNqnjyZYb1XEg1R2deAsMMCCHGYNb52pD7EuhqN bH5 yEZ432lWmoluKebkR wEDZt8qZfDb0gDaeLEIWjiBXf7JRl4u5F2QhyokHW\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"}},\"required\":[\"file\"]},\"input\":{\"$starlark\":\"{'file': input['file']}\"}}"
               }
             }
           ],
@@ -389,7 +389,7 @@
           "role": "tool",
           "index": 16,
           "content": "1",
-          "tool_call_id": "call_mock_13934725890079593465"
+          "tool_call_id": "call_mock_4606110093823333971"
         },
         {
           "role": "assistant",
@@ -440,10 +440,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_11864393936392989456",
+              "id": "call_mock_6714440862422348603",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-431\",\"spec\":\" p76kInLYmk2sT2b0bzDIvBuA6XbrHWYNDuVeA1Z0TvBp3bg5QV MRW wM68BijSsD4qQmDDlVgwEf1ilCjBdKcypthInU9rozlMnlECgFZuzYtRI33WwvfYvKtrreYAPn8SfxG8kqkE1JtvovB5pYbncXeNn\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"}},\"required\":[\"file\"]},\"input\":{\"$starlark\":\"{'file': input['file']}\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"S p76kInLYmk2sT2b0bzDIvBuA6XbrHWYNDuVeA1Z0TvBp3bg5QV MRW wM68BijSsD4qQmDDlVgwEf1ilCjBdKcypthInU9rozlMnlECgFZuzYtRI3\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"file\":{\"type\":\"string\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"file\",\"categories\"]},\"input\":{\"$starlark\":\"input\"}}"
               }
             }
           ],
@@ -465,7 +465,7 @@
           "role": "tool",
           "index": 20,
           "content": "2",
-          "tool_call_id": "call_mock_11864393936392989456"
+          "tool_call_id": "call_mock_6714440862422348603"
         },
         {
           "role": "assistant",
@@ -692,8 +692,31 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-361",
-        "spec": "GNqnjyZYb1XEg1R2deAsMMCCHGYNb52pD7EuhqN bH5 yEZ432lWmoluKebkR wEDZt8qZfDb0gDaeLEIWjiBXf7JRl4u5F2QhyokHWc13po",
+        "name": "sb-2d6Dtm",
+        "spec": "yGNqnjyZYb1XEg1R2deAsMMCCHGYNb52pD7EuhqN bH5 yEZ432lWmoluKebkR wEDZt8qZfDb0gDaeLEIWjiBXf7JRl4u5F2QhyokHW",
+        "input_schema": {
+          "properties": {
+            "file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "file"
+          ]
+        },
+        "input": {
+          "$starlark": "{'file': input['file']}"
+        }
+      },
+      {
+        "type": "placeholder.alpha.scalar.function",
+        "depth": 2,
+        "min_branch_width": 2,
+        "max_branch_width": 3,
+        "min_leaf_width": 2,
+        "max_leaf_width": 3,
+        "name": "sb-2d6Dtn",
+        "spec": "S p76kInLYmk2sT2b0bzDIvBuA6XbrHWYNDuVeA1Z0TvBp3bg5QV MRW wM68BijSsD4qQmDDlVgwEf1ilCjBdKcypthInU9rozlMnlECgFZuzYtRI3",
         "input_schema": {
           "properties": {
             "file": {
@@ -713,29 +736,6 @@
         },
         "input": {
           "$starlark": "input"
-        }
-      },
-      {
-        "type": "placeholder.alpha.scalar.function",
-        "depth": 2,
-        "min_branch_width": 2,
-        "max_branch_width": 3,
-        "min_leaf_width": 2,
-        "max_leaf_width": 3,
-        "name": "sub-function-431",
-        "spec": " p76kInLYmk2sT2b0bzDIvBuA6XbrHWYNDuVeA1Z0TvBp3bg5QV MRW wM68BijSsD4qQmDDlVgwEf1ilCjBdKcypthInU9rozlMnlECgFZuzYtRI33WwvfYvKtrreYAPn8SfxG8kqkE1JtvovB5pYbncXeNn",
-        "input_schema": {
-          "properties": {
-            "file": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "file"
-          ]
-        },
-        "input": {
-          "$starlark": "{'file': input['file']}"
         }
       }
     ],
@@ -772,8 +772,31 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-361",
-        "spec": "GNqnjyZYb1XEg1R2deAsMMCCHGYNb52pD7EuhqN bH5 yEZ432lWmoluKebkR wEDZt8qZfDb0gDaeLEIWjiBXf7JRl4u5F2QhyokHWc13po",
+        "name": "sb-2d6Dtm",
+        "spec": "yGNqnjyZYb1XEg1R2deAsMMCCHGYNb52pD7EuhqN bH5 yEZ432lWmoluKebkR wEDZt8qZfDb0gDaeLEIWjiBXf7JRl4u5F2QhyokHW",
+        "input_schema": {
+          "properties": {
+            "file": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "file"
+          ]
+        },
+        "input": {
+          "$starlark": "{'file': input['file']}"
+        }
+      },
+      {
+        "type": "placeholder.alpha.scalar.function",
+        "depth": 2,
+        "min_branch_width": 2,
+        "max_branch_width": 3,
+        "min_leaf_width": 2,
+        "max_leaf_width": 3,
+        "name": "sb-2d6Dtn",
+        "spec": "S p76kInLYmk2sT2b0bzDIvBuA6XbrHWYNDuVeA1Z0TvBp3bg5QV MRW wM68BijSsD4qQmDDlVgwEf1ilCjBdKcypthInU9rozlMnlECgFZuzYtRI3",
         "input_schema": {
           "properties": {
             "file": {
@@ -793,29 +816,6 @@
         },
         "input": {
           "$starlark": "input"
-        }
-      },
-      {
-        "type": "placeholder.alpha.scalar.function",
-        "depth": 2,
-        "min_branch_width": 2,
-        "max_branch_width": 3,
-        "min_leaf_width": 2,
-        "max_leaf_width": 3,
-        "name": "sub-function-431",
-        "spec": " p76kInLYmk2sT2b0bzDIvBuA6XbrHWYNDuVeA1Z0TvBp3bg5QV MRW wM68BijSsD4qQmDDlVgwEf1ilCjBdKcypthInU9rozlMnlECgFZuzYtRI33WwvfYvKtrreYAPn8SfxG8kqkE1JtvovB5pYbncXeNn",
-        "input_schema": {
-          "properties": {
-            "file": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "file"
-          ]
-        },
-        "input": {
-          "$starlark": "{'file': input['file']}"
         }
       }
     ]

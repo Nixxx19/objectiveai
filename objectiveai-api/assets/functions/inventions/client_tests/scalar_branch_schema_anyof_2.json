@@ -211,10 +211,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_6397514291276985049",
+              "id": "call_mock_4974352790888202497",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-291\",\"spec\":\"hIDey1rb7yew0derBycFv3TiL3LifJ5eTWdK2NVJZJb3o4JT3wGfKBdEzUCkKMUPdqt6OftL0YoGINsyeIBvpv0nBUXaRqneqqGpJ6tpD8QzoMCNXtosUl9YHVigSu4ZyHeh6nZFp2WcCtjo9dwqJ1cmEjCifkfs8xcHXF0Jm5EuMttrpW\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]},\"input\":{\"$starlark\":\"input\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"1hIDey1rb7yew0derBycFv3TiL3LifJ5eTWdK2NVJZJb3o4JT3wGfKBdEzUCkKMUPdqt6OftL0YoGINsyeIBvpv0nBUXaR\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]}},\"required\":[\"payload\"]},\"input\":{\"$starlark\":\"{'payload': input['payload']}\"}}"
               }
             }
           ],
@@ -236,7 +236,7 @@
           "role": "tool",
           "index": 9,
           "content": "1",
-          "tool_call_id": "call_mock_6397514291276985049"
+          "tool_call_id": "call_mock_4974352790888202497"
         },
         {
           "role": "assistant",
@@ -249,10 +249,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_13221647842345698700",
+              "id": "call_mock_17449680515018486373",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-141\",\"spec\":\" HtcINilOrQUhpU7gL3MWb il44uTFdp52CVPjSGLHNX8J66i95mNsFgqu5y\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]}},\"required\":[\"payload\"]},\"input\":{\"$starlark\":\"{'payload': input['payload']}\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"e HtcINilOrQUhpU7gL3MWb il44uTFdp52CVPjSGLHNX8J66i95mNsFgqu5yjtsT5T7zHv\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]},\"input\":{\"$starlark\":\"input\"}}"
               }
             }
           ],
@@ -274,7 +274,7 @@
           "role": "tool",
           "index": 11,
           "content": "2",
-          "tool_call_id": "call_mock_13221647842345698700"
+          "tool_call_id": "call_mock_17449680515018486373"
         },
         {
           "role": "assistant",
@@ -453,8 +453,52 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-291",
-        "spec": "hIDey1rb7yew0derBycFv3TiL3LifJ5eTWdK2NVJZJb3o4JT3wGfKBdEzUCkKMUPdqt6OftL0YoGINsyeIBvpv0nBUXaRqneqqGpJ6tpD8QzoMCNXtosUl9YHVigSu4ZyHeh6nZFp2WcCtjo9dwqJ1cmEjCifkfs8xcHXF0Jm5EuMttrpW",
+        "name": "sb-2RNZ8Me",
+        "spec": "1hIDey1rb7yew0derBycFv3TiL3LifJ5eTWdK2NVJZJb3o4JT3wGfKBdEzUCkKMUPdqt6OftL0YoGINsyeIBvpv0nBUXaR",
+        "input_schema": {
+          "properties": {
+            "payload": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "image"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "caption": {
+                      "type": "string"
+                    },
+                    "score": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "caption"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "payload"
+          ]
+        },
+        "input": {
+          "$starlark": "{'payload': input['payload']}"
+        }
+      },
+      {
+        "type": "placeholder.alpha.scalar.function",
+        "depth": 0,
+        "min_branch_width": 2,
+        "max_branch_width": 3,
+        "min_leaf_width": 2,
+        "max_leaf_width": 3,
+        "name": "sb-2RNZ8Mf",
+        "spec": "e HtcINilOrQUhpU7gL3MWb il44uTFdp52CVPjSGLHNX8J66i95mNsFgqu5yjtsT5T7zHv",
         "input_schema": {
           "properties": {
             "payload": {
@@ -501,50 +545,6 @@
         },
         "input": {
           "$starlark": "input"
-        }
-      },
-      {
-        "type": "placeholder.alpha.scalar.function",
-        "depth": 0,
-        "min_branch_width": 2,
-        "max_branch_width": 3,
-        "min_leaf_width": 2,
-        "max_leaf_width": 3,
-        "name": "sub-function-141",
-        "spec": " HtcINilOrQUhpU7gL3MWb il44uTFdp52CVPjSGLHNX8J66i95mNsFgqu5y",
-        "input_schema": {
-          "properties": {
-            "payload": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "image"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "caption": {
-                      "type": "string"
-                    },
-                    "score": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "caption"
-                  ]
-                }
-              ]
-            }
-          },
-          "required": [
-            "payload"
-          ]
-        },
-        "input": {
-          "$starlark": "{'payload': input['payload']}"
         }
       }
     ],
@@ -608,8 +608,52 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-291",
-        "spec": "hIDey1rb7yew0derBycFv3TiL3LifJ5eTWdK2NVJZJb3o4JT3wGfKBdEzUCkKMUPdqt6OftL0YoGINsyeIBvpv0nBUXaRqneqqGpJ6tpD8QzoMCNXtosUl9YHVigSu4ZyHeh6nZFp2WcCtjo9dwqJ1cmEjCifkfs8xcHXF0Jm5EuMttrpW",
+        "name": "sb-2RNZ8Me",
+        "spec": "1hIDey1rb7yew0derBycFv3TiL3LifJ5eTWdK2NVJZJb3o4JT3wGfKBdEzUCkKMUPdqt6OftL0YoGINsyeIBvpv0nBUXaR",
+        "input_schema": {
+          "properties": {
+            "payload": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "image"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "caption": {
+                      "type": "string"
+                    },
+                    "score": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "caption"
+                  ]
+                }
+              ]
+            }
+          },
+          "required": [
+            "payload"
+          ]
+        },
+        "input": {
+          "$starlark": "{'payload': input['payload']}"
+        }
+      },
+      {
+        "type": "placeholder.alpha.scalar.function",
+        "depth": 0,
+        "min_branch_width": 2,
+        "max_branch_width": 3,
+        "min_leaf_width": 2,
+        "max_leaf_width": 3,
+        "name": "sb-2RNZ8Mf",
+        "spec": "e HtcINilOrQUhpU7gL3MWb il44uTFdp52CVPjSGLHNX8J66i95mNsFgqu5yjtsT5T7zHv",
         "input_schema": {
           "properties": {
             "payload": {
@@ -656,50 +700,6 @@
         },
         "input": {
           "$starlark": "input"
-        }
-      },
-      {
-        "type": "placeholder.alpha.scalar.function",
-        "depth": 0,
-        "min_branch_width": 2,
-        "max_branch_width": 3,
-        "min_leaf_width": 2,
-        "max_leaf_width": 3,
-        "name": "sub-function-141",
-        "spec": " HtcINilOrQUhpU7gL3MWb il44uTFdp52CVPjSGLHNX8J66i95mNsFgqu5y",
-        "input_schema": {
-          "properties": {
-            "payload": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "image"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "caption": {
-                      "type": "string"
-                    },
-                    "score": {
-                      "type": "number"
-                    }
-                  },
-                  "required": [
-                    "caption"
-                  ]
-                }
-              ]
-            }
-          },
-          "required": [
-            "payload"
-          ]
-        },
-        "input": {
-          "$starlark": "{'payload': input['payload']}"
         }
       }
     ]

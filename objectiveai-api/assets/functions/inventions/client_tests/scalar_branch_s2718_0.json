@@ -287,10 +287,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_855408141309285586",
+              "id": "call_mock_17842976703419019601",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-614\",\"spec\":\"cJB7bGv510uHZbq d1MOc1B4UAcnHcNg 8oJeYyY 9qfddgnXFl3kkPREPBX7BFmcwwtatYI ZZXkqJlydywlXe8sFNNtsMjXnzE8vd\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"image\":{\"type\":\"image\"}},\"required\":[\"image\"]},\"input\":{\"$starlark\":\"{'image': input['image']}\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"wcJB7bGv510uHZbq d1MOc1B4UAcnHcNg 8oJeYyY 9qfddgnXFl3kkPREPBX7BFmcwwtatYI ZZXkqJlydywlXe8sFNNtsMjXnzE8vdxcicIIUljlLr58zto c1xxImjM6p3sm1nnd21w\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"image\":{\"type\":\"image\"},\"instruction\":{\"type\":\"string\"},\"voice\":{\"type\":\"audio\",\"description\":\"The voice\"}},\"required\":[\"image\",\"instruction\",\"voice\"]},\"input\":{\"$starlark\":\"input\"}}"
               }
             }
           ],
@@ -312,7 +312,7 @@
           "role": "tool",
           "index": 12,
           "content": "1",
-          "tool_call_id": "call_mock_855408141309285586"
+          "tool_call_id": "call_mock_17842976703419019601"
         },
         {
           "role": "assistant",
@@ -324,10 +324,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_17383535583672595232",
+              "id": "call_mock_16333614704092079771",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-324\",\"spec\":\"4SzveVYhX jf5UCH Ua8h8uZMae8C2WTotXznblFPPDJ jG5BhB\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"image\":{\"type\":\"image\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"image\",\"instruction\"]},\"input\":{\"$starlark\":\"{'image': input['image'], 'instruction': input['instruction']}\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"a4SzveVYhX jf5UCH Ua8h8uZMae8C2WTotXznblFPPDJ jG5BhBs267LU9t1MZAibte9SO7K75iFRaDj6ByUfw6TMnCct3vag\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"image\":{\"type\":\"image\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"image\",\"instruction\"]},\"input\":{\"$starlark\":\"{'image': input['image'], 'instruction': input['instruction']}\"}}"
               }
             }
           ],
@@ -349,7 +349,7 @@
           "role": "tool",
           "index": 14,
           "content": "2",
-          "tool_call_id": "call_mock_17383535583672595232"
+          "tool_call_id": "call_mock_16333614704092079771"
         },
         {
           "role": "assistant",
@@ -579,20 +579,29 @@
         "max_branch_width": 2,
         "min_leaf_width": 2,
         "max_leaf_width": 2,
-        "name": "sub-function-614",
-        "spec": "cJB7bGv510uHZbq d1MOc1B4UAcnHcNg 8oJeYyY 9qfddgnXFl3kkPREPBX7BFmcwwtatYI ZZXkqJlydywlXe8sFNNtsMjXnzE8vd",
+        "name": "sb-3HydYMUZ",
+        "spec": "wcJB7bGv510uHZbq d1MOc1B4UAcnHcNg 8oJeYyY 9qfddgnXFl3kkPREPBX7BFmcwwtatYI ZZXkqJlydywlXe8sFNNtsMjXnzE8vdxcicIIUljlLr58zto c1xxImjM6p3sm1nnd21w",
         "input_schema": {
           "properties": {
             "image": {
               "type": "image"
+            },
+            "instruction": {
+              "type": "string"
+            },
+            "voice": {
+              "type": "audio",
+              "description": "The voice"
             }
           },
           "required": [
-            "image"
+            "image",
+            "instruction",
+            "voice"
           ]
         },
         "input": {
-          "$starlark": "{'image': input['image']}"
+          "$starlark": "input"
         }
       },
       {
@@ -602,8 +611,8 @@
         "max_branch_width": 2,
         "min_leaf_width": 2,
         "max_leaf_width": 2,
-        "name": "sub-function-324",
-        "spec": "4SzveVYhX jf5UCH Ua8h8uZMae8C2WTotXznblFPPDJ jG5BhB",
+        "name": "sb-3HydYMUa",
+        "spec": "a4SzveVYhX jf5UCH Ua8h8uZMae8C2WTotXznblFPPDJ jG5BhBs267LU9t1MZAibte9SO7K75iFRaDj6ByUfw6TMnCct3vag",
         "input_schema": {
           "properties": {
             "image": {
@@ -658,20 +667,29 @@
         "max_branch_width": 2,
         "min_leaf_width": 2,
         "max_leaf_width": 2,
-        "name": "sub-function-614",
-        "spec": "cJB7bGv510uHZbq d1MOc1B4UAcnHcNg 8oJeYyY 9qfddgnXFl3kkPREPBX7BFmcwwtatYI ZZXkqJlydywlXe8sFNNtsMjXnzE8vd",
+        "name": "sb-3HydYMUZ",
+        "spec": "wcJB7bGv510uHZbq d1MOc1B4UAcnHcNg 8oJeYyY 9qfddgnXFl3kkPREPBX7BFmcwwtatYI ZZXkqJlydywlXe8sFNNtsMjXnzE8vdxcicIIUljlLr58zto c1xxImjM6p3sm1nnd21w",
         "input_schema": {
           "properties": {
             "image": {
               "type": "image"
+            },
+            "instruction": {
+              "type": "string"
+            },
+            "voice": {
+              "type": "audio",
+              "description": "The voice"
             }
           },
           "required": [
-            "image"
+            "image",
+            "instruction",
+            "voice"
           ]
         },
         "input": {
-          "$starlark": "{'image': input['image']}"
+          "$starlark": "input"
         }
       },
       {
@@ -681,8 +699,8 @@
         "max_branch_width": 2,
         "min_leaf_width": 2,
         "max_leaf_width": 2,
-        "name": "sub-function-324",
-        "spec": "4SzveVYhX jf5UCH Ua8h8uZMae8C2WTotXznblFPPDJ jG5BhB",
+        "name": "sb-3HydYMUa",
+        "spec": "a4SzveVYhX jf5UCH Ua8h8uZMae8C2WTotXznblFPPDJ jG5BhBs267LU9t1MZAibte9SO7K75iFRaDj6ByUfw6TMnCct3vag",
         "input_schema": {
           "properties": {
             "image": {

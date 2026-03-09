@@ -325,10 +325,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_5527062892245016893",
+              "id": "call_mock_17400032180533278872",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-679\",\"spec\":\"iY8L4IJGnqRXdMUarFjicFfCUaCk0F CdX9v9n7Th4b4UWXsDJxykL42FnJYL8AaLW8MC7J7xk119GPSPzR5lUrlHEdGUGJn2LfdCoxYZi2zHGxJb7UA8UpcnOlMWQwsOYqnMa2gCvMHd46\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"string\"}},\"required\":[\"audio\"]},\"input\":{\"$starlark\":\"{'audio': input['audio']}\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"NiY8L4IJGnqRXdMUarFjicFfCUaCk0F CdX9v9n7Th4b4UWXsDJxykL42FnJYL8AaLW8MC7J7xk119GPSPzR5lUrlHEdGUGJn2LfdCoxYZi2zHGxJb7UA8UpcnOlMWQwsOYqnMa2gCvMHd46BoTsGSZI\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"string\"},\"image\":{\"type\":\"image\"},\"photo\":{\"type\":\"image\"}},\"required\":[\"audio\",\"image\",\"photo\"]},\"input\":{\"$starlark\":\"input\"}}"
               }
             }
           ],
@@ -350,7 +350,7 @@
           "role": "tool",
           "index": 14,
           "content": "1",
-          "tool_call_id": "call_mock_5527062892245016893"
+          "tool_call_id": "call_mock_17400032180533278872"
         },
         {
           "role": "assistant",
@@ -363,10 +363,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_13377835369144013943",
+              "id": "call_mock_8129680478889518242",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-833\",\"spec\":\"TMxSCJI5Pt1VUbjv1osCDewIcwHELeRNR8kc5aij liXaHs68TKZuEYAb 3knNAscS1JcsVFZRV20G6sIanY1 JmHgpADTl8JnDCjYrU7zFDuAcqY5KbQvobIFvgneY8NGH umeBy5XvLZowcsP EfCCBBA2o7dRLWYxV9KbXS\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"string\"},\"image\":{\"type\":\"image\"},\"photo\":{\"type\":\"image\"}},\"required\":[\"audio\",\"image\",\"photo\"]},\"input\":{\"$starlark\":\"input\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"YTMxSCJI5Pt1VUbjv1osCDewIcwHELeRNR8kc5aij liXaHs68TKZuEYAb 3knNAscS1JcsVFZRV20G6sIanY1 JmHgpADTl8JnDCjYrU7zFDuAcqY5KbQvobIFvgneY8NGH umeBy5XvLZowcsP EfCCBBA2o7dRLWYxV9KbXS4RTR\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"string\"},\"image\":{\"type\":\"image\"},\"photo\":{\"type\":\"image\"}},\"required\":[\"audio\",\"image\",\"photo\"]},\"input\":{\"$starlark\":\"input\"}}"
               }
             }
           ],
@@ -388,7 +388,7 @@
           "role": "tool",
           "index": 16,
           "content": "2",
-          "tool_call_id": "call_mock_13377835369144013943"
+          "tool_call_id": "call_mock_8129680478889518242"
         },
         {
           "role": "assistant",
@@ -540,20 +540,28 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-679",
-        "spec": "iY8L4IJGnqRXdMUarFjicFfCUaCk0F CdX9v9n7Th4b4UWXsDJxykL42FnJYL8AaLW8MC7J7xk119GPSPzR5lUrlHEdGUGJn2LfdCoxYZi2zHGxJb7UA8UpcnOlMWQwsOYqnMa2gCvMHd46",
+        "name": "sb-2d6Dtm",
+        "spec": "NiY8L4IJGnqRXdMUarFjicFfCUaCk0F CdX9v9n7Th4b4UWXsDJxykL42FnJYL8AaLW8MC7J7xk119GPSPzR5lUrlHEdGUGJn2LfdCoxYZi2zHGxJb7UA8UpcnOlMWQwsOYqnMa2gCvMHd46BoTsGSZI",
         "input_schema": {
           "properties": {
             "audio": {
               "type": "string"
+            },
+            "image": {
+              "type": "image"
+            },
+            "photo": {
+              "type": "image"
             }
           },
           "required": [
-            "audio"
+            "audio",
+            "image",
+            "photo"
           ]
         },
         "input": {
-          "$starlark": "{'audio': input['audio']}"
+          "$starlark": "input"
         }
       },
       {
@@ -563,8 +571,8 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-833",
-        "spec": "TMxSCJI5Pt1VUbjv1osCDewIcwHELeRNR8kc5aij liXaHs68TKZuEYAb 3knNAscS1JcsVFZRV20G6sIanY1 JmHgpADTl8JnDCjYrU7zFDuAcqY5KbQvobIFvgneY8NGH umeBy5XvLZowcsP EfCCBBA2o7dRLWYxV9KbXS",
+        "name": "sb-2d6Dtn",
+        "spec": "YTMxSCJI5Pt1VUbjv1osCDewIcwHELeRNR8kc5aij liXaHs68TKZuEYAb 3knNAscS1JcsVFZRV20G6sIanY1 JmHgpADTl8JnDCjYrU7zFDuAcqY5KbQvobIFvgneY8NGH umeBy5XvLZowcsP EfCCBBA2o7dRLWYxV9KbXS4RTR",
         "input_schema": {
           "properties": {
             "audio": {
@@ -622,20 +630,28 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-679",
-        "spec": "iY8L4IJGnqRXdMUarFjicFfCUaCk0F CdX9v9n7Th4b4UWXsDJxykL42FnJYL8AaLW8MC7J7xk119GPSPzR5lUrlHEdGUGJn2LfdCoxYZi2zHGxJb7UA8UpcnOlMWQwsOYqnMa2gCvMHd46",
+        "name": "sb-2d6Dtm",
+        "spec": "NiY8L4IJGnqRXdMUarFjicFfCUaCk0F CdX9v9n7Th4b4UWXsDJxykL42FnJYL8AaLW8MC7J7xk119GPSPzR5lUrlHEdGUGJn2LfdCoxYZi2zHGxJb7UA8UpcnOlMWQwsOYqnMa2gCvMHd46BoTsGSZI",
         "input_schema": {
           "properties": {
             "audio": {
               "type": "string"
+            },
+            "image": {
+              "type": "image"
+            },
+            "photo": {
+              "type": "image"
             }
           },
           "required": [
-            "audio"
+            "audio",
+            "image",
+            "photo"
           ]
         },
         "input": {
-          "$starlark": "{'audio': input['audio']}"
+          "$starlark": "input"
         }
       },
       {
@@ -645,8 +661,8 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-833",
-        "spec": "TMxSCJI5Pt1VUbjv1osCDewIcwHELeRNR8kc5aij liXaHs68TKZuEYAb 3knNAscS1JcsVFZRV20G6sIanY1 JmHgpADTl8JnDCjYrU7zFDuAcqY5KbQvobIFvgneY8NGH umeBy5XvLZowcsP EfCCBBA2o7dRLWYxV9KbXS",
+        "name": "sb-2d6Dtn",
+        "spec": "YTMxSCJI5Pt1VUbjv1osCDewIcwHELeRNR8kc5aij liXaHs68TKZuEYAb 3knNAscS1JcsVFZRV20G6sIanY1 JmHgpADTl8JnDCjYrU7zFDuAcqY5KbQvobIFvgneY8NGH umeBy5XvLZowcsP EfCCBBA2o7dRLWYxV9KbXS4RTR",
         "input_schema": {
           "properties": {
             "audio": {

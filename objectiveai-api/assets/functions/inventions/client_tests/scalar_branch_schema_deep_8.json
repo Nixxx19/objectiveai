@@ -209,10 +209,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_11597802868769464723",
+              "id": "call_mock_15427599834047859599",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-896\",\"spec\":\"Lbld3uNZMbr88oyyKQtpD8 yGfQYPtipnkbTTg gT05RbaRBihETe8 0jYezPM2KCNfO0sdlL6WdKJnLwvqDhg7KH vcnPFN9qfdjWHVN2ykPt2 QIjKa6gQTIZWA Hw7c0Ug8na13FvB TQlJUJsILLCMDIBJxDmfP8Zp\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"submission\":{\"type\":\"object\",\"properties\":{\"content\":{\"type\":\"object\",\"properties\":{\"body\":{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\"},\"attachment\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"audio\"},{\"type\":\"video\"},{\"type\":\"file\"}]}},\"required\":[\"text\",\"attachment\"]},\"metadata\":{\"type\":\"object\",\"properties\":{\"author\":{\"type\":\"string\"},\"timestamp\":{\"type\":\"integer\"}},\"required\":[\"author\"]}},\"required\":[\"body\"]}},\"required\":[\"content\"]}},\"required\":[\"submission\"]},\"input\":{\"$starlark\":\"{'submission': input['submission']}\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"WLbld3uNZMbr88oyyKQtpD8 yGfQYPtipnkbTTg gT05RbaRBihETe8 0jYezPM2KCNfO0sdlL6WdKJnLwvqDhg7KH vcnPFN9qfdjWHVN2ykPt2 QIjKa6gQTIZWA Hw7c0Ug8na13FvB TQlJUJsILLCMDIBJxDmfP8Zpc35NgIbKXfpIAh3PBY\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"submission\":{\"type\":\"object\",\"properties\":{\"content\":{\"type\":\"object\",\"properties\":{\"body\":{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\"},\"attachment\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"audio\"},{\"type\":\"video\"},{\"type\":\"file\"}]}},\"required\":[\"text\",\"attachment\"]},\"metadata\":{\"type\":\"object\",\"properties\":{\"author\":{\"type\":\"string\"},\"timestamp\":{\"type\":\"integer\"}},\"required\":[\"author\"]}},\"required\":[\"body\"]}},\"required\":[\"content\"]},\"verified\":{\"type\":\"boolean\"}},\"required\":[\"submission\",\"verified\"]},\"input\":{\"$starlark\":\"input\"}}"
               }
             }
           ],
@@ -234,7 +234,7 @@
           "role": "tool",
           "index": 9,
           "content": "1",
-          "tool_call_id": "call_mock_11597802868769464723"
+          "tool_call_id": "call_mock_15427599834047859599"
         },
         {
           "role": "assistant",
@@ -437,8 +437,8 @@
         "max_branch_width": 2,
         "min_leaf_width": 1,
         "max_leaf_width": 2,
-        "name": "sub-function-896",
-        "spec": "Lbld3uNZMbr88oyyKQtpD8 yGfQYPtipnkbTTg gT05RbaRBihETe8 0jYezPM2KCNfO0sdlL6WdKJnLwvqDhg7KH vcnPFN9qfdjWHVN2ykPt2 QIjKa6gQTIZWA Hw7c0Ug8na13FvB TQlJUJsILLCMDIBJxDmfP8Zp",
+        "name": "sb-deep-3E79MM5",
+        "spec": "WLbld3uNZMbr88oyyKQtpD8 yGfQYPtipnkbTTg gT05RbaRBihETe8 0jYezPM2KCNfO0sdlL6WdKJnLwvqDhg7KH vcnPFN9qfdjWHVN2ykPt2 QIjKa6gQTIZWA Hw7c0Ug8na13FvB TQlJUJsILLCMDIBJxDmfP8Zpc35NgIbKXfpIAh3PBY",
         "input_schema": {
           "properties": {
             "submission": {
@@ -498,14 +498,18 @@
               "required": [
                 "content"
               ]
+            },
+            "verified": {
+              "type": "boolean"
             }
           },
           "required": [
-            "submission"
+            "submission",
+            "verified"
           ]
         },
         "input": {
-          "$starlark": "{'submission': input['submission']}"
+          "$starlark": "input"
         }
       }
     ],
@@ -594,8 +598,8 @@
         "max_branch_width": 2,
         "min_leaf_width": 1,
         "max_leaf_width": 2,
-        "name": "sub-function-896",
-        "spec": "Lbld3uNZMbr88oyyKQtpD8 yGfQYPtipnkbTTg gT05RbaRBihETe8 0jYezPM2KCNfO0sdlL6WdKJnLwvqDhg7KH vcnPFN9qfdjWHVN2ykPt2 QIjKa6gQTIZWA Hw7c0Ug8na13FvB TQlJUJsILLCMDIBJxDmfP8Zp",
+        "name": "sb-deep-3E79MM5",
+        "spec": "WLbld3uNZMbr88oyyKQtpD8 yGfQYPtipnkbTTg gT05RbaRBihETe8 0jYezPM2KCNfO0sdlL6WdKJnLwvqDhg7KH vcnPFN9qfdjWHVN2ykPt2 QIjKa6gQTIZWA Hw7c0Ug8na13FvB TQlJUJsILLCMDIBJxDmfP8Zpc35NgIbKXfpIAh3PBY",
         "input_schema": {
           "properties": {
             "submission": {
@@ -655,14 +659,18 @@
               "required": [
                 "content"
               ]
+            },
+            "verified": {
+              "type": "boolean"
             }
           },
           "required": [
-            "submission"
+            "submission",
+            "verified"
           ]
         },
         "input": {
-          "$starlark": "{'submission': input['submission']}"
+          "$starlark": "input"
         }
       }
     ]

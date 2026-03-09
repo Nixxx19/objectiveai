@@ -364,10 +364,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_15024687907917172160",
+              "id": "call_mock_14888794126268543169",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-188\",\"spec\":\"XCVRx8uQSQYjSufcekXdpGQy CaFIKKgE XoEMdEsWooXzd9TmzQetRZNwgH2T1C0o1ICiNatJKdusYO\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\",\"description\":\"The id\"},\"file\":{\"type\":\"file\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"id\",\"file\",\"tag\"]},\"input\":{\"$starlark\":\"input\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"mXCVRx8uQSQYjSufcekXdpGQy CaFIKKgE XoEMdEsWooXzd9TmzQetRZNwgH2T1C0o1ICiNatJKdu\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"string\",\"description\":\"The id\"},\"file\":{\"type\":\"file\"}},\"required\":[\"id\",\"file\"]},\"input\":{\"$starlark\":\"{'id': input['id'], 'file': input['file']}\"}}"
               }
             }
           ],
@@ -389,7 +389,7 @@
           "role": "tool",
           "index": 16,
           "content": "1",
-          "tool_call_id": "call_mock_15024687907917172160"
+          "tool_call_id": "call_mock_14888794126268543169"
         },
         {
           "role": "assistant",
@@ -543,8 +543,8 @@
         "max_branch_width": 1,
         "min_leaf_width": 1,
         "max_leaf_width": 1,
-        "name": "sub-function-188",
-        "spec": "XCVRx8uQSQYjSufcekXdpGQy CaFIKKgE XoEMdEsWooXzd9TmzQetRZNwgH2T1C0o1ICiNatJKdusYO",
+        "name": "sb-min-48",
+        "spec": "mXCVRx8uQSQYjSufcekXdpGQy CaFIKKgE XoEMdEsWooXzd9TmzQetRZNwgH2T1C0o1ICiNatJKdu",
         "input_schema": {
           "properties": {
             "id": {
@@ -553,19 +553,15 @@
             },
             "file": {
               "type": "file"
-            },
-            "tag": {
-              "type": "string"
             }
           },
           "required": [
             "id",
-            "file",
-            "tag"
+            "file"
           ]
         },
         "input": {
-          "$starlark": "input"
+          "$starlark": "{'id': input['id'], 'file': input['file']}"
         }
       }
     ],
@@ -604,8 +600,8 @@
         "max_branch_width": 1,
         "min_leaf_width": 1,
         "max_leaf_width": 1,
-        "name": "sub-function-188",
-        "spec": "XCVRx8uQSQYjSufcekXdpGQy CaFIKKgE XoEMdEsWooXzd9TmzQetRZNwgH2T1C0o1ICiNatJKdusYO",
+        "name": "sb-min-48",
+        "spec": "mXCVRx8uQSQYjSufcekXdpGQy CaFIKKgE XoEMdEsWooXzd9TmzQetRZNwgH2T1C0o1ICiNatJKdu",
         "input_schema": {
           "properties": {
             "id": {
@@ -614,19 +610,15 @@
             },
             "file": {
               "type": "file"
-            },
-            "tag": {
-              "type": "string"
             }
           },
           "required": [
             "id",
-            "file",
-            "tag"
+            "file"
           ]
         },
         "input": {
-          "$starlark": "input"
+          "$starlark": "{'id': input['id'], 'file': input['file']}"
         }
       }
     ]

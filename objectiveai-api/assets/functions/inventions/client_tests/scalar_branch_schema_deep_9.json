@@ -172,10 +172,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_3989187039410637328",
+              "id": "call_mock_14508348718856387757",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-974\",\"spec\":\"mGHHZexCU6ttgiUmmWU6N1r3B1cKtQ7PPgQBr30pjP0JiMfktw4AmckQyCHXAR2nrrkpzlbquv3sNL\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"submission\":{\"type\":\"object\",\"properties\":{\"content\":{\"type\":\"object\",\"properties\":{\"body\":{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\"},\"attachment\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"audio\"},{\"type\":\"video\"},{\"type\":\"file\"}]}},\"required\":[\"text\",\"attachment\"]},\"metadata\":{\"type\":\"object\",\"properties\":{\"author\":{\"type\":\"string\"},\"timestamp\":{\"type\":\"integer\"}},\"required\":[\"author\"]}},\"required\":[\"body\"]}},\"required\":[\"content\"]}},\"required\":[\"submission\"]},\"input\":{\"$starlark\":\"{'submission': input['submission']}\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"lmGHHZexCU6ttgiUmmWU6N1r3B1cKtQ7PPgQBr30pjP0JiMfktw4AmckQyCHXAR2nrrkpzlbquv3sNLmYcnJ8VW18tHduaE5ES92zbFVdXs9yADE1tGg0abzDvcdYg9tZTW2XWqlMDknsIYkl5S7NvJCz5tGKGfv9EJzQNUoJBf5iSDGN5vr8eaOjy zA9gdV0qK3\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"submission\":{\"type\":\"object\",\"properties\":{\"content\":{\"type\":\"object\",\"properties\":{\"body\":{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\"},\"attachment\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"audio\"},{\"type\":\"video\"},{\"type\":\"file\"}]}},\"required\":[\"text\",\"attachment\"]},\"metadata\":{\"type\":\"object\",\"properties\":{\"author\":{\"type\":\"string\"},\"timestamp\":{\"type\":\"integer\"}},\"required\":[\"author\"]}},\"required\":[\"body\"]}},\"required\":[\"content\"]},\"verified\":{\"type\":\"boolean\"}},\"required\":[\"submission\",\"verified\"]},\"input\":{\"$starlark\":\"input\"}}"
               }
             }
           ],
@@ -197,7 +197,7 @@
           "role": "tool",
           "index": 7,
           "content": "1",
-          "tool_call_id": "call_mock_3989187039410637328"
+          "tool_call_id": "call_mock_14508348718856387757"
         },
         {
           "role": "assistant",
@@ -401,8 +401,8 @@
         "max_branch_width": 2,
         "min_leaf_width": 1,
         "max_leaf_width": 2,
-        "name": "sub-function-974",
-        "spec": "mGHHZexCU6ttgiUmmWU6N1r3B1cKtQ7PPgQBr30pjP0JiMfktw4AmckQyCHXAR2nrrkpzlbquv3sNL",
+        "name": "sb-deep-3E79MM5",
+        "spec": "lmGHHZexCU6ttgiUmmWU6N1r3B1cKtQ7PPgQBr30pjP0JiMfktw4AmckQyCHXAR2nrrkpzlbquv3sNLmYcnJ8VW18tHduaE5ES92zbFVdXs9yADE1tGg0abzDvcdYg9tZTW2XWqlMDknsIYkl5S7NvJCz5tGKGfv9EJzQNUoJBf5iSDGN5vr8eaOjy zA9gdV0qK3",
         "input_schema": {
           "properties": {
             "submission": {
@@ -462,14 +462,18 @@
               "required": [
                 "content"
               ]
+            },
+            "verified": {
+              "type": "boolean"
             }
           },
           "required": [
-            "submission"
+            "submission",
+            "verified"
           ]
         },
         "input": {
-          "$starlark": "{'submission': input['submission']}"
+          "$starlark": "input"
         }
       }
     ],
@@ -558,8 +562,8 @@
         "max_branch_width": 2,
         "min_leaf_width": 1,
         "max_leaf_width": 2,
-        "name": "sub-function-974",
-        "spec": "mGHHZexCU6ttgiUmmWU6N1r3B1cKtQ7PPgQBr30pjP0JiMfktw4AmckQyCHXAR2nrrkpzlbquv3sNL",
+        "name": "sb-deep-3E79MM5",
+        "spec": "lmGHHZexCU6ttgiUmmWU6N1r3B1cKtQ7PPgQBr30pjP0JiMfktw4AmckQyCHXAR2nrrkpzlbquv3sNLmYcnJ8VW18tHduaE5ES92zbFVdXs9yADE1tGg0abzDvcdYg9tZTW2XWqlMDknsIYkl5S7NvJCz5tGKGfv9EJzQNUoJBf5iSDGN5vr8eaOjy zA9gdV0qK3",
         "input_schema": {
           "properties": {
             "submission": {
@@ -619,14 +623,18 @@
               "required": [
                 "content"
               ]
+            },
+            "verified": {
+              "type": "boolean"
             }
           },
           "required": [
-            "submission"
+            "submission",
+            "verified"
           ]
         },
         "input": {
-          "$starlark": "{'submission': input['submission']}"
+          "$starlark": "input"
         }
       }
     ]

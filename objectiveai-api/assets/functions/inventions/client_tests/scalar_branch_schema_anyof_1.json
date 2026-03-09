@@ -248,10 +248,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_15395248931424435412",
+              "id": "call_mock_9337025283520351467",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-348\",\"spec\":\"llr0QhV6oiWVTHvHSMvpODf9IEOmngJaTtHiFmdwjfkuBCfdGcGHh9a6PnRRt\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]},\"input\":{\"$starlark\":\"input\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"ellr0QhV6oiWVTHvHSMvpODf9IEOmngJaTtHiFmdwjfkuBCfdGcGHh9a6PnRRtS507GjSlb5EovBKl9MqpPjdF3ebA2hlzhPs7JR7W\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}}},\"required\":[\"payload\",\"tags\"]},\"input\":{\"$starlark\":\"{'payload': input['payload'], 'tags': input['tags']}\"}}"
               }
             }
           ],
@@ -273,7 +273,7 @@
           "role": "tool",
           "index": 11,
           "content": "1",
-          "tool_call_id": "call_mock_15395248931424435412"
+          "tool_call_id": "call_mock_9337025283520351467"
         },
         {
           "role": "assistant",
@@ -286,10 +286,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_17329741981423889684",
+              "id": "call_mock_12313218691302239441",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"name\":\"sub-function-926\",\"spec\":\"CyhiJ4Wz5GAmJ52qioyquWf0ZxTqYPDkyemOWo7p0vXqYruCZqbbG6k 6GrebzYawFOdiYGNnAZwTUQY9OkL6mYBi9sQyhaxbGVCP9V30xVvWli4FbryACUALpl0qiDKCZC2LjrsOUKz6gS5sR9WIEd8IYbaWBLQ17Az21yUKXqPj\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]},\"input\":{\"$starlark\":\"input\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"ZCyhiJ4Wz5GAmJ52qioyquWf0ZxTqYPDkyemOWo7p0vXqYruCZqbbG6k 6GrebzYawFOdiYGNnAZwTUQY9OkL6mYBi9sQyhaxbGVCP9V30xVvWli4FbryACUALpl0qiDKCZC2LjrsOUKz6gS5sR9WIEd8IYbaWBLQ17Az21yUKXqPjO47n3lP74RqlcmD\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}}},\"required\":[\"payload\",\"tags\"]},\"input\":{\"$starlark\":\"{'payload': input['payload'], 'tags': input['tags']}\"}}"
               }
             }
           ],
@@ -311,7 +311,7 @@
           "role": "tool",
           "index": 13,
           "content": "2",
-          "tool_call_id": "call_mock_17329741981423889684"
+          "tool_call_id": "call_mock_12313218691302239441"
         },
         {
           "role": "assistant",
@@ -489,8 +489,8 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-348",
-        "spec": "llr0QhV6oiWVTHvHSMvpODf9IEOmngJaTtHiFmdwjfkuBCfdGcGHh9a6PnRRt",
+        "name": "sb-2RNZ8Me",
+        "spec": "ellr0QhV6oiWVTHvHSMvpODf9IEOmngJaTtHiFmdwjfkuBCfdGcGHh9a6PnRRtS507GjSlb5EovBKl9MqpPjdF3ebA2hlzhPs7JR7W",
         "input_schema": {
           "properties": {
             "payload": {
@@ -524,19 +524,15 @@
               "items": {
                 "type": "string"
               }
-            },
-            "priority": {
-              "type": "integer"
             }
           },
           "required": [
             "payload",
-            "tags",
-            "priority"
+            "tags"
           ]
         },
         "input": {
-          "$starlark": "input"
+          "$starlark": "{'payload': input['payload'], 'tags': input['tags']}"
         }
       },
       {
@@ -546,8 +542,8 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-926",
-        "spec": "CyhiJ4Wz5GAmJ52qioyquWf0ZxTqYPDkyemOWo7p0vXqYruCZqbbG6k 6GrebzYawFOdiYGNnAZwTUQY9OkL6mYBi9sQyhaxbGVCP9V30xVvWli4FbryACUALpl0qiDKCZC2LjrsOUKz6gS5sR9WIEd8IYbaWBLQ17Az21yUKXqPj",
+        "name": "sb-2RNZ8Mf",
+        "spec": "ZCyhiJ4Wz5GAmJ52qioyquWf0ZxTqYPDkyemOWo7p0vXqYruCZqbbG6k 6GrebzYawFOdiYGNnAZwTUQY9OkL6mYBi9sQyhaxbGVCP9V30xVvWli4FbryACUALpl0qiDKCZC2LjrsOUKz6gS5sR9WIEd8IYbaWBLQ17Az21yUKXqPjO47n3lP74RqlcmD",
         "input_schema": {
           "properties": {
             "payload": {
@@ -581,19 +577,15 @@
               "items": {
                 "type": "string"
               }
-            },
-            "priority": {
-              "type": "integer"
             }
           },
           "required": [
             "payload",
-            "tags",
-            "priority"
+            "tags"
           ]
         },
         "input": {
-          "$starlark": "input"
+          "$starlark": "{'payload': input['payload'], 'tags': input['tags']}"
         }
       }
     ],
@@ -657,8 +649,8 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-348",
-        "spec": "llr0QhV6oiWVTHvHSMvpODf9IEOmngJaTtHiFmdwjfkuBCfdGcGHh9a6PnRRt",
+        "name": "sb-2RNZ8Me",
+        "spec": "ellr0QhV6oiWVTHvHSMvpODf9IEOmngJaTtHiFmdwjfkuBCfdGcGHh9a6PnRRtS507GjSlb5EovBKl9MqpPjdF3ebA2hlzhPs7JR7W",
         "input_schema": {
           "properties": {
             "payload": {
@@ -692,19 +684,15 @@
               "items": {
                 "type": "string"
               }
-            },
-            "priority": {
-              "type": "integer"
             }
           },
           "required": [
             "payload",
-            "tags",
-            "priority"
+            "tags"
           ]
         },
         "input": {
-          "$starlark": "input"
+          "$starlark": "{'payload': input['payload'], 'tags': input['tags']}"
         }
       },
       {
@@ -714,8 +702,8 @@
         "max_branch_width": 3,
         "min_leaf_width": 2,
         "max_leaf_width": 3,
-        "name": "sub-function-926",
-        "spec": "CyhiJ4Wz5GAmJ52qioyquWf0ZxTqYPDkyemOWo7p0vXqYruCZqbbG6k 6GrebzYawFOdiYGNnAZwTUQY9OkL6mYBi9sQyhaxbGVCP9V30xVvWli4FbryACUALpl0qiDKCZC2LjrsOUKz6gS5sR9WIEd8IYbaWBLQ17Az21yUKXqPj",
+        "name": "sb-2RNZ8Mf",
+        "spec": "ZCyhiJ4Wz5GAmJ52qioyquWf0ZxTqYPDkyemOWo7p0vXqYruCZqbbG6k 6GrebzYawFOdiYGNnAZwTUQY9OkL6mYBi9sQyhaxbGVCP9V30xVvWli4FbryACUALpl0qiDKCZC2LjrsOUKz6gS5sR9WIEd8IYbaWBLQ17Az21yUKXqPjO47n3lP74RqlcmD",
         "input_schema": {
           "properties": {
             "payload": {
@@ -749,19 +737,15 @@
               "items": {
                 "type": "string"
               }
-            },
-            "priority": {
-              "type": "integer"
             }
           },
           "required": [
             "payload",
-            "tags",
-            "priority"
+            "tags"
           ]
         },
         "input": {
-          "$starlark": "input"
+          "$starlark": "{'payload': input['payload'], 'tags': input['tags']}"
         }
       }
     ]
