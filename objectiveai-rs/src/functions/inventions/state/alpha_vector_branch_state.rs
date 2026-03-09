@@ -818,4 +818,43 @@ impl super::InventionState for AlphaVectorBranchState {
     fn write_readme(this: &Arc<Mutex<Self>>) {
         AlphaVectorBranchState::write_readme(this)
     }
+
+    fn replace_placeholders(
+        this: &Arc<Mutex<Self>>,
+        paths: &[crate::functions::RemoteFunctionPath],
+    ) {
+        let mut state = this.lock().unwrap();
+        let tasks = match state.tasks.take() {
+            Some(tasks) => tasks,
+            None => return,
+        };
+        state.tasks = Some(
+            tasks
+                .into_iter()
+                .map(|task| match task {
+                    functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                        match paths.iter().find(|p| {
+                            p.repository == t.params.name
+                        }) {
+                            Some(path) => functions::alpha_vector::BranchTaskExpression::ScalarFunction(
+                                t.replace(path),
+                            ),
+                            None => functions::alpha_vector::BranchTaskExpression::PlaceholderScalarFunction(t),
+                        }
+                    }
+                    functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t) => {
+                        match paths.iter().find(|p| {
+                            p.repository == t.params.name
+                        }) {
+                            Some(path) => functions::alpha_vector::BranchTaskExpression::VectorFunction(
+                                t.replace(path),
+                            ),
+                            None => functions::alpha_vector::BranchTaskExpression::PlaceholderVectorFunction(t),
+                        }
+                    }
+                    other => other,
+                })
+                .collect(),
+        );
+    }
 }

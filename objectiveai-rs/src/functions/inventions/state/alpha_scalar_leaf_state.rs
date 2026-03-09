@@ -766,4 +766,9 @@ impl super::InventionState for AlphaScalarLeafState {
     fn write_readme(this: &Arc<Mutex<Self>>) {
         AlphaScalarLeafState::write_readme(this)
     }
+
+    fn replace_placeholders(
+        _this: &Arc<Mutex<Self>>,
+        _paths: &[crate::functions::RemoteFunctionPath],
+    ) {}
 }

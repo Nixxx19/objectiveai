@@ -811,4 +811,33 @@ impl super::InventionState for AlphaScalarBranchState {
     fn write_readme(this: &Arc<Mutex<Self>>) {
         AlphaScalarBranchState::write_readme(this)
     }
+
+    fn replace_placeholders(
+        this: &Arc<Mutex<Self>>,
+        paths: &[crate::functions::RemoteFunctionPath],
+    ) {
+        let mut state = this.lock().unwrap();
+        let tasks = match state.tasks.take() {
+            Some(tasks) => tasks,
+            None => return,
+        };
+        state.tasks = Some(
+            tasks
+                .into_iter()
+                .map(|task| match task {
+                    functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t) => {
+                        match paths.iter().find(|p| {
+                            p.repository == t.params.name
+                        }) {
+                            Some(path) => functions::alpha_scalar::BranchTaskExpression::ScalarFunction(
+                                t.replace(path),
+                            ),
+                            None => functions::alpha_scalar::BranchTaskExpression::PlaceholderScalarFunction(t),
+                        }
+                    }
+                    other => other,
+                })
+                .collect(),
+        );
+    }
 }

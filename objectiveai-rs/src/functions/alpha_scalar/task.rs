@@ -155,6 +155,20 @@ impl PlaceholderScalarFunctionTaskExpression {
             ),
         }
     }
+
+    pub fn replace(
+        self,
+        path: &functions::RemoteFunctionPath,
+    ) -> ScalarFunctionTaskExpression {
+        ScalarFunctionTaskExpression {
+            remote: path.remote,
+            owner: path.owner.clone(),
+            repository: path.repository.clone(),
+            commit: path.commit.clone(),
+            skip: self.skip,
+            input: self.input,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

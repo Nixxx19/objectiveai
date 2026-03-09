@@ -82,6 +82,11 @@ pub trait InventionState: Clone + Send + 'static {
     fn validate_description(this: &Arc<Mutex<Self>>) -> Result<(), String>;
 
     fn write_readme(this: &Arc<Mutex<Self>>);
+
+    fn replace_placeholders(
+        this: &Arc<Mutex<Self>>,
+        paths: &[crate::functions::RemoteFunctionPath],
+    );
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
