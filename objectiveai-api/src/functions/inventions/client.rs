@@ -1110,10 +1110,18 @@ fn publish_github_git(
     }
     index.write().map_err(|e| e.to_string())?;
     let tree_oid = index.write_tree().map_err(|e| e.to_string())?;
+
+    // If the tree is identical to the parent's tree, skip commit and push.
+    let parent = git_repo.head().ok().and_then(|h| h.peel_to_commit().ok());
+    if let Some(ref parent) = parent {
+        if parent.tree_id() == tree_oid {
+            return Ok(parent.id().to_string());
+        }
+    }
+
     let tree = git_repo.find_tree(tree_oid).map_err(|e| e.to_string())?;
     let sig = git2::Signature::now(commit_author_name, commit_author_email)
         .map_err(|e| e.to_string())?;
-    let parent = git_repo.head().ok().and_then(|h| h.peel_to_commit().ok());
     let parents: Vec<&git2::Commit> = parent.iter().collect();
     let commit_oid = git_repo.commit(
         Some("HEAD"), &sig, &sig, commit_message, &tree, &parents,

@@ -161,11 +161,19 @@ impl Client {
         }
         index.write()?;
         let tree_oid = index.write_tree()?;
+
+        // If the tree is identical to the parent's tree, skip the commit.
+        let parent = repo.head().ok().and_then(|h| h.peel_to_commit().ok());
+        if let Some(ref parent) = parent {
+            if parent.tree_id() == tree_oid {
+                return Ok(parent.id().to_string());
+            }
+        }
+
         let tree = repo.find_tree(tree_oid)?;
 
         // Create commit.
         let sig = git2::Signature::now(&self.commit_author_name, &self.commit_author_email)?;
-        let parent = repo.head().ok().and_then(|h| h.peel_to_commit().ok());
         let parents: Vec<&git2::Commit> = parent.iter().collect();
         let commit_oid = repo.commit(
             Some("HEAD"),
