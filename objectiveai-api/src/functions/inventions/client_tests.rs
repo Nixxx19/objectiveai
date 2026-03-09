@@ -146,6 +146,7 @@ fn make_client() -> Arc<TestClient> {
         github_client,
         filesystem_client,
         Arc::new(StubInventionUsageHandler),
+        true,
     ))
 }
 

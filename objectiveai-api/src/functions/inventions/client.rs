@@ -39,6 +39,7 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG> 
     pub github_client: Arc<crate::github::Client>,
     pub filesystem_client: Arc<crate::filesystem::Client>,
     pub usage_handler: Arc<IUSG>,
+    pub persist: bool,
 }
 
 impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
@@ -53,12 +54,14 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
         github_client: Arc<crate::github::Client>,
         filesystem_client: Arc<crate::filesystem::Client>,
         usage_handler: Arc<IUSG>,
+        persist: bool,
     ) -> Self {
         Self {
             agent_client,
             github_client,
             filesystem_client,
             usage_handler,
+            persist,
         }
     }
 }
@@ -229,20 +232,21 @@ where
         let agent_client = self.agent_client.clone();
         let github_client = self.github_client.clone();
         let filesystem_client = self.filesystem_client.clone();
+        let persist = self.persist;
 
         let stream: Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>> =
             match state {
                 State::AlphaScalarBranch(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
                 }
                 State::AlphaScalarLeaf(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
                 }
                 State::AlphaVectorBranch(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
                 }
                 State::AlphaVectorLeaf(s) => {
-                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created)
+                    run_all_steps(s, agent_client, github_client, filesystem_client, ctx, request, id, created, persist)
                 }
             };
 
@@ -347,6 +351,7 @@ fn run_all_steps<T, CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG>(
     request: Arc<objectiveai::functions::inventions::request::FunctionInventionCreateParams>,
     id: String,
     created: u64,
+    persist: bool,
 ) -> Pin<Box<dyn Stream<Item = FunctionInventionChunk> + Send>>
 where
     T: InventionState,
@@ -767,6 +772,11 @@ where
             (s, function)
         };
 
+        // Clear filesystem before publishing if not persisting.
+        if !persist {
+            let _ = filesystem_client.clear();
+        }
+
         // Publish the function if remote is set and build succeeded.
         let (path, publish_error) = if function.is_some() {
             if let Some(remote) = &request.remote {
@@ -802,6 +812,11 @@ where
         } else {
             (None, None)
         };
+
+        // Clear filesystem after publishing if not persisting.
+        if !persist {
+            let _ = filesystem_client.clear();
+        }
 
         yield FunctionInventionChunk {
             id: id.to_string(),

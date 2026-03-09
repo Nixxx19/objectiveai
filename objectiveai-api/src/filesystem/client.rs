@@ -16,6 +16,14 @@ impl Client {
         Self { base_dir, commit_author_name, commit_author_email }
     }
 
+    /// Removes the entire base directory and all its contents.
+    pub fn clear(&self) -> std::io::Result<()> {
+        if self.base_dir.exists() {
+            std::fs::remove_dir_all(&self.base_dir)?;
+        }
+        Ok(())
+    }
+
     /// Returns the repository path for the given owner and repository.
     pub fn repo_path(&self, owner: &str, repository: &str) -> PathBuf {
         self.base_dir.join(owner).join(repository)
