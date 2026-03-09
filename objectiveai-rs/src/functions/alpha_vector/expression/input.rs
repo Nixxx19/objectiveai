@@ -51,7 +51,17 @@ impl VectorFunctionInputSchema {
                             functions::expression::InputSchema::Object(context),
                         );
                     }
-                    map.insert("items".to_string(), self.items);
+                    map.insert(
+                        "items".to_string(),
+                        functions::expression::InputSchema::Array(
+                            functions::expression::ArrayInputSchema {
+                                description: None,
+                                min_items: Some(2),
+                                max_items: None,
+                                items: Box::new(self.items),
+                            },
+                        ),
+                    );
                     map
                 },
             },
