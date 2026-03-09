@@ -604,6 +604,32 @@ pub(super) fn generate_tool_arguments(
     }
 }
 
+/// If the current task count equals the predicted task count (and both > 0),
+/// returns a `DeleteTask` tool call with a random index in `[0, task_length)`.
+async fn delete_if_at_predicted(
+    invention_tools: &[objectiveai::functions::inventions::InventionTool],
+    rng: &mut impl rand::Rng,
+) -> Option<MockToolCall> {
+    let tasks_len_str = call_invention_tool(
+        invention_tools, "ReadTasksLength", serde_json::Value::Null,
+    ).await;
+    let predicted_str = call_invention_tool(
+        invention_tools, "ReadPredictedTasksLength", serde_json::Value::Null,
+    ).await;
+    let tasks_len = tasks_len_str.parse::<u32>().ok()?;
+    let predicted = predicted_str.parse::<u32>().ok()?;
+    if tasks_len == 0 || tasks_len != predicted {
+        return None;
+    }
+    let index = rng.random_range(0..tasks_len);
+    Some(MockToolCall {
+        tool_name: "DeleteTask".to_string(),
+        call_id: format!("call_mock_{}", rng.random_range(0u64..u64::MAX)),
+        arguments: serde_json::json!({ "index": index }).to_string(),
+        n_deltas: 1,
+    })
+}
+
 /// Calls an invention tool by name with the given JSON argument and returns
 /// the result string, or the error string on failure.
 async fn call_invention_tool(
@@ -697,6 +723,9 @@ async fn resolve_invention_response(
                     serde_json::json!({"tasks_length": min_tasks}),
                 ).await;
             }
+            if let Some(tc) = delete_if_at_predicted(invention_tools, rng).await {
+                return MockResponse::ToolCalls(vec![tc]);
+            }
             super::invention::alpha_scalar_leaf::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
             ).await
@@ -714,6 +743,9 @@ async fn resolve_invention_response(
                     invention_tools, "EditPredictedTasksLength",
                     serde_json::json!({"tasks_length": min_tasks}),
                 ).await;
+            }
+            if let Some(tc) = delete_if_at_predicted(invention_tools, rng).await {
+                return MockResponse::ToolCalls(vec![tc]);
             }
             super::invention::alpha_scalar_branch::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
@@ -733,6 +765,9 @@ async fn resolve_invention_response(
                     serde_json::json!({"tasks_length": min_tasks}),
                 ).await;
             }
+            if let Some(tc) = delete_if_at_predicted(invention_tools, rng).await {
+                return MockResponse::ToolCalls(vec![tc]);
+            }
             super::invention::alpha_vector_leaf::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
             ).await
@@ -750,6 +785,9 @@ async fn resolve_invention_response(
                     invention_tools, "EditPredictedTasksLength",
                     serde_json::json!({"tasks_length": min_tasks}),
                 ).await;
+            }
+            if let Some(tc) = delete_if_at_predicted(invention_tools, rng).await {
+                return MockResponse::ToolCalls(vec![tc]);
             }
             let tasks_length_str = call_invention_tool(
                 invention_tools, "ReadTasksLength", serde_json::Value::Null,
