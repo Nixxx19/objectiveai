@@ -174,7 +174,7 @@
               "id": "call_mock_8805322544783580260",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"priority\":{\"type\":\"integer\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"clip\":{\"type\":\"audio\"}},\"required\":[\"priority\",\"values\",\"clip\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"language\":{\"type\":\"string\"},\"attachment\":{\"type\":\"file\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"icon\":{\"type\":\"image\"}},\"required\":[\"language\",\"attachment\",\"icon\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"priority\":{\"type\":\"integer\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"clip\":{\"type\":\"audio\"}},\"required\":[\"priority\",\"values\",\"clip\"]},\"items\":{\"type\":\"object\",\"properties\":{\"language\":{\"type\":\"string\"},\"attachment\":{\"type\":\"file\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"icon\":{\"type\":\"image\"}},\"required\":[\"language\",\"attachment\",\"icon\"]}}"
               }
             }
           ],
@@ -367,7 +367,7 @@
               "id": "call_mock_2837947091491526214",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"oTJJ0JucaPezzmsjpJgWMDHFbH6Eq ro8ZIDjCcl9sdwFQJi2ehQHxfPCBB6P5XptEGU9Dns5klK9qgYqC0YJH8KHysmFTqNT2hiLEB7LYiGBKIjPPcDvuHroQ m1fubjP WjyOFsUCQjJt rHYegRAXJv6\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"language\":{\"type\":\"string\"},\"attachment\":{\"type\":\"file\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"icon\":{\"type\":\"image\"}},\"required\":[\"language\",\"attachment\",\"icon\"]}},\"context\":{\"properties\":{\"priority\":{\"type\":\"integer\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"clip\":{\"type\":\"audio\"}},\"required\":[\"priority\",\"values\",\"clip\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"oTJJ0JucaPezzmsjpJgWMDHFbH6Eq ro8ZIDjCcl9sdwFQJi2ehQHxfPCBB6P5XptEGU9Dns5klK9qgYqC0YJH8KHysmFTqNT2hiLEB7LYiGBKIjPPcDvuHroQ m1fubjP WjyOFsUCQjJt rHYegRAXJv6\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"language\":{\"type\":\"string\"},\"attachment\":{\"type\":\"file\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"icon\":{\"type\":\"image\"}},\"required\":[\"language\",\"attachment\",\"icon\"]},\"context\":{\"properties\":{\"priority\":{\"type\":\"integer\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"clip\":{\"type\":\"audio\"}},\"required\":[\"priority\",\"values\",\"clip\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -538,33 +538,29 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "language": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "attachment": {
+            "type": "file"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
               "type": "string"
-            },
-            "attachment": {
-              "type": "file"
-            },
-            "tags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "icon": {
-              "type": "image"
             }
           },
-          "required": [
-            "language",
-            "attachment",
-            "icon"
-          ]
-        }
+          "icon": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "language",
+          "attachment",
+          "icon"
+        ]
       }
     },
     "essay_tasks": "KcFPN8ltap4aLiFWNmcqs1MxxjNdKpiTvzrQYtQ RrhfUfnuIXzKkGkhi7eCDyzhxVYCn02Vj6yTjpGFfiHluLzaAQqYJOM8a1OfmOE9hkFmExcyi9LOK3EyyTtlGs4nma0lUwhZnYmIboXDz3y8ugVC91WkpDktq9dkxAYzTVGpJtHgaPtf7k4J9w V55DqfQikkUwFQ0FsGbm7DXY6DoB2N22efkMC4RHy6fj5f268Sv9D9n4bOYcRCMLu4lXeccJZYKTFUNtXWBgAeflLKHDDBfoS2wwjm9 8ZgaRPGqJuKfmdwysFE Lfisyq23ayHs0pNCEiQmxrbdUj5pXlMXLaU2lynj4ipmXpQIyzYejpuwBU5VNton1wV v1IhoefKfDouP 18IUPwezJyi4Vl5g9zIu3PzjOacQ",
@@ -601,33 +597,29 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "language": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "attachment": {
+                "type": "file"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
                   "type": "string"
-                },
-                "attachment": {
-                  "type": "file"
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "icon": {
-                  "type": "image"
                 }
               },
-              "required": [
-                "language",
-                "attachment",
-                "icon"
-              ]
-            }
+              "icon": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "language",
+              "attachment",
+              "icon"
+            ]
           }
         },
         "input": {
@@ -671,33 +663,29 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "language": {
+        "type": "object",
+        "properties": {
+          "language": {
+            "type": "string"
+          },
+          "attachment": {
+            "type": "file"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
               "type": "string"
-            },
-            "attachment": {
-              "type": "file"
-            },
-            "tags": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            "icon": {
-              "type": "image"
             }
           },
-          "required": [
-            "language",
-            "attachment",
-            "icon"
-          ]
-        }
+          "icon": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "language",
+          "attachment",
+          "icon"
+        ]
       }
     },
     "tasks": [
@@ -733,33 +721,29 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "language": {
+            "type": "object",
+            "properties": {
+              "language": {
+                "type": "string"
+              },
+              "attachment": {
+                "type": "file"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
                   "type": "string"
-                },
-                "attachment": {
-                  "type": "file"
-                },
-                "tags": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "icon": {
-                  "type": "image"
                 }
               },
-              "required": [
-                "language",
-                "attachment",
-                "icon"
-              ]
-            }
+              "icon": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "language",
+              "attachment",
+              "icon"
+            ]
           }
         },
         "input": {

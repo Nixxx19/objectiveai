@@ -178,7 +178,7 @@
                   "id": "call_mock_15452783728936907052",
                   "function": {
                     "name": "WriteInputSchema",
-                    "arguments": "{\"context\":{\"properties\":{\"score\":{\"type\":\"number\"},\"tag\":{\"type\":\"string\"},\"instruction\":{\"type\":\"number\"}},\"required\":[\"score\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"}},\"required\":[\"flagged\"]}}}"
+                    "arguments": "{\"context\":{\"properties\":{\"score\":{\"type\":\"number\"},\"tag\":{\"type\":\"string\"},\"instruction\":{\"type\":\"number\"}},\"required\":[\"score\"]},\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"}},\"required\":[\"flagged\"]}}"
                   }
                 }
               ],
@@ -726,19 +726,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "flagged": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "flagged"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "flagged"
+            ]
           }
         },
         "essay_tasks": "sLQW7dTyhsNxLi9AWKURQM8OhrKbA sAcfeyofDU8GvHRrh0CU42GEk4AeJOzKFKi n7mGe0XUmiVxC40e dgTeK8zJPzcUofPBndsx8HImFPXV6dym5hEiL9MyQMiNhpl1MBUqaGptQXOvlqeT2BjN0OFvCmtLrGjwHh6yH1GY8Rt0DO1K5pCaXo8FtjboWYmWho0kV6uHMt4jocabuMPml4OPfDtNWHtJoIzBCQgtWJwdpo95CBo5zw4jVfksbwFE2uy 55ub58",
@@ -788,19 +784,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "flagged": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "flagged"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "flagged"
+            ]
           }
         },
         "tasks": [

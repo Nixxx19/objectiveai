@@ -134,7 +134,7 @@
               "id": "call_mock_3926064719191928474",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"key\":{\"type\":\"string\"},\"document\":{\"type\":\"file\"},\"avatar\":{\"type\":\"image\"}},\"required\":[\"key\",\"document\",\"avatar\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"threshold\":{\"type\":\"integer\"},\"text\":{\"type\":\"string\"}},\"required\":[\"threshold\",\"text\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"key\":{\"type\":\"string\"},\"document\":{\"type\":\"file\"},\"avatar\":{\"type\":\"image\"}},\"required\":[\"key\",\"document\",\"avatar\"]},\"items\":{\"type\":\"object\",\"properties\":{\"threshold\":{\"type\":\"integer\"},\"text\":{\"type\":\"string\"}},\"required\":[\"threshold\",\"text\"]}}"
               }
             }
           ],
@@ -608,23 +608,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "threshold": {
-              "type": "integer"
-            },
-            "text": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "threshold": {
+            "type": "integer"
           },
-          "required": [
-            "threshold",
-            "text"
-          ]
-        }
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "threshold",
+          "text"
+        ]
       }
     },
     "essay_tasks": "35Ry97Aer9Jei9ykwV jeerfUnHrRlm4L0Ik2MEkmXtrtcAGkxtxc1tu7bnLA9vY5Kt8fAzbdxCfBa1I4m3FGlsKmlKrve58OuUbPJ7Oi4PQmUOM19Ir8AbzIQP1yWZ3CzEZGdXlwXdSV1bo5JZ1jMNKFwbEhXCMz1XGAXs2IF9eckgi33mbj0UXGZrbC8QFxEWg8l6LrGK2UKcFUowVgSmZvIrJtZX27kMDhzazOwGeNKrp5773ZphwFgiQc9QbmZJv3BsQYVHRvkefCgZb40dLsroCPGpuKyAZELrVPXPiqvixvP1eaUE6bvKik9AfRxiE5QO2ziLo6fyjAuL7pmtYyzKCUEUw5emMiSnr9HLN",
@@ -676,23 +672,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "threshold": {
-              "type": "integer"
-            },
-            "text": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "threshold": {
+            "type": "integer"
           },
-          "required": [
-            "threshold",
-            "text"
-          ]
-        }
+          "text": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "threshold",
+          "text"
+        ]
       }
     },
     "tasks": [

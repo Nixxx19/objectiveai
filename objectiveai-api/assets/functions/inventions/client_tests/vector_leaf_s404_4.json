@@ -98,7 +98,7 @@
               "id": "call_mock_17170438536256645996",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"upload\":{\"type\":\"file\"},\"clip\":{\"type\":\"audio\"},\"instruction\":{\"type\":\"number\"},\"document\":{\"type\":\"file\"}},\"required\":[\"upload\",\"clip\",\"instruction\",\"document\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"upload\":{\"type\":\"file\"},\"clip\":{\"type\":\"audio\"},\"instruction\":{\"type\":\"number\"},\"document\":{\"type\":\"file\"}},\"required\":[\"upload\",\"clip\",\"instruction\",\"document\"]}}"
               }
             }
           ],
@@ -669,31 +669,27 @@
     "essay": " Q9f0eS4Hx9kd5WjIOucJkLQx iLtdox Qm4ETjtWFPoJiaxkp42qALxWms6fwlV YQOH4Y4qKcIseiGJ2gIbgFooxk j4joiDzdZs3lRUZN88BqE5n5wbZlbYOx508vSpodfFynsZmhcaYmuf HDWEPGa4nSpJHKDU3b0Zs72WJOzNTopY9tJcUcJHbisN8HbbWVbGU0Dv8 P5Jrao",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "upload": {
-              "type": "file"
-            },
-            "clip": {
-              "type": "audio"
-            },
-            "instruction": {
-              "type": "number"
-            },
-            "document": {
-              "type": "file"
-            }
+        "type": "object",
+        "properties": {
+          "upload": {
+            "type": "file"
           },
-          "required": [
-            "upload",
-            "clip",
-            "instruction",
-            "document"
-          ]
-        }
+          "clip": {
+            "type": "audio"
+          },
+          "instruction": {
+            "type": "number"
+          },
+          "document": {
+            "type": "file"
+          }
+        },
+        "required": [
+          "upload",
+          "clip",
+          "instruction",
+          "document"
+        ]
       }
     },
     "essay_tasks": "dzf w7PalWBJHEj5fTdAAOfxiY vS66bz9O2wAf0mH9GSj0SSm97d6Vj6IvyrhuNHjp6nAnHve58w7L3PfdmX7VrI6PV4BeyvWA0czYzPTDK xczn8NwFwQWD4zrv5dYY81LPGAouMC Tx5OtalzUSBORzzS6VwA2KIVfVtKalEQVI2eMrhx FF8mljtNy6WqxureDAJAewx9PPKRvsjycmfxbJXbcI9lLptNhQQA9YhKw8YkPbFREexZdvR7io3AB7zKr8crhwdWwgka3MuWYBqDmVWTeeKBLSUH56NIJnW1sknoSaHVhxL7epSMFkifBjmZNIPN3gceeXGKFb l5PTUCLLcsKm5klEvRHwIkeuxOuotzjEj3EnxgfSoJeSPj986gDrh4Q8fGbOgZLbVqB2UJ6aeDURxZ7xOcjVDOR7228So6SRJGek6JHv0sKsa4ibGXKNHcGc8kt0bb1It4zL7z69IVXavBjm4ZggiBWP",
@@ -727,31 +723,27 @@
     "description": "6UaI9Zwx6VVQdjLwOHYieKWT9cNDqJV4zkGCWH51ij7XaL6Lfw1mGBoqaxDtyN5U2RE9r8pLvjMyObJ9CXvQy3oS1L1aMgztr6zjR2pZDVd2ebuHfLhUZ1Qvr16jL7D7BRKiosPAkxPSD1v3DzmAKT6s7Ke2",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "upload": {
-              "type": "file"
-            },
-            "clip": {
-              "type": "audio"
-            },
-            "instruction": {
-              "type": "number"
-            },
-            "document": {
-              "type": "file"
-            }
+        "type": "object",
+        "properties": {
+          "upload": {
+            "type": "file"
           },
-          "required": [
-            "upload",
-            "clip",
-            "instruction",
-            "document"
-          ]
-        }
+          "clip": {
+            "type": "audio"
+          },
+          "instruction": {
+            "type": "number"
+          },
+          "document": {
+            "type": "file"
+          }
+        },
+        "required": [
+          "upload",
+          "clip",
+          "instruction",
+          "document"
+        ]
       }
     },
     "tasks": [

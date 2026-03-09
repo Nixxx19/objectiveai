@@ -135,7 +135,7 @@
               "id": "call_mock_11492348792034636810",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"values\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"body\":{\"type\":\"number\"}},\"required\":[\"flagged\",\"body\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"values\"]},\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"body\":{\"type\":\"number\"}},\"required\":[\"flagged\",\"body\"]}}"
               }
             }
           ],
@@ -291,7 +291,7 @@
               "id": "call_mock_6522383562354350622",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"4XP3IDVAiYeaWXeXHjLd0j9TxP3rw5UAi6XD7IRxGOobhV8zMTj8v\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"body\":{\"type\":\"number\"}},\"required\":[\"flagged\",\"body\"]}},\"context\":{\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"values\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"4XP3IDVAiYeaWXeXHjLd0j9TxP3rw5UAi6XD7IRxGOobhV8zMTj8v\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"body\":{\"type\":\"number\"}},\"required\":[\"flagged\",\"body\"]},\"context\":{\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"values\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -329,7 +329,7 @@
               "id": "call_mock_6972731131157279376",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"Rq3ilV IZj8awLy8NIJZZUOvcErcBuJb0i0hjrpBPVKyWmRnlENcErh5LiwzaZiAMwqCIIBa5SU0dQeEhMNScptp5mz5RGsSfAxsUG9kivtXFnExeMNxd1Sjf5CvhkRlWWqPI4HN0zoa\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"body\":{\"type\":\"number\"}},\"required\":[\"flagged\",\"body\"]}},\"context\":{\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"values\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"Rq3ilV IZj8awLy8NIJZZUOvcErcBuJb0i0hjrpBPVKyWmRnlENcErh5LiwzaZiAMwqCIIBa5SU0dQeEhMNScptp5mz5RGsSfAxsUG9kivtXFnExeMNxd1Sjf5CvhkRlWWqPI4HN0zoa\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"body\":{\"type\":\"number\"}},\"required\":[\"flagged\",\"body\"]},\"context\":{\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"values\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -492,23 +492,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "flagged": {
-              "type": "boolean"
-            },
-            "body": {
-              "type": "number"
-            }
+        "type": "object",
+        "properties": {
+          "flagged": {
+            "type": "boolean"
           },
-          "required": [
-            "flagged",
-            "body"
-          ]
-        }
+          "body": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "flagged",
+          "body"
+        ]
       }
     },
     "essay_tasks": "DN1RWMVUCAb6RUvb49rjz0q2bKVODBSOq jeJ0OCRVuTKqxtv9HWLkZpW0XzANeQ6o1W5fhv8wT5uKQ2oJ73ZAzlCXjUjR6mUAuXiPigndMjDkZHjURGa4EmI9v9fkrx5n6r6GC6aUu0ocba4WTJRGkuFN6UGbUsXvJ2b6VryKJxCG JHBnRiJrJ7 VJm3pn7uZKEAdkXDBl1yGO64boZokodMZbOdH6h9A1kSlsTOAVXZXzi1H6udyRwZTXY6V6eRk9cgKySq4fDcTGhNKSEQlvxitqbNMKh92SUFHwZKBR7Q2heDBvlRHW L 7aewP7GvncMczO8jn42CE5g6AoxsdjhVV8JWTC5JiykKjK lkyXbUWF6xTmbpU4eIfPU2Wr3FVSLhZerpiwuFSPAoNaDYpZuw9D7HVTo35Bx85OQ9udTB0tjPZAMQBYyanfRTxdFK0EoeXoREKuAJiVzLX uprZiphHKj0uvv8DLNigWFwn",
@@ -537,23 +533,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "flagged": {
-                  "type": "boolean"
-                },
-                "body": {
-                  "type": "number"
-                }
+            "type": "object",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
               },
-              "required": [
-                "flagged",
-                "body"
-              ]
-            }
+              "body": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "flagged",
+              "body"
+            ]
           }
         },
         "input": {
@@ -589,23 +581,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "flagged": {
-                  "type": "boolean"
-                },
-                "body": {
-                  "type": "number"
-                }
+            "type": "object",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
               },
-              "required": [
-                "flagged",
-                "body"
-              ]
-            }
+              "body": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "flagged",
+              "body"
+            ]
           }
         },
         "input": {
@@ -641,23 +629,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "flagged": {
-              "type": "boolean"
-            },
-            "body": {
-              "type": "number"
-            }
+        "type": "object",
+        "properties": {
+          "flagged": {
+            "type": "boolean"
           },
-          "required": [
-            "flagged",
-            "body"
-          ]
-        }
+          "body": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "flagged",
+          "body"
+        ]
       }
     },
     "tasks": [
@@ -685,23 +669,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "flagged": {
-                  "type": "boolean"
-                },
-                "body": {
-                  "type": "number"
-                }
+            "type": "object",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
               },
-              "required": [
-                "flagged",
-                "body"
-              ]
-            }
+              "body": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "flagged",
+              "body"
+            ]
           }
         },
         "input": {
@@ -737,23 +717,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "flagged": {
-                  "type": "boolean"
-                },
-                "body": {
-                  "type": "number"
-                }
+            "type": "object",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
               },
-              "required": [
-                "flagged",
-                "body"
-              ]
-            }
+              "body": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "flagged",
+              "body"
+            ]
           }
         },
         "input": {

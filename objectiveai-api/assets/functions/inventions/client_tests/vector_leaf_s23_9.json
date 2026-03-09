@@ -136,7 +136,7 @@
               "id": "call_mock_3617090726910668003",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"icon\":{\"type\":\"image\"},\"text\":{\"type\":\"string\"},\"is_draft\":{\"type\":\"boolean\"}},\"required\":[\"icon\",\"text\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"string\",\"description\":\"A candidate to assess\"}}}"
+                "arguments": "{\"context\":{\"properties\":{\"icon\":{\"type\":\"image\"},\"text\":{\"type\":\"string\"},\"is_draft\":{\"type\":\"boolean\"}},\"required\":[\"icon\",\"text\"]},\"items\":{\"type\":\"string\",\"description\":\"A candidate to assess\"}}"
               }
             }
           ],
@@ -235,7 +235,7 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\"context\":{\"properties\":{\"icon\":{\"type\":\"image\"},\"text\":{\"type\":\"string\"},\"is_draft\":{\"type\":\"boolean\"}},\"required\":[\"icon\",\"text\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"string\",\"description\":\"A candidate to assess\"}}}",
+          "content": "{\"context\":{\"properties\":{\"icon\":{\"type\":\"image\"},\"text\":{\"type\":\"string\"},\"is_draft\":{\"type\":\"boolean\"}},\"required\":[\"icon\",\"text\"]},\"items\":{\"type\":\"string\",\"description\":\"A candidate to assess\"}}",
           "tool_call_id": "call_mock_3462103277138833528"
         },
         {
@@ -572,12 +572,8 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "string",
-          "description": "A candidate to assess"
-        }
+        "type": "string",
+        "description": "A candidate to assess"
       }
     },
     "essay_tasks": "sGEDBGrtqnd0NYZTWi7fcVIrKh0Fl4ssTpgujJt Bqx3hyIMQdGAst7pUOAoRx6EDeyJlx8AHPMFPq 9UKyIeFLMI4VyBZUEeSTZrMhI1weOnSaDgYZqBmyYfh79ZOg0VAdGX21Ue2vCdQy0wfJsKIsN4QE7uP8NrsG5Ia5Md 29 7OpeBeJe8ytwSINoYUtjFYyXR1hC mX0Jcx KNWgNsMJiyR2j6pqTi9P4lexAZ29aw3UTnbGT5cVen3rpf18 vZbzrieWnuQNZzTde3 32HFPiWzOzGhf97B jWV02ralxgdUMYvs3w0w6",
@@ -619,12 +615,8 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "string",
-          "description": "A candidate to assess"
-        }
+        "type": "string",
+        "description": "A candidate to assess"
       }
     },
     "tasks": [

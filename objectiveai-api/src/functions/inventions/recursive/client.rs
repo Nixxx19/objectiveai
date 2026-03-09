@@ -31,22 +31,22 @@ pub fn recursive_invention_response_id(created: u64) -> String {
 /// then spawns child inventions for each placeholder task, recursing
 /// based on depth. All child streams are merged concurrently — no waiting,
 /// no collecting.
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, RIUSG> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG> {
     pub invention_client: Arc<
         crate::functions::inventions::Client<
-            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG,
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM,
         >,
     >,
     pub usage_handler: Arc<RIUSG>,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, RIUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, RIUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
 {
     pub fn new(
         invention_client: Arc<
             crate::functions::inventions::Client<
-                CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG,
+                CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM,
             >,
         >,
         usage_handler: Arc<RIUSG>,
@@ -58,8 +58,8 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, RIUSG>
     }
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, RIUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, RIUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM, RIUSG>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
@@ -78,6 +78,9 @@ where
     FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     IUSG: crate::functions::inventions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
+    FFNG: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNF: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNM: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     RIUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_streaming_handle_usage(
@@ -223,10 +226,10 @@ where
 /// 5. Merges all child streams via `select_all` and yields their chunks.
 /// 6. After all children complete, replaces placeholders with the invented
 ///    function paths.
-fn run_recursive<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>(
+fn run_recursive<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>(
     invention_client: Arc<
         crate::functions::inventions::Client<
-            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG,
+            CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM,
         >,
     >,
     ctx: ctx::Context<CTXEXT>,
@@ -255,6 +258,9 @@ where
     FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     IUSG: crate::functions::inventions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
+    FFNG: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNF: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNM: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
 {
     Box::pin(async_stream::stream! {
         // Build the single-level invention request from the recursive params.

@@ -64,7 +64,7 @@ fn validate_name(name: &str) -> Result<(), super::Error> {
 ///
 /// Orchestrates the multi-step invention flow: essay, input schema,
 /// essay tasks, tasks, description, and readme generation.
-pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG> {
+pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM> {
     pub agent_client: Arc<
         crate::agent::completions::Client<
             CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG,
@@ -72,12 +72,14 @@ pub struct Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG> 
     >,
     pub github_client: Arc<crate::github::Client>,
     pub filesystem_client: Arc<crate::filesystem::Client>,
+    pub function_fetcher:
+        Arc<crate::functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>>,
     pub usage_handler: Arc<IUSG>,
     pub persist: bool,
 }
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>
 {
     pub fn new(
         agent_client: Arc<
@@ -87,6 +89,9 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
         >,
         github_client: Arc<crate::github::Client>,
         filesystem_client: Arc<crate::filesystem::Client>,
+        function_fetcher: Arc<
+            crate::functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>,
+        >,
         usage_handler: Arc<IUSG>,
         persist: bool,
     ) -> Self {
@@ -94,6 +99,7 @@ impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
             agent_client,
             github_client,
             filesystem_client,
+            function_fetcher,
             usage_handler,
             persist,
         }
@@ -113,8 +119,8 @@ type Continuation<OPENROUTER, CLAUDEAGENTSDK, MOCK> =
         >>::State,
     >;
 
-impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
-    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG>
+impl<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>
+    Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, CUSG, IUSG, FFNG, FFNF, FFNM>
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
     OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent>
@@ -133,6 +139,9 @@ where
     FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     CUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
     IUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
+    FFNG: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNF: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNM: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
 {
     pub async fn create_unary_handle_usage(
         self: Arc<Self>,
@@ -264,6 +273,41 @@ where
             .as_secs();
         let id = invention_response_id(created);
         let state = request.state.clone().route();
+
+        // Validate predicted tasks_length against params bounds.
+        if let Some(tasks_length) = state.tasks_length() {
+            let p = state.params();
+            let (min, max) = match &state {
+                State::AlphaScalarBranch(_) | State::AlphaVectorBranch(_) => {
+                    (p.min_branch_width, p.max_branch_width)
+                }
+                State::AlphaScalarLeaf(_) | State::AlphaVectorLeaf(_) => {
+                    (p.min_leaf_width, p.max_leaf_width)
+                }
+            };
+            if tasks_length < min || tasks_length > max {
+                return Err(super::Error::InvalidState(format!(
+                    "tasks_length {} is outside bounds [{}, {}]",
+                    tasks_length, min, max,
+                )));
+            }
+        }
+
+        // If the initial state has tasks, fetch all referenced child functions
+        // and validate the initial state against them.
+        let children = if let Some(full_fn) = state.build_function() {
+            let transpiled = full_fn.transpile();
+            let children = self.function_fetcher
+                .fetch_recursive(&ctx, &transpiled)
+                .await
+                .map_err(super::Error::FunctionFetch)?;
+            Some(children)
+        } else {
+            None
+        };
+        state
+            .validate_initial_state(children.as_ref())
+            .map_err(super::Error::InvalidState)?;
         let agent_client = self.agent_client.clone();
         let github_client = self.github_client.clone();
         let filesystem_client = self.filesystem_client.clone();

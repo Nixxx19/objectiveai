@@ -134,7 +134,7 @@
               "id": "call_mock_7158429739149968763",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"headline\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"headline\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}"
               }
             }
           ],
@@ -403,7 +403,7 @@
               "id": "call_mock_16416219613283188461",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"a9r0nr4P1iDlAZAPTpzovFzYlsVL4r7WGt9pNUPpjmvweRoNdyzFbQRLHhvZHhBGDPip\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"headline\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"a9r0nr4P1iDlAZAPTpzovFzYlsVL4r7WGt9pNUPpjmvweRoNdyzFbQRLHhvZHhBGDPip\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"headline\":{\"type\":\"string\"}},\"required\":[\"summary\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -540,7 +540,7 @@
         {
           "role": "tool",
           "index": 23,
-          "content": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"headline\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}}",
+          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"headline\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}",
           "tool_call_id": "call_mock_17951279939090835475"
         },
         {
@@ -667,22 +667,18 @@
     "essay": "VJoFkjlgevq8AuZ3cI97cdWBsMUYU5TIGCniUeuiN1Y VNrQ50LbmhxmV8Sm2dl9wpuM64mPmeNxrb3Dgn3n1PlNUSNcgh8w9ACl4KemAF0Bg K1HW4UjAHR1tt4xB8TL1YvBjBjhxQJYEtgA T 6NgQKGTv9pfEQ3uaNGotXdh0LgCOi77k fpn3QdWGVwvV5kdI0s mPry1roqBSgvzIiRgSvjvNZiTCrxCVBqccbXTnS5lOTYTZnoODasEFzS4Qykyrt9ATWphu ql7Q7bE48z7f95q5rdIsM2g9wqLWhKVoTqnPT5HvRsCrfE6tbki6HaZDUsVL4 tSrJhhJexmWt5za473VBre",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "string"
-            },
-            "headline": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
           },
-          "required": [
-            "summary"
-          ]
-        }
+          "headline": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary"
+        ]
       }
     },
     "essay_tasks": "KlgLJavywRQfTH0xfjLQ4p6jqFkbJSqJkFIVa3PV5hu8yLRj5uLf8B3wj6npLuvOhe50HRBz48DJBKtYSHmE94kiBNLzs1Wm01OTn9LQR1WUg qbqPJhBtfWEk9NKPWWcOnUCkdTqupzncP4LCIoyZ6jPp blpJrrZRIh7QeEKzHU6b7ks96VPsGZlpYSPWEImeEezv5uWsyVYX1zDVpwRoxw2Y4GV6hswemoHVBkIAPJXX8p2O7353TUUZfC7",
@@ -698,22 +694,18 @@
         "spec": "a9r0nr4P1iDlAZAPTpzovFzYlsVL4r7WGt9pNUPpjmvweRoNdyzFbQRLHhvZHhBGDPip",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "string"
-                },
-                "headline": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
               },
-              "required": [
-                "summary"
-              ]
-            }
+              "headline": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary"
+            ]
           }
         },
         "input": {
@@ -733,22 +725,18 @@
     "description": "HkutKH4py09tEhjTXcyCVEyMshneTIEgqcoFJANJwRIUTr0RRW4tFwCZsI3euzupnjR8YiBbDjmlg e4tA7SG3WRLZ5FxVW81T6HGkGhtZKbqWf77dwTXQddF2XM5EwAY7vvQ77nXwvg511SXCKZf481GCMnCBosrlU5j6eHMt0c5ryzsDlMR0 j9PNF1jPUSWcGyGmECdXFWt5OwMf1helHmryyyy5FQrBFenijfqxGdKdqYE0DGNPlgwKcodd G9EIyFHIrLQD1nkEgPfZuS1 VXp3sX8YK0aoZ yRRdd0q0aUtfOkMel67M9azyW0HV1U VujZsbiOoloUsOUg0oV",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "string"
-            },
-            "headline": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
           },
-          "required": [
-            "summary"
-          ]
-        }
+          "headline": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary"
+        ]
       }
     },
     "tasks": [
@@ -763,22 +751,18 @@
         "spec": "a9r0nr4P1iDlAZAPTpzovFzYlsVL4r7WGt9pNUPpjmvweRoNdyzFbQRLHhvZHhBGDPip",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "string"
-                },
-                "headline": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
               },
-              "required": [
-                "summary"
-              ]
-            }
+              "headline": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary"
+            ]
           }
         },
         "input": {

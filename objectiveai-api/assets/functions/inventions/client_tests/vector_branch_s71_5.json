@@ -97,7 +97,7 @@
               "id": "call_mock_15965648286604198762",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"summary\":{\"type\":\"string\"}},\"required\":[\"summary\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"weight\":{\"type\":\"integer\"}},\"required\":[\"summary\",\"weight\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"summary\":{\"type\":\"string\"}},\"required\":[\"summary\"]},\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"weight\":{\"type\":\"integer\"}},\"required\":[\"summary\",\"weight\"]}}"
               }
             }
           ],
@@ -290,7 +290,7 @@
               "id": "call_mock_10121239390314638550",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"dw432t8z6FItF9IxOaFlUhe9k iIaDBUTjCiynJup4oLKWnZLHaMEV92xEshNiBcB7dm 5vDjW94fmKIW4eLz1I9hh2JHVjsSKXtYJx3Vwm8XRzvlJkjJNx3dwhpvwEyTG5jcW4b112QqDc iNvM8hmoSAPQ0gI1K6KhSY1xN8N0aypoSWLZkHeuk99\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"weight\":{\"type\":\"integer\"}},\"required\":[\"summary\",\"weight\"]}},\"context\":{\"properties\":{\"summary\":{\"type\":\"string\"}},\"required\":[\"summary\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"dw432t8z6FItF9IxOaFlUhe9k iIaDBUTjCiynJup4oLKWnZLHaMEV92xEshNiBcB7dm 5vDjW94fmKIW4eLz1I9hh2JHVjsSKXtYJx3Vwm8XRzvlJkjJNx3dwhpvwEyTG5jcW4b112QqDc iNvM8hmoSAPQ0gI1K6KhSY1xN8N0aypoSWLZkHeuk99\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"weight\":{\"type\":\"integer\"}},\"required\":[\"summary\",\"weight\"]},\"context\":{\"properties\":{\"summary\":{\"type\":\"string\"}},\"required\":[\"summary\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -450,23 +450,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "string"
-            },
-            "weight": {
-              "type": "integer"
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
           },
-          "required": [
-            "summary",
-            "weight"
-          ]
-        }
+          "weight": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "summary",
+          "weight"
+        ]
       }
     },
     "essay_tasks": "BEnnlgA3iyDCJxH5IA7hFl8tkjb1 2wCAem m9q8gp3aKzu5Jyafdrt WfYHJUe1S0vnh5SVE4DJPz4ENsRRlON8v5iNDg7ZIZ11jXVt17 7K6KQk37M8cHCvZbYKqJQXpldS4t1 1lN xN1c6MqAZn6gtfVq8MHt4L8kUfxc6C3ecAPwqt3tNrKxwF2oqWCsIR6k75z5Tiy 38S0W7PjEj3iah7vNG1Z8zyVas5POC5XX4aNhMZhBpf5bBRsSijUNnWNLp b6NTtyvax0771VqzKRFxrhVQWbtQobppy5JA7jqOf SsxmijNC",
@@ -492,23 +488,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "string"
-                },
-                "weight": {
-                  "type": "integer"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
               },
-              "required": [
-                "summary",
-                "weight"
-              ]
-            }
+              "weight": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "summary",
+              "weight"
+            ]
           }
         },
         "input": {
@@ -541,23 +533,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "string"
-            },
-            "weight": {
-              "type": "integer"
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
           },
-          "required": [
-            "summary",
-            "weight"
-          ]
-        }
+          "weight": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "summary",
+          "weight"
+        ]
       }
     },
     "tasks": [
@@ -582,23 +570,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "string"
-                },
-                "weight": {
-                  "type": "integer"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "string"
               },
-              "required": [
-                "summary",
-                "weight"
-              ]
-            }
+              "weight": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "summary",
+              "weight"
+            ]
           }
         },
         "input": {

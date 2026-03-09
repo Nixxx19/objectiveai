@@ -246,7 +246,7 @@
               "id": "call_mock_6955012524325617948",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"subject\":{\"type\":\"integer\"}},\"required\":[\"subject\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"clip\":{\"type\":\"audio\"},\"query\":{\"type\":\"string\"},\"image\":{\"type\":\"image\"}},\"required\":[\"clip\",\"query\",\"image\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"subject\":{\"type\":\"integer\"}},\"required\":[\"subject\"]},\"items\":{\"type\":\"object\",\"properties\":{\"clip\":{\"type\":\"audio\"},\"query\":{\"type\":\"string\"},\"image\":{\"type\":\"image\"}},\"required\":[\"clip\",\"query\",\"image\"]}}"
               }
             }
           ],
@@ -440,7 +440,7 @@
               "id": "call_mock_13921770976169443666",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"d qgpe68HjJI0i5smCKBXvcJ6gOvbDDZRI2M7pY0VHq2yA7guLrpWcydfeOsUagX8Uk2whL6GUt6qPt5lfo3WhgAyhnov5XmRkWQgiOhngBeD6IKParL6JSBEl80JgnhL1XAG4IpjtB1TP90m2iDn3bi7ADlsSEhvAOfoXIK5KDXPAe6pdFPAOut7HnSmCb7TbDh0KyV\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"clip\":{\"type\":\"audio\"},\"query\":{\"type\":\"string\"},\"image\":{\"type\":\"image\"}},\"required\":[\"clip\",\"query\",\"image\"]}},\"context\":{\"properties\":{\"subject\":{\"type\":\"integer\"}},\"required\":[\"subject\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"d qgpe68HjJI0i5smCKBXvcJ6gOvbDDZRI2M7pY0VHq2yA7guLrpWcydfeOsUagX8Uk2whL6GUt6qPt5lfo3WhgAyhnov5XmRkWQgiOhngBeD6IKParL6JSBEl80JgnhL1XAG4IpjtB1TP90m2iDn3bi7ADlsSEhvAOfoXIK5KDXPAe6pdFPAOut7HnSmCb7TbDh0KyV\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"clip\":{\"type\":\"audio\"},\"query\":{\"type\":\"string\"},\"image\":{\"type\":\"image\"}},\"required\":[\"clip\",\"query\",\"image\"]},\"context\":{\"properties\":{\"subject\":{\"type\":\"integer\"}},\"required\":[\"subject\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -638,27 +638,23 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "clip": {
-              "type": "audio"
-            },
-            "query": {
-              "type": "string"
-            },
-            "image": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "clip": {
+            "type": "audio"
           },
-          "required": [
-            "clip",
-            "query",
-            "image"
-          ]
-        }
+          "query": {
+            "type": "string"
+          },
+          "image": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "clip",
+          "query",
+          "image"
+        ]
       }
     },
     "essay_tasks": "Bg9M6s0FLfwAkLetF3mLbdzIUIK0gikgvvREHVD5xryBXO6szBE1mCf2noIcZqOrHILedwpaBKOGaRuDLVAWMMZInUynme7ETMRN69SpliWvsflG4NszyTHn9ISmluVdydaUCVTdBiVLlzaWOPA9gUHhLEuzSDaVkcSLYxn0xKRvG2DnHDUMvGkRT5XzW26wVNgVvo8 MsOBa8vs5OKz97WpUGGZUuYOM2vqfZxQ283i03oWKY8q0BAZVQjxL agcrTaxuhTb",
@@ -684,27 +680,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "clip": {
-                  "type": "audio"
-                },
-                "query": {
-                  "type": "string"
-                },
-                "image": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "clip": {
+                "type": "audio"
               },
-              "required": [
-                "clip",
-                "query",
-                "image"
-              ]
-            }
+              "query": {
+                "type": "string"
+              },
+              "image": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "clip",
+              "query",
+              "image"
+            ]
           }
         },
         "input": {
@@ -737,27 +729,23 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "clip": {
-              "type": "audio"
-            },
-            "query": {
-              "type": "string"
-            },
-            "image": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "clip": {
+            "type": "audio"
           },
-          "required": [
-            "clip",
-            "query",
-            "image"
-          ]
-        }
+          "query": {
+            "type": "string"
+          },
+          "image": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "clip",
+          "query",
+          "image"
+        ]
       }
     },
     "tasks": [
@@ -782,27 +770,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "clip": {
-                  "type": "audio"
-                },
-                "query": {
-                  "type": "string"
-                },
-                "image": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "clip": {
+                "type": "audio"
               },
-              "required": [
-                "clip",
-                "query",
-                "image"
-              ]
-            }
+              "query": {
+                "type": "string"
+              },
+              "image": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "clip",
+              "query",
+              "image"
+            ]
           }
         },
         "input": {

@@ -98,7 +98,7 @@
               "id": "call_mock_12459306807921057918",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"instruction\":{\"type\":\"string\"}},\"required\":[\"entries\",\"instruction\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\"},\"name\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}},\"required\":[\"status\",\"name\",\"description\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"instruction\":{\"type\":\"string\"}},\"required\":[\"entries\",\"instruction\"]},\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\"},\"name\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}},\"required\":[\"status\",\"name\",\"description\"]}}"
               }
             }
           ],
@@ -253,7 +253,7 @@
               "id": "call_mock_7772751425312336132",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"6TGEGbMp1LleAQgHmSydsLdQRChszqXX6xLVroC0HYSvGtXgkZMOCu5YOaNtckgBchwvuzg2NNhpInF4fBGGXgN XzYVkNfLKK8J01yxi5zcxfVsx5 jonuB5JctE3ZePjRT7xx1QUUMqB L4ELrmUymC0vCaiYul0HM\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\"},\"name\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}},\"required\":[\"status\",\"name\",\"description\"]}},\"context\":{\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"instruction\":{\"type\":\"string\"}},\"required\":[\"entries\",\"instruction\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"6TGEGbMp1LleAQgHmSydsLdQRChszqXX6xLVroC0HYSvGtXgkZMOCu5YOaNtckgBchwvuzg2NNhpInF4fBGGXgN XzYVkNfLKK8J01yxi5zcxfVsx5 jonuB5JctE3ZePjRT7xx1QUUMqB L4ELrmUymC0vCaiYul0HM\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\"},\"name\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}},\"required\":[\"status\",\"name\",\"description\"]},\"context\":{\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"instruction\":{\"type\":\"string\"}},\"required\":[\"entries\",\"instruction\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -329,7 +329,7 @@
               "id": "call_mock_13505086516095364353",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"zbKigjwJDJs27o uvFKruKqR4UyKV114v3fdsyFHb F QXe5LWlxUCI UXo3XEmD33rOXkl28UFPHI88imlWsZdBb45GwwZ\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\"},\"name\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}},\"required\":[\"status\",\"name\",\"description\"]}},\"context\":{\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"instruction\":{\"type\":\"string\"}},\"required\":[\"entries\",\"instruction\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"zbKigjwJDJs27o uvFKruKqR4UyKV114v3fdsyFHb F QXe5LWlxUCI UXo3XEmD33rOXkl28UFPHI88imlWsZdBb45GwwZ\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\"},\"name\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}},\"required\":[\"status\",\"name\",\"description\"]},\"context\":{\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"instruction\":{\"type\":\"string\"}},\"required\":[\"entries\",\"instruction\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -496,27 +496,23 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "string"
-            },
-            "name": {
-              "type": "number"
-            },
-            "description": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
           },
-          "required": [
-            "status",
-            "name",
-            "description"
-          ]
-        }
+          "name": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "name",
+          "description"
+        ]
       }
     },
     "essay_tasks": "rQeCdRZNSNawuNnxMejVlYX32SqI pjHUmMrh7pRXlaTik1mNl2Bx5j74Wm6sFUXCX0ND1QmzgnsMs0E4JT7EsRmqwsVqmPjdxqfjIb2YznWX1yVcDuXzYV8yBJ4wUMkBtT7Sc9zrFVzkLb8wAJumYNGBmMVhIhTbz4vAhfa",
@@ -549,27 +545,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "number"
-                },
-                "description": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
               },
-              "required": [
-                "status",
-                "name",
-                "description"
-              ]
-            }
+              "name": {
+                "type": "number"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "name",
+              "description"
+            ]
           }
         },
         "input": {
@@ -640,27 +632,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "number"
-                },
-                "description": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
               },
-              "required": [
-                "status",
-                "name",
-                "description"
-              ]
-            }
+              "name": {
+                "type": "number"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "name",
+              "description"
+            ]
           }
         },
         "input": {
@@ -700,27 +688,23 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "string"
-            },
-            "name": {
-              "type": "number"
-            },
-            "description": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
           },
-          "required": [
-            "status",
-            "name",
-            "description"
-          ]
-        }
+          "name": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "name",
+          "description"
+        ]
       }
     },
     "tasks": [
@@ -752,27 +736,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "number"
-                },
-                "description": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
               },
-              "required": [
-                "status",
-                "name",
-                "description"
-              ]
-            }
+              "name": {
+                "type": "number"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "name",
+              "description"
+            ]
           }
         },
         "input": {
@@ -843,27 +823,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "string"
-                },
-                "name": {
-                  "type": "number"
-                },
-                "description": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "string"
               },
-              "required": [
-                "status",
-                "name",
-                "description"
-              ]
-            }
+              "name": {
+                "type": "number"
+              },
+              "description": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "status",
+              "name",
+              "description"
+            ]
           }
         },
         "input": {

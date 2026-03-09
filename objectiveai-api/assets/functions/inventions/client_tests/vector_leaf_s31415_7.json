@@ -174,7 +174,7 @@
               "id": "call_mock_16758778509114681553",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"slug\":{\"type\":\"string\"},\"clip\":{\"type\":\"audio\"},\"score\":{\"type\":\"integer\"}},\"required\":[\"slug\",\"clip\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"boolean\"},\"prompt\":{\"type\":\"integer\"},\"icon\":{\"type\":\"image\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"description\",\"prompt\",\"icon\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"slug\":{\"type\":\"string\"},\"clip\":{\"type\":\"audio\"},\"score\":{\"type\":\"integer\"}},\"required\":[\"slug\",\"clip\"]},\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"boolean\"},\"prompt\":{\"type\":\"integer\"},\"icon\":{\"type\":\"image\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"description\",\"prompt\",\"icon\"]}}"
               }
             }
           ],
@@ -1327,33 +1327,29 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "boolean"
-            },
-            "prompt": {
-              "type": "integer"
-            },
-            "icon": {
-              "type": "image"
-            },
-            "values": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "boolean"
           },
-          "required": [
-            "description",
-            "prompt",
-            "icon"
-          ]
-        }
+          "prompt": {
+            "type": "integer"
+          },
+          "icon": {
+            "type": "image"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "description",
+          "prompt",
+          "icon"
+        ]
       }
     },
     "essay_tasks": "eDGkGgVuHyKs46oMORjaxcQYNR4XfItUVKPFNLAV54n8nXwVW0QMS8PcWwLJShGUfGqRj1A0u3m9wGKWl8xflThxnZtK25gIUXKA8yIzJGgiA47XgF3I8rhQCH0jYRQTa0Q70 KlIsFwBwlik4PPP8pBEywPOplNULSMJxe6hgkBNWLYvdV1Uh6DlZSewaiq2iXBsU7ADuF0N9idoeUncx4E0wTJHBXl0jGpILTNXwrVBMlGJPSpwAvTDC3xZuiSUwmk6zDNZ03RVA8kgiZ7RvZ1OwidZYencGtbxifMyAZyDRHr34MPnwlE3igrM",
@@ -1476,33 +1472,29 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "description": {
-              "type": "boolean"
-            },
-            "prompt": {
-              "type": "integer"
-            },
-            "icon": {
-              "type": "image"
-            },
-            "values": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "boolean"
           },
-          "required": [
-            "description",
-            "prompt",
-            "icon"
-          ]
-        }
+          "prompt": {
+            "type": "integer"
+          },
+          "icon": {
+            "type": "image"
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "description",
+          "prompt",
+          "icon"
+        ]
       }
     },
     "tasks": [

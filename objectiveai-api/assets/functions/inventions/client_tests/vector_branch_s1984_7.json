@@ -173,7 +173,7 @@
               "id": "call_mock_16005437269267605419",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"icon\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"icon\",\"banner\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"icon\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"icon\",\"banner\"]}}"
               }
             }
           ],
@@ -404,7 +404,7 @@
               "id": "call_mock_10618364730404287215",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"0ijj1G f1AYeRXWs1zr56WRQcQCEbzqcLJBZi2mgyeioh2eXuyB3sTqR  DZXbP1OeVRBWlDyPyStEkmcON8hQH7hzDOVrgyxMDPEhLeNXwOjBFyMCuQcFYYhWI2I1jUqWmys8qJDZz6D0Uo7juQtz1EfE7F\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"icon\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"icon\",\"banner\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"0ijj1G f1AYeRXWs1zr56WRQcQCEbzqcLJBZi2mgyeioh2eXuyB3sTqR  DZXbP1OeVRBWlDyPyStEkmcON8hQH7hzDOVrgyxMDPEhLeNXwOjBFyMCuQcFYYhWI2I1jUqWmys8qJDZz6D0Uo7juQtz1EfE7F\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"icon\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"icon\",\"banner\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -553,23 +553,19 @@
     "essay": "1VGOSPFtdpkLc07PdxvAgY Ce8aHshRlshok6NsbldIFM9oDMDmlecw8fc7yuf0FKYp7Ss A 7bxFeV7Vqus0Cq1XivjjDIAy6IQn5VxGi35T0QIAwLM5gPo0TvKZi2qj6VFWerTYVxHpHI 5WucWgkMrY0wYi2zBezi8hMGUsOtgRTnCjq0F3j9GGhVdsQhUIhIbgXwGCclWV0XaxkrPP 4Qd0HHf sMlTYv5GB7ooy8WhpMJXBd5I94mTa1 rESIeMVDcdxH0KOAdGDHxVanFryxCRu71ZZb9Fnh6J3h1nk69oK9uZZ64QiQc",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "icon": {
-              "type": "image"
-            },
-            "banner": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "image"
           },
-          "required": [
-            "icon",
-            "banner"
-          ]
-        }
+          "banner": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "icon",
+          "banner"
+        ]
       }
     },
     "essay_tasks": "K9x5EjP8yaxHf4sW6nGcaA4S0GWEbW8uXD28aDCCAoyMAdkEngEXhRXiav674jVDq2lzXrvvoRmy3DacERGaUp8 wmx1nJpj2Yhn sHzfTOJTzY6vfZdPPyUG5X7AEJyH FaH cEfNUVidGpvOk2XGdstuV9CWj06ym43yUvr3cAIJmeXWqohSFs5QupM VcBZ88yF58UPUaQvVYc2gQAE 6FeddjoC801NxSADt9JFUhRuVvPCJsys5SRJQcM23JNeg5NVIFcyVZ5JDQC9kzcyCHxDqAoIsNEOHCfNyAdbANV9erNjhv7EC7dXSJR7hGTbwzNhswrLnvyvVAbBpW21779CBwkKQ7ZPWkS6hjenrH6bwPuWd",
@@ -585,23 +581,19 @@
         "spec": "0ijj1G f1AYeRXWs1zr56WRQcQCEbzqcLJBZi2mgyeioh2eXuyB3sTqR  DZXbP1OeVRBWlDyPyStEkmcON8hQH7hzDOVrgyxMDPEhLeNXwOjBFyMCuQcFYYhWI2I1jUqWmys8qJDZz6D0Uo7juQtz1EfE7F",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "icon": {
-                  "type": "image"
-                },
-                "banner": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "icon": {
+                "type": "image"
               },
-              "required": [
-                "icon",
-                "banner"
-              ]
-            }
+              "banner": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "icon",
+              "banner"
+            ]
           }
         },
         "input": {
@@ -621,23 +613,19 @@
     "description": "Ba7a 06xCaHjIt6849xO7gY1C56dm1kYSF5VK14oW3gxgtwzo rYd5OoUKR6x1OPooFM3oRlXhrSrtYp3Xsm7PIdAlC4e5RpClxl35wzH1p4i7UYEuLmhTwGtuYBGV5bb9mYpDUFoxQTsbNAzsgkS82xmM9iH5Z2cAVcpqPjSi5xcjBCPNyNzl3aijW O131LqTksNsIKGZjegdFiCubaacsS66 fQ9Ubbm84qZGhufdlmdKfO9bNSVVH3S5MgafCqNChWnLXtRp7rgQ8EsRfGnfZLxvTkU3Eq6SR6",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "icon": {
-              "type": "image"
-            },
-            "banner": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "icon": {
+            "type": "image"
           },
-          "required": [
-            "icon",
-            "banner"
-          ]
-        }
+          "banner": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "icon",
+          "banner"
+        ]
       }
     },
     "tasks": [
@@ -652,23 +640,19 @@
         "spec": "0ijj1G f1AYeRXWs1zr56WRQcQCEbzqcLJBZi2mgyeioh2eXuyB3sTqR  DZXbP1OeVRBWlDyPyStEkmcON8hQH7hzDOVrgyxMDPEhLeNXwOjBFyMCuQcFYYhWI2I1jUqWmys8qJDZz6D0Uo7juQtz1EfE7F",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "icon": {
-                  "type": "image"
-                },
-                "banner": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "icon": {
+                "type": "image"
               },
-              "required": [
-                "icon",
-                "banner"
-              ]
-            }
+              "banner": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "icon",
+              "banner"
+            ]
           }
         },
         "input": {

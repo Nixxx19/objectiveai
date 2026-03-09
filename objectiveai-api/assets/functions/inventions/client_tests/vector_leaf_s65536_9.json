@@ -134,7 +134,7 @@
               "id": "call_mock_12161016793620329895",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"threshold\":{\"type\":\"integer\"},\"icon\":{\"type\":\"image\"},\"track\":{\"type\":\"audio\"}},\"required\":[\"threshold\",\"icon\",\"track\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"animation\":{\"type\":\"video\"},\"name\":{\"type\":\"string\"},\"instruction\":{\"type\":\"number\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"animation\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"threshold\":{\"type\":\"integer\"},\"icon\":{\"type\":\"image\"},\"track\":{\"type\":\"audio\"}},\"required\":[\"threshold\",\"icon\",\"track\"]},\"items\":{\"type\":\"object\",\"properties\":{\"animation\":{\"type\":\"video\"},\"name\":{\"type\":\"string\"},\"instruction\":{\"type\":\"number\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"animation\"]}}"
               }
             }
           ],
@@ -946,31 +946,27 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "animation": {
-              "type": "video"
-            },
-            "name": {
-              "type": "string"
-            },
-            "instruction": {
-              "type": "number"
-            },
-            "labels": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "animation": {
+            "type": "video"
           },
-          "required": [
-            "animation"
-          ]
-        }
+          "name": {
+            "type": "string"
+          },
+          "instruction": {
+            "type": "number"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "animation"
+        ]
       }
     },
     "essay_tasks": "64KIKz6j 26F0TQUI1BhwgZvqG2qvOefKUeQXSE10KhIVvLJTaoIlkHW Mb5ZRMQCdQEcQmkXQCALdZXmHhxcZ4taB D3hkek37vzjIRgSdDdR3uSYuatnQiVx7tGNb9AUDH6vbwITx0Bg4xCgipxlpG1vdkhyQ5Kc2U2jMNaP9lcUO 4ma955oKzfdls10evq B3JJEaFmXbCPa7hysWPtTO6W7qnmsBJxT20N6FTP4kkunhXDlQ qVBCizFVRDiLE4Um7m7L5G46gPEC2xn4H1VhpVx0HcIJ9ZbUi9lRE3lHgaLsaicRJQhUj3obJHNhPJcFkmO0JEX3WeNN4Af52dVzhL9Ze103hR2bHesdhfivc1XB7EflMQSd08S1qcsZ6TdNckhYSxT7DZ91cjEfdMbAMJUeG b6PIplg0QBt0JASWOaK",
@@ -1058,31 +1054,27 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "animation": {
-              "type": "video"
-            },
-            "name": {
-              "type": "string"
-            },
-            "instruction": {
-              "type": "number"
-            },
-            "labels": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "animation": {
+            "type": "video"
           },
-          "required": [
-            "animation"
-          ]
-        }
+          "name": {
+            "type": "string"
+          },
+          "instruction": {
+            "type": "number"
+          },
+          "labels": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "animation"
+        ]
       }
     },
     "tasks": [

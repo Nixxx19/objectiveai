@@ -98,7 +98,7 @@
               "id": "call_mock_15100936739295708633",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"integer\"},\"language\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"integer\"},\"language\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}"
               }
             }
           ],
@@ -717,22 +717,18 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "integer"
-            },
-            "language": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "integer"
           },
-          "required": [
-            "summary"
-          ]
-        }
+          "language": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary"
+        ]
       }
     },
     "essay_tasks": "H2MDmEtLY4ITxdLucc  ryMsYCtW4w0ZPIgyUTUqLy40vLBZqP4oOAmmHdWRUMl2rSAEugqKrHv2ky5kipw464kruVtw C7F4Bjhctf3PuE5DRLxQ1w I9nwZgXNPvyrlyCjHAyJNzF3hS3yC9sOGUN3BuchWTzjR00Em5WCOcZUM2mZ5w0owFDoDZ9dknEsfqwXpnIfIuPuzoDT6k5K4fBakuzbA85SsxkaZamWcV4 pQsdXD606z T9dhiyPBPYlt7dKcJkrFHrnEfbQWfgOW8hQ2az8Q2TDMSEnlnwwLEeh5OpJbB4EQncv v0hZvuhR5YA1Iyh6e5zPYBiQE4hesciJ",
@@ -812,22 +808,18 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "integer"
-            },
-            "language": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "integer"
           },
-          "required": [
-            "summary"
-          ]
-        }
+          "language": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary"
+        ]
       }
     },
     "tasks": [

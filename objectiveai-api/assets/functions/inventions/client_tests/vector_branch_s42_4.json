@@ -98,7 +98,7 @@
               "id": "call_mock_10197026428860061493",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"number\"},\"flagged\":{\"type\":\"boolean\"},\"slug\":{\"type\":\"integer\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"number\"},\"flagged\":{\"type\":\"boolean\"},\"slug\":{\"type\":\"integer\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}"
               }
             }
           ],
@@ -404,7 +404,7 @@
               "id": "call_mock_3802566993535214028",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"crolWVWVra0CDwXLeh19iNM5MOW0St1RwX20puJdT2LUMtfAsYj1lP1l0wajz05lY35cAuMmshR65Lqq2HczwFDbIViHCnch0KX310Na1njmWp\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"number\"},\"flagged\":{\"type\":\"boolean\"},\"slug\":{\"type\":\"integer\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"crolWVWVra0CDwXLeh19iNM5MOW0St1RwX20puJdT2LUMtfAsYj1lP1l0wajz05lY35cAuMmshR65Lqq2HczwFDbIViHCnch0KX310Na1njmWp\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"number\"},\"flagged\":{\"type\":\"boolean\"},\"slug\":{\"type\":\"integer\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"summary\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -442,7 +442,7 @@
               "id": "call_mock_14725375009729897336",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"n64wRuwh5RrVl2kWvT4wzhQYos4ucwXrmMiWtWaNiz7tb8A0SC8xtftDs0fIj98XZwdGLoMNGCeFFRZNQJHy8iWIhF8poy04vWCOfkVg08qc5g ZWl7BLEHk5e tq3J4Y\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"number\"},\"flagged\":{\"type\":\"boolean\"},\"slug\":{\"type\":\"integer\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"n64wRuwh5RrVl2kWvT4wzhQYos4ucwXrmMiWtWaNiz7tb8A0SC8xtftDs0fIj98XZwdGLoMNGCeFFRZNQJHy8iWIhF8poy04vWCOfkVg08qc5g ZWl7BLEHk5e tq3J4Y\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"number\"},\"flagged\":{\"type\":\"boolean\"},\"slug\":{\"type\":\"integer\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"summary\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -480,7 +480,7 @@
               "id": "call_mock_16858757822763515605",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\" eUbp30HEcmZ7ZFxjPZlA WsYkHoeW5WFnIrhyiN28C22FET1SG8xmrDLf2KiCfmZA5W3r ORKwkxU1CiyaOuUyURt5H3CUh7puTC66C9LAtHYbOksEHtBD9wEpT7aUqol3kaQ8v pDNTxNl2Yycoz8rzia4T nPIK5GIhW8kYTOWVsP\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"number\"},\"flagged\":{\"type\":\"boolean\"},\"slug\":{\"type\":\"integer\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"summary\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\" eUbp30HEcmZ7ZFxjPZlA WsYkHoeW5WFnIrhyiN28C22FET1SG8xmrDLf2KiCfmZA5W3r ORKwkxU1CiyaOuUyURt5H3CUh7puTC66C9LAtHYbOksEHtBD9wEpT7aUqol3kaQ8v pDNTxNl2Yycoz8rzia4T nPIK5GIhW8kYTOWVsP\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"number\"},\"flagged\":{\"type\":\"boolean\"},\"slug\":{\"type\":\"integer\"},\"tag\":{\"type\":\"string\"}},\"required\":[\"summary\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -630,28 +630,24 @@
     "essay": "uoQmh5tWDmoSOpPVylVpAdFMifVEs3tSADk5Fl8wTQVbUwp72uAvVn8mWcU60Z7t rC2H 4BOhfgaVOBuSoYEaWuFVbgzLTTydJqNRrmNv7mqwamtmqHQsqbrW4XP3HLnPbaeh7DXVDxslcLS0G3pM8ibZaoZ37sJ8VSuzAYxJPl4OuyiUMTRqMC083KFtnI6zSbcWyjv2sy HwG6aXyxCh5QM5899ocrqsjRGT8K2dWnKFhVeJ8yjbvNJMoInW AYWd1Jjh",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "number"
-            },
-            "flagged": {
-              "type": "boolean"
-            },
-            "slug": {
-              "type": "integer"
-            },
-            "tag": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "number"
           },
-          "required": [
-            "summary"
-          ]
-        }
+          "flagged": {
+            "type": "boolean"
+          },
+          "slug": {
+            "type": "integer"
+          },
+          "tag": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary"
+        ]
       }
     },
     "essay_tasks": "sU7GFFGnHPpmV1M0bLx0T 3IlkML6Aa2GfqFLXFYQAXf73AKfiyBEYUDoh5Tvckdw8mkHvPXHks7RCm5fDz4HOFEDIlFyaHLdabVueXBYU86LGIKxYi7Onuy9iWE aZ qYjKArsvlWhErxqQDdsMKpQnhfCVOOdVH7BQ3j7IIm7GM6d8QObg9ypIOOTUyf3at2wIveYsJMK2k7fawuBLqqRtd6pvmKEGufbrkYpNV29ckr4oabM9nut35IuwkMCIy61tn YvAFsZ3COiWGybHuKVn0GlNcgBpb2zJS19FbUr4bXYTzcBKSZAE1NOhYcOVtUNdH",
@@ -667,28 +663,24 @@
         "spec": "crolWVWVra0CDwXLeh19iNM5MOW0St1RwX20puJdT2LUMtfAsYj1lP1l0wajz05lY35cAuMmshR65Lqq2HczwFDbIViHCnch0KX310Na1njmWp",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "number"
-                },
-                "flagged": {
-                  "type": "boolean"
-                },
-                "slug": {
-                  "type": "integer"
-                },
-                "tag": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "number"
               },
-              "required": [
-                "summary"
-              ]
-            }
+              "flagged": {
+                "type": "boolean"
+              },
+              "slug": {
+                "type": "integer"
+              },
+              "tag": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary"
+            ]
           }
         },
         "input": {
@@ -708,28 +700,24 @@
         "spec": "n64wRuwh5RrVl2kWvT4wzhQYos4ucwXrmMiWtWaNiz7tb8A0SC8xtftDs0fIj98XZwdGLoMNGCeFFRZNQJHy8iWIhF8poy04vWCOfkVg08qc5g ZWl7BLEHk5e tq3J4Y",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "number"
-                },
-                "flagged": {
-                  "type": "boolean"
-                },
-                "slug": {
-                  "type": "integer"
-                },
-                "tag": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "number"
               },
-              "required": [
-                "summary"
-              ]
-            }
+              "flagged": {
+                "type": "boolean"
+              },
+              "slug": {
+                "type": "integer"
+              },
+              "tag": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary"
+            ]
           }
         },
         "input": {
@@ -749,28 +737,24 @@
         "spec": " eUbp30HEcmZ7ZFxjPZlA WsYkHoeW5WFnIrhyiN28C22FET1SG8xmrDLf2KiCfmZA5W3r ORKwkxU1CiyaOuUyURt5H3CUh7puTC66C9LAtHYbOksEHtBD9wEpT7aUqol3kaQ8v pDNTxNl2Yycoz8rzia4T nPIK5GIhW8kYTOWVsP",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "number"
-                },
-                "flagged": {
-                  "type": "boolean"
-                },
-                "slug": {
-                  "type": "integer"
-                },
-                "tag": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "number"
               },
-              "required": [
-                "summary"
-              ]
-            }
+              "flagged": {
+                "type": "boolean"
+              },
+              "slug": {
+                "type": "integer"
+              },
+              "tag": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary"
+            ]
           }
         },
         "input": {
@@ -790,28 +774,24 @@
     "description": "5U4BegpduLzhrPDoWuAmjsFKIFDp3VnJQ sxR8uTftR7mlkbYEyreKRcHt2eriyrrZV56g 1",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "number"
-            },
-            "flagged": {
-              "type": "boolean"
-            },
-            "slug": {
-              "type": "integer"
-            },
-            "tag": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "number"
           },
-          "required": [
-            "summary"
-          ]
-        }
+          "flagged": {
+            "type": "boolean"
+          },
+          "slug": {
+            "type": "integer"
+          },
+          "tag": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "summary"
+        ]
       }
     },
     "tasks": [
@@ -826,28 +806,24 @@
         "spec": "crolWVWVra0CDwXLeh19iNM5MOW0St1RwX20puJdT2LUMtfAsYj1lP1l0wajz05lY35cAuMmshR65Lqq2HczwFDbIViHCnch0KX310Na1njmWp",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "number"
-                },
-                "flagged": {
-                  "type": "boolean"
-                },
-                "slug": {
-                  "type": "integer"
-                },
-                "tag": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "number"
               },
-              "required": [
-                "summary"
-              ]
-            }
+              "flagged": {
+                "type": "boolean"
+              },
+              "slug": {
+                "type": "integer"
+              },
+              "tag": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary"
+            ]
           }
         },
         "input": {
@@ -867,28 +843,24 @@
         "spec": "n64wRuwh5RrVl2kWvT4wzhQYos4ucwXrmMiWtWaNiz7tb8A0SC8xtftDs0fIj98XZwdGLoMNGCeFFRZNQJHy8iWIhF8poy04vWCOfkVg08qc5g ZWl7BLEHk5e tq3J4Y",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "number"
-                },
-                "flagged": {
-                  "type": "boolean"
-                },
-                "slug": {
-                  "type": "integer"
-                },
-                "tag": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "number"
               },
-              "required": [
-                "summary"
-              ]
-            }
+              "flagged": {
+                "type": "boolean"
+              },
+              "slug": {
+                "type": "integer"
+              },
+              "tag": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary"
+            ]
           }
         },
         "input": {
@@ -908,28 +880,24 @@
         "spec": " eUbp30HEcmZ7ZFxjPZlA WsYkHoeW5WFnIrhyiN28C22FET1SG8xmrDLf2KiCfmZA5W3r ORKwkxU1CiyaOuUyURt5H3CUh7puTC66C9LAtHYbOksEHtBD9wEpT7aUqol3kaQ8v pDNTxNl2Yycoz8rzia4T nPIK5GIhW8kYTOWVsP",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "summary": {
-                  "type": "number"
-                },
-                "flagged": {
-                  "type": "boolean"
-                },
-                "slug": {
-                  "type": "integer"
-                },
-                "tag": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "summary": {
+                "type": "number"
               },
-              "required": [
-                "summary"
-              ]
-            }
+              "flagged": {
+                "type": "boolean"
+              },
+              "slug": {
+                "type": "integer"
+              },
+              "tag": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "summary"
+            ]
           }
         },
         "input": {

@@ -442,26 +442,22 @@
         "essay": "zb0OGXpJc1brtDueE2vlXyS15kJlDNIsYuTNMMuUqLTvLKf7Gr 7ga1Ui0peWvciSxbjDzd9 aUqCMhkqockJGiCeViHMrYCuCTTcdn7D3PrlG9ksaItHjhwg5BA1oVzkIxMT11gFkg2CBNvSTtKplzC29Cw2GiK51thVJ9yiXB89yqNgXiXUkIdcnqqvnMDIZPtp nE76WzArViI3lx4VoXrEq0z5fY8BFzIdPDfTTt11YBKJ9rdPunmMQa C3Xd XywHj5WDkWlawVJv8bdenY8nYePmVg2o4jiOdnYicAIWXp5JV0kcOtB16NErdS0aVwbIixxJCH18Jqe9EhjhgJYLDKRGEpr5NHi9eJcMZZML04TYfcGmkwx4mV8r6ozMGmRVVAUxEHHEcF50X9oEuC3dqn18QKTrhON4FRV9Ldw9t86 8ultERh6OC8pAUfUtMdfzLJWfvzXAnZtHIEGqOpdBaKhv5AME2hlFPVOrBrNaQHOPhE7OijiYSdqKsXt7bopmrM0Awz2SkS cZQusqOdGtcb9RxgLnjBfd62QoJGSUtM2HULJpDrPef0o72qKSt HYQfEt5umeJP6fS0SwPTfBj9rpq3yP8QihNlRk8twpaIUHpCFHNdPSpQzo0OCX8XD2S5Q",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "priority": {
-                  "type": "integer"
-                },
-                "categories": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+            "type": "object",
+            "properties": {
+              "priority": {
+                "type": "integer"
               },
-              "required": [
-                "priority",
-                "categories"
-              ]
-            }
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "priority",
+              "categories"
+            ]
           }
         },
         "essay_tasks": "RtoNssQBc6b7RyoNBwgsFHWNJSyureBdTgny8 ABwqYu3mqMT52T0LEuYCxWo1LXShUeCc5dGI4kt4JlgO4P018fP10nFeB7pZnWW9Ejey NdE4nTec6Cr9pVZRBASsD6hkz1A21FVUbUEgaRhB UXzM0OBevbBVVQGq9xwRWkzN3OjdoKZwAE19JQ4ZPr1EwTqwsH7x rR1yLPpzVkQ2TIAuNY2gvg p1XkjLqcS0avPgUTGCkk8Y9gw6ptC8tls0wBeHlp4yXzcIh9pM mUfqsakKomRogNYY3Y2kXV9WDAMwyzcgHk5ccefyA8LCd TjL8O6 BQK4fdiJ1CU4w3LvndrEvXKE0TJiU13ySLlx6AhOTPZ2rwR3LX0l5n38a3OYX2tTF13xdt56oH10gHtJZCIv7w6bZK Nfx2p4DLlocfO7T6Iy0NLOx1U5IpIqpbelumR3K8GL9VHNKMZScKc8RFnjfwGbX6ZsetQoV",
@@ -486,26 +482,22 @@
         "description": "c VfkP1dtKlskYkswQI1Nr9197AAXdqyZG3O4eXmgETGmQ0HtuFGiFkYJhp41T7DK4hAa0PC3aQzZrxc53BX59MVhUhDAm0P htWU0DdPekSTurzPI9kiN6IRLFUxS7iWaZKG2w518ya824G7u7Bbgs Js5lKaUgOnN7ZxFmmTHA3My1m3SPqXaPYPxvirt5RoAkocbyAn1i2vtGpsktD6TqB2hSqrfiK4EnwETINMELfzVxqPC4XMesSafy0r35HRSx eC303RFCwztCzGRvzF35ZybDtCTj9epdD1O6nvWMHe0fRe",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "priority": {
-                  "type": "integer"
-                },
-                "categories": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+            "type": "object",
+            "properties": {
+              "priority": {
+                "type": "integer"
               },
-              "required": [
-                "priority",
-                "categories"
-              ]
-            }
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "priority",
+              "categories"
+            ]
           }
         },
         "tasks": [
@@ -631,7 +623,7 @@
                   "id": "call_mock_4473743341094181152",
                   "function": {
                     "name": "WriteInputSchema",
-                    "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"priority\":{\"type\":\"integer\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"priority\",\"categories\"]}}}"
+                    "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"priority\":{\"type\":\"integer\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"priority\",\"categories\"]}}"
                   }
                 }
               ],
@@ -863,7 +855,7 @@
                   "id": "call_mock_17503265152879396527",
                   "function": {
                     "name": "AppendTask",
-                    "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"3s WVswPQDopD15AbMWxT4VTpOZJiPoalIqnqXGuJIU9LXqz N9zFcB6veAkxfIuYMqjzSFuG\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"priority\":{\"type\":\"integer\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"priority\",\"categories\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                    "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"3s WVswPQDopD15AbMWxT4VTpOZJiPoalIqnqXGuJIU9LXqz N9zFcB6veAkxfIuYMqjzSFuG\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"priority\":{\"type\":\"integer\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"priority\",\"categories\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
                   }
                 }
               ],
@@ -1050,26 +1042,22 @@
         "essay": "zb0OGXpJc1brtDueE2vlXyS15kJlDNIsYuTNMMuUqLTvLKf7Gr 7ga1Ui0peWvciSxbjDzd9 aUqCMhkqockJGiCeViHMrYCuCTTcdn7D3PrlG9ksaItHjhwg5BA1oVzkIxMT11gFkg2CBNvSTtKplzC29Cw2GiK51thVJ9yiXB89yqNgXiXUkIdcnqqvnMDIZPtp nE76WzArViI3lx4VoXrEq0z5fY8BFzIdPDfTTt11YBKJ9rdPunmMQa C3Xd XywHj5WDkWlawVJv8bdenY8nYePmVg2o4jiOdnYicAIWXp5JV0kcOtB16NErdS0aVwbIixxJCH18Jqe9EhjhgJYLDKRGEpr5NHi9eJcMZZML04TYfcGmkwx4mV8r6ozMGmRVVAUxEHHEcF50X9oEuC3dqn18QKTrhON4FRV9Ldw9t86 8ultERh6OC8pAUfUtMdfzLJWfvzXAnZtHIEGqOpdBaKhv5AME2hlFPVOrBrNaQHOPhE7OijiYSdqKsXt7bopmrM0Awz2SkS cZQusqOdGtcb9RxgLnjBfd62QoJGSUtM2HULJpDrPef0o72qKSt HYQfEt5umeJP6fS0SwPTfBj9rpq3yP8QihNlRk8twpaIUHpCFHNdPSpQzo0OCX8XD2S5Q",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "priority": {
-                  "type": "integer"
-                },
-                "categories": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+            "type": "object",
+            "properties": {
+              "priority": {
+                "type": "integer"
               },
-              "required": [
-                "priority",
-                "categories"
-              ]
-            }
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "priority",
+              "categories"
+            ]
           }
         },
         "essay_tasks": "yE0FKoWZh5DRWkVMwQGEWzKczdbP3t0726D58xtMm1J KQuNbZxfI3uCmJko2mNTZljiWEvhM3fVHgEU4MSzABmn4H4i3NnQ iQz7OVLqx9Mx1rCHyGm3duMTXYzuHOfwrxj4pmLHzRRidBlneJjZBRLoZIHx7DuGs1vAeloa5K5F1HbwlVNuQwsLCrgrWQRm6O1YvSJVCKMR8dLuaKutq3bGe",
@@ -1085,26 +1073,22 @@
             "spec": "3s WVswPQDopD15AbMWxT4VTpOZJiPoalIqnqXGuJIU9LXqz N9zFcB6veAkxfIuYMqjzSFuG",
             "input_schema": {
               "items": {
-                "type": "array",
-                "minItems": 2,
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "priority": {
-                      "type": "integer"
-                    },
-                    "categories": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
+                "type": "object",
+                "properties": {
+                  "priority": {
+                    "type": "integer"
                   },
-                  "required": [
-                    "priority",
-                    "categories"
-                  ]
-                }
+                  "categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "priority",
+                  "categories"
+                ]
               }
             },
             "input": {
@@ -1124,26 +1108,22 @@
         "description": "nIX0F7Ku0QQMRzQ2mzIfec0IIoZf29uwBtI3Dbxaj42PEXjV0Uj7rZ3094d6na9LHABMEI d89Xn1ECKfomrKfYbOM40uuH xu",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "priority": {
-                  "type": "integer"
-                },
-                "categories": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+            "type": "object",
+            "properties": {
+              "priority": {
+                "type": "integer"
               },
-              "required": [
-                "priority",
-                "categories"
-              ]
-            }
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "priority",
+              "categories"
+            ]
           }
         },
         "tasks": [
@@ -1158,26 +1138,22 @@
             "spec": "3s WVswPQDopD15AbMWxT4VTpOZJiPoalIqnqXGuJIU9LXqz N9zFcB6veAkxfIuYMqjzSFuG",
             "input_schema": {
               "items": {
-                "type": "array",
-                "minItems": 2,
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "priority": {
-                      "type": "integer"
-                    },
-                    "categories": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    }
+                "type": "object",
+                "properties": {
+                  "priority": {
+                    "type": "integer"
                   },
-                  "required": [
-                    "priority",
-                    "categories"
-                  ]
-                }
+                  "categories": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "required": [
+                  "priority",
+                  "categories"
+                ]
               }
             },
             "input": {

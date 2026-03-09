@@ -172,7 +172,7 @@
               "id": "call_mock_2059292935010780422",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"limit\":{\"type\":\"integer\"}},\"required\":[\"limit\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"stream\":{\"type\":\"video\"}},\"required\":[\"stream\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"limit\":{\"type\":\"integer\"}},\"required\":[\"limit\"]},\"items\":{\"type\":\"object\",\"properties\":{\"stream\":{\"type\":\"video\"}},\"required\":[\"stream\"]}}"
               }
             }
           ],
@@ -442,7 +442,7 @@
               "id": "call_mock_12618713576962825126",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"8XEo7zULEr0rB0yaWzehPVfnXPSQg42tAZV3x7PWQvSlgUsB4t3pWEjqMur\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"stream\":{\"type\":\"video\"}},\"required\":[\"stream\"]}},\"context\":{\"properties\":{\"limit\":{\"type\":\"integer\"}},\"required\":[\"limit\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"8XEo7zULEr0rB0yaWzehPVfnXPSQg42tAZV3x7PWQvSlgUsB4t3pWEjqMur\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"stream\":{\"type\":\"video\"}},\"required\":[\"stream\"]},\"context\":{\"properties\":{\"limit\":{\"type\":\"integer\"}},\"required\":[\"limit\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -639,19 +639,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "stream": {
-              "type": "video"
-            }
-          },
-          "required": [
-            "stream"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "stream": {
+            "type": "video"
+          }
+        },
+        "required": [
+          "stream"
+        ]
       }
     },
     "essay_tasks": "ewYAByZEKno4Z7OXLnS4Mt2TE8iVF4Nr0zq7CH7kEqQAyh7 MEs8EN2kote3GBbyOZLlCBttx1xEO8KIoLOjLBPl OgbslxxU0N6J4s2ZX ZeqmzXVWfWuoAg5EFL8V1rFLt",
@@ -677,19 +673,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "stream": {
-                  "type": "video"
-                }
-              },
-              "required": [
-                "stream"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "stream": {
+                "type": "video"
+              }
+            },
+            "required": [
+              "stream"
+            ]
           }
         },
         "input": {
@@ -722,19 +714,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "stream": {
-              "type": "video"
-            }
-          },
-          "required": [
-            "stream"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "stream": {
+            "type": "video"
+          }
+        },
+        "required": [
+          "stream"
+        ]
       }
     },
     "tasks": [
@@ -759,19 +747,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "stream": {
-                  "type": "video"
-                }
-              },
-              "required": [
-                "stream"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "stream": {
+                "type": "video"
+              }
+            },
+            "required": [
+              "stream"
+            ]
           }
         },
         "input": {

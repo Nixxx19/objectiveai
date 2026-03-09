@@ -51,14 +51,9 @@ fn description_empty() {
         description: "  ".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -84,14 +79,9 @@ fn description_too_long() {
         description: "a".repeat(351),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -119,14 +109,9 @@ fn no_tasks() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![],
@@ -142,14 +127,9 @@ fn valid_simple_string_items() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -175,14 +155,9 @@ fn valid_multiple_tasks() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![
@@ -219,25 +194,20 @@ fn valid_integer_items() {
         description: "Rank integers by preference".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "value" => InputSchema::Integer(IntegerInputSchema {
-                            description: None,
-                            minimum: Some(0),
-                            maximum: Some(999),
-                        }),
-                        "label" => InputSchema::String(StringInputSchema {
-                            description: None,
-                            r#enum: None,
-                        })
-                    },
-                    required: Some(vec!["value".to_string(), "label".to_string()]),
-                })),
+                properties: index_map! {
+                    "value" => InputSchema::Integer(IntegerInputSchema {
+                        description: None,
+                        minimum: Some(0),
+                        maximum: Some(999),
+                    }),
+                    "label" => InputSchema::String(StringInputSchema {
+                        description: None,
+                        r#enum: None,
+                    })
+                },
+                required: Some(vec!["value".to_string(), "label".to_string()]),
             }),
         },
         tasks: vec![
@@ -274,18 +244,13 @@ fn valid_object_items() {
         description: "Compare tagged items".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "name" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                        "tags" => InputSchema::Array(ArrayInputSchema { description: None, min_items: Some(1), max_items: Some(3), items: Box::new(InputSchema::String(StringInputSchema { description: None, r#enum: None })) })
-                    },
-                    required: Some(vec!["name".to_string(), "tags".to_string()]),
-                })),
+                properties: index_map! {
+                    "name" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
+                    "tags" => InputSchema::Array(ArrayInputSchema { description: None, min_items: Some(1), max_items: Some(3), items: Box::new(InputSchema::String(StringInputSchema { description: None, r#enum: None })) })
+                },
+                required: Some(vec!["name".to_string(), "tags".to_string()]),
             }),
         },
         tasks: vec![
@@ -322,14 +287,9 @@ fn valid_no_max_items() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: None,
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -357,14 +317,9 @@ fn responses_fixed_expression_fails_diversity() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(2),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -381,7 +336,7 @@ fn responses_fixed_expression_fails_diversity() {
             },
         )],
     };
-    test_err(&f, "AV16");
+    test_err(&f, "CV14");
 }
 
 #[test]
@@ -390,14 +345,9 @@ fn responses_fixed_pool_expression_fails_diversity() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(2),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -414,7 +364,7 @@ fn responses_fixed_pool_expression_fails_diversity() {
             },
         )],
     };
-    test_err(&f, "AV16");
+    test_err(&f, "CV14");
 }
 
 #[test]
@@ -423,14 +373,9 @@ fn responses_derived_from_input_passes_diversity() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -456,14 +401,9 @@ fn diversity_fail_third_task_fixed_responses() {
         description: "Pick the better candidate".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(2),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![
@@ -502,7 +442,7 @@ fn diversity_fail_third_task_fixed_responses() {
             }),
         ],
     };
-    test_err(&f, "AV16");
+    test_err(&f, "CV14");
 }
 
 #[test]
@@ -511,14 +451,9 @@ fn diversity_fail_positional_labels() {
         description: "Rank entries".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(3),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![
@@ -557,7 +492,7 @@ fn diversity_fail_positional_labels() {
             }),
         ],
     };
-    test_err(&f, "AV16");
+    test_err(&f, "CV03");
 }
 
 // --- Passing diversity ---
@@ -568,14 +503,9 @@ fn diversity_pass_ranking_with_enum_items() {
         description: "Compare options by criterion".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![
@@ -612,14 +542,9 @@ fn diversity_pass_multiple_tasks_with_varied_responses() {
         description: "Weighted choice selector".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![
@@ -669,14 +594,9 @@ fn within_input_responses_all_cloned() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -702,14 +622,9 @@ fn within_input_responses_cloned_two_elements() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(2),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -737,14 +652,9 @@ fn all_tasks_skipped() {
         description: "Ranks applications by quality".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: None,
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![
@@ -783,14 +693,9 @@ fn rejects_single_permutation_string_enum() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(2),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: Some(vec!["only".to_string()]),
-                })),
+                r#enum: Some(vec!["only".to_string()]),
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -807,7 +712,7 @@ fn rejects_single_permutation_string_enum() {
             },
         )],
     };
-    test_err(&f, "QI01");
+    test_err(&f, "AV16");
 }
 
 #[test]
@@ -816,15 +721,10 @@ fn rejects_single_permutation_integer() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Integer(IntegerInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(2),
-                items: Box::new(InputSchema::Integer(IntegerInputSchema {
-                    description: None,
-                    minimum: Some(0),
-                    maximum: Some(0),
-                })),
+                minimum: Some(0),
+                maximum: Some(0),
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -841,7 +741,7 @@ fn rejects_single_permutation_integer() {
             },
         )],
     };
-    test_err(&f, "QI01");
+    test_err(&f, "AV16");
 }
 
 // --- Multimodal coverage checks (AV18) ---
@@ -852,23 +752,18 @@ fn modality_fail_image_in_schema_but_text_only() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "photo" => InputSchema::Image(ImageInputSchema {
-                            description: None,
-                        }),
-                        "name" => InputSchema::String(StringInputSchema {
-                            description: None,
-                            r#enum: None,
-                        })
-                    },
-                    required: Some(vec!["photo".to_string(), "name".to_string()]),
-                })),
+                properties: index_map! {
+                    "photo" => InputSchema::Image(ImageInputSchema {
+                        description: None,
+                    }),
+                    "name" => InputSchema::String(StringInputSchema {
+                        description: None,
+                        r#enum: None,
+                    })
+                },
+                required: Some(vec!["photo".to_string(), "name".to_string()]),
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -894,23 +789,18 @@ fn modality_pass_image_in_responses() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "photo" => InputSchema::Image(ImageInputSchema {
-                            description: None,
-                        }),
-                        "name" => InputSchema::String(StringInputSchema {
-                            description: None,
-                            r#enum: None,
-                        })
-                    },
-                    required: Some(vec!["photo".to_string(), "name".to_string()]),
-                })),
+                properties: index_map! {
+                    "photo" => InputSchema::Image(ImageInputSchema {
+                        description: None,
+                    }),
+                    "name" => InputSchema::String(StringInputSchema {
+                        description: None,
+                        r#enum: None,
+                    })
+                },
+                required: Some(vec!["photo".to_string(), "name".to_string()]),
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -935,23 +825,18 @@ fn modality_pass_image_in_messages() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "photo" => InputSchema::Image(ImageInputSchema {
-                            description: None,
-                        }),
-                        "name" => InputSchema::String(StringInputSchema {
-                            description: None,
-                            r#enum: None,
-                        })
-                    },
-                    required: Some(vec!["photo".to_string(), "name".to_string()]),
-                })),
+                properties: index_map! {
+                    "photo" => InputSchema::Image(ImageInputSchema {
+                        description: None,
+                    }),
+                    "name" => InputSchema::String(StringInputSchema {
+                        description: None,
+                        r#enum: None,
+                    })
+                },
+                required: Some(vec!["photo".to_string(), "name".to_string()]),
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -979,14 +864,9 @@ fn valid_merged_subsets_simple() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -1014,23 +894,18 @@ fn valid_with_skip_last_task_boolean() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "text" => InputSchema::String(StringInputSchema {
-                            description: None,
-                            r#enum: None,
-                        }),
-                        "skip_last_task" => InputSchema::Boolean(BooleanInputSchema {
-                            description: None,
-                        })
-                    },
-                    required: Some(vec!["text".to_string(), "skip_last_task".to_string()]),
-                })),
+                properties: index_map! {
+                    "text" => InputSchema::String(StringInputSchema {
+                        description: None,
+                        r#enum: None,
+                    }),
+                    "skip_last_task" => InputSchema::Boolean(BooleanInputSchema {
+                        description: None,
+                    })
+                },
+                required: Some(vec!["text".to_string(), "skip_last_task".to_string()]),
             }),
         },
         tasks: vec![
@@ -1069,14 +944,9 @@ fn valid_with_skip_on_quick_mode() {
         description: "Rank with optional deep analysis".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(10),
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![
@@ -1117,19 +987,14 @@ fn valid_people_ranking_with_skip() {
         description: "Rank people by name quality".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "fullName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                        "firstName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                        "lastName" => InputSchema::String(StringInputSchema { description: None, r#enum: None })
-                    },
-                    required: Some(vec!["fullName".to_string(), "firstName".to_string()]),
-                })),
+                properties: index_map! {
+                    "fullName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
+                    "firstName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
+                    "lastName" => InputSchema::String(StringInputSchema { description: None, r#enum: None })
+                },
+                required: Some(vec!["fullName".to_string(), "firstName".to_string()]),
             }),
         },
         tasks: vec![
@@ -1179,19 +1044,14 @@ fn people_ranking_null_lastname_replaced() {
         description: "Rank people by name quality".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "fullName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                        "firstName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                        "lastName" => InputSchema::String(StringInputSchema { description: None, r#enum: None })
-                    },
-                    required: Some(vec!["fullName".to_string(), "firstName".to_string()]),
-                })),
+                properties: index_map! {
+                    "fullName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
+                    "firstName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
+                    "lastName" => InputSchema::String(StringInputSchema { description: None, r#enum: None })
+                },
+                required: Some(vec!["fullName".to_string(), "firstName".to_string()]),
             }),
         },
         tasks: vec![
@@ -1241,18 +1101,13 @@ fn response_diversity_pass_boolean_derived() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(4),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "label" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                        "flag" => InputSchema::Boolean(BooleanInputSchema { description: None })
-                    },
-                    required: None,
-                })),
+                properties: index_map! {
+                    "label" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
+                    "flag" => InputSchema::Boolean(BooleanInputSchema { description: None })
+                },
+                required: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -1278,18 +1133,13 @@ fn response_diversity_fail_fixed_responses() {
         description: "test".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::Object(ObjectInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: Some(3),
-                items: Box::new(InputSchema::Object(ObjectInputSchema {
-                    description: None,
-                    properties: index_map! {
-                        "label" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                        "flag" => InputSchema::Boolean(BooleanInputSchema { description: None })
-                    },
-                    required: None,
-                })),
+                properties: index_map! {
+                    "label" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
+                    "flag" => InputSchema::Boolean(BooleanInputSchema { description: None })
+                },
+                required: None,
             }),
         },
         tasks: vec![LeafTaskExpression::VectorCompletion(
@@ -1317,14 +1167,9 @@ fn job_application_ranker_pass() {
         description: "Ranks job applications against a job description by evaluating multiple dimensions".to_string(),
         input_schema: VectorFunctionInputSchema {
             context: None,
-            items: InputSchema::Array(ArrayInputSchema {
+            items: InputSchema::String(StringInputSchema {
                 description: None,
-                min_items: Some(2),
-                max_items: None,
-                items: Box::new(InputSchema::String(StringInputSchema {
-                    description: None,
-                    r#enum: None,
-                })),
+                r#enum: None,
             }),
         },
         tasks: vec![

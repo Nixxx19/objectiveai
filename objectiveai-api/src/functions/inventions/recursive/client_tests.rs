@@ -101,6 +101,9 @@ type TestInventionClient = crate::functions::inventions::Client<
     StubAgentFetcher,
     StubAgentUsageHandler,
     StubInventionUsageHandler,
+    crate::functions::function_fetcher::mock::MockFetcher,
+    crate::functions::function_fetcher::mock::MockFetcher,
+    crate::functions::function_fetcher::mock::MockFetcher,
 >;
 
 type TestClient = super::Client<
@@ -111,6 +114,9 @@ type TestClient = super::Client<
     StubAgentFetcher,
     StubAgentUsageHandler,
     StubInventionUsageHandler,
+    crate::functions::function_fetcher::mock::MockFetcher,
+    crate::functions::function_fetcher::mock::MockFetcher,
+    crate::functions::function_fetcher::mock::MockFetcher,
     StubRecursiveUsageHandler,
 >;
 
@@ -161,10 +167,16 @@ fn make_client() -> Arc<TestClient> {
         "ObjectiveAI".to_string(),
         "noreply@objective-ai.io".to_string(),
     ));
+    let function_fetcher = Arc::new(crate::functions::function_fetcher::FetcherRouter::new(
+        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
+        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
+        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
+    ));
     let invention_client = Arc::new(crate::functions::inventions::Client::new(
         agent_client,
         github_client,
         filesystem_client,
+        function_fetcher,
         Arc::new(StubInventionUsageHandler),
         true,
     ));
@@ -272,8 +284,8 @@ async fn run_recursive_invention(
         let _ = tx.send(result);
     });
 
-    rx.recv_timeout(Duration::from_secs(120))
-        .expect("recursive invention timed out after 120s")
+    rx.recv_timeout(Duration::from_secs(300))
+        .expect("recursive invention timed out after 300s — this may be caused by slow hardware or busy system resources")
 }
 
 // ---------------------------------------------------------------------------
@@ -603,3 +615,408 @@ recursive_test_3x!(test_scalar_d3_min,
     AlphaScalarBranch, AlphaScalarBranchState,
     "rsb-d3-min", 3, 1, 1, 1, 1, 4000,
     "scalar_d3_min");
+
+// ---------------------------------------------------------------------------
+// Initial state validation tests
+// ---------------------------------------------------------------------------
+
+use objectiveai::functions::expression::{InputSchema, ObjectInputSchema, StringInputSchema};
+use objectiveai::functions::alpha_scalar;
+use objectiveai::functions::alpha_vector;
+use indexmap::IndexMap;
+
+/// Helper: run a recursive invention that is expected to produce an error.
+/// The recursive client emits errors as stream chunks, not as Err returns.
+async fn run_recursive_invention_err(
+    client: &Arc<TestClient>,
+    request: Arc<FunctionInventionRecursiveCreateParams>,
+) -> String {
+    let client = Arc::clone(client);
+    let (tx, rx) = std::sync::mpsc::channel();
+
+    std::thread::spawn(move || {
+        let rt = tokio::runtime::Runtime::new().unwrap();
+        let result = rt.block_on(async {
+            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+            let stream = client
+                .clone()
+                .create_streaming(ctx, request)
+                .await
+                .expect("create_streaming should return Ok (errors come as chunks)");
+            let chunks: Vec<_> = Box::pin(stream).collect::<Vec<_>>().await;
+            let agg = aggregate(chunks);
+            assert!(
+                agg.inventions_errors,
+                "expected inventions_errors to be true",
+            );
+            // Find the first invention with an error and return its message.
+            for inv in &agg.inventions {
+                if let Some(ref err) = inv.inner.error {
+                    return err.message.to_string();
+                }
+            }
+            panic!("expected at least one invention with an error, but none found");
+        });
+        let _ = tx.send(result);
+    });
+
+    rx.recv_timeout(Duration::from_secs(300))
+        .expect("recursive invention error timed out after 300s — this may be caused by slow hardware or busy system resources")
+}
+
+/// A valid scalar input schema: object with a required string enum of 2 values.
+fn valid_scalar_schema() -> alpha_scalar::expression::ScalarFunctionInputSchema {
+    let mut properties = IndexMap::new();
+    properties.insert(
+        "sentiment".to_string(),
+        InputSchema::String(StringInputSchema {
+            description: None,
+            r#enum: Some(vec!["positive".to_string(), "negative".to_string()]),
+        }),
+    );
+    ObjectInputSchema {
+        description: None,
+        properties,
+        required: Some(vec!["sentiment".to_string()]),
+    }
+}
+
+/// An invalid scalar input schema: single enum value → only 1 permutation.
+fn invalid_scalar_schema() -> alpha_scalar::expression::ScalarFunctionInputSchema {
+    let mut properties = IndexMap::new();
+    properties.insert(
+        "mood".to_string(),
+        InputSchema::String(StringInputSchema {
+            description: None,
+            r#enum: Some(vec!["sad".to_string()]),
+        }),
+    );
+    ObjectInputSchema {
+        description: None,
+        properties,
+        required: Some(vec!["mood".to_string()]),
+    }
+}
+
+/// A valid vector input schema: items is a string enum of 2 values.
+fn valid_vector_schema() -> alpha_vector::expression::VectorFunctionInputSchema {
+    alpha_vector::expression::VectorFunctionInputSchema {
+        context: None,
+        items: InputSchema::String(StringInputSchema {
+            description: None,
+            r#enum: Some(vec!["apple".to_string(), "banana".to_string()]),
+        }),
+    }
+}
+
+/// A valid scalar leaf task: vector completion with messages derived from input.
+fn valid_scalar_leaf_task() -> alpha_scalar::LeafTaskExpression {
+    alpha_scalar::LeafTaskExpression::VectorCompletion(
+        alpha_scalar::VectorCompletionTaskExpression {
+            skip: None,
+            messages: objectiveai::functions::expression::Expression::Starlark(
+                "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]".to_string(),
+            ),
+            responses: vec![
+                objectiveai::agent::completions::message::RichContent::Text("yes".to_string()),
+                objectiveai::agent::completions::message::RichContent::Text("no".to_string()),
+            ],
+        },
+    )
+}
+
+/// An invalid scalar leaf task: messages is a fixed string (not derived from input).
+fn invalid_scalar_leaf_task() -> alpha_scalar::LeafTaskExpression {
+    alpha_scalar::LeafTaskExpression::VectorCompletion(
+        alpha_scalar::VectorCompletionTaskExpression {
+            skip: None,
+            messages: objectiveai::functions::expression::Expression::Starlark(
+                "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"hardcoded\"}]}]".to_string(),
+            ),
+            responses: vec![
+                objectiveai::agent::completions::message::RichContent::Text("yes".to_string()),
+                objectiveai::agent::completions::message::RichContent::Text("no".to_string()),
+            ],
+        },
+    )
+}
+
+/// A valid vector leaf task: messages and responses derived from input.
+fn valid_vector_leaf_task() -> alpha_vector::LeafTaskExpression {
+    alpha_vector::LeafTaskExpression::VectorCompletion(
+        alpha_vector::VectorCompletionTaskExpression {
+            skip: None,
+            messages: objectiveai::functions::expression::Expression::Starlark(
+                "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": \"rank these\"}]}]".to_string(),
+            ),
+            responses: objectiveai::functions::expression::Expression::Starlark(
+                "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]".to_string(),
+            ),
+        },
+    )
+}
+
+// --- Error tests: invalid initial states ---
+
+#[test]
+fn test_invalid_scalar_input_schema() {
+    // Scalar leaf with an invalid input schema (only 1 permutation) and no tasks.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("inv-bad-schema", 0, 1, 1, 2, 4),
+            essay: Some("An essay about feelings.".to_string()),
+            input_schema: Some(invalid_scalar_schema()),
+            essay_tasks: None,
+            tasks: None,
+            tasks_length: None,
+            description: None,
+            readme: None,
+        });
+        let request = make_request(state, 5000);
+        let err = run_recursive_invention_err(&client, request).await;
+        assert!(err.contains("invalid_state"), "expected invalid_state error, got: {err}");
+    });
+}
+
+// test_invalid_vector_input_schema removed: VectorFunctionInputSchema.transpile()
+// now wraps items in ArrayInputSchema(min_items=2), so a single-enum items
+// schema produces enough array permutations to pass QI01.
+
+#[test]
+fn test_valid_schema_invalid_tasks_scalar_leaf() {
+    // Scalar leaf with a valid input schema but tasks that don't use the input.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("inv-bad-tasks", 0, 1, 1, 2, 4),
+            essay: Some("An essay about scoring sentiment.".to_string()),
+            input_schema: Some(valid_scalar_schema()),
+            essay_tasks: Some("Tasks for scoring.".to_string()),
+            tasks: Some(vec![
+                invalid_scalar_leaf_task(),
+                invalid_scalar_leaf_task(),
+            ]),
+            tasks_length: Some(2),
+            description: None,
+            readme: None,
+        });
+        let request = make_request(state, 5200);
+        let err = run_recursive_invention_err(&client, request).await;
+        assert!(err.contains("invalid_state"), "expected invalid_state error, got: {err}");
+    });
+}
+
+#[test]
+fn test_valid_schema_valid_tasks_scalar_leaf() {
+    // Scalar leaf with valid input schema and valid tasks — should succeed.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("inv-good-sl", 0, 1, 1, 2, 4),
+            essay: None,
+            input_schema: Some(valid_scalar_schema()),
+            essay_tasks: Some("Good tasks incoming.".to_string()),
+            tasks: Some(vec![
+                valid_scalar_leaf_task(),
+                valid_scalar_leaf_task(),
+            ]),
+            tasks_length: Some(2),
+            description: Some("A valid scalar function.".to_string()),
+            readme: None,
+        });
+        let request = make_request(state, 5300);
+        let result = normalize(run_recursive_invention(&client, request).await);
+        let json = serde_json::to_string_pretty(&result).unwrap();
+        assert_snapshot(
+            &json,
+            concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/valid_schema_valid_tasks_scalar_leaf.json"),
+            include_str!("../../../../assets/functions/inventions/recursive_client_tests/valid_schema_valid_tasks_scalar_leaf.json"),
+        );
+    });
+}
+
+#[test]
+fn test_valid_vector_schema_valid_tasks() {
+    // Vector leaf with valid schema and tasks — should succeed.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
+            params: params("inv-good-vl", 0, 1, 1, 2, 4),
+            essay: Some("Ranking things.".to_string()),
+            input_schema: Some(valid_vector_schema()),
+            essay_tasks: None,
+            tasks: Some(vec![
+                valid_vector_leaf_task(),
+                valid_vector_leaf_task(),
+            ]),
+            tasks_length: Some(2),
+            description: None,
+            readme: None,
+        });
+        let request = make_request(state, 5400);
+        let result = normalize(run_recursive_invention(&client, request).await);
+        let json = serde_json::to_string_pretty(&result).unwrap();
+        assert_snapshot(
+            &json,
+            concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/valid_vector_schema_valid_tasks.json"),
+            include_str!("../../../../assets/functions/inventions/recursive_client_tests/valid_vector_schema_valid_tasks.json"),
+        );
+    });
+}
+
+#[test]
+fn test_predicted_tasks_length_too_low() {
+    // tasks_length = 0, but min_leaf_width = 2 — should fail.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("inv-tl-low", 0, 1, 1, 2, 4),
+            essay: Some("Writing an essay.".to_string()),
+            input_schema: None,
+            essay_tasks: Some("Tasks essay.".to_string()),
+            tasks: None,
+            tasks_length: Some(0),
+            description: None,
+            readme: None,
+        });
+        let request = make_request(state, 5500);
+        let err = run_recursive_invention_err(&client, request).await;
+        assert!(
+            err.contains("tasks_length") && err.contains("outside bounds"),
+            "expected tasks_length bounds error, got: {err}",
+        );
+    });
+}
+
+#[test]
+fn test_predicted_tasks_length_too_high() {
+    // tasks_length = 99, but max_leaf_width = 4 — should fail.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
+            params: params("inv-tl-high", 0, 1, 1, 2, 4),
+            essay: None,
+            input_schema: Some(valid_vector_schema()),
+            essay_tasks: None,
+            tasks: None,
+            tasks_length: Some(99),
+            description: Some("Description present.".to_string()),
+            readme: None,
+        });
+        let request = make_request(state, 5600);
+        let err = run_recursive_invention_err(&client, request).await;
+        assert!(
+            err.contains("tasks_length") && err.contains("outside bounds"),
+            "expected tasks_length bounds error, got: {err}",
+        );
+    });
+}
+
+#[test]
+fn test_predicted_tasks_length_too_high_branch() {
+    // Branch with tasks_length = 50, but max_branch_width = 5 — should fail.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaScalarBranch(AlphaScalarBranchState {
+            params: params("inv-tl-branch", 1, 3, 5, 2, 4),
+            essay: Some("Branch essay.".to_string()),
+            input_schema: Some(valid_scalar_schema()),
+            essay_tasks: Some("Branch tasks essay.".to_string()),
+            tasks: None,
+            tasks_length: Some(50),
+            description: None,
+            readme: None,
+        });
+        let request = make_request(state, 5700);
+        let err = run_recursive_invention_err(&client, request).await;
+        assert!(
+            err.contains("tasks_length") && err.contains("outside bounds"),
+            "expected tasks_length bounds error, got: {err}",
+        );
+    });
+}
+
+#[test]
+fn test_predicted_tasks_length_below_branch_min() {
+    // Vector branch with tasks_length = 1, but min_branch_width = 3.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaVectorBranch(AlphaVectorBranchState {
+            params: params("inv-tl-vb-low", 1, 3, 8, 2, 4),
+            essay: None,
+            input_schema: None,
+            essay_tasks: Some("Tasks essay for vector branch.".to_string()),
+            tasks: None,
+            tasks_length: Some(1),
+            description: Some("Vector branch description.".to_string()),
+            readme: None,
+        });
+        let request = make_request(state, 5800);
+        let err = run_recursive_invention_err(&client, request).await;
+        assert!(
+            err.contains("tasks_length") && err.contains("outside bounds"),
+            "expected tasks_length bounds error, got: {err}",
+        );
+    });
+}
+
+#[test]
+fn test_valid_schema_no_tasks_with_essay() {
+    // Valid schema, essay present, no tasks — should succeed (normal invention flow).
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("inv-schema-only", 0, 1, 1, 2, 4),
+            essay: Some("A great essay about things.".to_string()),
+            input_schema: Some(valid_scalar_schema()),
+            essay_tasks: None,
+            tasks: None,
+            tasks_length: None,
+            description: None,
+            readme: None,
+        });
+        let request = make_request(state, 5900);
+        let result = normalize(run_recursive_invention(&client, request).await);
+        let json = serde_json::to_string_pretty(&result).unwrap();
+        assert_snapshot(
+            &json,
+            concat!(env!("CARGO_MANIFEST_DIR"), "/assets/functions/inventions/recursive_client_tests/valid_schema_no_tasks_with_essay.json"),
+            include_str!("../../../../assets/functions/inventions/recursive_client_tests/valid_schema_no_tasks_with_essay.json"),
+        );
+    });
+}
+
+#[test]
+fn test_invalid_schema_with_tasks_and_description() {
+    // Invalid schema + tasks + description — should fail on schema validation.
+    let rt = tokio::runtime::Runtime::new().unwrap();
+    rt.block_on(async {
+        let client = make_client();
+        let state = ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
+            params: params("inv-full-bad", 0, 1, 1, 2, 4),
+            essay: Some("An elaborate essay.".to_string()),
+            input_schema: Some(invalid_scalar_schema()),
+            essay_tasks: Some("Essay about tasks.".to_string()),
+            tasks: Some(vec![invalid_scalar_leaf_task()]),
+            tasks_length: Some(1),
+            description: Some("A complete but invalid function.".to_string()),
+            readme: Some("# README\nThis is invalid.".to_string()),
+        });
+        let request = make_request(state, 6000);
+        let err = run_recursive_invention_err(&client, request).await;
+        assert!(err.contains("invalid_state"), "expected invalid_state error, got: {err}");
+    });
+}
+
+// test_invalid_vector_schema_with_tasks removed: same reason as
+// test_invalid_vector_input_schema above.

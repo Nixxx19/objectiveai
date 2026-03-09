@@ -173,7 +173,7 @@
               "id": "call_mock_13338528318540831443",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"},\"name\":{\"type\":\"number\"}},\"required\":[\"enabled\",\"name\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"},\"name\":{\"type\":\"number\"}},\"required\":[\"enabled\",\"name\"]}}"
               }
             }
           ],
@@ -1106,7 +1106,7 @@
         {
           "role": "tool",
           "index": 54,
-          "content": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"},\"name\":{\"type\":\"number\"}},\"required\":[\"enabled\",\"name\"]}}}",
+          "content": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"},\"name\":{\"type\":\"number\"}},\"required\":[\"enabled\",\"name\"]}}",
           "tool_call_id": "call_mock_13774864700020228863"
         },
         {
@@ -1432,23 +1432,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "name": {
-              "type": "number"
-            }
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
           },
-          "required": [
-            "enabled",
-            "name"
-          ]
-        }
+          "name": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "enabled",
+          "name"
+        ]
       }
     },
     "essay_tasks": "qt8sJQAlW6T9CRFiFqlgY8fGrmFSDcCj3JyXyDbMJ4QqR4G7xtD24gijkATppmkh2zouNZCc7C4yzc bxft1Fn73NG2kjLr8UPgQbBdV4OvsjIdej8uTIXaWI0PVfF5I3Nmwrenx7tlVLYNTNsaXWnz7rFx7Y3k0Jlgnh2HnBD0yykFm653qvVp4fGNz2SkWo17LUpb9KyioFOg48Ie5uFad7QnMYA2S0O404dlthTGbcYU1xo",
@@ -1564,23 +1560,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "name": {
-              "type": "number"
-            }
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
           },
-          "required": [
-            "enabled",
-            "name"
-          ]
-        }
+          "name": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "enabled",
+          "name"
+        ]
       }
     },
     "tasks": [

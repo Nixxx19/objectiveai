@@ -136,7 +136,7 @@
               "id": "call_mock_4590164027654818916",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"verified\":{\"type\":\"boolean\"},\"name\":{\"type\":\"string\"}},\"required\":[\"verified\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"number\"}},\"required\":[\"status\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"verified\":{\"type\":\"boolean\"},\"name\":{\"type\":\"string\"}},\"required\":[\"verified\"]},\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"number\"}},\"required\":[\"status\"]}}"
               }
             }
           ],
@@ -368,7 +368,7 @@
               "id": "call_mock_17428296418746817720",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"8bMsfEWrSGwVkexIjvu3h2 mFZFIZFuvtfQCONNEJSYee9DwHSuLsnKKSIUfhU81DOE1yZNRT6OJNs9Nq yAovUS KHXVH7jfwsWslul5nhnR\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"number\"}},\"required\":[\"status\"]}},\"context\":{\"properties\":{\"verified\":{\"type\":\"boolean\"},\"name\":{\"type\":\"string\"}},\"required\":[\"verified\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"8bMsfEWrSGwVkexIjvu3h2 mFZFIZFuvtfQCONNEJSYee9DwHSuLsnKKSIUfhU81DOE1yZNRT6OJNs9Nq yAovUS KHXVH7jfwsWslul5nhnR\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"number\"}},\"required\":[\"status\"]},\"context\":{\"properties\":{\"verified\":{\"type\":\"boolean\"},\"name\":{\"type\":\"string\"}},\"required\":[\"verified\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -567,19 +567,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "status"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "status"
+        ]
       }
     },
     "essay_tasks": "YV4Io1gyawS09Wx7Rx92THBcFBOfmwgp4iEVnEnGoi7LuwC2Y0PSnB7tlJBN9gofqu1PTCnT4zbLWVzbW8TzVKnAllSit8pB6NkDpl8dBeiDI  AS4or2cX c03VQdx7RNrM51aAwpkD6N FM30BeCIY8a462kD0sstSgphqCqyfonJXRd6Cq1ti91O1rWlzA7tzYBMsF4xWRoWPzPyBPsUuBpxigCcJG19YQG7z0QrHQEwsRHmc5er15QHtbQAIM bcAJL9uAflVcH0KQeuZYZZH30kLXCceF4OQJT2xpNnLd vB",
@@ -608,19 +604,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "status"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "status"
+            ]
           }
         },
         "input": {
@@ -679,19 +671,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "number"
-            }
-          },
-          "required": [
-            "status"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "status"
+        ]
       }
     },
     "tasks": [
@@ -719,19 +707,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "status": {
-                  "type": "number"
-                }
-              },
-              "required": [
-                "status"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "status": {
+                "type": "number"
+              }
+            },
+            "required": [
+              "status"
+            ]
           }
         },
         "input": {

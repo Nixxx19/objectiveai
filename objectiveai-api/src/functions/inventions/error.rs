@@ -27,6 +27,9 @@ pub enum Error {
     /// Filesystem error.
     #[error("filesystem error: {0}")]
     Filesystem(#[from] crate::filesystem::Error),
+    /// Error fetching a child function referenced by a branch task.
+    #[error("function fetch error: {0}")]
+    FunctionFetch(objectiveai::error::ResponseError),
 }
 
 impl StatusError for Error {
@@ -40,6 +43,7 @@ impl StatusError for Error {
             Error::GithubTokenMissingPermissions(_) => 403,
             Error::InvalidName(_) => 400,
             Error::Filesystem(e) => e.status(),
+            Error::FunctionFetch(e) => e.code,
         }
     }
 
@@ -76,6 +80,10 @@ impl StatusError for Error {
             Error::Filesystem(e) => serde_json::json!({
                 "kind": "filesystem",
                 "error": e.message(),
+            }),
+            Error::FunctionFetch(e) => serde_json::json!({
+                "kind": "function_fetch",
+                "error": e.message,
             }),
         };
         Some(serde_json::json!({

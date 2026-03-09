@@ -136,7 +136,7 @@
               "id": "call_mock_14545008514062791246",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"rank\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"},\"topic\":{\"type\":\"string\"},\"avatar\":{\"type\":\"image\"}},\"required\":[\"rank\",\"name\",\"topic\",\"avatar\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"rank\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"},\"topic\":{\"type\":\"string\"},\"avatar\":{\"type\":\"image\"}},\"required\":[\"rank\",\"name\",\"topic\",\"avatar\"]}}"
               }
             }
           ],
@@ -291,7 +291,7 @@
               "id": "call_mock_607891157598179173",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"nLo4hsWpgAWD7OlMrHSw ZYjo5RxqQtmhQ4V8BkZFGXmzvmE7ixRj fUHX4XQ6QiVmf48zcWlV PEV1lNyOfVlW4u2xc5EB xTPxTI3Do2ntJTobo8jfdqaVGI7t9Sz\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"rank\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"},\"topic\":{\"type\":\"string\"},\"avatar\":{\"type\":\"image\"}},\"required\":[\"rank\",\"name\",\"topic\",\"avatar\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"nLo4hsWpgAWD7OlMrHSw ZYjo5RxqQtmhQ4V8BkZFGXmzvmE7ixRj fUHX4XQ6QiVmf48zcWlV PEV1lNyOfVlW4u2xc5EB xTPxTI3Do2ntJTobo8jfdqaVGI7t9Sz\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"rank\":{\"type\":\"integer\"},\"name\":{\"type\":\"string\"},\"topic\":{\"type\":\"string\"},\"avatar\":{\"type\":\"image\"}},\"required\":[\"rank\",\"name\",\"topic\",\"avatar\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -478,31 +478,27 @@
     "essay": "eEqEg2IfcZ4pEgGzig9vfgcYed8fG5hPRlpAbL1M5RBtMEX8vdnHFzyisEwU8bFUMpJv7GMlmR1NmJmteWUh28UjkAIy E3UuQBCR2n5JPg5B297CxZpPDZCRbcyLD80BhJbGh4R1bJaquiiBPQ oJxsVDkK5ER0MZ8CHcVgywezNkBWoR87DpeQnw1QMplGmL4mqzmSh99nNmAXVUGTJrwIcLqYlWRLSFudhioziXR3PlsxZz DKlpHiWIa1J6EDbNdtCQK rU6PFY9RVxzLxUl1oLptiHjJYt3YWq6uNTeQHIdOudqPc1CUp6gH2PI7G122FYofuLD57b1MI8buxkuok85Ymf634u al1NyVx04hhX mOSLM6eMoka1HoOmDrMRQkv DbD3p2hDgk m04IQn5qq0INtLnFfay5rKnu2hoWtGnHmHf9e2Uk8SLW0abNFn00Gy9muN3DyEpDqPreR5dtC16puKeZ7dBUA3f4CdSjqd6M7stcje4kyTKdyXjYfIP hZ8bhFEY7ejjunXtp01vabE0BwR8 vCgoloWa6v9OV3xkn33avv7xituFLtsPK5uh3zfAosqzM 00U1nX",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "rank": {
-              "type": "integer"
-            },
-            "name": {
-              "type": "string"
-            },
-            "topic": {
-              "type": "string"
-            },
-            "avatar": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer"
           },
-          "required": [
-            "rank",
-            "name",
-            "topic",
-            "avatar"
-          ]
-        }
+          "name": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "rank",
+          "name",
+          "topic",
+          "avatar"
+        ]
       }
     },
     "essay_tasks": "Xu0IqlehDSWODI7Rjl06hU GBWE2BxKVkWHGcfhBfVx1RetzTqtW T2H5Nqk8FCNOfUElWCvV5vJ5ad8o4gczxQx9TPpXZwX4NLg9wDHzBlzAeFxMJEVugZOALLpj7PPhe33XH9sqyNWe9xSojzSwEZcKr76FChmb6EFoIAMJdsty  fSLdFaiVHltCv57F43ygpYS0UzwoZkn0OuBba4qULUMcM3KD9I81jv3HpA5qhjUYlZLvC9h5UKgXal2ZYM1 jRsOTZLKH9UMAUUuRRAscQRkk1oAxZqietf5R0NDsNZbBvXE05GOvstu98GLAUpNa83hNHTrN9l9N1pAF4sgwwEYcoGMRUfIbjw Mfc2Z1VqnngpcHPnb7kw88vAvTKh6KU2qIgbIz8K8AmHy uJgxptC4zNxgqa9B7cGkh 0VKBuDl3cjPsa4OucSGSFuCsTdnDLqMbc9O",
@@ -518,31 +514,27 @@
         "spec": "nLo4hsWpgAWD7OlMrHSw ZYjo5RxqQtmhQ4V8BkZFGXmzvmE7ixRj fUHX4XQ6QiVmf48zcWlV PEV1lNyOfVlW4u2xc5EB xTPxTI3Do2ntJTobo8jfdqaVGI7t9Sz",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "rank": {
-                  "type": "integer"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "topic": {
-                  "type": "string"
-                },
-                "avatar": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "rank": {
+                "type": "integer"
               },
-              "required": [
-                "rank",
-                "name",
-                "topic",
-                "avatar"
-              ]
-            }
+              "name": {
+                "type": "string"
+              },
+              "topic": {
+                "type": "string"
+              },
+              "avatar": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "rank",
+              "name",
+              "topic",
+              "avatar"
+            ]
           }
         },
         "input": {
@@ -562,31 +554,27 @@
     "description": "MbtxvoylMJ6 xJn2r0pTvxbU7NcpYHh95HpQIzM0Py5yceQ8BGUYTRffhT2glTEUiWyf5E6p1n2T7Uwu2crNR9ekmn9g56GX4soZqUxF 4VxNBYS8CdKfzbfmy00QGHqutULb8BhdxMqCxMYq",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "rank": {
-              "type": "integer"
-            },
-            "name": {
-              "type": "string"
-            },
-            "topic": {
-              "type": "string"
-            },
-            "avatar": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "rank": {
+            "type": "integer"
           },
-          "required": [
-            "rank",
-            "name",
-            "topic",
-            "avatar"
-          ]
-        }
+          "name": {
+            "type": "string"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "avatar": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "rank",
+          "name",
+          "topic",
+          "avatar"
+        ]
       }
     },
     "tasks": [
@@ -601,31 +589,27 @@
         "spec": "nLo4hsWpgAWD7OlMrHSw ZYjo5RxqQtmhQ4V8BkZFGXmzvmE7ixRj fUHX4XQ6QiVmf48zcWlV PEV1lNyOfVlW4u2xc5EB xTPxTI3Do2ntJTobo8jfdqaVGI7t9Sz",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "rank": {
-                  "type": "integer"
-                },
-                "name": {
-                  "type": "string"
-                },
-                "topic": {
-                  "type": "string"
-                },
-                "avatar": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "rank": {
+                "type": "integer"
               },
-              "required": [
-                "rank",
-                "name",
-                "topic",
-                "avatar"
-              ]
-            }
+              "name": {
+                "type": "string"
+              },
+              "topic": {
+                "type": "string"
+              },
+              "avatar": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "rank",
+              "name",
+              "topic",
+              "avatar"
+            ]
           }
         },
         "input": {

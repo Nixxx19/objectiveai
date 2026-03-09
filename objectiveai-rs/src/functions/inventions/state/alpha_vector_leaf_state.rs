@@ -24,6 +24,31 @@ pub struct AlphaVectorLeafState {
 }
 
 impl AlphaVectorLeafState {
+    /// Validates the initial state's input schema and tasks.
+    ///
+    /// If an input schema is present, checks that it produces at least 2
+    /// distinct example inputs. If tasks are also present, checks that
+    /// they are valid for the input schema.
+    pub fn validate_initial_state(&self) -> Result<(), String> {
+        if let Some(ref input_schema) = self.input_schema {
+            let transpiled = input_schema.clone().transpile();
+            functions::check::check_input_schema(&transpiled)?;
+        }
+        if let (Some(input_schema), Some(tasks)) =
+            (&self.input_schema, &self.tasks)
+        {
+            let function = functions::alpha_vector::RemoteFunction::Leaf {
+                description: "placeholder".to_string(),
+                input_schema: input_schema.clone(),
+                tasks: tasks.clone(),
+            };
+            functions::alpha_vector::check::check_alpha_leaf_vector_function(
+                &function,
+            )?;
+        }
+        Ok(())
+    }
+
     pub fn read_spec_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {

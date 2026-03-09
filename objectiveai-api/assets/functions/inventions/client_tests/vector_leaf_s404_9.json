@@ -136,7 +136,7 @@
               "id": "call_mock_5770064091082510931",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"rating\":{\"type\":\"number\"},\"keywords\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"summary\",\"rating\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"summary\":{\"type\":\"string\"},\"rating\":{\"type\":\"number\"},\"keywords\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"summary\",\"rating\"]}}"
               }
             }
           ],
@@ -591,29 +591,25 @@
     "essay": "8vHcpteOEodUzJ4ErQi5yc4ehW53t7K6QbiC2E8k2eag2wTTm5jhl7isThj0io1zWPRuDc iyKlGf6Elt2vXCZpVnHDl9Rxo7iFxJdmcoEfWR3O3v8iQR9eCr15NU7wkeDHy0FMr4LHTVIllgzeBNNPca6bpInMpds3xMBuXAx9SOT8lgmFqhs tYCpmxSkLyVobJlaoAjsNekqJXgBxHZX9 9R5P6TxrfDF4C5vrzADBq9CqqmLfWYsGSog2IEIsbSygzw03 5J2vUtmxGoAhZ4CDmWMaQleJZPKFMmdrB5cGjoSdcNoDPdZ3ubVxyrWRMiQI72QtB3vzAqo9Kjk8vEIZHL05xUZhIBigQZerFw9NQs3fonMiumTUZFdbTbiQDaI07w1YJUaVzfIMWeBCD8hFtbLgJWvlcJieMwhhCMPdpdXzXN2hCWjH2SfTYEoOmIXDGLwzFpJUJrVq2dL7f QEIZQoLXKLsjH61pubjbcitRqHRrbZ84BP6FCPG8fLnGyZ2d6GDFcjQ3r",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "string"
-            },
-            "rating": {
-              "type": "number"
-            },
-            "keywords": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
           },
-          "required": [
-            "summary",
-            "rating"
-          ]
-        }
+          "rating": {
+            "type": "number"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "rating"
+        ]
       }
     },
     "essay_tasks": "ikF26PyQb5cXcY1MKxud2K85c3T60YtTqD6aIML2R795Gx3Zxe716LuWNRtoc9yVLem2qkzeTaxGlUjD0Kkrv64spyth64 b0tAyXNlwn6KHF91YW4ysi4OaWEzqt4uv42Xlhwo8mR hWjofPS9gXi8QzSbFHlhOIH2HJ4odX4HVJhPwkld9859I TG676e0TpPKjQogoFv6TT2XNh9GoT1kq0E f6aEkeWR8PYf782TaVexUnPc c864vwS5OI2dL95MQt35qtno1rUPoK8ZAZhwuS5TLpaPOXnCRBhR0cmtTyUGzmvozL0YmdPl6NKQ228z90VYAnH3n7aO0xnUN98agO1qPG2M Rl4UxkGMw9",
@@ -647,29 +643,25 @@
     "description": "Huf qOd8kmAg8H5HwhWTyxQpyLi2503FlkEPRLpC6GBaq5XEfHyAFBWzXveY3Ikd2jzu0mW5Bdc9e kQ8DGoy9 T5KmVxWnwOHLirAkNGW4UfANh7pLNsSdGBgvYAM2e5yHwGBLgIITyCrcMl5xucX7HBoyJxyl1JQgZPrY2D47CGZzI8curIvnJ4LEXlPfsrOeIZWsSExJhmY4IbctPDNy8MkS4DRUZrzg85m1ac2kVBAvY8NfxbRa1XBaGtZvJZl pntSSw4xyz973hqKmONFclqaa2hVasMRlf1NzQaGQwH7o B6mRP",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "summary": {
-              "type": "string"
-            },
-            "rating": {
-              "type": "number"
-            },
-            "keywords": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "summary": {
+            "type": "string"
           },
-          "required": [
-            "summary",
-            "rating"
-          ]
-        }
+          "rating": {
+            "type": "number"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "summary",
+          "rating"
+        ]
       }
     },
     "tasks": [

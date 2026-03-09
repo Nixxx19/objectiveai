@@ -134,7 +134,7 @@
               "id": "call_mock_15876144831562028377",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"topic\":{\"type\":\"string\"},\"headline\":{\"type\":\"integer\"},\"upload\":{\"type\":\"file\"}},\"required\":[\"topic\",\"headline\",\"upload\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"topic\":{\"type\":\"string\"},\"headline\":{\"type\":\"integer\"},\"upload\":{\"type\":\"file\"}},\"required\":[\"topic\",\"headline\",\"upload\"]}}"
               }
             }
           ],
@@ -268,7 +268,7 @@
         {
           "role": "tool",
           "index": 11,
-          "content": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"topic\":{\"type\":\"string\"},\"headline\":{\"type\":\"integer\"},\"upload\":{\"type\":\"file\"}},\"required\":[\"topic\",\"headline\",\"upload\"]}}}",
+          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"topic\":{\"type\":\"string\"},\"headline\":{\"type\":\"integer\"},\"upload\":{\"type\":\"file\"}},\"required\":[\"topic\",\"headline\",\"upload\"]}}",
           "tool_call_id": "call_mock_1216628094235308288"
         },
         {
@@ -306,7 +306,7 @@
         {
           "role": "tool",
           "index": 13,
-          "content": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"topic\":{\"type\":\"string\"},\"headline\":{\"type\":\"integer\"},\"upload\":{\"type\":\"file\"}},\"required\":[\"topic\",\"headline\",\"upload\"]}}}",
+          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"topic\":{\"type\":\"string\"},\"headline\":{\"type\":\"integer\"},\"upload\":{\"type\":\"file\"}},\"required\":[\"topic\",\"headline\",\"upload\"]}}",
           "tool_call_id": "call_mock_15901743620196891674"
         },
         {
@@ -1380,27 +1380,23 @@
     "essay": "2osBKe4gv02Tlilv4kNRzy5xDBNhfvEpymwb2qpLxD4R4sAIzCbV662uPRSntZMBJ5KzdXm6mTvaZYtK5ki4yKYQScFgBlsjuWqfR7MAzM55EnR 7j1pIBnusKhG628fnV6dF56H0iA6Wm1rs44sHpa jjSsG7pjjTKk5xTwBw2 xOMxqWozeDMerUmsZXzBX8bEjNRrfJ6JXpZllH9FcynYUHsdwsSvavh3R7Q7Gi7voF cwOQHII3mV0X4lgG0Isug7J3Z8BjZnYvwVztgx11AUTzsB3Fjkah0b01l46BI691",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "topic": {
-              "type": "string"
-            },
-            "headline": {
-              "type": "integer"
-            },
-            "upload": {
-              "type": "file"
-            }
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string"
           },
-          "required": [
-            "topic",
-            "headline",
-            "upload"
-          ]
-        }
+          "headline": {
+            "type": "integer"
+          },
+          "upload": {
+            "type": "file"
+          }
+        },
+        "required": [
+          "topic",
+          "headline",
+          "upload"
+        ]
       }
     },
     "essay_tasks": "SVWmi6iF5w9NVFLcz7pMHQ3SLx3rfyJYhKNIDroizOkRvkaUxxJqPGSQTWbWvsZdPnuZsusRwuqscg46uSod8ayVwxPBENEW4nBOc8ep50D6RZP5auGq0FWo1rQAujyiUVk ozNS6HcBIToSXhoQ0Qc0oQZW9A8YnNYMq2HCuch9POIoNa0cGgFNJU6XmbclY jzcmWx88wKMOnNBoyCDIo4k8qAta5sgw7uKf5LpRuG6QPsFh6TtB9HWAYwVMQO69mVw1EbcIISrQygmjY0PKaDDT5Hvd7fkvjG321A6T0Zh a7p6fcEcH3IQ8H13zZ3KBza4cce1I1PGP3MfO6jI619FAakPWHufAB1By5ynV",
@@ -1506,27 +1502,23 @@
     "description": "aTb9xdSZ4VyilByGF5VqqfoZllkPspH5551HTvsoAKJRdEw0UzUL50Qn7LYhXOzZPdO5MohU8Q7YA12YNRoJIx8eDHWn3u6CinLCjtmPSr1u8PcxdLachQzBaPLPvQkVR8VbN1LFjIE6dJXKqY46NlcO7IATElCutWmqgPEbJeDFiSvDQuIn29d11TEH7D9IMWkfSJuofnXfXLQKxoOduh LdPNuqqxamlgfwUXpIucRkLj4zlXD96S9wwS 7oGcMh4n4hB XxxV2HSc4y4m dqtYq",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "topic": {
-              "type": "string"
-            },
-            "headline": {
-              "type": "integer"
-            },
-            "upload": {
-              "type": "file"
-            }
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string"
           },
-          "required": [
-            "topic",
-            "headline",
-            "upload"
-          ]
-        }
+          "headline": {
+            "type": "integer"
+          },
+          "upload": {
+            "type": "file"
+          }
+        },
+        "required": [
+          "topic",
+          "headline",
+          "upload"
+        ]
       }
     },
     "tasks": [

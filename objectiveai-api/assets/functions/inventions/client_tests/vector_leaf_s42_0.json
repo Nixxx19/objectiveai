@@ -173,7 +173,7 @@
               "id": "call_mock_1687484390616238820",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"name\":{\"type\":\"string\"},\"version\":{\"type\":\"string\"},\"photo\":{\"type\":\"image\"}},\"required\":[\"name\",\"photo\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"name\":{\"type\":\"string\"},\"version\":{\"type\":\"string\"},\"photo\":{\"type\":\"image\"}},\"required\":[\"name\",\"photo\"]},\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"]}}"
               }
             }
           ],
@@ -723,19 +723,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "key": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "key"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
       }
     },
     "essay_tasks": "hYtBBu2UaTx1fNp8GZWyzI5evceCpHeQyE68DA0wpla3wzBF Exv7FDCOpVcUHXKuO1008CL3BfH3ttJFOi BE04XhRjyHiBG9qDYBmi8aIC7JinqPmpyaWdYJTBZ6MGi2jeJ Z8OWgjZ3EP ALzSrQZ0o78IQZru7B52otva kes96IQAGbAaZDazrZqrgkcMkn2W76lcvId CbPnmImtoSV0SoFc7mbY5KMn3uXP70AACUVZ961FEZOsws1oKA1y8hk6hMl273Vkyz4DKQcN TSc0sagzlmrAVmsKG6rXiAivBAg0sDCfrmt1bDDrwh9CCdr49 hqM6ADLen4PWV69rZqxPxUlLen8aituL0kpFesxJ1Q R8C5BdrBhp9BtAPOImV2dUNoXRKFgdSNywODElNlIC",
@@ -795,19 +791,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "key": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "key"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
       }
     },
     "tasks": [

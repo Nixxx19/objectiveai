@@ -135,7 +135,7 @@
               "id": "call_mock_14429882470059847116",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"tag\":{\"type\":\"string\"},\"priority\":{\"type\":\"number\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"tag\",\"priority\",\"topic\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"tag\":{\"type\":\"string\"},\"priority\":{\"type\":\"number\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"tag\",\"priority\",\"topic\"]}}"
               }
             }
           ],
@@ -404,7 +404,7 @@
               "id": "call_mock_2512278427738555076",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"plgipvcfA9v 70zASu4KqRVXJHP9nls8sVV2NSrloZTxf4Xu8tsrtRPLyxxgQcPdXzIvVLG3tcrSneGD0ItVs2OoNKf0MeZQF5vLF2R\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"tag\":{\"type\":\"string\"},\"priority\":{\"type\":\"number\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"tag\",\"priority\",\"topic\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"plgipvcfA9v 70zASu4KqRVXJHP9nls8sVV2NSrloZTxf4Xu8tsrtRPLyxxgQcPdXzIvVLG3tcrSneGD0ItVs2OoNKf0MeZQF5vLF2R\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"tag\":{\"type\":\"string\"},\"priority\":{\"type\":\"number\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"tag\",\"priority\",\"topic\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -705,27 +705,23 @@
     "essay": "k57yulPNEa2PMGfBP1DBS4DgVp6p6XJfpreH6meFrK3lIq0D DZSfzgAx8r1Sz9wd 6hlko5THeGwDJvqOEbDdy2nMOs5f8blWlahAlSRKNH5b07 bQXjSMxEugHcr2BZUEOsNYpy03nxtKkXb1LPZHNpWPFHZaia9CO9xFklboNptf4BO9FQX psf7v1aeIJ 50NjoBtMJDHIMRxH1rTnT399h1q",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "tag": {
-              "type": "string"
-            },
-            "priority": {
-              "type": "number"
-            },
-            "topic": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string"
           },
-          "required": [
-            "tag",
-            "priority",
-            "topic"
-          ]
-        }
+          "priority": {
+            "type": "number"
+          },
+          "topic": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tag",
+          "priority",
+          "topic"
+        ]
       }
     },
     "essay_tasks": "UhPSTv33G0dgkHStLzYV8g6KRFhrvP9pwDHC9bqS PKpZ QUiRbBRYzXm2qbYaqrIdtdgod3CJKD6jiXN2Z06JGjwjghGQerqOKrY1  vNtMWAPOpmvnfHcfuS4fKw6sJ2JutGYOuudlU4l IznZ5VP",
@@ -741,27 +737,23 @@
         "spec": "plgipvcfA9v 70zASu4KqRVXJHP9nls8sVV2NSrloZTxf4Xu8tsrtRPLyxxgQcPdXzIvVLG3tcrSneGD0ItVs2OoNKf0MeZQF5vLF2R",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "tag": {
-                  "type": "string"
-                },
-                "priority": {
-                  "type": "number"
-                },
-                "topic": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "tag": {
+                "type": "string"
               },
-              "required": [
-                "tag",
-                "priority",
-                "topic"
-              ]
-            }
+              "priority": {
+                "type": "number"
+              },
+              "topic": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "priority",
+              "topic"
+            ]
           }
         },
         "input": {
@@ -812,27 +804,23 @@
     "description": "lP6U9N585T yfq8JJpVT6Rz608GUGcniK aRGFQcai9A2xS1iUCWiwcQQEV5eiiAymtrOYFQJQtzNHiUcKDwcnlf1d4DPvolDdBOasDTDBFPN6k8qe9zAx0sHF77z4PmipvTZVOQdEkvhUCqy8XommM0AO0K4FlvGaQZAwKMtggxl0tXyRtv6beQItl2oFxSL92",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "tag": {
-              "type": "string"
-            },
-            "priority": {
-              "type": "number"
-            },
-            "topic": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "tag": {
+            "type": "string"
           },
-          "required": [
-            "tag",
-            "priority",
-            "topic"
-          ]
-        }
+          "priority": {
+            "type": "number"
+          },
+          "topic": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tag",
+          "priority",
+          "topic"
+        ]
       }
     },
     "tasks": [
@@ -847,27 +835,23 @@
         "spec": "plgipvcfA9v 70zASu4KqRVXJHP9nls8sVV2NSrloZTxf4Xu8tsrtRPLyxxgQcPdXzIvVLG3tcrSneGD0ItVs2OoNKf0MeZQF5vLF2R",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "tag": {
-                  "type": "string"
-                },
-                "priority": {
-                  "type": "number"
-                },
-                "topic": {
-                  "type": "string"
-                }
+            "type": "object",
+            "properties": {
+              "tag": {
+                "type": "string"
               },
-              "required": [
-                "tag",
-                "priority",
-                "topic"
-              ]
-            }
+              "priority": {
+                "type": "number"
+              },
+              "topic": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "tag",
+              "priority",
+              "topic"
+            ]
           }
         },
         "input": {

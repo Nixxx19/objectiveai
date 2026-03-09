@@ -92,6 +92,9 @@ type TestClient = super::Client<
     StubAgentFetcher,
     StubAgentUsageHandler,
     StubInventionUsageHandler,
+    crate::functions::function_fetcher::mock::MockFetcher,
+    crate::functions::function_fetcher::mock::MockFetcher,
+    crate::functions::function_fetcher::mock::MockFetcher,
 >;
 
 fn make_client() -> Arc<TestClient> {
@@ -141,10 +144,16 @@ fn make_client() -> Arc<TestClient> {
         "ObjectiveAI".to_string(),
         "noreply@objective-ai.io".to_string(),
     ));
+    let function_fetcher = Arc::new(crate::functions::function_fetcher::FetcherRouter::new(
+        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
+        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
+        Arc::new(crate::functions::function_fetcher::mock::MockFetcher),
+    ));
     Arc::new(super::Client::new(
         agent_client,
         github_client,
         filesystem_client,
+        function_fetcher,
         Arc::new(StubInventionUsageHandler),
         true,
     ))
@@ -258,8 +267,8 @@ async fn run_invention(
         let _ = tx.send(result);
     });
 
-    rx.recv_timeout(Duration::from_secs(60))
-        .expect("invention timed out after 60s — this may be caused by slow hardware or busy system resources")
+    rx.recv_timeout(Duration::from_secs(300))
+        .expect("invention timed out after 300s — this may be caused by slow hardware or busy system resources")
 }
 
 // ---------------------------------------------------------------------------

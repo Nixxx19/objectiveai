@@ -98,7 +98,7 @@
               "id": "call_mock_15794269784524280627",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"image\":{\"type\":\"image\"},\"caption\":{\"type\":\"boolean\"},\"flagged\":{\"type\":\"boolean\"}},\"required\":[\"image\",\"caption\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"image\":{\"type\":\"image\"},\"caption\":{\"type\":\"boolean\"},\"flagged\":{\"type\":\"boolean\"}},\"required\":[\"image\",\"caption\"]}}"
               }
             }
           ],
@@ -1536,26 +1536,22 @@
     "essay": "lrBcc5t5huPO8GiIoOzF7bnNUC8Ux2rwDEJVsC1yqxjQzKbrZORtjNDUS83pym7ICjuZcawzQAdGTWwe3iXABhx8KxxJuTfRb8bqpWol1uRlPafu5i5ZzaBFGfff86NcROzobBsrQaChFtceIGIAmETVCShqElzqwdqT7FNHOpdflvZpbuBdR30C61gi3bWEKEwfrPO248 RgqQMTSX56tSwE9UmcvW4QRHRqsYy4Ys31",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "image": {
-              "type": "image"
-            },
-            "caption": {
-              "type": "boolean"
-            },
-            "flagged": {
-              "type": "boolean"
-            }
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "image"
           },
-          "required": [
-            "image",
-            "caption"
-          ]
-        }
+          "caption": {
+            "type": "boolean"
+          },
+          "flagged": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "image",
+          "caption"
+        ]
       }
     },
     "essay_tasks": "PZaZgBsLcfby M7tEqZXWEe4pfAv7fqWsOBNhzj3y27qOGEAbp WCXFOwe7lPU4 LcGvAY1y3vkPqhGfPScv4Ux6GPgIbVYhuBBDOae9XKcao3ezd571cr3goVK7BLFY7SGjQ5N3aFT5oBvn3tFU8Fu1X2LurCoSbDs7trd9gV1i0kXRJ6kBrtPwGJS3tQWuObmC5ZeHVMx1S4I0wvIkLAadr1bcK8Zu2BfvQUnTOnzUT LMTaUFzgxU InUoJADHZUxOE1Kknkr Yk1wKv2ibrGPOAuw35ggG6VMj14KSV",
@@ -1661,26 +1657,22 @@
     "description": "tJbFZRozp5ZHfhodvZFFveQjYtyVLYw6AMetYm2f1T5pcfUNQHd7GevtuM0OYpjmoJGIKl2w04YMVdezj",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "image": {
-              "type": "image"
-            },
-            "caption": {
-              "type": "boolean"
-            },
-            "flagged": {
-              "type": "boolean"
-            }
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "image"
           },
-          "required": [
-            "image",
-            "caption"
-          ]
-        }
+          "caption": {
+            "type": "boolean"
+          },
+          "flagged": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "image",
+          "caption"
+        ]
       }
     },
     "tasks": [

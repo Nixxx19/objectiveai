@@ -532,30 +532,26 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "subject": {
-                  "type": "boolean"
-                },
-                "labels": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "recording": {
-                  "type": "audio"
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "boolean"
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 }
               },
-              "required": [
-                "subject",
-                "labels",
-                "recording"
-              ]
-            }
+              "recording": {
+                "type": "audio"
+              }
+            },
+            "required": [
+              "subject",
+              "labels",
+              "recording"
+            ]
           }
         },
         "essay_tasks": "LzIeZc nAcx6P7WCgCaTYTZfcwaTlppw5VP4W6ka0UmF6grARbyZC081z6CXcmdimhV5UydeJUA1e CcDCNnVQBJCLY0uG24YVcB2XfbTbeN z5Cq6pJ5kvrzfnfSoFvea2Aebg95Lgoh36t0jImuCKHbqWZktLkIaIk2Tww218C1dLeBln cguVd1e6wD3CADbSaDl8bAtfyoGMXc504KxAuEMEfab sF ty96Y1vDVrIB363rcdg0AlzUsSOQjShn67EhEzkBiPlc7cX42ZUBLegl5u5dgeWwI5Z6AsY9YjtHXonldxdpfOraGM1LgsGDF1p3jmZwwT5N2ELXGEvVw1neWJ729u3dVgJMT D9g39LniCed36XMbUZec3hn9GMilpK16MzB0FVrAZGZWp1dEEG",
@@ -605,30 +601,26 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "subject": {
-                  "type": "boolean"
-                },
-                "labels": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "recording": {
-                  "type": "audio"
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "boolean"
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 }
               },
-              "required": [
-                "subject",
-                "labels",
-                "recording"
-              ]
-            }
+              "recording": {
+                "type": "audio"
+              }
+            },
+            "required": [
+              "subject",
+              "labels",
+              "recording"
+            ]
           }
         },
         "tasks": [
@@ -1498,7 +1490,7 @@
                   "id": "call_mock_3540003015912021058",
                   "function": {
                     "name": "WriteInputSchema",
-                    "arguments": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"threshold\":{\"type\":\"integer\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"subject\":{\"type\":\"boolean\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"recording\":{\"type\":\"audio\"}},\"required\":[\"subject\",\"labels\",\"recording\"]}}}"
+                    "arguments": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"threshold\":{\"type\":\"integer\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"object\",\"properties\":{\"subject\":{\"type\":\"boolean\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"recording\":{\"type\":\"audio\"}},\"required\":[\"subject\",\"labels\",\"recording\"]}}"
                   }
                 }
               ],
@@ -1597,7 +1589,7 @@
             {
               "role": "tool",
               "index": 9,
-              "content": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"threshold\":{\"type\":\"integer\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"subject\":{\"type\":\"boolean\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"recording\":{\"type\":\"audio\"}},\"required\":[\"subject\",\"labels\",\"recording\"]}}}",
+              "content": "{\"context\":{\"properties\":{\"status\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"threshold\":{\"type\":\"integer\"}},\"required\":[\"status\"]},\"items\":{\"type\":\"object\",\"properties\":{\"subject\":{\"type\":\"boolean\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"recording\":{\"type\":\"audio\"}},\"required\":[\"subject\",\"labels\",\"recording\"]}}",
               "tool_call_id": "call_mock_6724956282825101730"
             },
             {
@@ -1691,7 +1683,7 @@
                   "id": "call_mock_2901114239782558627",
                   "function": {
                     "name": "AppendTask",
-                    "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"tkTnjXiQgiXVj00 jtW1INt31MzBPExc9nnm9lPiHo3sNVvSs W\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"subject\":{\"type\":\"boolean\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"recording\":{\"type\":\"audio\"}},\"required\":[\"subject\",\"labels\",\"recording\"]}},\"context\":{\"properties\":{\"status\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"threshold\":{\"type\":\"integer\"}},\"required\":[\"status\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                    "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"tkTnjXiQgiXVj00 jtW1INt31MzBPExc9nnm9lPiHo3sNVvSs W\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"subject\":{\"type\":\"boolean\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"recording\":{\"type\":\"audio\"}},\"required\":[\"subject\",\"labels\",\"recording\"]},\"context\":{\"properties\":{\"status\":{\"type\":\"string\"},\"key\":{\"type\":\"string\"},\"threshold\":{\"type\":\"integer\"}},\"required\":[\"status\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
                   }
                 }
               ],
@@ -1894,30 +1886,26 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "subject": {
-                  "type": "boolean"
-                },
-                "labels": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "recording": {
-                  "type": "audio"
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "boolean"
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 }
               },
-              "required": [
-                "subject",
-                "labels",
-                "recording"
-              ]
-            }
+              "recording": {
+                "type": "audio"
+              }
+            },
+            "required": [
+              "subject",
+              "labels",
+              "recording"
+            ]
           }
         },
         "essay_tasks": "WLie5qBdaeMZbmFIcrT2R3xYP6ucwUtpXBwNC9ZL4AsxDlCQ31MDMIL9GidDV5oIIM3VSgOJnAm0Ir88jX5UhP6zbTBFwsT6zSF6KjLgJpC1L9Ha1UD7zIQ rvAFK52IICqz1YJtMECOd1Yezyd GTkHOmqbtA2Q4dfI O0gQaM8E7CE4vqtBfbiILxL3VAeGu jIys1nZpyPjFf6EgYhvbx307NXuw4pHUHLruiDTnCoAyiTQ4IB5k1uK6N1T7qLuirLwY5U2UerA62C6qRrfJQ6rsj1cR1mfYHqz6eEHXp0zQMzn0Oxzhjy2AYyFybQdREJFHNhi99QUKIZcbWGGLBlrGteiaovXHzafBKfCKeyItDuj8Aa4sFUthr6pOPCd5QOzEKho",
@@ -1949,30 +1937,26 @@
                 ]
               },
               "items": {
-                "type": "array",
-                "minItems": 2,
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "subject": {
-                      "type": "boolean"
-                    },
-                    "labels": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "recording": {
-                      "type": "audio"
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "boolean"
+                  },
+                  "labels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
                     }
                   },
-                  "required": [
-                    "subject",
-                    "labels",
-                    "recording"
-                  ]
-                }
+                  "recording": {
+                    "type": "audio"
+                  }
+                },
+                "required": [
+                  "subject",
+                  "labels",
+                  "recording"
+                ]
               }
             },
             "input": {
@@ -2045,30 +2029,26 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "subject": {
-                  "type": "boolean"
-                },
-                "labels": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "recording": {
-                  "type": "audio"
+            "type": "object",
+            "properties": {
+              "subject": {
+                "type": "boolean"
+              },
+              "labels": {
+                "type": "array",
+                "items": {
+                  "type": "string"
                 }
               },
-              "required": [
-                "subject",
-                "labels",
-                "recording"
-              ]
-            }
+              "recording": {
+                "type": "audio"
+              }
+            },
+            "required": [
+              "subject",
+              "labels",
+              "recording"
+            ]
           }
         },
         "tasks": [
@@ -2099,30 +2079,26 @@
                 ]
               },
               "items": {
-                "type": "array",
-                "minItems": 2,
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "subject": {
-                      "type": "boolean"
-                    },
-                    "labels": {
-                      "type": "array",
-                      "items": {
-                        "type": "string"
-                      }
-                    },
-                    "recording": {
-                      "type": "audio"
+                "type": "object",
+                "properties": {
+                  "subject": {
+                    "type": "boolean"
+                  },
+                  "labels": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
                     }
                   },
-                  "required": [
-                    "subject",
-                    "labels",
-                    "recording"
-                  ]
-                }
+                  "recording": {
+                    "type": "audio"
+                  }
+                },
+                "required": [
+                  "subject",
+                  "labels",
+                  "recording"
+                ]
               }
             },
             "input": {

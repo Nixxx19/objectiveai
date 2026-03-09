@@ -218,23 +218,15 @@ pub fn random_vector_input_schema(rng: &mut impl Rng) -> String {
         }));
     }
 
-    // Items: choose item type
+    // Items: per-element schema (transpile() wraps this in an array with minItems: 2)
     let items_schema = match rng.random_range(0u32..5) {
         0 => {
             // Plain strings
-            serde_json::json!({
-                "type": "array",
-                "minItems": 2,
-                "items": {"type": "string", "description": random_item_description(rng)}
-            })
+            serde_json::json!({"type": "string", "description": random_item_description(rng)})
         }
         1 => {
             // Image items
-            serde_json::json!({
-                "type": "array",
-                "minItems": 2,
-                "items": {"type": "image", "description": random_item_description(rng)}
-            })
+            serde_json::json!({"type": "image", "description": random_item_description(rng)})
         }
         _ => {
             // Object items with 1-4 properties
@@ -256,13 +248,9 @@ pub fn random_vector_input_schema(rng: &mut impl Rng) -> String {
                 }
             }
             serde_json::json!({
-                "type": "array",
-                "minItems": 2,
-                "items": {
-                    "type": "object",
-                    "properties": item_props,
-                    "required": item_required,
-                }
+                "type": "object",
+                "properties": item_props,
+                "required": item_required,
             })
         }
     };

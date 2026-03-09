@@ -69,18 +69,15 @@ fn random_placeholder_vector_task(
 ) -> serde_json::Value {
     let spec = random_string(rng, 50, 200);
 
-    // Build child input_schema from parent's items and context
+    // Build child input_schema from parent's items and context.
+    // parent_schema["items"] is the per-element schema (transpile wraps in array).
     let mut child_schema = serde_json::Map::new();
 
-    // Items: copy from parent, ensure minItems >= 2
+    // Items: copy per-element schema from parent directly
     let items = parent_schema.get("items").cloned().unwrap_or_else(|| {
-        serde_json::json!({"type": "array", "minItems": 2, "items": {"type": "string"}})
+        serde_json::json!({"type": "string"})
     });
-    let mut items_obj = items;
-    if let Some(obj) = items_obj.as_object_mut() {
-        obj.insert("minItems".into(), serde_json::json!(2));
-    }
-    child_schema.insert("items".into(), items_obj);
+    child_schema.insert("items".into(), items);
 
     // Context: copy from parent if present
     let mut input_expr = serde_json::Map::new();
@@ -105,26 +102,22 @@ fn random_placeholder_vector_task(
 /// sets `map: InputItemsOutputLength`). The `map` variable is an index, so
 /// the input expression indexes into `input['items']` using `map`.
 ///
-/// The child's input_schema uses actual types from the parent schema.
+/// The child's input_schema uses actual types from the parent's per-element
+/// schema. `parent_schema["items"]` is the per-element schema directly
+/// (transpile wraps it in an array).
 fn random_placeholder_scalar_task(
     parent_schema: &serde_json::Value,
     rng: &mut impl Rng,
 ) -> serde_json::Value {
     let spec = random_string(rng, 50, 200);
 
-    // Derive the child schema from the item type in the parent's items array
-    let item_schema = parent_schema.get("items")
-        .and_then(|items| items.get("items"));
+    // parent_schema["items"] is the per-element schema
+    let item_schema = parent_schema.get("items");
 
     let (child_schema, input_expr) = if let Some(item_s) = item_schema {
         if item_s.get("type").and_then(|t| t.as_str()) == Some("object") {
             // Items are objects — use the item schema as the child schema
-            let mut child = item_s.clone();
-            if let Some(obj) = child.as_object_mut() {
-                if !obj.contains_key("type") {
-                    obj.insert("type".into(), serde_json::json!("object"));
-                }
-            }
+            let child = item_s.clone();
             (child, "input['items'][map]".to_string())
         } else {
             // Items are simple types (string, image, etc.) — wrap in an object

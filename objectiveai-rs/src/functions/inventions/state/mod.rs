@@ -103,6 +103,42 @@ pub enum State {
 }
 
 impl State {
+    /// Validates the initial state's input schema and tasks.
+    ///
+    /// Returns an error if the input schema is invalid or if the tasks
+    /// are not valid for the provided input schema.
+    pub fn validate_initial_state(
+        &self,
+        children: Option<&std::collections::HashMap<String, crate::functions::RemoteFunction>>,
+    ) -> Result<(), String> {
+        match self {
+            State::AlphaScalarBranch(s) => s.validate_initial_state(children),
+            State::AlphaScalarLeaf(s) => s.validate_initial_state(),
+            State::AlphaVectorBranch(s) => s.validate_initial_state(children),
+            State::AlphaVectorLeaf(s) => s.validate_initial_state(),
+        }
+    }
+
+    /// Returns the predicted tasks length, if set.
+    pub fn tasks_length(&self) -> Option<u64> {
+        match self {
+            State::AlphaScalarBranch(s) => s.tasks_length,
+            State::AlphaScalarLeaf(s) => s.tasks_length,
+            State::AlphaVectorBranch(s) => s.tasks_length,
+            State::AlphaVectorLeaf(s) => s.tasks_length,
+        }
+    }
+
+    /// Returns a reference to the params.
+    pub fn params(&self) -> &Params {
+        match self {
+            State::AlphaScalarBranch(s) => &s.params,
+            State::AlphaScalarLeaf(s) => &s.params,
+            State::AlphaVectorBranch(s) => &s.params,
+            State::AlphaVectorLeaf(s) => &s.params,
+        }
+    }
+
     /// Returns a reference to the params name.
     pub fn name(&self) -> &str {
         match self {

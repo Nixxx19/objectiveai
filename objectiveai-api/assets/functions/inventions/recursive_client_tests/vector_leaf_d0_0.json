@@ -178,7 +178,7 @@
                   "id": "call_mock_2022755172831340996",
                   "function": {
                     "name": "WriteInputSchema",
-                    "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"footage\":{\"type\":\"video\"}},\"required\":[\"footage\"]}}}"
+                    "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"footage\":{\"type\":\"video\"}},\"required\":[\"footage\"]}}"
                   }
                 }
               ],
@@ -276,7 +276,7 @@
             {
               "role": "tool",
               "index": 11,
-              "content": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"footage\":{\"type\":\"video\"}},\"required\":[\"footage\"]}}}",
+              "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"footage\":{\"type\":\"video\"}},\"required\":[\"footage\"]}}",
               "tool_call_id": "call_mock_5793782682931278588"
             },
             {
@@ -710,19 +710,15 @@
         "essay": "oVIMW1t2JR94Gy77p68Se9yPFPxGSAUmTDW5o2i0ExLgVPuWypY5taYIouX1IXc9jtdLnnGJ5OvpVIo1J ECDsEKsqjOQrydO lqAxvo3dwr3kYMCGTUVp2xmHaju3SIgeSnPuWI6T9Qz4NcJuDMP2JBGPsAHWzGsa7P8i4osr7oCGXGkAMgO8Cwz2lWam2w2I6tXr0JT3iBeD4Ys1PypVed5cwwqY4i3v0jVjKxmzPwRY4AikwN nEDvw7tv8eSH9DjIr34TzUwmxK3dgeu4lhL3Jw4mJBvMQe UBi3wtSqt6BHw6fn00KcOfIzMy5S7SDZLjVouqphl9LO2rfT4H034LhySeXpIds3Z2AwMND9CsrmbrDe0pdp44HUldskcgYU2T924RjW66PmiG1GxYHyzByWQ610BshURpaFpM4uGapj9uewK6Be3l5KzsdOsVG6NTuEaZ77OOtJO2uFaqcxXPpQbUwpjGAR8QDdfi8Q6qxmhLxr7bBSfzj8mMC88lGpVwc9hZMaRZTJKwYyJ7z 8BRMFKrbkMNXYuCAVDkltXNk6EwBEiLg1QHXVcSTXfIZbVqpYL1B fQPzQglCOZLXB3AzV2oBSRXkmNFbzdzX50YaP43wHJbH9SB8JD06rKjcgodIMGU",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "footage": {
-                  "type": "video"
-                }
-              },
-              "required": [
-                "footage"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "footage": {
+                "type": "video"
+              }
+            },
+            "required": [
+              "footage"
+            ]
           }
         },
         "essay_tasks": "cgs75tOSTupVXT22c9fRTRhrePzgPZ9xMPUN81iva9pOHDuZNmj6YeKTcagjc8Er3VaOSHzNLsyzMX QQ7EUosM72IG4m7M6M7NCOjPF5dLhhl0eJgskxDcl2j1yAWViQBTFI56b8aom8k63T4cFZRzCzuMkwhJAhwlK7Ne7 umiOROD486fs",
@@ -756,19 +752,15 @@
         "description": "LY2foYoSsX2qEOQfJ82K 2cj4vqDCJTvZGVI85nC2wXLhJz1w8qC4vZvE8rUc5L56vkaCWVlXs2yXiKcBeEhQhlmQDDpTcsPaJcX2socaxHy3kowG8J",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "footage": {
-                  "type": "video"
-                }
-              },
-              "required": [
-                "footage"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "footage": {
+                "type": "video"
+              }
+            },
+            "required": [
+              "footage"
+            ]
           }
         },
         "tasks": [

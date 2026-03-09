@@ -97,7 +97,7 @@
               "id": "call_mock_7895621317487821950",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"upload\":{\"type\":\"file\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"upload\",\"topic\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"instruction\":{\"type\":\"string\"},\"id\":{\"type\":\"string\"},\"thumbnail\":{\"type\":\"image\"}},\"required\":[\"instruction\",\"id\",\"thumbnail\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"upload\":{\"type\":\"file\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"upload\",\"topic\"]},\"items\":{\"type\":\"object\",\"properties\":{\"instruction\":{\"type\":\"string\"},\"id\":{\"type\":\"string\"},\"thumbnail\":{\"type\":\"image\"}},\"required\":[\"instruction\",\"id\",\"thumbnail\"]}}"
               }
             }
           ],
@@ -252,7 +252,7 @@
               "id": "call_mock_5299196840296306350",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"JaEuNL5 6ARK5PVqRDbhamH24wWYic2c4UIhyxNMi0gEfr7U4oEyT5Hq7dlBbci1yfj3DS0RifFFVXFT2oEKUYWf9RR\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"instruction\":{\"type\":\"string\"},\"id\":{\"type\":\"string\"},\"thumbnail\":{\"type\":\"image\"}},\"required\":[\"instruction\",\"id\",\"thumbnail\"]}},\"context\":{\"properties\":{\"upload\":{\"type\":\"file\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"upload\",\"topic\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"JaEuNL5 6ARK5PVqRDbhamH24wWYic2c4UIhyxNMi0gEfr7U4oEyT5Hq7dlBbci1yfj3DS0RifFFVXFT2oEKUYWf9RR\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"instruction\":{\"type\":\"string\"},\"id\":{\"type\":\"string\"},\"thumbnail\":{\"type\":\"image\"}},\"required\":[\"instruction\",\"id\",\"thumbnail\"]},\"context\":{\"properties\":{\"upload\":{\"type\":\"file\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"upload\",\"topic\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -365,7 +365,7 @@
               "id": "call_mock_6621095091935123043",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"kIHmTAUC5sFp5GPJJhz9BH6eQFzuNYm2PhmYikdfVWUoEaO1CYZQW R0tkD56qc9nrHw0I6OHuMWDCwFzV2rDOcEInaRcmRI3n1 2PxSyHKe5r WKyqpIlv26pHLJWT00JxQEgzS6g QL1UH1c1pA1PKsMeHOVaKKm81\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"instruction\":{\"type\":\"string\"},\"id\":{\"type\":\"string\"},\"thumbnail\":{\"type\":\"image\"}},\"required\":[\"instruction\",\"id\",\"thumbnail\"]}},\"context\":{\"properties\":{\"upload\":{\"type\":\"file\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"upload\",\"topic\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"kIHmTAUC5sFp5GPJJhz9BH6eQFzuNYm2PhmYikdfVWUoEaO1CYZQW R0tkD56qc9nrHw0I6OHuMWDCwFzV2rDOcEInaRcmRI3n1 2PxSyHKe5r WKyqpIlv26pHLJWT00JxQEgzS6g QL1UH1c1pA1PKsMeHOVaKKm81\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"instruction\":{\"type\":\"string\"},\"id\":{\"type\":\"string\"},\"thumbnail\":{\"type\":\"image\"}},\"required\":[\"instruction\",\"id\",\"thumbnail\"]},\"context\":{\"properties\":{\"upload\":{\"type\":\"file\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"upload\",\"topic\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -566,27 +566,23 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "instruction": {
-              "type": "string"
-            },
-            "id": {
-              "type": "string"
-            },
-            "thumbnail": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "instruction": {
+            "type": "string"
           },
-          "required": [
-            "instruction",
-            "id",
-            "thumbnail"
-          ]
-        }
+          "id": {
+            "type": "string"
+          },
+          "thumbnail": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "instruction",
+          "id",
+          "thumbnail"
+        ]
       }
     },
     "essay_tasks": "kLixwM8MfMQNY0y Fas88ul t4HX6tCdiGfoPUGdYuqkDxdTOvJlhVysoODVqUFAbmgsXAe0ezmMCNfLUbu uqvkQkeU1CJgaAz0nMhw5BxJ8Z5FDyExdwiARMIGr1LPi3IdbKbTGmBMMolHOo 1tvP39P5x0gyrdv30B0bSq8yKeZESo80iT",
@@ -616,27 +612,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "instruction": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "string"
-                },
-                "thumbnail": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "instruction": {
+                "type": "string"
               },
-              "required": [
-                "instruction",
-                "id",
-                "thumbnail"
-              ]
-            }
+              "id": {
+                "type": "string"
+              },
+              "thumbnail": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "instruction",
+              "id",
+              "thumbnail"
+            ]
           }
         },
         "input": {
@@ -673,27 +665,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "instruction": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "string"
-                },
-                "thumbnail": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "instruction": {
+                "type": "string"
               },
-              "required": [
-                "instruction",
-                "id",
-                "thumbnail"
-              ]
-            }
+              "id": {
+                "type": "string"
+              },
+              "thumbnail": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "instruction",
+              "id",
+              "thumbnail"
+            ]
           }
         },
         "input": {
@@ -730,27 +718,23 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "instruction": {
-              "type": "string"
-            },
-            "id": {
-              "type": "string"
-            },
-            "thumbnail": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "instruction": {
+            "type": "string"
           },
-          "required": [
-            "instruction",
-            "id",
-            "thumbnail"
-          ]
-        }
+          "id": {
+            "type": "string"
+          },
+          "thumbnail": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "instruction",
+          "id",
+          "thumbnail"
+        ]
       }
     },
     "tasks": [
@@ -779,27 +763,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "instruction": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "string"
-                },
-                "thumbnail": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "instruction": {
+                "type": "string"
               },
-              "required": [
-                "instruction",
-                "id",
-                "thumbnail"
-              ]
-            }
+              "id": {
+                "type": "string"
+              },
+              "thumbnail": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "instruction",
+              "id",
+              "thumbnail"
+            ]
           }
         },
         "input": {
@@ -836,27 +816,23 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "instruction": {
-                  "type": "string"
-                },
-                "id": {
-                  "type": "string"
-                },
-                "thumbnail": {
-                  "type": "image"
-                }
+            "type": "object",
+            "properties": {
+              "instruction": {
+                "type": "string"
               },
-              "required": [
-                "instruction",
-                "id",
-                "thumbnail"
-              ]
-            }
+              "id": {
+                "type": "string"
+              },
+              "thumbnail": {
+                "type": "image"
+              }
+            },
+            "required": [
+              "instruction",
+              "id",
+              "thumbnail"
+            ]
           }
         },
         "input": {

@@ -98,7 +98,7 @@
               "id": "call_mock_5324467733931250687",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"rank\":{\"type\":\"number\"}},\"required\":[\"rank\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"rank\":{\"type\":\"number\"}},\"required\":[\"rank\"]},\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"]}}"
               }
             }
           ],
@@ -292,7 +292,7 @@
               "id": "call_mock_13671438436941935097",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"l gzRxeAhcS11CdFeFek60ldIOKSqDQvRrWuQMBs0wlZuUyv0YHTSuBfFrvj5OWtbZJoas1XlDM1nJN6vMMifuU 7NdCtWHTM1KsGID2Xlkj5vFrqIXV\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"]}},\"context\":{\"properties\":{\"rank\":{\"type\":\"number\"}},\"required\":[\"rank\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"l gzRxeAhcS11CdFeFek60ldIOKSqDQvRrWuQMBs0wlZuUyv0YHTSuBfFrvj5OWtbZJoas1XlDM1nJN6vMMifuU 7NdCtWHTM1KsGID2Xlkj5vFrqIXV\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"]},\"context\":{\"properties\":{\"rank\":{\"type\":\"number\"}},\"required\":[\"rank\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -405,7 +405,7 @@
               "id": "call_mock_2309308985967366255",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"ViU7 5JiL9r 25diyDHD  y6IHZQq361G4W ujpQGtyLH4Zt4xLeHAfX4IJf5wEsmOxsFkPoAZeIkF06gLpVJ1ZE7Tpl0Fz2XsfLU8CtMl\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"]}},\"context\":{\"properties\":{\"rank\":{\"type\":\"number\"}},\"required\":[\"rank\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"ViU7 5JiL9r 25diyDHD  y6IHZQq361G4W ujpQGtyLH4Zt4xLeHAfX4IJf5wEsmOxsFkPoAZeIkF06gLpVJ1ZE7Tpl0Fz2XsfLU8CtMl\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"}},\"required\":[\"key\"]},\"context\":{\"properties\":{\"rank\":{\"type\":\"number\"}},\"required\":[\"rank\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -565,19 +565,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "key": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "key"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
       }
     },
     "essay_tasks": "Y4tTtmhJBOhztm3VVYMbb2XhIlImdk leJQpGGQ4VIT8vsiKildDgo1FqplCe aOAl8Abxe 1mjFJCREDckDMVmJGjz3LCQhEJOeTPh16BvsSbH6N4JFNuEscy9PxFnY4ibQz1sXATzb4wGkJ2Nr2wh1TQ1Td1kcPOcc9Qo9j9gs4EVmdnNl GPQX6 IEKVw8XIlZGlF7TWyrU sw DoyRyx9znQ8ZFPxXYG6O2HSiPfYsm7ud1v0D6gqtxSB07jDYrLRYOeEoRAmgvH0n4DrySNvv7Yqp2SFCnXuTTE0eMLNcqqHOvSfkNACZoI1lyrbsRkjxTMh9ZZTnlzt7GeBZ2wOGk8vmgyZ8Y aHGtTRPbZ2tk7iM0pmSnmuVtmJNAnPW2WRR1B1UrzPEKTltOeJwMhQd6WNrCOx4J8if29",
@@ -603,19 +599,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "key": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "key"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
           }
         },
         "input": {
@@ -671,19 +663,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "key": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "key"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
           }
         },
         "input": {
@@ -716,19 +704,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "key": {
-              "type": "string"
-            }
-          },
-          "required": [
-            "key"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key"
+        ]
       }
     },
     "tasks": [
@@ -753,19 +737,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "key": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "key"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
           }
         },
         "input": {
@@ -821,19 +801,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "key": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "key"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "key"
+            ]
           }
         },
         "input": {

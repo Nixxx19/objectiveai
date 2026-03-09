@@ -172,7 +172,7 @@
               "id": "call_mock_11708751308003865226",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"approved\":{\"type\":\"boolean\"},\"image\":{\"type\":\"image\"}},\"required\":[\"approved\",\"image\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"approved\":{\"type\":\"boolean\"},\"image\":{\"type\":\"image\"}},\"required\":[\"approved\",\"image\"]}}"
               }
             }
           ],
@@ -688,7 +688,7 @@
         {
           "role": "tool",
           "index": 32,
-          "content": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"approved\":{\"type\":\"boolean\"},\"image\":{\"type\":\"image\"}},\"required\":[\"approved\",\"image\"]}}}",
+          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"approved\":{\"type\":\"boolean\"},\"image\":{\"type\":\"image\"}},\"required\":[\"approved\",\"image\"]}}",
           "tool_call_id": "call_mock_12376313700190667768"
         },
         {
@@ -1309,23 +1309,19 @@
     "essay": "UaC8mV6Q7kPx0pFNxTZ6CG83LOKfj64y6gjiQjSkYeLjX7A vVuSCWKptGu7lCvZIZazun0y7W8OP5zT4K6PffS Z3lvjbSDJ3heE Ws42Lz6s04cLdbwJFiV24TDtOKwHNcp0K7fu45etkF71ZJeHLDJTyPVj6Nkib 1o6VDNwLauBIWpGm5xwFSUVd1i3S6xDgxj2TWTEGyQE77hX42bVQmlQc HT2sHwUf7AunLNqRtk4uwujsKRrCaCiYoTuf8I WpDzGxST41RyWk1bj9eCgJL36iZH7Y7rgCAS2q5L2yW1SbXcemrPa4P98Fmm3KpFXe8Ps0bDOS7BYBr V5 meeNPxG178N",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "approved": {
-              "type": "boolean"
-            },
-            "image": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "approved": {
+            "type": "boolean"
           },
-          "required": [
-            "approved",
-            "image"
-          ]
-        }
+          "image": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "approved",
+          "image"
+        ]
       }
     },
     "essay_tasks": "2VrKCP5pI3j0fKgtYoTf9JgIqNYYXzI7wyQBdMLh4Dls8BaFk2QEvYIdLX0BpDlsVag8lvR4ZiSzyfPOsr0n4D0 kmcPlow0Uwd9Mo0mhsh3KY7v8bdM1J6LgNpsJA8jP91P0qRDL8w27y5Z3vclPETCanzdBTtY8q8SQyJrLZ555flzfPex9Y6G7EzKhDe5zBIB6PWE6DHbwNOVvWKWKtgIoyp9OvtCaAkyft SJjp776XJhWyDeMIoNSXsyzGXtfHkSksNJPoe8TPOwHZ7tf rLgtJQrco0NSxSfgGoiMAOyKeWQwvCmlfnTwYgSI922Fakf89Bs6LVfgaob5b5RM 8WXXCi9p56G7GNviWp",
@@ -1431,23 +1427,19 @@
     "description": "ZHKLqrWeIir5gLUqMRi4y9jMxLFNZk6pI7ZPZpB7zFa6DCTHQiLqVzCGS3Ut79eRlNp6wNZUuOXeDiBdqOBA7MwHeFKKRGc3skcC0VKaOYxdc4xKEOrmmD3GCoXTt8V9rlHSzrWwPBGbhJnYyOKFNiWFYaePGa6z2iAkaRbOzzkeEByhUhY4HhwnWCh6e9UNSeLIo4dU1uPXgwrtctl1j4yNhNo716d",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "approved": {
-              "type": "boolean"
-            },
-            "image": {
-              "type": "image"
-            }
+        "type": "object",
+        "properties": {
+          "approved": {
+            "type": "boolean"
           },
-          "required": [
-            "approved",
-            "image"
-          ]
-        }
+          "image": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "approved",
+          "image"
+        ]
       }
     },
     "tasks": [

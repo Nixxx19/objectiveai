@@ -97,7 +97,7 @@
               "id": "call_mock_14999602382935209900",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"threshold\":{\"type\":\"integer\"},\"score\":{\"type\":\"number\"}},\"required\":[\"threshold\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"},\"label\":{\"type\":\"string\"},\"is_draft\":{\"type\":\"boolean\"}},\"required\":[\"key\",\"description\",\"label\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"threshold\":{\"type\":\"integer\"},\"score\":{\"type\":\"number\"}},\"required\":[\"threshold\"]},\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"},\"label\":{\"type\":\"string\"},\"is_draft\":{\"type\":\"boolean\"}},\"required\":[\"key\",\"description\",\"label\"]}}"
               }
             }
           ],
@@ -454,30 +454,26 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "key": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "label": {
-              "type": "string"
-            },
-            "is_draft": {
-              "type": "boolean"
-            }
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
           },
-          "required": [
-            "key",
-            "description",
-            "label"
-          ]
-        }
+          "description": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "is_draft": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "description",
+          "label"
+        ]
       }
     },
     "essay_tasks": "dBIhWuv9xaF7pREO2t1vdxV06M17HfjtY0clupoVoPwevGAgIWB6X1SjZERqdtxaq2W76boRU9ZPDsakXSItM0t6poaRqj8kXwiu7OFAp e n7u9YHjrP89lLUJGQVHNFsCgPRKNsggsLJVSMPDnn9C5oesBGp9Wg9 H mtUZ0rA8PfX2E4L3CY4MJLm5j5ki7oNTU8ZVGkiY8LVZGZ2BfrFfCbRfZzRWwQ9BsnRhh8qzkIZW2JMWcReJ73RnkdS0bkvHuniBd764RLQunYVzVHgKbP4bD5b6wejgc78Q56R YFobLJL8OAkZITXpZvWGLHIK BUlZR80UWyX7GZaEyD0og9TKxK7w1I1GRVkQ  rbxtKW0Zy3ehJx1D7Jew 14YMKPF8y0WrmSKB2B6N4NeCJLDkbfczDLAA",
@@ -515,30 +511,26 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "key": {
-              "type": "string"
-            },
-            "description": {
-              "type": "string"
-            },
-            "label": {
-              "type": "string"
-            },
-            "is_draft": {
-              "type": "boolean"
-            }
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
           },
-          "required": [
-            "key",
-            "description",
-            "label"
-          ]
-        }
+          "description": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "is_draft": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "description",
+          "label"
+        ]
       }
     },
     "tasks": [

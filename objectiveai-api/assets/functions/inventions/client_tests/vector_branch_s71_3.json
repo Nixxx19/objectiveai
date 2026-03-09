@@ -135,7 +135,7 @@
               "id": "call_mock_3881511389917155804",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"},\"is_draft\":{\"type\":\"boolean\"},\"keywords\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"enabled\",\"is_draft\",\"keywords\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"},\"is_draft\":{\"type\":\"boolean\"},\"keywords\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"enabled\",\"is_draft\",\"keywords\"]}}"
               }
             }
           ],
@@ -329,7 +329,7 @@
               "id": "call_mock_37959039522242556",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"Pac9mJxVg7pcTInGH6ieOTHZmblLorDSdKQk2n8zVVoYGcHCV9FVAua0LMjIFHiXLzaENY3oygQcp4tLlMZOvsj2liS33vowvMAMu3nlFA5CsEOtpy Jes38ROG1MBVYbjaWOaRXAcNKOtiiGPNjFSW2i1rQ6\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"},\"is_draft\":{\"type\":\"boolean\"},\"keywords\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"enabled\",\"is_draft\",\"keywords\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"Pac9mJxVg7pcTInGH6ieOTHZmblLorDSdKQk2n8zVVoYGcHCV9FVAua0LMjIFHiXLzaENY3oygQcp4tLlMZOvsj2liS33vowvMAMu3nlFA5CsEOtpy Jes38ROG1MBVYbjaWOaRXAcNKOtiiGPNjFSW2i1rQ6\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"enabled\":{\"type\":\"boolean\"},\"is_draft\":{\"type\":\"boolean\"},\"keywords\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"enabled\",\"is_draft\",\"keywords\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -479,30 +479,26 @@
     "essay": "YzPa pQl13Qe399JXAodmjqVSFuvYETV1oP9PmPCYFfjnNaLn0twMLTJ 4xLEA1iY XJppNKpdRY2fccsy9ouq8p rblFU1YM2wozBmfcN1eZFH7fB2YBZGxetkPB1VV IgxNftjgCYM nQ9GbAQ16ZHNiydvAfuRIWO0AoWZrBadlh1OuW3wfVrrgIcWFIhJm6QCvZkDODpL8Og6UaFvsQtr73W3HLBEMaqDgNIFfRcnqohJ14gKnG8fdlMJCPdFV5ea2uoHWeW8EYGM6i6MngQQAUn5TBD9kRoeGqi 2IeSIcOBc6hfuhgAYF76mlVgGL2lL4ga2zs ouUToRbzTL89sOrO3gwON7PAY4grWYNAwZIarGNBparIH9EBeJ83TNsZuiqWoQKxg0XwCxrrmRCTW GmQ1e0WwTjLbGEw2 fzwos5VLoee2SF9JueNglP3FxzOQCXHGjy51Rfsp LczP9PrcmeFq4c 1xfMRoCYMd8tKz05 LDZAlNL 0A6QjjuXqHmpq2a4Fv6Cf0Law3ZIgmmmZMTlbYXUAJw7NDSS55Ay1MDFzU5QouiQM8Y8r9V9uNPFT0 XA 4n8vghc1LWZyCVLx2mhpAsrGOUktNCoF9vDOLY PtICp4ztXoK2JbkgsNEzlL yQ7Y0QCSYy6gakcwRznE",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "is_draft": {
-              "type": "boolean"
-            },
-            "keywords": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
           },
-          "required": [
-            "enabled",
-            "is_draft",
-            "keywords"
-          ]
-        }
+          "is_draft": {
+            "type": "boolean"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "enabled",
+          "is_draft",
+          "keywords"
+        ]
       }
     },
     "essay_tasks": "39vMDn1u5BosGZro0AZW592BbKlaf7AizVRSu2hR19u3izgJbprGM4k2qaFgO2BRK7vbyqHQA z0F6EwZ 590l4qfmXqHF1W6xQyg2OyywTVJaS8wAepJTG6BPpjBElOI36vlHhf9YMR3XdW1yZnnu1QgWr7RJgoqPkJBzdBeyHPavyoDDYXgfMEbSFEg9uC032zdge79azfjKpdUZrRv0UPsYhgyDTOQ Q4aB2IcnCpOmKVkECkmnlPSCWGMqruSoHuMuxagd8lPLcCmLmfF9PYd8lSLS8jVrXn IwSXnaR4FP62LMMx3zKSEHCrd1VHUV5xlk3YA",
@@ -518,30 +514,26 @@
         "spec": "Pac9mJxVg7pcTInGH6ieOTHZmblLorDSdKQk2n8zVVoYGcHCV9FVAua0LMjIFHiXLzaENY3oygQcp4tLlMZOvsj2liS33vowvMAMu3nlFA5CsEOtpy Jes38ROG1MBVYbjaWOaRXAcNKOtiiGPNjFSW2i1rQ6",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "type": "boolean"
-                },
-                "is_draft": {
-                  "type": "boolean"
-                },
-                "keywords": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
               },
-              "required": [
-                "enabled",
-                "is_draft",
-                "keywords"
-              ]
-            }
+              "is_draft": {
+                "type": "boolean"
+              },
+              "keywords": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "enabled",
+              "is_draft",
+              "keywords"
+            ]
           }
         },
         "input": {
@@ -561,30 +553,26 @@
     "description": "TgTEnVzac0vFF9cBHS4pJtuiE75V7pAIHBBaOXDOD2c5OASOmhRIY5O3N066kDvcWSIK4",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "enabled": {
-              "type": "boolean"
-            },
-            "is_draft": {
-              "type": "boolean"
-            },
-            "keywords": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
           },
-          "required": [
-            "enabled",
-            "is_draft",
-            "keywords"
-          ]
-        }
+          "is_draft": {
+            "type": "boolean"
+          },
+          "keywords": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "enabled",
+          "is_draft",
+          "keywords"
+        ]
       }
     },
     "tasks": [
@@ -599,30 +587,26 @@
         "spec": "Pac9mJxVg7pcTInGH6ieOTHZmblLorDSdKQk2n8zVVoYGcHCV9FVAua0LMjIFHiXLzaENY3oygQcp4tLlMZOvsj2liS33vowvMAMu3nlFA5CsEOtpy Jes38ROG1MBVYbjaWOaRXAcNKOtiiGPNjFSW2i1rQ6",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "enabled": {
-                  "type": "boolean"
-                },
-                "is_draft": {
-                  "type": "boolean"
-                },
-                "keywords": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "type": "boolean"
               },
-              "required": [
-                "enabled",
-                "is_draft",
-                "keywords"
-              ]
-            }
+              "is_draft": {
+                "type": "boolean"
+              },
+              "keywords": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "enabled",
+              "is_draft",
+              "keywords"
+            ]
           }
         },
         "input": {

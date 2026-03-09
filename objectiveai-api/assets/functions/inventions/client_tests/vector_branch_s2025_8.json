@@ -135,7 +135,7 @@
               "id": "call_mock_14600939596751722377",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"approved\":{\"type\":\"boolean\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"flagged\",\"approved\",\"categories\"]}}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"approved\":{\"type\":\"boolean\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"flagged\",\"approved\",\"categories\"]}}"
               }
             }
           ],
@@ -234,7 +234,7 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"approved\":{\"type\":\"boolean\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"flagged\",\"approved\",\"categories\"]}}}",
+          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"approved\":{\"type\":\"boolean\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"flagged\",\"approved\",\"categories\"]}}",
           "tool_call_id": "call_mock_16236331552289471982"
         },
         {
@@ -479,7 +479,7 @@
               "id": "call_mock_4299030175354995697",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"nm5qnaCE8fJkTALpuPLUtGOBtLpv9ojVAIpmKaLd71eRzgz1m Ba0jmV0tcLgvSIIcrzeoQ6y85Qc0kYfAnxiauovTS81tEDtmhNJ1FbZoskDfp8Q0edmD wLdr69WyKS1LS7VY3UTaK3GVUxLkth6LD KTlNO34GfaCxB ukO7M3BY1yl1P\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"approved\":{\"type\":\"boolean\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"flagged\",\"approved\",\"categories\"]}}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"nm5qnaCE8fJkTALpuPLUtGOBtLpv9ojVAIpmKaLd71eRzgz1m Ba0jmV0tcLgvSIIcrzeoQ6y85Qc0kYfAnxiauovTS81tEDtmhNJ1FbZoskDfp8Q0edmD wLdr69WyKS1LS7VY3UTaK3GVUxLkth6LD KTlNO34GfaCxB ukO7M3BY1yl1P\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"flagged\":{\"type\":\"boolean\"},\"approved\":{\"type\":\"boolean\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"flagged\",\"approved\",\"categories\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -667,30 +667,26 @@
     "essay": "KvQQ9ig1kFDk8LGyT0wAfHtwRo7dTSx0DwFllkYEW00FuBMx9AUlKdpZlZNXztEHRcHgBiit8MeoxnF3GsGF6VbNKxiMJu2HKsZ1bg eQ 7yZF102HaFtrOgJUAnkWPfLFlYxm8UMP86WKRmoa6EYPkkvSIIK67s02ougQlNwwei1bOyggGH7Xvze84NEyfUGfDNwCIQPU",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "flagged": {
-              "type": "boolean"
-            },
-            "approved": {
-              "type": "boolean"
-            },
-            "categories": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "flagged": {
+            "type": "boolean"
           },
-          "required": [
-            "flagged",
-            "approved",
-            "categories"
-          ]
-        }
+          "approved": {
+            "type": "boolean"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "flagged",
+          "approved",
+          "categories"
+        ]
       }
     },
     "essay_tasks": "Dx W60pvfXpBLw3ncbWbcoJdsWukKC5UUms4CLGVsjYGyMx54wAVQuZqRtx0OcnogqIC2i5hnoBIao9H2ozGwVrAen4QapKmUGYELbDvhbli8OA 3pKvBhtpCN9jngMk51TE0HMwxtDVGrjsW eEfNM3BAMcCcP 0mCPeelbwkCv0g7Fo0RcSlbge1Ge1ikHlIfFeyJ7eAH5cDBKWN2r0Z76eR1FoGjBk78l9xWZDu7X",
@@ -706,30 +702,26 @@
         "spec": "nm5qnaCE8fJkTALpuPLUtGOBtLpv9ojVAIpmKaLd71eRzgz1m Ba0jmV0tcLgvSIIcrzeoQ6y85Qc0kYfAnxiauovTS81tEDtmhNJ1FbZoskDfp8Q0edmD wLdr69WyKS1LS7VY3UTaK3GVUxLkth6LD KTlNO34GfaCxB ukO7M3BY1yl1P",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "flagged": {
-                  "type": "boolean"
-                },
-                "approved": {
-                  "type": "boolean"
-                },
-                "categories": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+            "type": "object",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
               },
-              "required": [
-                "flagged",
-                "approved",
-                "categories"
-              ]
-            }
+              "approved": {
+                "type": "boolean"
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "flagged",
+              "approved",
+              "categories"
+            ]
           }
         },
         "input": {
@@ -783,30 +775,26 @@
     "description": "6fic5WJoDEZA6crooFcMwdpOQBfgnkKJZEXNrsK6kZGvL2ghMM66ydPDMyJvpacFwbcZ iheCYm2OV1VhQhnAhoQdlBD4u5sPnxnQqbPDNPDgvXuDjk5ZWhLMlonix31qybDL0RpgvKH",
     "input_schema": {
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "flagged": {
-              "type": "boolean"
-            },
-            "approved": {
-              "type": "boolean"
-            },
-            "categories": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            }
+        "type": "object",
+        "properties": {
+          "flagged": {
+            "type": "boolean"
           },
-          "required": [
-            "flagged",
-            "approved",
-            "categories"
-          ]
-        }
+          "approved": {
+            "type": "boolean"
+          },
+          "categories": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "flagged",
+          "approved",
+          "categories"
+        ]
       }
     },
     "tasks": [
@@ -821,30 +809,26 @@
         "spec": "nm5qnaCE8fJkTALpuPLUtGOBtLpv9ojVAIpmKaLd71eRzgz1m Ba0jmV0tcLgvSIIcrzeoQ6y85Qc0kYfAnxiauovTS81tEDtmhNJ1FbZoskDfp8Q0edmD wLdr69WyKS1LS7VY3UTaK3GVUxLkth6LD KTlNO34GfaCxB ukO7M3BY1yl1P",
         "input_schema": {
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "flagged": {
-                  "type": "boolean"
-                },
-                "approved": {
-                  "type": "boolean"
-                },
-                "categories": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
+            "type": "object",
+            "properties": {
+              "flagged": {
+                "type": "boolean"
               },
-              "required": [
-                "flagged",
-                "approved",
-                "categories"
-              ]
-            }
+              "approved": {
+                "type": "boolean"
+              },
+              "categories": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "flagged",
+              "approved",
+              "categories"
+            ]
           }
         },
         "input": {

@@ -173,7 +173,7 @@
               "id": "call_mock_7569836378386920351",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"video\":{\"type\":\"video\"},\"thumbnail\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"video\",\"thumbnail\",\"banner\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"audio\"}},\"required\":[\"audio\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"video\":{\"type\":\"video\"},\"thumbnail\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"video\",\"thumbnail\",\"banner\"]},\"items\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"audio\"}},\"required\":[\"audio\"]}}"
               }
             }
           ],
@@ -329,7 +329,7 @@
               "id": "call_mock_13416427104977450732",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"8AW6Bzkmgt kVPKuNpHpBj1kz8CD vsIU1TmXs7JOwJTmf3b33LsOYXGciYTzk4nNreJQgZvef0XJGkhmMrEhmvyw\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"audio\"}},\"required\":[\"audio\"]}},\"context\":{\"properties\":{\"video\":{\"type\":\"video\"},\"thumbnail\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"video\",\"thumbnail\",\"banner\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"8AW6Bzkmgt kVPKuNpHpBj1kz8CD vsIU1TmXs7JOwJTmf3b33LsOYXGciYTzk4nNreJQgZvef0XJGkhmMrEhmvyw\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"audio\"}},\"required\":[\"audio\"]},\"context\":{\"properties\":{\"video\":{\"type\":\"video\"},\"thumbnail\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"video\",\"thumbnail\",\"banner\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -426,7 +426,7 @@
         {
           "role": "tool",
           "index": 18,
-          "content": "{\"context\":{\"properties\":{\"video\":{\"type\":\"video\"},\"thumbnail\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"video\",\"thumbnail\",\"banner\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"audio\"}},\"required\":[\"audio\"]}}}",
+          "content": "{\"context\":{\"properties\":{\"video\":{\"type\":\"video\"},\"thumbnail\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"video\",\"thumbnail\",\"banner\"]},\"items\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"audio\"}},\"required\":[\"audio\"]}}",
           "tool_call_id": "call_mock_11956571352486028102"
         },
         {
@@ -443,7 +443,7 @@
               "id": "call_mock_1119640297051064935",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"emqZP6JfffhQshskF9PCVnkjI5g5KNahaFl3WdrhDYXsUg5qAGYVLGhGamj5IIWWakyfa7Tqdv1DOvtUJPEQmJhH7XqCzQ85KmZWhH0vvcRgY eZocPfjcIuBOTjk8\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"audio\"}},\"required\":[\"audio\"]}},\"context\":{\"properties\":{\"video\":{\"type\":\"video\"},\"thumbnail\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"video\",\"thumbnail\",\"banner\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"emqZP6JfffhQshskF9PCVnkjI5g5KNahaFl3WdrhDYXsUg5qAGYVLGhGamj5IIWWakyfa7Tqdv1DOvtUJPEQmJhH7XqCzQ85KmZWhH0vvcRgY eZocPfjcIuBOTjk8\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"audio\":{\"type\":\"audio\"}},\"required\":[\"audio\"]},\"context\":{\"properties\":{\"video\":{\"type\":\"video\"},\"thumbnail\":{\"type\":\"image\"},\"banner\":{\"type\":\"image\"}},\"required\":[\"video\",\"thumbnail\",\"banner\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -649,19 +649,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "audio": {
-              "type": "audio"
-            }
-          },
-          "required": [
-            "audio"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "audio": {
+            "type": "audio"
+          }
+        },
+        "required": [
+          "audio"
+        ]
       }
     },
     "essay_tasks": "rjFwD67aQJIwjAtHsGOST9laIUDgg3a1Yl3td12IhRAqrRdg13ikqWxBPs3CkxmuJ07kEcQPPAFQE5UXLbQ0N59kxvw2JtebjL28ITr5KiVFoqjuJiqR5ZYmWmyq p0j8Iqsq2WUK4A0AuLh4WwovhFrCV52x22xsCb54gg58XsoiSD9CqwkVTzD4IBBJQc0kjAVMKGrs7ccL 2QSjCe7yB9YlquzRjgEtrmKgqCApOhX77N1nZZCMfDH SOEVrtC1PWuOwLIU2UIYkJ9kXgHUevNnO85Y1g94TYG5sRAU WE3ehF68T89RBJnogQcyXYwTbWXM7",
@@ -695,19 +691,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "audio": {
-                  "type": "audio"
-                }
-              },
-              "required": [
-                "audio"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "audio": {
+                "type": "audio"
+              }
+            },
+            "required": [
+              "audio"
+            ]
           }
         },
         "input": {
@@ -748,19 +740,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "audio": {
-                  "type": "audio"
-                }
-              },
-              "required": [
-                "audio"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "audio": {
+                "type": "audio"
+              }
+            },
+            "required": [
+              "audio"
+            ]
           }
         },
         "input": {
@@ -801,19 +789,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "audio": {
-              "type": "audio"
-            }
-          },
-          "required": [
-            "audio"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "audio": {
+            "type": "audio"
+          }
+        },
+        "required": [
+          "audio"
+        ]
       }
     },
     "tasks": [
@@ -846,19 +830,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "audio": {
-                  "type": "audio"
-                }
-              },
-              "required": [
-                "audio"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "audio": {
+                "type": "audio"
+              }
+            },
+            "required": [
+              "audio"
+            ]
           }
         },
         "input": {
@@ -899,19 +879,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "audio": {
-                  "type": "audio"
-                }
-              },
-              "required": [
-                "audio"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "audio": {
+                "type": "audio"
+              }
+            },
+            "required": [
+              "audio"
+            ]
           }
         },
         "input": {

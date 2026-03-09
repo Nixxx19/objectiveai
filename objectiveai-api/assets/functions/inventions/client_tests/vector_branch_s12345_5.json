@@ -174,7 +174,7 @@
               "id": "call_mock_10256747273113251532",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"rating\":{\"type\":\"integer\"}},\"required\":[\"rating\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"integer\"}},\"required\":[\"question\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"rating\":{\"type\":\"integer\"}},\"required\":[\"rating\"]},\"items\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"integer\"}},\"required\":[\"question\"]}}"
               }
             }
           ],
@@ -329,7 +329,7 @@
               "id": "call_mock_7714660007357252646",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"9rmwfCQhSgcIFtOvvsT892xf0239pghN97YxO7FFE9qPtloPsaKUIsYKOfz1XI74P5zOSuZ6JC\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"integer\"}},\"required\":[\"question\"]}},\"context\":{\"properties\":{\"rating\":{\"type\":\"integer\"}},\"required\":[\"rating\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"9rmwfCQhSgcIFtOvvsT892xf0239pghN97YxO7FFE9qPtloPsaKUIsYKOfz1XI74P5zOSuZ6JC\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"integer\"}},\"required\":[\"question\"]},\"context\":{\"properties\":{\"rating\":{\"type\":\"integer\"}},\"required\":[\"rating\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -481,7 +481,7 @@
               "id": "call_mock_17000628485899232867",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"5skfab0AByb9A8H35De1xHm5nRSOX2RmzCMjwcV 1wqSNfKh1BcFyENZGnhRucRyPj5awu6amkzeILu\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"integer\"}},\"required\":[\"question\"]}},\"context\":{\"properties\":{\"rating\":{\"type\":\"integer\"}},\"required\":[\"rating\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"5skfab0AByb9A8H35De1xHm5nRSOX2RmzCMjwcV 1wqSNfKh1BcFyENZGnhRucRyPj5awu6amkzeILu\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"integer\"}},\"required\":[\"question\"]},\"context\":{\"properties\":{\"rating\":{\"type\":\"integer\"}},\"required\":[\"rating\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -640,19 +640,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "question": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "question"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "question"
+        ]
       }
     },
     "essay_tasks": "17YfuGyrkvuVHnG6RsW AnO1FtgpifGUvnC0RMc6p5OLWP7AIboVSmyRv3XiJTAFujKvQES9pUypYSr3JTcee34rDBfGwwR1RFFf CBIE5jjnhhgrrqBCrhhov6MzouF0NsTDRk9L7IMaFXnEMaBtMdwM7RIs8VGeS6UDWp9DOuwwtB 5TQCVG4t3Z9jtr6gllz0xjtPS2RDF86cZLIn40Iz8KF1rGTjXogrPc MFrj34cKYFdv0mXj4Oh0 qMaooaeTFPlO88",
@@ -678,19 +674,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "question": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "question"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "question"
+            ]
           }
         },
         "input": {
@@ -723,19 +715,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "question": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "question"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "question"
+            ]
           }
         },
         "input": {
@@ -768,19 +756,15 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "question": {
-              "type": "integer"
-            }
-          },
-          "required": [
-            "question"
-          ]
-        }
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "question"
+        ]
       }
     },
     "tasks": [
@@ -805,19 +789,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "question": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "question"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "question"
+            ]
           }
         },
         "input": {
@@ -850,19 +830,15 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "question": {
-                  "type": "integer"
-                }
-              },
-              "required": [
-                "question"
-              ]
-            }
+            "type": "object",
+            "properties": {
+              "question": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "question"
+            ]
           }
         },
         "input": {

@@ -98,7 +98,7 @@
               "id": "call_mock_18020084297003938723",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"weight\":{\"type\":\"number\"},\"rank\":{\"type\":\"integer\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"weight\",\"rank\",\"instruction\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"image\",\"description\":\"A response option\"}}}"
+                "arguments": "{\"context\":{\"properties\":{\"weight\":{\"type\":\"number\"},\"rank\":{\"type\":\"integer\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"weight\",\"rank\",\"instruction\"]},\"items\":{\"type\":\"image\",\"description\":\"A response option\"}}"
               }
             }
           ],
@@ -310,7 +310,7 @@
         {
           "role": "tool",
           "index": 12,
-          "content": "{\"context\":{\"properties\":{\"weight\":{\"type\":\"number\"},\"rank\":{\"type\":\"integer\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"weight\",\"rank\",\"instruction\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"image\",\"description\":\"A response option\"}}}",
+          "content": "{\"context\":{\"properties\":{\"weight\":{\"type\":\"number\"},\"rank\":{\"type\":\"integer\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"weight\",\"rank\",\"instruction\"]},\"items\":{\"type\":\"image\",\"description\":\"A response option\"}}",
           "tool_call_id": "call_mock_17976065514449561377"
         },
         {
@@ -517,7 +517,7 @@
               "id": "call_mock_17342685652846787678",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"navDU9rOsJOiQMZuyw sjyRGgbBVL4IKAvFblRCUgHfyAPEIfFFmZZELd aRYoH3SoTjVByvmiR gm3pr5i6kCPS7jrijyMlYF6GFg GYZpv2gVzxystO8s0JQB9NDOuwmGszkGW0Wd0z7nyK95IH\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"image\",\"description\":\"A response option\"}},\"context\":{\"properties\":{\"weight\":{\"type\":\"number\"},\"rank\":{\"type\":\"integer\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"weight\",\"rank\",\"instruction\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"navDU9rOsJOiQMZuyw sjyRGgbBVL4IKAvFblRCUgHfyAPEIfFFmZZELd aRYoH3SoTjVByvmiR gm3pr5i6kCPS7jrijyMlYF6GFg GYZpv2gVzxystO8s0JQB9NDOuwmGszkGW0Wd0z7nyK95IH\",\"input_schema\":{\"items\":{\"type\":\"image\",\"description\":\"A response option\"},\"context\":{\"properties\":{\"weight\":{\"type\":\"number\"},\"rank\":{\"type\":\"integer\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"weight\",\"rank\",\"instruction\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -631,7 +631,7 @@
               "id": "call_mock_16858603897458600939",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"uEtMlm2bkuzHCxUGsvEu6Vyzi12spjNhPW958uqIBLHSRxx9SJS9kMe3MbDhl7tCiVkJbsJUlszKGzfrOSbZUkgl8LEFDFm6O5Vw3v09FI4vxJPc3WOpddpupR6WnTlm8M6PVVsHG3sxGVxXjuVpOU7IFgOzmStKUp2EtsaXvucYmaj7h3wXmPcnpyxR19hLrZ6Yrb\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"image\",\"description\":\"A response option\"}},\"context\":{\"properties\":{\"weight\":{\"type\":\"number\"},\"rank\":{\"type\":\"integer\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"weight\",\"rank\",\"instruction\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"uEtMlm2bkuzHCxUGsvEu6Vyzi12spjNhPW958uqIBLHSRxx9SJS9kMe3MbDhl7tCiVkJbsJUlszKGzfrOSbZUkgl8LEFDFm6O5Vw3v09FI4vxJPc3WOpddpupR6WnTlm8M6PVVsHG3sxGVxXjuVpOU7IFgOzmStKUp2EtsaXvucYmaj7h3wXmPcnpyxR19hLrZ6Yrb\",\"input_schema\":{\"items\":{\"type\":\"image\",\"description\":\"A response option\"},\"context\":{\"properties\":{\"weight\":{\"type\":\"number\"},\"rank\":{\"type\":\"integer\"},\"instruction\":{\"type\":\"string\"}},\"required\":[\"weight\",\"rank\",\"instruction\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -799,12 +799,8 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "image",
-          "description": "A response option"
-        }
+        "type": "image",
+        "description": "A response option"
       }
     },
     "essay_tasks": "sm6DcbXWsTsgQwzLsIe7LCwigiTffNPy3wCC4uL33uAxEeovrTl0Vqmnja82ZAPuPqOoJh9LVoKCGPKOoQ5tzSaJzwI VFiz5wsjk t0eV Bt9SqwByohWrxSBeB61xiJSBKBGBcTy1fsA1kLxXQX6t7lkom B6AMdJxB3jso1VFuL9KgEYfxZzqkZtDvsVB2uoyqtpbfQnMpQVuAs0h8fk4Ds81VOSeg2yUkrN6Lc5qTb5w1B3nTsRyKUr7jNZLY4dzqKlcNkAbRQhnf LLcQoyGAMkT3xMMLorUyHa7njkUNp2b4bWKXfHRWVwikHJGLtpWa1AdXwnlOqo8AsdRr2qkriw9gMSRwNLJaWEI2POvU5T10jfMhb0fbXZGLxIdIyE83ZIbGzWMbXMcR1gQ7GVYC1WbkwosWTpTSrVJh n",
@@ -838,12 +834,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "image",
-              "description": "A response option"
-            }
+            "type": "image",
+            "description": "A response option"
           }
         },
         "input": {
@@ -884,12 +876,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "image",
-              "description": "A response option"
-            }
+            "type": "image",
+            "description": "A response option"
           }
         },
         "input": {
@@ -930,12 +918,8 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "image",
-          "description": "A response option"
-        }
+        "type": "image",
+        "description": "A response option"
       }
     },
     "tasks": [
@@ -968,12 +952,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "image",
-              "description": "A response option"
-            }
+            "type": "image",
+            "description": "A response option"
           }
         },
         "input": {
@@ -1014,12 +994,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "image",
-              "description": "A response option"
-            }
+            "type": "image",
+            "description": "A response option"
           }
         },
         "input": {

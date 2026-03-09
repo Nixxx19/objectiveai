@@ -98,7 +98,7 @@
               "id": "call_mock_16485699204180625762",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"label\":{\"type\":\"string\"}},\"required\":[\"label\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"string\",\"description\":\"An item to rank\"}}}"
+                "arguments": "{\"context\":{\"properties\":{\"label\":{\"type\":\"string\"}},\"required\":[\"label\"]},\"items\":{\"type\":\"string\",\"description\":\"An item to rank\"}}"
               }
             }
           ],
@@ -330,7 +330,7 @@
               "id": "call_mock_12450380015712830233",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"fWtKBc7hb3tOtjLPJ5FDOHDoMJQDtXlTfqWkFmShuasmwjBeOmV\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"string\",\"description\":\"An item to rank\"}},\"context\":{\"properties\":{\"label\":{\"type\":\"string\"}},\"required\":[\"label\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"fWtKBc7hb3tOtjLPJ5FDOHDoMJQDtXlTfqWkFmShuasmwjBeOmV\",\"input_schema\":{\"items\":{\"type\":\"string\",\"description\":\"An item to rank\"},\"context\":{\"properties\":{\"label\":{\"type\":\"string\"}},\"required\":[\"label\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -368,7 +368,7 @@
               "id": "call_mock_16292859254797998292",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"2NJcuQqNq6tuu9aDfAh4o5hd2I0tYl8t xRwAXwEVV5ahvjZxIIGEWVWobCAdJfTGCASyL8QOz54Qqnks9ZMGYbFkV22L52I4F7 TFtLsDef7iwo7TaaWLEHRwYKfimP3cXPeUrBjlCZ9hTjc38ToI\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"string\",\"description\":\"An item to rank\"}},\"context\":{\"properties\":{\"label\":{\"type\":\"string\"}},\"required\":[\"label\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"2NJcuQqNq6tuu9aDfAh4o5hd2I0tYl8t xRwAXwEVV5ahvjZxIIGEWVWobCAdJfTGCASyL8QOz54Qqnks9ZMGYbFkV22L52I4F7 TFtLsDef7iwo7TaaWLEHRwYKfimP3cXPeUrBjlCZ9hTjc38ToI\",\"input_schema\":{\"items\":{\"type\":\"string\",\"description\":\"An item to rank\"},\"context\":{\"properties\":{\"label\":{\"type\":\"string\"}},\"required\":[\"label\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -405,7 +405,7 @@
               "id": "call_mock_9811606660807458790",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"PW26NjZAUaS5wloD4xNOfOCsgRwggKgaFJtZJ MFF9mbKBh84FSzq8Zu8UZOJDg dA 4Trhjx0cDiB2mMa6KWs9tIGT4gUl8ZrNgrYk74afo5k3Qdwn7dbtlMcE6CrSDkf206vT7aidHRazTOTV2y7s4ngH\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"string\",\"description\":\"An item to rank\"}},\"context\":{\"properties\":{\"label\":{\"type\":\"string\"}},\"required\":[\"label\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"PW26NjZAUaS5wloD4xNOfOCsgRwggKgaFJtZJ MFF9mbKBh84FSzq8Zu8UZOJDg dA 4Trhjx0cDiB2mMa6KWs9tIGT4gUl8ZrNgrYk74afo5k3Qdwn7dbtlMcE6CrSDkf206vT7aidHRazTOTV2y7s4ngH\",\"input_schema\":{\"items\":{\"type\":\"string\",\"description\":\"An item to rank\"},\"context\":{\"properties\":{\"label\":{\"type\":\"string\"}},\"required\":[\"label\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -565,12 +565,8 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "string",
-          "description": "An item to rank"
-        }
+        "type": "string",
+        "description": "An item to rank"
       }
     },
     "essay_tasks": "8OapGadz0Ah5qsIG9kZjGHDTwdbOk0W9Wzb3Va4uVO33yQVczJ0 TEAPMQzPmiOQilKn2i qIGH6o6QsLGmh4iQoh0SvEP4h2tlhobW79L0itWxhjoHkKNYX1nfeMfz U093kiykYHGcb5 GOpN1D8caQBLrb pySkNxvDonoV8jMgfuBAuHaP8sBerpYaT9atN2feROmOVBJm5TNotYZOMQTJ9Rb3smLHVG5CkXwspj2rSa99uKWH0MPRlszKqmCzZs8j9y4mAtjPXhbCWPZid TkCHFpdTIDnR0Y53oKy3gFmqKn4dbN03T",
@@ -596,12 +592,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "string",
-              "description": "An item to rank"
-            }
+            "type": "string",
+            "description": "An item to rank"
           }
         },
         "input": {
@@ -634,12 +626,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "string",
-              "description": "An item to rank"
-            }
+            "type": "string",
+            "description": "An item to rank"
           }
         },
         "input": {
@@ -672,12 +660,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "string",
-              "description": "An item to rank"
-            }
+            "type": "string",
+            "description": "An item to rank"
           }
         },
         "input": {
@@ -710,12 +694,8 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "string",
-          "description": "An item to rank"
-        }
+        "type": "string",
+        "description": "An item to rank"
       }
     },
     "tasks": [
@@ -740,12 +720,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "string",
-              "description": "An item to rank"
-            }
+            "type": "string",
+            "description": "An item to rank"
           }
         },
         "input": {
@@ -778,12 +754,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "string",
-              "description": "An item to rank"
-            }
+            "type": "string",
+            "description": "An item to rank"
           }
         },
         "input": {
@@ -816,12 +788,8 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "string",
-              "description": "An item to rank"
-            }
+            "type": "string",
+            "description": "An item to rank"
           }
         },
         "input": {

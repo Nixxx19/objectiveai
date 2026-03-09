@@ -250,7 +250,7 @@
               "id": "call_mock_4230534843522158684",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"content\":{\"type\":\"string\"},\"id\":{\"type\":\"number\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"content\",\"id\",\"categories\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"},\"footage\":{\"type\":\"video\"}},\"required\":[\"document\",\"footage\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"content\":{\"type\":\"string\"},\"id\":{\"type\":\"number\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"content\",\"id\",\"categories\"]},\"items\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"},\"footage\":{\"type\":\"video\"}},\"required\":[\"document\",\"footage\"]}}"
               }
             }
           ],
@@ -443,7 +443,7 @@
               "id": "call_mock_3249443333601989645",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"6jQz7K4ywO0DkSC01fmPRgGfgygmOMCguAMYlQhf9HeLmLCc 4Mp n7jfCPCyfUWwnP1lUzc2GXmtPHcEzpYa1QJk2WCK8WIhpfw6ABgYvRwNPyo9PkmU1ePKwp1rSyT yCka9Qn\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"},\"footage\":{\"type\":\"video\"}},\"required\":[\"document\",\"footage\"]}},\"context\":{\"properties\":{\"content\":{\"type\":\"string\"},\"id\":{\"type\":\"number\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"content\",\"id\",\"categories\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"6jQz7K4ywO0DkSC01fmPRgGfgygmOMCguAMYlQhf9HeLmLCc 4Mp n7jfCPCyfUWwnP1lUzc2GXmtPHcEzpYa1QJk2WCK8WIhpfw6ABgYvRwNPyo9PkmU1ePKwp1rSyT yCka9Qn\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"},\"footage\":{\"type\":\"video\"}},\"required\":[\"document\",\"footage\"]},\"context\":{\"properties\":{\"content\":{\"type\":\"string\"},\"id\":{\"type\":\"number\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"content\",\"id\",\"categories\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -708,7 +708,7 @@
               "id": "call_mock_6018017156869865552",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"WfBoTA7BJ6Gl1jVaVq33xqxRzvJxpogKka4ITP6pqynjdAlpF3sLJ3kShS1LEx tz6Yrd 1n5Kn5hwtvEFONsp46Mfis8xNof16MNbsb6KhHBiPelFh5STO49PZIVOug8KGw8y2ydxLvNeVAZXTyZJj9Ulsj\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"},\"footage\":{\"type\":\"video\"}},\"required\":[\"document\",\"footage\"]}},\"context\":{\"properties\":{\"content\":{\"type\":\"string\"},\"id\":{\"type\":\"number\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"content\",\"id\",\"categories\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"WfBoTA7BJ6Gl1jVaVq33xqxRzvJxpogKka4ITP6pqynjdAlpF3sLJ3kShS1LEx tz6Yrd 1n5Kn5hwtvEFONsp46Mfis8xNof16MNbsb6KhHBiPelFh5STO49PZIVOug8KGw8y2ydxLvNeVAZXTyZJj9Ulsj\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"},\"footage\":{\"type\":\"video\"}},\"required\":[\"document\",\"footage\"]},\"context\":{\"properties\":{\"content\":{\"type\":\"string\"},\"id\":{\"type\":\"number\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"content\",\"id\",\"categories\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -879,23 +879,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "document": {
-              "type": "file"
-            },
-            "footage": {
-              "type": "video"
-            }
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "file"
           },
-          "required": [
-            "document",
-            "footage"
-          ]
-        }
+          "footage": {
+            "type": "video"
+          }
+        },
+        "required": [
+          "document",
+          "footage"
+        ]
       }
     },
     "essay_tasks": "GCdge83kLFvtEp b8PkJRBTF5MEJWN9t7LyhTgvZxB9eaVamq83m3zbp2GUMjbULkXPjorRLLvrUE4VYQlN3YqFszNLmkvt5ZHXY",
@@ -932,23 +928,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "document": {
-                  "type": "file"
-                },
-                "footage": {
-                  "type": "video"
-                }
+            "type": "object",
+            "properties": {
+              "document": {
+                "type": "file"
               },
-              "required": [
-                "document",
-                "footage"
-              ]
-            }
+              "footage": {
+                "type": "video"
+              }
+            },
+            "required": [
+              "document",
+              "footage"
+            ]
           }
         },
         "input": {
@@ -992,23 +984,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "document": {
-                  "type": "file"
-                },
-                "footage": {
-                  "type": "video"
-                }
+            "type": "object",
+            "properties": {
+              "document": {
+                "type": "file"
               },
-              "required": [
-                "document",
-                "footage"
-              ]
-            }
+              "footage": {
+                "type": "video"
+              }
+            },
+            "required": [
+              "document",
+              "footage"
+            ]
           }
         },
         "input": {
@@ -1052,23 +1040,19 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "document": {
-              "type": "file"
-            },
-            "footage": {
-              "type": "video"
-            }
+        "type": "object",
+        "properties": {
+          "document": {
+            "type": "file"
           },
-          "required": [
-            "document",
-            "footage"
-          ]
-        }
+          "footage": {
+            "type": "video"
+          }
+        },
+        "required": [
+          "document",
+          "footage"
+        ]
       }
     },
     "tasks": [
@@ -1104,23 +1088,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "document": {
-                  "type": "file"
-                },
-                "footage": {
-                  "type": "video"
-                }
+            "type": "object",
+            "properties": {
+              "document": {
+                "type": "file"
               },
-              "required": [
-                "document",
-                "footage"
-              ]
-            }
+              "footage": {
+                "type": "video"
+              }
+            },
+            "required": [
+              "document",
+              "footage"
+            ]
           }
         },
         "input": {
@@ -1164,23 +1144,19 @@
             ]
           },
           "items": {
-            "type": "array",
-            "minItems": 2,
-            "items": {
-              "type": "object",
-              "properties": {
-                "document": {
-                  "type": "file"
-                },
-                "footage": {
-                  "type": "video"
-                }
+            "type": "object",
+            "properties": {
+              "document": {
+                "type": "file"
               },
-              "required": [
-                "document",
-                "footage"
-              ]
-            }
+              "footage": {
+                "type": "video"
+              }
+            },
+            "required": [
+              "document",
+              "footage"
+            ]
           }
         },
         "input": {

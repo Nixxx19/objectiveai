@@ -24,6 +24,33 @@ pub struct AlphaScalarLeafState {
 }
 
 impl AlphaScalarLeafState {
+    /// Validates the initial state's input schema and tasks.
+    ///
+    /// If an input schema is present, checks that it produces at least 2
+    /// distinct example inputs. If tasks are also present, checks that
+    /// they are valid for the input schema.
+    pub fn validate_initial_state(&self) -> Result<(), String> {
+        if let Some(ref input_schema) = self.input_schema {
+            let wrapped = functions::expression::InputSchema::Object(
+                input_schema.clone(),
+            );
+            functions::check::check_input_schema(&wrapped)?;
+        }
+        if let (Some(input_schema), Some(tasks)) =
+            (&self.input_schema, &self.tasks)
+        {
+            let function = functions::alpha_scalar::RemoteFunction::Leaf {
+                description: "placeholder".to_string(),
+                input_schema: input_schema.clone(),
+                tasks: tasks.clone(),
+            };
+            functions::alpha_scalar::check::check_alpha_leaf_scalar_function(
+                &function,
+            )?;
+        }
+        Ok(())
+    }
+
     pub fn read_spec_tool(
         this: &Arc<Mutex<Self>>,
     ) -> crate::functions::inventions::InventionTool {

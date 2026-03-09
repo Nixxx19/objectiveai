@@ -98,7 +98,7 @@
               "id": "call_mock_12459306807921057918",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"instruction\":{\"type\":\"string\"}},\"required\":[\"entries\",\"instruction\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\"},\"name\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}},\"required\":[\"status\",\"name\",\"description\"]}}}"
+                "arguments": "{\"context\":{\"properties\":{\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"instruction\":{\"type\":\"string\"}},\"required\":[\"entries\",\"instruction\"]},\"items\":{\"type\":\"object\",\"properties\":{\"status\":{\"type\":\"string\"},\"name\":{\"type\":\"number\"},\"description\":{\"type\":\"string\"}},\"required\":[\"status\",\"name\",\"description\"]}}"
               }
             }
           ],
@@ -570,27 +570,23 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "string"
-            },
-            "name": {
-              "type": "number"
-            },
-            "description": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
           },
-          "required": [
-            "status",
-            "name",
-            "description"
-          ]
-        }
+          "name": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "name",
+          "description"
+        ]
       }
     },
     "essay_tasks": "rQeCdRZNSNawuNnxMejVlYX32SqI pjHUmMrh7pRXlaTik1mNl2Bx5j74Wm6sFUXCX0ND1QmzgnsMs0E4JT7EsRmqwsVqmPjdxqfjIb2YznWX1yVcDuXzYV8yBJ4wUMkBtT7Sc9zrFVzkLb8wAJumYNGBmMVhIhTbz4vAhfa",
@@ -650,27 +646,23 @@
         ]
       },
       "items": {
-        "type": "array",
-        "minItems": 2,
-        "items": {
-          "type": "object",
-          "properties": {
-            "status": {
-              "type": "string"
-            },
-            "name": {
-              "type": "number"
-            },
-            "description": {
-              "type": "string"
-            }
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
           },
-          "required": [
-            "status",
-            "name",
-            "description"
-          ]
-        }
+          "name": {
+            "type": "number"
+          },
+          "description": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "status",
+          "name",
+          "description"
+        ]
       }
     },
     "tasks": [
