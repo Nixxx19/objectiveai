@@ -1137,3 +1137,26 @@ async fn test_min_greater_than_max_rejected() {
     let result = client.create_streaming(ctx, request).await;
     assert!(result.is_err(), "min > max should be rejected");
 }
+
+// ---------------------------------------------------------------------------
+// Completed state test — no completions should be generated
+// ---------------------------------------------------------------------------
+
+#[tokio::test]
+async fn test_completed_state_generates_no_completions() {
+    // Load a fully completed snapshot and extract its state as ParamsState.
+    let snapshot: serde_json::Value = serde_json::from_str(
+        include_str!("../../../assets/functions/inventions/client_tests/scalar_leaf_s42_0.json"),
+    ).unwrap();
+    let state: ParamsState = serde_json::from_value(snapshot["state"].clone()).unwrap();
+
+    let client = make_client();
+    let request = make_request(state, 42);
+    let result = run_invention(&client, request).await;
+
+    assert!(
+        result.completions.is_empty(),
+        "completed state should generate no completions, got {}",
+        result.completions.len(),
+    );
+}
