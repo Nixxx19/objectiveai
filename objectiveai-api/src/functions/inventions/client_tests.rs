@@ -137,6 +137,7 @@ fn make_client() -> Arc<TestClient> {
         None,
         None,
         None,
+        None,
         backoff::ExponentialBackoff::default(),
     ));
     let filesystem_client = Arc::new(crate::filesystem::Client::new(

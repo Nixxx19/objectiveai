@@ -5,7 +5,10 @@ use std::sync::Arc;
 #[derive(Debug, Clone)]
 pub struct Client {
     pub http_client: reqwest::Client,
-    pub github_token: Option<String>,
+    /// Token used for fetching functions/profiles from GitHub (read-only).
+    pub fetch_github_token: Option<String>,
+    /// Token used for publishing inventions to GitHub (requires repo scope).
+    pub publish_github_token: Option<String>,
     pub user_agent: Option<String>,
     pub x_title: Option<String>,
     pub referer: Option<String>,
@@ -15,7 +18,8 @@ pub struct Client {
 impl Client {
     pub fn new(
         http_client: reqwest::Client,
-        github_token: Option<String>,
+        fetch_github_token: Option<String>,
+        publish_github_token: Option<String>,
         user_agent: Option<String>,
         x_title: Option<String>,
         referer: Option<String>,
@@ -23,12 +27,25 @@ impl Client {
     ) -> Self {
         Self {
             http_client,
-            github_token,
+            fetch_github_token,
+            publish_github_token,
             user_agent,
             x_title,
             referer,
             backoff,
         }
+    }
+
+    /// Resolves the publish token: uses the provided token if Some,
+    /// otherwise falls back to the client's `publish_github_token`.
+    /// Returns `Err(MissingPublishToken)` if neither is available.
+    pub(crate) fn resolve_publish_token<'a>(
+        &'a self,
+        token: Option<&'a str>,
+    ) -> Result<&'a str, super::Error> {
+        token
+            .or(self.publish_github_token.as_deref())
+            .ok_or(super::Error::MissingPublishToken)
     }
 
     pub async fn fetch_function<CTXEXT>(
@@ -431,10 +448,11 @@ impl Client {
     /// Checks whether a GitHub repository exists.
     pub async fn repository_exists(
         &self,
-        token: &str,
+        token: Option<&str>,
         owner: &str,
         repository: &str,
     ) -> Result<bool, super::Error> {
+        let token = self.resolve_publish_token(token)?;
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
@@ -477,8 +495,9 @@ impl Client {
     /// The caller should check for the `repo` scope.
     pub async fn validate_token(
         &self,
-        token: &str,
+        token: Option<&str>,
     ) -> Result<Vec<String>, super::Error> {
+        let token = self.resolve_publish_token(token)?;
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
@@ -521,8 +540,9 @@ impl Client {
     /// Returns the authenticated user's login name.
     pub async fn get_authenticated_user(
         &self,
-        token: &str,
+        token: Option<&str>,
     ) -> Result<String, super::Error> {
+        let token = self.resolve_publish_token(token)?;
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
@@ -569,10 +589,11 @@ impl Client {
     /// Returns the clone URL (e.g. `https://github.com/owner/repo.git`).
     pub async fn create_repository(
         &self,
-        token: &str,
+        token: Option<&str>,
         name: &str,
         description: &str,
     ) -> Result<String, super::Error> {
+        let token = self.resolve_publish_token(token)?;
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
@@ -619,11 +640,12 @@ impl Client {
     /// Updates the description of a GitHub repository.
     pub async fn update_description(
         &self,
-        token: &str,
+        token: Option<&str>,
         owner: &str,
         repository: &str,
         description: &str,
     ) -> Result<(), super::Error> {
+        let token = self.resolve_publish_token(token)?;
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
@@ -660,14 +682,78 @@ impl Client {
         .await
     }
 
+    /// Publishes files to a GitHub repository.
+    ///
+    /// Creates the repository if needed, writes files locally, commits, pushes,
+    /// and updates the repository description.
+    ///
+    /// Returns the `RemoteFunctionPath` on success.
+    pub async fn publish(
+        &self,
+        filesystem_client: &crate::filesystem::Client,
+        token: Option<&str>,
+        name: &str,
+        description: &str,
+        files: &[(&str, &str)],
+    ) -> Result<objectiveai::functions::RemoteFunctionPath, super::Error> {
+        // Parse owner/repo or just repo name.
+        let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
+            (o.to_string(), r.to_string())
+        } else {
+            let user = self.get_authenticated_user(token).await?;
+            (user, name.to_string())
+        };
+
+        // Create repository if it doesn't exist.
+        let exists = self.repository_exists(token, &owner, &repo).await?;
+        if !exists {
+            self.create_repository(token, &repo, description).await?;
+        }
+
+        // Resolve the token for git2 operations.
+        let resolved_token = self.resolve_publish_token(token)?.to_string();
+        let remote_url = format!("https://github.com/{}/{}.git", owner, repo);
+        let commit_message = format!("Publish {}", name);
+
+        let fs = filesystem_client.clone();
+        let owner_clone = owner.clone();
+        let repo_clone = repo.clone();
+        let files_owned: Vec<(String, String)> = files.iter()
+            .map(|(n, c)| (n.to_string(), c.to_string()))
+            .collect();
+
+        let commit_sha = tokio::task::spawn_blocking(move || -> Result<String, crate::filesystem::Error> {
+            let file_refs: Vec<(&str, &str)> = files_owned.iter()
+                .map(|(n, c)| (n.as_str(), c.as_str()))
+                .collect();
+            fs.publish_and_push(
+                &owner_clone, &repo_clone, &file_refs, &commit_message,
+                &remote_url, &resolved_token,
+            )
+        })
+        .await
+        .map_err(super::Error::Join)?
+        .map_err(super::Error::Filesystem)?;
+
+        // Update repository description (best-effort).
+        let _ = self.update_description(token, &owner, &repo, description).await;
+
+        Ok(objectiveai::functions::RemoteFunctionPath {
+            remote: objectiveai::functions::Remote::Github,
+            owner,
+            repository: repo,
+            commit: commit_sha,
+        })
+    }
+
     fn request_headers(
         &self,
         mut http_request: reqwest::RequestBuilder,
     ) -> reqwest::RequestBuilder {
-        if let Some(github_token) = &self.github_token {
+        if let Some(token) = &self.fetch_github_token {
             http_request = http_request.header(
                 reqwest::header::AUTHORIZATION,
-                format!("Bearer {}", github_token),
+                format!("Bearer {}", token),
             );
         }
         if let Some(user_agent) = &self.user_agent {

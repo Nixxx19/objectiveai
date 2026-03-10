@@ -15,6 +15,12 @@ pub enum Error {
     MultipleErrors(Box<Error>, Box<Error>),
     #[error("profile commit SHA is required")]
     ProfileCommitShaRequired,
+    #[error("no publish GitHub token available")]
+    MissingPublishToken,
+    #[error("filesystem error: {0}")]
+    Filesystem(#[from] crate::filesystem::Error),
+    #[error("task join error: {0}")]
+    Join(#[from] tokio::task::JoinError),
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -29,6 +35,9 @@ impl objectiveai::error::StatusError for Error {
                 if status2 != 500 { status2 } else { e1.status() }
             }
             Error::ProfileCommitShaRequired => 400,
+            Error::MissingPublishToken => 400,
+            Error::Filesystem(e) => e.status(),
+            Error::Join(_) => 500,
         }
     }
 
@@ -60,6 +69,18 @@ impl objectiveai::error::StatusError for Error {
                 Error::ProfileCommitShaRequired => serde_json::json!({
                     "kind": "profile_commit_sha_required",
                     "error": "Profile commit SHA is required for remote function tasks.",
+                }),
+                Error::MissingPublishToken => serde_json::json!({
+                    "kind": "missing_publish_token",
+                    "error": "No publish GitHub token available. Provide a github_token in the request or configure PUBLISH_GITHUB_TOKEN on the server.",
+                }),
+                Error::Filesystem(e) => serde_json::json!({
+                    "kind": "filesystem",
+                    "error": e.message(),
+                }),
+                Error::Join(e) => serde_json::json!({
+                    "kind": "join",
+                    "error": e.to_string(),
                 }),
             }
         }))

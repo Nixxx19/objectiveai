@@ -77,8 +77,10 @@ struct Config {
         default = "40000" // 40 seconds
     )]
     chat_completions_backoff_max_elapsed_time: u64,
-    #[envconfig(from = "GITHUB_PAT")]
-    github_pat: Option<String>,
+    #[envconfig(from = "FETCH_GITHUB_TOKEN")]
+    fetch_github_token: Option<String>,
+    #[envconfig(from = "PUBLISH_GITHUB_TOKEN")]
+    publish_github_token: Option<String>,
     #[envconfig(from = "ADDRESS", default = "0.0.0.0")]
     address: String,
     #[envconfig(from = "PORT", default = "5000")]
@@ -106,7 +108,8 @@ async fn main() {
         chat_completions_backoff_multiplier,
         chat_completions_backoff_max_interval,
         chat_completions_backoff_max_elapsed_time,
-        github_pat,
+        fetch_github_token,
+        publish_github_token,
         address,
         port,
     } = Config::init_from_env().unwrap();
@@ -211,7 +214,8 @@ async fn main() {
     // GitHub Client
     let github_client = Arc::new(github::Client::new(
         reqwest::Client::new(),
-        github_pat,
+        fetch_github_token,
+        publish_github_token,
         user_agent,
         x_title,
         http_referer,

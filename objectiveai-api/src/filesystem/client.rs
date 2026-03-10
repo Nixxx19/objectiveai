@@ -186,6 +186,126 @@ impl Client {
 
         Ok(commit_oid.to_string())
     }
+
+    /// Publishes files to a local git repository and pushes to a remote.
+    ///
+    /// Like [`publish`], but also sets the remote URL, fetches existing content,
+    /// and pushes the commit using the provided token for authentication.
+    ///
+    /// Returns the commit SHA on success.
+    pub fn publish_and_push(
+        &self,
+        owner: &str,
+        repository: &str,
+        files: &[(&str, &str)],
+        commit_message: &str,
+        remote_url: &str,
+        token: &str,
+    ) -> Result<String, super::Error> {
+        let repo_path = self.repo_path(owner, repository);
+
+        // Create directory recursively if needed.
+        std::fs::create_dir_all(&repo_path)?;
+
+        // Open or initialize the git repository.
+        let repo = match git2::Repository::open(&repo_path) {
+            Ok(r) => r,
+            Err(_) => git2::Repository::init(&repo_path)?,
+        };
+
+        // Set or update remote URL.
+        match repo.find_remote("origin") {
+            Ok(_) => {
+                repo.remote_set_url("origin", remote_url)?;
+            }
+            Err(_) => {
+                repo.remote("origin", remote_url)?;
+            }
+        }
+
+        // Fetch from remote (may have content from a previous push or manual commit).
+        {
+            for branch in &["main", "master"] {
+                let mut callbacks = git2::RemoteCallbacks::new();
+                callbacks.credentials(|_url, _username_from_url, _allowed_types| {
+                    git2::Cred::userpass_plaintext("x-access-token", token)
+                });
+                let mut fetch_options = git2::FetchOptions::new();
+                fetch_options.remote_callbacks(callbacks);
+                let mut remote = repo.find_remote("origin")?;
+                let _ = remote.fetch(&[branch], Some(&mut fetch_options), None);
+            }
+
+            // Reset to remote HEAD if it has commits.
+            for branch in &["refs/remotes/origin/main", "refs/remotes/origin/master"] {
+                if let Ok(reference) = repo.find_reference(branch) {
+                    if let Ok(commit) = reference.peel_to_commit() {
+                        let mut checkout = git2::build::CheckoutBuilder::new();
+                        checkout.force();
+                        checkout.remove_untracked(true);
+                        let _ = repo.reset(
+                            commit.as_object(),
+                            git2::ResetType::Hard,
+                            Some(&mut checkout),
+                        );
+                        let local_branch = branch.replace("refs/remotes/origin/", "");
+                        let _ = repo.set_head(
+                            &format!("refs/heads/{}", local_branch),
+                        );
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Write files to the working tree.
+        for (name, content) in files {
+            let file_path = repo_path.join(name);
+            std::fs::write(&file_path, content)?;
+        }
+
+        // Stage all files.
+        let mut index = repo.index()?;
+        for (name, _) in files {
+            index.add_path(Path::new(name))?;
+        }
+        index.write()?;
+        let tree_oid = index.write_tree()?;
+
+        // If the tree is identical to the parent's tree, skip commit and push.
+        let parent = repo.head().ok().and_then(|h| h.peel_to_commit().ok());
+        if let Some(ref parent) = parent {
+            if parent.tree_id() == tree_oid {
+                return Ok(parent.id().to_string());
+            }
+        }
+
+        let tree = repo.find_tree(tree_oid)?;
+
+        // Create commit.
+        let sig = git2::Signature::now(&self.commit_author_name, &self.commit_author_email)?;
+        let parents: Vec<&git2::Commit> = parent.iter().collect();
+        let commit_oid = repo.commit(
+            Some("HEAD"), &sig, &sig, commit_message, &tree, &parents,
+        )?;
+
+        // Push using credentials callback (token stays in memory only).
+        let mut remote = repo.find_remote("origin")?;
+        let head_ref = repo.head()?;
+        let branch_name = head_ref.shorthand().unwrap_or("main");
+        let refspec = format!("refs/heads/{}:refs/heads/{}", branch_name, branch_name);
+
+        let mut callbacks = git2::RemoteCallbacks::new();
+        callbacks.credentials(|_url, _username_from_url, _allowed_types| {
+            git2::Cred::userpass_plaintext("x-access-token", token)
+        });
+        let mut push_options = git2::PushOptions::new();
+        push_options.remote_callbacks(callbacks);
+
+        remote.push(&[&refspec], Some(&mut push_options))?;
+
+        Ok(commit_oid.to_string())
+    }
 }
 
 /// Returns true if the git error represents a "not found" condition.

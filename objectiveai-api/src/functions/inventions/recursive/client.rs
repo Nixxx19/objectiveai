@@ -1,4 +1,5 @@
 use crate::{ctx, util::ChoiceIndexer};
+use objectiveai::error::StatusError;
 use futures::{Stream, StreamExt};
 use std::{
     pin::Pin,
@@ -495,11 +496,11 @@ where
                 }
             }
             objectiveai::functions::Remote::Github => {
-                let token = request.github_token.as_deref().unwrap_or("");
                 match crate::functions::inventions::publish_github(
                     &invention_client.github_client,
                     &invention_client.filesystem_client,
-                    token, name, &description, &publish_files,
+                    request.github_token.as_deref(), name, &description,
+                    &publish_files,
                 ).await {
                     Ok(path) => (Some(path), None),
                     Err(e) => (None, Some(e)),
@@ -516,11 +517,8 @@ where
                 final_path,
                 Some(true),
                 Some(objectiveai::error::ResponseError {
-                    code: 500,
-                    message: serde_json::json!({
-                        "kind": "publish",
-                        "error": publish_error,
-                    }),
+                    code: publish_error.status(),
+                    message: publish_error.message().unwrap_or(serde_json::Value::Null),
                 }),
             )
         } else {
