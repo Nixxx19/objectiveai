@@ -632,6 +632,10 @@ async fn delete_if_at_predicted(
 
 /// Calls an invention tool by name with the given JSON argument and returns
 /// the result string, or the error string on failure.
+///
+/// TODO: Do not call directly. These calls bypass the agent completions loop
+/// and never appear in the continuation or stream. Tool invocations should be
+/// yielded as mock tool call responses instead.
 async fn call_invention_tool(
     invention_tools: &[objectiveai::functions::inventions::InventionTool],
     name: &str,
