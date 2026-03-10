@@ -84,6 +84,26 @@ where
     FFNM: crate::functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     RIUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
+    pub async fn create_unary_handle_usage(
+        self: Arc<Self>,
+        ctx: ctx::Context<CTXEXT>,
+        request: Arc<objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams>,
+    ) -> Result<
+        objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive,
+        super::Error,
+    > {
+        let mut aggregate: Option<RecursiveChunk> = None;
+        let mut stream =
+            self.create_streaming_handle_usage(ctx, request).await?;
+        while let Some(chunk) = stream.next().await {
+            match &mut aggregate {
+                Some(aggregate) => aggregate.push(&chunk),
+                None => aggregate = Some(chunk),
+            }
+        }
+        Ok(aggregate.unwrap().into())
+    }
+
     pub async fn create_streaming_handle_usage(
         self: Arc<Self>,
         ctx: ctx::Context<CTXEXT>,
