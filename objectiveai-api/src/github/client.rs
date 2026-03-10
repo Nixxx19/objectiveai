@@ -752,7 +752,7 @@ impl Client {
                 .map(|(n, c)| (n.as_str(), c.as_str()))
                 .collect();
             fs.publish_and_push(
-                &owner_clone, &repo_clone, &file_refs, &commit_message,
+                crate::filesystem::Kind::Functions, &owner_clone, &repo_clone, &file_refs, &commit_message,
                 &remote_url, &bare_token,
             )
         })

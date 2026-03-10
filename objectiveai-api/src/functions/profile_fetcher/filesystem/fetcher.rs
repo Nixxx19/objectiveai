@@ -32,6 +32,7 @@ where
         match self
             .client
             .read_json::<objectiveai::functions::RemoteProfile>(
+                crate::filesystem::Kind::Profiles,
                 owner,
                 repository,
                 commit,

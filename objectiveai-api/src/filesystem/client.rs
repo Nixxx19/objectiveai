@@ -1,9 +1,27 @@
 use std::path::{Path, PathBuf};
 
+/// The kind of resource stored in a filesystem repository.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum Kind {
+    Functions,
+    Profiles,
+}
+
+impl Kind {
+    /// Returns the directory name for this kind.
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Kind::Functions => "functions",
+            Kind::Profiles => "profiles",
+        }
+    }
+}
+
 /// Reads files from local git repositories on the filesystem.
 ///
-/// Repositories are expected at `{base_dir}/{owner}/{repository}/`.
-/// Files can be read from the working tree or from a specific git commit.
+/// Repositories are organized by kind under the base directory:
+/// - Functions: `{base_dir}/functions/{owner}/{repository}/`
+/// - Profiles: `{base_dir}/profiles/{owner}/{repository}/`
 #[derive(Debug, Clone)]
 pub struct Client {
     pub base_dir: PathBuf,
@@ -24,20 +42,20 @@ impl Client {
         Ok(())
     }
 
-    /// Returns the repository path for the given owner and repository.
-    pub fn repo_path(&self, owner: &str, repository: &str) -> PathBuf {
-        self.base_dir.join(owner).join(repository)
+    /// Returns the repository path for the given kind, owner, and repository.
+    pub fn repo_path(&self, kind: Kind, owner: &str, repository: &str) -> PathBuf {
+        self.base_dir.join(kind.as_str()).join(owner).join(repository)
     }
 
     /// Checks whether a repository exists on the filesystem as an initialized git repository.
-    pub fn repository_exists(&self, owner: &str, repository: &str) -> bool {
-        let repo_path = self.repo_path(owner, repository);
+    pub fn repository_exists(&self, kind: Kind, owner: &str, repository: &str) -> bool {
+        let repo_path = self.repo_path(kind, owner, repository);
         git2::Repository::open(&repo_path).is_ok()
     }
 
     /// Resolves the HEAD commit SHA for a repository.
-    pub fn resolve_head(&self, owner: &str, repository: &str) -> Result<String, super::Error> {
-        let repo_path = self.repo_path(owner, repository);
+    pub fn resolve_head(&self, kind: Kind, owner: &str, repository: &str) -> Result<String, super::Error> {
+        let repo_path = self.repo_path(kind, owner, repository);
         let repo = git2::Repository::open(&repo_path)?;
         let head = repo.head()?;
         let commit = head.peel_to_commit()?;
@@ -53,12 +71,13 @@ impl Client {
     /// Returns `Ok(Some((content, resolved_commit)))` on success.
     pub async fn read_file(
         &self,
+        kind: Kind,
         owner: &str,
         repository: &str,
         commit: Option<&str>,
         file_name: &str,
     ) -> Result<Option<(String, String)>, super::Error> {
-        let repo_path = self.repo_path(owner, repository);
+        let repo_path = self.repo_path(kind, owner, repository);
 
         match commit {
             Some(sha) => {
@@ -73,7 +92,7 @@ impl Client {
                 match tokio::fs::read_to_string(&file_path).await {
                     Ok(content) => {
                         let resolved = self
-                            .resolve_head(owner, repository)
+                            .resolve_head(kind, owner, repository)
                             .unwrap_or_else(|_| "HEAD".to_string());
                         Ok(Some((content, resolved)))
                     }
@@ -93,13 +112,14 @@ impl Client {
     /// Returns `Ok(Some((value, resolved_commit)))` on success.
     pub async fn read_json<T: serde::de::DeserializeOwned>(
         &self,
+        kind: Kind,
         owner: &str,
         repository: &str,
         commit: Option<&str>,
         file_name: &str,
     ) -> Result<Option<(T, String)>, super::Error> {
         let Some((content, resolved_commit)) =
-            self.read_file(owner, repository, commit, file_name).await?
+            self.read_file(kind, owner, repository, commit, file_name).await?
         else {
             return Ok(None);
         };
@@ -117,12 +137,13 @@ impl Client {
     /// Returns the commit SHA on success.
     pub fn publish(
         &self,
+        kind: Kind,
         owner: &str,
         repository: &str,
         files: &[(&str, &str)],
         commit_message: &str,
     ) -> Result<String, super::Error> {
-        let repo_path = self.repo_path(owner, repository);
+        let repo_path = self.repo_path(kind, owner, repository);
 
         // Create directory recursively if needed.
         std::fs::create_dir_all(&repo_path)?;
@@ -195,6 +216,7 @@ impl Client {
     /// Returns the commit SHA on success.
     pub fn publish_and_push(
         &self,
+        kind: Kind,
         owner: &str,
         repository: &str,
         files: &[(&str, &str)],
@@ -202,7 +224,7 @@ impl Client {
         remote_url: &str,
         token: &str,
     ) -> Result<String, super::Error> {
-        let repo_path = self.repo_path(owner, repository);
+        let repo_path = self.repo_path(kind, owner, repository);
 
         // Create directory recursively if needed.
         std::fs::create_dir_all(&repo_path)?;
