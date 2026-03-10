@@ -35,6 +35,8 @@ pub mod functions;
 pub mod github;
 /// MCP (Model Context Protocol) types.
 pub mod mcp;
+/// ObjectiveAI HTTP client wrapper with per-request authorization.
+pub mod objectiveai_http;
 /// Utility types for streaming and choice indexing.
 pub mod util;
 /// Vector completions for scoring and ranking responses.

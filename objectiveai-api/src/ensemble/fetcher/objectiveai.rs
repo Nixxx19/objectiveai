@@ -7,12 +7,12 @@ use std::sync::Arc;
 /// Fetches ensembles from the ObjectiveAI HTTP API.
 pub struct ObjectiveAiFetcher {
     /// The underlying HTTP client.
-    pub client: Arc<objectiveai::HttpClient>,
+    pub client: Arc<crate::objectiveai_http::Client>,
 }
 
 impl ObjectiveAiFetcher {
     /// Creates a new ObjectiveAI ensemble fetcher.
-    pub fn new(client: Arc<objectiveai::HttpClient>) -> Self {
+    pub fn new(client: Arc<crate::objectiveai_http::Client>) -> Self {
         Self { client }
     }
 }
@@ -20,17 +20,18 @@ impl ObjectiveAiFetcher {
 #[async_trait::async_trait]
 impl<CTXEXT> super::Fetcher<CTXEXT> for ObjectiveAiFetcher
 where
-    CTXEXT: Send + Sync + 'static,
+    CTXEXT: Send + Sync + 'static + ctx::ContextExt,
 {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
+        ctx: ctx::Context<CTXEXT>,
         id: &str,
     ) -> Result<
         Option<(objectiveai::ensemble::Ensemble, u64)>,
         objectiveai::error::ResponseError,
     > {
-        match objectiveai::ensemble::get_ensemble(&self.client, id).await {
+        let client = self.client.with_authorization(&ctx).await;
+        match objectiveai::ensemble::get_ensemble(&client, id).await {
             Ok(ensemble) => Ok(Some((ensemble.inner, ensemble.created))),
             Err(e) if e.status() == 404 => Ok(None),
             Err(e) => Err(objectiveai::error::ResponseError::from(&e)),

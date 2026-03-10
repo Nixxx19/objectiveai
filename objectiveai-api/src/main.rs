@@ -122,7 +122,7 @@ async fn main() {
     let http_client = reqwest::Client::new();
 
     // ObjectiveAI HTTP Client
-    let objectiveai_http_client = Arc::new(objectiveai::HttpClient::new(
+    let objectiveai_http_client = Arc::new(objectiveai_http::Client::new(
         http_client.clone(),
         Some(objectiveai_api_base),
         objectiveai_api_key,
