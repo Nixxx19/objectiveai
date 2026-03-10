@@ -81,6 +81,10 @@ struct Config {
     fetch_github_token: Option<String>,
     #[envconfig(from = "PUBLISH_GITHUB_TOKEN")]
     publish_github_token: Option<String>,
+    #[envconfig(from = "FILESYSTEM_COMMIT_AUTHOR_NAME", default = "ObjectiveAI")]
+    filesystem_commit_author_name: String,
+    #[envconfig(from = "FILESYSTEM_COMMIT_AUTHOR_EMAIL", default = "admin@objective-ai.io")]
+    filesystem_commit_author_email: String,
     #[envconfig(from = "ADDRESS", default = "0.0.0.0")]
     address: String,
     #[envconfig(from = "PORT", default = "5000")]
@@ -246,8 +250,8 @@ async fn main() {
 
     let filesystem_client = Arc::new(filesystem::Client::new(
         filesystem_base_dir,
-        "ObjectiveAI".to_string(),
-        "noreply@objective-ai.io".to_string(),
+        config.filesystem_commit_author_name,
+        config.filesystem_commit_author_email,
     ));
 
     // Function Fetcher (routes to GitHub or Filesystem based on Remote)
