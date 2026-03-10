@@ -129,27 +129,31 @@ impl<CTXEXT> Clone for Context<CTXEXT> {
 impl<CTXEXT> Context<CTXEXT> {
     /// Creates a new context by extracting authorization headers from the request.
     ///
-    /// Looks for:
-    /// - `OPENROUTER-AUTHORIZATION`: OpenRouter API key
-    /// - `GITHUB-AUTHORIZATION`: GitHub token
-    /// - `MCP-AUTHORIZATION`: JSON-encoded `HashMap<String, String>` of MCP headers
+    /// For each header, checks the `X-` prefixed variant first, then falls back
+    /// to the non-prefixed variant:
+    /// - `X-OPENROUTER-AUTHORIZATION` / `OPENROUTER-AUTHORIZATION`: OpenRouter API key
+    /// - `X-GITHUB-AUTHORIZATION` / `GITHUB-AUTHORIZATION`: GitHub token
+    /// - `X-MCP-AUTHORIZATION` / `MCP-AUTHORIZATION`: JSON-encoded `HashMap<String, String>`
     pub fn new(
         ext: Arc<CTXEXT>,
         cost_multiplier: rust_decimal::Decimal,
         headers: &axum::http::HeaderMap,
     ) -> Self {
         let openrouter_authorization = headers
-            .get("OPENROUTER-AUTHORIZATION")
+            .get("X-OPENROUTER-AUTHORIZATION")
+            .or_else(|| headers.get("OPENROUTER-AUTHORIZATION"))
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
         let github_authorization = headers
-            .get("GITHUB-AUTHORIZATION")
+            .get("X-GITHUB-AUTHORIZATION")
+            .or_else(|| headers.get("GITHUB-AUTHORIZATION"))
             .and_then(|v| v.to_str().ok())
             .map(|s| Arc::new(s.to_owned()));
 
         let mcp_authorization = headers
-            .get("MCP-AUTHORIZATION")
+            .get("X-MCP-AUTHORIZATION")
+            .or_else(|| headers.get("MCP-AUTHORIZATION"))
             .and_then(|v| v.to_str().ok())
             .and_then(|s| serde_json::from_str::<HashMap<String, String>>(s).ok())
             .map(Arc::new);
