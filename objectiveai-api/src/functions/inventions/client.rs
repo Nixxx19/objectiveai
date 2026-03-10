@@ -266,7 +266,7 @@ where
         }
 
         // Pre-flight: validate remote, token, and name.
-        self.check_preflight(&request, &params.name).await?;
+        self.check_preflight(&ctx, &request, &params.name).await?;
 
         let created = time::SystemTime::now()
             .duration_since(time::UNIX_EPOCH)
@@ -341,6 +341,7 @@ where
     ///   exist on the target remote.
     async fn check_preflight(
         &self,
+        ctx: &ctx::Context<CTXEXT>,
         request: &objectiveai::functions::inventions::request::FunctionInventionCreateParams,
         name: &str,
     ) -> Result<(), super::Error> {
@@ -353,7 +354,7 @@ where
         if matches!(remote, objectiveai::functions::Remote::Github) {
             let scopes = self
                 .github_client
-                .validate_token(request.github_token.as_deref())
+                .validate_token(ctx)
                 .await?;
 
             // The `repo` scope grants create, push, and description edit.
@@ -384,7 +385,7 @@ where
                     return Ok(());
                 };
                 self.github_client
-                    .repository_exists(request.github_token.as_deref(), owner, repo)
+                    .repository_exists(ctx, owner, repo)
                     .await?
             }
             objectiveai::functions::Remote::Filesystem => {
@@ -867,8 +868,7 @@ where
                     objectiveai::functions::Remote::Github => {
                         match publish_github(
                             &github_client, &filesystem_client,
-                            request.github_token.as_deref(), name,
-                            &description, &publish_files,
+                            &ctx, name, &description, &publish_files,
                         ).await {
                             Ok(path) => (Some(path), None),
                             Err(e) => (None, Some(e)),
@@ -990,10 +990,10 @@ pub(crate) fn publish_filesystem(
 ///
 /// Delegates to [`crate::github::Client::publish`] which handles repo
 /// creation, local git operations (via filesystem client), and push.
-pub(crate) async fn publish_github(
+pub(crate) async fn publish_github<CTXEXT: ctx::ContextExt + Send + Sync>(
     github_client: &crate::github::Client,
     filesystem_client: &crate::filesystem::Client,
-    token: Option<&str>,
+    ctx: &ctx::Context<CTXEXT>,
     name: &str,
     description: &str,
     files: &[(&'static str, String)],
@@ -1002,7 +1002,7 @@ pub(crate) async fn publish_github(
         .map(|(n, c)| (*n, c.as_str()))
         .collect();
     Ok(github_client
-        .publish(filesystem_client, token, name, description, &file_refs)
+        .publish(filesystem_client, ctx, name, description, &file_refs)
         .await?)
 }
 

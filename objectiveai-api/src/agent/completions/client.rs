@@ -407,13 +407,7 @@ where
                 );
 
                 // d. Get BYOK for this agent's upstream.
-                let byok = match ctx.ext.get_byok(agent.base().upstream()).await {
-                    Ok(b) => b,
-                    Err(e) => {
-                        errors.push(super::Error::Fetch(e));
-                        continue;
-                    }
-                };
+                let byok = ctx.get_upstream_byok(agent.base().upstream()).await;
 
                 // e. BYOK strategy: try with key first, then without.
                 let byok_attempts: Vec<Option<&str>> = match &byok {

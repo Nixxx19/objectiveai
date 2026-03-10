@@ -36,15 +36,34 @@ impl Client {
         }
     }
 
-    /// Resolves the publish token: uses the provided token if Some,
-    /// otherwise falls back to the client's `publish_github_token`.
-    /// Returns `Err(MissingPublishToken)` if neither is available.
-    pub(crate) fn resolve_publish_token<'a>(
-        &'a self,
-        token: Option<&'a str>,
-    ) -> Result<&'a str, super::Error> {
-        token
-            .or(self.publish_github_token.as_deref())
+    /// Resolves the fetch token: checks the context first (per-request header
+    /// → BYOK ext), then falls back to `self.fetch_github_token`.
+    /// Returns `None` if neither is available.
+    async fn resolve_fetch_token<CTXEXT: ctx::ContextExt>(
+        &self,
+        ctx: &ctx::Context<CTXEXT>,
+    ) -> Option<Arc<String>> {
+        if let Some(token) = ctx.github_authorization().await {
+            return Some(token);
+        }
+        self.fetch_github_token
+            .as_ref()
+            .map(|t| Arc::new(t.clone()))
+    }
+
+    /// Resolves the publish token: checks the context first (per-request header
+    /// → BYOK ext), then falls back to `self.publish_github_token`.
+    /// Returns `Err(MissingPublishToken)` if none is available.
+    async fn resolve_publish_token<CTXEXT: ctx::ContextExt>(
+        &self,
+        ctx: &ctx::Context<CTXEXT>,
+    ) -> Result<Arc<String>, super::Error> {
+        if let Some(token) = ctx.github_authorization().await {
+            return Ok(token);
+        }
+        self.publish_github_token
+            .as_ref()
+            .map(|t| Arc::new(t.clone()))
             .ok_or(super::Error::MissingPublishToken)
     }
 
@@ -446,13 +465,14 @@ impl Client {
     }
 
     /// Checks whether a GitHub repository exists.
-    pub async fn repository_exists(
+    pub async fn repository_exists<CTXEXT: ctx::ContextExt>(
         &self,
-        token: Option<&str>,
+        ctx: &ctx::Context<CTXEXT>,
         owner: &str,
         repository: &str,
     ) -> Result<bool, super::Error> {
-        let token = self.resolve_publish_token(token)?;
+        let token = self.resolve_publish_token(ctx).await?;
+        let bearer = ensure_bearer(&token);
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
@@ -460,7 +480,7 @@ impl Client {
                     "https://api.github.com/repos/{}/{}",
                     owner, repository,
                 ))
-                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header(reqwest::header::AUTHORIZATION, &*bearer)
                 .header("accept", "application/vnd.github+json")
                 .header("user-agent", "objectiveai")
                 .send()
@@ -493,16 +513,17 @@ impl Client {
     ///
     /// Returns the scopes the token has. Errors if the token is invalid.
     /// The caller should check for the `repo` scope.
-    pub async fn validate_token(
+    pub async fn validate_token<CTXEXT: ctx::ContextExt>(
         &self,
-        token: Option<&str>,
+        ctx: &ctx::Context<CTXEXT>,
     ) -> Result<Vec<String>, super::Error> {
-        let token = self.resolve_publish_token(token)?;
+        let token = self.resolve_publish_token(ctx).await?;
+        let bearer = ensure_bearer(&token);
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
                 .get("https://api.github.com/user")
-                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header(reqwest::header::AUTHORIZATION, &*bearer)
                 .header("accept", "application/vnd.github+json")
                 .header("user-agent", "objectiveai")
                 .send()
@@ -538,16 +559,17 @@ impl Client {
     }
 
     /// Returns the authenticated user's login name.
-    pub async fn get_authenticated_user(
+    pub async fn get_authenticated_user<CTXEXT: ctx::ContextExt>(
         &self,
-        token: Option<&str>,
+        ctx: &ctx::Context<CTXEXT>,
     ) -> Result<String, super::Error> {
-        let token = self.resolve_publish_token(token)?;
+        let token = self.resolve_publish_token(ctx).await?;
+        let bearer = ensure_bearer(&token);
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
                 .get("https://api.github.com/user")
-                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header(reqwest::header::AUTHORIZATION, &*bearer)
                 .header("accept", "application/vnd.github+json")
                 .header("user-agent", "objectiveai")
                 .send()
@@ -587,18 +609,19 @@ impl Client {
     /// Creates a new GitHub repository under the authenticated user.
     ///
     /// Returns the clone URL (e.g. `https://github.com/owner/repo.git`).
-    pub async fn create_repository(
+    pub async fn create_repository<CTXEXT: ctx::ContextExt>(
         &self,
-        token: Option<&str>,
+        ctx: &ctx::Context<CTXEXT>,
         name: &str,
         description: &str,
     ) -> Result<String, super::Error> {
-        let token = self.resolve_publish_token(token)?;
+        let token = self.resolve_publish_token(ctx).await?;
+        let bearer = ensure_bearer(&token);
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
                 .post("https://api.github.com/user/repos")
-                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header(reqwest::header::AUTHORIZATION, &*bearer)
                 .header("accept", "application/vnd.github+json")
                 .header("user-agent", "objectiveai")
                 .json(&serde_json::json!({
@@ -638,14 +661,15 @@ impl Client {
     }
 
     /// Updates the description of a GitHub repository.
-    pub async fn update_description(
+    pub async fn update_description<CTXEXT: ctx::ContextExt>(
         &self,
-        token: Option<&str>,
+        ctx: &ctx::Context<CTXEXT>,
         owner: &str,
         repository: &str,
         description: &str,
     ) -> Result<(), super::Error> {
-        let token = self.resolve_publish_token(token)?;
+        let token = self.resolve_publish_token(ctx).await?;
+        let bearer = ensure_bearer(&token);
         backoff::future::retry(self.backoff.clone(), || async {
             let response = self
                 .http_client
@@ -653,7 +677,7 @@ impl Client {
                     "https://api.github.com/repos/{}/{}",
                     owner, repository,
                 ))
-                .header(reqwest::header::AUTHORIZATION, format!("Bearer {}", token))
+                .header(reqwest::header::AUTHORIZATION, &*bearer)
                 .header("accept", "application/vnd.github+json")
                 .header("user-agent", "objectiveai")
                 .json(&serde_json::json!({
@@ -688,10 +712,10 @@ impl Client {
     /// and updates the repository description.
     ///
     /// Returns the `RemoteFunctionPath` on success.
-    pub async fn publish(
+    pub async fn publish<CTXEXT: ctx::ContextExt + Send + Sync>(
         &self,
         filesystem_client: &crate::filesystem::Client,
-        token: Option<&str>,
+        ctx: &ctx::Context<CTXEXT>,
         name: &str,
         description: &str,
         files: &[(&str, &str)],
@@ -700,18 +724,19 @@ impl Client {
         let (owner, repo) = if let Some((o, r)) = name.split_once('/') {
             (o.to_string(), r.to_string())
         } else {
-            let user = self.get_authenticated_user(token).await?;
+            let user = self.get_authenticated_user(ctx).await?;
             (user, name.to_string())
         };
 
         // Create repository if it doesn't exist.
-        let exists = self.repository_exists(token, &owner, &repo).await?;
+        let exists = self.repository_exists(ctx, &owner, &repo).await?;
         if !exists {
-            self.create_repository(token, &repo, description).await?;
+            self.create_repository(ctx, &repo, description).await?;
         }
 
-        // Resolve the token for git2 operations.
-        let resolved_token = self.resolve_publish_token(token)?.to_string();
+        // Resolve the token for git2 operations (strip Bearer prefix if present).
+        let token = self.resolve_publish_token(ctx).await?;
+        let bare_token = strip_bearer(&token).to_string();
         let remote_url = format!("https://github.com/{}/{}.git", owner, repo);
         let commit_message = format!("Publish {}", name);
 
@@ -728,7 +753,7 @@ impl Client {
                 .collect();
             fs.publish_and_push(
                 &owner_clone, &repo_clone, &file_refs, &commit_message,
-                &remote_url, &resolved_token,
+                &remote_url, &bare_token,
             )
         })
         .await
@@ -736,7 +761,7 @@ impl Client {
         .map_err(super::Error::Filesystem)?;
 
         // Update repository description (best-effort).
-        let _ = self.update_description(token, &owner, &repo, description).await;
+        let _ = self.update_description(ctx, &owner, &repo, description).await;
 
         Ok(objectiveai::functions::RemoteFunctionPath {
             remote: objectiveai::functions::Remote::Github,
@@ -753,7 +778,7 @@ impl Client {
         if let Some(token) = &self.fetch_github_token {
             http_request = http_request.header(
                 reqwest::header::AUTHORIZATION,
-                format!("Bearer {}", token),
+                ensure_bearer(token),
             );
         }
         if let Some(user_agent) = &self.user_agent {
@@ -769,4 +794,18 @@ impl Client {
         }
         http_request
     }
+}
+
+/// Ensures a token has the "Bearer " prefix.
+fn ensure_bearer(token: &str) -> String {
+    if token.starts_with("Bearer ") {
+        token.to_string()
+    } else {
+        format!("Bearer {}", token)
+    }
+}
+
+/// Strips the "Bearer " prefix from a token if present.
+fn strip_bearer(token: &str) -> &str {
+    token.strip_prefix("Bearer ").unwrap_or(token)
 }

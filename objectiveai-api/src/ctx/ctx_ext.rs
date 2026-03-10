@@ -7,12 +7,14 @@
 /// instead of ObjectiveAI's pooled keys.
 #[async_trait::async_trait]
 pub trait ContextExt {
-    /// Returns the user's BYOK API key for the given upstream provider.
-    ///
-    /// Returns `Ok(None)` if the user has not configured a BYOK key
-    /// for this upstream, in which case the locally configured key will be used.
-    async fn get_byok(
+    /// Returns the user's BYOK OpenRouter API key.
+    async fn get_openrouter_byok(&self) -> Option<std::sync::Arc<String>>;
+
+    /// Returns the user's BYOK GitHub authorization token.
+    async fn get_github_byok(&self) -> Option<std::sync::Arc<String>>;
+
+    /// Returns the user's BYOK MCP authorization headers.
+    async fn get_mcp_byok(
         &self,
-        upstream: objectiveai::agent::Upstream,
-    ) -> Result<Option<String>, objectiveai::error::ResponseError>;
+    ) -> Option<std::sync::Arc<std::collections::HashMap<String, String>>>;
 }

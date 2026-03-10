@@ -6,8 +6,6 @@ use serde::{Deserialize, Serialize};
 pub struct FunctionInventionRecursiveCreateParams {
     pub remote: functions::Remote,
     pub name: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub github_token: Option<String>,
     pub state: functions::inventions::ParamsState,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,

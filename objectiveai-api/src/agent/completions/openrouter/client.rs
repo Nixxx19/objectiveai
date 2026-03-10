@@ -37,7 +37,11 @@ impl Client {
         let mut http_request = self
             .http_client
             .post(format!("{}/chat/completions", self.api_base))
-            .header("authorization", format!("Bearer {}", api_key));
+            .header("authorization", if api_key.starts_with("Bearer ") {
+                api_key.to_string()
+            } else {
+                format!("Bearer {}", api_key)
+            });
         if let Some(ref user_agent) = self.user_agent {
             http_request = http_request.header("user-agent", user_agent);
         }

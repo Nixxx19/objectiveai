@@ -387,7 +387,7 @@ fn assert_chunk_invariants(chunks: &[FunctionExecutionChunk]) {
 }
 
 async fn run_execution(client: &Arc<TestClient>, request: Arc<Request>) -> FunctionExecution {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
         .create_streaming(ctx, request)
@@ -1167,7 +1167,7 @@ fn make_request_with_body(
 
 /// Helper: expect create_streaming to return Err with a specific status code.
 async fn expect_err(client: &Arc<TestClient>, request: Arc<Request>, expected_status: u16) -> super::Error {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     match client.clone().create_streaming(ctx, request).await {
         Ok(_) => panic!("expected create_streaming to fail, but it succeeded"),
         Err(err) => {
@@ -1180,7 +1180,7 @@ async fn expect_err(client: &Arc<TestClient>, request: Arc<Request>, expected_st
 /// Helper: run execution and return the aggregated result (for tests where
 /// the stream succeeds but the response contains error fields).
 async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<Request>) -> FunctionExecution {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     let stream = client
         .clone()
         .create_streaming(ctx, request)

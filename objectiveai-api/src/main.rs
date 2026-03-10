@@ -345,10 +345,10 @@ async fn main() {
             "/chat/completions",
             axum::routing::post({
                 let chat_completions_client = chat_completions_client.clone();
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::chat::completions::request::ChatCompletionCreateParams,
                 >| {
-                    create_chat_completion(chat_completions_client, body)
+                    create_chat_completion(chat_completions_client, headers, body)
                 }
             }),
         )
@@ -357,10 +357,10 @@ async fn main() {
             "/vector/completions",
             axum::routing::post({
                 let vector_completions_client = vector_completions_client.clone();
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::vector::completions::request::VectorCompletionCreateParams,
                 >| {
-                    create_vector_completion(vector_completions_client, body)
+                    create_vector_completion(vector_completions_client, headers, body)
                 }
             }),
         )
@@ -370,9 +370,10 @@ async fn main() {
             axum::routing::post({
                 let vector_completions_cache_client =
                     vector_completions_cache_client.clone();
-                move |Path(id): Path<String>| {
+                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
                     get_vector_completion_votes(
                         vector_completions_cache_client,
+                        headers,
                         id,
                     )
                 }
@@ -384,11 +385,12 @@ async fn main() {
             axum::routing::post({
                 let vector_completions_cache_client =
                     vector_completions_cache_client.clone();
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::vector::completions::cache::request::CacheVoteRequestOwned,
                 >| {
                     get_vector_cache_vote(
                         vector_completions_cache_client,
+                        headers,
                         body,
                     )
                 }
@@ -399,7 +401,7 @@ async fn main() {
             "/functions",
             axum::routing::get({
                 let functions_client = functions_client.clone();
-                move || list_functions(functions_client)
+                move |headers: axum::http::HeaderMap| list_functions(functions_client, headers)
             }),
         )
         // Functions - get (without commit)
@@ -407,8 +409,8 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}",
             axum::routing::get({
                 let functions_client = functions_client.clone();
-                move |Path((fremote, fowner, frepository)): Path<(objectiveai::functions::Remote, String, String)>| {
-                    get_function(functions_client, fremote, fowner, frepository, None)
+                move |Path((fremote, fowner, frepository)): Path<(objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
+                    get_function(functions_client, headers, fremote, fowner, frepository, None)
                 }
             }),
         )
@@ -422,9 +424,10 @@ async fn main() {
                     String,
                     String,
                     String,
-                )>| {
+                )>, headers: axum::http::HeaderMap| {
                     get_function(
                         functions_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -438,8 +441,8 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/usage",
             axum::routing::get({
                 let functions_client = functions_client.clone();
-                move |Path((fremote, fowner, frepository)): Path<(objectiveai::functions::Remote, String, String)>| {
-                    get_function_usage(functions_client, fremote, fowner, frepository, None)
+                move |Path((fremote, fowner, frepository)): Path<(objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
+                    get_function_usage(functions_client, headers, fremote, fowner, frepository, None)
                 }
             }),
         )
@@ -448,9 +451,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/usage",
             axum::routing::get({
                 let functions_client = functions_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit)): Path<(objectiveai::functions::Remote, String, String, String)>| {
+                move |Path((fremote, fowner, frepository, fcommit)): Path<(objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_usage(
                         functions_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -466,11 +470,12 @@ async fn main() {
             "/functions",
             axum::routing::post({
                 let function_executions_client = function_executions_client.clone();
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::functions::executions::request::FunctionInlineProfileInlineRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
                             body,
                         },
@@ -488,11 +493,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::executions::request::FunctionRemoteProfileInlineRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::executions::request::FunctionRemoteProfileInlineRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionRemoteProfileInline {
                             path,
                             body,
@@ -511,11 +518,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::executions::request::FunctionRemoteProfileInlineRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::executions::request::FunctionRemoteProfileInlineRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionRemoteProfileInline {
                             path,
                             body,
@@ -534,11 +543,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::executions::request::FunctionInlineProfileRemoteRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::executions::request::FunctionInlineProfileRemoteRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionInlineProfileRemote {
                             path,
                             body,
@@ -557,11 +568,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::executions::request::FunctionInlineProfileRemoteRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::executions::request::FunctionInlineProfileRemoteRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionInlineProfileRemote {
                             path,
                             body,
@@ -580,11 +593,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
                             path,
                             body,
@@ -603,11 +618,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
                             path,
                             body,
@@ -626,11 +643,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
                             path,
                             body,
@@ -649,11 +668,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::executions::request::FunctionRemoteProfileRemoteRequestBody,
                 >| {
                     execute_function(
                         function_executions_client,
+                        headers,
                         objectiveai::functions::executions::request::Request::FunctionRemoteProfileRemote {
                             path,
                             body,
@@ -667,7 +688,7 @@ async fn main() {
             "/functions/profiles",
             axum::routing::get({
                 let profiles_client = profiles_client.clone();
-                move || list_profiles(profiles_client)
+                move |headers: axum::http::HeaderMap| list_profiles(profiles_client, headers)
             }),
         )
         // Function Profiles - get (without commit)
@@ -675,8 +696,8 @@ async fn main() {
             "/functions/profiles/{premote}/{powner}/{prepository}",
             axum::routing::get({
                 let profiles_client = profiles_client.clone();
-                move |Path((premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String)>| {
-                    get_profile(profiles_client, premote, powner, prepository, None)
+                move |Path((premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
+                    get_profile(profiles_client, headers, premote, powner, prepository, None)
                 }
             }),
         )
@@ -690,9 +711,10 @@ async fn main() {
                     String,
                     String,
                     String,
-                )>| {
+                )>, headers: axum::http::HeaderMap| {
                     get_profile(
                         profiles_client,
+                        headers,
                         premote,
                         powner,
                         prepository,
@@ -706,8 +728,8 @@ async fn main() {
             "/functions/profiles/{premote}/{powner}/{prepository}/usage",
             axum::routing::get({
                 let profiles_client = profiles_client.clone();
-                move |Path((premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String)>| {
-                    get_profile_usage(profiles_client, premote, powner, prepository, None)
+                move |Path((premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
+                    get_profile_usage(profiles_client, headers, premote, powner, prepository, None)
                 }
             }),
         )
@@ -716,9 +738,10 @@ async fn main() {
             "/functions/profiles/{premote}/{powner}/{prepository}/{pcommit}/usage",
             axum::routing::get({
                 let profiles_client = profiles_client.clone();
-                move |Path((premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, String)>| {
+                move |Path((premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
                     get_profile_usage(
                         profiles_client,
+                        headers,
                         premote,
                         powner,
                         prepository,
@@ -732,7 +755,7 @@ async fn main() {
             "/functions/profiles/pairs",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move || list_function_profile_pairs(pairs_client)
+                move |headers: axum::http::HeaderMap| list_function_profile_pairs(pairs_client, headers)
             }),
         )
         // Function-Profile Pairs - get (no commits)
@@ -740,9 +763,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/profiles/{premote}/{powner}/{prepository}",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String)>| {
+                move |Path((fremote, fowner, frepository, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_profile_pair(
                         pairs_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -760,9 +784,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/{premote}/{powner}/{prepository}",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String)>| {
+                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_profile_pair(
                         pairs_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -780,9 +805,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/profiles/{premote}/{powner}/{prepository}/{pcommit}",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String, String)>| {
+                move |Path((fremote, fowner, frepository, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_profile_pair(
                         pairs_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -800,9 +826,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/{premote}/{powner}/{prepository}/{pcommit}",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String, String)>| {
+                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_profile_pair(
                         pairs_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -820,9 +847,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/profiles/{premote}/{powner}/{prepository}/usage",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String)>| {
+                move |Path((fremote, fowner, frepository, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_profile_pair_usage(
                         pairs_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -840,9 +868,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/{premote}/{powner}/{prepository}/usage",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String)>| {
+                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_profile_pair_usage(
                         pairs_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -860,9 +889,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/profiles/{premote}/{powner}/{prepository}/{pcommit}/usage",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String, String)>| {
+                move |Path((fremote, fowner, frepository, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_profile_pair_usage(
                         pairs_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -880,9 +910,10 @@ async fn main() {
             "/functions/{fremote}/{fowner}/{frepository}/{fcommit}/profiles/{premote}/{powner}/{prepository}/{pcommit}/usage",
             axum::routing::get({
                 let pairs_client = pairs_client.clone();
-                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String, String)>| {
+                move |Path((fremote, fowner, frepository, fcommit, premote, powner, prepository, pcommit)): Path<(objectiveai::functions::Remote, String, String, String, objectiveai::functions::Remote, String, String, String)>, headers: axum::http::HeaderMap| {
                     get_function_profile_pair_usage(
                         pairs_client,
+                        headers,
                         fremote,
                         fowner,
                         frepository,
@@ -902,11 +933,12 @@ async fn main() {
             axum::routing::post({
                 let profile_computations_client =
                     profile_computations_client.clone();
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::functions::profiles::computations::request::FunctionInlineRequestBody,
                 >| {
                     create_profile_computation(
                         profile_computations_client,
+                        headers,
                         objectiveai::functions::profiles::computations::request::Request::FunctionInline {
                             body,
                         },
@@ -924,11 +956,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::profiles::computations::request::FunctionRemoteRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::profiles::computations::request::FunctionRemoteRequestBody,
                 >| {
                     create_profile_computation(
                         profile_computations_client,
+                        headers,
                         objectiveai::functions::profiles::computations::request::Request::FunctionRemote {
                             path,
                             body,
@@ -947,11 +981,13 @@ async fn main() {
                 move |Path(path): Path<
                     objectiveai::functions::profiles::computations::request::FunctionRemoteRequestPath,
                 >,
+                      headers: axum::http::HeaderMap,
                       Json(body): Json<
                     objectiveai::functions::profiles::computations::request::FunctionRemoteRequestBody,
                 >| {
                     create_profile_computation(
                         profile_computations_client,
+                        headers,
                         objectiveai::functions::profiles::computations::request::Request::FunctionRemote {
                             path,
                             body,
@@ -965,10 +1001,10 @@ async fn main() {
             "/auth/keys",
             axum::routing::post({
                 let auth_client = auth_client.clone();
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::auth::request::CreateApiKeyRequest,
                 >| {
-                    create_api_key(auth_client, body)
+                    create_api_key(auth_client, headers, body)
                 }
             }),
         )
@@ -977,10 +1013,10 @@ async fn main() {
             "/auth/keys/openrouter",
             axum::routing::post({
                 let auth_client = auth_client.clone();
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::auth::request::CreateOpenRouterByokApiKeyRequest,
                 >| {
-                    create_openrouter_byok_api_key(auth_client, body)
+                    create_openrouter_byok_api_key(auth_client, headers, body)
                 }
             }),
         )
@@ -989,10 +1025,10 @@ async fn main() {
             "/auth/keys",
             axum::routing::delete({
                 let auth_client = auth_client.clone();
-                move |Json(body): Json<
+                move |headers: axum::http::HeaderMap, Json(body): Json<
                     objectiveai::auth::request::DisableApiKeyRequest,
                 >| {
-                    disable_api_key(auth_client, body)
+                    disable_api_key(auth_client, headers, body)
                 }
             }),
         )
@@ -1001,8 +1037,8 @@ async fn main() {
             "/auth/keys/openrouter",
             axum::routing::delete({
                 let auth_client = auth_client.clone();
-                move || {
-                    delete_openrouter_byok_api_key(auth_client)
+                move |headers: axum::http::HeaderMap| {
+                    delete_openrouter_byok_api_key(auth_client, headers)
                 }
             }),
         )
@@ -1011,8 +1047,8 @@ async fn main() {
             "/auth/keys",
             axum::routing::get({
                 let auth_client = auth_client.clone();
-                move || {
-                    list_api_keys(auth_client)
+                move |headers: axum::http::HeaderMap| {
+                    list_api_keys(auth_client, headers)
                 }
             }),
         )
@@ -1021,8 +1057,8 @@ async fn main() {
             "/auth/keys/openrouter",
             axum::routing::get({
                 let auth_client = auth_client.clone();
-                move || {
-                    get_openrouter_byok_api_key(auth_client)
+                move |headers: axum::http::HeaderMap| {
+                    get_openrouter_byok_api_key(auth_client, headers)
                 }
             }),
         )
@@ -1031,8 +1067,8 @@ async fn main() {
             "/auth/credits",
             axum::routing::get({
                 let auth_client = auth_client.clone();
-                move || {
-                    get_credits(auth_client)
+                move |headers: axum::http::HeaderMap| {
+                    get_credits(auth_client, headers)
                 }
             }),
         )
@@ -1041,8 +1077,8 @@ async fn main() {
             "/ensembles",
             axum::routing::get({
                 let ensemble_client = ensemble_client.clone();
-                move || {
-                    list_ensembles(ensemble_client)
+                move |headers: axum::http::HeaderMap| {
+                    list_ensembles(ensemble_client, headers)
                 }
             }),
         )
@@ -1051,8 +1087,8 @@ async fn main() {
             "/ensembles/{id}",
             axum::routing::get({
                 let ensemble_client = ensemble_client.clone();
-                move |Path(id): Path<String>| {
-                    get_ensemble(ensemble_client, id)
+                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
+                    get_ensemble(ensemble_client, headers, id)
                 }
             }),
         )
@@ -1061,8 +1097,8 @@ async fn main() {
             "/ensembles/{id}/usage",
             axum::routing::get({
                 let ensemble_client = ensemble_client.clone();
-                move |Path(id): Path<String>| {
-                    get_ensemble_usage(ensemble_client, id)
+                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
+                    get_ensemble_usage(ensemble_client, headers, id)
                 }
             }),
         )
@@ -1071,8 +1107,8 @@ async fn main() {
             "/ensemble_llms",
             axum::routing::get({
                 let ensemble_llm_client = ensemble_llm_client.clone();
-                move || {
-                    list_ensemble_llms(ensemble_llm_client)
+                move |headers: axum::http::HeaderMap| {
+                    list_ensemble_llms(ensemble_llm_client, headers)
                 }
             }),
         )
@@ -1081,8 +1117,8 @@ async fn main() {
             "/ensemble_llms/{id}",
             axum::routing::get({
                 let ensemble_llm_client = ensemble_llm_client.clone();
-                move |Path(id): Path<String>| {
-                    get_ensemble_llm(ensemble_llm_client, id)
+                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
+                    get_ensemble_llm(ensemble_llm_client, headers, id)
                 }
             }),
         )
@@ -1091,8 +1127,8 @@ async fn main() {
             "/ensemble_llms/{id}/usage",
             axum::routing::get({
                 let ensemble_llm_client = ensemble_llm_client.clone();
-                move |Path(id): Path<String>| {
-                    get_ensemble_llm_usage(ensemble_llm_client, id)
+                move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
+                    get_ensemble_llm_usage(ensemble_llm_client, headers, id)
                 }
             }),
         )
@@ -1116,10 +1152,11 @@ async fn main() {
 
 // Create Context
 
-fn context() -> ctx::Context<ctx::DefaultContextExt> {
+fn context(headers: &axum::http::HeaderMap) -> ctx::Context<ctx::DefaultContextExt> {
     ctx::Context::new(
         Arc::new(ctx::DefaultContextExt),
         rust_decimal::Decimal::ONE,
+        headers,
     )
 }
 
@@ -1140,9 +1177,10 @@ async fn create_chat_completion(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     body: objectiveai::chat::completions::request::ChatCompletionCreateParams,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     if body.stream.unwrap_or(false) {
         match client
             .create_streaming_for_chat_handle_usage(ctx, Arc::new(body))
@@ -1217,9 +1255,10 @@ async fn create_vector_completion(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     body: objectiveai::vector::completions::request::VectorCompletionCreateParams,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     if body.stream.unwrap_or(false) {
         match client
             .create_streaming_handle_usage(ctx, Arc::new(body))
@@ -1268,8 +1307,9 @@ async fn list_functions(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.list_functions(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => ResponseError::from(&e).into_response(),
@@ -1294,12 +1334,13 @@ async fn get_function_usage(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     remote: objectiveai::functions::Remote,
     owner: String,
     repository: String,
     commit: Option<String>,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client
         .get_function_usage(ctx, remote, &owner, &repository, commit.as_deref())
         .await
@@ -1364,9 +1405,10 @@ async fn execute_function(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     request: objectiveai::functions::executions::request::Request,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     if request.base().stream.unwrap_or(false) {
         match client
             .create_streaming_handle_usage(ctx, Arc::new(request))
@@ -1419,8 +1461,9 @@ async fn list_profiles(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.list_profiles(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => ResponseError::from(&e).into_response(),
@@ -1446,12 +1489,13 @@ async fn get_profile_usage(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     remote: objectiveai::functions::Remote,
     owner: String,
     repository: String,
     commit: Option<String>,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client
         .get_profile_usage(ctx, remote, &owner, &repository, commit.as_deref())
         .await
@@ -1470,8 +1514,9 @@ async fn list_function_profile_pairs(
         + Sync
         + 'static,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.list_function_profile_pairs(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1485,6 +1530,7 @@ async fn get_function_profile_pair(
         + Sync
         + 'static,
     >,
+    headers: axum::http::HeaderMap,
     fremote: objectiveai::functions::Remote,
     fowner: String,
     frepository: String,
@@ -1494,7 +1540,7 @@ async fn get_function_profile_pair(
     prepository: String,
     pcommit: Option<String>,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client
         .get_function_profile_pair(
             ctx,
@@ -1521,6 +1567,7 @@ async fn get_function_profile_pair_usage(
         + Sync
         + 'static,
     >,
+    headers: axum::http::HeaderMap,
     fremote: objectiveai::functions::Remote,
     fowner: String,
     frepository: String,
@@ -1530,7 +1577,7 @@ async fn get_function_profile_pair_usage(
     prepository: String,
     pcommit: Option<String>,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client
         .get_function_profile_pair_usage(
             ctx,
@@ -1568,9 +1615,10 @@ async fn get_vector_completion_votes(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     id: String,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.fetch_completion_votes(ctx, &id).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1593,9 +1641,10 @@ async fn get_vector_cache_vote(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     body: objectiveai::vector::completions::cache::request::CacheVoteRequestOwned,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client
         .fetch_cache_vote(
             ctx,
@@ -1632,12 +1681,13 @@ async fn get_function(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     remote: objectiveai::functions::Remote,
     owner: String,
     repository: String,
     commit: Option<String>,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client
         .get_function(ctx, remote, &owner, &repository, commit.as_deref())
         .await
@@ -1668,12 +1718,13 @@ async fn get_profile(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     remote: objectiveai::functions::Remote,
     owner: String,
     repository: String,
     commit: Option<String>,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client
         .get_profile(ctx, remote, &owner, &repository, commit.as_deref())
         .await
@@ -1695,9 +1746,10 @@ async fn create_profile_computation(
     // https://github.com/rust-lang/rust/issues/100013
     // using a concrete type for client instead
     client: Arc<functions::profiles::computations::ObjectiveAiClient>,
+    headers: axum::http::HeaderMap,
     request: objectiveai::functions::profiles::computations::request::Request,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     if request.base().stream.unwrap_or(false) {
         match client.create_streaming(ctx, Arc::new(request)).await {
             Ok(stream) => Sse::new(
@@ -1734,9 +1786,10 @@ async fn create_api_key(
     client: Arc<
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
+    headers: axum::http::HeaderMap,
     body: objectiveai::auth::request::CreateApiKeyRequest,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.create_api_key(ctx, body).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1747,9 +1800,10 @@ async fn create_openrouter_byok_api_key(
     client: Arc<
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
+    headers: axum::http::HeaderMap,
     body: objectiveai::auth::request::CreateOpenRouterByokApiKeyRequest,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.create_openrouter_byok_api_key(ctx, body).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1760,9 +1814,10 @@ async fn disable_api_key(
     client: Arc<
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
+    headers: axum::http::HeaderMap,
     body: objectiveai::auth::request::DisableApiKeyRequest,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.disable_api_key(ctx, body).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1773,8 +1828,9 @@ async fn delete_openrouter_byok_api_key(
     client: Arc<
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.delete_openrouter_byok_api_key(ctx).await {
         Ok(()) => axum::http::StatusCode::OK.into_response(),
         Err(e) => e.into_response(),
@@ -1785,8 +1841,9 @@ async fn list_api_keys(
     client: Arc<
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.list_api_keys(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1797,8 +1854,9 @@ async fn get_openrouter_byok_api_key(
     client: Arc<
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.get_openrouter_byok_api_key(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1809,8 +1867,9 @@ async fn get_credits(
     client: Arc<
         impl auth::Client<ctx::DefaultContextExt> + Send + Sync + 'static,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.get_credits(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1833,8 +1892,9 @@ async fn list_ensembles(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.list(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1855,9 +1915,10 @@ async fn get_ensemble(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     id: String,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.get(ctx, &id).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1878,9 +1939,10 @@ async fn get_ensemble_usage(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     id: String,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.get_usage(ctx, &id).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1903,8 +1965,9 @@ async fn list_ensemble_llms(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.list(ctx).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1925,9 +1988,10 @@ async fn get_ensemble_llm(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     id: String,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.get(ctx, &id).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),
@@ -1948,9 +2012,10 @@ async fn get_ensemble_llm_usage(
             + 'static,
         >,
     >,
+    headers: axum::http::HeaderMap,
     id: String,
 ) -> axum::response::Response {
-    let ctx = context();
+    let ctx = context(&headers);
     match client.get_usage(ctx, &id).await {
         Ok(r) => Json(r).into_response(),
         Err(e) => e.into_response(),

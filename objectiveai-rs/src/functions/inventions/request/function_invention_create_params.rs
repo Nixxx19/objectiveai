@@ -8,8 +8,6 @@ pub struct FunctionInventionCreateParams {
     pub remote: Option<functions::Remote>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub overwrite: Option<bool>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub github_token: Option<String>,
     pub state: functions::inventions::ParamsState,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,

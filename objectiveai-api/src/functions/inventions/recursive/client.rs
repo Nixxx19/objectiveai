@@ -289,7 +289,6 @@ where
             objectiveai::functions::inventions::request::FunctionInventionCreateParams {
                 remote: Some(request.remote),
                 overwrite: Some(true),
-                github_token: request.github_token.clone(),
                 state: request.state.clone(),
                 provider: request.provider.clone(),
                 agent: request.agent.clone(),
@@ -403,7 +402,6 @@ where
                 objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams {
                     remote: request.remote,
                     name: request.name.clone(),
-                    github_token: request.github_token.clone(),
                     state: child_state,
                     provider: request.provider.clone(),
                     agent: request.agent.clone(),
@@ -519,7 +517,7 @@ where
                 match crate::functions::inventions::publish_github(
                     &invention_client.github_client,
                     &invention_client.filesystem_client,
-                    request.github_token.as_deref(), name, &description,
+                    &ctx, name, &description,
                     &publish_files,
                 ).await {
                     Ok(path) => (Some(path), None),

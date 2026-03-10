@@ -255,7 +255,7 @@ async fn run_invention(
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
         let result = rt.block_on(async {
-            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
             let stream = client
                 .clone()
                 .create_streaming(ctx, request)
@@ -1102,7 +1102,7 @@ invention_test_10x_schema!(test_vector_branch_schema_noctx,
 #[tokio::test]
 async fn test_zero_leaf_width_rejected() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     let request = make_request(
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("bad-zero", 0, 3, 5, 0, 0),
@@ -1118,7 +1118,7 @@ async fn test_zero_leaf_width_rejected() {
 #[tokio::test]
 async fn test_zero_branch_width_rejected() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     let request = make_request(
         ParamsState::AlphaScalarBranch(AlphaScalarBranchState {
             params: params("bad-zero-branch", 1, 0, 0, 3, 5),
@@ -1134,7 +1134,7 @@ async fn test_zero_branch_width_rejected() {
 #[tokio::test]
 async fn test_min_greater_than_max_rejected() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     let request = make_request(
         ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
             params: params("bad-inverted", 0, 5, 3, 5, 3),
@@ -1177,7 +1177,7 @@ async fn test_completed_state_generates_no_completions() {
 #[tokio::test]
 async fn test_name_over_100_bytes_rejected() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     let long_name = "a".repeat(101);
     let request = make_request(
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
@@ -1194,7 +1194,7 @@ async fn test_name_over_100_bytes_rejected() {
 #[tokio::test]
 async fn test_name_without_path_over_77_bytes_rejected() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     // 78 bytes, no `-` path segment
     let name = "a".repeat(78);
     let request = make_request(
@@ -1212,7 +1212,7 @@ async fn test_name_without_path_over_77_bytes_rejected() {
 #[tokio::test]
 async fn test_name_without_path_at_77_bytes_accepted() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     let name = "a".repeat(77);
     let request = make_request(
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
@@ -1229,7 +1229,7 @@ async fn test_name_without_path_at_77_bytes_accepted() {
 #[tokio::test]
 async fn test_name_with_valid_path_over_77_bytes_accepted() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     // 80 bytes before `-`, then a valid b62 path segment: "1" encodes path [0]
     let name = format!("{}-1", "a".repeat(80));
     let request = make_request(
@@ -1247,7 +1247,7 @@ async fn test_name_with_valid_path_over_77_bytes_accepted() {
 #[tokio::test]
 async fn test_name_78_bytes_ending_in_dash_rejected() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     // 77 'a's + '-' = 78 bytes, empty segment after dash is not a valid b62 path
     let name = format!("{}-", "a".repeat(77));
     assert_eq!(name.len(), 78);
@@ -1266,7 +1266,7 @@ async fn test_name_78_bytes_ending_in_dash_rejected() {
 #[tokio::test]
 async fn test_name_100_bytes_ending_in_dash_rejected() {
     let client = make_client();
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
     // 99 'a's + '-' = 100 bytes, empty segment after dash is not a valid b62 path
     let name = format!("{}-", "a".repeat(99));
     assert_eq!(name.len(), 100);

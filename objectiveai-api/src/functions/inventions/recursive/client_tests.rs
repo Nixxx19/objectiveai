@@ -272,7 +272,7 @@ async fn run_recursive_invention(
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
         let result = rt.block_on(async {
-            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
             let stream = client
                 .clone()
                 .create_streaming(ctx, request)
@@ -638,7 +638,7 @@ async fn run_recursive_invention_err(
     std::thread::spawn(move || {
         let rt = tokio::runtime::Runtime::new().unwrap();
         let result = rt.block_on(async {
-            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE);
+            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
             let stream = client
                 .clone()
                 .create_streaming(ctx, request)
