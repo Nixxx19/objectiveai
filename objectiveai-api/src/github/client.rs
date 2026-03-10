@@ -1,6 +1,7 @@
 use crate::{ctx, functions};
 use futures::FutureExt;
 use std::sync::Arc;
+use std::time::Duration;
 
 #[derive(Debug, Clone)]
 pub struct Client {
@@ -12,7 +13,12 @@ pub struct Client {
     pub user_agent: Option<String>,
     pub x_title: Option<String>,
     pub referer: Option<String>,
-    pub backoff: backoff::ExponentialBackoff,
+    pub backoff_current_interval: Duration,
+    pub backoff_initial_interval: Duration,
+    pub backoff_randomization_factor: f64,
+    pub backoff_multiplier: f64,
+    pub backoff_max_interval: Duration,
+    pub backoff_max_elapsed_time: Duration,
 }
 
 impl Client {
@@ -23,7 +29,12 @@ impl Client {
         user_agent: Option<String>,
         x_title: Option<String>,
         referer: Option<String>,
-        backoff: backoff::ExponentialBackoff,
+        backoff_current_interval: Duration,
+        backoff_initial_interval: Duration,
+        backoff_randomization_factor: f64,
+        backoff_multiplier: f64,
+        backoff_max_interval: Duration,
+        backoff_max_elapsed_time: Duration,
     ) -> Self {
         Self {
             http_client,
@@ -32,7 +43,24 @@ impl Client {
             user_agent,
             x_title,
             referer,
-            backoff,
+            backoff_current_interval,
+            backoff_initial_interval,
+            backoff_randomization_factor,
+            backoff_multiplier,
+            backoff_max_interval,
+            backoff_max_elapsed_time,
+        }
+    }
+
+    fn backoff(&self) -> backoff::ExponentialBackoff {
+        backoff::ExponentialBackoff {
+            current_interval: self.backoff_current_interval,
+            initial_interval: self.backoff_initial_interval,
+            randomization_factor: self.backoff_randomization_factor,
+            multiplier: self.backoff_multiplier,
+            max_interval: self.backoff_max_interval,
+            max_elapsed_time: Some(self.backoff_max_elapsed_time),
+            ..Default::default()
         }
     }
 
@@ -287,7 +315,7 @@ impl Client {
                 ))
                 .header("accept", "application/vnd.github+json"),
         );
-        backoff::future::retry(self.backoff.clone(), || async {
+        backoff::future::retry(self.backoff(), || async {
             let response = http_request
                 .try_clone()
                 .unwrap()
@@ -346,7 +374,7 @@ impl Client {
     where
         T: serde::de::DeserializeOwned,
     {
-        backoff::future::retry(self.backoff.clone(), || async {
+        backoff::future::retry(self.backoff(), || async {
             match self.fetch_file_raw(owner, repository, commit, path).await {
                 Ok(opt) => Ok(opt),
                 Err(e1) => match self
@@ -473,7 +501,7 @@ impl Client {
     ) -> Result<bool, super::Error> {
         let token = self.resolve_publish_token(ctx).await?;
         let bearer = ensure_bearer(&token);
-        backoff::future::retry(self.backoff.clone(), || async {
+        backoff::future::retry(self.backoff(), || async {
             let response = self
                 .http_client
                 .get(format!(
@@ -519,7 +547,7 @@ impl Client {
     ) -> Result<Vec<String>, super::Error> {
         let token = self.resolve_publish_token(ctx).await?;
         let bearer = ensure_bearer(&token);
-        backoff::future::retry(self.backoff.clone(), || async {
+        backoff::future::retry(self.backoff(), || async {
             let response = self
                 .http_client
                 .get("https://api.github.com/user")
@@ -565,7 +593,7 @@ impl Client {
     ) -> Result<String, super::Error> {
         let token = self.resolve_publish_token(ctx).await?;
         let bearer = ensure_bearer(&token);
-        backoff::future::retry(self.backoff.clone(), || async {
+        backoff::future::retry(self.backoff(), || async {
             let response = self
                 .http_client
                 .get("https://api.github.com/user")
@@ -617,7 +645,7 @@ impl Client {
     ) -> Result<String, super::Error> {
         let token = self.resolve_publish_token(ctx).await?;
         let bearer = ensure_bearer(&token);
-        backoff::future::retry(self.backoff.clone(), || async {
+        backoff::future::retry(self.backoff(), || async {
             let response = self
                 .http_client
                 .post("https://api.github.com/user/repos")
@@ -670,7 +698,7 @@ impl Client {
     ) -> Result<(), super::Error> {
         let token = self.resolve_publish_token(ctx).await?;
         let bearer = ensure_bearer(&token);
-        backoff::future::retry(self.backoff.clone(), || async {
+        backoff::future::retry(self.backoff(), || async {
             let response = self
                 .http_client
                 .patch(format!(

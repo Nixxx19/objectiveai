@@ -1,8 +1,3 @@
-// TODO: Re-enable after refactor is complete.
-fn main() {}
-
-#[cfg(any())]
-mod _old {
 //! ObjectiveAI API server.
 //!
 //! REST API server for chat completions, vector completions, Functions,
@@ -16,10 +11,11 @@ use axum::{
 use envconfig::Envconfig;
 use objectiveai::error::ResponseError;
 use objectiveai_api::{
-    auth, chat, ctx, ensemble, ensemble_llm,
+    agent, auth, ctx, ensemble,
     error::ResponseErrorExt,
+    filesystem,
     functions::{self, profiles::computations::Client},
-    github,
+    github, mcp, objectiveai_http,
     util::StreamOnce,
     vector,
 };
@@ -51,32 +47,106 @@ struct Config {
     #[envconfig(from = "X_TITLE")]
     x_title: Option<String>,
     #[envconfig(
-        from = "CHAT_COMPLETIONS_BACKOFF_CURRENT_INTERVAL",
+        from = "AGENT_COMPLETIONS_BACKOFF_CURRENT_INTERVAL",
         default = "100" // 100 milliseconds
     )]
-    chat_completions_backoff_current_interval: u64,
+    agent_completions_backoff_current_interval: u64,
     #[envconfig(
-        from = "CHAT_COMPLETIONS_BACKOFF_INITIAL_INTERVAL",
+        from = "AGENT_COMPLETIONS_BACKOFF_INITIAL_INTERVAL",
         default = "100" // 100 milliseconds
     )]
-    chat_completions_backoff_initial_interval: u64,
+    agent_completions_backoff_initial_interval: u64,
     #[envconfig(
-        from = "CHAT_COMPLETIONS_BACKOFF_RANDOMIZATION_FACTOR",
+        from = "AGENT_COMPLETIONS_BACKOFF_RANDOMIZATION_FACTOR",
         default = "0.5"
     )]
-    chat_completions_backoff_randomization_factor: f64,
-    #[envconfig(from = "CHAT_COMPLETIONS_BACKOFF_MULTIPLIER", default = "1.5")]
-    chat_completions_backoff_multiplier: f64,
+    agent_completions_backoff_randomization_factor: f64,
+    #[envconfig(from = "AGENT_COMPLETIONS_BACKOFF_MULTIPLIER", default = "1.5")]
+    agent_completions_backoff_multiplier: f64,
     #[envconfig(
-        from = "CHAT_COMPLETIONS_BACKOFF_MAX_INTERVAL",
+        from = "AGENT_COMPLETIONS_BACKOFF_MAX_INTERVAL",
         default = "1000" // 1 second
     )]
-    chat_completions_backoff_max_interval: u64,
+    agent_completions_backoff_max_interval: u64,
     #[envconfig(
-        from = "CHAT_COMPLETIONS_BACKOFF_MAX_ELAPSED_TIME",
+        from = "AGENT_COMPLETIONS_BACKOFF_MAX_ELAPSED_TIME",
         default = "40000" // 40 seconds
     )]
-    chat_completions_backoff_max_elapsed_time: u64,
+    agent_completions_backoff_max_elapsed_time: u64,
+    #[envconfig(
+        from = "MCP_BACKOFF_CURRENT_INTERVAL",
+        default = "100" // 100 milliseconds
+    )]
+    mcp_backoff_current_interval: u64,
+    #[envconfig(
+        from = "MCP_BACKOFF_INITIAL_INTERVAL",
+        default = "100" // 100 milliseconds
+    )]
+    mcp_backoff_initial_interval: u64,
+    #[envconfig(
+        from = "MCP_BACKOFF_RANDOMIZATION_FACTOR",
+        default = "0.5"
+    )]
+    mcp_backoff_randomization_factor: f64,
+    #[envconfig(from = "MCP_BACKOFF_MULTIPLIER", default = "1.5")]
+    mcp_backoff_multiplier: f64,
+    #[envconfig(
+        from = "MCP_BACKOFF_MAX_INTERVAL",
+        default = "1000" // 1 second
+    )]
+    mcp_backoff_max_interval: u64,
+    #[envconfig(
+        from = "MCP_BACKOFF_MAX_ELAPSED_TIME",
+        default = "40000" // 40 seconds
+    )]
+    mcp_backoff_max_elapsed_time: u64,
+    #[envconfig(
+        from = "GITHUB_BACKOFF_CURRENT_INTERVAL",
+        default = "100" // 100 milliseconds
+    )]
+    github_backoff_current_interval: u64,
+    #[envconfig(
+        from = "GITHUB_BACKOFF_INITIAL_INTERVAL",
+        default = "100" // 100 milliseconds
+    )]
+    github_backoff_initial_interval: u64,
+    #[envconfig(
+        from = "GITHUB_BACKOFF_RANDOMIZATION_FACTOR",
+        default = "0.5"
+    )]
+    github_backoff_randomization_factor: f64,
+    #[envconfig(from = "GITHUB_BACKOFF_MULTIPLIER", default = "1.5")]
+    github_backoff_multiplier: f64,
+    #[envconfig(
+        from = "GITHUB_BACKOFF_MAX_INTERVAL",
+        default = "1000" // 1 second
+    )]
+    github_backoff_max_interval: u64,
+    #[envconfig(
+        from = "GITHUB_BACKOFF_MAX_ELAPSED_TIME",
+        default = "40000" // 40 seconds
+    )]
+    github_backoff_max_elapsed_time: u64,
+    #[envconfig(
+        from = "AGENT_COMPLETIONS_FIRST_CHUNK_TIMEOUT",
+        default = "60000" // 60 seconds
+    )]
+    agent_completions_first_chunk_timeout: u64,
+    #[envconfig(
+        from = "AGENT_COMPLETIONS_OTHER_CHUNK_TIMEOUT",
+        default = "30000" // 30 seconds
+    )]
+    agent_completions_other_chunk_timeout: u64,
+    #[envconfig(
+        from = "MCP_CONNECT_TIMEOUT",
+        default = "30000" // 30 seconds
+    )]
+    mcp_connect_timeout: u64,
+    #[envconfig(
+        from = "MCP_CALL_TIMEOUT",
+        default = "30000" // 30 seconds
+    )]
+    mcp_call_timeout: u64,
     #[envconfig(from = "FETCH_GITHUB_TOKEN")]
     fetch_github_token: Option<String>,
     #[envconfig(from = "PUBLISH_GITHUB_TOKEN")]
@@ -106,14 +176,32 @@ async fn main() {
         user_agent,
         http_referer,
         x_title,
-        chat_completions_backoff_current_interval,
-        chat_completions_backoff_initial_interval,
-        chat_completions_backoff_randomization_factor,
-        chat_completions_backoff_multiplier,
-        chat_completions_backoff_max_interval,
-        chat_completions_backoff_max_elapsed_time,
+        agent_completions_backoff_current_interval,
+        agent_completions_backoff_initial_interval,
+        agent_completions_backoff_randomization_factor,
+        agent_completions_backoff_multiplier,
+        agent_completions_backoff_max_interval,
+        agent_completions_backoff_max_elapsed_time,
+        mcp_backoff_current_interval,
+        mcp_backoff_initial_interval,
+        mcp_backoff_randomization_factor,
+        mcp_backoff_multiplier,
+        mcp_backoff_max_interval,
+        mcp_backoff_max_elapsed_time,
+        github_backoff_current_interval,
+        github_backoff_initial_interval,
+        github_backoff_randomization_factor,
+        github_backoff_multiplier,
+        github_backoff_max_interval,
+        github_backoff_max_elapsed_time,
+        agent_completions_first_chunk_timeout,
+        agent_completions_other_chunk_timeout,
+        mcp_connect_timeout,
+        mcp_call_timeout,
         fetch_github_token,
         publish_github_token,
+        filesystem_commit_author_name,
+        filesystem_commit_author_email,
         address,
         port,
     } = Config::init_from_env().unwrap();
@@ -129,53 +217,6 @@ async fn main() {
         user_agent.clone(),
         x_title.clone(),
         http_referer.clone(),
-    ));
-
-    // Ensemble LLM Fetcher
-    let ensemble_llm_fetcher =
-        Arc::new(ensemble_llm::fetcher::CachingFetcher::new(Arc::new(
-            ensemble_llm::fetcher::ObjectiveAiFetcher::new(
-                objectiveai_http_client.clone(),
-            ),
-        )));
-
-    // Chat Completions Client
-    let chat_completions_client = Arc::new(chat::completions::Client::<
-        ctx::DefaultContextExt,
-        _,
-        _,
-    >::new(
-        ensemble_llm_fetcher.clone(),
-        Arc::new(chat::completions::usage_handler::LogUsageHandler),
-        chat::completions::upstream::Client::new(
-            openrouter_api_key.map(|key| {
-                chat::completions::upstream::openrouter::Client::new(
-                    http_client,
-                    openrouter_api_base,
-                    key,
-                    user_agent.clone(),
-                    x_title.clone(),
-                    http_referer.clone(),
-                )
-            }),
-            if !matches!(claude_agent_sdk.to_lowercase().as_str(), "0" | "false") {
-                Some(chat::completions::upstream::claude_agent_sdk::client::Client::new())
-            } else {
-                None
-            },
-        ),
-        std::time::Duration::from_millis(
-            chat_completions_backoff_current_interval,
-        ),
-        std::time::Duration::from_millis(
-            chat_completions_backoff_initial_interval,
-        ),
-        chat_completions_backoff_randomization_factor,
-        chat_completions_backoff_multiplier,
-        std::time::Duration::from_millis(chat_completions_backoff_max_interval),
-        std::time::Duration::from_millis(
-            chat_completions_backoff_max_elapsed_time,
-        ),
     ));
 
     // Ensemble Fetcher
@@ -199,9 +240,127 @@ async fn main() {
         ),
     );
 
+    // GitHub Client
+    let github_client = Arc::new(github::Client::new(
+        reqwest::Client::new(),
+        fetch_github_token,
+        publish_github_token,
+        user_agent,
+        x_title,
+        http_referer,
+        std::time::Duration::from_millis(github_backoff_current_interval),
+        std::time::Duration::from_millis(github_backoff_initial_interval),
+        github_backoff_randomization_factor,
+        github_backoff_multiplier,
+        std::time::Duration::from_millis(github_backoff_max_interval),
+        std::time::Duration::from_millis(github_backoff_max_elapsed_time),
+    ));
+
+    // Filesystem base directory for local function/profile repositories
+    let filesystem_base_dir = dirs::home_dir()
+        .unwrap_or_else(|| std::path::PathBuf::from("."))
+        .join(".objectiveai")
+        .join("functions");
+
+    let filesystem_client = Arc::new(filesystem::Client::new(
+        filesystem_base_dir,
+        filesystem_commit_author_name,
+        filesystem_commit_author_email,
+    ));
+
+    // Function Fetcher (routes to GitHub, Filesystem, or Mock based on Remote)
+    let function_fetcher =
+        Arc::new(functions::function_fetcher::FetcherRouter::new(
+            Arc::new(functions::function_fetcher::github::GithubFetcher::new(
+                github_client.clone(),
+            )),
+            Arc::new(
+                functions::function_fetcher::filesystem::FilesystemFetcher::new(
+                    filesystem_client.clone(),
+                ),
+            ),
+            Arc::new(functions::function_fetcher::mock::MockFetcher),
+        ));
+
+    // Function Profile Fetcher (routes to GitHub, Filesystem, or Mock based on Remote)
+    let profile_fetcher =
+        Arc::new(functions::profile_fetcher::FetcherRouter::new(
+            Arc::new(functions::profile_fetcher::github::GithubFetcher::new(
+                github_client.clone(),
+            )),
+            Arc::new(
+                functions::profile_fetcher::filesystem::FilesystemFetcher::new(
+                    filesystem_client.clone(),
+                ),
+            ),
+            Arc::new(functions::profile_fetcher::mock::MockFetcher),
+        ));
+
+    // MCP Client
+    let mcp_client = Arc::new(mcp::Client::new(
+        reqwest::Client::new(),
+        None, // user_agent already moved
+        None, // x_title already moved
+        None, // referer already moved
+        std::time::Duration::from_millis(mcp_connect_timeout),
+        std::time::Duration::from_millis(
+            mcp_backoff_current_interval,
+        ),
+        std::time::Duration::from_millis(
+            mcp_backoff_initial_interval,
+        ),
+        mcp_backoff_randomization_factor,
+        mcp_backoff_multiplier,
+        std::time::Duration::from_millis(mcp_backoff_max_interval),
+        std::time::Duration::from_millis(
+            mcp_backoff_max_elapsed_time,
+        ),
+        std::time::Duration::from_millis(mcp_call_timeout),
+    ));
+
+    // Agent Fetcher
+    let agent_fetcher = Arc::new(agent::fetcher::CachingFetcher::new(
+        Arc::new(agent::fetcher::ObjectiveAiFetcher::new(
+            objectiveai_http_client.clone(),
+        )),
+    ));
+
+    // Agent Completions Client
+    let agent_completions_client = Arc::new(agent::completions::Client::new(
+        mcp_client.clone(),
+        agent_fetcher.clone(),
+        Arc::new(agent::completions::usage_handler::LogUsageHandler),
+        Arc::new(agent::completions::openrouter::Client {
+            http_client: reqwest::Client::new(),
+            api_base: openrouter_api_base.clone(),
+            api_key: openrouter_api_key.clone().unwrap_or_default(),
+            user_agent: None,
+            x_title: None,
+            referer: None,
+        }),
+        Arc::new(agent::completions::claude_agent_sdk::Client::new(None)),
+        Arc::new(agent::completions::mock::Client {
+            delay: std::time::Duration::from_millis(0),
+        }),
+        std::time::Duration::from_millis(
+            agent_completions_backoff_current_interval,
+        ),
+        std::time::Duration::from_millis(
+            agent_completions_backoff_initial_interval,
+        ),
+        agent_completions_backoff_randomization_factor,
+        agent_completions_backoff_multiplier,
+        std::time::Duration::from_millis(agent_completions_backoff_max_interval),
+        std::time::Duration::from_millis(
+            agent_completions_backoff_max_elapsed_time,
+        ),
+        std::time::Duration::from_millis(agent_completions_first_chunk_timeout),
+        std::time::Duration::from_millis(agent_completions_other_chunk_timeout),
+    ));
+
     // Vector Completions Client
     let vector_completions_client = Arc::new(vector::completions::Client::new(
-        chat_completions_client.clone(),
+        agent_completions_client.clone(),
         ensemble_fetcher.clone(),
         completion_votes_fetcher.clone(),
         cache_vote_fetcher.clone(),
@@ -215,75 +374,30 @@ async fn main() {
             cache_vote_fetcher.clone(),
         ));
 
-    // GitHub Client
-    let github_client = Arc::new(github::Client::new(
-        reqwest::Client::new(),
-        fetch_github_token,
-        publish_github_token,
-        user_agent,
-        x_title,
-        http_referer,
-        backoff::ExponentialBackoff {
-            current_interval: std::time::Duration::from_millis(
-                chat_completions_backoff_current_interval,
-            ),
-            initial_interval: std::time::Duration::from_millis(
-                chat_completions_backoff_initial_interval,
-            ),
-            randomization_factor: chat_completions_backoff_randomization_factor,
-            multiplier: chat_completions_backoff_multiplier,
-            max_interval: std::time::Duration::from_millis(
-                chat_completions_backoff_max_interval,
-            ),
-            max_elapsed_time: Some(std::time::Duration::from_millis(
-                chat_completions_backoff_max_elapsed_time,
-            )),
-            ..Default::default()
-        },
-    ));
-
-    // Filesystem base directory for local function/profile repositories
-    let filesystem_base_dir = dirs::home_dir()
-        .unwrap_or_else(|| std::path::PathBuf::from("."))
-        .join(".objectiveai")
-        .join("functions");
-
-    let filesystem_client = Arc::new(filesystem::Client::new(
-        filesystem_base_dir,
-        config.filesystem_commit_author_name,
-        config.filesystem_commit_author_email,
-    ));
-
-    // Function Fetcher (routes to GitHub or Filesystem based on Remote)
-    let function_fetcher =
-        Arc::new(functions::function_fetcher::FetcherRouter::new(
-            Arc::new(functions::function_fetcher::github::GithubFetcher::new(
-                github_client.clone(),
-            )),
-            Arc::new(
-                functions::function_fetcher::filesystem::FilesystemFetcher::new(
-                    filesystem_client.clone(),
-                ),
-            ),
+    // Function Inventions Client
+    let function_inventions_client =
+        Arc::new(functions::inventions::Client::new(
+            agent_completions_client.clone(),
+            github_client.clone(),
+            filesystem_client.clone(),
+            function_fetcher.clone(),
+            Arc::new(functions::inventions::usage_handler::LogUsageHandler),
+            true, // persist
         ));
 
-    // Function Profile Fetcher (routes to GitHub or Filesystem based on Remote)
-    let profile_fetcher =
-        Arc::new(functions::profile_fetcher::FetcherRouter::new(
-            Arc::new(functions::profile_fetcher::github::GithubFetcher::new(
-                github_client,
-            )),
+    // Function Inventions Recursive Client
+    let function_inventions_recursive_client =
+        Arc::new(functions::inventions::recursive::Client::new(
+            function_inventions_client.clone(),
             Arc::new(
-                functions::profile_fetcher::filesystem::FilesystemFetcher::new(
-                    filesystem_client,
-                ),
+                functions::inventions::recursive::usage_handler::LogUsageHandler,
             ),
         ));
 
     // Function Executions Client
     let function_executions_client =
         Arc::new(functions::executions::Client::new(
-            chat_completions_client.clone(),
+            agent_completions_client.clone(),
             ensemble_fetcher.clone(),
             vector_completions_client.clone(),
             function_fetcher.clone(),
@@ -334,25 +448,25 @@ async fn main() {
         )),
     ));
 
-    // Ensemble LLM Client
-    let ensemble_llm_client = Arc::new(ensemble_llm::Client::new(
-        ensemble_llm_fetcher.clone(),
-        Arc::new(ensemble_llm::retrieval_client::ObjectiveAiClient::new(
+    // Agent Client (browse/list/get)
+    let agent_client = Arc::new(agent::Client::new(
+        agent_fetcher.clone(),
+        Arc::new(agent::retrieval_client::ObjectiveAiClient::new(
             objectiveai_http_client.clone(),
         )),
     ));
 
     // Router
     let app = axum::Router::new()
-        // Chat Completions - create
+        // Agent Completions - create
         .route(
-            "/chat/completions",
+            "/agent/completions",
             axum::routing::post({
-                let chat_completions_client = chat_completions_client.clone();
+                let agent_completions_client = agent_completions_client.clone();
                 move |headers: axum::http::HeaderMap, Json(body): Json<
-                    objectiveai::chat::completions::request::ChatCompletionCreateParams,
+                    objectiveai::agent::completions::request::AgentCompletionCreateParams,
                 >| {
-                    create_chat_completion(chat_completions_client, headers, body)
+                    create_agent_completion(agent_completions_client, headers, body)
                 }
             }),
         )
@@ -930,6 +1044,35 @@ async fn main() {
                 }
             }),
         )
+        // Function Inventions - create
+        .route(
+            "/functions/inventions",
+            axum::routing::post({
+                let function_inventions_client = function_inventions_client.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::functions::inventions::request::FunctionInventionCreateParams,
+                >| {
+                    create_function_invention(function_inventions_client, headers, body)
+                }
+            }),
+        )
+        // Function Inventions Recursive - create
+        .route(
+            "/functions/inventions/recursive",
+            axum::routing::post({
+                let function_inventions_recursive_client =
+                    function_inventions_recursive_client.clone();
+                move |headers: axum::http::HeaderMap, Json(body): Json<
+                    objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
+                >| {
+                    create_function_invention_recursive(
+                        function_inventions_recursive_client,
+                        headers,
+                        body,
+                    )
+                }
+            }),
+        )
         // Function Profile Computations - create
         // inline function
         .route(
@@ -1106,33 +1249,33 @@ async fn main() {
                 }
             }),
         )
-        // Ensemble LLM - list
+        // Agent - list
         .route(
-            "/ensemble_llms",
+            "/agents",
             axum::routing::get({
-                let ensemble_llm_client = ensemble_llm_client.clone();
+                let agent_client = agent_client.clone();
                 move |headers: axum::http::HeaderMap| {
-                    list_ensemble_llms(ensemble_llm_client, headers)
+                    list_agents(agent_client, headers)
                 }
             }),
         )
-        // Ensemble LLM - get
+        // Agent - get
         .route(
-            "/ensemble_llms/{id}",
+            "/agents/{id}",
             axum::routing::get({
-                let ensemble_llm_client = ensemble_llm_client.clone();
+                let agent_client = agent_client.clone();
                 move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
-                    get_ensemble_llm(ensemble_llm_client, headers, id)
+                    get_agent(agent_client, headers, id)
                 }
             }),
         )
-        // Ensemble LLM - get usage
+        // Agent - get usage
         .route(
-            "/ensemble_llms/{id}/usage",
+            "/agents/{id}/usage",
             axum::routing::get({
-                let ensemble_llm_client = ensemble_llm_client.clone();
+                let agent_client = agent_client.clone();
                 move |Path(id): Path<String>, headers: axum::http::HeaderMap| {
-                    get_ensemble_llm_usage(ensemble_llm_client, headers, id)
+                    get_agent_usage(agent_client, headers, id)
                 }
             }),
         )
@@ -1164,17 +1307,32 @@ fn context(headers: &axum::http::HeaderMap) -> ctx::Context<ctx::DefaultContextE
     )
 }
 
-// Chat Completions
+// Agent Completions
 
-async fn create_chat_completion(
+async fn create_agent_completion(
     client: Arc<
-        chat::completions::Client<
+        agent::completions::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl chat::completions::usage_handler::UsageHandler<
+            impl agent::completions::usage_handler::UsageHandler<
                 ctx::DefaultContextExt,
             > + Send
             + Sync
@@ -1182,28 +1340,33 @@ async fn create_chat_completion(
         >,
     >,
     headers: axum::http::HeaderMap,
-    body: objectiveai::chat::completions::request::ChatCompletionCreateParams,
+    body: objectiveai::agent::completions::request::AgentCompletionCreateParams,
 ) -> axum::response::Response {
     let ctx = context(&headers);
     if body.stream.unwrap_or(false) {
         match client
-            .create_streaming_for_chat_handle_usage(ctx, Arc::new(body))
+            .create_streaming_handle_usage(
+                ctx,
+                Arc::new(body),
+                None,
+                None,
+                None,
+                None,
+            )
             .await
         {
             Ok(stream) => Sse::new(
                 stream
-                    .map(|result| {
-                        Ok::<Event, Infallible>(
-                            Event::default().data(
-                                match result {
-                                    Ok(chunk) => serde_json::to_string(&chunk),
-                                    Err(e) => serde_json::to_string(
-                                        &ResponseError::from(&e),
-                                    ),
-                                }
-                                .unwrap(),
-                            ),
-                        )
+                    .filter_map(|item| {
+                        match item {
+                            agent::completions::StreamItem::Chunk(chunk) => {
+                                Some(Ok::<Event, Infallible>(
+                                    Event::default()
+                                        .data(serde_json::to_string(&chunk).unwrap()),
+                                ))
+                            }
+                            agent::completions::StreamItem::State(_) => None,
+                        }
                     })
                     .chain(StreamOnce::new(
                         Ok(Event::default().data("[DONE]")),
@@ -1214,7 +1377,14 @@ async fn create_chat_completion(
         }
     } else {
         match client
-            .create_unary_for_chat_handle_usage(ctx, Arc::new(body))
+            .create_unary_handle_usage(
+                ctx,
+                Arc::new(body),
+                None,
+                None,
+                None,
+                None,
+            )
             .await
         {
             Ok(r) => Json(r).into_response(),
@@ -1229,11 +1399,26 @@ async fn create_vector_completion(
     client: Arc<
         vector::completions::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl chat::completions::usage_handler::UsageHandler<
+            impl agent::completions::usage_handler::UsageHandler<
                 ctx::DefaultContextExt,
             > + Send
             + Sync
@@ -1305,6 +1490,10 @@ async fn list_functions(
             + Send
             + Sync
             + 'static,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
             impl functions::retrieval_client::Client<ctx::DefaultContextExt>
             + Send
             + Sync
@@ -1324,6 +1513,10 @@ async fn get_function_usage(
     client: Arc<
         functions::Client<
             ctx::DefaultContextExt,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
             impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
@@ -1358,11 +1551,26 @@ async fn execute_function(
     client: Arc<
         functions::executions::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl chat::completions::usage_handler::UsageHandler<
+            impl agent::completions::usage_handler::UsageHandler<
                 ctx::DefaultContextExt,
             > + Send
             + Sync
@@ -1391,6 +1599,14 @@ async fn execute_function(
             + Sync
             + 'static,
             impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -1458,6 +1674,10 @@ async fn list_profiles(
             + Send
             + Sync
             + 'static,
+            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
             impl functions::profiles::retrieval_client::Client<
                 ctx::DefaultContextExt,
             > + Send
@@ -1478,6 +1698,10 @@ async fn get_profile_usage(
     client: Arc<
         functions::profiles::Client<
             ctx::DefaultContextExt,
+            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
             impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
@@ -1652,10 +1876,9 @@ async fn get_vector_cache_vote(
     match client
         .fetch_cache_vote(
             ctx,
-            &body.model,
-            body.models.as_deref(),
+            &body.agent,
+            body.agents.as_deref(),
             &body.messages,
-            body.tools.as_deref(),
             &body.responses,
         )
         .await
@@ -1671,6 +1894,10 @@ async fn get_function(
     client: Arc<
         functions::Client<
             ctx::DefaultContextExt,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
             impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
@@ -1707,6 +1934,10 @@ async fn get_profile(
     client: Arc<
         functions::profiles::Client<
             ctx::DefaultContextExt,
+            impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
             impl functions::profile_fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
@@ -1953,17 +2184,17 @@ async fn get_ensemble_usage(
     }
 }
 
-// Ensemble LLM
+// Agent
 
-async fn list_ensemble_llms(
+async fn list_agents(
     client: Arc<
-        ensemble_llm::Client<
+        agent::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl ensemble_llm::retrieval_client::Client<ctx::DefaultContextExt>
+            impl agent::retrieval_client::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -1978,15 +2209,15 @@ async fn list_ensemble_llms(
     }
 }
 
-async fn get_ensemble_llm(
+async fn get_agent(
     client: Arc<
-        ensemble_llm::Client<
+        agent::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl ensemble_llm::retrieval_client::Client<ctx::DefaultContextExt>
+            impl agent::retrieval_client::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -2002,15 +2233,15 @@ async fn get_ensemble_llm(
     }
 }
 
-async fn get_ensemble_llm_usage(
+async fn get_agent_usage(
     client: Arc<
-        ensemble_llm::Client<
+        agent::Client<
             ctx::DefaultContextExt,
-            impl ensemble_llm::fetcher::Fetcher<ctx::DefaultContextExt>
+            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
-            impl ensemble_llm::retrieval_client::Client<ctx::DefaultContextExt>
+            impl agent::retrieval_client::Client<ctx::DefaultContextExt>
             + Send
             + Sync
             + 'static,
@@ -2025,4 +2256,175 @@ async fn get_ensemble_llm_usage(
         Err(e) => e.into_response(),
     }
 }
-} // mod _old
+// Function Inventions
+
+async fn create_function_invention(
+    client: Arc<
+        functions::inventions::Client<
+            ctx::DefaultContextExt,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl agent::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl functions::inventions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    body: objectiveai::functions::inventions::request::FunctionInventionCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers);
+    if body.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|chunk| {
+                        Ok::<Event, Infallible>(
+                            Event::default()
+                                .data(serde_json::to_string(&chunk).unwrap()),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client
+            .create_unary_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}
+
+// Function Inventions Recursive
+
+async fn create_function_invention_recursive(
+    client: Arc<
+        functions::inventions::recursive::Client<
+            ctx::DefaultContextExt,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::openrouter::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::claude_agent_sdk::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::completions::UpstreamClient<
+                objectiveai::agent::mock::Agent,
+            > + Send
+            + Sync
+            + 'static,
+            impl agent::fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl agent::completions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl functions::inventions::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::function_fetcher::Fetcher<ctx::DefaultContextExt>
+            + Send
+            + Sync
+            + 'static,
+            impl functions::inventions::recursive::usage_handler::UsageHandler<
+                ctx::DefaultContextExt,
+            > + Send
+            + Sync
+            + 'static,
+        >,
+    >,
+    headers: axum::http::HeaderMap,
+    body: objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams,
+) -> axum::response::Response {
+    let ctx = context(&headers);
+    if body.stream.unwrap_or(false) {
+        match client
+            .create_streaming_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|chunk| {
+                        Ok::<Event, Infallible>(
+                            Event::default()
+                                .data(serde_json::to_string(&chunk).unwrap()),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    } else {
+        match client
+            .create_unary_handle_usage(ctx, Arc::new(body))
+            .await
+        {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}
