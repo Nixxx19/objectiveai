@@ -13,6 +13,7 @@ objectiveai/
 ├── objectiveai-rs/                 # Rust SDK (core crate: data structures, validation, compilation)
 ├── objectiveai-api/                # API server (self-hostable, or import as library)
 ├── objectiveai-rs-wasm-js/         # WASM bindings for browser/Node.js
+├── objectiveai-rs-registry/        # Auto-generated type registry for objectiveai-rs (see below)
 ├── objectiveai-js/                 # TypeScript SDK (npm: objectiveai)
 ├── objectiveai-json-schema/        # Generated JSON Schema files (built from JS SDK)
 ├── objectiveai-cli/                # ObjectiveAI CLI
@@ -223,6 +224,29 @@ Location: `objectiveai-rs/`
 - `ensemble_llm/` - Ensemble LLM configuration and validation
 - `functions/` - Function definitions, tasks, profiles, expressions
 - `http/` - HTTP client (feature-gated)
+
+## Rust SDK Type Registry
+
+Location: `objectiveai-rs-registry/`
+
+Auto-generated JSON registry of every public struct, enum, and type alias in `objectiveai-rs`. Mirrors the source directory structure — each `.rs` file with public types gets a corresponding `.rs.json` file under `objectiveai-rs-registry/src/`.
+
+**To find types quickly:** Search the registry JSON files instead of grepping Rust source. For example, to find where `Ensemble` is defined:
+
+```bash
+grep -r '"name": "Ensemble"' objectiveai-rs-registry/src/
+```
+
+Each entry contains:
+- `name` — Type name (e.g., `Generator`)
+- `full_name` — PascalCased module path + name for disambiguation (e.g., `FunctionsCheckExampleInputsFileGenerator`)
+- `kind` — `struct`, `enum`, or `type`
+- `path` — Source file path relative to repo root (e.g., `objectiveai-rs/src/ensemble/ensemble.rs`)
+- `line_start` / `line_end` — Line range of the definition
+
+**Rebuilding:** `cargo run --package objectiveai-rs-registry-builder`
+
+The builder uses `syn` to parse the Rust AST (no regexes). It wipes `objectiveai-rs-registry/src/` on each run to prevent orphan files from deleted modules. The builder source lives at `objectiveai-rs-registry/builder/`.
 
 ## API Server
 
