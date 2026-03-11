@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "VectorCompletionsCacheCacheVoteRequest")]
+#[schemars(rename = "vector.completions.cache.CacheVoteRequest")]
 pub enum CacheVoteRequest<'a> {
     Ref(CacheVoteRequestRef<'a>),
     Owned(CacheVoteRequestOwned),
@@ -20,7 +20,7 @@ impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
 }
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
-#[schemars(rename = "VectorCompletionsCacheCacheVoteRequestRef")]
+#[schemars(rename = "vector.completions.cache.CacheVoteRequestRef")]
 pub struct CacheVoteRequestRef<'a> {
     pub agent: &'a agent::completions::request::Agent,
     pub agents: Option<&'a [agent::completions::request::Agent]>,
@@ -29,7 +29,7 @@ pub struct CacheVoteRequestRef<'a> {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "VectorCompletionsCacheCacheVoteRequestOwned")]
+#[schemars(rename = "vector.completions.cache.CacheVoteRequestOwned")]
 pub struct CacheVoteRequestOwned {
     pub agent: agent::completions::request::Agent,
     pub agents: Option<Vec<agent::completions::request::Agent>>,

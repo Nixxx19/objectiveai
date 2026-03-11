@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponseToolResponse")]
+#[schemars(rename = "agent.completions.response.ToolResponse")]
 pub struct ToolResponse {
     pub role: ToolRole,
     pub index: u64,
@@ -14,7 +14,7 @@ pub struct ToolResponse {
 #[derive(
     Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq, JsonSchema,
 )]
-#[schemars(rename = "AgentCompletionsResponseToolRole")]
+#[schemars(rename = "agent.completions.response.ToolRole")]
 pub enum ToolRole {
     #[serde(rename = "tool")]
     #[default]

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.completions.message.AssistantMessageExpression",
+  "description": "Expression variant of [`AssistantMessage`] for dynamic content.",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "The content expression.",
+      "anyOf": [
+        {
+          "$ref": "functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.WithExpression.Nullable_string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "refusal": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.WithExpression.Nullable_string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tool_calls": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.WithExpression.Nullable_string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

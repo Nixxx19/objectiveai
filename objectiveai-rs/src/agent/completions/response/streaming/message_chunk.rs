@@ -3,7 +3,7 @@ use schemars::JsonSchema;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentCompletionsResponseStreamingMessageChunk")]
+#[schemars(rename = "agent.completions.response.streaming.MessageChunk")]
 pub enum MessageChunk {
     Assistant(super::AssistantResponseChunk),
     Tool(super::super::ToolResponse),

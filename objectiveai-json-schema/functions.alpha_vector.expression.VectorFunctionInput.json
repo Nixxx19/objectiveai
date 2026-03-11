@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.alpha_vector.expression.VectorFunctionInput",
+  "type": "object",
+  "properties": {
+    "context": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "$ref": "functions.expression.Input"
+      }
+    },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.expression.Input"
+      }
+    }
+  },
+  "required": [
+    "items"
+  ]
+}

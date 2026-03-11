@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.profiles.ListProfile",
+  "description": "Response from listing profiles.",
+  "type": "object",
+  "properties": {
+    "data": {
+      "description": "List of available profiles.",
+      "type": "array",
+      "items": {
+        "$ref": "functions.profiles.ListProfileItem"
+      }
+    }
+  },
+  "required": [
+    "data"
+  ]
+}

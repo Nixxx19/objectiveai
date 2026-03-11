@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 /// Deserialization tries each variant in order until one matches.
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentAgentBase")]
+#[schemars(rename = "agent.AgentBase")]
 pub enum AgentBase {
     Openrouter(super::openrouter::AgentBase),
     ClaudeAgentSdk(super::claude_agent_sdk::AgentBase),
@@ -143,7 +143,7 @@ impl<'a> AgentBaseRef<'a> {
 /// This is an untagged enum that dispatches to the per-upstream Agent.
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentAgent")]
+#[schemars(rename = "agent.Agent")]
 pub enum Agent {
     Openrouter(super::openrouter::Agent),
     ClaudeAgentSdk(super::claude_agent_sdk::Agent),
@@ -198,7 +198,7 @@ impl TryFrom<AgentBase> for Agent {
 /// Used to specify how many instances of an agent to include in an ensemble,
 /// along with fallback agents to try if the primary fails.
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentWithFallbacksAndCount{T}")]
+#[schemars(rename = "agent.WithFallbacksAndCount.{T}")]
 pub struct WithFallbacksAndCount<T> {
     /// Number of instances of this agent in the ensemble. Defaults to 1.
     #[serde(default = "WithFallbacksAndCount::<T>::default_count")]

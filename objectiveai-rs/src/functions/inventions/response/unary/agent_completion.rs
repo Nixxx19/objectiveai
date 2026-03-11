@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsResponseUnaryAgentCompletion")]
+#[schemars(rename = "functions.inventions.response.unary.AgentCompletion")]
 pub struct AgentCompletion {
     pub index: u64,
     #[serde(flatten)]

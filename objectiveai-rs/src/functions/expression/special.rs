@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 /// Predefined expression behaviors that require no user-authored code.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "FunctionsExpressionSpecial")]
+#[schemars(rename = "functions.expression.Special")]
 pub enum Special {
     /// Returns the params input as-is.
     Input,

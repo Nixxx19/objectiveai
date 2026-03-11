@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.inventions.recursive.response.streaming.FunctionInventionChunk",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "id": {
+      "type": "string"
+    },
+    "completions": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.inventions.response.streaming.AgentCompletionChunk"
+      }
+    },
+    "state": {
+      "anyOf": [
+        {
+          "$ref": "functions.inventions.state.State"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "path": {
+      "anyOf": [
+        {
+          "$ref": "functions.RemoteFunctionPath"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "function": {
+      "anyOf": [
+        {
+          "$ref": "functions.FullRemoteFunction"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "object": {
+      "$ref": "functions.inventions.response.streaming.Object"
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "index",
+    "id",
+    "completions",
+    "created",
+    "object"
+  ]
+}

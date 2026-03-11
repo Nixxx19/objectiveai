@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.expression.InputSchema",
+  "description": "Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.",
+  "oneOf": [
+    {
+      "description": "An object with named properties.",
+      "type": "object",
+      "properties": {
+        "Object": {
+          "$ref": "functions.expression.ObjectInputSchema"
+        }
+      },
+      "required": [
+        "Object"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "An array of items.",
+      "type": "object",
+      "properties": {
+        "Array": {
+          "$ref": "functions.expression.ArrayInputSchema"
+        }
+      },
+      "required": [
+        "Array"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "A string value.",
+      "type": "object",
+      "properties": {
+        "String": {
+          "$ref": "functions.expression.StringInputSchema"
+        }
+      },
+      "required": [
+        "String"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "An integer value.",
+      "type": "object",
+      "properties": {
+        "Integer": {
+          "$ref": "functions.expression.IntegerInputSchema"
+        }
+      },
+      "required": [
+        "Integer"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "A floating-point number.",
+      "type": "object",
+      "properties": {
+        "Number": {
+          "$ref": "functions.expression.NumberInputSchema"
+        }
+      },
+      "required": [
+        "Number"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "A boolean value.",
+      "type": "object",
+      "properties": {
+        "Boolean": {
+          "$ref": "functions.expression.BooleanInputSchema"
+        }
+      },
+      "required": [
+        "Boolean"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "An image (URL or base64).",
+      "type": "object",
+      "properties": {
+        "Image": {
+          "$ref": "functions.expression.ImageInputSchema"
+        }
+      },
+      "required": [
+        "Image"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "Audio content.",
+      "type": "object",
+      "properties": {
+        "Audio": {
+          "$ref": "functions.expression.AudioInputSchema"
+        }
+      },
+      "required": [
+        "Audio"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "Video content.",
+      "type": "object",
+      "properties": {
+        "Video": {
+          "$ref": "functions.expression.VideoInputSchema"
+        }
+      },
+      "required": [
+        "Video"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "A file.",
+      "type": "object",
+      "properties": {
+        "File": {
+          "$ref": "functions.expression.FileInputSchema"
+        }
+      },
+      "required": [
+        "File"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "description": "A union of schemas - input must match at least one.",
+      "type": "object",
+      "properties": {
+        "AnyOf": {
+          "$ref": "functions.expression.AnyOfInputSchema"
+        }
+      },
+      "required": [
+        "AnyOf"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

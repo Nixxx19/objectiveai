@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 /// **Note:** The `max_tokens`, `effort`, and `summary_verbosity` fields are
 /// only supported by some models. Unsupported fields are silently ignored.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentOpenrouterReasoning")]
+#[schemars(rename = "agent.openrouter.Reasoning")]
 pub struct Reasoning {
     /// Whether reasoning is enabled. Defaults to `true` if other fields are set.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -98,7 +98,7 @@ impl Reasoning {
 /// Only supported by some models.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentOpenrouterReasoningEffort")]
+#[schemars(rename = "agent.openrouter.ReasoningEffort")]
 pub enum ReasoningEffort {
     /// No reasoning.
     None,
@@ -119,7 +119,7 @@ pub enum ReasoningEffort {
 /// Only supported by some models.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentOpenrouterReasoningSummaryVerbosity")]
+#[schemars(rename = "agent.openrouter.ReasoningSummaryVerbosity")]
 pub enum ReasoningSummaryVerbosity {
     /// Let the model decide (default, normalized away).
     Auto,

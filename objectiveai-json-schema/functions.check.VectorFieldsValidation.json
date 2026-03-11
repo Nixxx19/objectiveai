@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.check.VectorFieldsValidation",
+  "description": "The 4 fields needed to validate a vector function's split/merge behavior.",
+  "type": "object",
+  "properties": {
+    "input_schema": {
+      "$ref": "functions.expression.InputSchema"
+    },
+    "output_length": {
+      "$ref": "functions.expression.Expression"
+    },
+    "input_split": {
+      "$ref": "functions.expression.Expression"
+    },
+    "input_merge": {
+      "$ref": "functions.expression.Expression"
+    }
+  },
+  "required": [
+    "input_schema",
+    "output_length",
+    "input_split",
+    "input_merge"
+  ]
+}

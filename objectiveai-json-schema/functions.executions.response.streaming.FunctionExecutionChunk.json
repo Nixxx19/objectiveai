@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.executions.response.streaming.FunctionExecutionChunk",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.executions.response.streaming.TaskChunk"
+      }
+    },
+    "tasks_errors": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "$ref": "functions.executions.response.streaming.ReasoningSummaryChunk"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.TaskOutputOwned"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "function": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "profile": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "object": {
+      "$ref": "functions.executions.response.streaming.Object"
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "tasks",
+    "created",
+    "object"
+  ]
+}

@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 /// Used internally to route requests to the appropriate API endpoint.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsExecutionsRequestRequest")]
+#[schemars(rename = "functions.executions.request.Request")]
 pub enum Request {
     FunctionInlineProfileInline {
         body: super::FunctionInlineProfileInlineRequestBody,
@@ -112,7 +112,7 @@ impl Request {
 /// are provided inline or referenced from remote repositories.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsExecutionsRequestFunctionExecutionCreateParams")]
+#[schemars(rename = "functions.executions.request.FunctionExecutionCreateParams")]
 pub enum FunctionExecutionCreateParams {
     /// Inline Function with inline Profile.
     FunctionInlineProfileInline(super::FunctionInlineProfileInlineRequestBody),

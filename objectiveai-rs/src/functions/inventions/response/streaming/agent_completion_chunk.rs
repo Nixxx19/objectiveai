@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsResponseStreamingAgentCompletionChunk")]
+#[schemars(rename = "functions.inventions.response.streaming.AgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     pub index: u64,
     #[serde(flatten)]

@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsResponseStreamingObject")]
+#[schemars(rename = "functions.executions.response.streaming.Object")]
 pub enum Object {
     #[serde(rename = "scalar.function.execution.chunk")]
     ScalarFunctionExecutionChunk,

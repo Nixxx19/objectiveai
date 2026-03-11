@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsRequestFunctionInventionCreateParams")]
+#[schemars(rename = "functions.inventions.request.FunctionInventionCreateParams")]
 pub struct FunctionInventionCreateParams {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub remote: Option<functions::Remote>,

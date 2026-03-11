@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsStateAlphaVectorState")]
+#[schemars(rename = "functions.inventions.state.AlphaVectorState")]
 pub struct AlphaVectorState {
     #[serde(flatten)]
     pub params: super::Params,

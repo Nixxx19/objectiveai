@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.WithFallbacksAndCount.agent.AgentBase",
+  "description": "Wrapper that adds fallback agents and a count to any agent type.\n\nUsed to specify how many instances of an agent to include in an ensemble,\nalong with fallback agents to try if the primary fails.",
+  "type": "object",
+  "properties": {
+    "count": {
+      "description": "Number of instances of this agent in the ensemble. Defaults to 1.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0,
+      "default": 1
+    },
+    "fallbacks": {
+      "description": "Fallback agents to try if the primary fails.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.AgentBase"
+      }
+    }
+  },
+  "anyOf": [
+    {
+      "$ref": "agent.openrouter.AgentBase"
+    },
+    {
+      "$ref": "agent.claude_agent_sdk.AgentBase"
+    },
+    {
+      "$ref": "agent.mock.AgentBase"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "vector.completions.response.unary.AgentCompletion",
+  "description": "A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the ensemble produced it.",
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "Index of this completion within the vector completion.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "id": {
+      "type": "string"
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.response.unary.Message"
+      }
+    },
+    "object": {
+      "description": "The object type (always \"agent.completion\").",
+      "$ref": "agent.completions.response.unary.Object"
+    },
+    "usage": {
+      "$ref": "agent.completions.response.Usage"
+    },
+    "upstream": {
+      "description": "Upstream provider",
+      "$ref": "agent.Upstream"
+    },
+    "error": {
+      "description": "Error details if this completion failed.",
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "index",
+    "id",
+    "created",
+    "messages",
+    "object",
+    "usage",
+    "upstream"
+  ]
+}

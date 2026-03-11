@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.alpha_scalar.LeafTaskExpression",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "vector.completion"
+        }
+      },
+      "$ref": "functions.alpha_scalar.VectorCompletionTaskExpression",
+      "required": [
+        "type"
+      ]
+    }
+  ]
+}

@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentCompletionsResponseUnaryMessage")]
+#[schemars(rename = "agent.completions.response.unary.Message")]
 pub enum Message {
     Assistant(super::AssistantResponse),
     Tool(response::ToolResponse),

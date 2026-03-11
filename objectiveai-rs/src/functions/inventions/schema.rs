@@ -2,7 +2,7 @@ use crate::json_schema::JsonSchema;
 use serde::Deserialize;
 
 #[derive(Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "FunctionsInventionsIndexObject")]
+#[schemars(rename = "functions.inventions.IndexObject")]
 pub struct IndexObject {
     pub index: u64,
 }
@@ -45,7 +45,7 @@ impl JsonSchema for IndexObject {
 }
 
 #[derive(Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "FunctionsInventionsEssayObject")]
+#[schemars(rename = "functions.inventions.EssayObject")]
 pub struct EssayObject {
     pub essay: String,
 }
@@ -88,7 +88,7 @@ impl JsonSchema for EssayObject {
 }
 
 #[derive(Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "FunctionsInventionsEssayTasksObject")]
+#[schemars(rename = "functions.inventions.EssayTasksObject")]
 pub struct EssayTasksObject {
     pub essay_tasks: String,
 }
@@ -131,7 +131,7 @@ impl JsonSchema for EssayTasksObject {
 }
 
 #[derive(Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "FunctionsInventionsTasksLengthObject")]
+#[schemars(rename = "functions.inventions.TasksLengthObject")]
 pub struct TasksLengthObject {
     pub tasks_length: u64,
 }
@@ -174,7 +174,7 @@ impl JsonSchema for TasksLengthObject {
 }
 
 #[derive(Deserialize, schemars::JsonSchema)]
-#[schemars(rename = "FunctionsInventionsDescriptionObject")]
+#[schemars(rename = "functions.inventions.DescriptionObject")]
 pub struct DescriptionObject {
     pub description: String,
 }

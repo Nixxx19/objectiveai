@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.expression.Special",
+  "description": "Predefined expression behaviors that require no user-authored code.",
+  "oneOf": [
+    {
+      "description": "Returns the params input as-is.",
+      "type": "string",
+      "const": "input"
+    },
+    {
+      "description": "Returns the params output as-is.",
+      "type": "string",
+      "const": "output"
+    },
+    {
+      "description": "L1-normalizes the output. Scalar/Err pass through.\nVector: L1 normalize. Vectors: L1 normalize each.",
+      "type": "string",
+      "const": "task_output_l1_normalized"
+    },
+    {
+      "description": "Weighted sum of the output. Vector → Scalar. Vectors → Vector.",
+      "type": "string",
+      "const": "task_output_weighted_sum"
+    },
+    {
+      "description": "Returns the length of input['items'] as u64",
+      "type": "string",
+      "const": "input_items_output_length"
+    },
+    {
+      "description": "Splits an input containing items and optionally context into multiple inputs",
+      "type": "string",
+      "const": "input_items_optional_context_split"
+    },
+    {
+      "description": "Merges multiple inputs containing items and optionally context into a single input",
+      "type": "string",
+      "const": "input_items_optional_context_merge"
+    }
+  ]
+}

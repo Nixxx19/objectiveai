@@ -14,7 +14,7 @@ use serde::{Deserialize, Serialize};
 /// * `name` - A user-provided name for identifying the key.
 /// * `description` - Optional description providing additional context.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AuthCreateApiKeyRequest")]
+#[schemars(rename = "auth.CreateApiKeyRequest")]
 pub struct CreateApiKeyRequest {
     /// The expiration timestamp for the API key, or `None` for a non-expiring key.
     pub expires: Option<chrono::DateTime<chrono::Utc>>,
@@ -29,7 +29,7 @@ pub struct CreateApiKeyRequest {
 /// Once disabled, the API key can no longer be used for authentication.
 /// This action is reversible only by creating a new key.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AuthDisableApiKeyRequest")]
+#[schemars(rename = "auth.DisableApiKeyRequest")]
 pub struct DisableApiKeyRequest {
     /// The API key to disable.
     pub api_key: super::ApiKey,
@@ -40,7 +40,7 @@ pub struct DisableApiKeyRequest {
 /// This allows users to provide their own OpenRouter API key for routing
 /// requests through OpenRouter's model marketplace.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AuthCreateOpenRouterByokApiKeyRequest")]
+#[schemars(rename = "auth.CreateOpenRouterByokApiKeyRequest")]
 pub struct CreateOpenRouterByokApiKeyRequest {
     /// The OpenRouter API key to associate with the user's account.
     pub api_key: String,

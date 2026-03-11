@@ -3,7 +3,7 @@ use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsExecutionsResponseStreamingTaskChunk")]
+#[schemars(rename = "functions.executions.response.streaming.TaskChunk")]
 pub enum TaskChunk {
     FunctionExecution(super::FunctionExecutionTaskChunk),
     VectorCompletion(super::VectorCompletionTaskChunk),

@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.expression.InputExpression",
+  "description": "An input value that may contain expressions (pre-compilation).\n\nSimilar to [`Input`] but object values and array elements can be\nexpressions (JMESPath or Starlark) that are evaluated during compilation.",
+  "anyOf": [
+    {
+      "description": "Rich content (image, audio, video, file).",
+      "$ref": "agent.completions.message.RichContentPart"
+    },
+    {
+      "description": "An object with values that may be expressions.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "functions.expression.WithExpression.functions.expression.InputExpression"
+      }
+    },
+    {
+      "description": "An array with elements that may be expressions.",
+      "type": "array",
+      "items": {
+        "$ref": "functions.expression.WithExpression.functions.expression.InputExpression"
+      }
+    },
+    {
+      "description": "A string value.",
+      "type": "string"
+    },
+    {
+      "description": "An integer value.",
+      "type": "integer",
+      "format": "int64"
+    },
+    {
+      "description": "A floating-point number.",
+      "type": "number",
+      "format": "double"
+    },
+    {
+      "description": "A boolean value.",
+      "type": "boolean"
+    }
+  ]
+}

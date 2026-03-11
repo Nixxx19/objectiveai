@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesComputationsRequestFunctionInlineRequestBody")]
+#[schemars(rename = "functions.profiles.computations.request.FunctionInlineRequestBody")]
 pub struct FunctionInlineRequestBody {
     pub function: functions::InlineFunction,
     #[serde(flatten)]
@@ -12,7 +12,7 @@ pub struct FunctionInlineRequestBody {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesComputationsRequestFunctionRemoteRequestBody")]
+#[schemars(rename = "functions.profiles.computations.request.FunctionRemoteRequestBody")]
 pub struct FunctionRemoteRequestBody {
     // if present, retries vector completions from previous request
     #[serde(skip_serializing_if = "Option::is_none")]

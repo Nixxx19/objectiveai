@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 
 /// Request body for inline Function with inline Profile.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody")]
+#[schemars(rename = "functions.executions.request.FunctionInlineProfileInlineRequestBody")]
 pub struct FunctionInlineProfileInlineRequestBody {
     /// The inline Function definition.
     pub function: functions::InlineFunction,
@@ -20,7 +20,7 @@ pub struct FunctionInlineProfileInlineRequestBody {
 
 /// Request body for inline Function with remote Profile.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody")]
+#[schemars(rename = "functions.executions.request.FunctionInlineProfileRemoteRequestBody")]
 pub struct FunctionInlineProfileRemoteRequestBody {
     /// The inline Function definition.
     pub function: functions::InlineFunction,
@@ -31,7 +31,7 @@ pub struct FunctionInlineProfileRemoteRequestBody {
 
 /// Request body for remote Function with inline Profile.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody")]
+#[schemars(rename = "functions.executions.request.FunctionRemoteProfileInlineRequestBody")]
 pub struct FunctionRemoteProfileInlineRequestBody {
     /// The inline Profile definition.
     pub profile: functions::InlineProfile,
@@ -45,7 +45,7 @@ pub struct FunctionRemoteProfileInlineRequestBody {
 /// Used directly for remote Function + remote Profile, or flattened into
 /// other request body types.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody")]
+#[schemars(rename = "functions.executions.request.FunctionRemoteProfileRemoteRequestBody")]
 pub struct FunctionRemoteProfileRemoteRequestBody {
     // --- Caching and retry options ---
     /// If present, reuses votes from a previous execution with this token.

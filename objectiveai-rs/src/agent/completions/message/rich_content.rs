@@ -16,7 +16,7 @@ use starlark::values::{
 /// Rich content for user/assistant messages (supports multimodal input).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentCompletionsMessageRichContent")]
+#[schemars(rename = "agent.completions.message.RichContent")]
 pub enum RichContent {
     /// Plain text content.
     Text(String),
@@ -138,7 +138,7 @@ impl FromStarlarkValue for RichContent {
 /// Expression variant of [`RichContent`] for dynamic content.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentCompletionsMessageRichContentExpression")]
+#[schemars(rename = "agent.completions.message.RichContentExpression")]
 pub enum RichContentExpression {
     /// Plain text content.
     Text(String),
@@ -206,7 +206,7 @@ impl FromStarlarkValue for RichContentExpression {
 /// A part of rich content.
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
-#[schemars(rename = "AgentCompletionsMessageRichContentPart")]
+#[schemars(rename = "agent.completions.message.RichContentPart")]
 pub enum RichContentPart {
     /// Text content.
     Text { text: String },
@@ -386,7 +386,7 @@ impl FromStarlarkValue for RichContentPart {
 /// Expression variant of [`RichContentPart`] for dynamic content.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
-#[schemars(rename = "AgentCompletionsMessageRichContentPartExpression")]
+#[schemars(rename = "agent.completions.message.RichContentPartExpression")]
 pub enum RichContentPartExpression {
     Text {
         text: functions::expression::WithExpression<String>,
@@ -518,7 +518,7 @@ impl FromStarlarkValue for RichContentPartExpression {
 
 /// An image URL for multimodal input.
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageImageUrl")]
+#[schemars(rename = "agent.completions.message.ImageUrl")]
 pub struct ImageUrl {
     /// The URL of the image (can be a data URL or HTTP URL).
     pub url: String,
@@ -598,7 +598,7 @@ impl FromStarlarkValue for ImageUrl {
 
 /// Detail level for image processing.
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageImageUrlDetail")]
+#[schemars(rename = "agent.completions.message.ImageUrlDetail")]
 pub enum ImageUrlDetail {
     /// Let the model decide the detail level.
     #[serde(rename = "auto")]
@@ -651,7 +651,7 @@ impl FromStarlarkValue for ImageUrlDetail {
 
 /// Audio input for multimodal messages.
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageInputAudio")]
+#[schemars(rename = "agent.completions.message.InputAudio")]
 pub struct InputAudio {
     /// Base64-encoded audio data.
     pub data: String,
@@ -717,7 +717,7 @@ impl FromStarlarkValue for InputAudio {
 
 /// A video URL for multimodal input.
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageVideoUrl")]
+#[schemars(rename = "agent.completions.message.VideoUrl")]
 pub struct VideoUrl {
     /// The URL of the video.
     pub url: String,
@@ -778,7 +778,7 @@ impl FromStarlarkValue for VideoUrl {
 
 /// A file attachment for multimodal input.
 #[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageFile")]
+#[schemars(rename = "agent.completions.message.File")]
 pub struct File {
     /// Base64-encoded file data.
     #[serde(skip_serializing_if = "Option::is_none")]

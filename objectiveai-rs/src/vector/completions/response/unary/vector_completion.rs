@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 /// Contains the final scores, all votes from the ensemble, and the underlying
 /// agent completions that produced those votes.
 #[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "VectorCompletionsResponseUnaryVectorCompletion")]
+#[schemars(rename = "vector.completions.response.unary.VectorCompletion")]
 pub struct VectorCompletion {
     /// Unique identifier for this vector completion.
     pub id: String,

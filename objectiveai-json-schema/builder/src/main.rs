@@ -55,7 +55,7 @@ fn main() {
 
         strip_defs_and_rewrite_refs(&mut json);
 
-        let filename = format!("{title}JsonSchema.json");
+        let filename = format!("{title}.json");
         let path = out_dir.join(&filename);
         let contents = serde_json::to_string_pretty(&json).unwrap();
         fs::write(&path, format!("{contents}\n")).unwrap();

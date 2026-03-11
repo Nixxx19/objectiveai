@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.expression.TaskOutputOwned",
+  "description": "Owned task output variants.",
+  "anyOf": [
+    {
+      "description": "A single scalar score.",
+      "type": [
+        "string",
+        "number"
+      ],
+      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+    },
+    {
+      "description": "A vector of scores.",
+      "type": "array",
+      "items": {
+        "type": [
+          "string",
+          "number"
+        ],
+        "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+      }
+    },
+    {
+      "description": "Multiple vectors of scores (from mapped tasks).",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": [
+            "string",
+            "number"
+          ],
+          "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+        }
+      }
+    },
+    {
+      "description": "An error occurred during execution."
+    }
+  ]
+}

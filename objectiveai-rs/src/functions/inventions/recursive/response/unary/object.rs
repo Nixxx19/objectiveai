@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsRecursiveResponseUnaryObject")]
+#[schemars(rename = "functions.inventions.recursive.response.unary.Object")]
 pub enum Object {
     #[serde(rename = "alpha.scalar.function.invention.recursive")]
     AlphaScalarFunctionInventionRecursive,

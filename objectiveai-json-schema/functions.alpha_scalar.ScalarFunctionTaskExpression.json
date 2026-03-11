@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.alpha_scalar.ScalarFunctionTaskExpression",
+  "type": "object",
+  "properties": {
+    "remote": {
+      "$ref": "functions.Remote"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "commit": {
+      "type": "string"
+    },
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.Expression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "input": {
+      "$ref": "functions.expression.Expression"
+    }
+  },
+  "required": [
+    "remote",
+    "owner",
+    "repository",
+    "commit",
+    "input"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.expression.ParamsRef",
+  "description": "Borrowed version of expression parameters.",
+  "type": "object",
+  "properties": {
+    "input": {
+      "description": "The function's input data.",
+      "$ref": "functions.expression.Input"
+    },
+    "output": {
+      "description": "Results from executed tasks. Only populated for task output expressions.",
+      "anyOf": [
+        {
+          "$ref": "functions.expression.TaskOutput"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "map": {
+      "description": "Current map index. Only populated for mapped task expressions.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "input"
+  ]
+}

@@ -4,7 +4,7 @@ use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
-#[schemars(rename = "FunctionsAlphaScalarRemoteFunction")]
+#[schemars(rename = "functions.alpha_scalar.RemoteFunction")]
 pub enum RemoteFunction {
     #[serde(rename = "alpha.scalar.branch.function")]
     Branch {
@@ -59,7 +59,7 @@ impl RemoteFunction {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
-#[schemars(rename = "FunctionsAlphaScalarInlineFunction")]
+#[schemars(rename = "functions.alpha_scalar.InlineFunction")]
 pub enum InlineFunction {
     #[serde(rename = "alpha.scalar.branch.function")]
     Branch {

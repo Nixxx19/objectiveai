@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 
 /// Response from listing functions.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsListFunction")]
+#[schemars(rename = "functions.ListFunction")]
 pub struct ListFunction {
     /// List of available functions.
     pub data: Vec<ListFunctionItem>,
@@ -14,7 +14,7 @@ pub struct ListFunction {
 
 /// A function in a list response.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsListFunctionItem")]
+#[schemars(rename = "functions.ListFunctionItem")]
 pub struct ListFunctionItem {
     /// The remote source where the function is hosted.
     pub remote: functions::Remote,
@@ -27,7 +27,7 @@ pub struct ListFunctionItem {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsGetFunction")]
+#[schemars(rename = "functions.GetFunction")]
 pub struct GetFunction {
     pub remote: functions::Remote,
     pub owner: String,
@@ -39,7 +39,7 @@ pub struct GetFunction {
 
 /// Usage statistics for a function.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsUsageFunction")]
+#[schemars(rename = "functions.UsageFunction")]
 pub struct UsageFunction {
     /// Total number of requests made with this function.
     pub requests: u64,
@@ -53,7 +53,7 @@ pub struct UsageFunction {
 
 /// Response from listing function-profile pairs.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsListFunctionProfilePair")]
+#[schemars(rename = "functions.ListFunctionProfilePair")]
 pub struct ListFunctionProfilePair {
     /// List of available function-profile pairs.
     pub data: Vec<ListFunctionProfilePairItem>,
@@ -61,7 +61,7 @@ pub struct ListFunctionProfilePair {
 
 /// A function-profile pair in a list response.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsListFunctionProfilePairItem")]
+#[schemars(rename = "functions.ListFunctionProfilePairItem")]
 pub struct ListFunctionProfilePairItem {
     /// The function.
     pub function: ListFunctionItem,
@@ -71,7 +71,7 @@ pub struct ListFunctionProfilePairItem {
 
 /// Response from getting a function-profile pair.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsGetFunctionProfilePair")]
+#[schemars(rename = "functions.GetFunctionProfilePair")]
 pub struct GetFunctionProfilePair {
     /// The function.
     pub function: GetFunction,
@@ -81,7 +81,7 @@ pub struct GetFunctionProfilePair {
 
 /// Usage statistics for a function-profile pair.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsUsageFunctionProfilePair")]
+#[schemars(rename = "functions.UsageFunctionProfilePair")]
 pub struct UsageFunctionProfilePair {
     /// Total number of requests made with this function-profile pair.
     pub requests: u64,

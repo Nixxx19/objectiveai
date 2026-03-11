@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.inventions.request.FunctionInventionCreateParams",
+  "type": "object",
+  "properties": {
+    "remote": {
+      "anyOf": [
+        {
+          "$ref": "functions.Remote"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "overwrite": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "state": {
+      "$ref": "functions.inventions.state.ParamsState"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.Provider"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "agent": {
+      "$ref": "agent.completions.request.Agent"
+    },
+    "agents": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.completions.request.Agent"
+      }
+    },
+    "seed": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "int64"
+    },
+    "stream": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "max_step_retries": {
+      "description": "Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint32",
+      "minimum": 0
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "state",
+    "agent"
+  ]
+}

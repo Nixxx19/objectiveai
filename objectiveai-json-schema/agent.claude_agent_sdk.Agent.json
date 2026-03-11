@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.claude_agent_sdk.Agent",
+  "description": "A validated Claude Agent SDK Agent with its computed content-addressed ID.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "The deterministic content-addressed ID (22-character base62 string).",
+      "type": "string"
+    },
+    "upstream": {
+      "description": "The upstream provider marker.",
+      "$ref": "agent.claude_agent_sdk.Upstream"
+    },
+    "model": {
+      "description": "The upstream language model identifier.",
+      "type": "string"
+    },
+    "output_mode": {
+      "description": "The output mode for vector completions. Ignored for agent completions.",
+      "$ref": "agent.claude_agent_sdk.OutputMode"
+    },
+    "synthetic_reasoning": {
+      "description": "Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.\n\nWhen enabled, forces the LLM to output a `_think` field before voting,\nsimulating chain-of-thought reasoning. Requires `output_mode` to be\n`ToolCall` (not `Instruction`).",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "thinking": {
+      "description": "Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "effort": {
+      "description": "The effort level for model output.",
+      "anyOf": [
+        {
+          "$ref": "agent.claude_agent_sdk.Effort"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "system_prompt": {
+      "description": "System prompt for the agent.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "prefix_content": {
+      "description": "Rich content prepended to the user's prompt.",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.message.RichContent"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "suffix_content": {
+      "description": "Rich content appended after the user's prompt.",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.message.RichContent"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mcp_servers": {
+      "description": "MCP servers the agent can connect to.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.McpServer"
+      }
+    }
+  },
+  "required": [
+    "id",
+    "upstream",
+    "model",
+    "output_mode"
+  ]
+}

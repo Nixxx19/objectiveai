@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 
 /// A tool message containing the result of a tool call.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageToolMessage")]
+#[schemars(rename = "agent.completions.message.ToolMessage")]
 pub struct ToolMessage {
     /// The content of the tool response.
     pub content: RichContent,
@@ -78,7 +78,7 @@ impl FromStarlarkValue for ToolMessage {
 
 /// Expression variant of [`ToolMessage`] for dynamic content.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageToolMessageExpression")]
+#[schemars(rename = "agent.completions.message.ToolMessageExpression")]
 pub struct ToolMessageExpression {
     /// The content expression.
     pub content: functions::expression::WithExpression<RichContentExpression>,

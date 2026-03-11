@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 ///
 /// When enabled, an LLM summarizes the execution's reasoning process.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsRequestReasoning")]
+#[schemars(rename = "functions.executions.request.Reasoning")]
 pub struct Reasoning {
     /// The primary agent to use for generating reasoning summaries.
     pub agent: agent::completions::request::Agent,

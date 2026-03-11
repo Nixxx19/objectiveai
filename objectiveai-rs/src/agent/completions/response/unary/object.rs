@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 
 /// The object type for agent completion responses.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponseUnaryObject")]
+#[schemars(rename = "agent.completions.response.unary.Object")]
 pub enum Object {
     /// A agent completion object.
     #[serde(rename = "agent.completion")]

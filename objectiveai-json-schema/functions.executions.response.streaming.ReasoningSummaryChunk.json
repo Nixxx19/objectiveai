@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.executions.response.streaming.ReasoningSummaryChunk",
+  "description": "A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.response.streaming.MessageChunk"
+      }
+    },
+    "object": {
+      "description": "The object type (always \"agent.completion.chunk\").",
+      "$ref": "agent.completions.response.streaming.Object"
+    },
+    "usage": {
+      "description": "Token usage (only present in the final chunk).",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "upstream": {
+      "description": "Upstream provider",
+      "$ref": "agent.Upstream"
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "created",
+    "messages",
+    "object",
+    "upstream"
+  ]
+}

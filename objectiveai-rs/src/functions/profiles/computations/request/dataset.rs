@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 pub type Dataset = Vec<DatasetItem>;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesComputationsRequestDatasetItem")]
+#[schemars(rename = "functions.profiles.computations.request.DatasetItem")]
 pub struct DatasetItem {
     pub input: functions::expression::Input,
     pub target: Target,
@@ -13,7 +13,7 @@ pub struct DatasetItem {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
-#[schemars(rename = "FunctionsProfilesComputationsRequestTarget")]
+#[schemars(rename = "functions.profiles.computations.request.Target")]
 pub enum Target {
     Scalar { value: rust_decimal::Decimal }, // desired scalar output
     Vector { value: Vec<rust_decimal::Decimal> }, // desired vector output

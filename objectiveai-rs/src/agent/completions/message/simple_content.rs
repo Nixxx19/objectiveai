@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 /// Simple text content for system/developer messages.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentCompletionsMessageSimpleContent")]
+#[schemars(rename = "agent.completions.message.SimpleContent")]
 pub enum SimpleContent {
     /// Plain text content.
     Text(String),
@@ -85,7 +85,7 @@ impl FromStarlarkValue for SimpleContent {
 /// Expression variant of [`SimpleContent`] for dynamic content.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentCompletionsMessageSimpleContentExpression")]
+#[schemars(rename = "agent.completions.message.SimpleContentExpression")]
 pub enum SimpleContentExpression {
     /// Plain text content.
     Text(String),
@@ -140,7 +140,7 @@ impl FromStarlarkValue for SimpleContentExpression {
 /// A part of simple text content.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
-#[schemars(rename = "AgentCompletionsMessageSimpleContentPart")]
+#[schemars(rename = "agent.completions.message.SimpleContentPart")]
 pub enum SimpleContentPart {
     /// A text part.
     Text {
@@ -174,7 +174,7 @@ impl FromStarlarkValue for SimpleContentPart {
 /// Expression variant of [`SimpleContentPart`] for dynamic content.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
-#[schemars(rename = "AgentCompletionsMessageSimpleContentPartExpression")]
+#[schemars(rename = "agent.completions.message.SimpleContentPartExpression")]
 pub enum SimpleContentPartExpression {
     /// A text part expression.
     Text {

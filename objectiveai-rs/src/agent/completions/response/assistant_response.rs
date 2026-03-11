@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 
 /// The role of a message in a response (always "assistant").
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponseAssistantRole")]
+#[schemars(rename = "agent.completions.response.AssistantRole")]
 pub enum AssistantRole {
     /// The assistant role.
     #[serde(rename = "assistant")]

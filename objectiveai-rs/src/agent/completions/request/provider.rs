@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 
 /// Provider routing and selection preferences.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsRequestProvider")]
+#[schemars(rename = "agent.completions.request.Provider")]
 pub struct Provider {
     /// Whether to allow providers to collect data.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -36,7 +36,7 @@ pub struct Provider {
 /// Data collection policy for providers.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentCompletionsRequestProviderDataCollection")]
+#[schemars(rename = "agent.completions.request.ProviderDataCollection")]
 pub enum ProviderDataCollection {
     /// Do not allow data collection.
     Deny,
@@ -47,7 +47,7 @@ pub enum ProviderDataCollection {
 /// How to sort/prioritize providers.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentCompletionsRequestProviderSort")]
+#[schemars(rename = "agent.completions.request.ProviderSort")]
 pub enum ProviderSort {
     /// Prioritize by price (cheapest first).
     Price,
@@ -59,7 +59,7 @@ pub enum ProviderSort {
 
 /// Maximum price constraints per token type.
 #[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsRequestProviderMaxPrice")]
+#[schemars(rename = "agent.completions.request.ProviderMaxPrice")]
 pub struct ProviderMaxPrice {
     /// Maximum price per prompt token.
     #[serde(skip_serializing_if = "Option::is_none")]

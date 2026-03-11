@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 
 /// Response containing a list of Agents.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentListAgent")]
+#[schemars(rename = "agent.ListAgent")]
 pub struct ListAgent {
     /// The list of Agent summaries.
     pub data: Vec<ListAgentItem>,
@@ -13,7 +13,7 @@ pub struct ListAgent {
 
 /// Summary information for a listed Agent.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentListAgentItem")]
+#[schemars(rename = "agent.ListAgentItem")]
 pub struct ListAgentItem {
     /// The unique content-addressed ID of the Agent.
     pub id: String,
@@ -21,7 +21,7 @@ pub struct ListAgentItem {
 
 /// Response containing a single Agent with creation timestamp.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentGetAgent")]
+#[schemars(rename = "agent.GetAgent")]
 pub struct GetAgent {
     /// Unix timestamp when this Agent was first used.
     pub created: u64,
@@ -32,7 +32,7 @@ pub struct GetAgent {
 
 /// Usage statistics for an Agent.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentUsageAgent")]
+#[schemars(rename = "agent.UsageAgent")]
 pub struct UsageAgent {
     /// Total number of requests made with this Agent.
     pub requests: u64,

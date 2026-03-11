@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.RemoteTasksProfile",
+  "description": "A remote tasks-based profile with full metadata.\n\nStored as `profile.json` in repositories and referenced by\n`remote/owner/repository`.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "Human-readable description of the profile.",
+      "type": "string"
+    },
+    "tasks": {
+      "description": "Configuration for each task in the corresponding Function.",
+      "type": "array",
+      "items": {
+        "$ref": "functions.TaskProfile"
+      }
+    },
+    "profile": {
+      "description": "Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
+      "$ref": "vector.completions.request.Profile"
+    }
+  },
+  "required": [
+    "description",
+    "tasks",
+    "profile"
+  ]
+}

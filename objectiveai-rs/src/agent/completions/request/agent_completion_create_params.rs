@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 
 /// Parameters for creating a agent completion.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsRequestAgentCompletionCreateParams")]
+#[schemars(rename = "agent.completions.request.AgentCompletionCreateParams")]
 pub struct AgentCompletionCreateParams {
     /// The conversation messages.
     pub messages: Vec<super::super::message::Message>,

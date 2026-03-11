@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 #[schemars(!transparent)]
-#[schemars(rename = "FunctionsProfilesComputationsRetryToken")]
+#[schemars(rename = "functions.profiles.computations.RetryToken")]
 pub struct RetryToken(pub Vec<Option<String>>);
 
 impl RetryToken {

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.completions.message.AssistantToolCallFunctionExpression",
+  "description": "Expression variant of [`AssistantToolCallFunction`] for dynamic content.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "The function name expression.",
+      "$ref": "functions.expression.WithExpression.string"
+    },
+    "arguments": {
+      "description": "The arguments expression.",
+      "$ref": "functions.expression.WithExpression.string"
+    }
+  },
+  "required": [
+    "name",
+    "arguments"
+  ]
+}

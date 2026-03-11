@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesComputationsResponseUnaryObject")]
+#[schemars(rename = "functions.profiles.computations.response.unary.Object")]
 pub enum Object {
     #[serde(rename = "function.profile.computation")]
     FunctionProfileComputation,

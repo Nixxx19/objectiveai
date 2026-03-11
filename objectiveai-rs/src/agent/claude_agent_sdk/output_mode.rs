@@ -18,7 +18,7 @@ use schemars::JsonSchema;
     Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Hash, JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentClaudeAgentSdkOutputMode")]
+#[schemars(rename = "agent.claude_agent_sdk.OutputMode")]
 pub enum OutputMode {
     /// The model is instructed via the prompt to output a specific key.
     ///

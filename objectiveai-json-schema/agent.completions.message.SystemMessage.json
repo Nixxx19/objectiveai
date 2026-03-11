@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.completions.message.SystemMessage",
+  "description": "A system message setting context or instructions.",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "The message content.",
+      "$ref": "agent.completions.message.SimpleContent"
+    },
+    "name": {
+      "description": "Optional name for the message author.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "content"
+  ]
+}

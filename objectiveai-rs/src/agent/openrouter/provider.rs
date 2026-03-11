@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 /// Controls which providers are used and in what order when routing
 /// requests to upstream model hosts.
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Hash, JsonSchema)]
-#[schemars(rename = "AgentOpenrouterProvider")]
+#[schemars(rename = "agent.openrouter.Provider")]
 pub struct Provider {
     /// Whether to allow fallback to other providers if preferred ones fail.
     /// Defaults to `true`.
@@ -112,7 +112,7 @@ impl Provider {
 /// increase inference speed, potentially at the cost of output quality.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentOpenrouterProviderQuantization")]
+#[schemars(rename = "agent.openrouter.ProviderQuantization")]
 pub enum ProviderQuantization {
     /// 4-bit integer quantization.
     Int4,

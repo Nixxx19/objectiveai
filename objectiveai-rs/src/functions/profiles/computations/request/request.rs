@@ -4,7 +4,7 @@ use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsProfilesComputationsRequestRequest")]
+#[schemars(rename = "functions.profiles.computations.request.Request")]
 pub enum Request {
     FunctionInline {
         body: super::FunctionInlineRequestBody,
@@ -49,7 +49,7 @@ impl Request {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams")]
+#[schemars(rename = "functions.profiles.computations.request.FunctionProfileComputationCreateParams")]
 pub enum FunctionProfileComputationCreateParams {
     FunctionInline(super::FunctionInlineRequestBody),
     FunctionRemote(super::FunctionRemoteRequestBody),

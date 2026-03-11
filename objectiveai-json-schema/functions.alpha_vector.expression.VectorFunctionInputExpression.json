@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.alpha_vector.expression.VectorFunctionInputExpression",
+  "type": "object",
+  "properties": {
+    "context": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.Expression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "items": {
+      "$ref": "functions.expression.Expression"
+    }
+  },
+  "required": [
+    "items"
+  ]
+}

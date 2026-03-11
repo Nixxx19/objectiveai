@@ -4,30 +4,21 @@ use std::path::Path;
 use syn::{Item, Visibility};
 use walkdir::WalkDir;
 
-fn to_pascal_case(s: &str) -> String {
-    s.split('_')
-        .map(|part| {
-            let mut chars = part.chars();
-            match chars.next() {
-                Some(c) => c.to_uppercase().to_string() + chars.as_str(),
-                None => String::new(),
-            }
-        })
-        .collect()
-}
-
 /// Build a module prefix from a path like "src/functions/check/example_inputs/file.rs".
-/// Strips "src/" prefix, drops the filename entirely, then PascalCases each folder segment.
+/// Strips "src/" prefix, drops the filename, then joins folder segments with dots
+/// in lowercase. Returns e.g. "functions.check.example_inputs." (with trailing dot)
+/// or "" for top-level files.
 fn module_prefix(path: &str) -> String {
     let inner = path.strip_prefix("src/").unwrap_or(path);
     let segments: Vec<&str> = inner.split('/').collect();
 
     // Take only folder segments (skip the last segment which is the filename)
-    segments[..segments.len().saturating_sub(1)]
-        .iter()
-        .map(|seg| to_pascal_case(seg))
-        .collect::<Vec<_>>()
-        .join("")
+    let folders = &segments[..segments.len().saturating_sub(1)];
+    if folders.is_empty() {
+        String::new()
+    } else {
+        format!("{}.", folders.join("."))
+    }
 }
 
 fn has_derive(attrs: &[syn::Attribute], trait_name: &str) -> bool {
@@ -201,11 +192,11 @@ fn all_serializable_types_have_json_schema() {
                     ));
                 }
                 Some(rename) if has_type_param => {
-                    let expected_prefix = format!("{full_name}{{");
+                    let expected_prefix = format!("{full_name}.{{");
                     if !rename.starts_with(&expected_prefix) {
                         errors.push(format!(
                             "{name} in {relative} has wrong schemars rename: \
-                             got \"{rename}\", expected \"{full_name}{{...}}\""
+                             got \"{rename}\", expected \"{full_name}.{{...}}\""
                         ));
                     }
                 }

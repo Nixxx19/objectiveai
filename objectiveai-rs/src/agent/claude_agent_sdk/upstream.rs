@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 /// Claude Agent SDK upstream marker.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentClaudeAgentSdkUpstream")]
+#[schemars(rename = "agent.claude_agent_sdk.Upstream")]
 pub enum Upstream {
     #[default]
     ClaudeAgentSdk,

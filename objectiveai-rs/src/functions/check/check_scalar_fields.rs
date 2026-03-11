@@ -11,7 +11,7 @@ use schemars::JsonSchema;
 
 /// The fields needed to validate a scalar function's input behavior.
 #[derive(Debug, Clone, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsCheckScalarFieldsValidation")]
+#[schemars(rename = "functions.check.ScalarFieldsValidation")]
 pub struct ScalarFieldsValidation {
     pub input_schema: InputSchema,
 }

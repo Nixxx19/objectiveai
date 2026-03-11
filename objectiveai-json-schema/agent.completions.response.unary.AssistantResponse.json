@@ -1,0 +1,106 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.completions.response.unary.AssistantResponse",
+  "description": "An assistant response in a unary agent completion.",
+  "type": "object",
+  "properties": {
+    "role": {
+      "$ref": "agent.completions.response.AssistantRole"
+    },
+    "index": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "agent": {
+      "type": "string"
+    },
+    "model": {
+      "type": "string"
+    },
+    "upstream_id": {
+      "type": "string"
+    },
+    "reasoning": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tool_calls": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.completions.message.AssistantToolCall"
+      }
+    },
+    "content": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.message.RichContent"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "refusal": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "finish_reason": {
+      "$ref": "agent.completions.response.FinishReason"
+    },
+    "logprobs": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Logprobs"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "service_tier": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "system_fingerprint": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "provider": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "usage": {
+      "description": "Upstream usage for this assistant response (set by upstream clients).",
+      "$ref": "agent.completions.response.UpstreamUsage"
+    }
+  },
+  "required": [
+    "role",
+    "index",
+    "created",
+    "agent",
+    "model",
+    "upstream_id",
+    "finish_reason",
+    "usage"
+  ]
+}

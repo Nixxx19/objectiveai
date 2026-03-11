@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.executions.request.FunctionInlineProfileRemoteRequestPath",
+  "description": "Path parameters for inline Function with remote Profile.",
+  "type": "object",
+  "properties": {
+    "premote": {
+      "description": "Profile remote source.",
+      "$ref": "functions.Remote"
+    },
+    "powner": {
+      "description": "Profile repository owner.",
+      "type": "string"
+    },
+    "prepository": {
+      "description": "Profile repository name.",
+      "type": "string"
+    },
+    "pcommit": {
+      "description": "Profile Git commit SHA (optional).",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "premote",
+    "powner",
+    "prepository"
+  ]
+}

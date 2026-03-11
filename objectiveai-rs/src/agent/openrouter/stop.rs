@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 /// stops producing further tokens.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentOpenrouterStop")]
+#[schemars(rename = "agent.openrouter.Stop")]
 pub enum Stop {
     /// A single stop sequence.
     String(String),

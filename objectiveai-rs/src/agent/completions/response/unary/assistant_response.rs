@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 
 /// An assistant response in a unary agent completion.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponseUnaryAssistantResponse")]
+#[schemars(rename = "agent.completions.response.unary.AssistantResponse")]
 pub struct AssistantResponse {
     pub role: response::AssistantRole,
     pub index: u64,

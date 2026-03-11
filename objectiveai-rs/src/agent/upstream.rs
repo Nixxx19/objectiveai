@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
     Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default, JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentUpstream")]
+#[schemars(rename = "agent.Upstream")]
 pub enum Upstream {
     /// Unknown Upstream.
     #[default]

@@ -16,7 +16,7 @@ use schemars::JsonSchema;
 /// completely ignored for agent completions.
 #[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Hash, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentMockOutputMode")]
+#[schemars(rename = "agent.mock.OutputMode")]
 pub enum OutputMode {
     /// The model is instructed via the prompt to output a specific key.
     ///

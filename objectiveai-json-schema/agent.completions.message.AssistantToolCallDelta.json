@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.completions.message.AssistantToolCallDelta",
+  "description": "A tool call delta in a streaming response.",
+  "type": "object",
+  "properties": {
+    "index": {
+      "description": "The index of this tool call.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "type": {
+      "description": "The type of tool call (always \"function\").",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.message.AssistantToolCallType"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "description": "The unique ID of this tool call.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "function": {
+      "description": "The function call details.",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.message.AssistantToolCallFunctionDelta"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "index"
+  ]
+}

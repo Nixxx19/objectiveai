@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive")]
+#[schemars(rename = "functions.inventions.recursive.response.unary.FunctionInventionRecursive")]
 pub struct FunctionInventionRecursive {
     pub id: String,
     pub inventions: Vec<super::FunctionInvention>,

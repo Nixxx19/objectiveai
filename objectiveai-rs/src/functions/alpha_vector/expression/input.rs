@@ -15,7 +15,7 @@ pub mod scalar_function_input_schema {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsAlphaVectorExpressionVectorFunctionInputSchema")]
+#[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInputSchema")]
 pub struct VectorFunctionInputSchema {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<functions::expression::ObjectInputSchema>,
@@ -85,7 +85,7 @@ pub mod scalar_function_input_expression {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsAlphaVectorExpressionVectorFunctionInputExpression")]
+#[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInputExpression")]
 pub struct VectorFunctionInputExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<functions::expression::Expression>,
@@ -138,7 +138,7 @@ pub mod scalar_function_input {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
-#[schemars(rename = "FunctionsAlphaVectorExpressionVectorFunctionInput")]
+#[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInput")]
 pub struct VectorFunctionInput {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<IndexMap<String, functions::expression::Input>>,

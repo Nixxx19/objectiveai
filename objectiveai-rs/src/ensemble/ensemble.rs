@@ -13,7 +13,7 @@ use schemars::JsonSchema;
 /// Contains a list of agent configurations that will be validated, deduplicated,
 /// and sorted when converting to [`Ensemble`].
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "EnsembleEnsembleBase")]
+#[schemars(rename = "ensemble.EnsembleBase")]
 pub struct EnsembleBase {
     /// The LLMs in this ensemble, with optional counts and fallbacks.
     pub agents: Vec<agent::AgentBaseWithFallbacksAndCount>,
@@ -32,7 +32,7 @@ pub struct EnsembleBase {
 /// - Individual LLMs with `count: 0` are skipped
 /// - Total agent count (sum of all counts) must be between 1 and 128
 #[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "EnsembleEnsemble")]
+#[schemars(rename = "ensemble.Ensemble")]
 pub struct Ensemble {
     /// The deterministic content-addressed ID (22-character base62 string).
     pub id: String,

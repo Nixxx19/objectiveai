@@ -92,7 +92,7 @@ pub trait InventionState: Clone + Send + 'static {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
-#[schemars(rename = "FunctionsInventionsStateState")]
+#[schemars(rename = "functions.inventions.state.State")]
 pub enum State {
     #[serde(rename = "alpha.scalar.branch.function")]
     AlphaScalarBranch(AlphaScalarBranchState),
@@ -233,7 +233,7 @@ impl State {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
-#[schemars(rename = "FunctionsInventionsStateParamsState")]
+#[schemars(rename = "functions.inventions.state.ParamsState")]
 pub enum ParamsState {
     #[serde(rename = "alpha.scalar.branch.function")]
     AlphaScalarBranch(AlphaScalarBranchState),

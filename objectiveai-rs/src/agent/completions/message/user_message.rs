@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 
 /// A user message from the end user.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageUserMessage")]
+#[schemars(rename = "agent.completions.message.UserMessage")]
 pub struct UserMessage {
     /// The message content (supports text, images, audio, video, files).
     pub content: RichContent,
@@ -84,7 +84,7 @@ impl FromStarlarkValue for UserMessage {
 
 /// Expression variant of [`UserMessage`] for dynamic content.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageUserMessageExpression")]
+#[schemars(rename = "agent.completions.message.UserMessageExpression")]
 pub struct UserMessageExpression {
     /// The message content expression.
     pub content: functions::expression::WithExpression<RichContentExpression>,

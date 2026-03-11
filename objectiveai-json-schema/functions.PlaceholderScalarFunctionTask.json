@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.PlaceholderScalarFunctionTask",
+  "description": "A compiled placeholder scalar function task.\n\nAlways produces `Scalar(0.5)` before the output expression\nis applied.",
+  "type": "object",
+  "properties": {
+    "input_schema": {
+      "description": "JSON Schema defining the expected input structure.",
+      "$ref": "functions.expression.InputSchema"
+    },
+    "input": {
+      "description": "The resolved input.",
+      "$ref": "functions.expression.Input"
+    },
+    "output": {
+      "description": "Expression to transform the fixed 0.5 output.",
+      "$ref": "functions.expression.Expression"
+    }
+  },
+  "required": [
+    "input_schema",
+    "input",
+    "output"
+  ]
+}

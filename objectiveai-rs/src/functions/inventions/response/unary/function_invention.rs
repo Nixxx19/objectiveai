@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsResponseUnaryFunctionInvention")]
+#[schemars(rename = "functions.inventions.response.unary.FunctionInvention")]
 pub struct FunctionInvention {
     pub id: String,
     pub completions: Vec<super::AgentCompletion>,

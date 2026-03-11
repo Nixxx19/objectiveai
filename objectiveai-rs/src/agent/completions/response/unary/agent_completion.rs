@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 
 /// A complete agent completion response.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponseUnaryAgentCompletion")]
+#[schemars(rename = "agent.completions.response.unary.AgentCompletion")]
 pub struct AgentCompletion {
     pub id: String,
     pub created: u64,

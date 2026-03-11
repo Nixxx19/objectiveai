@@ -18,7 +18,7 @@ pub type ApiKey = PrefixedUuid<'a', 'p', 'k'>;
 /// when it was created, when it expires (if ever), whether it has been
 /// disabled, and user-provided name and description.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AuthApiKeyWithMetadata")]
+#[schemars(rename = "auth.ApiKeyWithMetadata")]
 pub struct ApiKeyWithMetadata {
     /// The API key itself.
     pub api_key: ApiKey,

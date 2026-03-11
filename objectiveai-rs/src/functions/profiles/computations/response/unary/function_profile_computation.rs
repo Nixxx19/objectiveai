@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation")]
+#[schemars(rename = "functions.profiles.computations.response.unary.FunctionProfileComputation")]
 pub struct FunctionProfileComputation {
     pub id: String,
     pub executions: Vec<super::FunctionExecution>,

@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk")]
+#[schemars(rename = "functions.executions.response.streaming.VectorCompletionTaskChunk")]
 pub struct VectorCompletionTaskChunk {
     pub index: u64,
     pub task_index: u64,

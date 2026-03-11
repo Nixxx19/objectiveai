@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 #[derive(
     Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, JsonSchema,
 )]
-#[schemars(rename = "AgentMcpServer")]
+#[schemars(rename = "agent.McpServer")]
 pub struct McpServer {
     /// The URL of the MCP server.
     pub url: String,

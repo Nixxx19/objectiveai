@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 ///
 /// Serializes to `"vector.completion.chunk"` in JSON.
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "VectorCompletionsResponseStreamingObject")]
+#[schemars(rename = "vector.completions.response.streaming.Object")]
 pub enum Object {
     /// A streaming vector completion chunk.
     #[serde(rename = "vector.completion.chunk")]

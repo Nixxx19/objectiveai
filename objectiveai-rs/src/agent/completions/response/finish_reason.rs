@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 #[derive(
     Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq, JsonSchema,
 )]
-#[schemars(rename = "AgentCompletionsResponseFinishReason")]
+#[schemars(rename = "agent.completions.response.FinishReason")]
 pub enum FinishReason {
     /// The model reached a natural stop point or stop sequence.
     #[serde(rename = "stop")]

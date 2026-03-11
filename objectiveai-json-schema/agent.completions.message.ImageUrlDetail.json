@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.completions.message.ImageUrlDetail",
+  "description": "Detail level for image processing.",
+  "oneOf": [
+    {
+      "description": "Let the model decide the detail level.",
+      "type": "string",
+      "const": "auto"
+    },
+    {
+      "description": "Low detail mode (faster, less tokens).",
+      "type": "string",
+      "const": "low"
+    },
+    {
+      "description": "High detail mode (more accurate, more tokens).",
+      "type": "string",
+      "const": "high"
+    }
+  ]
+}

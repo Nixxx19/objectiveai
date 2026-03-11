@@ -11,7 +11,7 @@ use schemars::JsonSchema;
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
 #[schemars(!transparent)]
-#[schemars(rename = "FunctionsExecutionsRetryToken")]
+#[schemars(rename = "functions.executions.RetryToken")]
 pub struct RetryToken(pub Vec<Option<String>>);
 
 impl RetryToken {

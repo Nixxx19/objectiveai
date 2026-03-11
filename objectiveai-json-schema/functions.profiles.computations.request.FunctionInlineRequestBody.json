@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.profiles.computations.request.FunctionInlineRequestBody",
+  "type": "object",
+  "properties": {
+    "function": {
+      "$ref": "functions.InlineFunction"
+    },
+    "retry_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "from_cache": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "max_retries": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "n": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "dataset": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.profiles.computations.request.DatasetItem"
+      }
+    },
+    "ensemble": {
+      "$ref": "vector.completions.request.Ensemble"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.Provider"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seed": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "int64"
+    },
+    "stream": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "function",
+    "n",
+    "dataset",
+    "ensemble"
+  ]
+}

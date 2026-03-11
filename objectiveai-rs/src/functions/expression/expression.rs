@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize, de::DeserializeOwned};
 /// Result of an expression that may produce one or many values.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsExpressionOneOrMany{T}")]
+#[schemars(rename = "functions.expression.OneOrMany.{T}")]
 pub enum OneOrMany<T> {
     /// A single value.
     One(T),
@@ -31,7 +31,7 @@ pub enum OneOrMany<T> {
 /// {"$starlark": "input['items'][0]['name']"}
 /// ```
 #[derive(Debug, Clone, JsonSchema)]
-#[schemars(rename = "FunctionsExpressionExpression")]
+#[schemars(rename = "functions.expression.Expression")]
 pub enum Expression {
     /// A JMESPath expression.
     JMESPath(String),
@@ -232,7 +232,7 @@ impl Expression {
 /// ```
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsExpressionWithExpression{T}")]
+#[schemars(rename = "functions.expression.WithExpression.{T}")]
 pub enum WithExpression<T> {
     /// An expression (JMESPath or Starlark) to evaluate.
     Expression(Expression),

@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "auth.ApiKeyWithMetadata",
+  "description": "An ObjectiveAI API Key with associated metadata.\n\nThis struct contains the API key itself along with information about\nwhen it was created, when it expires (if ever), whether it has been\ndisabled, and user-provided name and description.",
+  "type": "object",
+  "properties": {
+    "api_key": {
+      "description": "The API key itself.",
+      "$ref": "PrefixedUuid"
+    },
+    "created": {
+      "description": "The timestamp when the API key was created (RFC 3339 format).",
+      "type": "string",
+      "format": "date-time"
+    },
+    "expires": {
+      "description": "The timestamp when the API key expires, or `None` if it does not expire.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "disabled": {
+      "description": "The timestamp when the API key was disabled, or `None` if it is active.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "name": {
+      "description": "The user-provided name of the API key.",
+      "type": "string"
+    },
+    "description": {
+      "description": "The user-provided description of the API key, or `None` if not provided.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "api_key",
+    "created",
+    "name"
+  ]
+}

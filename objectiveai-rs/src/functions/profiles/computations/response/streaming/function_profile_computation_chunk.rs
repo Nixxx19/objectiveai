@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk")]
+#[schemars(rename = "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk")]
 pub struct FunctionProfileComputationChunk {
     pub id: String,
     pub executions: Vec<super::FunctionExecutionChunk>,

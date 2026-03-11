@@ -1,0 +1,131 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.executions.response.streaming.FunctionExecutionTaskChunk",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "task_index": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "task_path": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "format": "uint64",
+        "minimum": 0
+      }
+    },
+    "swiss_pool_index": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "swiss_round": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "id": {
+      "type": "string"
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.executions.response.streaming.TaskChunk"
+      }
+    },
+    "tasks_errors": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "$ref": "functions.executions.response.streaming.ReasoningSummaryChunk"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.TaskOutputOwned"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "function": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "profile": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "object": {
+      "$ref": "functions.executions.response.streaming.Object"
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "index",
+    "task_index",
+    "task_path",
+    "id",
+    "tasks",
+    "created",
+    "object"
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.expression.StringInputSchema",
+  "description": "Schema for a string input.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "Human-readable description of the string.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "enum": {
+      "description": "If provided, the string must be one of these values.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

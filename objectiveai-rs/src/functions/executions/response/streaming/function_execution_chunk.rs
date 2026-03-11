@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsResponseStreamingFunctionExecutionChunk")]
+#[schemars(rename = "functions.executions.response.streaming.FunctionExecutionChunk")]
 pub struct FunctionExecutionChunk {
     pub id: String,
     pub tasks: Vec<super::TaskChunk>,

@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 /// OpenRouter upstream marker.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq, Hash, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
-#[schemars(rename = "AgentOpenrouterUpstream")]
+#[schemars(rename = "agent.openrouter.Upstream")]
 pub enum Upstream {
     #[default]
     Openrouter,

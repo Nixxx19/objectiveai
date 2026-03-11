@@ -1,0 +1,219 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.openrouter.AgentBase",
+  "description": "The base configuration for an OpenRouter Agent (without computed ID).",
+  "type": "object",
+  "properties": {
+    "upstream": {
+      "description": "The upstream provider marker.",
+      "$ref": "agent.openrouter.Upstream"
+    },
+    "model": {
+      "description": "The upstream language model identifier (e.g., `\"gpt-4\"`, `\"claude-3-opus\"`).",
+      "type": "string"
+    },
+    "output_mode": {
+      "description": "The output mode for vector completions. Ignored for agent completions.",
+      "$ref": "agent.openrouter.OutputMode",
+      "default": "instruction"
+    },
+    "synthetic_reasoning": {
+      "description": "Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "top_logprobs": {
+      "description": "Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "prefix_messages": {
+      "description": "Messages prepended to the user's prompt.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.completions.message.Message"
+      }
+    },
+    "post_system_prefix_messages": {
+      "description": "Messages inserted after the leading chain of system/developer messages.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.completions.message.Message"
+      }
+    },
+    "suffix_messages": {
+      "description": "Messages appended after the user's prompt.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.completions.message.Message"
+      }
+    },
+    "mcp_servers": {
+      "description": "MCP servers the agent can connect to.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.McpServer"
+      }
+    },
+    "frequency_penalty": {
+      "description": "Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "logit_bias": {
+      "description": "Token ID to bias mapping (-100 to 100). Positive values increase likelihood.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "integer",
+        "format": "int64"
+      }
+    },
+    "max_completion_tokens": {
+      "description": "Maximum tokens in the completion.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "presence_penalty": {
+      "description": "Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "stop": {
+      "description": "Stop sequences that halt generation.",
+      "anyOf": [
+        {
+          "$ref": "agent.openrouter.Stop"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "temperature": {
+      "description": "Sampling temperature (0.0 to 2.0). Higher = more random.",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "top_p": {
+      "description": "Nucleus sampling probability (0.0 to 1.0).",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "max_tokens": {
+      "description": "Maximum tokens (OpenRouter variant of max_completion_tokens).",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "min_p": {
+      "description": "Minimum probability threshold for sampling (0.0 to 1.0).",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "provider": {
+      "description": "Provider routing preferences.",
+      "anyOf": [
+        {
+          "$ref": "agent.openrouter.Provider"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reasoning": {
+      "description": "Reasoning/thinking configuration for supported models.",
+      "anyOf": [
+        {
+          "$ref": "agent.openrouter.Reasoning"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "repetition_penalty": {
+      "description": "Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "top_a": {
+      "description": "Top-a sampling parameter (0.0 to 1.0).",
+      "type": [
+        "number",
+        "null"
+      ],
+      "format": "double"
+    },
+    "top_k": {
+      "description": "Top-k sampling: only consider the k most likely tokens.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "verbosity": {
+      "description": "Output verbosity hint for supported models.",
+      "anyOf": [
+        {
+          "$ref": "agent.openrouter.Verbosity"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "upstream",
+    "model"
+  ]
+}

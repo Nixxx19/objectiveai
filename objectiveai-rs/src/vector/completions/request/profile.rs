@@ -16,7 +16,7 @@ use schemars::JsonSchema;
 
 /// An entry in a profile with an explicit weight and optional invert flag.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "VectorCompletionsRequestProfileEntry")]
+#[schemars(rename = "vector.completions.request.ProfileEntry")]
 pub struct ProfileEntry {
     /// The weight for this agent in the ensemble. Must be in [0, 1].
     pub weight: Decimal,
@@ -36,7 +36,7 @@ pub struct ProfileEntry {
 /// - `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "VectorCompletionsRequestProfile")]
+#[schemars(rename = "vector.completions.request.Profile")]
 pub enum Profile {
     /// Simple vector of decimal weights.
     Weights(Vec<Decimal>),

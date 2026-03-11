@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.profiles.computations.response.unary.FunctionExecution",
+  "description": "A complete function execution response (non-streaming).",
+  "type": "object",
+  "properties": {
+    "index": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "dataset": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "n": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "retry": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "id": {
+      "description": "Unique identifier for this execution.",
+      "type": "string"
+    },
+    "tasks": {
+      "description": "Results from each task in the function.",
+      "type": "array",
+      "items": {
+        "$ref": "functions.executions.response.unary.Task"
+      }
+    },
+    "tasks_errors": {
+      "description": "Whether any tasks encountered errors.",
+      "type": "boolean"
+    },
+    "reasoning": {
+      "description": "Reasoning summary if reasoning was enabled.",
+      "anyOf": [
+        {
+          "$ref": "functions.executions.response.unary.ReasoningSummary"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "output": {
+      "description": "The final output (scalar or vector score).",
+      "$ref": "functions.expression.TaskOutputOwned"
+    },
+    "error": {
+      "description": "Error details if the execution failed.",
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "description": "Token for retrying this execution with cached votes.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created": {
+      "description": "Unix timestamp when the execution was created.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "function": {
+      "description": "ID of the function used (if remote).",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "profile": {
+      "description": "ID of the profile used (if remote).",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "object": {
+      "description": "Object type identifier.",
+      "$ref": "functions.executions.response.unary.Object"
+    },
+    "usage": {
+      "description": "Aggregated token and cost usage.",
+      "$ref": "agent.completions.response.Usage"
+    }
+  },
+  "required": [
+    "index",
+    "dataset",
+    "n",
+    "retry",
+    "id",
+    "tasks",
+    "tasks_errors",
+    "output",
+    "created",
+    "object",
+    "usage"
+  ]
+}

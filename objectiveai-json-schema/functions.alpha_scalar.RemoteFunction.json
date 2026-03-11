@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.alpha_scalar.RemoteFunction",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "input_schema": {
+          "$ref": "functions.expression.ObjectInputSchema"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "functions.alpha_scalar.BranchTaskExpression"
+          }
+        },
+        "type": {
+          "type": "string",
+          "const": "alpha.scalar.branch.function"
+        }
+      },
+      "required": [
+        "type",
+        "description",
+        "input_schema",
+        "tasks"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "input_schema": {
+          "$ref": "functions.expression.ObjectInputSchema"
+        },
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "functions.alpha_scalar.LeafTaskExpression"
+          }
+        },
+        "type": {
+          "type": "string",
+          "const": "alpha.scalar.leaf.function"
+        }
+      },
+      "required": [
+        "type",
+        "description",
+        "input_schema",
+        "tasks"
+      ]
+    }
+  ]
+}

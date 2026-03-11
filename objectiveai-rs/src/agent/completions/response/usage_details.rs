@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 
 /// Detailed breakdown of completion token usage.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponseCompletionTokensDetails")]
+#[schemars(rename = "agent.completions.response.CompletionTokensDetails")]
 pub struct CompletionTokensDetails {
     /// Tokens from accepted predictions (speculative decoding).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -52,7 +52,7 @@ impl CompletionTokensDetails {
 
 /// Detailed breakdown of prompt token usage.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponsePromptTokensDetails")]
+#[schemars(rename = "agent.completions.response.PromptTokensDetails")]
 pub struct PromptTokensDetails {
     /// Audio input tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -91,7 +91,7 @@ impl PromptTokensDetails {
 
 /// Detailed cost breakdown.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponseCostDetails")]
+#[schemars(rename = "agent.completions.response.CostDetails")]
 pub struct CostDetails {
     /// Cost charged by the immediate upstream (e.g., OpenRouter).
     pub upstream_inference_cost: rust_decimal::Decimal,

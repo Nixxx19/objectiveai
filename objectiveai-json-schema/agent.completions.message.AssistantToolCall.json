@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.completions.message.AssistantToolCall",
+  "description": "A tool call made by the assistant.",
+  "oneOf": [
+    {
+      "description": "A function call with an ID and function details.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The unique ID of this tool call.",
+          "type": "string"
+        },
+        "function": {
+          "description": "The function being called.",
+          "$ref": "agent.completions.message.AssistantToolCallFunction"
+        },
+        "type": {
+          "type": "string",
+          "const": "function"
+        }
+      },
+      "required": [
+        "type",
+        "id",
+        "function"
+      ]
+    }
+  ]
+}

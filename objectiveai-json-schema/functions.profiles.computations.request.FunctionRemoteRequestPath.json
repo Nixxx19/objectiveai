@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.profiles.computations.request.FunctionRemoteRequestPath",
+  "type": "object",
+  "properties": {
+    "fremote": {
+      "$ref": "functions.Remote"
+    },
+    "fowner": {
+      "type": "string"
+    },
+    "frepository": {
+      "type": "string"
+    },
+    "fcommit": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "fremote",
+    "fowner",
+    "frepository"
+  ]
+}

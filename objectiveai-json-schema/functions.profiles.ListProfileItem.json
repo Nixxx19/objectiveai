@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.profiles.ListProfileItem",
+  "description": "A profile in a list response.",
+  "type": "object",
+  "properties": {
+    "remote": {
+      "description": "The remote source where the profile is hosted.",
+      "$ref": "functions.Remote"
+    },
+    "owner": {
+      "description": "Repository owner.",
+      "type": "string"
+    },
+    "repository": {
+      "description": "Repository name.",
+      "type": "string"
+    },
+    "commit": {
+      "description": "Git commit SHA.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "remote",
+    "owner",
+    "repository",
+    "commit"
+  ]
+}

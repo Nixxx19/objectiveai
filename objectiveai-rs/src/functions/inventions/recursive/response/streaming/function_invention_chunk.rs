@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk")]
+#[schemars(rename = "functions.inventions.recursive.response.streaming.FunctionInventionChunk")]
 pub struct FunctionInventionChunk {
     pub index: u64,
     #[serde(flatten)]

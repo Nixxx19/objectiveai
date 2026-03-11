@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "vector.completions.request.VectorCompletionCreateParams",
+  "description": "Parameters for creating a vector completion.\n\nVector completions run multiple agent completions (one per LLM in the\nensemble), force each to vote for one of the predefined responses, and\ncombine votes using the provided profile weights to produce final scores.",
+  "type": "object",
+  "properties": {
+    "retry": {
+      "description": "If present, reuses votes from a previous request with this ID.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "from_cache": {
+      "description": "If true, uses cached votes when available.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "messages": {
+      "description": "The conversation messages (the prompt).",
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.Message"
+      }
+    },
+    "provider": {
+      "description": "Provider routing preferences.",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.Provider"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "ensemble": {
+      "description": "The Ensemble of agents to use.",
+      "$ref": "vector.completions.request.Ensemble"
+    },
+    "profile": {
+      "description": "The profile weights for each agent in the ensemble.\n\nMust have the same length as the total agent count in the ensemble.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
+      "$ref": "vector.completions.request.Profile"
+    },
+    "seed": {
+      "description": "Random seed for deterministic results.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "int64"
+    },
+    "stream": {
+      "description": "Whether to stream the response.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "responses": {
+      "description": "The possible responses the LLMs can vote for.",
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.RichContent"
+      }
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "messages",
+    "ensemble",
+    "profile",
+    "responses"
+  ]
+}

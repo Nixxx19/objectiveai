@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "vector.completions.cache.CacheVoteRequestRef",
+  "type": "object",
+  "properties": {
+    "agent": {
+      "$ref": "agent.completions.request.Agent"
+    },
+    "agents": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "agent.completions.request.Agent"
+      }
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.Message"
+      }
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.RichContent"
+      }
+    }
+  },
+  "required": [
+    "agent",
+    "messages",
+    "responses"
+  ]
+}

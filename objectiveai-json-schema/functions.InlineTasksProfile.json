@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.InlineTasksProfile",
+  "description": "An inline tasks-based profile definition without metadata.",
+  "type": "object",
+  "properties": {
+    "tasks": {
+      "description": "Configuration for each task in the corresponding Function.",
+      "type": "array",
+      "items": {
+        "$ref": "functions.TaskProfile"
+      }
+    },
+    "profile": {
+      "description": "Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
+      "$ref": "vector.completions.request.Profile"
+    }
+  },
+  "required": [
+    "tasks",
+    "profile"
+  ]
+}

@@ -3,7 +3,7 @@ use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsFullRemoteFunction")]
+#[schemars(rename = "functions.FullRemoteFunction")]
 pub enum FullRemoteFunction {
     Alpha(AlphaRemoteFunction),
     Standard(super::RemoteFunction),
@@ -20,7 +20,7 @@ impl FullRemoteFunction {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsFullInlineFunction")]
+#[schemars(rename = "functions.FullInlineFunction")]
 pub enum FullInlineFunction {
     Alpha(AlphaInlineFunction),
     Standard(super::InlineFunction),
@@ -37,7 +37,7 @@ impl FullInlineFunction {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsAlphaRemoteFunction")]
+#[schemars(rename = "functions.AlphaRemoteFunction")]
 pub enum AlphaRemoteFunction {
     Scalar(super::alpha_scalar::RemoteFunction),
     Vector(super::alpha_vector::RemoteFunction),
@@ -54,7 +54,7 @@ impl AlphaRemoteFunction {
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsAlphaInlineFunction")]
+#[schemars(rename = "functions.AlphaInlineFunction")]
 pub enum AlphaInlineFunction {
     Scalar(super::alpha_scalar::InlineFunction),
     Vector(super::alpha_vector::InlineFunction),

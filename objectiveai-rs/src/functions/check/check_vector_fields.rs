@@ -14,7 +14,7 @@ use schemars::JsonSchema;
 
 /// The 4 fields needed to validate a vector function's split/merge behavior.
 #[derive(Debug, Clone, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsCheckVectorFieldsValidation")]
+#[schemars(rename = "functions.check.VectorFieldsValidation")]
 pub struct VectorFieldsValidation {
     pub input_schema: InputSchema,
     pub output_length: Expression,

@@ -10,7 +10,7 @@ use schemars::JsonSchema;
 /// accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)
 /// using the [`push`](Self::push) method.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "AgentCompletionsResponseStreamingAgentCompletionChunk")]
+#[schemars(rename = "agent.completions.response.streaming.AgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     pub id: String,
     pub created: u64,

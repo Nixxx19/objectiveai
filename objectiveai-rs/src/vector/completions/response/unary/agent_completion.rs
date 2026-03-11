@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 /// Wraps the standard agent completion response with an index to identify
 /// which agent in the ensemble produced it.
 #[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "VectorCompletionsResponseUnaryAgentCompletion")]
+#[schemars(rename = "vector.completions.response.unary.AgentCompletion")]
 pub struct AgentCompletion {
     /// Index of this completion within the vector completion.
     pub index: u64,

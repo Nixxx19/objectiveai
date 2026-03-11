@@ -30,7 +30,7 @@ use schemars::JsonSchema;
 /// [`EnsembleBase`]: crate::ensemble::EnsembleBase
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "VectorCompletionsRequestEnsemble")]
+#[schemars(rename = "vector.completions.request.Ensemble")]
 pub enum Ensemble {
     /// Reference an existing Ensemble by its ID.
     Id(String),

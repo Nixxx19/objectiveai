@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.alpha_vector.InlineFunction",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "functions.alpha_vector.BranchTaskExpression"
+          }
+        },
+        "type": {
+          "type": "string",
+          "const": "alpha.vector.branch.function"
+        }
+      },
+      "required": [
+        "type",
+        "tasks"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "tasks": {
+          "type": "array",
+          "items": {
+            "$ref": "functions.alpha_vector.LeafTaskExpression"
+          }
+        },
+        "type": {
+          "type": "string",
+          "const": "alpha.vector.leaf.function"
+        }
+      },
+      "required": [
+        "type",
+        "tasks"
+      ]
+    }
+  ]
+}

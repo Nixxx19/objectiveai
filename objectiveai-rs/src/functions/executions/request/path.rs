@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 
 /// Path parameters for remote Function with inline Profile.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPath")]
+#[schemars(rename = "functions.executions.request.FunctionRemoteProfileInlineRequestPath")]
 pub struct FunctionRemoteProfileInlineRequestPath {
     /// Function remote source.
     pub fremote: Remote,
@@ -23,7 +23,7 @@ pub struct FunctionRemoteProfileInlineRequestPath {
 
 /// Path parameters for inline Function with remote Profile.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPath")]
+#[schemars(rename = "functions.executions.request.FunctionInlineProfileRemoteRequestPath")]
 pub struct FunctionInlineProfileRemoteRequestPath {
     /// Profile remote source.
     pub premote: Remote,
@@ -37,7 +37,7 @@ pub struct FunctionInlineProfileRemoteRequestPath {
 
 /// Path parameters for remote Function with remote Profile.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPath")]
+#[schemars(rename = "functions.executions.request.FunctionRemoteProfileRemoteRequestPath")]
 pub struct FunctionRemoteProfileRemoteRequestPath {
     /// Function remote source.
     pub fremote: Remote,

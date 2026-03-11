@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "agent.mock.AgentBase",
+  "description": "The base configuration for a Mock Agent (without computed ID).",
+  "type": "object",
+  "properties": {
+    "upstream": {
+      "description": "The upstream provider marker.",
+      "$ref": "agent.mock.Upstream"
+    },
+    "output_mode": {
+      "description": "The output mode for vector completions. Ignored for agent completions.",
+      "$ref": "agent.mock.OutputMode"
+    },
+    "top_logprobs": {
+      "description": "Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "error": {
+      "description": "If true, the mock client will return an error instead of a response.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "invention": {
+      "description": "If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "upstream",
+    "output_mode"
+  ]
+}

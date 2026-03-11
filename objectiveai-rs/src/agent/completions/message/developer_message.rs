@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 
 /// A developer message.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageDeveloperMessage")]
+#[schemars(rename = "agent.completions.message.DeveloperMessage")]
 pub struct DeveloperMessage {
     /// The message content.
     pub content: SimpleContent,
@@ -84,7 +84,7 @@ impl FromStarlarkValue for DeveloperMessage {
 
 /// Expression variant of [`DeveloperMessage`] for dynamic content.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "AgentCompletionsMessageDeveloperMessageExpression")]
+#[schemars(rename = "agent.completions.message.DeveloperMessageExpression")]
 pub struct DeveloperMessageExpression {
     /// The message content expression.
     pub content: functions::expression::WithExpression<SimpleContentExpression>,

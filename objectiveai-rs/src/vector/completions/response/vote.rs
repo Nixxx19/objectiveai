@@ -19,7 +19,7 @@ use schemars::JsonSchema;
 /// selection), but when `top_logprobs` is used, votes may be probability
 /// distributions.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "VectorCompletionsResponseVote")]
+#[schemars(rename = "vector.completions.response.Vote")]
 pub struct Vote {
     // --- Identifiers ---
 

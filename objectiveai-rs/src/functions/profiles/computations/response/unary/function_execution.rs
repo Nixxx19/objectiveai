@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesComputationsResponseUnaryFunctionExecution")]
+#[schemars(rename = "functions.profiles.computations.response.unary.FunctionExecution")]
 pub struct FunctionExecution {
     pub index: u64,
     pub dataset: u64,

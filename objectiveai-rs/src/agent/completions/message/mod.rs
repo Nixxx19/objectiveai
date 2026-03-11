@@ -98,7 +98,7 @@ use schemars::JsonSchema;
 /// A message in the conversation.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "role")]
-#[schemars(rename = "AgentCompletionsMessageMessage")]
+#[schemars(rename = "agent.completions.message.Message")]
 pub enum Message {
     /// A developer message (similar to system, but from the developer).
     #[serde(rename = "developer")]
@@ -196,7 +196,7 @@ impl FromStarlarkValue for Message {
 /// Supports both JMESPath and Starlark expressions.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "role")]
-#[schemars(rename = "AgentCompletionsMessageMessageExpression")]
+#[schemars(rename = "agent.completions.message.MessageExpression")]
 pub enum MessageExpression {
     #[serde(rename = "developer")]
     Developer(DeveloperMessageExpression),

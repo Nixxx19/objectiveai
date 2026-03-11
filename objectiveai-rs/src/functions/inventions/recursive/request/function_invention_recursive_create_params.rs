@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams")]
+#[schemars(rename = "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams")]
 pub struct FunctionInventionRecursiveCreateParams {
     pub remote: functions::Remote,
     pub name: String,

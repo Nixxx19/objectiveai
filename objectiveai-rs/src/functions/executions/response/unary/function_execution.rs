@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 
 /// A complete function execution response (non-streaming).
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsExecutionsResponseUnaryFunctionExecution")]
+#[schemars(rename = "functions.executions.response.unary.FunctionExecution")]
 pub struct FunctionExecution {
     /// Unique identifier for this execution.
     pub id: String,

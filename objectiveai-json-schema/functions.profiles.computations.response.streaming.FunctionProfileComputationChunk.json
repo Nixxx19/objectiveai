@@ -1,0 +1,78 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "executions": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.profiles.computations.response.streaming.FunctionExecutionChunk"
+      }
+    },
+    "executions_errors": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "$ref": "functions.InlineTasksProfile"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fitting_stats": {
+      "anyOf": [
+        {
+          "$ref": "functions.profiles.computations.response.FittingStats"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "function": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "object": {
+      "$ref": "functions.profiles.computations.response.streaming.Object"
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "executions",
+    "created",
+    "object"
+  ]
+}

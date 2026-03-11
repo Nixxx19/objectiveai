@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsStateAlphaVectorLeafState")]
+#[schemars(rename = "functions.inventions.state.AlphaVectorLeafState")]
 pub struct AlphaVectorLeafState {
     #[serde(flatten)]
     pub params: super::Params,

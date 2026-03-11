@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "functions.TaskExpression",
+  "description": "A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "scalar.function"
+        }
+      },
+      "$ref": "functions.ScalarFunctionTaskExpression",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "vector.function"
+        }
+      },
+      "$ref": "functions.VectorFunctionTaskExpression",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "vector.completion"
+        }
+      },
+      "$ref": "functions.VectorCompletionTaskExpression",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "placeholder.scalar.function"
+        }
+      },
+      "$ref": "functions.PlaceholderScalarFunctionTaskExpression",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "placeholder.vector.function"
+        }
+      },
+      "$ref": "functions.PlaceholderVectorFunctionTaskExpression",
+      "required": [
+        "type"
+      ]
+    }
+  ]
+}

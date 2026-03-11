@@ -11,7 +11,7 @@ use schemars::JsonSchema;
 /// ensemble), force each to vote for one of the predefined responses, and
 /// combine votes using the provided profile weights to produce final scores.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "VectorCompletionsRequestVectorCompletionCreateParams")]
+#[schemars(rename = "vector.completions.request.VectorCompletionCreateParams")]
 pub struct VectorCompletionCreateParams {
     // --- Caching and retry options ---
     /// If present, reuses votes from a previous request with this ID.

@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 /// Each chunk contains incremental updates to the completion. Use the
 /// [`push`](Self::push) method to accumulate chunks into a complete response.
 #[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
-#[schemars(rename = "VectorCompletionsResponseStreamingVectorCompletionChunk")]
+#[schemars(rename = "vector.completions.response.streaming.VectorCompletionChunk")]
 pub struct VectorCompletionChunk {
     /// Unique identifier for this vector completion.
     pub id: String,

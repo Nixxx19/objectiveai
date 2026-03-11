@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 /// The format of the model's response.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
-#[schemars(rename = "AgentCompletionsRequestResponseFormat")]
+#[schemars(rename = "agent.completions.request.ResponseFormat")]
 pub enum ResponseFormat {
     /// Plain text response (default).
     Text,
@@ -52,7 +52,7 @@ pub type PerAgentResponseFormat = IndexMap<String, ResponseFormat>;
 /// Either a single response format or a per-agent map.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentCompletionsRequestResponseFormatParam")]
+#[schemars(rename = "agent.completions.request.ResponseFormatParam")]
 pub enum ResponseFormatParam {
     /// A single response format applied to all agents.
     Single(ResponseFormat),

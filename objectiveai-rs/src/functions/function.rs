@@ -30,7 +30,7 @@ use schemars::JsonSchema;
 /// for given inputs.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "FunctionsFunction")]
+#[schemars(rename = "functions.Function")]
 pub enum Function {
     /// A remote function with metadata (description, schema, etc.).
     Remote(RemoteFunction),
@@ -446,7 +446,7 @@ impl Function {
 /// that inline functions lack.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
-#[schemars(rename = "FunctionsRemoteFunction")]
+#[schemars(rename = "functions.RemoteFunction")]
 pub enum RemoteFunction {
     /// Produces a single score in [0, 1].
     #[serde(rename = "scalar.function")]
@@ -545,7 +545,7 @@ impl RemoteFunction {
 /// schema fields.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
-#[schemars(rename = "FunctionsInlineFunction")]
+#[schemars(rename = "functions.InlineFunction")]
 pub enum InlineFunction {
     /// Produces a single score in [0, 1].
     #[serde(rename = "scalar.function")]
@@ -605,7 +605,7 @@ impl InlineFunction {
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, JsonSchema)]
-#[schemars(rename = "FunctionsFunctionType")]
+#[schemars(rename = "functions.FunctionType")]
 pub enum FunctionType {
     #[serde(rename = "scalar.function")]
     Scalar,

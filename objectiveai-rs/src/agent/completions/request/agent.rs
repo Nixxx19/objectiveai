@@ -14,7 +14,7 @@ use schemars::JsonSchema;
 /// ObjectiveAI's database from any successful use by anyone.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
-#[schemars(rename = "AgentCompletionsRequestAgent")]
+#[schemars(rename = "agent.completions.request.Agent")]
 pub enum Agent {
     /// The content-addressed ID of an Agent stored in ObjectiveAI's database.
     Id(String),

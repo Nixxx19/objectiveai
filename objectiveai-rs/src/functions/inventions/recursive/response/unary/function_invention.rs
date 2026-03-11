@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsInventionsRecursiveResponseUnaryFunctionInvention")]
+#[schemars(rename = "functions.inventions.recursive.response.unary.FunctionInvention")]
 pub struct FunctionInvention {
     pub index: u64,
     #[serde(flatten)]

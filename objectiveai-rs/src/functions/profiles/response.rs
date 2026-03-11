@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 
 /// Response from listing profiles.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesListProfile")]
+#[schemars(rename = "functions.profiles.ListProfile")]
 pub struct ListProfile {
     /// List of available profiles.
     pub data: Vec<ListProfileItem>,
@@ -14,7 +14,7 @@ pub struct ListProfile {
 
 /// A profile in a list response.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesListProfileItem")]
+#[schemars(rename = "functions.profiles.ListProfileItem")]
 pub struct ListProfileItem {
     /// The remote source where the profile is hosted.
     pub remote: functions::Remote,
@@ -27,7 +27,7 @@ pub struct ListProfileItem {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesGetProfile")]
+#[schemars(rename = "functions.profiles.GetProfile")]
 pub struct GetProfile {
     pub remote: functions::Remote,
     pub owner: String,
@@ -39,7 +39,7 @@ pub struct GetProfile {
 
 /// Usage statistics for a profile.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "FunctionsProfilesUsageProfile")]
+#[schemars(rename = "functions.profiles.UsageProfile")]
 pub struct UsageProfile {
     /// Total number of requests made with this profile.
     pub requests: u64,
