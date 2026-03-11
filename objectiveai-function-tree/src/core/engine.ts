@@ -4,6 +4,7 @@ import type {
   FunctionTreeConfig,
   InputFunctionExecution,
   InputFunctionDefinition,
+  VectorCompletionNodeData,
 } from "../types";
 import { DEFAULT_CONFIG } from "../types";
 import { buildTree } from "./tree-data";
@@ -102,6 +103,23 @@ export class FunctionTreeEngine {
       return;
     }
 
+    // Preserve prompt data from structural tree (execution responses don't include prompts)
+    if (this.prevNodes) {
+      for (const [id, node] of newTree.nodes) {
+        if (node.data.kind !== "vector-completion") continue;
+        const prev = this.prevNodes.get(id);
+        if (!prev || prev.data.kind !== "vector-completion") continue;
+        const prevData = prev.data as VectorCompletionNodeData;
+        if (prevData.promptPreview) {
+          const execData = node.data as VectorCompletionNodeData;
+          execData.promptPreview = prevData.promptPreview;
+          execData.promptMessages = prevData.promptMessages;
+          // Increase height to match structural node
+          if (node.height < 85) node.height = 85;
+        }
+      }
+    }
+
     // Debounce layout during rapid streaming (max 3/sec)
     this.treeData = newTree;
     this.scheduleLayout();
@@ -155,7 +173,7 @@ export class FunctionTreeEngine {
 
     // Re-fit content when user hasn't manually panned/zoomed
     if (!this.userHasInteracted && this.treeData && width > 0 && height > 0) {
-      this.viewport.fitToContent(this.treeData.nodes, width, height);
+      this.viewport.fitToContent(this.treeData.nodes, width, height, 40, 1.0);
     }
 
     this.requestRender();
@@ -261,12 +279,16 @@ export class FunctionTreeEngine {
 
     layoutTree(this.treeData, this.config);
 
-    // Auto-fit whenever data changes, as long as user hasn't manually panned/zoomed
-    if (!this.userHasInteracted && this.canvas.clientWidth > 0) {
+    // Auto-fit only on first layout (no previous nodes), not during streaming updates.
+    // This prevents jarring zoom changes as execution data streams in.
+    // Cap auto zoom at 1.0 so small trees appear at natural size, not blown up.
+    if (!this.userHasInteracted && !this.prevNodes && this.canvas.clientWidth > 0) {
       this.viewport.fitToContent(
         this.treeData.nodes,
         this.canvas.clientWidth,
-        this.canvas.clientHeight
+        this.canvas.clientHeight,
+        40,
+        1.0
       );
     }
 
@@ -334,8 +356,10 @@ export class FunctionTreeEngine {
       // Clear and draw empty state
       this.ctx.resetTransform();
       this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-      this.ctx.fillStyle = this.theme.bg;
-      this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      if (!this.config.transparentBg) {
+        this.ctx.fillStyle = this.theme.bg;
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+      }
       return;
     }
 
@@ -351,7 +375,8 @@ export class FunctionTreeEngine {
       this.selectedId,
       this.hoveredId,
       this.canvas.clientWidth,
-      this.canvas.clientHeight
+      this.canvas.clientHeight,
+      this.config.transparentBg
     );
   }
 }

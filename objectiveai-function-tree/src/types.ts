@@ -41,6 +41,10 @@ export interface VectorCompletionNodeData {
   error: string | null;
   /** Structural mode: number of response options (null if expression-based). */
   responseCount?: number | null;
+  /** Truncated preview of the task's prompt/question (from system/developer message). */
+  promptPreview?: string | null;
+  /** Full message array for detail panel display. Content is null for expression-based messages. */
+  promptMessages?: Array<{ role: string; content: string | null }> | null;
 }
 
 export type TreeNodeData =
@@ -200,6 +204,8 @@ export interface FunctionTreeConfig {
   theme: "light" | "dark" | "auto";
   /** Max children before switching to grid layout. Default: 20. */
   gridThreshold: number;
+  /** Use transparent background (no canvas fill). For full-bleed layouts where the page bg shows through. */
+  transparentBg: boolean;
 }
 
 export const DEFAULT_CONFIG: FunctionTreeConfig = {
@@ -212,6 +218,7 @@ export const DEFAULT_CONFIG: FunctionTreeConfig = {
   maxZoom: 3,
   theme: "auto",
   gridThreshold: 20,
+  transparentBg: false,
 };
 
 // -- Node Dimensions --------------------------------------------------------
@@ -246,6 +253,8 @@ export interface FunctionTreeProps {
   height?: number | string;
   /** CSS class name for the container. */
   className?: string;
+  /** Remove border and border-radius for full-bleed canvas layouts. */
+  borderless?: boolean;
 }
 
 // -- Score Colors -----------------------------------------------------------

@@ -1,28 +1,27 @@
 "use client";
 
-import { useState, useEffect, use } from "react";
+import { useState, useEffect, useCallback, use } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { createPublicClient } from "../../../lib/client";
-import { deriveDisplayName, DEV_EXECUTION_OPTIONS } from "../../../lib/objectiveai";
+import { deriveDisplayName } from "../../../lib/objectiveai";
 import { PINNED_COLOR_ANIMATION_MS } from "../../../lib/constants";
 import { DEFAULT_PROFILES } from "../../../lib/profiles";
 import { loadReasoningModels } from "../../../lib/reasoning-models";
 import { useIsMobile } from "../../../hooks/useIsMobile";
 import { useObjectiveAI } from "../../../hooks/useObjectiveAI";
-import { InputBuilder } from "../../../components/InputBuilder";
-import SchemaFormBuilder from "../../../components/SchemaForm/SchemaFormBuilder";
-import type { InputSchema, InputValue } from "../../../components/SchemaForm/types";
 import SplitItemDisplay from "../../../components/SplitItemDisplay";
 import { simplifySplitItems, toDisplayItem, getDisplayMode } from "../../../lib/split-item-utils";
 import { compileFunctionInputSplit, type FunctionConfig } from "../../../lib/wasm-validation";
+import type { InputValue } from "../../../components/SchemaForm/types";
 import { Functions, EnsembleLlm } from "objectiveai";
-import { ObjectiveAIFetchError } from "objectiveai";
 import { SkeletonFunctionDetails } from "../../../components/ui";
 import { FunctionTree } from "@objectiveai/function-tree";
 import type { InputFunctionDefinition } from "@objectiveai/function-tree";
 import "@objectiveai/function-tree/styles";
 import { useResolvedSubFunctions } from "../../../hooks/useResolvedSubFunctions";
+import { ChatBar } from "../../../components/ChatBar/ChatBar";
+import { useChatOrchestration } from "../../../components/ChatBar/useChatOrchestration";
 interface FunctionDetails {
   owner: string;
   repository: string;
@@ -65,7 +64,6 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   const [isLoadingDetails, setIsLoadingDetails] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  const [formData, setFormData] = useState<InputValue>({});
   const [isRunning, setIsRunning] = useState(false);
   const isMobile = useIsMobile();
   const { getClient } = useObjectiveAI();
@@ -112,7 +110,6 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
     } | null;
     error?: string;
   } | null>(null);
-  const [runError, setRunError] = useState<string | null>(null);
   const [modelNames, setModelNames] = useState<Record<string, string>>({});
   const [showAllModels, setShowAllModels] = useState(false);
   const [expandedVotes, setExpandedVotes] = useState<Set<number>>(new Set());
@@ -158,46 +155,8 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
         // Store raw definition for structural tree
         setRawDefinition(details as unknown as InputFunctionDefinition);
 
-        // Try to get available profiles (separately, so function loads even if no profiles exist)
-        let functionProfiles: Array<{ owner: string; repository: string; commit: string; label: string; description: string }> = [];
-        try {
-          const pairs = await Functions.listPairs(publicClient);
-          const matchingPairs = pairs.data.filter(
-            (p: { function: { owner: string; repository: string } }) =>
-              p.function.owner === owner && p.function.repository === repository
-          );
-          functionProfiles = matchingPairs.map(
-            (p: { profile: { owner: string; repository: string; commit: string } }) => ({
-              owner: p.profile.owner,
-              repository: p.profile.repository,
-              commit: p.profile.commit,
-              label: deriveDisplayName(p.profile.repository),
-              description: `${p.profile.owner}/${p.profile.repository}`,
-            })
-          );
-        } catch {
-          // If pairs fetch fails, continue to fallback
-          functionProfiles = [];
-        }
-
-        // Fallback: try fetching profile from same repo (CLI puts profile.json in the function repo)
-        if (functionProfiles.length === 0) {
-          try {
-            const profile = await Functions.Profiles.retrieve(publicClient, "github", owner, repository, null);
-            functionProfiles = [{
-              owner,
-              repository,
-              commit: profile.commit,
-              label: deriveDisplayName(repository),
-              description: `${owner}/${repository}`,
-            }];
-          } catch {
-            // Genuinely no profile exists for this function
-          }
-        }
-
-        // Function-specific profiles first, then defaults
-        setAvailableProfiles([...functionProfiles, ...DEFAULT_PROFILES]);
+        // Only show default profiles (Nano, Mini, Standard, Giga, Giga Max)
+        setAvailableProfiles(DEFAULT_PROFILES);
         setSelectedProfileIndex(0);
       } catch (err) {
         setLoadError(err instanceof Error ? err.message : "Failed to load function");
@@ -233,6 +192,81 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
 
   // Resolve sub-function definitions for structural tree
   const resolvedSubFunctions = useResolvedSubFunctions(rawDefinition);
+
+  // Chat orchestration — replaces old manual input form
+  const selectedProfile = availableProfiles[selectedProfileIndex];
+
+  const handleExecutionUpdate = useCallback((chunk: unknown) => {
+    // Merge streaming chunk into results (same logic as old handleRun)
+    const c = chunk as Record<string, unknown>;
+
+    setResults(prev => {
+      const existing = prev || {};
+      const output = c.output !== undefined ? c.output as number | number[] : existing.output;
+      const usage = c.usage ? c.usage as NonNullable<typeof results>["usage"] : existing.usage;
+
+      // Merge tasks
+      let tasks = existing.tasks;
+      if (c.tasks && Array.isArray(c.tasks)) {
+        const incoming = c.tasks as NonNullable<typeof results>["tasks"];
+        if (!tasks || tasks.length === 0) {
+          tasks = incoming;
+        } else {
+          const merged = [...tasks];
+          for (const task of incoming!) {
+            if (!task) continue;
+            const taskIndex = (task as { index?: number }).index;
+            const existingIdx = merged.findIndex(t => t && (t as { index?: number }).index === taskIndex);
+            if (existingIdx === -1) {
+              merged.push(task);
+            } else {
+              merged[existingIdx] = { ...merged[existingIdx], ...task };
+            }
+          }
+          tasks = merged;
+        }
+      }
+
+      // Merge reasoning
+      let reasoning = existing.reasoning;
+      const rc = c.reasoning as { choices?: Array<{ delta?: { content?: string }; message?: { content?: string } }> } | undefined;
+      if (rc?.choices?.[0]?.delta?.content) {
+        const prev = reasoning?.choices?.[0]?.message?.content || "";
+        reasoning = { choices: [{ message: { content: prev + rc.choices[0].delta.content } }] };
+      } else if (rc?.choices?.[0]?.message?.content) {
+        reasoning = { choices: [{ message: { content: rc.choices[0].message.content } }] };
+      }
+
+      return { ...existing, output, usage, tasks, reasoning } as typeof results;
+    });
+  }, []);
+
+  const handleExecutionStart = useCallback(() => {
+    setIsRunning(true);
+    setResults(null);
+    setSplitItems(null);
+    setShowAllModels(false);
+    setExpandedVotes(new Set());
+  }, []);
+
+  const handleExecutionEnd = useCallback(() => {
+    setIsRunning(false);
+  }, []);
+
+  const { messages, chatState, sendMessage, clearMessages } = useChatOrchestration({
+    functionMeta: functionDetails,
+    profile: selectedProfile ? {
+      owner: selectedProfile.owner,
+      repository: selectedProfile.repository,
+      commit: selectedProfile.commit,
+    } : { owner: "ObjectiveAI", repository: "profile-nano", commit: null },
+    demoMode,
+    reasoningEnabled,
+    reasoningModel,
+    onExecutionUpdate: handleExecutionUpdate,
+    onExecutionStart: handleExecutionStart,
+    onExecutionEnd: handleExecutionEnd,
+  });
 
   // Toggle save state
   const toggleSave = () => {
@@ -316,218 +350,6 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
 
     computeSplitItems();
   }, [results?.output, results?.inputSnapshot, functionDetails]);
-
-  /**
-   * Execute the function with streaming results.
-   *
-   * This function:
-   * 1. Gets an authenticated SDK client (or anonymous client for non-logged-in users)
-   * 2. Builds execution options including streaming, caching, and optional reasoning
-   * 3. Calls Functions.Executions.create with the selected profile
-   * 4. Processes streaming chunks, merging completions and tasks progressively
-   * 5. Updates UI state as chunks arrive for real-time feedback
-   *
-   * Chunk merging strategy:
-   * - `output`: Takes the latest value (replaced on each chunk)
-   * - `tasks`: Merged by index, with completions content concatenated
-   * - `usage`: Takes the latest value
-   * - `reasoning`: Concatenates content across chunks
-   *
-   * Error handling: Catches execution errors and displays them in the UI.
-   * The user can retry by clicking Execute again.
-   */
-  const handleRun = async () => {
-    const selectedProfile = availableProfiles[selectedProfileIndex];
-    if (!functionDetails || !selectedProfile) return;
-
-    setIsRunning(true);
-    setRunError(null);
-    setResults(null);
-    setSplitItems(null);
-    setShowAllModels(false);
-    setExpandedVotes(new Set());
-
-    try {
-      // Get authenticated client (or public client for anonymous users)
-      const client = await getClient();
-
-      // Build execution options with streaming and optional reasoning
-      const executionBody = {
-        // Type assertion needed: local InputValue type is compatible with SDK's InputValue but TS can't verify
-        input: formData as unknown as Parameters<typeof Functions.Executions.create>[3]["input"],
-        stream: true as const,
-        from_cache: DEV_EXECUTION_OPTIONS.from_cache,
-        from_rng: demoMode,
-        reasoning: reasoningEnabled ? {
-          model: {
-            model: reasoningModel,
-            output_mode: "instruction" as const,
-          },
-        } : undefined,
-      };
-
-      // Execute using SDK with streaming
-      const stream = await Functions.Executions.create(
-        client,
-        {
-          remote: "github",
-          owner: functionDetails.owner,
-          repository: functionDetails.repository,
-          commit: functionDetails.commit,
-        },
-        {
-          remote: "github",
-          owner: selectedProfile.owner,
-          repository: selectedProfile.repository,
-          commit: selectedProfile.commit,
-        },
-        executionBody
-      );
-
-      // Accumulated state for merging chunks
-      type AccumulatedTask = NonNullable<typeof results>["tasks"] extends (infer T)[] | undefined ? T : never;
-      let accumulatedOutput: number | number[] | undefined;
-      let accumulatedTasks: AccumulatedTask[] = [];
-      let accumulatedUsage: NonNullable<typeof results>["usage"] | undefined;
-      let accumulatedReasoningContent = "";
-
-      // Helper: Merge completions by model, accumulating delta content
-      type CompletionType = NonNullable<AccumulatedTask["completions"]>[number];
-      const mergeCompletions = (existing: CompletionType[] | undefined, incoming: CompletionType[] | undefined): CompletionType[] | undefined => {
-        if (!Array.isArray(incoming) || incoming.length === 0) return existing;
-        if (!Array.isArray(existing) || existing.length === 0) return incoming;
-
-        const result = [...existing];
-        for (const comp of incoming) {
-          if (!comp) continue;
-          const existingIdx = result.findIndex(c => c.model === comp.model);
-          if (existingIdx === -1) {
-            result.push(comp);
-          } else {
-            const existingComp = result[existingIdx];
-            const existingContent = existingComp.choices?.[0]?.delta?.content || existingComp.choices?.[0]?.message?.content || "";
-            const incomingContent = comp.choices?.[0]?.delta?.content || "";
-            const mergedContent = existingContent + incomingContent;
-
-            result[existingIdx] = {
-              ...existingComp,
-              choices: [{
-                ...existingComp.choices?.[0],
-                delta: { content: mergedContent },
-                message: comp.choices?.[0]?.message || existingComp.choices?.[0]?.message,
-              }],
-            };
-          }
-        }
-        return result;
-      };
-
-      // Helper: Merge tasks by index
-      const mergeTasks = (existing: AccumulatedTask[], incoming: AccumulatedTask[]): AccumulatedTask[] => {
-        const result = [...existing];
-        for (const task of incoming) {
-          if (!task) continue;
-          const taskIndex = (task as { index?: number }).index;
-          const existingIdx = result.findIndex(t => t && (t as { index?: number }).index === taskIndex);
-          if (existingIdx === -1) {
-            result.push(task);
-          } else {
-            const existingTask = result[existingIdx];
-            result[existingIdx] = {
-              ...existingTask,
-              votes: Array.isArray(task.votes) && task.votes.length > 0 ? task.votes : existingTask?.votes,
-              completions: mergeCompletions(existingTask?.completions, task.completions),
-              scores: Array.isArray(task.scores) && task.scores.length > 0 ? task.scores : existingTask?.scores,
-            };
-          }
-        }
-        return result;
-      };
-
-      // Stream chunks and update UI progressively
-      for await (const chunk of stream) {
-        // Check for errors in chunk
-        if (chunk.error) {
-          throw new Error(typeof chunk.error === 'object' ? JSON.stringify(chunk.error) : String(chunk.error));
-        }
-
-        // Merge output (take latest)
-        if (chunk.output !== undefined) {
-          accumulatedOutput = chunk.output as number | number[];
-        }
-
-        // Merge tasks
-        if (chunk.tasks && Array.isArray(chunk.tasks)) {
-          accumulatedTasks = mergeTasks(accumulatedTasks, chunk.tasks as AccumulatedTask[]);
-        }
-
-        // Merge usage (take latest)
-        if (chunk.usage) {
-          accumulatedUsage = chunk.usage as NonNullable<typeof results>["usage"];
-        }
-
-        // Merge reasoning content
-        const reasoningChunk = chunk.reasoning as { choices?: Array<{ delta?: { content?: string }; message?: { content?: string } }> } | undefined;
-        if (reasoningChunk?.choices?.[0]?.delta?.content) {
-          accumulatedReasoningContent += reasoningChunk.choices[0].delta.content;
-        } else if (reasoningChunk?.choices?.[0]?.message?.content) {
-          accumulatedReasoningContent = reasoningChunk.choices[0].message.content;
-        }
-
-        // Update UI progressively
-        setResults({
-          output: accumulatedOutput,
-          inputSnapshot: typeof formData === 'object' && formData !== null ? { ...(formData as Record<string, unknown>) } : {},
-          usage: accumulatedUsage,
-          tasks: accumulatedTasks.length > 0 ? accumulatedTasks : undefined,
-          reasoning: accumulatedReasoningContent ? {
-            choices: [{ message: { content: accumulatedReasoningContent } }]
-          } : undefined,
-        });
-      }
-    } catch (err) {
-      if (err instanceof ObjectiveAIFetchError) {
-        const code = err.code;
-        if (code === 401 || code === 403) {
-          setRunError("Authentication required. Please sign in to execute functions.");
-        } else if (code === 429) {
-          setRunError("Rate limit exceeded. Please try again later.");
-        } else {
-          setRunError(err.message || `API error (${code})`);
-        }
-      } else {
-        setRunError(err instanceof Error ? err.message : "Execution failed");
-      }
-    } finally {
-      setIsRunning(false);
-    }
-  };
-
-  // Build input fields — schema-driven when available, freeform otherwise
-  const renderInputFields = () => {
-    if (functionDetails?.inputSchema) {
-      // Use SchemaFormBuilder for functions with schemas - supports typed fields (image, audio, video, file)
-      return (
-        <SchemaFormBuilder
-          schema={functionDetails.inputSchema as unknown as InputSchema}
-          value={formData}
-          onChange={setFormData}
-          disabled={isRunning}
-        />
-      );
-    }
-
-    // Use InputBuilder for freeform input (no schema)
-    return (
-      <InputBuilder
-        value={formData}
-        onChange={setFormData}
-        disabled={isRunning}
-        label="Input"
-        description="Build your input data"
-      />
-    );
-  };
 
   // Score color gradient: green (100%) → yellow (66%) → orange (33%) → red (0%)
   const getScoreColor = (percentage: number): string => {
@@ -749,309 +571,172 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
   }
 
   return (
-    <div className="page">
-      <div className="container">
-        {/* Compact Header */}
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "12px",
-          gap: "16px",
-          flexWrap: "wrap",
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "12px", flexWrap: "wrap", minWidth: 0 }}>
-            <nav style={{
+    <div className="page" style={{ padding: 0, height: "calc(100dvh - var(--nav-height-actual, 64px))", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      {/* Tree viewport — fills remaining space */}
+      <div style={{
+        position: "relative",
+        flex: 1,
+        minHeight: 0,
+        overflow: "hidden",
+      }}>
+          <FunctionTree
+            data={results ? {
+              output: results.output,
+              tasks: results.tasks as any,
+              function: functionDetails ? `${functionDetails.owner}/${functionDetails.repository}` : undefined,
+              reasoning: results.reasoning,
+            } : null}
+            definition={rawDefinition}
+            resolvedSubFunctions={resolvedSubFunctions}
+            modelNames={modelNames}
+            height="100%"
+            borderless
+            config={{ theme: "auto", transparentBg: true }}
+          />
+
+          {/* Floating header card — top-left */}
+          <div style={{
+            position: "absolute",
+            top: isMobile ? 12 : 16,
+            left: isMobile ? 12 : 20,
+            right: isMobile ? 12 : undefined,
+            maxWidth: isMobile ? undefined : "600px",
+            zIndex: 10,
+            background: "var(--card-bg)",
+            borderRadius: "12px",
+            border: "1px solid var(--border)",
+            backdropFilter: "blur(16px)",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            overflow: "hidden",
+          }}>
+            {/* Top row: breadcrumb, name, tags, pin */}
+            <div style={{
               display: "flex",
-              gap: "6px",
-              color: "var(--text-muted)",
-              fontSize: "13px",
-              flexShrink: 0,
+              alignItems: "center",
+              gap: "10px",
+              padding: isMobile ? "8px 12px" : "8px 16px",
             }}>
-              <Link href="/functions" style={{ color: "var(--accent)", textDecoration: "none" }}>
-                Functions
-              </Link>
-              <span>/</span>
-            </nav>
-            <h1 style={{
-              fontSize: isMobile ? "18px" : "22px",
-              fontWeight: 700,
-              margin: 0,
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-            }}>
-              {functionDetails.name}
-            </h1>
-            <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
-              <span className="tag" style={{ display: "inline-block", fontSize: "11px", padding: "2px 8px" }}>{functionDetails.category}</span>
-              <span style={{
-                fontSize: "11px",
-                padding: "2px 8px",
-                background: "var(--border)",
-                borderRadius: "10px",
+              <nav style={{
+                display: "flex",
+                gap: "6px",
                 color: "var(--text-muted)",
+                fontSize: "13px",
+                flexShrink: 0,
               }}>
-                {functionDetails.owner}/{functionDetails.repository}
-              </span>
+                <Link href="/functions" style={{ color: "var(--accent)", textDecoration: "none" }}>
+                  Functions
+                </Link>
+                <span>/</span>
+              </nav>
+              <h1 style={{
+                fontSize: isMobile ? "15px" : "16px",
+                fontWeight: 700,
+                margin: 0,
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                minWidth: 0,
+              }}>
+                {functionDetails.name}
+              </h1>
+              {!isMobile && (
+                <div style={{ display: "flex", gap: "6px", flexShrink: 0 }}>
+                  <span className="tag" style={{ display: "inline-block", fontSize: "11px", padding: "2px 8px" }}>{functionDetails.category}</span>
+                  <span style={{
+                    fontSize: "11px",
+                    padding: "2px 8px",
+                    background: "var(--border)",
+                    borderRadius: "10px",
+                    color: "var(--text-muted)",
+                  }}>
+                    {functionDetails.owner}/{functionDetails.repository}
+                  </span>
+                </div>
+              )}
+              <button
+                onClick={toggleSave}
+                style={{
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  cursor: "pointer",
+                  fontSize: "13px",
+                  color: showPinnedColor ? "var(--accent)" : "var(--text-muted)",
+                  opacity: 0.7,
+                  transition: showPinnedColor ? "color 0.15s ease-in" : "color 0.5s ease-out",
+                  flexShrink: 0,
+                  marginLeft: "auto",
+                }}
+              >
+                {isSaved ? "Pinned" : "Pin"}
+              </button>
             </div>
+            {/* Description row */}
+            {!isMobile && functionDetails.description && (
+              <p style={{
+                fontSize: "11px",
+                color: "var(--text-muted)",
+                margin: 0,
+                padding: "0 16px 8px",
+                lineHeight: 1.3,
+                opacity: 0.7,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}>
+                {functionDetails.description}
+              </p>
+            )}
           </div>
+
+      </div>
+
+      {/* Chat bar — bottom of flex layout */}
+      <div style={{ flex: "0 0 auto", padding: isMobile ? "8px 0 12px" : "12px 0 16px" }}>
+        <ChatBar
+          messages={messages}
+          chatState={chatState}
+          onSend={sendMessage}
+          onClear={clearMessages}
+          profiles={availableProfiles}
+          selectedProfileIndex={selectedProfileIndex}
+          onProfileChange={setSelectedProfileIndex}
+          demoMode={demoMode}
+          onDemoModeChange={setDemoMode}
+          reasoningEnabled={reasoningEnabled}
+          onReasoningChange={setReasoningEnabled}
+          isMobile={isMobile}
+          isExecuting={isRunning}
+        />
+      </div>
+
+      {/* Detailed Results — below the canvas, in a container */}
+      {results && !isRunning && (
+        <div className="container" style={{ paddingTop: isMobile ? "16px" : "24px", paddingBottom: "32px" }}>
           <button
-            onClick={toggleSave}
+            onClick={() => setShowDetailedResults((v) => !v)}
             style={{
               background: "none",
               border: "none",
-              padding: 0,
+              padding: "8px 0",
               cursor: "pointer",
               fontSize: "13px",
-              color: showPinnedColor ? "var(--accent)" : "var(--text-muted)",
-              opacity: 0.7,
-              transition: showPinnedColor ? "color 0.15s ease-in" : "color 0.5s ease-out",
-              flexShrink: 0,
+              color: "var(--text-muted)",
+              display: "flex",
+              alignItems: "center",
+              gap: "6px",
             }}
           >
-            {isSaved ? "Pinned" : "Pin"}
+            <span style={{
+              transform: showDetailedResults ? "rotate(90deg)" : "rotate(0deg)",
+              transition: "transform 0.15s ease",
+              display: "inline-block",
+              fontSize: "10px",
+            }}>
+              ▶
+            </span>
+            Detailed Results
           </button>
-        </div>
-
-        {/* Description - subtle subtitle */}
-        <p style={{
-          fontSize: "14px",
-          color: "var(--text-muted)",
-          marginBottom: isMobile ? "12px" : "16px",
-          lineHeight: 1.5,
-          maxWidth: "700px",
-        }}>
-          {functionDetails.description}
-        </p>
-
-        {/* Main Layout: Tree (70%) + Input Sidebar (30%) */}
-        <div style={{
-          display: isMobile ? "flex" : "grid",
-          flexDirection: "column",
-          gridTemplateColumns: "7fr 3fr",
-          gap: isMobile ? "16px" : "24px",
-          alignItems: isMobile ? "stretch" : "start",
-        }}>
-          {/* Left — Function Tree (always visible) */}
-          <div style={{ minHeight: isMobile ? 300 : 400 }}>
-            <FunctionTree
-              data={results ? {
-                output: results.output,
-                tasks: results.tasks as any,
-                function: functionDetails ? `${functionDetails.owner}/${functionDetails.repository}` : undefined,
-                reasoning: results.reasoning,
-              } : null}
-              definition={rawDefinition}
-              resolvedSubFunctions={resolvedSubFunctions}
-              modelNames={modelNames}
-              height={isMobile ? 300 : "min(calc(100vh - 250px), 600px)"}
-              config={{ theme: "auto" }}
-            />
-          </div>
-
-          {/* Right — Input Panel + Output Summary */}
-          <div style={{ display: "flex", flexDirection: "column", gap: isMobile ? "16px" : "20px" }}>
-            {/* Input Section */}
-            <div className="card" style={{ padding: isMobile ? "12px" : "16px" }}>
-              <h3 style={{
-                fontSize: "11px",
-                fontWeight: 600,
-                marginBottom: "12px",
-                textTransform: "uppercase",
-                letterSpacing: "0.05em",
-                color: "var(--text-muted)",
-              }}>
-                Input
-              </h3>
-
-              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-                {renderInputFields()}
-              </div>
-
-              <div style={{ marginTop: "12px" }}>
-                <label style={{
-                  display: "block",
-                  fontSize: "13px",
-                  fontWeight: 600,
-                  marginBottom: "6px",
-                  color: "var(--text)",
-                }}>
-                  Profile
-                </label>
-                <select
-                  className="select"
-                  value={selectedProfileIndex}
-                  onChange={(e) => setSelectedProfileIndex(parseInt(e.target.value, 10))}
-                  style={{
-                    width: "100%",
-                    padding: "8px 12px",
-                    fontSize: "13px",
-                    background: "var(--page-bg)",
-                    border: "1px solid var(--border)",
-                    borderRadius: "8px",
-                    color: "var(--text)",
-                    cursor: "pointer",
-                  }}
-                >
-                  {availableProfiles.map((profile, idx) => (
-                    <option key={`${profile.owner}/${profile.repository}`} value={idx}>
-                      {profile.label} — {profile.description}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Compact options row */}
-              <div style={{
-                marginTop: "12px",
-                display: "flex",
-                gap: "12px",
-                flexWrap: "wrap",
-              }}>
-                <label style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  color: "var(--text-muted)",
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={demoMode}
-                    onChange={(e) => setDemoMode(e.target.checked)}
-                    style={{ width: "14px", height: "14px", accentColor: "var(--accent)" }}
-                  />
-                  Demo
-                </label>
-                <label style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "6px",
-                  cursor: "pointer",
-                  fontSize: "12px",
-                  color: "var(--text-muted)",
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={reasoningEnabled}
-                    onChange={(e) => setReasoningEnabled(e.target.checked)}
-                    style={{ width: "14px", height: "14px", accentColor: "var(--accent)" }}
-                  />
-                  Reasoning
-                </label>
-              </div>
-
-              {reasoningEnabled && (
-                <select
-                  className="select"
-                  value={reasoningModel}
-                  onChange={(e) => setReasoningModel(e.target.value)}
-                  style={{
-                    width: "100%",
-                    marginTop: "8px",
-                    padding: "8px 12px",
-                    fontSize: "13px",
-                  }}
-                >
-                  {reasoningModels.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {option.label}
-                    </option>
-                  ))}
-                </select>
-              )}
-
-              <button
-                className="pillBtn"
-                onClick={handleRun}
-                disabled={isRunning}
-                style={{
-                  width: "100%",
-                  marginTop: "16px",
-                  padding: "10px 16px",
-                  opacity: isRunning ? 0.7 : 1,
-                }}
-              >
-                {isRunning ? "Running..." : "Execute"}
-              </button>
-            </div>
-
-            {/* Output Summary (appears after execution) */}
-            {isRunning && (
-              <div className="card" style={{ padding: "16px", textAlign: "center" }}>
-                <div style={{
-                  width: "32px",
-                  height: "32px",
-                  border: "3px solid var(--border)",
-                  borderTopColor: "var(--accent)",
-                  borderRadius: "50%",
-                  margin: "0 auto 12px",
-                  animation: "spin 1s linear infinite",
-                }} />
-                <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>Processing...</p>
-              </div>
-            )}
-
-            {runError && !isRunning && !results && (
-              <div className="card" style={{ padding: "16px" }}>
-                <p style={{ color: "var(--color-error)", fontSize: "13px", marginBottom: "4px" }}>
-                  {runError.includes("401") ? "Not authenticated" : "Execution failed"}
-                </p>
-                <p style={{ fontSize: "12px", color: "var(--text-muted)" }}>
-                  {runError.includes("401")
-                    ? "API key missing or invalid."
-                    : runError}
-                </p>
-              </div>
-            )}
-
-            {results && !isRunning && (
-              <div className="card" style={{ padding: isMobile ? "12px" : "16px" }}>
-                <h3 style={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                  marginBottom: "12px",
-                  textTransform: "uppercase",
-                  letterSpacing: "0.05em",
-                  color: "var(--text-muted)",
-                }}>
-                  Output
-                </h3>
-                {renderResults()}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Detailed Results (collapsible, below main layout) */}
-        {results && !isRunning && (
-          <div style={{ marginTop: isMobile ? "16px" : "24px" }}>
-            <button
-              onClick={() => setShowDetailedResults((v) => !v)}
-              style={{
-                background: "none",
-                border: "none",
-                padding: "8px 0",
-                cursor: "pointer",
-                fontSize: "13px",
-                color: "var(--text-muted)",
-                display: "flex",
-                alignItems: "center",
-                gap: "6px",
-              }}
-            >
-              <span style={{
-                transform: showDetailedResults ? "rotate(90deg)" : "rotate(0deg)",
-                transition: "transform 0.15s ease",
-                display: "inline-block",
-                fontSize: "10px",
-              }}>
-                ▶
-              </span>
-              Detailed Results
-            </button>
             {showDetailedResults && (
               <div className="card" style={{ padding: isMobile ? "12px" : "16px", marginTop: "8px" }}>
                 {/* Model Breakdown */}
@@ -1316,7 +1001,6 @@ export default function FunctionDetailPage({ params }: { params: Promise<{ slug:
           </div>
         )}
 
-      </div>
     </div>
   );
 }

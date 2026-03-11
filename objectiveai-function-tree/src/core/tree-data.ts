@@ -80,7 +80,8 @@ export function buildTree(
     x: 0,
     y: 0,
     width: SIZES.function.width,
-    height: SIZES.function.height,
+    // Root node is taller when it has output to display the score prominently
+    height: execution.output !== undefined ? 96 : SIZES.function.height,
     state: functionState(execution),
     data: {
       kind: "function",

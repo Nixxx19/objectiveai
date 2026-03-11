@@ -21,6 +21,7 @@ export function FunctionTree({
   width = "100%",
   height = 400,
   className,
+  borderless = false,
 }: FunctionTreeProps): React.ReactElement {
   const [selectedNode, setSelectedNode] = useState<TreeNode | null>(null);
 
@@ -67,15 +68,19 @@ export function FunctionTree({
     width: typeof width === "number" ? `${width}px` : width,
     height: typeof height === "number" ? `${height}px` : height,
     overflow: "hidden",
-    borderRadius: 8,
-    border: "1px solid var(--ft-border, #D1D1D9)",
-    background: "var(--ft-bg, #EDEDF2)",
+    ...(!borderless && {
+      borderRadius: 8,
+      border: "1px solid var(--ft-border, #D1D1D9)",
+    }),
+    ...(!borderless && {
+      background: "var(--ft-bg, #EDEDF2)",
+    }),
   };
 
   return (
     <div
       ref={containerRef}
-      className={`ft-container${className ? ` ${className}` : ""}`}
+      className={`ft-container${borderless ? " ft-borderless" : ""}${className ? ` ${className}` : ""}`}
       style={containerStyle}
     >
       <canvas

@@ -89,7 +89,8 @@ export class Viewport {
     nodes: Map<string, TreeNode>,
     canvasWidth: number,
     canvasHeight: number,
-    padding: number = 40
+    padding: number = 40,
+    maxAutoZoom?: number
   ): void {
     if (nodes.size === 0) return;
 
@@ -118,7 +119,8 @@ export class Viewport {
       availableHeight / contentHeight
     );
 
-    this.zoom = clamp(naturalZoom, this.minZoom, this.maxZoom);
+    const effectiveMax = maxAutoZoom != null ? Math.min(this.maxZoom, maxAutoZoom) : this.maxZoom;
+    this.zoom = clamp(naturalZoom, this.minZoom, effectiveMax);
 
     // Center content
     this.panX = minX - (canvasWidth / this.zoom - contentWidth) / 2;

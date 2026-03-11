@@ -1,21 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { Functions } from "objectiveai";
 import { createPublicClient } from "../lib/client";
-import HeroText from "@/components/HeroText";
 import { deriveCategory, deriveDisplayName } from "../lib/objectiveai";
 import { useResponsive } from "../hooks/useResponsive";
 
+// Lazy-load the 3D hero scene (heavy, uses WebGL)
+const HeroScene = dynamic(() => import("@/components/hero3d/HeroScene"), {
+  ssr: false,
+  loading: () => null, // Fallback handled inside HeroScene itself
+});
+
 // =============================================================================
 // FEATURED FUNCTIONS CONFIGURATION
-// -----------------------------------------------------------------------------
-// Number of functions to display on the landing page.
-// Functions are fetched from the API and the first N are shown.
-// To feature specific functions, they can be pinned in the functions page.
 // =============================================================================
 const FEATURED_COUNT = 3;
+const INSTALL_COMMAND = "npm i -g @objectiveai/cli";
 
 interface FeaturedFunction {
   slug: string;
@@ -25,12 +28,49 @@ interface FeaturedFunction {
   tags: string[];
 }
 
+function CopyIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function CheckIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
 export default function Home() {
   const { isMobile } = useResponsive();
+  const [copied, setCopied] = useState(false);
   const [slots, setSlots] = useState<(FeaturedFunction | null)[]>(
     Array.from({ length: FEATURED_COUNT }, () => null)
   );
   const [isListLoading, setIsListLoading] = useState(true);
+
+  // Copy install command
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(INSTALL_COMMAND);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Fallback for older browsers
+      const textarea = document.createElement("textarea");
+      textarea.value = INSTALL_COMMAND;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, []);
 
   // Fetch functions from API — progressive loading
   useEffect(() => {
@@ -55,11 +95,9 @@ export default function Home() {
         const entries = Array.from(uniqueFunctions.values()).slice(0, FEATURED_COUNT);
         if (cancelled) return;
 
-        // Initialize slots to match actual count
         setSlots(Array.from({ length: entries.length }, () => null));
         setIsListLoading(false);
 
-        // Fire all detail fetches — fill slots as each resolves
         entries.forEach((fn, index) => {
           const controller = new AbortController();
           const timeout = setTimeout(() => controller.abort(), 5000);
@@ -110,46 +148,42 @@ export default function Home() {
       gap: isMobile ? '80px' : '120px',
       paddingBottom: '60px',
     }}>
-      {/* Hero Section */}
-      <section style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        minHeight: 'calc(45vh - 100px)',
-        paddingTop: isMobile ? '32px' : '48px',
-      }}>
-        <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%', padding: isMobile ? '0 16px' : '0 32px', maxWidth: '800px' }}>
-          <p style={{
-            fontSize: isMobile ? '11px' : '13px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.12em',
-            color: 'var(--accent)',
-            marginBottom: '12px',
-          }}>
-            AI Scoring Primitives for Developers
+      {/* Hero Section — Thinker + Atmospheric Flow into Hyperprompt */}
+      <section className="hero">
+        {/* Atmospheric glow */}
+        <div className="hero-atmosphere" />
+
+        {/* 3D Thinker Council Scene */}
+        <div className="hero-scene-wrap">
+          <HeroScene />
+        </div>
+
+        {/* Copy + Terminal Command */}
+        <div className="hero-content">
+          <h1 className="hero-tagline">
+            <span>Score everything.</span>
+            <span>Rank everything.</span>
+            <span>Simulate anyone.</span>
+          </h1>
+
+          <p className="hero-description">
+            Ensembles of LLMs vote on your inputs to produce objective, weighted scores. Build scoring pipelines from your terminal.
           </p>
-          <div style={{ marginBottom: '12px', width: '100%' }}>
-            <HeroText />
+
+          {/* Terminal install command */}
+          <div className="hero-terminal">
+            <span className="terminal-prompt">$</span>
+            <code>{INSTALL_COMMAND}</code>
+            <button
+              className={`hero-terminal-copy ${copied ? "copied" : ""}`}
+              onClick={handleCopy}
+              aria-label="Copy install command"
+            >
+              {copied ? <CheckIcon size={14} /> : <CopyIcon size={14} />}
+            </button>
           </div>
-          <p style={{
-            fontSize: isMobile ? '14px' : '17px',
-            color: 'var(--text-muted)',
-            marginBottom: '24px',
-            maxWidth: '395px',
-            textWrap: 'balance',
-          }}>
-            Ensembles of LLMs, voting, to provide confidence in objective AI measurements.
-          </p>
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-          }}>
-            <Link href="/functions" className="pillBtn">
-              Functions
-            </Link>
+
+          <div className="hero-ctas">
             <a
               href="https://github.com/ObjectiveAI/objectiveai"
               target="_blank"
@@ -158,6 +192,9 @@ export default function Home() {
             >
               GitHub
             </a>
+            <Link href="/functions" className="pillBtnGhost" style={{ textDecoration: 'none' }}>
+              Browse Functions
+            </Link>
           </div>
         </div>
       </section>

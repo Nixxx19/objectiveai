@@ -3,9 +3,66 @@ import type {
   TreeData,
   InputFunctionDefinition,
   InputTaskDefinition,
+  VectorCompletionNodeData,
 } from "../types";
 import { NODE_SIZES as SIZES } from "../types";
 import { nodeId } from "./node-id";
+
+// ---------------------------------------------------------------------------
+// Prompt extraction helpers
+// ---------------------------------------------------------------------------
+
+/** Extract a truncated preview from a task's messages array. */
+export function extractPromptPreview(messages: unknown[] | undefined): string | null {
+  if (!Array.isArray(messages) || messages.length === 0) return null;
+
+  // Find first system or developer message with static string content
+  for (const msg of messages) {
+    if (typeof msg !== "object" || msg === null) continue;
+    const m = msg as Record<string, unknown>;
+    const role = m.role;
+    if (role !== "system" && role !== "developer") continue;
+
+    const content = m.content;
+    if (typeof content === "string" && content.length > 0) {
+      // Truncate to ~80 chars
+      return content.length > 80 ? content.slice(0, 77) + "…" : content;
+    }
+  }
+
+  // Fallback: check user message
+  for (const msg of messages) {
+    if (typeof msg !== "object" || msg === null) continue;
+    const m = msg as Record<string, unknown>;
+    if (m.role !== "user") continue;
+
+    const content = m.content;
+    if (typeof content === "string" && content.length > 0) {
+      return content.length > 80 ? content.slice(0, 77) + "…" : content;
+    }
+    // Expression-based content
+    if (typeof content === "object" && content !== null) {
+      return "[Dynamic prompt]";
+    }
+  }
+
+  return null;
+}
+
+/** Extract full message array for detail panel display. */
+function extractPromptMessages(messages: unknown[] | undefined): Array<{ role: string; content: string | null }> | null {
+  if (!Array.isArray(messages) || messages.length === 0) return null;
+
+  const result: Array<{ role: string; content: string | null }> = [];
+  for (const msg of messages) {
+    if (typeof msg !== "object" || msg === null) continue;
+    const m = msg as Record<string, unknown>;
+    const role = typeof m.role === "string" ? m.role : "unknown";
+    const content = typeof m.content === "string" ? m.content : null;
+    result.push({ role, content });
+  }
+  return result.length > 0 ? result : null;
+}
 
 // ---------------------------------------------------------------------------
 // Build a structural tree from a function definition (no execution data).
@@ -115,6 +172,11 @@ function processStructuralVCTask(
     responseCount = task.responses.length;
   }
 
+  // Extract prompt preview and full messages
+  const promptPreview = extractPromptPreview(task.messages);
+  const promptMessages = extractPromptMessages(task.messages);
+  const hasPrompt = promptPreview != null;
+
   const node: TreeNode = {
     id,
     kind: "vector-completion",
@@ -124,7 +186,8 @@ function processStructuralVCTask(
     x: 0,
     y: 0,
     width: SIZES["vector-completion"].width,
-    height: SIZES["vector-completion"].height,
+    // Taller when prompt preview is present
+    height: hasPrompt ? 85 : SIZES["vector-completion"].height,
     state: "pending",
     data: {
       kind: "vector-completion",
@@ -137,6 +200,8 @@ function processStructuralVCTask(
       completions: null,
       error: null,
       responseCount,
+      promptPreview,
+      promptMessages,
     },
   };
 

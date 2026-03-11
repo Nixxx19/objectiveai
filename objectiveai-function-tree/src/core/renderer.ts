@@ -92,7 +92,8 @@ export class TreeRenderer {
     selectedId: string | null,
     hoveredId: string | null,
     canvasWidth: number,
-    canvasHeight: number
+    canvasHeight: number,
+    transparentBg: boolean = false
   ): void {
     const ctx = this.ctx;
     const params = getLodParams(lod);
@@ -103,8 +104,10 @@ export class TreeRenderer {
     ctx.resetTransform();
     ctx.clearRect(0, 0, canvasWidth * dpr, canvasHeight * dpr);
     ctx.scale(dpr, dpr);
-    ctx.fillStyle = theme.bg;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    if (!transparentBg) {
+      ctx.fillStyle = theme.bg;
+      ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    }
 
     // Apply viewport transform (multiplies with DPR scale)
     viewport.applyTransform(ctx);
@@ -118,7 +121,7 @@ export class TreeRenderer {
     if (lod === "dots") {
       this.drawDots(nodes, viewport, theme, params, animation, now, canvasWidth, canvasHeight);
     } else {
-      this.drawNodes(nodes, viewport, theme, params, animation, now, selectedId, hoveredId, canvasWidth, canvasHeight);
+      this.drawNodes(nodes, rootId, viewport, theme, params, animation, now, selectedId, hoveredId, canvasWidth, canvasHeight);
     }
   }
 
@@ -234,6 +237,7 @@ export class TreeRenderer {
 
   private drawNodes(
     nodes: Map<string, TreeNode>,
+    rootId: string,
     viewport: Viewport,
     theme: RenderTheme,
     params: LodParams,
@@ -285,9 +289,10 @@ export class TreeRenderer {
       }
 
       // Kind-specific rendering
+      const isRoot = node.id === rootId;
       switch (node.data.kind) {
         case "function":
-          this.drawFunctionNode(node, x, y, theme, params);
+          this.drawFunctionNode(node, x, y, theme, params, isRoot);
           break;
         case "vector-completion":
           this.drawVectorCompletionNode(node, x, y, theme, params);
@@ -307,7 +312,8 @@ export class TreeRenderer {
     node: TreeNode,
     x: number, y: number,
     theme: RenderTheme,
-    params: LodParams
+    params: LodParams,
+    isRoot: boolean = false
   ): void {
     const ctx = this.ctx;
     const data = node.data as FunctionNodeData;
@@ -327,8 +333,58 @@ export class TreeRenderer {
       ctx.fillText(label, x + padding + 4, y + 22, node.width - padding * 2);
     }
 
-    // Output score or structural info
-    if (data.output !== null && params.showScoreBars) {
+    // Root node with output: prominent score display
+    if (isRoot && data.output !== null && params.showScoreBars) {
+      if (typeof data.output === "number") {
+        const pct = data.output * 100;
+        const color = scoreColor(data.output);
+
+        // Large score text
+        ctx.font = `bold 22px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.fillStyle = color;
+        ctx.fillText(`${pct.toFixed(1)}%`, x + padding + 4, y + 52, node.width - padding * 2);
+
+        // Score bar
+        const barY = y + 62;
+        const barWidth = node.width - padding * 2 - 4;
+        const barHeight = 5;
+        ctx.fillStyle = theme.nodeBorder;
+        this.drawRoundedRectFill(x + padding + 4, barY, barWidth, barHeight, 2.5);
+        ctx.fillStyle = color;
+        this.drawRoundedRectFill(x + padding + 4, barY, barWidth * data.output, barHeight, 2.5);
+
+        // Task count below bar
+        if (params.showLabels) {
+          ctx.font = theme.fontSmall;
+          ctx.fillStyle = theme.textSecondary;
+          const typeLabel = data.functionType ? `${data.functionType} · ` : "";
+          ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 82, node.width - padding * 2);
+        }
+      } else {
+        // Vector output — show top scores
+        const scores = data.output as number[];
+        const maxIdx = scores.indexOf(Math.max(...scores));
+        const topScore = scores[maxIdx];
+        const color = scoreColor(topScore);
+
+        ctx.font = `bold 18px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+        ctx.fillStyle = color;
+        ctx.fillText(`#${maxIdx + 1} · ${(topScore * 100).toFixed(1)}%`, x + padding + 4, y + 48, node.width - padding * 2);
+
+        // Show up to 3 scores as mini bars
+        const sorted = scores.map((s, i) => ({ s, i })).sort((a, b) => b.s - a.s).slice(0, 3);
+        const barWidth = node.width - padding * 2 - 4;
+        sorted.forEach((item, rank) => {
+          const barY = y + 56 + rank * 12;
+          const barHeight = 4;
+          ctx.fillStyle = theme.nodeBorder;
+          this.drawRoundedRectFill(x + padding + 4, barY, barWidth, barHeight, 2);
+          ctx.fillStyle = scoreColor(item.s);
+          this.drawRoundedRectFill(x + padding + 4, barY, barWidth * item.s, barHeight, 2);
+        });
+      }
+    } else if (data.output !== null && params.showScoreBars) {
+      // Non-root: compact output
       const outputStr = typeof data.output === "number"
         ? `${(data.output * 100).toFixed(1)}%`
         : `[${(data.output as number[]).map(v => v.toFixed(2)).join(", ")}]`;
@@ -338,18 +394,32 @@ export class TreeRenderer {
         ? scoreColor(data.output)
         : theme.textSecondary;
       ctx.fillText(outputStr, x + padding + 4, y + 42, node.width - padding * 2);
+
+      // Task count + function type
+      if (params.showLabels) {
+        ctx.font = theme.fontSmall;
+        ctx.fillStyle = theme.textSecondary;
+        const typeLabel = data.functionType ? `${data.functionType} · ` : "";
+        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 60, node.width - padding * 2);
+      }
     } else if (data.ownerRepo && params.showLabels) {
       ctx.font = theme.fontSmall;
       ctx.fillStyle = theme.textSecondary;
       ctx.fillText(data.ownerRepo, x + padding + 4, y + 42, node.width - padding * 2);
-    }
 
-    // Task count + function type
-    if (params.showLabels) {
+      // Task count + function type
+      if (params.showLabels) {
+        ctx.font = theme.fontSmall;
+        ctx.fillStyle = theme.textSecondary;
+        const typeLabel = data.functionType ? `${data.functionType} · ` : "";
+        ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 60, node.width - padding * 2);
+      }
+    } else if (params.showLabels) {
+      // No output, no ownerRepo: show task count
       ctx.font = theme.fontSmall;
       ctx.fillStyle = theme.textSecondary;
       const typeLabel = data.functionType ? `${data.functionType} · ` : "";
-      ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 60, node.width - padding * 2);
+      ctx.fillText(`${typeLabel}${data.taskCount} tasks`, x + padding + 4, y + 42, node.width - padding * 2);
     }
   }
 
@@ -362,6 +432,9 @@ export class TreeRenderer {
     const ctx = this.ctx;
     const data = node.data as VectorCompletionNodeData;
     const padding = 10;
+    const hasPrompt = !!data.promptPreview;
+    // Vertical offset when prompt preview is shown (shifts score bar + status down)
+    const promptOffset = hasPrompt ? 15 : 0;
 
     // Label
     if (params.showLabels) {
@@ -373,10 +446,19 @@ export class TreeRenderer {
       ctx.fillText(label, x + padding, y + 20, node.width - padding * 2);
     }
 
+    // Prompt preview (below label, small muted italic text)
+    if (hasPrompt && params.showLabels) {
+      ctx.font = `italic 10px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+      ctx.fillStyle = theme.textSecondary;
+      const maxW = node.width - padding * 2;
+      const preview = truncate(data.promptPreview!, 50);
+      ctx.fillText(preview, x + padding, y + 33, maxW);
+    }
+
     // Score bar
     if (data.scores && data.scores.length > 0 && params.showScoreBars) {
       const maxScore = Math.max(...data.scores);
-      const barY = y + 32;
+      const barY = y + 32 + promptOffset;
       const barWidth = node.width - padding * 2;
       const barHeight = 6;
 
@@ -392,25 +474,26 @@ export class TreeRenderer {
     // Vote count / status / structural info
     if (params.showLabels) {
       ctx.font = theme.fontSmall;
+      const statusY = y + 56 + promptOffset;
       if (data.voteCount > 0) {
         ctx.fillStyle = theme.textSecondary;
-        ctx.fillText(`${data.voteCount} LLMs`, x + padding, y + 56, node.width - padding * 2);
+        ctx.fillText(`${data.voteCount} LLMs`, x + padding, statusY, node.width - padding * 2);
       } else if (data.responseCount != null && data.responseCount > 0) {
         // Structural mode: show response count
         ctx.fillStyle = theme.textSecondary;
-        ctx.fillText(`${data.responseCount} responses`, x + padding, y + 56, node.width - padding * 2);
+        ctx.fillText(`${data.responseCount} responses`, x + padding, statusY, node.width - padding * 2);
       } else if (node.state === "pending") {
         ctx.fillStyle = theme.nodeBorder;
-        ctx.fillText("Pending", x + padding, y + 56, node.width - padding * 2);
+        ctx.fillText("Pending", x + padding, statusY, node.width - padding * 2);
       } else if (node.state === "streaming") {
         ctx.fillStyle = theme.accent;
-        ctx.fillText("Running\u2026", x + padding, y + 56, node.width - padding * 2);
+        ctx.fillText("Running\u2026", x + padding, statusY, node.width - padding * 2);
       } else if (node.state === "error") {
         ctx.fillStyle = SCORE_COLORS.red;
-        ctx.fillText("Error", x + padding, y + 56, node.width - padding * 2);
+        ctx.fillText("Error", x + padding, statusY, node.width - padding * 2);
       } else {
         ctx.fillStyle = theme.textSecondary;
-        ctx.fillText("No votes", x + padding, y + 56, node.width - padding * 2);
+        ctx.fillText("No votes", x + padding, statusY, node.width - padding * 2);
       }
     }
   }
