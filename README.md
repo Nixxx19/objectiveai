@@ -119,9 +119,8 @@ objectiveai/
 ├── objectiveai-rs/                 # Rust SDK (core crate)
 ├── objectiveai-api/                # API server (run locally or import as library)
 ├── objectiveai-rs-wasm-js/         # WASM bindings
-├── objectiveai-rs-registry/        # Auto-generated type registry for objectiveai-rs
 ├── objectiveai-js/                 # TypeScript SDK
-├── objectiveai-json-schema/        # Generated JSON Schema files (built from JS SDK)
+├── objectiveai-json-schema/        # Generated JSON Schema files (built from Rust SDK)
 ├── objectiveai-cli/                # ObjectiveAI CLI
 ├── objectiveai-web/                # Web interface
 └── objectiveai-scripts/            # Utility scripts

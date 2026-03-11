@@ -13,9 +13,8 @@ objectiveai/
 ├── objectiveai-rs/                 # Rust SDK (core crate: data structures, validation, compilation)
 ├── objectiveai-api/                # API server (self-hostable, or import as library)
 ├── objectiveai-rs-wasm-js/         # WASM bindings for browser/Node.js
-├── objectiveai-rs-registry/        # Auto-generated type registry for objectiveai-rs (see below)
 ├── objectiveai-js/                 # TypeScript SDK (npm: objectiveai)
-├── objectiveai-json-schema/        # Generated JSON Schema files (built from JS SDK)
+├── objectiveai-json-schema/        # Generated JSON Schema files (built from Rust SDK)
 ├── objectiveai-cli/                # ObjectiveAI CLI
 ├── objectiveai-web/                # Next.js web interface (production)
 ├── objectiveai-scripts/            # Utility scripts (see objectiveai-scripts/README.md)
@@ -225,29 +224,6 @@ Location: `objectiveai-rs/`
 - `functions/` - Function definitions, tasks, profiles, expressions
 - `http/` - HTTP client (feature-gated)
 
-## Rust SDK Type Registry
-
-Location: `objectiveai-rs-registry/`
-
-Auto-generated JSON registry of every public struct, enum, and type alias in `objectiveai-rs`. Mirrors the source directory structure — each `.rs` file with public types gets a corresponding `.rs.json` file under `objectiveai-rs-registry/src/`.
-
-**To find types quickly:** Search the registry JSON files instead of grepping Rust source. For example, to find where `Ensemble` is defined:
-
-```bash
-grep -r '"name": "Ensemble"' objectiveai-rs-registry/src/
-```
-
-Each entry contains:
-- `name` — Type name (e.g., `Generator`)
-- `full_name` — PascalCased module path + name for disambiguation (e.g., `FunctionsCheckExampleInputsFileGenerator`)
-- `kind` — `struct`, `enum`, or `type`
-- `path` — Source file path relative to repo root (e.g., `objectiveai-rs/src/ensemble/ensemble.rs`)
-- `line_start` / `line_end` — Line range of the definition
-
-**Rebuilding:** `cargo run --package objectiveai-rs-registry-builder`
-
-The builder uses `syn` to parse the Rust AST (no regexes). It wipes `objectiveai-rs-registry/src/` on each run to prevent orphan files from deleted modules. The builder source lives at `objectiveai-rs-registry/builder/`.
-
 ## API Server
 
 Location: `objectiveai-api/`
@@ -286,23 +262,11 @@ Enables browser-based validation and preview without server round-trips.
 
 ## JSON Schema (`objectiveai-json-schema/`)
 
-Generated JSON Schema files for all Zod schemas in the TypeScript SDK. Used by `objectiveai-rs/build.rs` to inline schemas at compile time for LLM-callable tools.
+Generated JSON Schema files for every public serializable type in `objectiveai-rs`. Each file is named `{title}.json` where the title uses dot-separated module paths (e.g. `functions.executions.RetryToken.json`).
 
-**Build:** Requires the JS SDK to be built first (`objectiveai-js/dist/` must exist).
+**Rebuilding:** `cargo run --package objectiveai-json-schema-builder`
 
-```bash
-cd objectiveai-json-schema
-node build.js
-```
-
-**How `build.js` works:**
-1. Cleans all existing `.json` and `lengths.csv` files
-2. Imports the built JS SDK (`objectiveai-js/dist/index.js`)
-3. Walks all exported Zod schemas with a `title` in their metadata
-4. Converts each to JSON Schema via `convert()` and writes `{title}.json`
-5. Writes `lengths.csv` with line counts sorted descending
-
-**Consumed by:** `objectiveai-rs/build.rs` reads these JSON files, extracts `$ref` dependencies, and generates a Rust lookup module (`schema_lookup.rs`) that inlines all schemas via `include_str!`. This powers `schema_tools()` which provides LLM-callable tools that return JSON Schema definitions.
+The builder calls `objectiveai::json_schemas()`, strips `$defs` from each schema, rewrites `$ref` targets to bare type names, and writes one file per type. It clears the output directory (except `builder/`) on each run.
 
 ## Development
 
