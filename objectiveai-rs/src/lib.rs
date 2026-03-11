@@ -56,7 +56,6 @@ pub use http::*;
 pub fn json_schemas() -> Vec<schemars::Schema> {
     vec![
         schemars::schema_for!(agent::AgentBase),
-        schemars::schema_for!(agent::AgentBaseRef),
         schemars::schema_for!(agent::Agent),
         schemars::schema_for!(agent::WithFallbacksAndCount<agent::AgentBase>),
         schemars::schema_for!(agent::WithFallbacksAndCount<agent::Agent>),
@@ -235,7 +234,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(functions::expression::Input),
         schemars::schema_for!(functions::expression::InputExpression),
         schemars::schema_for!(functions::expression::InputSchema),
-        schemars::schema_for!(functions::expression::Modalities),
         schemars::schema_for!(functions::expression::AnyOfInputSchema),
         schemars::schema_for!(functions::expression::ObjectInputSchema),
         schemars::schema_for!(functions::expression::ArrayInputSchema),
@@ -340,8 +338,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(functions::PlaceholderVectorFunctionTaskExpression),
         schemars::schema_for!(functions::PlaceholderVectorFunctionTask),
         schemars::schema_for!(functions::CompiledTask),
-        schemars::schema_for!(json_schema::EmptyObjectJsonSchema),
-        schemars::schema_for!(json_schema::AnyObjectJsonSchema),
         schemars::schema_for!(prefixed_uuid::PrefixedUuid<'a', 'p', 'k'>),
         schemars::schema_for!(vector::completions::cache::request::CacheVoteRequest<'static>),
         schemars::schema_for!(vector::completions::cache::request::CacheVoteRequestRef<'static>),

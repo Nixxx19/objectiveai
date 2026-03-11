@@ -4,30 +4,6 @@ use std::path::Path;
 use syn::{Item, Visibility};
 use walkdir::WalkDir;
 
-/// Whitelisted paths and types exempt from JsonSchema requirements.
-/// Each entry is either:
-/// - A folder path (ending with `/`) to skip all types in that subtree
-/// - A `("src/path.rs", "TypeName")` pair to skip a specific type
-const WHITELIST_FOLDERS: &[&str] = &[
-    "src/functions/check/example_inputs/",
-    "src/http/",
-];
-
-const WHITELIST_TYPES: &[(&str, &str)] = &[
-    ("src/functions/expression/error.rs", "ExpressionError"),
-    ("src/functions/inventions/tool.rs", "InventionTool"),
-    ("src/prefixed_uuid.rs", "ParseError"),
-];
-
-fn is_whitelisted(path: &str, name: &str) -> bool {
-    WHITELIST_FOLDERS
-        .iter()
-        .any(|folder| path.starts_with(folder))
-        || WHITELIST_TYPES
-            .iter()
-            .any(|(p, n)| path == *p && *n == name)
-}
-
 fn to_pascal_case(s: &str) -> String {
     s.split('_')
         .map(|part| {
@@ -54,7 +30,7 @@ fn module_prefix(path: &str) -> String {
         .join("")
 }
 
-fn has_json_schema_derive(attrs: &[syn::Attribute]) -> bool {
+fn has_derive(attrs: &[syn::Attribute], trait_name: &str) -> bool {
     attrs.iter().any(|attr| {
         if attr.path().is_ident("derive") {
             let tokens = attr
@@ -66,13 +42,52 @@ fn has_json_schema_derive(attrs: &[syn::Attribute]) -> bool {
                 t.split(',').any(|s| {
                     s.split("::")
                         .last()
-                        .map_or(false, |last| last.trim() == "JsonSchema")
+                        .map_or(false, |last| last.trim() == trait_name)
                 })
             })
         } else {
             false
         }
     })
+}
+
+fn has_json_schema_derive(attrs: &[syn::Attribute]) -> bool {
+    has_derive(attrs, "JsonSchema")
+}
+
+fn has_serde_derive(attrs: &[syn::Attribute]) -> bool {
+    has_derive(attrs, "Serialize") || has_derive(attrs, "Deserialize")
+}
+
+/// Check whether a type has a manual `impl Serialize for TypeName` or
+/// `impl ... Deserialize<'_> for TypeName` anywhere in the file.
+fn has_manual_serde_impl(file: &syn::File, type_name: &str) -> bool {
+    for item in &file.items {
+        if let Item::Impl(impl_item) = item {
+            // Check if the Self type matches
+            let self_matches = match impl_item.self_ty.as_ref() {
+                syn::Type::Path(tp) => tp
+                    .path
+                    .segments
+                    .last()
+                    .map_or(false, |seg| seg.ident == type_name),
+                _ => false,
+            };
+            if !self_matches {
+                continue;
+            }
+            // Check if this is a trait impl for Serialize or Deserialize
+            if let Some((_, trait_path, _)) = &impl_item.trait_ {
+                if let Some(last) = trait_path.segments.last() {
+                    let name = last.ident.to_string();
+                    if name == "Serialize" || name == "Deserialize" {
+                        return true;
+                    }
+                }
+            }
+        }
+    }
+    false
 }
 
 fn get_schemars_rename(attrs: &[syn::Attribute]) -> Option<String> {
@@ -103,8 +118,12 @@ fn has_type_params(item: &Item) -> bool {
         .any(|p| matches!(p, syn::GenericParam::Type(_)))
 }
 
+/// Every public type that implements Serialize or Deserialize (via derive or
+/// manual impl) must derive JsonSchema with the correct schemars rename.
+/// Conversely, types that do NOT implement Serialize/Deserialize must NOT
+/// derive JsonSchema.
 #[test]
-fn all_public_types_have_json_schema() {
+fn all_serializable_types_have_json_schema() {
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
     let source_root = Path::new(manifest_dir).join("src");
 
@@ -124,14 +143,6 @@ fn all_public_types_have_json_schema() {
             .to_str()
             .unwrap()
             .replace('\\', "/");
-
-        // Skip entire whitelisted folders early
-        if WHITELIST_FOLDERS
-            .iter()
-            .any(|folder| relative.starts_with(folder))
-        {
-            continue;
-        }
 
         let source = fs::read_to_string(path).unwrap();
         let file = match syn::parse_file(&source) {
@@ -153,15 +164,28 @@ fn all_public_types_have_json_schema() {
             };
 
             let full_name = format!("{prefix}{name}");
+            let is_serializable =
+                has_serde_derive(attrs) || has_manual_serde_impl(&file, &name);
+            let has_schema = has_json_schema_derive(attrs);
 
-            if is_whitelisted(&relative, &name) {
+            if is_serializable && !has_schema {
+                errors.push(format!(
+                    "{name} in {relative} implements Serialize/Deserialize \
+                     but is missing #[derive(JsonSchema)]"
+                ));
                 continue;
             }
 
-            if !has_json_schema_derive(attrs) {
+            if !is_serializable && has_schema {
                 errors.push(format!(
-                    "{name} in {relative} is missing #[derive(JsonSchema)]"
+                    "{name} in {relative} has #[derive(JsonSchema)] but does \
+                     not implement Serialize or Deserialize"
                 ));
+                continue;
+            }
+
+            // From here on, only check rename for types that have JsonSchema
+            if !has_schema {
                 continue;
             }
 
@@ -205,8 +229,8 @@ fn all_public_types_have_json_schema() {
     }
 }
 
-/// Verifies that `json_schemas()` returns a schema for every non-whitelisted,
-/// non-generic public struct/enum that derives JsonSchema.
+/// Verifies that `json_schemas()` returns a schema for every non-generic
+/// public struct/enum that derives JsonSchema.
 #[test]
 fn json_schemas_covers_all_types() {
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
@@ -227,12 +251,6 @@ fn json_schemas_covers_all_types() {
             .to_str()
             .unwrap()
             .replace('\\', "/");
-        if WHITELIST_FOLDERS
-            .iter()
-            .any(|folder| relative.starts_with(folder))
-        {
-            continue;
-        }
         let source = fs::read_to_string(path).unwrap();
         let file = match syn::parse_file(&source) {
             Ok(f) => f,
@@ -253,9 +271,6 @@ fn json_schemas_covers_all_types() {
                 }
                 _ => continue,
             };
-            if is_whitelisted(&relative, &name) {
-                continue;
-            }
             if !has_json_schema_derive(attrs) {
                 continue;
             }

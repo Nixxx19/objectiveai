@@ -759,8 +759,7 @@ impl Serialize for InputSchema {
 }
 
 /// Which media modalities are present in a schema.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, JsonSchema)]
-#[schemars(rename = "FunctionsExpressionModalities")]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
 pub struct Modalities {
     pub image: bool,
     pub audio: bool,

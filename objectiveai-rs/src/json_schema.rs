@@ -7,8 +7,6 @@ pub trait JsonSchema {
     }
 }
 
-#[derive(schemars::JsonSchema)]
-#[schemars(rename = "EmptyObjectJsonSchema")]
 pub struct EmptyObjectJsonSchema;
 
 impl JsonSchema for EmptyObjectJsonSchema {
@@ -26,8 +24,6 @@ impl JsonSchema for EmptyObjectJsonSchema {
     }
 }
 
-#[derive(schemars::JsonSchema)]
-#[schemars(rename = "AnyObjectJsonSchema")]
 pub struct AnyObjectJsonSchema;
 
 impl JsonSchema for AnyObjectJsonSchema {

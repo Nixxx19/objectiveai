@@ -68,8 +68,7 @@ impl AgentBase {
 }
 
 /// A borrowed reference into an [`AgentBase`] variant.
-#[derive(Clone, Copy, Debug, JsonSchema)]
-#[schemars(rename = "AgentAgentBaseRef")]
+#[derive(Clone, Copy, Debug)]
 pub enum AgentBaseRef<'a> {
     Openrouter(&'a super::openrouter::AgentBase),
     ClaudeAgentSdk(&'a super::claude_agent_sdk::AgentBase),
