@@ -1,0 +1,7 @@
+import { z } from "zod";
+import { FunctionsListFunctionProfilePairsSourceSchema } from "./listFunctionProfilePairsSource";
+
+export const FunctionsListFunctionProfilePairsQueryParametersSchema = z.object({
+  source: FunctionsListFunctionProfilePairsSourceSchema.nullable().describe("Optional source filter for listing function-profile pairs.").optional(),
+}).describe("Query parameters for the list function-profile pairs endpoint.").meta({ title: "functions.ListFunctionProfilePairsQueryParameters" });
+export type FunctionsListFunctionProfilePairsQueryParameters = z.infer<typeof FunctionsListFunctionProfilePairsQueryParametersSchema>;
