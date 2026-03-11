@@ -4,7 +4,6 @@ use crate::error;
 use eventsource_stream::Event as MessageEvent;
 use futures::{Stream, StreamExt};
 use reqwest_eventsource::{Event, RequestBuilderExt};
-
 /// HTTP client for making requests to the ObjectiveAI API.
 ///
 /// Handles authentication, request building, and response parsing for both

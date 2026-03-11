@@ -8,9 +8,11 @@ use functions::expression::{
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
+use schemars::JsonSchema;
 
 /// A tool message containing the result of a tool call.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageToolMessage")]
 pub struct ToolMessage {
     /// The content of the tool response.
     pub content: RichContent,
@@ -75,7 +77,8 @@ impl FromStarlarkValue for ToolMessage {
 }
 
 /// Expression variant of [`ToolMessage`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageToolMessageExpression")]
 pub struct ToolMessageExpression {
     /// The content expression.
     pub content: functions::expression::WithExpression<RichContentExpression>,

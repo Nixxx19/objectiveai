@@ -18,6 +18,7 @@ pub use params::*;
 use std::sync::{Arc, Mutex};
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Constructs a child name by appending the task index to the parent's path.
 ///
@@ -89,8 +90,9 @@ pub trait InventionState: Clone + Send + 'static {
     );
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsInventionsStateState")]
 pub enum State {
     #[serde(rename = "alpha.scalar.branch.function")]
     AlphaScalarBranch(AlphaScalarBranchState),
@@ -229,8 +231,9 @@ impl State {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsInventionsStateParamsState")]
 pub enum ParamsState {
     #[serde(rename = "alpha.scalar.branch.function")]
     AlphaScalarBranch(AlphaScalarBranchState),

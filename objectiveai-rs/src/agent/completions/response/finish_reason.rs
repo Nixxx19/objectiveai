@@ -1,11 +1,13 @@
 //! Finish reason for agent completions.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// The reason the model stopped generating.
 #[derive(
-    Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq,
+    Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq, JsonSchema,
 )]
+#[schemars(rename = "AgentCompletionsResponseFinishReason")]
 pub enum FinishReason {
     /// The model reached a natural stop point or stop sequence.
     #[serde(rename = "stop")]

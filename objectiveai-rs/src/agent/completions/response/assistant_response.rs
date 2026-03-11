@@ -1,9 +1,11 @@
 //! Role type for agent completion responses.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// The role of a message in a response (always "assistant").
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseAssistantRole")]
 pub enum AssistantRole {
     /// The assistant role.
     #[serde(rename = "assistant")]

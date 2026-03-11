@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema)]
+#[schemars(rename = "FunctionsRemoteFunctionPath")]
 pub struct RemoteFunctionPath {
     pub remote: super::Remote,
     pub owner: String,

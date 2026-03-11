@@ -1,8 +1,10 @@
 use crate::functions::inventions::response;
 use crate::{agent, error, functions};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsResponseUnaryFunctionInvention")]
 pub struct FunctionInvention {
     pub id: String,
     pub completions: Vec<super::AgentCompletion>,

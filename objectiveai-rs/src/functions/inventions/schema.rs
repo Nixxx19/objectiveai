@@ -1,7 +1,8 @@
 use crate::json_schema::JsonSchema;
 use serde::Deserialize;
 
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "FunctionsInventionsIndexObject")]
 pub struct IndexObject {
     pub index: u64,
 }
@@ -43,7 +44,8 @@ impl JsonSchema for IndexObject {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "FunctionsInventionsEssayObject")]
 pub struct EssayObject {
     pub essay: String,
 }
@@ -85,7 +87,8 @@ impl JsonSchema for EssayObject {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "FunctionsInventionsEssayTasksObject")]
 pub struct EssayTasksObject {
     pub essay_tasks: String,
 }
@@ -127,7 +130,8 @@ impl JsonSchema for EssayTasksObject {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "FunctionsInventionsTasksLengthObject")]
 pub struct TasksLengthObject {
     pub tasks_length: u64,
 }
@@ -169,7 +173,8 @@ impl JsonSchema for TasksLengthObject {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, schemars::JsonSchema)]
+#[schemars(rename = "FunctionsInventionsDescriptionObject")]
 pub struct DescriptionObject {
     pub description: String,
 }

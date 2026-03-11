@@ -10,9 +10,11 @@ use super::check_input_schema::check_input_schema;
 use super::example_inputs;
 use crate::functions::expression::{Expression, Input, InputSchema};
 use crate::functions::{Function, RemoteFunction};
+use schemars::JsonSchema;
 
 /// The 4 fields needed to validate a vector function's split/merge behavior.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsCheckVectorFieldsValidation")]
 pub struct VectorFieldsValidation {
     pub input_schema: InputSchema,
     pub output_length: Expression,

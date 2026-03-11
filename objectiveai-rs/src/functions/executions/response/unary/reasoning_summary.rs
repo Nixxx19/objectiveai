@@ -1,8 +1,10 @@
 use crate::functions::executions::response;
 use crate::{agent, error};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsResponseUnaryReasoningSummary")]
 pub struct ReasoningSummary {
     #[serde(flatten)]
     pub inner: agent::completions::response::unary::AgentCompletion,

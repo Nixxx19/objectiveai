@@ -5,9 +5,11 @@ use crate::{
     functions::{self, executions::response},
 };
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A complete function execution response (non-streaming).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsResponseUnaryFunctionExecution")]
 pub struct FunctionExecution {
     /// Unique identifier for this execution.
     pub id: String,

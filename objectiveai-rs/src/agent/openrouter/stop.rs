@@ -1,13 +1,15 @@
 //! Stop sequence configuration for Agents.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Stop sequences that terminate model generation.
 ///
 /// When the model generates any of these sequences, it immediately
 /// stops producing further tokens.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "AgentOpenrouterStop")]
 pub enum Stop {
     /// A single stop sequence.
     String(String),

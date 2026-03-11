@@ -1,12 +1,14 @@
 //! Upstream enumeration.
 
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 /// Supported agent upstreams.
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default,
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default, JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
+#[schemars(rename = "AgentUpstream")]
 pub enum Upstream {
     /// Unknown Upstream.
     #[default]

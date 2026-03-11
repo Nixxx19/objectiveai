@@ -1,7 +1,9 @@
 use crate::{agent, error, functions};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsResponseStreamingFunctionExecutionChunk")]
 pub struct FunctionExecutionChunk {
     pub id: String,
     pub tasks: Vec<super::TaskChunk>,

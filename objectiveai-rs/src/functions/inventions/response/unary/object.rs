@@ -1,7 +1,9 @@
 use crate::functions::inventions::response;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsResponseUnaryObject")]
 pub enum Object {
     #[serde(rename = "alpha.scalar.function.invention")]
     AlphaScalarFunctionInvention,

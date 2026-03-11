@@ -4,6 +4,7 @@
 //! compilation, including the function input, task outputs, and current map element.
 
 use super::{ExpressionError, FromStarlarkValue, ToStarlarkValue};
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use starlark::values::{
     Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue,
@@ -12,8 +13,9 @@ use starlark::values::{
 /// Context for evaluating expressions (JMESPath or Starlark).
 ///
 /// Contains all data accessible within expressions: `input`, `output`, and `map`.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsExpressionParams")]
 pub enum Params<'i, 'to> {
     /// Owned version (for deserialization).
     Owned(ParamsOwned),
@@ -32,7 +34,8 @@ impl<'de> serde::Deserialize<'de> for Params<'static, 'static> {
 }
 
 /// Owned version of expression parameters.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsExpressionParamsOwned")]
 pub struct ParamsOwned {
     /// The function's input data.
     pub input: super::Input,
@@ -43,7 +46,8 @@ pub struct ParamsOwned {
 }
 
 /// Borrowed version of expression parameters.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[schemars(rename = "FunctionsExpressionParamsRef")]
 pub struct ParamsRef<'i, 'to> {
     /// The function's input data.
     pub input: &'i super::Input,
@@ -54,8 +58,9 @@ pub struct ParamsRef<'i, 'to> {
 }
 
 /// Output from an executed task.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsExpressionTaskOutput")]
 pub enum TaskOutput<'a> {
     /// Owned version.
     Owned(TaskOutputOwned),
@@ -86,8 +91,9 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 }
 
 /// Owned task output variants.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsExpressionTaskOutputOwned")]
 pub enum TaskOutputOwned {
     /// A single scalar score.
     Scalar(rust_decimal::Decimal),
@@ -118,6 +124,7 @@ impl FromStarlarkValue for TaskOutputOwned {
         value: &StarlarkValue,
     ) -> Result<Self, ExpressionError> {
         use starlark::values::float::UnpackFloat;
+use schemars::JsonSchema;
         if value.is_none() {
             return Ok(TaskOutputOwned::Err(serde_json::Value::Null));
         }
@@ -278,8 +285,9 @@ impl TaskOutputOwned {
 }
 
 /// Borrowed task output variants.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsExpressionTaskOutputRef")]
 pub enum TaskOutputRef<'a> {
     /// A single scalar score.
     Scalar(&'a rust_decimal::Decimal),

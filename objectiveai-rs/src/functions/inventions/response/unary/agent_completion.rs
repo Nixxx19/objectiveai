@@ -1,8 +1,10 @@
 use crate::agent;
 use crate::functions::inventions::response;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsResponseUnaryAgentCompletion")]
 pub struct AgentCompletion {
     pub index: u64,
     #[serde(flatten)]

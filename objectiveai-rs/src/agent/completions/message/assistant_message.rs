@@ -8,9 +8,11 @@ use functions::expression::{
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
+use schemars::JsonSchema;
 
 /// An assistant message (model's previous response).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageAssistantMessage")]
 pub struct AssistantMessage {
     /// The message content, if any.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -111,7 +113,8 @@ impl FromStarlarkValue for AssistantMessage {
 }
 
 /// Expression variant of [`AssistantMessage`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageAssistantMessageExpression")]
 pub struct AssistantMessageExpression {
     /// The content expression.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -287,8 +290,9 @@ impl FromStarlarkValue for AssistantMessageExpression {
 }
 
 /// A tool call made by the assistant.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
+#[schemars(rename = "AgentCompletionsMessageAssistantToolCall")]
 pub enum AssistantToolCall {
     /// A function call with an ID and function details.
     Function {
@@ -365,8 +369,9 @@ impl FromStarlarkValue for AssistantToolCall {
 }
 
 /// Expression variant of [`AssistantToolCall`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
+#[schemars(rename = "AgentCompletionsMessageAssistantToolCallExpression")]
 pub enum AssistantToolCallExpression {
     /// A function call expression.
     Function {
@@ -419,7 +424,8 @@ impl FromStarlarkValue for AssistantToolCallExpression {
 }
 
 /// Details of a function call made by the assistant.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageAssistantToolCallFunction")]
 pub struct AssistantToolCallFunction {
     /// The name of the function to call.
     pub name: String,
@@ -491,7 +497,8 @@ impl FromStarlarkValue for AssistantToolCallFunction {
 }
 
 /// A tool call delta in a streaming response.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageAssistantToolCallDelta")]
 pub struct AssistantToolCallDelta {
     /// The index of this tool call.
     pub index: u64,
@@ -528,7 +535,8 @@ impl AssistantToolCallDelta {
 }
 
 /// The type of tool call.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageAssistantToolCallType")]
 pub enum AssistantToolCallType {
     /// A function call.
     #[serde(rename = "function")]
@@ -537,7 +545,8 @@ pub enum AssistantToolCallType {
 }
 
 /// Function call details in a streaming tool call.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageAssistantToolCallFunctionDelta")]
 pub struct AssistantToolCallFunctionDelta {
     /// The function name (only present in the first delta).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -566,7 +575,8 @@ impl AssistantToolCallFunctionDelta {
 }
 
 /// Expression variant of [`AssistantToolCallFunction`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageAssistantToolCallFunctionExpression")]
 pub struct AssistantToolCallFunctionExpression {
     /// The function name expression.
     pub name: functions::expression::WithExpression<String>,

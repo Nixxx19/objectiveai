@@ -1,8 +1,11 @@
 use base64::Engine;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(transparent)]
+#[schemars(!transparent)]
+#[schemars(rename = "FunctionsProfilesComputationsRetryToken")]
 pub struct RetryToken(pub Vec<Option<String>>);
 
 impl RetryToken {

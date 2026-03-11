@@ -5,6 +5,7 @@
 //! for API response errors.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A trait for errors that have an HTTP status code and optional message.
 ///
@@ -38,8 +39,9 @@ pub trait StatusError {
 ///     message: json!({"error": "Invalid request"}),
 /// };
 /// ```
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, thiserror::Error)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, thiserror::Error, JsonSchema)]
 #[error("{}", &serde_json::to_string(self).unwrap_or_default())]
+#[schemars(rename = "ResponseError")]
 pub struct ResponseError {
     /// The HTTP status code of the error response.
     pub code: u16,

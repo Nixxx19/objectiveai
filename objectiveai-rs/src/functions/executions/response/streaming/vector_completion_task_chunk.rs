@@ -1,7 +1,9 @@
 use crate::{error, vector};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk")]
 pub struct VectorCompletionTaskChunk {
     pub index: u64,
     pub task_index: u64,

@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "AgentCompletionsResponseStreamingMessageChunk")]
 pub enum MessageChunk {
     Assistant(super::AssistantResponseChunk),
     Tool(super::super::ToolResponse),

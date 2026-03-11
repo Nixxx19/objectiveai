@@ -1,23 +1,27 @@
 //! Response types for Ensemble API endpoints.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Response containing a list of Ensembles.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "EnsembleListEnsemble")]
 pub struct ListEnsemble {
     /// The list of Ensemble summaries.
     pub data: Vec<ListEnsembleItem>,
 }
 
 /// Summary information for a listed Ensemble.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "EnsembleListEnsembleItem")]
 pub struct ListEnsembleItem {
     /// The unique content-addressed ID of the Ensemble.
     pub id: String,
 }
 
 /// Response containing a single Ensemble with creation timestamp.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "EnsembleGetEnsemble")]
 pub struct GetEnsemble {
     /// Unix timestamp when this Ensemble was first used.
     pub created: u64,
@@ -27,7 +31,8 @@ pub struct GetEnsemble {
 }
 
 /// Usage statistics for an Ensemble.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "EnsembleUsageEnsemble")]
 pub struct UsageEnsemble {
     /// Total number of requests made with this Ensemble.
     pub requests: u64,

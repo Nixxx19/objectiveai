@@ -1,7 +1,9 @@
 use crate::{agent, error, functions};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsResponseStreamingFunctionInventionChunk")]
 pub struct FunctionInventionChunk {
     pub id: String,
     pub completions: Vec<super::AgentCompletionChunk>,

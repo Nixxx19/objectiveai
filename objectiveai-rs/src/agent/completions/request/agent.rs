@@ -1,6 +1,7 @@
 //! Agent specification for agent completion requests.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// The agent to use for agent completion.
 ///
@@ -11,8 +12,9 @@ use serde::{Deserialize, Serialize};
 /// Since IDs are content-addressed, ObjectiveAI stores Agent definitions
 /// when they are successfully used. "Previously used" means the ID exists in
 /// ObjectiveAI's database from any successful use by anyone.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "AgentCompletionsRequestAgent")]
 pub enum Agent {
     /// The content-addressed ID of an Agent stored in ObjectiveAI's database.
     Id(String),

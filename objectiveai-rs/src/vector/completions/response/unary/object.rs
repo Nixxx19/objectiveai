@@ -2,11 +2,13 @@
 
 use crate::vector::completions::response;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Object type for unary vector completion responses.
 ///
 /// Serializes to `"vector.completion"` in JSON.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "VectorCompletionsResponseUnaryObject")]
 pub enum Object {
     /// A complete vector completion response.
     #[serde(rename = "vector.completion")]

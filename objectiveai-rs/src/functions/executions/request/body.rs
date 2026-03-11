@@ -3,9 +3,11 @@
 use crate::{agent, functions};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Request body for inline Function with inline Profile.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody")]
 pub struct FunctionInlineProfileInlineRequestBody {
     /// The inline Function definition.
     pub function: functions::InlineFunction,
@@ -17,7 +19,8 @@ pub struct FunctionInlineProfileInlineRequestBody {
 }
 
 /// Request body for inline Function with remote Profile.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody")]
 pub struct FunctionInlineProfileRemoteRequestBody {
     /// The inline Function definition.
     pub function: functions::InlineFunction,
@@ -27,7 +30,8 @@ pub struct FunctionInlineProfileRemoteRequestBody {
 }
 
 /// Request body for remote Function with inline Profile.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody")]
 pub struct FunctionRemoteProfileInlineRequestBody {
     /// The inline Profile definition.
     pub profile: functions::InlineProfile,
@@ -40,7 +44,8 @@ pub struct FunctionRemoteProfileInlineRequestBody {
 ///
 /// Used directly for remote Function + remote Profile, or flattened into
 /// other request body types.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody")]
 pub struct FunctionRemoteProfileRemoteRequestBody {
     // --- Caching and retry options ---
     /// If present, reuses votes from a previous execution with this token.

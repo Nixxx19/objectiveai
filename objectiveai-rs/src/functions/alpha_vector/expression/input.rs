@@ -1,5 +1,6 @@
 use crate::functions;
 use indexmap::IndexMap;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 pub type ScalarFunctionInputSchema = functions::expression::ObjectInputSchema;
@@ -13,7 +14,8 @@ pub mod scalar_function_input_schema {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorExpressionVectorFunctionInputSchema")]
 pub struct VectorFunctionInputSchema {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<functions::expression::ObjectInputSchema>,
@@ -82,7 +84,8 @@ pub mod scalar_function_input_expression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorExpressionVectorFunctionInputExpression")]
 pub struct VectorFunctionInputExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<functions::expression::Expression>,
@@ -134,7 +137,8 @@ pub mod scalar_function_input {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorExpressionVectorFunctionInput")]
 pub struct VectorFunctionInput {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub context: Option<IndexMap<String, functions::expression::Input>>,

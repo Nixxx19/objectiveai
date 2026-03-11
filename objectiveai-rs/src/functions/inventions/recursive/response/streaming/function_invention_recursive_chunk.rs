@@ -1,7 +1,9 @@
 use crate::agent;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk")]
 pub struct FunctionInventionRecursiveChunk {
     pub id: String,
     pub inventions: Vec<super::FunctionInventionChunk>,

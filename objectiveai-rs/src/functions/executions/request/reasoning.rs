@@ -2,11 +2,13 @@
 
 use crate::agent;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Configuration for generating reasoning summaries during execution.
 ///
 /// When enabled, an LLM summarizes the execution's reasoning process.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsExecutionsRequestReasoning")]
 pub struct Reasoning {
     /// The primary agent to use for generating reasoning summaries.
     pub agent: agent::completions::request::Agent,

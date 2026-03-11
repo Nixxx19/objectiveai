@@ -12,9 +12,11 @@
 
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// An entry in a profile with an explicit weight and optional invert flag.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "VectorCompletionsRequestProfileEntry")]
 pub struct ProfileEntry {
     /// The weight for this agent in the ensemble. Must be in [0, 1].
     pub weight: Decimal,
@@ -32,8 +34,9 @@ pub struct ProfileEntry {
 ///
 /// - `Weights(Vec<Decimal>)` - legacy representation (no inversion)
 /// - `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "VectorCompletionsRequestProfile")]
 pub enum Profile {
     /// Simple vector of decimal weights.
     Weights(Vec<Decimal>),

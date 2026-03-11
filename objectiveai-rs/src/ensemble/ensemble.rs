@@ -6,12 +6,14 @@ use indexmap::IndexMap;
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
+use schemars::JsonSchema;
 
 /// The base configuration for an Ensemble (without computed ID).
 ///
 /// Contains a list of agent configurations that will be validated, deduplicated,
 /// and sorted when converting to [`Ensemble`].
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "EnsembleEnsembleBase")]
 pub struct EnsembleBase {
     /// The LLMs in this ensemble, with optional counts and fallbacks.
     pub agents: Vec<agent::AgentBaseWithFallbacksAndCount>,
@@ -29,7 +31,8 @@ pub struct EnsembleBase {
 ///
 /// - Individual LLMs with `count: 0` are skipped
 /// - Total agent count (sum of all counts) must be between 1 and 128
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "EnsembleEnsemble")]
 pub struct Ensemble {
     /// The deterministic content-addressed ID (22-character base62 string).
     pub id: String,

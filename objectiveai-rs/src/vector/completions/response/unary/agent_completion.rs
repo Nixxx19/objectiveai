@@ -2,12 +2,14 @@
 
 use crate::{agent, vector::completions::response};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A agent completion from a single agent within a vector completion.
 ///
 /// Wraps the standard agent completion response with an index to identify
 /// which agent in the ensemble produced it.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "VectorCompletionsResponseUnaryAgentCompletion")]
 pub struct AgentCompletion {
     /// Index of this completion within the vector completion.
     pub index: u64,

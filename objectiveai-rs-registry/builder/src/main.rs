@@ -12,6 +12,7 @@ struct TypeEntry {
     path: String,
     line_start: usize,
     line_end: usize,
+    has_json_schema: bool,
 }
 
 /// Convert a snake_case segment to PascalCase: "example_inputs" → "ExampleInputs"
@@ -28,33 +29,32 @@ fn to_pascal_case(s: &str) -> String {
 }
 
 /// Build a module prefix from a path like "objectiveai-rs/src/functions/check/example_inputs/file.rs".
-/// Strips "objectiveai-rs/src/" prefix, drops "lib.rs"/"mod.rs" filenames (or strips .rs extension),
-/// then PascalCases each segment.
+/// Strips "objectiveai-rs/src/" prefix, drops the filename entirely,
+/// then PascalCases each folder segment.
 fn module_prefix(path: &str) -> String {
     let inner = path
         .strip_prefix("objectiveai-rs/src/")
         .unwrap_or(path);
 
     let segments: Vec<&str> = inner.split('/').collect();
-    let mut parts: Vec<String> = Vec::new();
 
-    for (i, seg) in segments.iter().enumerate() {
-        let is_last = i == segments.len() - 1;
-        if is_last {
-            // Skip lib.rs and mod.rs; otherwise strip .rs extension
-            match *seg {
-                "lib.rs" | "mod.rs" => {}
-                _ => {
-                    let name = seg.strip_suffix(".rs").unwrap_or(seg);
-                    parts.push(to_pascal_case(name));
-                }
-            }
+    // Take only folder segments (skip the last segment which is the filename)
+    segments[..segments.len().saturating_sub(1)]
+        .iter()
+        .map(|seg| to_pascal_case(seg))
+        .collect::<Vec<_>>()
+        .join("")
+}
+
+fn has_json_schema_derive(attrs: &[syn::Attribute]) -> bool {
+    attrs.iter().any(|attr| {
+        if attr.path().is_ident("derive") {
+            let tokens = attr.meta.require_list().ok().map(|list| list.tokens.to_string());
+            tokens.map_or(false, |t| t.split(',').any(|s| s.split("::").last().map_or(false, |last| last.trim() == "JsonSchema")))
         } else {
-            parts.push(to_pascal_case(seg));
+            false
         }
-    }
-
-    parts.join("")
+    })
 }
 
 fn extract_public_types(source: &str, path: &str) -> Vec<TypeEntry> {
@@ -84,6 +84,7 @@ fn extract_public_types(source: &str, path: &str) -> Vec<TypeEntry> {
                     path: path.to_owned(),
                     line_start: s.ident.span().start().line,
                     line_end,
+                    has_json_schema: has_json_schema_derive(&s.attrs),
                 });
             }
             Item::Enum(e) if matches!(e.vis, Visibility::Public(_)) => {
@@ -95,6 +96,7 @@ fn extract_public_types(source: &str, path: &str) -> Vec<TypeEntry> {
                     path: path.to_owned(),
                     line_start: e.ident.span().start().line,
                     line_end: e.brace_token.span.close().end().line,
+                    has_json_schema: has_json_schema_derive(&e.attrs),
                 });
             }
             Item::Type(t) if matches!(t.vis, Visibility::Public(_)) => {
@@ -106,6 +108,7 @@ fn extract_public_types(source: &str, path: &str) -> Vec<TypeEntry> {
                     path: path.to_owned(),
                     line_start: t.ident.span().start().line,
                     line_end: t.semi_token.span.end().line,
+                    has_json_schema: false,
                 });
             }
             _ => {}
@@ -169,4 +172,34 @@ fn main() {
     }
 
     println!("Registry built: {total_types} types from {total_files} files");
+
+    // Collect all types missing JsonSchema and print them
+    let mut missing: Vec<(String, String, String)> = Vec::new();
+    for entry in WalkDir::new(&output_root) {
+        let entry = entry.unwrap();
+        let path = entry.path();
+        if path.extension().is_none_or(|ext| ext != "json") {
+            continue;
+        }
+        let contents = fs::read_to_string(path).unwrap();
+        let types: Vec<serde_json::Value> = serde_json::from_str(&contents).unwrap();
+        for t in &types {
+            if t["has_json_schema"] == false && t["kind"] != "type" {
+                missing.push((
+                    t["name"].as_str().unwrap().to_string(),
+                    t["path"].as_str().unwrap().to_string(),
+                    t["kind"].as_str().unwrap().to_string(),
+                ));
+            }
+        }
+    }
+
+    if missing.is_empty() {
+        println!("All structs/enums derive JsonSchema.");
+    } else {
+        println!("\nMissing JsonSchema ({} types):", missing.len());
+        for (name, path, kind) in &missing {
+            println!("  {kind:6} {name:40} {path}");
+        }
+    }
 }

@@ -1,8 +1,10 @@
 use crate::functions;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsAlphaVectorBranchTaskExpression")]
 pub enum BranchTaskExpression {
     #[serde(rename = "alpha.scalar.function")]
     ScalarFunction(ScalarFunctionTaskExpression),
@@ -55,8 +57,9 @@ impl BranchTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression")]
 pub enum PartialPlaceholderBranchTaskExpression {
     #[serde(rename = "placeholder.alpha.scalar.function")]
     PlaceholderScalarFunction(PartialPlaceholderScalarFunctionTaskExpression),
@@ -103,8 +106,9 @@ impl PartialPlaceholderBranchTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsAlphaVectorLeafTaskExpression")]
 pub enum LeafTaskExpression {
     #[serde(rename = "vector.completion")]
     VectorCompletion(VectorCompletionTaskExpression),
@@ -120,7 +124,8 @@ impl LeafTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
     pub remote: functions::Remote,
     pub owner: String,
@@ -155,7 +160,8 @@ impl ScalarFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorVectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
     pub remote: functions::Remote,
     pub owner: String,
@@ -187,7 +193,8 @@ impl VectorFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression")]
 pub struct PlaceholderScalarFunctionTaskExpression {
     #[serde(flatten)]
     pub params: functions::inventions::Params,
@@ -235,7 +242,8 @@ impl PlaceholderScalarFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression")]
 pub struct PartialPlaceholderScalarFunctionTaskExpression {
     pub spec: String,
     pub input_schema: super::expression::ScalarFunctionInputSchema,
@@ -271,7 +279,8 @@ impl PartialPlaceholderScalarFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression")]
 pub struct PlaceholderVectorFunctionTaskExpression {
     #[serde(flatten)]
     pub params: functions::inventions::Params,
@@ -320,7 +329,8 @@ impl PlaceholderVectorFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression")]
 pub struct PartialPlaceholderVectorFunctionTaskExpression {
     pub spec: String,
     pub input_schema: super::expression::VectorFunctionInputSchema,
@@ -356,7 +366,8 @@ impl PartialPlaceholderVectorFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsAlphaVectorVectorCompletionTaskExpression")]
 pub struct VectorCompletionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,

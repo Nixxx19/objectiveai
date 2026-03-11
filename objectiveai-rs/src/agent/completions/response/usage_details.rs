@@ -3,9 +3,11 @@
 
 use super::util;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Detailed breakdown of completion token usage.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseCompletionTokensDetails")]
 pub struct CompletionTokensDetails {
     /// Tokens from accepted predictions (speculative decoding).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -49,7 +51,8 @@ impl CompletionTokensDetails {
 }
 
 /// Detailed breakdown of prompt token usage.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponsePromptTokensDetails")]
 pub struct PromptTokensDetails {
     /// Audio input tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -87,7 +90,8 @@ impl PromptTokensDetails {
 }
 
 /// Detailed cost breakdown.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseCostDetails")]
 pub struct CostDetails {
     /// Cost charged by the immediate upstream (e.g., OpenRouter).
     pub upstream_inference_cost: rust_decimal::Decimal,

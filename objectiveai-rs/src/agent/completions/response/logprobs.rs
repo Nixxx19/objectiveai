@@ -1,9 +1,11 @@
 //! Log probability information for generated tokens.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Log probabilities for generated tokens.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseLogprobs")]
 pub struct Logprobs {
     /// Log probabilities for content tokens.
     pub content: Option<Vec<Logprob>>,
@@ -36,7 +38,8 @@ impl Logprobs {
 }
 
 /// Log probability information for a single token.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseLogprob")]
 pub struct Logprob {
     /// The token string.
     pub token: String,
@@ -49,7 +52,8 @@ pub struct Logprob {
 }
 
 /// A top alternative token with its log probability.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseTopLogprob")]
 pub struct TopLogprob {
     /// The token string.
     pub token: String,

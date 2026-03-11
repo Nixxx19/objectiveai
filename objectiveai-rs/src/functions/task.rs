@@ -27,14 +27,16 @@
 
 use crate::agent;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A task definition with expressions (pre-compilation).
 ///
 /// Task expressions contain dynamic fields (JMESPath or Starlark) that are
 /// resolved against input data during compilation. Use [`compile`](Self::compile)
 /// to produce a concrete [`Task`].
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsTaskExpression")]
 pub enum TaskExpression {
     #[serde(rename = "scalar.function")]
     ScalarFunction(ScalarFunctionTaskExpression),
@@ -114,8 +116,9 @@ impl TaskExpression {
 ///
 /// Produced by compiling a [`TaskExpression`] against input data. All
 /// expressions have been resolved to concrete values.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsTask")]
 pub enum Task {
     /// Calls a scalar function (produces a single score).
     #[serde(rename = "scalar.function")]
@@ -164,7 +167,8 @@ impl Task {
 }
 
 /// Expression for a task that calls a scalar function (pre-compilation).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
     /// The remote source where the function is hosted.
     pub remote: super::Remote,
@@ -230,7 +234,8 @@ impl ScalarFunctionTaskExpression {
 }
 
 /// A compiled scalar function task ready for execution.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsScalarFunctionTask")]
 pub struct ScalarFunctionTask {
     /// The remote source where the function is hosted.
     pub remote: super::Remote,
@@ -275,7 +280,8 @@ impl ScalarFunctionTask {
 }
 
 /// Expression for a task that calls a vector function (pre-compilation).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsVectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
     /// The remote source where the function is hosted.
     pub remote: super::Remote,
@@ -341,7 +347,8 @@ impl VectorFunctionTaskExpression {
 }
 
 /// A compiled vector function task ready for execution.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsVectorFunctionTask")]
 pub struct VectorFunctionTask {
     /// The remote source where the function is hosted.
     pub remote: super::Remote,
@@ -386,7 +393,8 @@ impl VectorFunctionTask {
 }
 
 /// Expression for a task that runs a vector completion (pre-compilation).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsVectorCompletionTaskExpression")]
 pub struct VectorCompletionTaskExpression {
     /// If this expression evaluates to true, skip the task. Receives: `input`.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -477,7 +485,8 @@ impl VectorCompletionTaskExpression {
 }
 
 /// A compiled vector completion task ready for execution.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsVectorCompletionTask")]
 pub struct VectorCompletionTask {
     /// The resolved conversation messages.
     pub messages: Vec<agent::completions::message::Message>,
@@ -515,7 +524,8 @@ impl VectorCompletionTask {
 ///
 /// Like [`ScalarFunctionTaskExpression`] but without owner/repository/commit.
 /// Always produces a fixed output of 0.5.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsPlaceholderScalarFunctionTaskExpression")]
 pub struct PlaceholderScalarFunctionTaskExpression {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
@@ -558,7 +568,8 @@ impl PlaceholderScalarFunctionTaskExpression {
 ///
 /// Always produces `Scalar(0.5)` before the output expression
 /// is applied.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsPlaceholderScalarFunctionTask")]
 pub struct PlaceholderScalarFunctionTask {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
@@ -592,7 +603,8 @@ impl PlaceholderScalarFunctionTask {
 ///
 /// Like [`VectorFunctionTaskExpression`] but without owner/repository/commit.
 /// Always produces an equalized vector of length `output_length`.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsPlaceholderVectorFunctionTaskExpression")]
 pub struct PlaceholderVectorFunctionTaskExpression {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
@@ -650,7 +662,8 @@ impl PlaceholderVectorFunctionTaskExpression {
 ///
 /// Always produces `Vector(vec![1/N; output_length])` before
 /// the output expression is applied.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsPlaceholderVectorFunctionTask")]
 pub struct PlaceholderVectorFunctionTask {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
@@ -691,8 +704,9 @@ impl PlaceholderVectorFunctionTask {
 /// Tasks without a `map` field compile to a single task. Tasks with a `map`
 /// expression are expanded into multiple tasks, one per integer index from
 /// 0 to the evaluated count.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsCompiledTask")]
 pub enum CompiledTask {
     /// A single task (no mapping).
     One(Task),

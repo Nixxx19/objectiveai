@@ -11,13 +11,15 @@ use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::float::UnpackFloat;
 use starlark::values::list::ListRef as StarlarkListRef;
 use starlark::values::{Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue};
+use schemars::JsonSchema;
 
 /// A concrete input value (post-compilation).
 ///
 /// Represents any JSON-like value that can be passed to a Function,
 /// including rich content types (images, audio, video, files).
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsExpressionInput")]
 pub enum Input {
     /// Rich content (image, audio, video, file).
     RichContentPart(agent::completions::message::RichContentPart),
@@ -367,8 +369,9 @@ impl Input {
 ///
 /// Similar to [`Input`] but object values and array elements can be
 /// expressions (JMESPath or Starlark) that are evaluated during compilation.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsExpressionInputExpression")]
 pub enum InputExpression {
     /// Rich content (image, audio, video, file).
     RichContentPart(agent::completions::message::RichContentPart),
@@ -489,7 +492,8 @@ impl super::FromStarlarkValue for InputExpression {
 ///
 /// Defines the expected structure and constraints for input data.
 /// Used by remote Functions to document and validate their inputs.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, JsonSchema)]
+#[schemars(rename = "FunctionsExpressionInputSchema")]
 pub enum InputSchema {
     /// An object with named properties.
     Object(ObjectInputSchema),
@@ -755,7 +759,8 @@ impl Serialize for InputSchema {
 }
 
 /// Which media modalities are present in a schema.
-#[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Eq, JsonSchema)]
+#[schemars(rename = "FunctionsExpressionModalities")]
 pub struct Modalities {
     pub image: bool,
     pub audio: bool,
@@ -776,8 +781,9 @@ impl Modalities {
 }
 
 /// Schema for a union of possible types - input must match at least one.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionAnyOfInputSchema")]
 pub struct AnyOfInputSchema {
     /// The possible schemas that the input can match.
     pub any_of: Vec<InputSchema>,
@@ -798,8 +804,9 @@ impl AnyOfInputSchema {
 }
 
 /// Schema for an object input with named properties.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionObjectInputSchema")]
 pub struct ObjectInputSchema {
     /// Human-readable description of the object.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -835,8 +842,9 @@ impl ObjectInputSchema {
 }
 
 /// Schema for an array input.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionArrayInputSchema")]
 pub struct ArrayInputSchema {
     /// Human-readable description of the array.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -879,8 +887,9 @@ impl ArrayInputSchema {
 }
 
 /// Schema for a string input.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionStringInputSchema")]
 pub struct StringInputSchema {
     /// Human-readable description of the string.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -907,8 +916,9 @@ impl StringInputSchema {
 }
 
 /// Schema for an integer input.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionIntegerInputSchema")]
 pub struct IntegerInputSchema {
     /// Human-readable description of the integer.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -960,8 +970,9 @@ impl IntegerInputSchema {
 }
 
 /// Schema for a floating-point number input.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionNumberInputSchema")]
 pub struct NumberInputSchema {
     /// Human-readable description of the number.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1011,8 +1022,9 @@ impl NumberInputSchema {
 }
 
 /// Schema for a boolean input.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionBooleanInputSchema")]
 pub struct BooleanInputSchema {
     /// Human-readable description of the boolean.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1030,8 +1042,9 @@ impl BooleanInputSchema {
 }
 
 /// Schema for an image input (URL or base64-encoded).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionImageInputSchema")]
 pub struct ImageInputSchema {
     /// Human-readable description of the expected image.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1053,8 +1066,9 @@ impl ImageInputSchema {
 }
 
 /// Schema for an audio input.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionAudioInputSchema")]
 pub struct AudioInputSchema {
     /// Human-readable description of the expected audio.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1076,8 +1090,9 @@ impl AudioInputSchema {
 }
 
 /// Schema for a video input (URL or base64-encoded).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionVideoInputSchema")]
 pub struct VideoInputSchema {
     /// Human-readable description of the expected video.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -1104,8 +1119,9 @@ impl VideoInputSchema {
 }
 
 /// Schema for a file input.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
+#[schemars(rename = "FunctionsExpressionFileInputSchema")]
 pub struct FileInputSchema {
     /// Human-readable description of the expected file.
     #[serde(skip_serializing_if = "Option::is_none")]

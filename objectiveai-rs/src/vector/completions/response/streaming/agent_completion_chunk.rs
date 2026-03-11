@@ -2,12 +2,14 @@
 
 use crate::agent;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A streaming agent completion chunk from a single agent within a vector completion.
 ///
 /// The `index` field is used to correlate chunks belonging to the same
 /// underlying completion when accumulating via [`push`](Self::push).
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "VectorCompletionsResponseStreamingAgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     /// Index used to correlate chunks from the same completion.
     pub index: u64,

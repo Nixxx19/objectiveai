@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsResponseStreamingObject")]
 pub enum Object {
     #[serde(rename = "alpha.scalar.function.invention.chunk")]
     AlphaScalarFunctionInventionChunk,

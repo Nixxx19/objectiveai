@@ -1,11 +1,13 @@
 //! MCP server configuration for agents.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// An MCP server that the agent can connect to.
 #[derive(
-    Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord,
+    Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, JsonSchema,
 )]
+#[schemars(rename = "AgentMcpServer")]
 pub struct McpServer {
     /// The URL of the MCP server.
     pub url: String,

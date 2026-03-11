@@ -1,7 +1,9 @@
 use crate::functions::profiles::computations::response;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsProfilesComputationsResponseUnaryObject")]
 pub enum Object {
     #[serde(rename = "function.profile.computation")]
     FunctionProfileComputation,

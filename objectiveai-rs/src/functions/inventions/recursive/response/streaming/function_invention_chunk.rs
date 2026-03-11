@@ -1,7 +1,9 @@
 use crate::functions;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk")]
 pub struct FunctionInventionChunk {
     pub index: u64,
     #[serde(flatten)]

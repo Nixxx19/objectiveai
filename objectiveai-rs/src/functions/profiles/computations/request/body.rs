@@ -1,15 +1,18 @@
 use crate::{agent, functions, vector};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsProfilesComputationsRequestFunctionInlineRequestBody")]
 pub struct FunctionInlineRequestBody {
     pub function: functions::InlineFunction,
     #[serde(flatten)]
     pub base: FunctionRemoteRequestBody,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsProfilesComputationsRequestFunctionRemoteRequestBody")]
 pub struct FunctionRemoteRequestBody {
     // if present, retries vector completions from previous request
     #[serde(skip_serializing_if = "Option::is_none")]

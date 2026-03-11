@@ -1,13 +1,15 @@
 //! Core Agent types — unified enum dispatching to per-upstream implementations.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// The base configuration for an Agent (without computed ID).
 ///
 /// This is an untagged enum that dispatches to the per-upstream AgentBase.
 /// Deserialization tries each variant in order until one matches.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "AgentAgentBase")]
 pub enum AgentBase {
     Openrouter(super::openrouter::AgentBase),
     ClaudeAgentSdk(super::claude_agent_sdk::AgentBase),
@@ -66,7 +68,8 @@ impl AgentBase {
 }
 
 /// A borrowed reference into an [`AgentBase`] variant.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, JsonSchema)]
+#[schemars(rename = "AgentAgentBaseRef")]
 pub enum AgentBaseRef<'a> {
     Openrouter(&'a super::openrouter::AgentBase),
     ClaudeAgentSdk(&'a super::claude_agent_sdk::AgentBase),
@@ -139,8 +142,9 @@ impl<'a> AgentBaseRef<'a> {
 /// A validated Agent with its computed content-addressed ID.
 ///
 /// This is an untagged enum that dispatches to the per-upstream Agent.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "AgentAgent")]
 pub enum Agent {
     Openrouter(super::openrouter::Agent),
     ClaudeAgentSdk(super::claude_agent_sdk::Agent),
@@ -194,7 +198,8 @@ impl TryFrom<AgentBase> for Agent {
 ///
 /// Used to specify how many instances of an agent to include in an ensemble,
 /// along with fallback agents to try if the primary fails.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentWithFallbacksAndCount{T}")]
 pub struct WithFallbacksAndCount<T> {
     /// Number of instances of this agent in the ensemble. Defaults to 1.
     #[serde(default = "WithFallbacksAndCount::<T>::default_count")]

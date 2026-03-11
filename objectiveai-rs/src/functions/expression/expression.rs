@@ -1,11 +1,13 @@
 //! Core expression types for JMESPath and Starlark evaluation.
 
 use super::special::FromSpecial;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 /// Result of an expression that may produce one or many values.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsExpressionOneOrMany{T}")]
 pub enum OneOrMany<T> {
     /// A single value.
     One(T),
@@ -28,7 +30,8 @@ pub enum OneOrMany<T> {
 /// ```json
 /// {"$starlark": "input['items'][0]['name']"}
 /// ```
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, JsonSchema)]
+#[schemars(rename = "FunctionsExpressionExpression")]
 pub enum Expression {
     /// A JMESPath expression.
     JMESPath(String),
@@ -227,8 +230,9 @@ impl Expression {
 /// ```json
 /// {"$starlark": "input['greeting']"}
 /// ```
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsExpressionWithExpression{T}")]
 pub enum WithExpression<T> {
     /// An expression (JMESPath or Starlark) to evaluate.
     Expression(Expression),

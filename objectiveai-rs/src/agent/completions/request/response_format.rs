@@ -3,10 +3,12 @@
 use std::hash::{Hash, Hasher};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// The format of the model's response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
+#[schemars(rename = "AgentCompletionsRequestResponseFormat")]
 pub enum ResponseFormat {
     /// Plain text response (default).
     Text,
@@ -48,8 +50,9 @@ impl ResponseFormat {
 pub type PerAgentResponseFormat = IndexMap<String, ResponseFormat>;
 
 /// Either a single response format or a per-agent map.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "AgentCompletionsRequestResponseFormatParam")]
 pub enum ResponseFormatParam {
     /// A single response format applied to all agents.
     Single(ResponseFormat),

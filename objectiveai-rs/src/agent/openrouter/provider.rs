@@ -5,12 +5,14 @@
 
 use serde::{Deserialize, Serialize};
 use std::collections::HashSet;
+use schemars::JsonSchema;
 
 /// Provider routing preferences.
 ///
 /// Controls which providers are used and in what order when routing
 /// requests to upstream model hosts.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Hash)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Hash, JsonSchema)]
+#[schemars(rename = "AgentOpenrouterProvider")]
 pub struct Provider {
     /// Whether to allow fallback to other providers if preferred ones fail.
     /// Defaults to `true`.
@@ -108,8 +110,9 @@ impl Provider {
 ///
 /// Quantization reduces model precision to decrease memory usage and
 /// increase inference speed, potentially at the cost of output quality.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema)]
 #[serde(rename_all = "snake_case")]
+#[schemars(rename = "AgentOpenrouterProviderQuantization")]
 pub enum ProviderQuantization {
     /// 4-bit integer quantization.
     Int4,

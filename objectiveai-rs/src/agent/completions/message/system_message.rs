@@ -8,9 +8,11 @@ use functions::expression::{
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::DictRef as StarlarkDictRef;
 use starlark::values::{UnpackValue, Value as StarlarkValue};
+use schemars::JsonSchema;
 
 /// A system message setting context or instructions.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageSystemMessage")]
 pub struct SystemMessage {
     /// The message content.
     pub content: SimpleContent,
@@ -81,7 +83,8 @@ impl FromStarlarkValue for SystemMessage {
 }
 
 /// Expression variant of [`SystemMessage`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentCompletionsMessageSystemMessageExpression")]
 pub struct SystemMessageExpression {
     /// The message content expression.
     pub content: functions::expression::WithExpression<SimpleContentExpression>,

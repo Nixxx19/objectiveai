@@ -2,9 +2,11 @@
 
 use crate::agent::completions::response;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// The object type for agent completion responses.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseUnaryObject")]
 pub enum Object {
     /// A agent completion object.
     #[serde(rename = "agent.completion")]

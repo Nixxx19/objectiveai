@@ -6,13 +6,15 @@
 
 use crate::vector;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A Profile definition, either remote or inline.
 ///
 /// Profiles contain the weights and nested configurations needed to execute
 /// a Function. They correspond to a Function's task structure.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsProfile")]
 pub enum Profile {
     /// A remote profile with metadata.
     Remote(RemoteProfile),
@@ -21,8 +23,9 @@ pub enum Profile {
 }
 
 /// A remote profile, either tasks-based or auto.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsRemoteProfile")]
 pub enum RemoteProfile {
     /// Tasks-based profile with per-task configuration.
     Tasks(RemoteTasksProfile),
@@ -31,8 +34,9 @@ pub enum RemoteProfile {
 }
 
 /// An inline profile, either tasks-based or auto.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsInlineProfile")]
 pub enum InlineProfile {
     /// Tasks-based profile with per-task configuration.
     Tasks(InlineTasksProfile),
@@ -44,7 +48,8 @@ pub enum InlineProfile {
 ///
 /// Stored as `profile.json` in repositories and referenced by
 /// `remote/owner/repository`.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsRemoteTasksProfile")]
 pub struct RemoteTasksProfile {
     /// Human-readable description of the profile.
     pub description: String,
@@ -62,7 +67,8 @@ pub struct RemoteTasksProfile {
 ///
 /// Applies a single ensemble and weights to every vector completion task
 /// in the function, with equal task weights.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsRemoteAutoProfile")]
 pub struct RemoteAutoProfile {
     /// Human-readable description of the profile.
     pub description: String,
@@ -73,7 +79,8 @@ pub struct RemoteAutoProfile {
 }
 
 /// An inline tasks-based profile definition without metadata.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInlineTasksProfile")]
 pub struct InlineTasksProfile {
     /// Configuration for each task in the corresponding Function.
     pub tasks: Vec<TaskProfile>,
@@ -89,7 +96,8 @@ pub struct InlineTasksProfile {
 ///
 /// Applies a single ensemble and weights to every vector completion task
 /// in the function, with equal task weights.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInlineAutoProfile")]
 pub struct InlineAutoProfile {
     /// The ensemble to use for all vector completion tasks.
     pub ensemble: vector::completions::request::Ensemble,
@@ -100,8 +108,9 @@ pub struct InlineAutoProfile {
 /// Configuration for a single task within a Profile.
 ///
 /// Each variant corresponds to a task type in the Function definition.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "FunctionsTaskProfile")]
 pub enum TaskProfile {
     /// Profile for a nested function task (references another profile).
     Remote {

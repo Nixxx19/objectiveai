@@ -2,12 +2,14 @@
 
 use super::{CompletionTokensDetails, CostDetails, PromptTokensDetails};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Token usage and cost information from an upstream provider.
 ///
 /// This is the per-assistant-response usage yielded by upstream clients.
 /// It includes upstream-specific fields like `cost_multiplier` and `is_byok`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseUpstreamUsage")]
 pub struct UpstreamUsage {
     /// Number of tokens in the completion.
     pub completion_tokens: u64,

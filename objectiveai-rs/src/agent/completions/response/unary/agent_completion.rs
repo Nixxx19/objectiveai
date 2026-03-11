@@ -2,9 +2,11 @@
 
 use crate::agent::completions::response;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A complete agent completion response.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseUnaryAgentCompletion")]
 pub struct AgentCompletion {
     pub id: String,
     pub created: u64,

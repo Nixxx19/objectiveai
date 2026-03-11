@@ -2,16 +2,19 @@
 
 use crate::functions;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Response from listing profiles.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsProfilesListProfile")]
 pub struct ListProfile {
     /// List of available profiles.
     pub data: Vec<ListProfileItem>,
 }
 
 /// A profile in a list response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsProfilesListProfileItem")]
 pub struct ListProfileItem {
     /// The remote source where the profile is hosted.
     pub remote: functions::Remote,
@@ -23,7 +26,8 @@ pub struct ListProfileItem {
     pub commit: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsProfilesGetProfile")]
 pub struct GetProfile {
     pub remote: functions::Remote,
     pub owner: String,
@@ -34,7 +38,8 @@ pub struct GetProfile {
 }
 
 /// Usage statistics for a profile.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsProfilesUsageProfile")]
 pub struct UsageProfile {
     /// Total number of requests made with this profile.
     pub requests: u64,

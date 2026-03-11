@@ -2,9 +2,11 @@
 
 use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
+use schemars::JsonSchema;
 
 /// The base configuration for a Mock Agent (without computed ID).
-#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[derive(Clone, Debug, Default, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentMockAgentBase")]
 pub struct AgentBase {
     /// The upstream provider marker.
     pub upstream: super::Upstream,
@@ -82,7 +84,8 @@ impl AgentBase {
 }
 
 /// A validated Mock Agent with its computed content-addressed ID.
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentMockAgent")]
 pub struct Agent {
     /// The deterministic content-addressed ID (22-character base62 string).
     pub id: String,

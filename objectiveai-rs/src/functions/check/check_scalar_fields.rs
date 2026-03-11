@@ -7,9 +7,11 @@ use serde::Deserialize;
 use super::check_input_schema::check_input_schema;
 use super::example_inputs;
 use crate::functions::expression::InputSchema;
+use schemars::JsonSchema;
 
 /// The fields needed to validate a scalar function's input behavior.
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsCheckScalarFieldsValidation")]
 pub struct ScalarFieldsValidation {
     pub input_schema: InputSchema,
 }

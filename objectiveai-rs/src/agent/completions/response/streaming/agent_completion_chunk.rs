@@ -2,13 +2,15 @@
 
 use crate::agent::completions::response;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A chunk of a streaming agent completion response.
 ///
 /// Multiple chunks are received via Server-Sent Events and can be
 /// accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)
 /// using the [`push`](Self::push) method.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseStreamingAgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     pub id: String,
     pub created: u64,

@@ -3,8 +3,10 @@ use crate::{
     functions::{self, profiles::computations::response},
 };
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation")]
 pub struct FunctionProfileComputation {
     pub id: String,
     pub executions: Vec<super::FunctionExecution>,

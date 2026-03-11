@@ -1,8 +1,10 @@
 use crate::functions;
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsStateAlphaScalarLeafState")]
 pub struct AlphaScalarLeafState {
     #[serde(flatten)]
     pub params: super::Params,

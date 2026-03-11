@@ -1,6 +1,8 @@
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "FunctionsInventionsStateParams")]
 pub struct Params {
     pub depth: u64,
     pub min_branch_width: u64,

@@ -2,12 +2,14 @@
 
 use crate::{agent, vector::completions::response};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A chunk in a streaming vector completion response.
 ///
 /// Each chunk contains incremental updates to the completion. Use the
 /// [`push`](Self::push) method to accumulate chunks into a complete response.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "VectorCompletionsResponseStreamingVectorCompletionChunk")]
 pub struct VectorCompletionChunk {
     /// Unique identifier for this vector completion.
     pub id: String,

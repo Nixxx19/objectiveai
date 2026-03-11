@@ -5,6 +5,7 @@
 //! is **only used for vector completions** and is ignored for agent completions.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// The method used to constrain LLM output to valid response keys.
 ///
@@ -14,9 +15,10 @@ use serde::{Deserialize, Serialize};
 /// **Note:** This setting is only relevant for vector completions and is
 /// completely ignored for agent completions.
 #[derive(
-    Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Hash,
+    Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Hash, JsonSchema,
 )]
 #[serde(rename_all = "snake_case")]
+#[schemars(rename = "AgentClaudeAgentSdkOutputMode")]
 pub enum OutputMode {
     /// The model is instructed via the prompt to output a specific key.
     ///

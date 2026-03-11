@@ -1,8 +1,10 @@
 use crate::functions;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsAlphaVectorRemoteFunction")]
 pub enum RemoteFunction {
     #[serde(rename = "alpha.vector.branch.function")]
     Branch {
@@ -67,8 +69,9 @@ impl RemoteFunction {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
+#[schemars(rename = "FunctionsAlphaVectorInlineFunction")]
 pub enum InlineFunction {
     #[serde(rename = "alpha.vector.branch.function")]
     Branch {

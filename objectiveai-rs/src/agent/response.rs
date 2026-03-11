@@ -1,23 +1,27 @@
 //! Response types for Agent API endpoints.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Response containing a list of Agents.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentListAgent")]
 pub struct ListAgent {
     /// The list of Agent summaries.
     pub data: Vec<ListAgentItem>,
 }
 
 /// Summary information for a listed Agent.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentListAgentItem")]
 pub struct ListAgentItem {
     /// The unique content-addressed ID of the Agent.
     pub id: String,
 }
 
 /// Response containing a single Agent with creation timestamp.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentGetAgent")]
 pub struct GetAgent {
     /// Unix timestamp when this Agent was first used.
     pub created: u64,
@@ -27,7 +31,8 @@ pub struct GetAgent {
 }
 
 /// Usage statistics for an Agent.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AgentUsageAgent")]
 pub struct UsageAgent {
     /// Total number of requests made with this Agent.
     pub requests: u64,

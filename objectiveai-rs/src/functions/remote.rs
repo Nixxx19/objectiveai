@@ -2,10 +2,12 @@
 
 use serde::{Deserialize, Serialize};
 use std::fmt;
+use schemars::JsonSchema;
 
 /// The remote source where a function or profile is hosted.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema)]
 #[serde(rename_all = "snake_case")]
+#[schemars(rename = "FunctionsRemote")]
 pub enum Remote {
     /// GitHub repository.
     Github,

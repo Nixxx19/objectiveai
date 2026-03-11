@@ -4,6 +4,7 @@ use crate::functions::expression::ToStarlarkValue;
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::AllocDict as StarlarkAllocDict;
 use starlark::values::{Heap as StarlarkHeap, Value as StarlarkValue};
+use schemars::JsonSchema;
 
 /// A single LLM's vote in a vector completion.
 ///
@@ -17,7 +18,8 @@ use starlark::values::{Heap as StarlarkHeap, Value as StarlarkValue};
 /// in the request. Typically one element is 1.0 and the rest are 0.0 (discrete
 /// selection), but when `top_logprobs` is used, votes may be probability
 /// distributions.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "VectorCompletionsResponseVote")]
 pub struct Vote {
     // --- Identifiers ---
 

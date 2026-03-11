@@ -1,11 +1,13 @@
 //! Object type marker for streaming vector completion chunks.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Object type for streaming vector completion chunks.
 ///
 /// Serializes to `"vector.completion.chunk"` in JSON.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "VectorCompletionsResponseStreamingObject")]
 pub enum Object {
     /// A streaming vector completion chunk.
     #[serde(rename = "vector.completion.chunk")]

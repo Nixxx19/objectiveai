@@ -2,9 +2,11 @@
 
 use crate::agent::completions::{message, response};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// An assistant response in a unary agent completion.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "AgentCompletionsResponseUnaryAssistantResponse")]
 pub struct AssistantResponse {
     pub role: response::AssistantRole,
     pub index: u64,

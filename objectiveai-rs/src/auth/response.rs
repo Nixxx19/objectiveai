@@ -5,12 +5,14 @@
 //! BYOK configuration.
 
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Response containing the user's credit balance information.
 ///
 /// Credits are the billing unit for ObjectiveAI. This response provides
 /// a complete view of the user's credit status.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AuthGetCreditsResponse")]
 pub struct GetCreditsResponse {
     /// The current available credit balance.
     pub credits: rust_decimal::Decimal,
@@ -31,7 +33,8 @@ pub type CreateApiKeyResponse = super::ApiKeyWithMetadata;
 pub type DisableApiKeyResponse = super::ApiKeyWithMetadata;
 
 /// Response containing a list of API keys.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AuthListApiKeyResponse")]
 pub struct ListApiKeyResponse {
     /// The list of API keys with their metadata and usage costs.
     pub data: Vec<ListApiKeyItem>,
@@ -41,7 +44,8 @@ pub struct ListApiKeyResponse {
 ///
 /// This extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with
 /// the total cost incurred by requests using this key.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AuthListApiKeyItem")]
 pub struct ListApiKeyItem {
     /// The API key and its metadata.
     #[serde(flatten)]
@@ -51,7 +55,8 @@ pub struct ListApiKeyItem {
 }
 
 /// Response containing the user's OpenRouter BYOK API key.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "AuthGetOpenRouterByokApiKeyResponse")]
 pub struct GetOpenRouterByokApiKeyResponse {
     /// The OpenRouter API key, or `None` if not configured.
     pub api_key: Option<String>,

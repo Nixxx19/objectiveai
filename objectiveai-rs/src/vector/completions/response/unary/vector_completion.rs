@@ -2,12 +2,14 @@
 
 use crate::{agent, vector::completions::response};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A complete vector completion response (non-streaming).
 ///
 /// Contains the final scores, all votes from the ensemble, and the underlying
 /// agent completions that produced those votes.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "VectorCompletionsResponseUnaryVectorCompletion")]
 pub struct VectorCompletion {
     /// Unique identifier for this vector completion.
     pub id: String,
