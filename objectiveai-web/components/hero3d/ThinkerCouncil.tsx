@@ -167,14 +167,16 @@ export default function ThinkerCouncil({ scrollProgressRef, reducedMotion }: Thi
   return (
     <>
       {/* Environment for reflections */}
-      <Environment preset="city" environmentIntensity={0.3} />
+      <Environment preset="city" environmentIntensity={0.5} />
 
       {/* Fog for depth fade */}
       <fog attach="fog" args={["#1B1B1B", 6, 16]} />
 
       {/* Lighting */}
-      <ambientLight intensity={0.4} />
-      <directionalLight position={[4, 6, 2]} intensity={0.8} />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[4, 6, 2]} intensity={0.7} />
+      {/* Front fill light so camera-facing figures aren't backlit */}
+      <directionalLight position={[-2, 3, 6]} intensity={0.5} />
 
       {/* Point light near the orb */}
       <pointLight

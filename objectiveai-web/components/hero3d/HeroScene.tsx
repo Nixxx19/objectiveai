@@ -1,8 +1,28 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef, useCallback } from "react";
-import { Canvas } from "@react-three/fiber";
+import { Component, Suspense, useState, useEffect, useRef, useCallback } from "react";
+import type { ReactNode, ErrorInfo } from "react";
+import { Canvas, useFrame } from "@react-three/fiber";
 import ThinkerCouncil from "./ThinkerCouncil";
+
+// ---------------------------------------------------------------------------
+// Error boundary — if WebGL or GLB loading fails, stay on static fallback
+// ---------------------------------------------------------------------------
+class HeroErrorBoundary extends Component<
+  { children: ReactNode; fallback: ReactNode },
+  { hasError: boolean }
+> {
+  state = { hasError: false };
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error, info: ErrorInfo) {
+    console.warn("[HeroScene] 3D failed, using static fallback:", error.message);
+  }
+  render() {
+    return this.state.hasError ? this.props.fallback : this.props.children;
+  }
+}
 
 // ---------------------------------------------------------------------------
 // Scroll-phase boundaries
@@ -12,6 +32,11 @@ import ThinkerCouncil from "./ThinkerCouncil";
 // Phase 2 (0.4–0.6): Deliberation — staggered tilts increase
 // Phase 3 (0.6–0.8): Voting — figures nod
 // Phase 4 (0.8–1.0): Resolved — score climbs to 1.0, green
+
+// ---------------------------------------------------------------------------
+// Crossfade duration (ms) for fallback → canvas transition
+// ---------------------------------------------------------------------------
+const CROSSFADE_MS = 300;
 
 // ---------------------------------------------------------------------------
 // Static fallback shown while R3F loads (or if WebGL unavailable)
@@ -36,6 +61,22 @@ function StaticFallback() {
 }
 
 // ---------------------------------------------------------------------------
+// Notifies parent when the R3F Canvas has rendered its first frame
+// ---------------------------------------------------------------------------
+function CanvasReadySignal({ onReady }: { onReady: () => void }) {
+  const fired = useRef(false);
+  // useFrame runs once per R3F render loop tick — first call means the
+  // Canvas + scene are actually painted.
+  useFrame(() => {
+    if (!fired.current) {
+      fired.current = true;
+      onReady();
+    }
+  });
+  return null;
+}
+
+// ---------------------------------------------------------------------------
 // HeroScene
 // ---------------------------------------------------------------------------
 export default function HeroScene() {
@@ -48,10 +89,23 @@ export default function HeroScene() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [isClient, setIsClient] = useState(false);
 
+  // Crossfade state: "fallback" → "crossfading" → "canvas"
+  const [canvasReady, setCanvasReady] = useState(false);
+  const [fallbackMounted, setFallbackMounted] = useState(true);
+
   // SSR guard — Canvas must only render on the client
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  // When canvasReady flips to true, start the crossfade, then unmount fallback
+  useEffect(() => {
+    if (!canvasReady) return;
+    const timer = setTimeout(() => {
+      setFallbackMounted(false);
+    }, CROSSFADE_MS);
+    return () => clearTimeout(timer);
+  }, [canvasReady]);
 
   // Detect prefers-reduced-motion
   useEffect(() => {
@@ -112,6 +166,10 @@ export default function HeroScene() {
     };
   }, [prefersReducedMotion, updateScrollProgress]);
 
+  const handleCanvasReady = useCallback(() => {
+    setCanvasReady(true);
+  }, []);
+
   // Before hydration, show static fallback
   if (!isClient) {
     return (
@@ -135,12 +193,13 @@ export default function HeroScene() {
       ref={containerRef}
       style={{ width: "100%", height: "100%", position: "relative" }}
     >
-      <Suspense
+      {/* Canvas layer — fades in when ready */}
+      <HeroErrorBoundary
         fallback={
           <div
             style={{
-              width: "100%",
-              height: "100%",
+              position: "absolute",
+              inset: 0,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -150,23 +209,53 @@ export default function HeroScene() {
           </div>
         }
       >
-        <Canvas
-          camera={{ position: [0, 0.5, 8], fov: 35 }}
-          dpr={[1, 2]}
-          frameloop={isVisible ? "always" : "never"}
-          gl={{
-            antialias: true,
-            alpha: true,
-            powerPreference: "high-performance",
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: canvasReady ? 1 : 0,
+            transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
           }}
-          style={{ background: "transparent" }}
         >
-          <ThinkerCouncil
-            scrollProgressRef={scrollProgressRef}
-            reducedMotion={prefersReducedMotion}
-          />
-        </Canvas>
-      </Suspense>
+          <Suspense fallback={null}>
+            <Canvas
+              camera={{ position: [0, 0.5, 8], fov: 35 }}
+              dpr={[1, 2]}
+              frameloop={isVisible ? "always" : "never"}
+              gl={{
+                antialias: true,
+                alpha: true,
+                powerPreference: "high-performance",
+              }}
+              style={{ background: "transparent" }}
+            >
+              <CanvasReadySignal onReady={handleCanvasReady} />
+              <ThinkerCouncil
+                scrollProgressRef={scrollProgressRef}
+                reducedMotion={prefersReducedMotion}
+              />
+            </Canvas>
+          </Suspense>
+        </div>
+      </HeroErrorBoundary>
+
+      {/* Static fallback layer — fades out once canvas is ready, then unmounts */}
+      {fallbackMounted && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            opacity: canvasReady ? 0 : 1,
+            transition: `opacity ${CROSSFADE_MS}ms ease-in-out`,
+            pointerEvents: "none",
+          }}
+        >
+          <StaticFallback />
+        </div>
+      )}
     </div>
   );
 }
