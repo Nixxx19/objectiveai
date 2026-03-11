@@ -12,5 +12,11 @@ pub use schema_tool::*;
 pub use state::*;
 pub use tool::*;
 
+#[cfg(feature = "http")]
+mod http;
+
+#[cfg(feature = "http")]
+pub use http::*;
+
 #[cfg(test)]
 mod path_tests;
