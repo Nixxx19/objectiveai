@@ -1,0 +1,8 @@
+import { z } from "zod";
+import { FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema } from "./functionInlineProfileInlineRequestBody";
+import { FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema } from "./functionInlineProfileRemoteRequestBody";
+import { FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema } from "./functionRemoteProfileInlineRequestBody";
+import { FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema } from "./functionRemoteProfileRemoteRequestBody";
+
+export const FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema = z.union([FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema.describe("Inline Function with inline Profile."), FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema.describe("Inline Function with remote Profile."), FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema.describe("Remote Function with inline Profile."), FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema.describe("Remote Function with remote Profile.")]).describe("Parameters for creating a function execution.\n\nSupports four combinations based on whether the Function and Profile\nare provided inline or referenced from remote repositories.").meta({ title: "functions.executions.request.FunctionExecutionCreateParams" });
+export type FunctionsExecutionsRequestFunctionExecutionCreateParams = z.infer<typeof FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema>;

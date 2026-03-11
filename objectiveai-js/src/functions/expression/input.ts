@@ -1,0 +1,5 @@
+import { z } from "zod";
+import { AgentCompletionsMessageRichContentPartSchema } from "../../agent/completions/message/richContentPart";
+
+export const FunctionsExpressionInputSchema = z.union([AgentCompletionsMessageRichContentPartSchema.describe("Rich content (image, audio, video, file)."), z.record(z.string(), z.lazy(() => FunctionsExpressionInputSchema)).describe("An object with string keys."), z.array(z.lazy(() => FunctionsExpressionInputSchema)).describe("An array of values."), z.string().describe("A string value."), z.number().int().meta({ format: "int64" }).describe("An integer value."), z.number().meta({ format: "double" }).describe("A floating-point number."), z.boolean().describe("A boolean value.")]).describe("A concrete input value (post-compilation).\n\nRepresents any JSON-like value that can be passed to a Function,\nincluding rich content types (images, audio, video, files).").meta({ title: "functions.expression.Input" });
+export type FunctionsExpressionInput = z.infer<typeof FunctionsExpressionInputSchema>;

@@ -1,0 +1,7 @@
+import { z } from "zod";
+
+export const AgentCompletionsMessageSimpleContentPartSchema = z.union([z.object({
+  text: z.string().describe("The text content."),
+  type: z.literal("text"),
+}).describe("A text part.")]).describe("A part of simple text content.").meta({ title: "agent.completions.message.SimpleContentPart" });
+export type AgentCompletionsMessageSimpleContentPart = z.infer<typeof AgentCompletionsMessageSimpleContentPartSchema>;

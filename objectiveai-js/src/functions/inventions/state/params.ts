@@ -1,0 +1,12 @@
+import { z } from "zod";
+
+export const FunctionsInventionsStateParamsSchema = z.object({
+  depth: z.number().int().min(0).meta({ format: "uint64" }),
+  min_branch_width: z.number().int().min(0).meta({ format: "uint64" }),
+  max_branch_width: z.number().int().min(0).meta({ format: "uint64" }),
+  min_leaf_width: z.number().int().min(0).meta({ format: "uint64" }),
+  max_leaf_width: z.number().int().min(0).meta({ format: "uint64" }),
+  name: z.string(),
+  spec: z.string(),
+}).meta({ title: "functions.inventions.state.Params" });
+export type FunctionsInventionsStateParams = z.infer<typeof FunctionsInventionsStateParamsSchema>;

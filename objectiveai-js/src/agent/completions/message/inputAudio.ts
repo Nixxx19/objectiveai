@@ -1,0 +1,7 @@
+import { z } from "zod";
+
+export const AgentCompletionsMessageInputAudioSchema = z.object({
+  data: z.string().describe("Base64-encoded audio data."),
+  format: z.string().describe("The audio format (e.g., \"wav\", \"mp3\")."),
+}).describe("Audio input for multimodal messages.").meta({ title: "agent.completions.message.InputAudio" });
+export type AgentCompletionsMessageInputAudio = z.infer<typeof AgentCompletionsMessageInputAudioSchema>;

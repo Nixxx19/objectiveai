@@ -1,0 +1,18 @@
+import { z } from "zod";
+import { AgentCompletionsResponseStreamingMessageChunkSchema } from "../../../../agent/completions/response/streaming/messageChunk";
+import { AgentCompletionsResponseStreamingObjectSchema } from "../../../../agent/completions/response/streaming/object";
+import { AgentCompletionsResponseUsageSchema } from "../../../../agent/completions/response/usage";
+import { AgentUpstreamSchema } from "../../../../agent/upstream";
+import { ResponseErrorSchema } from "../../../../responseError";
+
+export const VectorCompletionsResponseStreamingAgentCompletionChunkSchema = z.object({
+  index: z.number().int().min(0).meta({ format: "uint64" }).describe("Index used to correlate chunks from the same completion."),
+  id: z.string(),
+  created: z.number().int().min(0).meta({ format: "uint64" }),
+  messages: z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
+  object: AgentCompletionsResponseStreamingObjectSchema.describe("The object type (always \"agent.completion.chunk\")."),
+  usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").optional(),
+  upstream: AgentUpstreamSchema.describe("Upstream provider"),
+  error: ResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
+}).describe("A streaming agent completion chunk from a single agent within a vector completion.\n\nThe `index` field is used to correlate chunks belonging to the same\nunderlying completion when accumulating via [`push`](Self::push).").meta({ title: "vector.completions.response.streaming.AgentCompletionChunk" });
+export type VectorCompletionsResponseStreamingAgentCompletionChunk = z.infer<typeof VectorCompletionsResponseStreamingAgentCompletionChunkSchema>;

@@ -1,0 +1,10 @@
+import { z } from "zod";
+import { FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema } from "./partialPlaceholderScalarFunctionTaskExpression";
+import { FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema } from "./partialPlaceholderVectorFunctionTaskExpression";
+
+export const FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema = z.union([FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema.extend({
+  type: z.literal("placeholder.alpha.scalar.function"),
+}), FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema.extend({
+  type: z.literal("placeholder.alpha.vector.function"),
+})]).meta({ title: "functions.alpha_vector.PartialPlaceholderBranchTaskExpression" });
+export type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression = z.infer<typeof FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema>;

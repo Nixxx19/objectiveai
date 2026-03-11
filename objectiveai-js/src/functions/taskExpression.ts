@@ -1,0 +1,19 @@
+import { z } from "zod";
+import { FunctionsPlaceholderScalarFunctionTaskExpressionSchema } from "./placeholderScalarFunctionTaskExpression";
+import { FunctionsPlaceholderVectorFunctionTaskExpressionSchema } from "./placeholderVectorFunctionTaskExpression";
+import { FunctionsScalarFunctionTaskExpressionSchema } from "./scalarFunctionTaskExpression";
+import { FunctionsVectorCompletionTaskExpressionSchema } from "./vectorCompletionTaskExpression";
+import { FunctionsVectorFunctionTaskExpressionSchema } from "./vectorFunctionTaskExpression";
+
+export const FunctionsTaskExpressionSchema = z.union([FunctionsScalarFunctionTaskExpressionSchema.extend({
+  type: z.literal("scalar.function"),
+}), FunctionsVectorFunctionTaskExpressionSchema.extend({
+  type: z.literal("vector.function"),
+}), FunctionsVectorCompletionTaskExpressionSchema.extend({
+  type: z.literal("vector.completion"),
+}), FunctionsPlaceholderScalarFunctionTaskExpressionSchema.extend({
+  type: z.literal("placeholder.scalar.function"),
+}), FunctionsPlaceholderVectorFunctionTaskExpressionSchema.extend({
+  type: z.literal("placeholder.vector.function"),
+})]).describe("A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].").meta({ title: "functions.TaskExpression" });
+export type FunctionsTaskExpression = z.infer<typeof FunctionsTaskExpressionSchema>;

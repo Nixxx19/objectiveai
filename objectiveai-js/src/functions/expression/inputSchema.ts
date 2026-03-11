@@ -1,0 +1,37 @@
+import { z } from "zod";
+import { FunctionsExpressionAnyOfInputSchemaSchema } from "./anyOfInputSchema";
+import { FunctionsExpressionArrayInputSchemaSchema } from "./arrayInputSchema";
+import { FunctionsExpressionAudioInputSchemaSchema } from "./audioInputSchema";
+import { FunctionsExpressionBooleanInputSchemaSchema } from "./booleanInputSchema";
+import { FunctionsExpressionFileInputSchemaSchema } from "./fileInputSchema";
+import { FunctionsExpressionImageInputSchemaSchema } from "./imageInputSchema";
+import { FunctionsExpressionIntegerInputSchemaSchema } from "./integerInputSchema";
+import { FunctionsExpressionNumberInputSchemaSchema } from "./numberInputSchema";
+import { FunctionsExpressionObjectInputSchemaSchema } from "./objectInputSchema";
+import { FunctionsExpressionStringInputSchemaSchema } from "./stringInputSchema";
+import { FunctionsExpressionVideoInputSchemaSchema } from "./videoInputSchema";
+
+export const FunctionsExpressionInputSchemaSchema = z.union([z.object({
+  Object: z.lazy(() => FunctionsExpressionObjectInputSchemaSchema),
+}).strict().describe("An object with named properties."), z.object({
+  Array: FunctionsExpressionArrayInputSchemaSchema,
+}).strict().describe("An array of items."), z.object({
+  String: FunctionsExpressionStringInputSchemaSchema,
+}).strict().describe("A string value."), z.object({
+  Integer: FunctionsExpressionIntegerInputSchemaSchema,
+}).strict().describe("An integer value."), z.object({
+  Number: FunctionsExpressionNumberInputSchemaSchema,
+}).strict().describe("A floating-point number."), z.object({
+  Boolean: FunctionsExpressionBooleanInputSchemaSchema,
+}).strict().describe("A boolean value."), z.object({
+  Image: FunctionsExpressionImageInputSchemaSchema,
+}).strict().describe("An image (URL or base64)."), z.object({
+  Audio: FunctionsExpressionAudioInputSchemaSchema,
+}).strict().describe("Audio content."), z.object({
+  Video: FunctionsExpressionVideoInputSchemaSchema,
+}).strict().describe("Video content."), z.object({
+  File: FunctionsExpressionFileInputSchemaSchema,
+}).strict().describe("A file."), z.object({
+  AnyOf: FunctionsExpressionAnyOfInputSchemaSchema,
+}).strict().describe("A union of schemas - input must match at least one.")]).describe("Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.").meta({ title: "functions.expression.InputSchema" });
+export type FunctionsExpressionInputSchema = z.infer<typeof FunctionsExpressionInputSchemaSchema>;

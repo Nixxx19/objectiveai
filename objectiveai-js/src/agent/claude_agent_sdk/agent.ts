@@ -1,0 +1,21 @@
+import { z } from "zod";
+import { AgentClaudeAgentSdkEffortSchema } from "./effort";
+import { AgentClaudeAgentSdkOutputModeSchema } from "./outputMode";
+import { AgentClaudeAgentSdkUpstreamSchema } from "./upstream";
+import { AgentCompletionsMessageRichContentSchema } from "../completions/message/richContent";
+import { AgentMcpServerSchema } from "../mcpServer";
+
+export const AgentClaudeAgentSdkAgentSchema = z.object({
+  id: z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
+  upstream: AgentClaudeAgentSdkUpstreamSchema.describe("The upstream provider marker."),
+  model: z.string().describe("The upstream language model identifier."),
+  output_mode: AgentClaudeAgentSdkOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
+  synthetic_reasoning: z.boolean().nullable().describe("Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.\n\nWhen enabled, forces the LLM to output a `_think` field before voting,\nsimulating chain-of-thought reasoning. Requires `output_mode` to be\n`ToolCall` (not `Instruction`).").optional(),
+  thinking: z.boolean().nullable().describe("Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.").optional(),
+  effort: AgentClaudeAgentSdkEffortSchema.nullable().describe("The effort level for model output.").optional(),
+  system_prompt: z.string().nullable().describe("System prompt for the agent.").optional(),
+  prefix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content prepended to the user's prompt.").optional(),
+  suffix_content: AgentCompletionsMessageRichContentSchema.nullable().describe("Rich content appended after the user's prompt.").optional(),
+  mcp_servers: z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").optional(),
+}).describe("A validated Claude Agent SDK Agent with its computed content-addressed ID.").meta({ title: "agent.claude_agent_sdk.Agent" });
+export type AgentClaudeAgentSdkAgent = z.infer<typeof AgentClaudeAgentSdkAgentSchema>;

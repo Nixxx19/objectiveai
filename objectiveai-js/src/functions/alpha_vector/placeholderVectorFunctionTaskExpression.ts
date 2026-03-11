@@ -1,0 +1,18 @@
+import { z } from "zod";
+import { FunctionsAlphaVectorExpressionVectorFunctionInputExpressionSchema } from "./expression/vectorFunctionInputExpression";
+import { FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema } from "./expression/vectorFunctionInputSchema";
+import { FunctionsExpressionExpressionSchema } from "../expression/expression";
+
+export const FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema = z.object({
+  depth: z.number().int().min(0).meta({ format: "uint64" }),
+  min_branch_width: z.number().int().min(0).meta({ format: "uint64" }),
+  max_branch_width: z.number().int().min(0).meta({ format: "uint64" }),
+  min_leaf_width: z.number().int().min(0).meta({ format: "uint64" }),
+  max_leaf_width: z.number().int().min(0).meta({ format: "uint64" }),
+  name: z.string(),
+  spec: z.string(),
+  input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
+  skip: FunctionsExpressionExpressionSchema.nullable().optional(),
+  input: FunctionsAlphaVectorExpressionVectorFunctionInputExpressionSchema,
+}).meta({ title: "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression" });
+export type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression = z.infer<typeof FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema>;

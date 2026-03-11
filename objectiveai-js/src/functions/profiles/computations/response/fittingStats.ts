@@ -1,0 +1,10 @@
+import { z } from "zod";
+
+export const FunctionsProfilesComputationsResponseFittingStatsSchema = z.object({
+  loss: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]),
+  executions: z.number().int().min(0).meta({ format: "uint" }),
+  starts: z.number().int().min(0).meta({ format: "uint" }),
+  rounds: z.number().int().min(0).meta({ format: "uint" }),
+  errors: z.number().int().min(0).meta({ format: "uint" }),
+}).meta({ title: "functions.profiles.computations.response.FittingStats" });
+export type FunctionsProfilesComputationsResponseFittingStats = z.infer<typeof FunctionsProfilesComputationsResponseFittingStatsSchema>;

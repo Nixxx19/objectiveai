@@ -1,0 +1,27 @@
+import { z } from "zod";
+import { AgentCompletionsMessageAssistantToolCallDeltaSchema } from "../../message/assistantToolCallDelta";
+import { AgentCompletionsMessageRichContentSchema } from "../../message/richContent";
+import { AgentCompletionsResponseAssistantRoleSchema } from "../assistantRole";
+import { AgentCompletionsResponseFinishReasonSchema } from "../finishReason";
+import { AgentCompletionsResponseLogprobsSchema } from "../logprobs";
+import { AgentCompletionsResponseUpstreamUsageSchema } from "../upstreamUsage";
+
+export const AgentCompletionsResponseStreamingAssistantResponseChunkSchema = z.object({
+  role: AgentCompletionsResponseAssistantRoleSchema,
+  index: z.number().int().min(0).meta({ format: "uint64" }),
+  created: z.number().int().min(0).meta({ format: "uint64" }),
+  agent: z.string(),
+  model: z.string(),
+  upstream_id: z.string(),
+  reasoning: z.string().nullable().optional(),
+  tool_calls: z.array(AgentCompletionsMessageAssistantToolCallDeltaSchema).nullable().optional(),
+  content: AgentCompletionsMessageRichContentSchema.nullable().optional(),
+  refusal: z.string().nullable().optional(),
+  finish_reason: AgentCompletionsResponseFinishReasonSchema.nullable().optional(),
+  logprobs: AgentCompletionsResponseLogprobsSchema.nullable().optional(),
+  service_tier: z.string().nullable().optional(),
+  system_fingerprint: z.string().nullable().optional(),
+  provider: z.string().nullable().optional(),
+  usage: AgentCompletionsResponseUpstreamUsageSchema.nullable().describe("Upstream usage for this assistant response (set by upstream clients).").optional(),
+}).describe("A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.").meta({ title: "agent.completions.response.streaming.AssistantResponseChunk" });
+export type AgentCompletionsResponseStreamingAssistantResponseChunk = z.infer<typeof AgentCompletionsResponseStreamingAssistantResponseChunkSchema>;

@@ -1,0 +1,20 @@
+import { z } from "zod";
+import { AgentCompletionsRequestProviderSchema } from "../../../../agent/completions/request/provider";
+import { FunctionsInlineFunctionSchema } from "../../../inlineFunction";
+import { FunctionsProfilesComputationsRequestDatasetItemSchema } from "./datasetItem";
+import { VectorCompletionsRequestEnsembleSchema } from "../../../../vector/completions/request/ensemble";
+
+export const FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema = z.object({
+  function: FunctionsInlineFunctionSchema,
+  retry_token: z.string().nullable().optional(),
+  from_cache: z.boolean().nullable().optional(),
+  max_retries: z.number().int().min(0).meta({ format: "uint64" }).nullable().optional(),
+  n: z.number().int().min(0).meta({ format: "uint64" }),
+  dataset: z.array(FunctionsProfilesComputationsRequestDatasetItemSchema),
+  ensemble: VectorCompletionsRequestEnsembleSchema,
+  provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
+  seed: z.number().int().meta({ format: "int64" }).nullable().optional(),
+  stream: z.boolean().nullable().optional(),
+  mcp_server_authorization: z.record(z.string(), z.string()).nullable().describe("Map from MCP server URL to authorization header value.").optional(),
+}).meta({ title: "functions.profiles.computations.request.FunctionInlineRequestBody" });
+export type FunctionsProfilesComputationsRequestFunctionInlineRequestBody = z.infer<typeof FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema>;

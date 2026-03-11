@@ -1,0 +1,8 @@
+import { z } from "zod";
+import { FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, FunctionsExpressionWithExpressionStringSchema } from "../../../functions/expression/withExpression";
+
+export const AgentCompletionsMessageToolMessageExpressionSchema = z.object({
+  content: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema).describe("The content expression."),
+  tool_call_id: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The tool call ID expression."),
+}).describe("Expression variant of [`ToolMessage`] for dynamic content.").meta({ title: "agent.completions.message.ToolMessageExpression" });
+export type AgentCompletionsMessageToolMessageExpression = z.infer<typeof AgentCompletionsMessageToolMessageExpressionSchema>;

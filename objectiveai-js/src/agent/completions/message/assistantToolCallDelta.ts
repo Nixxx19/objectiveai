@@ -1,0 +1,11 @@
+import { z } from "zod";
+import { AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema } from "./assistantToolCallFunctionDelta";
+import { AgentCompletionsMessageAssistantToolCallTypeSchema } from "./assistantToolCallType";
+
+export const AgentCompletionsMessageAssistantToolCallDeltaSchema = z.object({
+  index: z.number().int().min(0).meta({ format: "uint64" }).describe("The index of this tool call."),
+  type: AgentCompletionsMessageAssistantToolCallTypeSchema.nullable().describe("The type of tool call (always \"function\").").optional(),
+  id: z.string().nullable().describe("The unique ID of this tool call.").optional(),
+  function: AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema.nullable().describe("The function call details.").optional(),
+}).describe("A tool call delta in a streaming response.").meta({ title: "agent.completions.message.AssistantToolCallDelta" });
+export type AgentCompletionsMessageAssistantToolCallDelta = z.infer<typeof AgentCompletionsMessageAssistantToolCallDeltaSchema>;

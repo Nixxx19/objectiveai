@@ -1,0 +1,14 @@
+import { z } from "zod";
+import { FunctionsRemoteSchema } from "../../remote";
+
+export const FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema = z.object({
+  fremote: FunctionsRemoteSchema.describe("Function remote source."),
+  fowner: z.string().describe("Function repository owner."),
+  frepository: z.string().describe("Function repository name."),
+  fcommit: z.string().nullable().describe("Function Git commit SHA (optional).").optional(),
+  premote: FunctionsRemoteSchema.describe("Profile remote source."),
+  powner: z.string().describe("Profile repository owner."),
+  prepository: z.string().describe("Profile repository name."),
+  pcommit: z.string().nullable().describe("Profile Git commit SHA (optional).").optional(),
+}).describe("Path parameters for remote Function with remote Profile.").meta({ title: "functions.executions.request.FunctionRemoteProfileRemoteRequestPath" });
+export type FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPath = z.infer<typeof FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema>;

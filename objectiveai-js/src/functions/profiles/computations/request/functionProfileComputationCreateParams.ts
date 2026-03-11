@@ -1,0 +1,6 @@
+import { z } from "zod";
+import { FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema } from "./functionInlineRequestBody";
+import { FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema } from "./functionRemoteRequestBody";
+
+export const FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema = z.union([FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema, FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema]).meta({ title: "functions.profiles.computations.request.FunctionProfileComputationCreateParams" });
+export type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams = z.infer<typeof FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema>;

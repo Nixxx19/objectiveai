@@ -1,0 +1,16 @@
+import { z } from "zod";
+import { FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema } from "./placeholderScalarFunctionTaskExpression";
+import { FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema } from "./placeholderVectorFunctionTaskExpression";
+import { FunctionsAlphaVectorScalarFunctionTaskExpressionSchema } from "./scalarFunctionTaskExpression";
+import { FunctionsAlphaVectorVectorFunctionTaskExpressionSchema } from "./vectorFunctionTaskExpression";
+
+export const FunctionsAlphaVectorBranchTaskExpressionSchema = z.union([FunctionsAlphaVectorScalarFunctionTaskExpressionSchema.extend({
+  type: z.literal("alpha.scalar.function"),
+}), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.extend({
+  type: z.literal("alpha.vector.function"),
+}), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.extend({
+  type: z.literal("placeholder.alpha.scalar.function"),
+}), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.extend({
+  type: z.literal("placeholder.alpha.vector.function"),
+})]).meta({ title: "functions.alpha_vector.BranchTaskExpression" });
+export type FunctionsAlphaVectorBranchTaskExpression = z.infer<typeof FunctionsAlphaVectorBranchTaskExpressionSchema>;

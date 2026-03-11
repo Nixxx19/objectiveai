@@ -1,0 +1,4 @@
+import { z } from "zod";
+
+export const AgentCompletionsMessageImageUrlDetailSchema = z.union([z.literal("auto").describe("Let the model decide the detail level."), z.literal("low").describe("Low detail mode (faster, less tokens)."), z.literal("high").describe("High detail mode (more accurate, more tokens).")]).describe("Detail level for image processing.").meta({ title: "agent.completions.message.ImageUrlDetail" });
+export type AgentCompletionsMessageImageUrlDetail = z.infer<typeof AgentCompletionsMessageImageUrlDetailSchema>;

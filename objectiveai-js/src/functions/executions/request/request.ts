@@ -1,0 +1,22 @@
+import { z } from "zod";
+import { FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema } from "./functionInlineProfileInlineRequestBody";
+import { FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema } from "./functionInlineProfileRemoteRequestBody";
+import { FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema } from "./functionInlineProfileRemoteRequestPath";
+import { FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema } from "./functionRemoteProfileInlineRequestBody";
+import { FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPathSchema } from "./functionRemoteProfileInlineRequestPath";
+import { FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema } from "./functionRemoteProfileRemoteRequestBody";
+import { FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema } from "./functionRemoteProfileRemoteRequestPath";
+
+export const FunctionsExecutionsRequestRequestSchema = z.union([z.object({
+  body: FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema,
+}), z.object({
+  path: FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema,
+  body: FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema,
+}), z.object({
+  path: FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPathSchema,
+  body: FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema,
+}), z.object({
+  path: FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema,
+  body: FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema,
+})]).describe("Internal request representation with path and body separated.\n\nUsed internally to route requests to the appropriate API endpoint.").meta({ title: "functions.executions.request.Request" });
+export type FunctionsExecutionsRequestRequest = z.infer<typeof FunctionsExecutionsRequestRequestSchema>;

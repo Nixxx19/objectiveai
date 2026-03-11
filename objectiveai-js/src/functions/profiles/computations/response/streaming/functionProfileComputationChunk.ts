@@ -1,0 +1,20 @@
+import { z } from "zod";
+import { AgentCompletionsResponseUsageSchema } from "../../../../../agent/completions/response/usage";
+import { FunctionsInlineTasksProfileSchema } from "../../../../inlineTasksProfile";
+import { FunctionsProfilesComputationsResponseFittingStatsSchema } from "../fittingStats";
+import { FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema } from "./functionExecutionChunk";
+import { FunctionsProfilesComputationsResponseStreamingObjectSchema } from "./object";
+
+export const FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema = z.object({
+  id: z.string(),
+  executions: z.array(FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema),
+  executions_errors: z.boolean().nullable().optional(),
+  profile: FunctionsInlineTasksProfileSchema.nullable().optional(),
+  fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema.nullable().optional(),
+  retry_token: z.string().nullable().optional(),
+  created: z.number().int().min(0).meta({ format: "uint64" }),
+  function: z.string().nullable().optional(),
+  object: FunctionsProfilesComputationsResponseStreamingObjectSchema,
+  usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
+}).meta({ title: "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk" });
+export type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk = z.infer<typeof FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema>;

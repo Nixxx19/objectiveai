@@ -1,0 +1,596 @@
+// install-zod.js
+// Reads JSON schemas from objectiveai-json-schema/ and generates Zod schemas
+// in objectiveai-js/src/ with proper imports and index.ts barrel exports.
+
+const fs = require("fs");
+const path = require("path");
+
+const SCHEMA_DIR = path.resolve(__dirname, "../../objectiveai-json-schema");
+const SRC_DIR = path.resolve(__dirname, "../src");
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** "agent.Agent" → "AgentAgent", "agent.claude_agent_sdk.Agent" → "AgentClaudeAgentSdkAgent" */
+function titleToPascal(title) {
+  return title
+    .split(/[._]/)
+    .filter(Boolean)
+    .map((s) => s[0].toUpperCase() + s.slice(1))
+    .join("");
+}
+
+/**
+ * "agent.Agent" → { dir: "agent", file: "agent" }
+ * "agent.openrouter.Agent" → { dir: "agent/openrouter", file: "agent" }
+ * "ResponseError" → { dir: "", file: "responseError" }
+ * "PrefixedUuid" → { dir: "", file: "prefixedUuid" }
+ *
+ * For generics like "functions.expression.WithExpression.string",
+ * we group by the base type: dir = "functions/expression", file = "withExpression"
+ */
+function titleToPath(title) {
+  // Detect generic monomorphizations
+  const genericBase = getGenericBase(title);
+  if (genericBase) {
+    const parts = genericBase.split(".");
+    const typeName = parts.pop();
+    const dir = parts.join("/");
+    const file = typeName[0].toLowerCase() + typeName.slice(1);
+    return { dir, file };
+  }
+
+  const parts = title.split(".");
+  const typeName = parts.pop();
+  const dir = parts.join("/");
+  const file = typeName[0].toLowerCase() + typeName.slice(1);
+  return { dir, file };
+}
+
+/** Returns the generic base if this is a monomorphized generic, else null.
+ * "functions.expression.WithExpression.string" → "functions.expression.WithExpression"
+ * "agent.WithFallbacksAndCount.agent.Agent" → "agent.WithFallbacksAndCount"
+ * "functions.expression.OneOrMany.string" → "functions.expression.OneOrMany"
+ * "agent.Agent" → null
+ */
+function getGenericBase(title) {
+  const genericPrefixes = [
+    "functions.expression.WithExpression.",
+    "agent.WithFallbacksAndCount.",
+    "functions.expression.OneOrMany.",
+  ];
+  for (const prefix of genericPrefixes) {
+    if (title.startsWith(prefix) && title.length > prefix.length) {
+      return prefix.slice(0, -1); // remove trailing dot
+    }
+  }
+  return null;
+}
+
+/**
+ * Compute relative import path from `fromFile` to `toFile`.
+ * Both are relative to SRC_DIR without extension.
+ */
+function relativeImport(fromFile, toFile) {
+  const fromDir = path.dirname(fromFile);
+  let rel = path.posix.relative(fromDir, toFile);
+  if (!rel.startsWith(".")) rel = "./" + rel;
+  return rel;
+}
+
+// ---------------------------------------------------------------------------
+// JSON Schema → Zod conversion
+// ---------------------------------------------------------------------------
+
+/** Recursively collect all $ref titles from a schema. */
+function collectRefs(schema, refs) {
+  if (!schema || typeof schema !== "object") return;
+  if (Array.isArray(schema)) {
+    for (const item of schema) collectRefs(item, refs);
+    return;
+  }
+  if (schema.$ref) {
+    if (schema.$ref !== "#") refs.add(schema.$ref);
+    // Also recurse into sibling properties (adjacently-tagged enum discriminants)
+    for (const [key, value] of Object.entries(schema)) {
+      if (key !== "$ref") collectRefs(value, refs);
+    }
+    return;
+  }
+  for (const value of Object.values(schema)) {
+    collectRefs(value, refs);
+  }
+}
+
+/**
+ * Convert a JSON schema node to a Zod expression string.
+ * `lazyRefs` is a Set of titles that must use z.lazy() to break cycles.
+ * `selfTitle` is the current schema's title, used to resolve `$ref: "#"` (self-reference).
+ */
+function convert(schema, refs, lazyRefs, selfTitle) {
+  if (!schema || typeof schema !== "object") {
+    return "z.unknown()";
+  }
+
+  // $ref
+  if (schema.$ref) {
+    const isSelfRef = schema.$ref === "#";
+    if (!isSelfRef) refs.add(schema.$ref);
+    const name = titleToPascal(schema.$ref) + "Schema";
+    const isLazy = isSelfRef || (lazyRefs && lazyRefs.has(schema.$ref));
+    const baseName = isSelfRef && selfTitle
+      ? titleToPascal(selfTitle) + "Schema"
+      : name;
+
+    let expr;
+
+    // $ref with sibling properties (adjacently-tagged enum discriminant)
+    if (schema.properties) {
+      const required = new Set(schema.required || []);
+      const props = [];
+      for (const [key, propSchema] of Object.entries(schema.properties)) {
+        const propCode = convert(propSchema, refs, lazyRefs, selfTitle);
+        const safeKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+        if (required.has(key)) {
+          props.push(`  ${safeKey}: ${propCode}`);
+        } else {
+          props.push(`  ${safeKey}: ${propCode}.optional()`);
+        }
+      }
+      const extendBlock = `.extend({\n${props.join(",\n")},\n})`;
+      if (isLazy) {
+        expr = `z.lazy(() => ${baseName}${extendBlock})`;
+      } else {
+        expr = `${baseName}${extendBlock}`;
+      }
+    } else if (isLazy) {
+      expr = `z.lazy(() => ${baseName})`;
+    } else {
+      expr = baseName;
+    }
+
+    // $ref can have description alongside it (draft-2020-12)
+    if (schema.description) {
+      expr += `.describe(${JSON.stringify(schema.description)})`;
+    }
+    return expr;
+  }
+
+  let expr;
+
+  // const (string enum literal)
+  if (schema.const !== undefined) {
+    expr = `z.literal(${JSON.stringify(schema.const)})`;
+  }
+  // enum (string enum)
+  else if (schema.enum) {
+    if (schema.enum.length === 1) {
+      expr = `z.literal(${JSON.stringify(schema.enum[0])})`;
+    } else {
+      expr = `z.enum(${JSON.stringify(schema.enum)})`;
+    }
+  }
+  // oneOf
+  else if (schema.oneOf) {
+    const variants = schema.oneOf.map((v) => convert(v, refs, lazyRefs, selfTitle));
+    expr = `z.union([${variants.join(", ")}])`;
+  }
+  // anyOf
+  else if (schema.anyOf) {
+    expr = convertAnyOf(schema, refs, lazyRefs, selfTitle);
+  }
+  // type handling
+  else {
+    const type = schema.type;
+
+    if (Array.isArray(type)) {
+      const nonNull = type.filter((t) => t !== "null");
+      const isNullable = type.includes("null");
+      if (nonNull.length === 1) {
+        const inner = convertSingleType(nonNull[0], schema, refs, lazyRefs, selfTitle);
+        expr = isNullable ? `${inner}.nullable()` : inner;
+      } else {
+        const variants = nonNull.map((t) =>
+          convertSingleType(t, schema, refs, lazyRefs, selfTitle)
+        );
+        expr = isNullable
+          ? `z.union([${variants.join(", ")}]).nullable()`
+          : `z.union([${variants.join(", ")}])`;
+      }
+    } else if (typeof type === "string") {
+      expr = convertSingleType(type, schema, refs, lazyRefs, selfTitle);
+    } else if (schema.properties) {
+      expr = convertSingleType("object", schema, refs, lazyRefs, selfTitle);
+    } else {
+      expr = "z.unknown()";
+    }
+  }
+
+  // Apply default
+  if (schema.default !== undefined) {
+    expr += `.default(${JSON.stringify(schema.default)})`;
+  }
+
+  // Apply description
+  if (schema.description) {
+    expr += `.describe(${JSON.stringify(schema.description)})`;
+  }
+
+  return expr;
+}
+
+function convertAnyOf(schema, refs, lazyRefs, selfTitle) {
+  const { anyOf } = schema;
+
+  // Check if it's a simple nullable: [something, {"type":"null"}]
+  const nullVariant = anyOf.find(
+    (v) => v.type === "null" || (Array.isArray(v.type) && v.type.length === 1 && v.type[0] === "null")
+  );
+  const nonNullVariants = anyOf.filter((v) => v !== nullVariant);
+
+  if (nullVariant && nonNullVariants.length === 1) {
+    return `${convert(nonNullVariants[0], refs, lazyRefs, selfTitle)}.nullable()`;
+  }
+
+  // If the parent schema also has properties + anyOf (like WithFallbacksAndCount),
+  // we handle this in the caller. Here just do union.
+  const variants = anyOf.map((v) => convert(v, refs, lazyRefs, selfTitle));
+  return `z.union([${variants.join(", ")}])`;
+}
+
+function convertSingleType(type, schema, refs, lazyRefs, selfTitle) {
+  switch (type) {
+    case "string": {
+      let expr = "z.string()";
+      if (schema.pattern) {
+        expr += `.regex(new RegExp(${JSON.stringify(schema.pattern)}))`;
+      }
+      if (schema.format) {
+        expr += `.meta({ format: ${JSON.stringify(schema.format)} })`;
+      }
+      return expr;
+    }
+    case "number": {
+      let expr = "z.number()";
+      if (schema.minimum !== undefined) expr += `.min(${schema.minimum})`;
+      if (schema.maximum !== undefined) expr += `.max(${schema.maximum})`;
+      if (schema.format) {
+        expr += `.meta({ format: ${JSON.stringify(schema.format)} })`;
+      }
+      return expr;
+    }
+    case "integer": {
+      let expr = "z.number().int()";
+      if (schema.minimum !== undefined) expr += `.min(${schema.minimum})`;
+      if (schema.maximum !== undefined) expr += `.max(${schema.maximum})`;
+      if (schema.format) {
+        expr += `.meta({ format: ${JSON.stringify(schema.format)} })`;
+      }
+      return expr;
+    }
+    case "boolean":
+      return "z.boolean()";
+    case "null":
+      return "z.null()";
+    case "array":
+      if (schema.items) {
+        const itemSchema = convert(schema.items, refs, lazyRefs, selfTitle);
+        return `z.array(${itemSchema})`;
+      }
+      return "z.array(z.unknown())";
+    case "object":
+      return convertObject(schema, refs, lazyRefs, selfTitle);
+    default:
+      return "z.unknown()";
+  }
+}
+
+function convertObject(schema, refs, lazyRefs, selfTitle) {
+  if (!schema.properties && schema.additionalProperties) {
+    const valSchema = convert(schema.additionalProperties, refs, lazyRefs, selfTitle);
+    return `z.record(z.string(), ${valSchema})`;
+  }
+
+  if (!schema.properties) {
+    if (schema.additionalProperties === false) {
+      return "z.object({}).strict()";
+    }
+    return "z.record(z.string(), z.unknown())";
+  }
+
+  const required = new Set(schema.required || []);
+  const props = [];
+  for (const [key, propSchema] of Object.entries(schema.properties)) {
+    const propCode = convert(propSchema, refs, lazyRefs, selfTitle);
+    const isRequired = required.has(key);
+    // Use safe key
+    const safeKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
+
+    if (isRequired) {
+      props.push(`  ${safeKey}: ${propCode}`);
+    } else {
+      // Check if the prop is already nullable — if so, just make it optional
+      if (propCode.endsWith(".nullable()")) {
+        props.push(`  ${safeKey}: ${propCode}.optional()`);
+      } else {
+        props.push(`  ${safeKey}: ${propCode}.optional()`);
+      }
+    }
+  }
+
+  let obj = `z.object({\n${props.join(",\n")},\n})`;
+
+  // Handle additionalProperties
+  if (schema.additionalProperties === false) {
+    obj += ".strict()";
+  } else if (schema.additionalProperties && schema.additionalProperties !== true) {
+    obj += `.catchall(${convert(schema.additionalProperties, refs, lazyRefs, selfTitle)})`;
+  }
+
+  return obj;
+}
+
+/**
+ * Convert a top-level schema. Handles the special case where a schema has
+ * both `properties` and `anyOf` (like WithFallbacksAndCount which flattens
+ * the inner type).
+ */
+function convertTopLevel(schema, refs, lazyRefs, selfTitle) {
+  // Special case: object with properties AND anyOf/oneOf (serde flatten)
+  if (schema.properties && (schema.anyOf || schema.oneOf)) {
+    const anyOfVariants = schema.anyOf || schema.oneOf;
+    // Build the object part with its own properties
+    const objectPart = convertObject(
+      {
+        type: "object",
+        properties: schema.properties,
+        required: schema.required,
+        additionalProperties: true,
+      },
+      refs,
+      lazyRefs,
+      selfTitle
+    );
+
+    // The anyOf/oneOf represents the flattened inner type
+    const anyOfPart = convertAnyOf({ anyOf: anyOfVariants }, refs, lazyRefs, selfTitle);
+
+    // Merge/intersection
+    let expr = `${anyOfPart}.and(${objectPart})`;
+
+    // Apply description from the top-level schema
+    if (schema.description) {
+      expr += `.describe(${JSON.stringify(schema.description)})`;
+    }
+
+    return expr;
+  }
+
+  return convert(schema, refs, lazyRefs, selfTitle);
+}
+
+// ---------------------------------------------------------------------------
+// Main
+// ---------------------------------------------------------------------------
+
+function main() {
+  // Read all schema files
+  const files = fs.readdirSync(SCHEMA_DIR).filter((f) => f.endsWith(".json"));
+  const schemas = new Map(); // title -> schema object
+
+  for (const file of files) {
+    const content = JSON.parse(
+      fs.readFileSync(path.join(SCHEMA_DIR, file), "utf-8")
+    );
+    if (content.title) {
+      schemas.set(content.title, content);
+    }
+  }
+
+  console.log(`Read ${schemas.size} schemas`);
+
+  // Group schemas by output file path
+  // key: "agent/agent" (relative to src/), value: [{ title, schema }]
+  const fileGroups = new Map();
+
+  for (const [title, schema] of schemas) {
+    const { dir, file } = titleToPath(title);
+    const filePath = dir ? `${dir}/${file}` : file;
+    if (!fileGroups.has(filePath)) {
+      fileGroups.set(filePath, []);
+    }
+    fileGroups.get(filePath).push({ title, schema });
+  }
+
+  console.log(`Generating ${fileGroups.size} .ts files`);
+
+  // ---------------------------------------------------------------------------
+  // Build file dependency graph and detect cycles
+  // ---------------------------------------------------------------------------
+
+  // First pass: collect refs for each file to build the dependency graph
+  const fileRefs = new Map(); // filePath -> Set<refFilePath>
+  for (const [filePath, entries] of fileGroups) {
+    const refs = new Set();
+    for (const { schema } of entries) {
+      collectRefs(schema, refs);
+    }
+    const depFiles = new Set();
+    for (const ref of refs) {
+      const { dir: refDir, file: refFile } = titleToPath(ref);
+      const refPath = refDir ? `${refDir}/${refFile}` : refFile;
+      if (refPath !== filePath) {
+        depFiles.add(refPath);
+      }
+    }
+    fileRefs.set(filePath, depFiles);
+  }
+
+  // Detect back-edges (cycles) via DFS
+  const lazyEdges = new Set(); // "fromFile->toFile" edges that must use z.lazy()
+  {
+    const WHITE = 0, GRAY = 1, BLACK = 2;
+    const color = new Map();
+    for (const f of fileGroups.keys()) color.set(f, WHITE);
+
+    function dfs(u) {
+      color.set(u, GRAY);
+      for (const v of fileRefs.get(u) || []) {
+        if (!color.has(v)) continue; // ref to non-existent file, skip
+        if (color.get(v) === GRAY) {
+          // Back-edge: this import would create a cycle
+          lazyEdges.add(`${u}->${v}`);
+        } else if (color.get(v) === WHITE) {
+          dfs(v);
+        }
+      }
+      color.set(u, BLACK);
+    }
+
+    for (const f of fileGroups.keys()) {
+      if (color.get(f) === WHITE) dfs(f);
+    }
+  }
+
+  if (lazyEdges.size > 0) {
+    console.log(`Found ${lazyEdges.size} circular dependency edge(s), using z.lazy()`);
+  }
+
+  // Build a set of titles whose refs are lazy (from a given file)
+  // lazyRefTitles: filePath -> Set<title> where the ref should use z.lazy()
+  const lazyRefTitles = new Map();
+  for (const edge of lazyEdges) {
+    const [fromFile, toFile] = edge.split("->");
+    // Find which titles in toFile are referenced by fromFile
+    for (const { schema } of fileGroups.get(fromFile) || []) {
+      const refs = new Set();
+      collectRefs(schema, refs);
+      for (const ref of refs) {
+        const { dir: refDir, file: refFile } = titleToPath(ref);
+        const refPath = refDir ? `${refDir}/${refFile}` : refFile;
+        if (refPath === toFile) {
+          if (!lazyRefTitles.has(fromFile)) lazyRefTitles.set(fromFile, new Set());
+          lazyRefTitles.get(fromFile).add(ref);
+        }
+      }
+    }
+  }
+
+  // Track all directories that need index.ts files
+  const allDirs = new Set();
+
+  // Generate each .ts file
+  for (const [filePath, entries] of fileGroups) {
+    const refs = new Set();
+    const lazyRefs = lazyRefTitles.get(filePath) || new Set();
+    const exports = [];
+
+    for (const { title, schema } of entries) {
+      const pascalName = titleToPascal(title);
+      const zodCode = convertTopLevel(schema, refs, lazyRefs, title);
+      // Add .meta({ title }) for top-level schema title
+      const withTitle = `${zodCode}.meta({ title: ${JSON.stringify(title)} })`;
+      exports.push(
+        `export const ${pascalName}Schema = ${withTitle};\n` +
+          `export type ${pascalName} = z.infer<typeof ${pascalName}Schema>;`
+      );
+    }
+
+    // Compute imports
+    const imports = [];
+    // Always need zod
+    imports.push('import { z } from "zod";');
+
+    // Group refs by their target file
+    const refsByFile = new Map();
+    for (const ref of refs) {
+      // Skip self-references (refs within the same file)
+      const { dir: refDir, file: refFile } = titleToPath(ref);
+      const refPath = refDir ? `${refDir}/${refFile}` : refFile;
+      if (refPath === filePath) continue;
+      if (!refsByFile.has(refPath)) {
+        refsByFile.set(refPath, []);
+      }
+      refsByFile.get(refPath).push(ref);
+    }
+
+    for (const [refPath, refTitles] of [...refsByFile.entries()].sort()) {
+      const importNames = refTitles
+        .map((t) => titleToPascal(t) + "Schema")
+        .sort();
+      const relPath = relativeImport(filePath, refPath);
+      // Lazy refs are still imported statically — z.lazy() defers evaluation,
+      // which breaks the initialization-time cycle.
+      imports.push(
+        `import { ${importNames.join(", ")} } from "${relPath}";`
+      );
+    }
+
+    const content =
+      imports.join("\n") + "\n\n" + exports.join("\n\n") + "\n";
+
+    const fullPath = path.join(SRC_DIR, filePath + ".ts");
+    const dir = path.dirname(fullPath);
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(fullPath, content);
+
+    // Track directories
+    const parts = filePath.split("/");
+    for (let i = 1; i <= parts.length - 1; i++) {
+      allDirs.add(parts.slice(0, i).join("/"));
+    }
+  }
+
+  // Generate index.ts files for each directory
+  // Walk from leaves to root
+  const sortedDirs = [...allDirs].sort((a, b) => b.length - a.length);
+
+  // Also generate root-level entries
+  allDirs.add("");
+
+  for (const dir of [...allDirs].sort()) {
+    const absDir = dir ? path.join(SRC_DIR, dir) : SRC_DIR;
+    if (!fs.existsSync(absDir)) continue;
+
+    const entries = fs.readdirSync(absDir, { withFileTypes: true });
+    const exportLines = [];
+
+    // Export subdirectories (that have index.ts)
+    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      if (entry.isDirectory()) {
+        const subIndexPath = path.join(absDir, entry.name, "index.ts");
+        if (fs.existsSync(subIndexPath)) {
+          exportLines.push(`export * from "./${entry.name}/index";`);
+        }
+      }
+    }
+
+    // Export .ts files (but not index.ts itself)
+    for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
+      if (
+        entry.isFile() &&
+        entry.name.endsWith(".ts") &&
+        entry.name !== "index.ts"
+      ) {
+        const name = entry.name.replace(/\.ts$/, "");
+        // Only export files we generated (check if they have a Schema export)
+        const fullFilePath = path.join(absDir, entry.name);
+        const fileContent = fs.readFileSync(fullFilePath, "utf-8");
+        if (fileContent.includes("Schema =")) {
+          exportLines.push(`export * from "./${name}";`);
+        }
+      }
+    }
+
+    if (exportLines.length > 0) {
+      const indexPath = path.join(absDir, "index.ts");
+      fs.writeFileSync(indexPath, exportLines.join("\n") + "\n");
+    }
+  }
+
+  console.log(`Generated index.ts for ${allDirs.size} directories`);
+  console.log("Done!");
+}
+
+main();

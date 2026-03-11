@@ -1,0 +1,4 @@
+import { z } from "zod";
+
+export const FunctionsExpressionTaskOutputRefSchema = z.union([z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("A single scalar score."), z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("A vector of scores."), z.array(z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]))).describe("Multiple vectors of scores (from mapped tasks)."), z.unknown().describe("An error occurred during execution.")]).describe("Borrowed task output variants.").meta({ title: "functions.expression.TaskOutputRef" });
+export type FunctionsExpressionTaskOutputRef = z.infer<typeof FunctionsExpressionTaskOutputRefSchema>;

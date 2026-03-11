@@ -1,0 +1,10 @@
+import { z } from "zod";
+import { VectorCompletionsRequestEnsembleSchema } from "../vector/completions/request/ensemble";
+import { VectorCompletionsRequestProfileSchema } from "../vector/completions/request/profile";
+
+export const FunctionsRemoteAutoProfileSchema = z.object({
+  description: z.string().describe("Human-readable description of the profile."),
+  ensemble: VectorCompletionsRequestEnsembleSchema.describe("The ensemble to use for all vector completion tasks."),
+  profile: VectorCompletionsRequestProfileSchema.describe("Weights for each agent in the ensemble."),
+}).describe("A remote auto profile with full metadata.\n\nApplies a single ensemble and weights to every vector completion task\nin the function, with equal task weights.").meta({ title: "functions.RemoteAutoProfile" });
+export type FunctionsRemoteAutoProfile = z.infer<typeof FunctionsRemoteAutoProfileSchema>;

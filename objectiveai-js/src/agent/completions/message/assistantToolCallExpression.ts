@@ -1,0 +1,9 @@
+import { z } from "zod";
+import { FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, FunctionsExpressionWithExpressionStringSchema } from "../../../functions/expression/withExpression";
+
+export const AgentCompletionsMessageAssistantToolCallExpressionSchema = z.union([z.object({
+  id: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The tool call ID expression."),
+  function: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema).describe("The function expression."),
+  type: z.literal("function"),
+}).describe("A function call expression.")]).describe("Expression variant of [`AssistantToolCall`] for dynamic content.").meta({ title: "agent.completions.message.AssistantToolCallExpression" });
+export type AgentCompletionsMessageAssistantToolCallExpression = z.infer<typeof AgentCompletionsMessageAssistantToolCallExpressionSchema>;

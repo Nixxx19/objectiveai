@@ -1,0 +1,8 @@
+import { z } from "zod";
+import { FunctionsExpressionWithExpressionStringSchema } from "../../../functions/expression/withExpression";
+
+export const AgentCompletionsMessageSimpleContentPartExpressionSchema = z.union([z.object({
+  text: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The text expression."),
+  type: z.literal("text"),
+}).describe("A text part expression.")]).describe("Expression variant of [`SimpleContentPart`] for dynamic content.").meta({ title: "agent.completions.message.SimpleContentPartExpression" });
+export type AgentCompletionsMessageSimpleContentPartExpression = z.infer<typeof AgentCompletionsMessageSimpleContentPartExpressionSchema>;

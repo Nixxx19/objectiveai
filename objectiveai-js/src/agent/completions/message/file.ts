@@ -1,0 +1,9 @@
+import { z } from "zod";
+
+export const AgentCompletionsMessageFileSchema = z.object({
+  file_data: z.string().nullable().describe("Base64-encoded file data.").optional(),
+  file_id: z.string().nullable().describe("The ID of a previously uploaded file.").optional(),
+  filename: z.string().nullable().describe("The filename for display purposes.").optional(),
+  file_url: z.string().nullable().describe("A URL to fetch the file from.").optional(),
+}).describe("A file attachment for multimodal input.").meta({ title: "agent.completions.message.File" });
+export type AgentCompletionsMessageFile = z.infer<typeof AgentCompletionsMessageFileSchema>;

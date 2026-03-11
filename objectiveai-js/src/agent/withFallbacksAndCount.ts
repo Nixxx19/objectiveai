@@ -1,0 +1,21 @@
+import { z } from "zod";
+import { AgentAgentSchema } from "./agent";
+import { AgentAgentBaseSchema } from "./agentBase";
+import { AgentClaudeAgentSdkAgentSchema } from "./claude_agent_sdk/agent";
+import { AgentClaudeAgentSdkAgentBaseSchema } from "./claude_agent_sdk/agentBase";
+import { AgentMockAgentSchema } from "./mock/agent";
+import { AgentMockAgentBaseSchema } from "./mock/agentBase";
+import { AgentOpenrouterAgentSchema } from "./openrouter/agent";
+import { AgentOpenrouterAgentBaseSchema } from "./openrouter/agentBase";
+
+export const AgentWithFallbacksAndCountAgentAgentSchema = z.union([AgentOpenrouterAgentSchema, AgentClaudeAgentSdkAgentSchema, AgentMockAgentSchema]).and(z.object({
+  count: z.number().int().min(0).meta({ format: "uint64" }).default(1).describe("Number of instances of this agent in the ensemble. Defaults to 1.").optional(),
+  fallbacks: z.array(AgentAgentSchema).nullable().describe("Fallback agents to try if the primary fails.").optional(),
+})).describe("Wrapper that adds fallback agents and a count to any agent type.\n\nUsed to specify how many instances of an agent to include in an ensemble,\nalong with fallback agents to try if the primary fails.").meta({ title: "agent.WithFallbacksAndCount.agent.Agent" });
+export type AgentWithFallbacksAndCountAgentAgent = z.infer<typeof AgentWithFallbacksAndCountAgentAgentSchema>;
+
+export const AgentWithFallbacksAndCountAgentAgentBaseSchema = z.union([AgentOpenrouterAgentBaseSchema, AgentClaudeAgentSdkAgentBaseSchema, AgentMockAgentBaseSchema]).and(z.object({
+  count: z.number().int().min(0).meta({ format: "uint64" }).default(1).describe("Number of instances of this agent in the ensemble. Defaults to 1.").optional(),
+  fallbacks: z.array(AgentAgentBaseSchema).nullable().describe("Fallback agents to try if the primary fails.").optional(),
+})).describe("Wrapper that adds fallback agents and a count to any agent type.\n\nUsed to specify how many instances of an agent to include in an ensemble,\nalong with fallback agents to try if the primary fails.").meta({ title: "agent.WithFallbacksAndCount.agent.AgentBase" });
+export type AgentWithFallbacksAndCountAgentAgentBase = z.infer<typeof AgentWithFallbacksAndCountAgentAgentBaseSchema>;

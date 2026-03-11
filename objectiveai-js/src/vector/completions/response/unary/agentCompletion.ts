@@ -1,0 +1,18 @@
+import { z } from "zod";
+import { AgentCompletionsResponseUnaryMessageSchema } from "../../../../agent/completions/response/unary/message";
+import { AgentCompletionsResponseUnaryObjectSchema } from "../../../../agent/completions/response/unary/object";
+import { AgentCompletionsResponseUsageSchema } from "../../../../agent/completions/response/usage";
+import { AgentUpstreamSchema } from "../../../../agent/upstream";
+import { ResponseErrorSchema } from "../../../../responseError";
+
+export const VectorCompletionsResponseUnaryAgentCompletionSchema = z.object({
+  index: z.number().int().min(0).meta({ format: "uint64" }).describe("Index of this completion within the vector completion."),
+  id: z.string(),
+  created: z.number().int().min(0).meta({ format: "uint64" }),
+  messages: z.array(AgentCompletionsResponseUnaryMessageSchema),
+  object: AgentCompletionsResponseUnaryObjectSchema.describe("The object type (always \"agent.completion\")."),
+  usage: AgentCompletionsResponseUsageSchema,
+  upstream: AgentUpstreamSchema.describe("Upstream provider"),
+  error: ResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
+}).describe("A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the ensemble produced it.").meta({ title: "vector.completions.response.unary.AgentCompletion" });
+export type VectorCompletionsResponseUnaryAgentCompletion = z.infer<typeof VectorCompletionsResponseUnaryAgentCompletionSchema>;

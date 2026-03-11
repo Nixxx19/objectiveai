@@ -1,0 +1,13 @@
+import { z } from "zod";
+import { FunctionsExpressionExpressionSchema } from "../expression/expression";
+import { FunctionsRemoteSchema } from "../remote";
+
+export const FunctionsAlphaVectorScalarFunctionTaskExpressionSchema = z.object({
+  remote: FunctionsRemoteSchema,
+  owner: z.string(),
+  repository: z.string(),
+  commit: z.string(),
+  skip: FunctionsExpressionExpressionSchema.nullable().optional(),
+  input: FunctionsExpressionExpressionSchema,
+}).meta({ title: "functions.alpha_vector.ScalarFunctionTaskExpression" });
+export type FunctionsAlphaVectorScalarFunctionTaskExpression = z.infer<typeof FunctionsAlphaVectorScalarFunctionTaskExpressionSchema>;

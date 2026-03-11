@@ -1,0 +1,8 @@
+import { z } from "zod";
+
+export const AuthCreateApiKeyRequestSchema = z.object({
+  expires: z.string().meta({ format: "date-time" }).nullable().describe("The expiration timestamp for the API key, or `None` for a non-expiring key.").optional(),
+  name: z.string().describe("A user-provided name to identify this API key."),
+  description: z.string().nullable().describe("An optional description providing additional context about the key's purpose.").optional(),
+}).describe("Request to create a new API key.\n\n# Fields\n\n* `expires` - Optional expiration timestamp. If `None`, the key never expires.\n* `name` - A user-provided name for identifying the key.\n* `description` - Optional description providing additional context.").meta({ title: "auth.CreateApiKeyRequest" });
+export type AuthCreateApiKeyRequest = z.infer<typeof AuthCreateApiKeyRequestSchema>;

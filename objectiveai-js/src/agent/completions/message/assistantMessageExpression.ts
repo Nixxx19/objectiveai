@@ -1,0 +1,11 @@
+import { z } from "zod";
+import { FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema, FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, FunctionsExpressionWithExpressionNullableStringSchema } from "../../../functions/expression/withExpression";
+
+export const AgentCompletionsMessageAssistantMessageExpressionSchema = z.object({
+  content: FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema.nullable().describe("The content expression.").optional(),
+  name: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional(),
+  refusal: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional(),
+  tool_calls: FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema.nullable().optional(),
+  reasoning: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional(),
+}).describe("Expression variant of [`AssistantMessage`] for dynamic content.").meta({ title: "agent.completions.message.AssistantMessageExpression" });
+export type AgentCompletionsMessageAssistantMessageExpression = z.infer<typeof AgentCompletionsMessageAssistantMessageExpressionSchema>;

@@ -1,0 +1,9 @@
+import { z } from "zod";
+import { AgentCompletionsMessageAssistantToolCallFunctionSchema } from "./assistantToolCallFunction";
+
+export const AgentCompletionsMessageAssistantToolCallSchema = z.union([z.object({
+  id: z.string().describe("The unique ID of this tool call."),
+  function: AgentCompletionsMessageAssistantToolCallFunctionSchema.describe("The function being called."),
+  type: z.literal("function"),
+}).describe("A function call with an ID and function details.")]).describe("A tool call made by the assistant.").meta({ title: "agent.completions.message.AssistantToolCall" });
+export type AgentCompletionsMessageAssistantToolCall = z.infer<typeof AgentCompletionsMessageAssistantToolCallSchema>;

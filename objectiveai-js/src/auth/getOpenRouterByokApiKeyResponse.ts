@@ -1,0 +1,6 @@
+import { z } from "zod";
+
+export const AuthGetOpenRouterByokApiKeyResponseSchema = z.object({
+  api_key: z.string().nullable().describe("The OpenRouter API key, or `None` if not configured.").optional(),
+}).describe("Response containing the user's OpenRouter BYOK API key.").meta({ title: "auth.GetOpenRouterByokApiKeyResponse" });
+export type AuthGetOpenRouterByokApiKeyResponse = z.infer<typeof AuthGetOpenRouterByokApiKeyResponseSchema>;

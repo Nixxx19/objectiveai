@@ -1,0 +1,17 @@
+import { z } from "zod";
+import { AgentCompletionsResponseUnaryMessageSchema } from "./message";
+import { AgentCompletionsResponseUnaryObjectSchema } from "./object";
+import { AgentCompletionsResponseUsageSchema } from "../usage";
+import { AgentUpstreamSchema } from "../../../upstream";
+import { ResponseErrorSchema } from "../../../../responseError";
+
+export const AgentCompletionsResponseUnaryAgentCompletionSchema = z.object({
+  id: z.string(),
+  created: z.number().int().min(0).meta({ format: "uint64" }),
+  messages: z.array(AgentCompletionsResponseUnaryMessageSchema),
+  object: AgentCompletionsResponseUnaryObjectSchema.describe("The object type (always \"agent.completion\")."),
+  usage: AgentCompletionsResponseUsageSchema,
+  upstream: AgentUpstreamSchema.describe("Upstream provider"),
+  error: ResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
+}).describe("A complete agent completion response.").meta({ title: "agent.completions.response.unary.AgentCompletion" });
+export type AgentCompletionsResponseUnaryAgentCompletion = z.infer<typeof AgentCompletionsResponseUnaryAgentCompletionSchema>;

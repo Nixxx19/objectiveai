@@ -1,0 +1,9 @@
+import { z } from "zod";
+import { FunctionsListFunctionItemSchema } from "./listFunctionItem";
+import { FunctionsProfilesListProfileItemSchema } from "./profiles/listProfileItem";
+
+export const FunctionsListFunctionProfilePairItemSchema = z.object({
+  function: FunctionsListFunctionItemSchema.describe("The function."),
+  profile: FunctionsProfilesListProfileItemSchema.describe("The profile."),
+}).describe("A function-profile pair in a list response.").meta({ title: "functions.ListFunctionProfilePairItem" });
+export type FunctionsListFunctionProfilePairItem = z.infer<typeof FunctionsListFunctionProfilePairItemSchema>;

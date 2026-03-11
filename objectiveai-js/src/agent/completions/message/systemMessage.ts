@@ -1,0 +1,8 @@
+import { z } from "zod";
+import { AgentCompletionsMessageSimpleContentSchema } from "./simpleContent";
+
+export const AgentCompletionsMessageSystemMessageSchema = z.object({
+  content: AgentCompletionsMessageSimpleContentSchema.describe("The message content."),
+  name: z.string().nullable().describe("Optional name for the message author.").optional(),
+}).describe("A system message setting context or instructions.").meta({ title: "agent.completions.message.SystemMessage" });
+export type AgentCompletionsMessageSystemMessage = z.infer<typeof AgentCompletionsMessageSystemMessageSchema>;

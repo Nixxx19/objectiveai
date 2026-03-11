@@ -1,0 +1,7 @@
+import { z } from "zod";
+
+export const FunctionsExpressionStringInputSchemaSchema = z.object({
+  description: z.string().nullable().describe("Human-readable description of the string.").optional(),
+  enum: z.array(z.string()).nullable().describe("If provided, the string must be one of these values.").optional(),
+}).describe("Schema for a string input.").meta({ title: "functions.expression.StringInputSchema" });
+export type FunctionsExpressionStringInputSchema = z.infer<typeof FunctionsExpressionStringInputSchemaSchema>;

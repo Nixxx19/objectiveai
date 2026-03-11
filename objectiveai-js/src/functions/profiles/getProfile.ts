@@ -1,0 +1,12 @@
+import { z } from "zod";
+import { FunctionsRemoteSchema } from "../remote";
+import { FunctionsRemoteAutoProfileSchema } from "../remoteAutoProfile";
+import { FunctionsRemoteTasksProfileSchema } from "../remoteTasksProfile";
+
+export const FunctionsProfilesGetProfileSchema = z.union([FunctionsRemoteTasksProfileSchema.describe("Tasks-based profile with per-task configuration."), FunctionsRemoteAutoProfileSchema.describe("Auto profile that applies a single ensemble+weights to all vector completion tasks.")]).and(z.object({
+  remote: FunctionsRemoteSchema,
+  owner: z.string(),
+  repository: z.string(),
+  commit: z.string(),
+})).describe("A remote profile, either tasks-based or auto.").meta({ title: "functions.profiles.GetProfile" });
+export type FunctionsProfilesGetProfile = z.infer<typeof FunctionsProfilesGetProfileSchema>;

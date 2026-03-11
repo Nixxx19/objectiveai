@@ -1,0 +1,12 @@
+import { z } from "zod";
+import { FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema } from "./functionInlineRequestBody";
+import { FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema } from "./functionRemoteRequestBody";
+import { FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema } from "./functionRemoteRequestPath";
+
+export const FunctionsProfilesComputationsRequestRequestSchema = z.union([z.object({
+  body: FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema,
+}), z.object({
+  path: FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema,
+  body: FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema,
+})]).meta({ title: "functions.profiles.computations.request.Request" });
+export type FunctionsProfilesComputationsRequestRequest = z.infer<typeof FunctionsProfilesComputationsRequestRequestSchema>;

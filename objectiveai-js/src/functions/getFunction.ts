@@ -1,0 +1,26 @@
+import { z } from "zod";
+import { FunctionsExpressionExpressionSchema } from "./expression/expression";
+import { FunctionsExpressionInputSchemaSchema } from "./expression/inputSchema";
+import { FunctionsRemoteSchema } from "./remote";
+import { FunctionsTaskExpressionSchema } from "./taskExpression";
+
+export const FunctionsGetFunctionSchema = z.union([z.object({
+  description: z.string().describe("Human-readable description of what the function does."),
+  input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
+  tasks: z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
+  type: z.literal("scalar.function"),
+}).describe("Produces a single score in [0, 1]."), z.object({
+  description: z.string().describe("Human-readable description of what the function does."),
+  input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
+  tasks: z.array(FunctionsTaskExpressionSchema).describe("The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped)."),
+  output_length: FunctionsExpressionExpressionSchema.describe("Expression computing the expected output vector length for task outputs.\nReceives: `input`."),
+  input_split: FunctionsExpressionExpressionSchema.describe("Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`."),
+  input_merge: FunctionsExpressionExpressionSchema.describe("Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array)."),
+  type: z.literal("vector.function"),
+}).describe("Produces a vector of scores that sums to 1.")]).and(z.object({
+  remote: FunctionsRemoteSchema,
+  owner: z.string(),
+  repository: z.string(),
+  commit: z.string(),
+})).describe("A remote function with full metadata.\n\nRemote functions are stored as `function.json` in repositories and\nreferenced by `remote/owner/repository`. They include documentation fields\nthat inline functions lack.").meta({ title: "functions.GetFunction" });
+export type FunctionsGetFunction = z.infer<typeof FunctionsGetFunctionSchema>;

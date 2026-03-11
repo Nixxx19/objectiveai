@@ -1,0 +1,19 @@
+import { z } from "zod";
+import { AgentCompletionsMessageAssistantMessageExpressionSchema } from "./assistantMessageExpression";
+import { AgentCompletionsMessageDeveloperMessageExpressionSchema } from "./developerMessageExpression";
+import { AgentCompletionsMessageSystemMessageExpressionSchema } from "./systemMessageExpression";
+import { AgentCompletionsMessageToolMessageExpressionSchema } from "./toolMessageExpression";
+import { AgentCompletionsMessageUserMessageExpressionSchema } from "./userMessageExpression";
+
+export const AgentCompletionsMessageMessageExpressionSchema = z.union([AgentCompletionsMessageDeveloperMessageExpressionSchema.extend({
+  role: z.literal("developer"),
+}), AgentCompletionsMessageSystemMessageExpressionSchema.extend({
+  role: z.literal("system"),
+}), AgentCompletionsMessageUserMessageExpressionSchema.extend({
+  role: z.literal("user"),
+}), z.lazy(() => AgentCompletionsMessageAssistantMessageExpressionSchema.extend({
+  role: z.literal("assistant"),
+})), AgentCompletionsMessageToolMessageExpressionSchema.extend({
+  role: z.literal("tool"),
+})]).describe("A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.").meta({ title: "agent.completions.message.MessageExpression" });
+export type AgentCompletionsMessageMessageExpression = z.infer<typeof AgentCompletionsMessageMessageExpressionSchema>;

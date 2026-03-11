@@ -1,0 +1,9 @@
+import { z } from "zod";
+import { AgentClaudeAgentSdkAgentSchema } from "./claude_agent_sdk/agent";
+import { AgentMockAgentSchema } from "./mock/agent";
+import { AgentOpenrouterAgentSchema } from "./openrouter/agent";
+
+export const AgentGetAgentSchema = z.union([AgentOpenrouterAgentSchema, AgentClaudeAgentSdkAgentSchema, AgentMockAgentSchema]).and(z.object({
+  created: z.number().int().min(0).meta({ format: "uint64" }).describe("Unix timestamp when this Agent was first used."),
+})).describe("Response containing a single Agent with creation timestamp.").meta({ title: "agent.GetAgent" });
+export type AgentGetAgent = z.infer<typeof AgentGetAgentSchema>;

@@ -1,0 +1,16 @@
+import { z } from "zod";
+import { FunctionsInventionsStateAlphaScalarBranchStateSchema } from "./alphaScalarBranchState";
+import { FunctionsInventionsStateAlphaScalarLeafStateSchema } from "./alphaScalarLeafState";
+import { FunctionsInventionsStateAlphaVectorBranchStateSchema } from "./alphaVectorBranchState";
+import { FunctionsInventionsStateAlphaVectorLeafStateSchema } from "./alphaVectorLeafState";
+
+export const FunctionsInventionsStateStateSchema = z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.extend({
+  type: z.literal("alpha.scalar.branch.function"),
+}), FunctionsInventionsStateAlphaScalarLeafStateSchema.extend({
+  type: z.literal("alpha.scalar.leaf.function"),
+}), FunctionsInventionsStateAlphaVectorBranchStateSchema.extend({
+  type: z.literal("alpha.vector.branch.function"),
+}), FunctionsInventionsStateAlphaVectorLeafStateSchema.extend({
+  type: z.literal("alpha.vector.leaf.function"),
+})]).meta({ title: "functions.inventions.state.State" });
+export type FunctionsInventionsStateState = z.infer<typeof FunctionsInventionsStateStateSchema>;

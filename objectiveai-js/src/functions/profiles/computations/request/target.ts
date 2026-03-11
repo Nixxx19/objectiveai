@@ -1,0 +1,13 @@
+import { z } from "zod";
+
+export const FunctionsProfilesComputationsRequestTargetSchema = z.union([z.object({
+  value: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]),
+  type: z.literal("scalar"),
+}), z.object({
+  value: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])),
+  type: z.literal("vector"),
+}), z.object({
+  value: z.number().int().min(0).meta({ format: "uint" }),
+  type: z.literal("vector_winner"),
+})]).meta({ title: "functions.profiles.computations.request.Target" });
+export type FunctionsProfilesComputationsRequestTarget = z.infer<typeof FunctionsProfilesComputationsRequestTargetSchema>;

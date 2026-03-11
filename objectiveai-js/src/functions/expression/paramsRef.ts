@@ -1,0 +1,10 @@
+import { z } from "zod";
+import { FunctionsExpressionInputSchema } from "./input";
+import { FunctionsExpressionTaskOutputSchema } from "./taskOutput";
+
+export const FunctionsExpressionParamsRefSchema = z.object({
+  input: FunctionsExpressionInputSchema.describe("The function's input data."),
+  output: FunctionsExpressionTaskOutputSchema.nullable().describe("Results from executed tasks. Only populated for task output expressions.").optional(),
+  map: z.number().int().min(0).meta({ format: "uint64" }).nullable().describe("Current map index. Only populated for mapped task expressions.").optional(),
+}).describe("Borrowed version of expression parameters.").meta({ title: "functions.expression.ParamsRef" });
+export type FunctionsExpressionParamsRef = z.infer<typeof FunctionsExpressionParamsRefSchema>;

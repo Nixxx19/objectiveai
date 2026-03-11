@@ -1,0 +1,7 @@
+import { z } from "zod";
+import { AgentClaudeAgentSdkAgentBaseSchema } from "./claude_agent_sdk/agentBase";
+import { AgentMockAgentBaseSchema } from "./mock/agentBase";
+import { AgentOpenrouterAgentBaseSchema } from "./openrouter/agentBase";
+
+export const AgentAgentBaseSchema = z.union([AgentOpenrouterAgentBaseSchema, AgentClaudeAgentSdkAgentBaseSchema, AgentMockAgentBaseSchema]).describe("The base configuration for an Agent (without computed ID).\n\nThis is an untagged enum that dispatches to the per-upstream AgentBase.\nDeserialization tries each variant in order until one matches.").meta({ title: "agent.AgentBase" });
+export type AgentAgentBase = z.infer<typeof AgentAgentBaseSchema>;

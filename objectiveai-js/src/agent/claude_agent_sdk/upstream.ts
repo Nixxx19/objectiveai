@@ -1,0 +1,4 @@
+import { z } from "zod";
+
+export const AgentClaudeAgentSdkUpstreamSchema = z.literal("claude_agent_sdk").describe("Claude Agent SDK upstream marker.").meta({ title: "agent.claude_agent_sdk.Upstream" });
+export type AgentClaudeAgentSdkUpstream = z.infer<typeof AgentClaudeAgentSdkUpstreamSchema>;

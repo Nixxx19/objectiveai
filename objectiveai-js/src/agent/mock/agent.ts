@@ -1,0 +1,13 @@
+import { z } from "zod";
+import { AgentMockOutputModeSchema } from "./outputMode";
+import { AgentMockUpstreamSchema } from "./upstream";
+
+export const AgentMockAgentSchema = z.object({
+  id: z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
+  upstream: AgentMockUpstreamSchema.describe("The upstream provider marker."),
+  output_mode: AgentMockOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
+  top_logprobs: z.number().int().min(0).meta({ format: "uint64" }).nullable().describe("Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.").optional(),
+  error: z.boolean().nullable().describe("If true, the mock client will return an error instead of a response.").optional(),
+  invention: z.boolean().nullable().describe("If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.").optional(),
+}).describe("A validated Mock Agent with its computed content-addressed ID.").meta({ title: "agent.mock.Agent" });
+export type AgentMockAgent = z.infer<typeof AgentMockAgentSchema>;

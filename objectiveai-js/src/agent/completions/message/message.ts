@@ -1,0 +1,19 @@
+import { z } from "zod";
+import { AgentCompletionsMessageAssistantMessageSchema } from "./assistantMessage";
+import { AgentCompletionsMessageDeveloperMessageSchema } from "./developerMessage";
+import { AgentCompletionsMessageSystemMessageSchema } from "./systemMessage";
+import { AgentCompletionsMessageToolMessageSchema } from "./toolMessage";
+import { AgentCompletionsMessageUserMessageSchema } from "./userMessage";
+
+export const AgentCompletionsMessageMessageSchema = z.union([AgentCompletionsMessageDeveloperMessageSchema.extend({
+  role: z.literal("developer"),
+}).describe("A developer message (similar to system, but from the developer)."), AgentCompletionsMessageSystemMessageSchema.extend({
+  role: z.literal("system"),
+}).describe("A system message setting context or instructions."), AgentCompletionsMessageUserMessageSchema.extend({
+  role: z.literal("user"),
+}).describe("A user message from the end user."), AgentCompletionsMessageAssistantMessageSchema.extend({
+  role: z.literal("assistant"),
+}).describe("An assistant message (model's previous response)."), AgentCompletionsMessageToolMessageSchema.extend({
+  role: z.literal("tool"),
+}).describe("A tool message containing the result of a tool call.")]).describe("A message in the conversation.").meta({ title: "agent.completions.message.Message" });
+export type AgentCompletionsMessageMessage = z.infer<typeof AgentCompletionsMessageMessageSchema>;

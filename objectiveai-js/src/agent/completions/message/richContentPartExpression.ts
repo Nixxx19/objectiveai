@@ -1,0 +1,23 @@
+import { z } from "zod";
+import { FunctionsExpressionWithExpressionAgentCompletionsMessageFileSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema, FunctionsExpressionWithExpressionStringSchema } from "../../../functions/expression/withExpression";
+
+export const AgentCompletionsMessageRichContentPartExpressionSchema = z.union([z.object({
+  text: z.lazy(() => FunctionsExpressionWithExpressionStringSchema),
+  type: z.literal("text"),
+}), z.object({
+  image_url: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlSchema),
+  type: z.literal("image_url"),
+}), z.object({
+  input_audio: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioSchema),
+  type: z.literal("input_audio"),
+}), z.object({
+  video_url: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema),
+  type: z.literal("input_video"),
+}), z.object({
+  video_url: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema),
+  type: z.literal("video_url"),
+}), z.object({
+  file: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageFileSchema),
+  type: z.literal("file"),
+})]).describe("Expression variant of [`RichContentPart`] for dynamic content.").meta({ title: "agent.completions.message.RichContentPartExpression" });
+export type AgentCompletionsMessageRichContentPartExpression = z.infer<typeof AgentCompletionsMessageRichContentPartExpressionSchema>;

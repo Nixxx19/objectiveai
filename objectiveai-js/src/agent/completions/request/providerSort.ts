@@ -1,0 +1,4 @@
+import { z } from "zod";
+
+export const AgentCompletionsRequestProviderSortSchema = z.union([z.literal("price").describe("Prioritize by price (cheapest first)."), z.literal("throughput").describe("Prioritize by throughput (fastest first)."), z.literal("latency").describe("Prioritize by latency (lowest first).")]).describe("How to sort/prioritize providers.").meta({ title: "agent.completions.request.ProviderSort" });
+export type AgentCompletionsRequestProviderSort = z.infer<typeof AgentCompletionsRequestProviderSortSchema>;

@@ -1,0 +1,6 @@
+import { z } from "zod";
+import { FunctionsInlineAutoProfileSchema } from "./inlineAutoProfile";
+import { FunctionsInlineTasksProfileSchema } from "./inlineTasksProfile";
+
+export const FunctionsInlineProfileSchema = z.union([FunctionsInlineTasksProfileSchema.describe("Tasks-based profile with per-task configuration."), FunctionsInlineAutoProfileSchema.describe("Auto profile that applies a single ensemble+weights to all vector completion tasks.")]).describe("An inline profile, either tasks-based or auto.").meta({ title: "functions.InlineProfile" });
+export type FunctionsInlineProfile = z.infer<typeof FunctionsInlineProfileSchema>;

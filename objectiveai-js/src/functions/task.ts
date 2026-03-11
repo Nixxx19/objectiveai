@@ -1,0 +1,19 @@
+import { z } from "zod";
+import { FunctionsPlaceholderScalarFunctionTaskSchema } from "./placeholderScalarFunctionTask";
+import { FunctionsPlaceholderVectorFunctionTaskSchema } from "./placeholderVectorFunctionTask";
+import { FunctionsScalarFunctionTaskSchema } from "./scalarFunctionTask";
+import { FunctionsVectorCompletionTaskSchema } from "./vectorCompletionTask";
+import { FunctionsVectorFunctionTaskSchema } from "./vectorFunctionTask";
+
+export const FunctionsTaskSchema = z.union([FunctionsScalarFunctionTaskSchema.extend({
+  type: z.literal("scalar.function"),
+}).describe("Calls a scalar function (produces a single score)."), FunctionsVectorFunctionTaskSchema.extend({
+  type: z.literal("vector.function"),
+}).describe("Calls a vector function (produces a vector of scores)."), FunctionsVectorCompletionTaskSchema.extend({
+  type: z.literal("vector.completion"),
+}).describe("Runs a vector completion."), FunctionsPlaceholderScalarFunctionTaskSchema.extend({
+  type: z.literal("placeholder.scalar.function"),
+}).describe("Placeholder scalar function (always outputs 0.5)."), FunctionsPlaceholderVectorFunctionTaskSchema.extend({
+  type: z.literal("placeholder.vector.function"),
+}).describe("Placeholder vector function (always outputs equalized vector).")]).describe("A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.").meta({ title: "functions.Task" });
+export type FunctionsTask = z.infer<typeof FunctionsTaskSchema>;

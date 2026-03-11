@@ -1,0 +1,5 @@
+import { z } from "zod";
+import { AgentCompletionsMessageRichContentPartSchema } from "./richContentPart";
+
+export const AgentCompletionsMessageRichContentSchema = z.union([z.string().describe("Plain text content."), z.array(AgentCompletionsMessageRichContentPartSchema).describe("Multi-part content (text, images, audio, video, files).")]).describe("Rich content for user/assistant messages (supports multimodal input).").meta({ title: "agent.completions.message.RichContent" });
+export type AgentCompletionsMessageRichContent = z.infer<typeof AgentCompletionsMessageRichContentSchema>;

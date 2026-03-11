@@ -1,0 +1,14 @@
+import { z } from "zod";
+import { AgentCompletionsResponseUsageSchema } from "../../../../../agent/completions/response/usage";
+import { FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema } from "./functionInventionChunk";
+import { FunctionsInventionsRecursiveResponseStreamingObjectSchema } from "./object";
+
+export const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema = z.object({
+  id: z.string(),
+  inventions: z.array(FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema),
+  inventions_errors: z.boolean().nullable().optional(),
+  created: z.number().int().min(0).meta({ format: "uint64" }),
+  object: FunctionsInventionsRecursiveResponseStreamingObjectSchema,
+  usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
+}).meta({ title: "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk" });
+export type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk = z.infer<typeof FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema>;

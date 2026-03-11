@@ -1,0 +1,17 @@
+import { z } from "zod";
+import { FunctionsAlphaVectorBranchTaskExpressionSchema } from "./branchTaskExpression";
+import { FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema } from "./expression/vectorFunctionInputSchema";
+import { FunctionsAlphaVectorLeafTaskExpressionSchema } from "./leafTaskExpression";
+
+export const FunctionsAlphaVectorRemoteFunctionSchema = z.union([z.object({
+  description: z.string(),
+  input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
+  tasks: z.array(FunctionsAlphaVectorBranchTaskExpressionSchema),
+  type: z.literal("alpha.vector.branch.function"),
+}), z.object({
+  description: z.string(),
+  input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
+  tasks: z.array(FunctionsAlphaVectorLeafTaskExpressionSchema),
+  type: z.literal("alpha.vector.leaf.function"),
+})]).meta({ title: "functions.alpha_vector.RemoteFunction" });
+export type FunctionsAlphaVectorRemoteFunction = z.infer<typeof FunctionsAlphaVectorRemoteFunctionSchema>;
