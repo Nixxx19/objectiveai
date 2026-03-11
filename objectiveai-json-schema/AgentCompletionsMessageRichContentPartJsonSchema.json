@@ -1,0 +1,109 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageRichContentPart",
+  "description": "A part of rich content.",
+  "oneOf": [
+    {
+      "description": "Text content.",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "const": "text"
+        }
+      },
+      "required": [
+        "type",
+        "text"
+      ]
+    },
+    {
+      "description": "An image URL.",
+      "type": "object",
+      "properties": {
+        "image_url": {
+          "$ref": "AgentCompletionsMessageImageUrl"
+        },
+        "type": {
+          "type": "string",
+          "const": "image_url"
+        }
+      },
+      "required": [
+        "type",
+        "image_url"
+      ]
+    },
+    {
+      "description": "Audio input.",
+      "type": "object",
+      "properties": {
+        "input_audio": {
+          "$ref": "AgentCompletionsMessageInputAudio"
+        },
+        "type": {
+          "type": "string",
+          "const": "input_audio"
+        }
+      },
+      "required": [
+        "type",
+        "input_audio"
+      ]
+    },
+    {
+      "description": "Video input.",
+      "type": "object",
+      "properties": {
+        "video_url": {
+          "$ref": "AgentCompletionsMessageVideoUrl"
+        },
+        "type": {
+          "type": "string",
+          "const": "input_video"
+        }
+      },
+      "required": [
+        "type",
+        "video_url"
+      ]
+    },
+    {
+      "description": "A video URL.",
+      "type": "object",
+      "properties": {
+        "video_url": {
+          "$ref": "AgentCompletionsMessageVideoUrl"
+        },
+        "type": {
+          "type": "string",
+          "const": "video_url"
+        }
+      },
+      "required": [
+        "type",
+        "video_url"
+      ]
+    },
+    {
+      "description": "A file.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "$ref": "AgentCompletionsMessageFile"
+        },
+        "type": {
+          "type": "string",
+          "const": "file"
+        }
+      },
+      "required": [
+        "type",
+        "file"
+      ]
+    }
+  ]
+}

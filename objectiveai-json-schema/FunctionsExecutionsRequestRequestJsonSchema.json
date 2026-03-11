@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsExecutionsRequestRequest",
+  "description": "Internal request representation with path and body separated.\n\nUsed internally to route requests to the appropriate API endpoint.",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "body": {
+          "$ref": "FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody"
+        }
+      },
+      "required": [
+        "body"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "path": {
+          "$ref": "FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPath"
+        },
+        "body": {
+          "$ref": "FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody"
+        }
+      },
+      "required": [
+        "path",
+        "body"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "path": {
+          "$ref": "FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPath"
+        },
+        "body": {
+          "$ref": "FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody"
+        }
+      },
+      "required": [
+        "path",
+        "body"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "path": {
+          "$ref": "FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPath"
+        },
+        "body": {
+          "$ref": "FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody"
+        }
+      },
+      "required": [
+        "path",
+        "body"
+      ]
+    }
+  ]
+}

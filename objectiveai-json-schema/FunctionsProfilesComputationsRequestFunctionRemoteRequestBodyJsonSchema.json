@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsProfilesComputationsRequestFunctionRemoteRequestBody",
+  "type": "object",
+  "properties": {
+    "retry_token": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "from_cache": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "max_retries": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "n": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "dataset": {
+      "type": "array",
+      "items": {
+        "$ref": "FunctionsProfilesComputationsRequestDatasetItem"
+      }
+    },
+    "ensemble": {
+      "$ref": "VectorCompletionsRequestEnsemble"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "AgentCompletionsRequestProvider"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seed": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "int64"
+    },
+    "stream": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "type": [
+        "object",
+        "null"
+      ],
+      "additionalProperties": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "n",
+    "dataset",
+    "ensemble"
+  ]
+}

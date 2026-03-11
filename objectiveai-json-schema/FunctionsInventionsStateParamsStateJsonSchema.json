@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsInventionsStateParamsState",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "alpha.scalar.branch.function"
+        }
+      },
+      "$ref": "FunctionsInventionsStateAlphaScalarBranchState",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "alpha.scalar.leaf.function"
+        }
+      },
+      "$ref": "FunctionsInventionsStateAlphaScalarLeafState",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "alpha.vector.branch.function"
+        }
+      },
+      "$ref": "FunctionsInventionsStateAlphaVectorBranchState",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "alpha.vector.leaf.function"
+        }
+      },
+      "$ref": "FunctionsInventionsStateAlphaVectorLeafState",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "alpha.scalar.function"
+        }
+      },
+      "$ref": "FunctionsInventionsStateAlphaScalarState",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "alpha.vector.function"
+        }
+      },
+      "$ref": "FunctionsInventionsStateAlphaVectorState",
+      "required": [
+        "type"
+      ]
+    }
+  ]
+}

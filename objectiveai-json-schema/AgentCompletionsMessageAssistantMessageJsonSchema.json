@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageAssistantMessage",
+  "description": "An assistant message (model's previous response).",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "The message content, if any.",
+      "anyOf": [
+        {
+          "$ref": "AgentCompletionsMessageRichContent"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "description": "Optional name for the assistant.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "refusal": {
+      "description": "Refusal message if the model declined to respond.",
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tool_calls": {
+      "description": "Tool calls made by the assistant.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AgentCompletionsMessageAssistantToolCall"
+      }
+    },
+    "reasoning": {
+      "description": "Reasoning content from models that support chain-of-thought.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VectorCompletionsCacheCacheVoteRequest",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "Ref": {
+          "$ref": "VectorCompletionsCacheCacheVoteRequestRef"
+        }
+      },
+      "required": [
+        "Ref"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Owned": {
+          "$ref": "VectorCompletionsCacheCacheVoteRequestOwned"
+        }
+      },
+      "required": [
+        "Owned"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

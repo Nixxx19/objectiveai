@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsTaskProfile",
+  "description": "Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.",
+  "anyOf": [
+    {
+      "description": "Profile for a nested function task (references another profile).",
+      "type": "object",
+      "properties": {
+        "remote": {
+          "description": "The remote source where the profile is hosted.",
+          "$ref": "FunctionsRemote"
+        },
+        "owner": {
+          "description": "Repository owner.",
+          "type": "string"
+        },
+        "repository": {
+          "description": "Repository name.",
+          "type": "string"
+        },
+        "commit": {
+          "description": "Git commit SHA. Highly recommended for remote profiles to\nensure compatibility if the referenced profile's shape changes.",
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "remote",
+        "owner",
+        "repository"
+      ]
+    },
+    {
+      "description": "Inline profile for a task (tasks-based or auto).",
+      "$ref": "FunctionsInlineProfile"
+    },
+    {
+      "description": "Placeholder task — no configuration needed, output is fixed.",
+      "type": "object"
+    }
+  ]
+}

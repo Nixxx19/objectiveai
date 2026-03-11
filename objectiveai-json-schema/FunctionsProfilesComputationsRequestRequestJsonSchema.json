@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsProfilesComputationsRequestRequest",
+  "anyOf": [
+    {
+      "type": "object",
+      "properties": {
+        "body": {
+          "$ref": "FunctionsProfilesComputationsRequestFunctionInlineRequestBody"
+        }
+      },
+      "required": [
+        "body"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "path": {
+          "$ref": "FunctionsProfilesComputationsRequestFunctionRemoteRequestPath"
+        },
+        "body": {
+          "$ref": "FunctionsProfilesComputationsRequestFunctionRemoteRequestBody"
+        }
+      },
+      "required": [
+        "path",
+        "body"
+      ]
+    }
+  ]
+}

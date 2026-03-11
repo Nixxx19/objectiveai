@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageUserMessage",
+  "description": "A user message from the end user.",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "The message content (supports text, images, audio, video, files).",
+      "$ref": "AgentCompletionsMessageRichContent"
+    },
+    "name": {
+      "description": "Optional name for the user.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "content"
+  ]
+}

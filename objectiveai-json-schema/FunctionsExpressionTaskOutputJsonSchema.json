@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsExpressionTaskOutput",
+  "description": "Output from an executed task.",
+  "anyOf": [
+    {
+      "description": "Owned version.",
+      "$ref": "FunctionsExpressionTaskOutputOwned"
+    },
+    {
+      "description": "Borrowed version.",
+      "$ref": "FunctionsExpressionTaskOutputRef"
+    }
+  ]
+}

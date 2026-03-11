@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentMockAgent",
+  "description": "A validated Mock Agent with its computed content-addressed ID.",
+  "type": "object",
+  "properties": {
+    "id": {
+      "description": "The deterministic content-addressed ID (22-character base62 string).",
+      "type": "string"
+    },
+    "upstream": {
+      "description": "The upstream provider marker.",
+      "$ref": "AgentMockUpstream"
+    },
+    "output_mode": {
+      "description": "The output mode for vector completions. Ignored for agent completions.",
+      "$ref": "AgentMockOutputMode"
+    },
+    "top_logprobs": {
+      "description": "Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "error": {
+      "description": "If true, the mock client will return an error instead of a response.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "invention": {
+      "description": "If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.",
+      "type": [
+        "boolean",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "upstream",
+    "output_mode"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsGetFunctionProfilePair",
+  "description": "Response from getting a function-profile pair.",
+  "type": "object",
+  "properties": {
+    "function": {
+      "description": "The function.",
+      "$ref": "FunctionsGetFunction"
+    },
+    "profile": {
+      "description": "The profile.",
+      "$ref": "FunctionsProfilesGetProfile"
+    }
+  },
+  "required": [
+    "function",
+    "profile"
+  ]
+}

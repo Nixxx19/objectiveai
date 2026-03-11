@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageToolMessageExpression",
+  "description": "Expression variant of [`ToolMessage`] for dynamic content.",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "The content expression.",
+      "$ref": "FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression"
+    },
+    "tool_call_id": {
+      "description": "The tool call ID expression.",
+      "$ref": "FunctionsExpressionWithExpressionstring"
+    }
+  },
+  "required": [
+    "content",
+    "tool_call_id"
+  ]
+}

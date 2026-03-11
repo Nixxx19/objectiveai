@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentClaudeAgentSdkEffort",
+  "description": "The effort level for model output.\n\nThis setting hints to the model how detailed its responses should be.",
+  "oneOf": [
+    {
+      "description": "Minimal output, concise responses.",
+      "type": "string",
+      "const": "low"
+    },
+    {
+      "description": "Balanced output (default, normalized away during preparation).",
+      "type": "string",
+      "const": "medium"
+    },
+    {
+      "description": "Detailed output with thorough explanations.",
+      "type": "string",
+      "const": "high"
+    },
+    {
+      "description": "Maximum effort, most detailed output possible.",
+      "type": "string",
+      "const": "max"
+    }
+  ]
+}

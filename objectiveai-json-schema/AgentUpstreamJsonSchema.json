@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentUpstream",
+  "description": "Supported agent upstreams.",
+  "oneOf": [
+    {
+      "description": "Unknown Upstream.",
+      "type": "string",
+      "const": "unknown"
+    },
+    {
+      "description": "OpenRouter Upstream.",
+      "type": "string",
+      "const": "openrouter"
+    },
+    {
+      "description": "Claude Agent SDK Upstream.",
+      "type": "string",
+      "const": "claude_agent_sdk"
+    },
+    {
+      "description": "Mock Upstream.",
+      "type": "string",
+      "const": "mock"
+    }
+  ]
+}

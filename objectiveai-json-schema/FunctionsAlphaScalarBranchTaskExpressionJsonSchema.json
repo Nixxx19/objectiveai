@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsAlphaScalarBranchTaskExpression",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "alpha.scalar.function"
+        }
+      },
+      "$ref": "FunctionsAlphaScalarScalarFunctionTaskExpression",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "placeholder.alpha.scalar.function"
+        }
+      },
+      "$ref": "FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression",
+      "required": [
+        "type"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageSimpleContentPartExpression",
+  "description": "Expression variant of [`SimpleContentPart`] for dynamic content.",
+  "oneOf": [
+    {
+      "description": "A text part expression.",
+      "type": "object",
+      "properties": {
+        "text": {
+          "description": "The text expression.",
+          "$ref": "FunctionsExpressionWithExpressionstring"
+        },
+        "type": {
+          "type": "string",
+          "const": "text"
+        }
+      },
+      "required": [
+        "type",
+        "text"
+      ]
+    }
+  ]
+}

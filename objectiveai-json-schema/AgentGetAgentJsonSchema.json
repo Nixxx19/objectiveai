@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentGetAgent",
+  "description": "Response containing a single Agent with creation timestamp.",
+  "type": "object",
+  "properties": {
+    "created": {
+      "description": "Unix timestamp when this Agent was first used.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    }
+  },
+  "required": [
+    "created"
+  ],
+  "anyOf": [
+    {
+      "$ref": "AgentOpenrouterAgent"
+    },
+    {
+      "$ref": "AgentClaudeAgentSdkAgent"
+    },
+    {
+      "$ref": "AgentMockAgent"
+    }
+  ]
+}

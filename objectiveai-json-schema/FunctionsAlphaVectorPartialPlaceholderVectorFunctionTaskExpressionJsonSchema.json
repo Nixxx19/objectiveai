@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression",
+  "type": "object",
+  "properties": {
+    "spec": {
+      "type": "string"
+    },
+    "input_schema": {
+      "$ref": "FunctionsAlphaVectorExpressionVectorFunctionInputSchema"
+    },
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "FunctionsExpressionExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "input": {
+      "$ref": "FunctionsAlphaVectorExpressionVectorFunctionInputExpression"
+    }
+  },
+  "required": [
+    "spec",
+    "input_schema",
+    "input"
+  ]
+}

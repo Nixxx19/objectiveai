@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsPlaceholderScalarFunctionTaskExpression",
+  "description": "Expression for a placeholder scalar function task (pre-compilation).\n\nLike [`ScalarFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces a fixed output of 0.5.",
+  "type": "object",
+  "properties": {
+    "input_schema": {
+      "description": "JSON Schema defining the expected input structure.",
+      "$ref": "FunctionsExpressionInputSchema"
+    },
+    "skip": {
+      "description": "If this expression evaluates to true, skip the task. Receives: `input`.",
+      "anyOf": [
+        {
+          "$ref": "FunctionsExpressionExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "map": {
+      "description": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
+      "anyOf": [
+        {
+          "$ref": "FunctionsExpressionExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "input": {
+      "description": "Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).",
+      "$ref": "FunctionsExpressionWithExpressionFunctionsExpressionInputExpression"
+    },
+    "output": {
+      "description": "Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`.",
+      "$ref": "FunctionsExpressionExpression"
+    }
+  },
+  "required": [
+    "input_schema",
+    "input",
+    "output"
+  ]
+}

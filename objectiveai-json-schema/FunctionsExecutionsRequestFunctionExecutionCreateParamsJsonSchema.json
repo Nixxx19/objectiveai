@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsExecutionsRequestFunctionExecutionCreateParams",
+  "description": "Parameters for creating a function execution.\n\nSupports four combinations based on whether the Function and Profile\nare provided inline or referenced from remote repositories.",
+  "anyOf": [
+    {
+      "description": "Inline Function with inline Profile.",
+      "$ref": "FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody"
+    },
+    {
+      "description": "Inline Function with remote Profile.",
+      "$ref": "FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody"
+    },
+    {
+      "description": "Remote Function with inline Profile.",
+      "$ref": "FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody"
+    },
+    {
+      "description": "Remote Function with remote Profile.",
+      "$ref": "FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody"
+    }
+  ]
+}

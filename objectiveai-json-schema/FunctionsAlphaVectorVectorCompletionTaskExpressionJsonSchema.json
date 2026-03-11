@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsAlphaVectorVectorCompletionTaskExpression",
+  "type": "object",
+  "properties": {
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "FunctionsExpressionExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "messages": {
+      "$ref": "FunctionsExpressionExpression"
+    },
+    "responses": {
+      "$ref": "FunctionsExpressionExpression"
+    }
+  },
+  "required": [
+    "messages",
+    "responses"
+  ]
+}

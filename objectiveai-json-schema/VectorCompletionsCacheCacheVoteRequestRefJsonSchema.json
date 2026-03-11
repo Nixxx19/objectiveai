@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "VectorCompletionsCacheCacheVoteRequestRef",
+  "type": "object",
+  "properties": {
+    "agent": {
+      "$ref": "AgentCompletionsRequestAgent"
+    },
+    "agents": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AgentCompletionsRequestAgent"
+      }
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "AgentCompletionsMessageMessage"
+      }
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "$ref": "AgentCompletionsMessageRichContent"
+      }
+    }
+  },
+  "required": [
+    "agent",
+    "messages",
+    "responses"
+  ]
+}

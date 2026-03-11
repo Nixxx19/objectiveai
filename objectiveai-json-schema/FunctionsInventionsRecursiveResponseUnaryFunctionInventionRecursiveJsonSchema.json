@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "inventions": {
+      "type": "array",
+      "items": {
+        "$ref": "FunctionsInventionsRecursiveResponseUnaryFunctionInvention"
+      }
+    },
+    "inventions_errors": {
+      "type": "boolean"
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "object": {
+      "$ref": "FunctionsInventionsRecursiveResponseUnaryObject"
+    },
+    "usage": {
+      "$ref": "AgentCompletionsResponseUsage"
+    }
+  },
+  "required": [
+    "id",
+    "inventions",
+    "inventions_errors",
+    "created",
+    "object",
+    "usage"
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsRequestProviderSort",
+  "description": "How to sort/prioritize providers.",
+  "oneOf": [
+    {
+      "description": "Prioritize by price (cheapest first).",
+      "type": "string",
+      "const": "price"
+    },
+    {
+      "description": "Prioritize by throughput (fastest first).",
+      "type": "string",
+      "const": "throughput"
+    },
+    {
+      "description": "Prioritize by latency (lowest first).",
+      "type": "string",
+      "const": "latency"
+    }
+  ]
+}

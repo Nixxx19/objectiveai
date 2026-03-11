@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageMessage",
+  "description": "A message in the conversation.",
+  "oneOf": [
+    {
+      "description": "A developer message (similar to system, but from the developer).",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "developer"
+        }
+      },
+      "$ref": "AgentCompletionsMessageDeveloperMessage",
+      "required": [
+        "role"
+      ]
+    },
+    {
+      "description": "A system message setting context or instructions.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "system"
+        }
+      },
+      "$ref": "AgentCompletionsMessageSystemMessage",
+      "required": [
+        "role"
+      ]
+    },
+    {
+      "description": "A user message from the end user.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "user"
+        }
+      },
+      "$ref": "AgentCompletionsMessageUserMessage",
+      "required": [
+        "role"
+      ]
+    },
+    {
+      "description": "An assistant message (model's previous response).",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "assistant"
+        }
+      },
+      "$ref": "AgentCompletionsMessageAssistantMessage",
+      "required": [
+        "role"
+      ]
+    },
+    {
+      "description": "A tool message containing the result of a tool call.",
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "tool"
+        }
+      },
+      "$ref": "AgentCompletionsMessageToolMessage",
+      "required": [
+        "role"
+      ]
+    }
+  ]
+}

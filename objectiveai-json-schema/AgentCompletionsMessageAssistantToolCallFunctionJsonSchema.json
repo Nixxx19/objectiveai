@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageAssistantToolCallFunction",
+  "description": "Details of a function call made by the assistant.",
+  "type": "object",
+  "properties": {
+    "name": {
+      "description": "The name of the function to call.",
+      "type": "string"
+    },
+    "arguments": {
+      "description": "The arguments to pass to the function, as a JSON string.",
+      "type": "string"
+    }
+  },
+  "required": [
+    "name",
+    "arguments"
+  ]
+}

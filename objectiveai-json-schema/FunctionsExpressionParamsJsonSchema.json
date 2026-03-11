@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsExpressionParams",
+  "description": "Context for evaluating expressions (JMESPath or Starlark).\n\nContains all data accessible within expressions: `input`, `output`, and `map`.",
+  "anyOf": [
+    {
+      "description": "Owned version (for deserialization).",
+      "$ref": "FunctionsExpressionParamsOwned"
+    },
+    {
+      "description": "Borrowed version (for efficient evaluation).",
+      "$ref": "FunctionsExpressionParamsRef"
+    }
+  ]
+}

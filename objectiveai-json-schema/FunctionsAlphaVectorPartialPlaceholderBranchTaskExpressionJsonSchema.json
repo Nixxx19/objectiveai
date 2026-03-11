@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "placeholder.alpha.scalar.function"
+        }
+      },
+      "$ref": "FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression",
+      "required": [
+        "type"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "const": "placeholder.alpha.vector.function"
+        }
+      },
+      "$ref": "FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression",
+      "required": [
+        "type"
+      ]
+    }
+  ]
+}

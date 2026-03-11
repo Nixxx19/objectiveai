@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageMessageExpression",
+  "description": "A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "developer"
+        }
+      },
+      "$ref": "AgentCompletionsMessageDeveloperMessageExpression",
+      "required": [
+        "role"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "system"
+        }
+      },
+      "$ref": "AgentCompletionsMessageSystemMessageExpression",
+      "required": [
+        "role"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "user"
+        }
+      },
+      "$ref": "AgentCompletionsMessageUserMessageExpression",
+      "required": [
+        "role"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "assistant"
+        }
+      },
+      "$ref": "AgentCompletionsMessageAssistantMessageExpression",
+      "required": [
+        "role"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "role": {
+          "type": "string",
+          "const": "tool"
+        }
+      },
+      "$ref": "AgentCompletionsMessageToolMessageExpression",
+      "required": [
+        "role"
+      ]
+    }
+  ]
+}

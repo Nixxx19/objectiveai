@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentUsageAgent",
+  "description": "Usage statistics for an Agent.",
+  "type": "object",
+  "properties": {
+    "requests": {
+      "description": "Total number of requests made with this Agent.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "completion_tokens": {
+      "description": "Total completion tokens generated.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "prompt_tokens": {
+      "description": "Total prompt tokens processed.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "total_cost": {
+      "description": "Total cost incurred.",
+      "type": [
+        "string",
+        "number"
+      ],
+      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+    }
+  },
+  "required": [
+    "requests",
+    "completion_tokens",
+    "prompt_tokens",
+    "total_cost"
+  ]
+}

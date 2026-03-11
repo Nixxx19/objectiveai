@@ -1,0 +1,98 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsInventionsStateAlphaScalarBranchState",
+  "type": "object",
+  "properties": {
+    "depth": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "min_branch_width": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "max_branch_width": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "min_leaf_width": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "max_leaf_width": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "name": {
+      "type": "string"
+    },
+    "spec": {
+      "type": "string"
+    },
+    "essay": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "input_schema": {
+      "anyOf": [
+        {
+          "$ref": "FunctionsExpressionObjectInputSchema"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "essay_tasks": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "tasks": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "FunctionsAlphaScalarBranchTaskExpression"
+      }
+    },
+    "tasks_length": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "format": "uint64",
+      "minimum": 0
+    },
+    "description": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "readme": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "depth",
+    "min_branch_width",
+    "max_branch_width",
+    "min_leaf_width",
+    "max_leaf_width",
+    "name",
+    "spec"
+  ]
+}

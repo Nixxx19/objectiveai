@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsAlphaVectorVectorFunctionTaskExpression",
+  "type": "object",
+  "properties": {
+    "remote": {
+      "$ref": "FunctionsRemote"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "commit": {
+      "type": "string"
+    },
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "FunctionsExpressionExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "input": {
+      "$ref": "FunctionsAlphaVectorExpressionVectorFunctionInputExpression"
+    }
+  },
+  "required": [
+    "remote",
+    "owner",
+    "repository",
+    "commit",
+    "input"
+  ]
+}

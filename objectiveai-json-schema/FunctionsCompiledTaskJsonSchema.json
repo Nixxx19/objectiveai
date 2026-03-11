@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsCompiledTask",
+  "description": "The result of compiling a task expression.\n\nTasks without a `map` field compile to a single task. Tasks with a `map`\nexpression are expanded into multiple tasks, one per integer index from\n0 to the evaluated count.",
+  "anyOf": [
+    {
+      "description": "A single task (no mapping).",
+      "$ref": "FunctionsTask"
+    },
+    {
+      "description": "Multiple task instances from mapped execution.",
+      "type": "array",
+      "items": {
+        "$ref": "FunctionsTask"
+      }
+    }
+  ]
+}

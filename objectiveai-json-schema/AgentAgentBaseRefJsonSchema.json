@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentAgentBaseRef",
+  "description": "A borrowed reference into an [`AgentBase`] variant.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "Openrouter": {
+          "$ref": "AgentOpenrouterAgentBase"
+        }
+      },
+      "required": [
+        "Openrouter"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "ClaudeAgentSdk": {
+          "$ref": "AgentClaudeAgentSdkAgentBase"
+        }
+      },
+      "required": [
+        "ClaudeAgentSdk"
+      ],
+      "additionalProperties": false
+    },
+    {
+      "type": "object",
+      "properties": {
+        "Mock": {
+          "$ref": "AgentMockAgentBase"
+        }
+      },
+      "required": [
+        "Mock"
+      ],
+      "additionalProperties": false
+    }
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageSimpleContentExpression",
+  "description": "Expression variant of [`SimpleContent`] for dynamic content.",
+  "anyOf": [
+    {
+      "description": "Plain text content.",
+      "type": "string"
+    },
+    {
+      "description": "Multi-part text content expressions.",
+      "type": "array",
+      "items": {
+        "$ref": "FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpression"
+      }
+    }
+  ]
+}

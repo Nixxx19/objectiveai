@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentOpenrouterProviderQuantization",
+  "description": "Model quantization levels for provider filtering.\n\nQuantization reduces model precision to decrease memory usage and\nincrease inference speed, potentially at the cost of output quality.",
+  "oneOf": [
+    {
+      "description": "4-bit integer quantization.",
+      "type": "string",
+      "const": "int4"
+    },
+    {
+      "description": "8-bit integer quantization.",
+      "type": "string",
+      "const": "int8"
+    },
+    {
+      "description": "4-bit floating point quantization.",
+      "type": "string",
+      "const": "fp4"
+    },
+    {
+      "description": "6-bit floating point quantization.",
+      "type": "string",
+      "const": "fp6"
+    },
+    {
+      "description": "8-bit floating point quantization.",
+      "type": "string",
+      "const": "fp8"
+    },
+    {
+      "description": "16-bit floating point (half precision).",
+      "type": "string",
+      "const": "fp16"
+    },
+    {
+      "description": "16-bit brain floating point.",
+      "type": "string",
+      "const": "bf16"
+    },
+    {
+      "description": "32-bit floating point (full precision).",
+      "type": "string",
+      "const": "fp32"
+    },
+    {
+      "description": "Unknown quantization level.",
+      "type": "string",
+      "const": "unknown"
+    }
+  ]
+}

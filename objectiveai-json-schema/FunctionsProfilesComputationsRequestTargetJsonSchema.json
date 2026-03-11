@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsProfilesComputationsRequestTarget",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": [
+            "string",
+            "number"
+          ],
+          "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+        },
+        "type": {
+          "type": "string",
+          "const": "scalar"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "type": [
+              "string",
+              "number"
+            ],
+            "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+          }
+        },
+        "type": {
+          "type": "string",
+          "const": "vector"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "value": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0
+        },
+        "type": {
+          "type": "string",
+          "const": "vector_winner"
+        }
+      },
+      "required": [
+        "type",
+        "value"
+      ]
+    }
+  ]
+}

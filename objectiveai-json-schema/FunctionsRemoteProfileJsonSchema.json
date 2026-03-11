@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsRemoteProfile",
+  "description": "A remote profile, either tasks-based or auto.",
+  "anyOf": [
+    {
+      "description": "Tasks-based profile with per-task configuration.",
+      "$ref": "FunctionsRemoteTasksProfile"
+    },
+    {
+      "description": "Auto profile that applies a single ensemble+weights to all vector completion tasks.",
+      "$ref": "FunctionsRemoteAutoProfile"
+    }
+  ]
+}

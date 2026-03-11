@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsGetFunction",
+  "description": "A remote function with full metadata.\n\nRemote functions are stored as `function.json` in repositories and\nreferenced by `remote/owner/repository`. They include documentation fields\nthat inline functions lack.",
+  "type": "object",
+  "properties": {
+    "remote": {
+      "$ref": "FunctionsRemote"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "commit": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "remote",
+    "owner",
+    "repository",
+    "commit"
+  ],
+  "oneOf": [
+    {
+      "description": "Produces a single score in [0, 1].",
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "Human-readable description of what the function does.",
+          "type": "string"
+        },
+        "input_schema": {
+          "description": "JSON Schema defining the expected input structure.",
+          "$ref": "FunctionsExpressionInputSchema"
+        },
+        "tasks": {
+          "description": "The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).",
+          "type": "array",
+          "items": {
+            "$ref": "FunctionsTaskExpression"
+          }
+        },
+        "type": {
+          "type": "string",
+          "const": "scalar.function"
+        }
+      },
+      "required": [
+        "type",
+        "description",
+        "input_schema",
+        "tasks"
+      ]
+    },
+    {
+      "description": "Produces a vector of scores that sums to 1.",
+      "type": "object",
+      "properties": {
+        "description": {
+          "description": "Human-readable description of what the function does.",
+          "type": "string"
+        },
+        "input_schema": {
+          "description": "JSON Schema defining the expected input structure.",
+          "$ref": "FunctionsExpressionInputSchema"
+        },
+        "tasks": {
+          "description": "The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).",
+          "type": "array",
+          "items": {
+            "$ref": "FunctionsTaskExpression"
+          }
+        },
+        "output_length": {
+          "description": "Expression computing the expected output vector length for task outputs.\nReceives: `input`.",
+          "$ref": "FunctionsExpressionExpression"
+        },
+        "input_split": {
+          "description": "Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`.",
+          "$ref": "FunctionsExpressionExpression"
+        },
+        "input_merge": {
+          "description": "Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array).",
+          "$ref": "FunctionsExpressionExpression"
+        },
+        "type": {
+          "type": "string",
+          "const": "vector.function"
+        }
+      },
+      "required": [
+        "type",
+        "description",
+        "input_schema",
+        "tasks",
+        "output_length",
+        "input_split",
+        "input_merge"
+      ]
+    }
+  ]
+}

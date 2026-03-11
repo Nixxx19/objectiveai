@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression",
+  "type": "object",
+  "properties": {
+    "spec": {
+      "type": "string"
+    },
+    "input_schema": {
+      "$ref": "FunctionsExpressionObjectInputSchema"
+    },
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "FunctionsExpressionExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "input": {
+      "$ref": "FunctionsExpressionExpression"
+    }
+  },
+  "required": [
+    "spec",
+    "input_schema",
+    "input"
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsAlphaScalarVectorCompletionTaskExpression",
+  "type": "object",
+  "properties": {
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "FunctionsExpressionExpression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "messages": {
+      "$ref": "FunctionsExpressionExpression"
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "$ref": "AgentCompletionsMessageRichContent"
+      }
+    }
+  },
+  "required": [
+    "messages",
+    "responses"
+  ]
+}

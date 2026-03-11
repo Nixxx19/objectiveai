@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsRequestProviderMaxPrice",
+  "description": "Maximum price constraints per token type.",
+  "type": "object",
+  "properties": {
+    "prompt": {
+      "description": "Maximum price per prompt token.",
+      "type": [
+        "string",
+        "number",
+        "null"
+      ],
+      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+    },
+    "completion": {
+      "description": "Maximum price per completion token.",
+      "type": [
+        "string",
+        "number",
+        "null"
+      ],
+      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+    },
+    "image": {
+      "description": "Maximum price per image.",
+      "type": [
+        "string",
+        "number",
+        "null"
+      ],
+      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+    },
+    "audio": {
+      "description": "Maximum price per audio second.",
+      "type": [
+        "string",
+        "number",
+        "null"
+      ],
+      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+    },
+    "request": {
+      "description": "Maximum price per request.",
+      "type": [
+        "string",
+        "number",
+        "null"
+      ],
+      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+    }
+  }
+}

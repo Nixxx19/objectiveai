@@ -1,0 +1,103 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageRichContentPartExpression",
+  "description": "Expression variant of [`RichContentPart`] for dynamic content.",
+  "oneOf": [
+    {
+      "type": "object",
+      "properties": {
+        "text": {
+          "$ref": "FunctionsExpressionWithExpressionstring"
+        },
+        "type": {
+          "type": "string",
+          "const": "text"
+        }
+      },
+      "required": [
+        "type",
+        "text"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "image_url": {
+          "$ref": "FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrl"
+        },
+        "type": {
+          "type": "string",
+          "const": "image_url"
+        }
+      },
+      "required": [
+        "type",
+        "image_url"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "input_audio": {
+          "$ref": "FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudio"
+        },
+        "type": {
+          "type": "string",
+          "const": "input_audio"
+        }
+      },
+      "required": [
+        "type",
+        "input_audio"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "video_url": {
+          "$ref": "FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl"
+        },
+        "type": {
+          "type": "string",
+          "const": "input_video"
+        }
+      },
+      "required": [
+        "type",
+        "video_url"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "video_url": {
+          "$ref": "FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl"
+        },
+        "type": {
+          "type": "string",
+          "const": "video_url"
+        }
+      },
+      "required": [
+        "type",
+        "video_url"
+      ]
+    },
+    {
+      "type": "object",
+      "properties": {
+        "file": {
+          "$ref": "FunctionsExpressionWithExpressionAgentCompletionsMessageFile"
+        },
+        "type": {
+          "type": "string",
+          "const": "file"
+        }
+      },
+      "required": [
+        "type",
+        "file"
+      ]
+    }
+  ]
+}

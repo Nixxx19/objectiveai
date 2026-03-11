@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuthDisableApiKeyRequest",
+  "description": "Request to disable an existing API key.\n\nOnce disabled, the API key can no longer be used for authentication.\nThis action is reversible only by creating a new key.",
+  "type": "object",
+  "properties": {
+    "api_key": {
+      "description": "The API key to disable.",
+      "$ref": "PrefixedUuid"
+    }
+  },
+  "required": [
+    "api_key"
+  ]
+}

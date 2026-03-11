@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsInlineProfile",
+  "description": "An inline profile, either tasks-based or auto.",
+  "anyOf": [
+    {
+      "description": "Tasks-based profile with per-task configuration.",
+      "$ref": "FunctionsInlineTasksProfile"
+    },
+    {
+      "description": "Auto profile that applies a single ensemble+weights to all vector completion tasks.",
+      "$ref": "FunctionsInlineAutoProfile"
+    }
+  ]
+}

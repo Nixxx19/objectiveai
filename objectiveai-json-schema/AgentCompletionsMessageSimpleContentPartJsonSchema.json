@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsMessageSimpleContentPart",
+  "description": "A part of simple text content.",
+  "oneOf": [
+    {
+      "description": "A text part.",
+      "type": "object",
+      "properties": {
+        "text": {
+          "description": "The text content.",
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "const": "text"
+        }
+      },
+      "required": [
+        "type",
+        "text"
+      ]
+    }
+  ]
+}

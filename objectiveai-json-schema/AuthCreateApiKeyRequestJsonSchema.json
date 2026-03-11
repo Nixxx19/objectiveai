@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AuthCreateApiKeyRequest",
+  "description": "Request to create a new API key.\n\n# Fields\n\n* `expires` - Optional expiration timestamp. If `None`, the key never expires.\n* `name` - A user-provided name for identifying the key.\n* `description` - Optional description providing additional context.",
+  "type": "object",
+  "properties": {
+    "expires": {
+      "description": "The expiration timestamp for the API key, or `None` for a non-expiring key.",
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "name": {
+      "description": "A user-provided name to identify this API key.",
+      "type": "string"
+    },
+    "description": {
+      "description": "An optional description providing additional context about the key's purpose.",
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

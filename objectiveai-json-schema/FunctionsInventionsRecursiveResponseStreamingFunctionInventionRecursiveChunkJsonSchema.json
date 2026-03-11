@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "inventions": {
+      "type": "array",
+      "items": {
+        "$ref": "FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk"
+      }
+    },
+    "inventions_errors": {
+      "type": [
+        "boolean",
+        "null"
+      ]
+    },
+    "created": {
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "object": {
+      "$ref": "FunctionsInventionsRecursiveResponseStreamingObject"
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "AgentCompletionsResponseUsage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "id",
+    "inventions",
+    "created",
+    "object"
+  ]
+}

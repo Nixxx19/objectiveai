@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AgentCompletionsResponseLogprobs",
+  "description": "Log probabilities for generated tokens.",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "Log probabilities for content tokens.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AgentCompletionsResponseLogprob"
+      }
+    },
+    "refusal": {
+      "description": "Log probabilities for refusal tokens.",
+      "type": [
+        "array",
+        "null"
+      ],
+      "items": {
+        "$ref": "AgentCompletionsResponseLogprob"
+      }
+    }
+  }
+}

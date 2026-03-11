@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "EnsembleGetEnsemble",
+  "description": "Response containing a single Ensemble with creation timestamp.",
+  "type": "object",
+  "properties": {
+    "created": {
+      "description": "Unix timestamp when this Ensemble was first used.",
+      "type": "integer",
+      "format": "uint64",
+      "minimum": 0
+    },
+    "id": {
+      "description": "The deterministic content-addressed ID (22-character base62 string).",
+      "type": "string"
+    },
+    "agents": {
+      "description": "The validated and deduplicated LLMs, sorted by full_id.",
+      "type": "array",
+      "items": {
+        "$ref": "AgentWithFallbacksAndCountAgentAgent"
+      }
+    }
+  },
+  "required": [
+    "created",
+    "id",
+    "agents"
+  ]
+}

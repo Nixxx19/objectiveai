@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsProfilesGetProfile",
+  "description": "A remote profile, either tasks-based or auto.",
+  "type": "object",
+  "properties": {
+    "remote": {
+      "$ref": "FunctionsRemote"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "commit": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "remote",
+    "owner",
+    "repository",
+    "commit"
+  ],
+  "anyOf": [
+    {
+      "description": "Tasks-based profile with per-task configuration.",
+      "$ref": "FunctionsRemoteTasksProfile"
+    },
+    {
+      "description": "Auto profile that applies a single ensemble+weights to all vector completion tasks.",
+      "$ref": "FunctionsRemoteAutoProfile"
+    }
+  ]
+}

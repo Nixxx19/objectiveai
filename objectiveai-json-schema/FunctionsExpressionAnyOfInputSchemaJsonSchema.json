@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FunctionsExpressionAnyOfInputSchema",
+  "description": "Schema for a union of possible types - input must match at least one.",
+  "type": "object",
+  "properties": {
+    "anyOf": {
+      "description": "The possible schemas that the input can match.",
+      "type": "array",
+      "items": {
+        "$ref": "FunctionsExpressionInputSchema"
+      }
+    }
+  },
+  "required": [
+    "anyOf"
+  ]
+}
