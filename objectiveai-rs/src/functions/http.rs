@@ -1,5 +1,6 @@
 //! HTTP functions for function management.
 
+use super::request::{ListFunctionProfilePairsSource, ListFunctionsSource};
 use super::Remote;
 use crate::{HttpClient, HttpError};
 
@@ -8,15 +9,21 @@ use crate::{HttpClient, HttpError};
 /// # Arguments
 ///
 /// * `client` - The HTTP client to use
+/// * `source` - Optional source filter
 ///
 /// # Returns
 ///
 /// A list of functions with their repository information.
 pub async fn list_functions(
     client: &HttpClient,
+    source: Option<ListFunctionsSource>,
 ) -> Result<super::response::ListFunction, HttpError> {
+    let path = match &source {
+        Some(s) => format!("functions?source={}", s.as_str()),
+        None => "functions".to_string(),
+    };
     client
-        .send_unary(reqwest::Method::GET, "functions", None::<String>)
+        .send_unary(reqwest::Method::GET, &path, None::<String>)
         .await
 }
 
@@ -90,19 +97,21 @@ pub async fn get_function_usage(
 /// # Arguments
 ///
 /// * `client` - The HTTP client to use
+/// * `source` - Optional source filter
 ///
 /// # Returns
 ///
 /// A list of function-profile pairs with their repository information.
 pub async fn list_function_profile_pairs(
     client: &HttpClient,
+    source: Option<ListFunctionProfilePairsSource>,
 ) -> Result<super::response::ListFunctionProfilePair, HttpError> {
+    let path = match &source {
+        Some(s) => format!("functions/profiles/pairs?source={}", s.as_str()),
+        None => "functions/profiles/pairs".to_string(),
+    };
     client
-        .send_unary(
-            reqwest::Method::GET,
-            "functions/profiles/pairs",
-            None::<String>,
-        )
+        .send_unary(reqwest::Method::GET, &path, None::<String>)
         .await
 }
 

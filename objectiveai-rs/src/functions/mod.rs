@@ -50,6 +50,7 @@ mod path;
 mod profile;
 pub mod profiles;
 mod remote;
+pub mod request;
 pub mod response;
 mod task;
 
