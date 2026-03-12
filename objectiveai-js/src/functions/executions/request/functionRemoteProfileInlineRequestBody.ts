@@ -4,7 +4,7 @@ import { z } from "zod";
 import { AgentCompletionsRequestProviderSchema } from "../../../agent/completions/request/provider";
 import { FunctionsExecutionsRequestReasoningSchema } from "./reasoning";
 import { FunctionsExecutionsRequestStrategySchema } from "./strategy";
-import { FunctionsExpressionInputSchema } from "../../expression/input";
+import { FunctionsExpressionInputValueSchema } from "../../expression/inputValue";
 import { FunctionsInlineProfileSchema } from "../../inlineProfile";
 
 export const FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema = z.object({
@@ -13,7 +13,7 @@ export const FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySch
   from_cache: z.boolean().nullable().describe("If true, uses cached votes when available.").optional(),
   reasoning: FunctionsExecutionsRequestReasoningSchema.nullable().describe("Reasoning summary configuration.").optional(),
   strategy: FunctionsExecutionsRequestStrategySchema.nullable().describe("Execution strategy.\nDefaults to `Default` strategy if not specified.").optional(),
-  input: FunctionsExpressionInputSchema.describe("The input data to pass to the Function."),
+  input: FunctionsExpressionInputValueSchema.describe("The input data to pass to the Function."),
   provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").optional(),
   seed: z.number().int().meta({ format: "int64" }).nullable().describe("Random seed for deterministic results.").optional(),
   stream: z.boolean().nullable().describe("Whether to stream the response.").optional(),

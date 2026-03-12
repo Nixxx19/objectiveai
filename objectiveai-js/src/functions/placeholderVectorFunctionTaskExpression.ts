@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { FunctionsExpressionExpressionSchema } from "./expression/expression";
 import { FunctionsExpressionInputSchemaSchema } from "./expression/inputSchema";
-import { FunctionsExpressionWithExpressionFunctionsExpressionInputExpressionSchema } from "./expression/withExpression";
+import { FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema } from "./expression/withExpression";
 
 export const FunctionsPlaceholderVectorFunctionTaskExpressionSchema = z.object({
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
@@ -12,7 +12,7 @@ export const FunctionsPlaceholderVectorFunctionTaskExpressionSchema = z.object({
   input_merge: FunctionsExpressionExpressionSchema.describe("Expression merging sub-inputs back into one input.\nReceives: `input` (as an array)."),
   skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").optional(),
   map: FunctionsExpressionExpressionSchema.nullable().describe("Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).").optional(),
-  input: FunctionsExpressionWithExpressionFunctionsExpressionInputExpressionSchema.describe("Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped)."),
+  input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema.describe("Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped)."),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the equalized vector output.\nReceives: `input`, `output` as `Vector(equalized)`."),
 }).describe("Expression for a placeholder vector function task (pre-compilation).\n\nLike [`VectorFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces an equalized vector of length `output_length`.").meta({ title: "functions.PlaceholderVectorFunctionTaskExpression" });
 export type FunctionsPlaceholderVectorFunctionTaskExpression = z.infer<typeof FunctionsPlaceholderVectorFunctionTaskExpressionSchema>;
