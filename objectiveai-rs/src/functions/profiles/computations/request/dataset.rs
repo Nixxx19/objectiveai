@@ -7,7 +7,7 @@ pub type Dataset = Vec<DatasetItem>;
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.profiles.computations.request.DatasetItem")]
 pub struct DatasetItem {
-    pub input: functions::expression::Input,
+    pub input: functions::expression::InputValue,
     pub target: Target,
 }
 

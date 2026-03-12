@@ -17,7 +17,7 @@ mod array_tests;
 #[cfg(test)]
 mod tests;
 
-use crate::functions::expression::{Input, InputSchema};
+use crate::functions::expression::{InputValue, InputSchema};
 
 pub fn permutations(schema: &InputSchema) -> usize {
     optional::inner_permutations(schema)
@@ -37,8 +37,8 @@ pub struct Generator {
 }
 
 impl Iterator for Generator {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         if self.remaining == 0 {
             return None;
         }

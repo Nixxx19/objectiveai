@@ -1,7 +1,7 @@
 use indexmap::IndexMap;
 use rand::Rng;
 
-use crate::functions::expression::{Input, InputSchema, ObjectInputSchema};
+use crate::functions::expression::{InputValue, InputSchema, ObjectInputSchema};
 
 pub fn permutations(schema: &ObjectInputSchema) -> usize {
     let required = schema.required.as_deref().unwrap_or(&[]);
@@ -49,7 +49,7 @@ enum FieldSource {
 }
 
 impl FieldSource {
-    fn advance(&mut self) -> Option<Input> {
+    fn advance(&mut self) -> Option<InputValue> {
         match self {
             FieldSource::Required(iter) => Some(iter.next().unwrap()),
             FieldSource::Optional(iter) => iter.next().unwrap(),
@@ -71,10 +71,10 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         if self.fields.is_empty() {
-            return Some(Input::Object(IndexMap::new()));
+            return Some(InputValue::Object(IndexMap::new()));
         }
 
         // Build object: advance each field's iterator
@@ -85,7 +85,7 @@ impl<R: Rng> Iterator for Generator<R> {
                 map.insert(field.name.clone(), v);
             }
         }
-        let result = Input::Object(map);
+        let result = InputValue::Object(map);
 
         Some(result)
     }

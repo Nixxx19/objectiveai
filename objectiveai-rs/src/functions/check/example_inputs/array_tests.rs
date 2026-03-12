@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::functions::expression::{
-    ArrayInputSchema, BooleanInputSchema, Input, InputSchema, StringInputSchema,
+    ArrayInputSchema, BooleanInputSchema, InputValue, InputSchema, StringInputSchema,
 };
 use crate::functions::check::example_inputs::array;
 
@@ -16,13 +16,13 @@ fn assert_per_index_coverage(schema: &ArrayInputSchema) {
     let iter = array::generate(schema, rng);
 
     // length -> index -> set of observed items
-    let mut seen: HashMap<usize, HashMap<usize, HashSet<Input>>> = HashMap::new();
+    let mut seen: HashMap<usize, HashMap<usize, HashSet<InputValue>>> = HashMap::new();
     let mut count = 0usize;
 
     for item in iter.take(total) {
         count += 1;
         let arr = match item {
-            Input::Array(a) => a,
+            InputValue::Array(a) => a,
             other => panic!("expected Array, got {other:?}"),
         };
         let len = arr.len();

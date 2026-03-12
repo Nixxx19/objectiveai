@@ -2,7 +2,7 @@ use rand::Rng;
 use rand::seq::SliceRandom;
 
 use crate::agent::completions::message::{File, RichContentPart};
-use crate::functions::expression::{FileInputSchema, Input};
+use crate::functions::expression::{FileInputSchema, InputValue};
 
 pub const fn permutations(_schema: &FileInputSchema) -> usize {
     16usize
@@ -25,8 +25,8 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         if self.pos >= self.indices.len() {
             self.indices.shuffle(&mut self.rng);
             self.pos = 0;
@@ -57,6 +57,6 @@ impl<R: Rng> Iterator for Generator<R> {
                 None
             },
         };
-        Some(Input::RichContentPart(RichContentPart::File { file }))
+        Some(InputValue::RichContentPart(RichContentPart::File { file }))
     }
 }

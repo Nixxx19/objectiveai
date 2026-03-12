@@ -78,7 +78,7 @@ pub mod scalar_function_input_expression {
     pub fn transpile(
         this: super::ScalarFunctionInputExpression,
     ) -> functions::expression::WithExpression<
-        functions::expression::InputExpression,
+        functions::expression::InputValueExpression,
     > {
         functions::expression::WithExpression::Expression(this)
     }
@@ -96,10 +96,10 @@ impl VectorFunctionInputExpression {
     pub fn transpile(
         self,
     ) -> functions::expression::WithExpression<
-        functions::expression::InputExpression,
+        functions::expression::InputValueExpression,
     > {
         functions::expression::WithExpression::Value(
-            functions::expression::InputExpression::Object({
+            functions::expression::InputValueExpression::Object({
                 let mut map =
                     IndexMap::with_capacity(if self.context.is_some() {
                         2
@@ -126,14 +126,14 @@ impl VectorFunctionInputExpression {
     }
 }
 
-pub type ScalarFunctionInput = IndexMap<String, functions::expression::Input>;
+pub type ScalarFunctionInput = IndexMap<String, functions::expression::InputValue>;
 
 pub mod scalar_function_input {
     use crate::functions;
     pub fn transpile(
         this: super::ScalarFunctionInput,
-    ) -> functions::expression::Input {
-        functions::expression::Input::Object(this)
+    ) -> functions::expression::InputValue {
+        functions::expression::InputValue::Object(this)
     }
 }
 
@@ -141,13 +141,13 @@ pub mod scalar_function_input {
 #[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInput")]
 pub struct VectorFunctionInput {
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub context: Option<IndexMap<String, functions::expression::Input>>,
-    pub items: Vec<functions::expression::Input>,
+    pub context: Option<IndexMap<String, functions::expression::InputValue>>,
+    pub items: Vec<functions::expression::InputValue>,
 }
 
 impl VectorFunctionInput {
-    pub fn transpile(self) -> functions::expression::Input {
-        functions::expression::Input::Object({
+    pub fn transpile(self) -> functions::expression::InputValue {
+        functions::expression::InputValue::Object({
             let mut map = IndexMap::with_capacity(if self.context.is_some() {
                 2
             } else {
@@ -156,12 +156,12 @@ impl VectorFunctionInput {
             if let Some(context) = self.context {
                 map.insert(
                     "context".to_string(),
-                    functions::expression::Input::Object(context),
+                    functions::expression::InputValue::Object(context),
                 );
             }
             map.insert(
                 "items".to_string(),
-                functions::expression::Input::Array(self.items),
+                functions::expression::InputValue::Array(self.items),
             );
             map
         })

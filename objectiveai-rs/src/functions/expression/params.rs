@@ -38,7 +38,7 @@ impl<'de> serde::Deserialize<'de> for Params<'static, 'static> {
 #[schemars(rename = "functions.expression.ParamsOwned")]
 pub struct ParamsOwned {
     /// The function's input data.
-    pub input: super::Input,
+    pub input: super::InputValue,
     /// Results from executed tasks. Only populated for task output expressions.
     pub output: Option<TaskOutputOwned>,
     /// Current map index. Only populated for mapped task expressions.
@@ -50,7 +50,7 @@ pub struct ParamsOwned {
 #[schemars(rename = "functions.expression.ParamsRef")]
 pub struct ParamsRef<'i, 'to> {
     /// The function's input data.
-    pub input: &'i super::Input,
+    pub input: &'i super::InputValue,
     /// Results from executed tasks. Only populated for task output expressions.
     pub output: Option<TaskOutput<'to>>,
     /// Current map index. Only populated for mapped task expressions.

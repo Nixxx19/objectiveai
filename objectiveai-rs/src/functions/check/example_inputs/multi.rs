@@ -1,4 +1,4 @@
-use crate::functions::expression::{Input, InputSchema};
+use crate::functions::expression::{InputValue, InputSchema};
 
 type Rng = rand::rngs::ThreadRng;
 
@@ -56,8 +56,8 @@ pub enum Generator {
 }
 
 impl Iterator for Generator {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         match self {
             Generator::Boolean(g) => g.next(),
             Generator::String(g) => g.next(),

@@ -1,6 +1,6 @@
 use super::*;
 use crate::functions::expression::{
-    ExpressionError, Input, InputExpression, Params,
+    ExpressionError, InputValue, InputValueExpression, Params,
     ParamsOwned, TaskOutputOwned,
 };
 use indexmap::IndexMap;
@@ -11,57 +11,57 @@ use rust_decimal::dec;
 #[test]
 fn special_input_returns_string_input() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::String("hello".to_string()),
+        input: InputValue::String("hello".to_string()),
         output: None,
         map: None,
     });
-    let result = Input::from_special(&Special::Input, &params).unwrap();
-    assert_eq!(result, Input::String("hello".to_string()));
+    let result = InputValue::from_special(&Special::Input, &params).unwrap();
+    assert_eq!(result, InputValue::String("hello".to_string()));
 }
 
 #[test]
 fn special_input_returns_object_input() {
     let mut obj = IndexMap::new();
-    obj.insert("name".to_string(), Input::String("alice".to_string()));
-    obj.insert("age".to_string(), Input::Integer(30));
+    obj.insert("name".to_string(), InputValue::String("alice".to_string()));
+    obj.insert("age".to_string(), InputValue::Integer(30));
     let params = Params::Owned(ParamsOwned {
-        input: Input::Object(obj.clone()),
+        input: InputValue::Object(obj.clone()),
         output: None,
         map: None,
     });
-    let result = Input::from_special(&Special::Input, &params).unwrap();
-    assert_eq!(result, Input::Object(obj));
+    let result = InputValue::from_special(&Special::Input, &params).unwrap();
+    assert_eq!(result, InputValue::Object(obj));
 }
 
 #[test]
 fn special_input_returns_input_expression() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::String("hello".to_string()),
+        input: InputValue::String("hello".to_string()),
         output: None,
         map: None,
     });
     let result =
-        InputExpression::from_special(&Special::Input, &params).unwrap();
-    assert!(matches!(result, InputExpression::String(s) if s == "hello"));
+        InputValueExpression::from_special(&Special::Input, &params).unwrap();
+    assert!(matches!(result, InputValueExpression::String(s) if s == "hello"));
 }
 
 #[test]
 fn special_input_returns_object_input_expression() {
     let mut obj = IndexMap::new();
-    obj.insert("x".to_string(), Input::Integer(42));
+    obj.insert("x".to_string(), InputValue::Integer(42));
     let params = Params::Owned(ParamsOwned {
-        input: Input::Object(obj),
+        input: InputValue::Object(obj),
         output: None,
         map: None,
     });
     let result =
-        InputExpression::from_special(&Special::Input, &params).unwrap();
+        InputValueExpression::from_special(&Special::Input, &params).unwrap();
     match result {
-        InputExpression::Object(map) => {
+        InputValueExpression::Object(map) => {
             assert!(map.contains_key("x"));
         }
         other => {
-            panic!("expected InputExpression::Object, got {:?}", other)
+            panic!("expected InputValueExpression::Object, got {:?}", other)
         }
     }
 }
@@ -71,7 +71,7 @@ fn special_input_returns_object_input_expression() {
 #[test]
 fn special_input_fails_for_bool() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::String("hello".to_string()),
+        input: InputValue::String("hello".to_string()),
         output: None,
         map: None,
     });
@@ -82,7 +82,7 @@ fn special_input_fails_for_bool() {
 #[test]
 fn special_input_fails_for_task_output() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::String("hello".to_string()),
+        input: InputValue::String("hello".to_string()),
         output: None,
         map: None,
     });
@@ -95,7 +95,7 @@ fn special_input_fails_for_task_output() {
 #[test]
 fn special_output_returns_scalar() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Scalar(dec!(0.75))),
         map: None,
     });
@@ -107,7 +107,7 @@ fn special_output_returns_scalar() {
 #[test]
 fn special_output_returns_vector() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(0.3), dec!(0.7)],
         )),
@@ -128,18 +128,18 @@ fn special_output_returns_vector() {
 #[test]
 fn special_output_fails_for_input() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Scalar(dec!(0.5))),
         map: None,
     });
-    let result = Input::from_special(&Special::Output, &params);
+    let result = InputValue::from_special(&Special::Output, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
 #[test]
 fn special_output_fails_for_u64() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Scalar(dec!(0.5))),
         map: None,
     });
@@ -152,7 +152,7 @@ fn special_output_fails_for_u64() {
 #[test]
 fn special_l1_norm_normalizes_vector() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(2), dec!(3), dec!(5)],
         )),
@@ -175,7 +175,7 @@ fn special_l1_norm_normalizes_vector() {
 fn special_l1_norm_normalizes_mapped_scalars_as_vector() {
     // Mapped scalars are now represented as Vector
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(1), dec!(3)],
         )),
@@ -199,19 +199,19 @@ fn special_l1_norm_normalizes_mapped_scalars_as_vector() {
 #[test]
 fn special_l1_norm_fails_for_input() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(vec![dec!(1)])),
         map: None,
     });
     let result =
-        Input::from_special(&Special::TaskOutputL1Normalized, &params);
+        InputValue::from_special(&Special::TaskOutputL1Normalized, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
 #[test]
 fn special_l1_norm_fails_for_string() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(vec![dec!(1)])),
         map: None,
     });
@@ -227,14 +227,14 @@ fn special_items_output_length_returns_count() {
     let mut obj = IndexMap::new();
     obj.insert(
         "items".to_string(),
-        Input::Array(vec![
-            Input::String("a".to_string()),
-            Input::String("b".to_string()),
-            Input::String("c".to_string()),
+        InputValue::Array(vec![
+            InputValue::String("a".to_string()),
+            InputValue::String("b".to_string()),
+            InputValue::String("c".to_string()),
         ]),
     );
     let params = Params::Owned(ParamsOwned {
-        input: Input::Object(obj),
+        input: InputValue::Object(obj),
         output: None,
         map: None,
     });
@@ -247,9 +247,9 @@ fn special_items_output_length_returns_count() {
 #[test]
 fn special_items_output_length_returns_zero_for_empty() {
     let mut obj = IndexMap::new();
-    obj.insert("items".to_string(), Input::Array(vec![]));
+    obj.insert("items".to_string(), InputValue::Array(vec![]));
     let params = Params::Owned(ParamsOwned {
-        input: Input::Object(obj),
+        input: InputValue::Object(obj),
         output: None,
         map: None,
     });
@@ -264,7 +264,7 @@ fn special_items_output_length_returns_zero_for_empty() {
 #[test]
 fn special_items_output_length_fails_for_non_object_input() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::String("hello".to_string()),
+        input: InputValue::String("hello".to_string()),
         output: None,
         map: None,
     });
@@ -276,9 +276,9 @@ fn special_items_output_length_fails_for_non_object_input() {
 #[test]
 fn special_items_output_length_fails_for_missing_items() {
     let mut obj = IndexMap::new();
-    obj.insert("name".to_string(), Input::String("alice".to_string()));
+    obj.insert("name".to_string(), InputValue::String("alice".to_string()));
     let params = Params::Owned(ParamsOwned {
-        input: Input::Object(obj),
+        input: InputValue::Object(obj),
         output: None,
         map: None,
     });
@@ -294,18 +294,18 @@ fn special_split_with_context() {
     let mut obj = IndexMap::new();
     obj.insert(
         "items".to_string(),
-        Input::Array(vec![
-            Input::String("x".to_string()),
-            Input::String("y".to_string()),
+        InputValue::Array(vec![
+            InputValue::String("x".to_string()),
+            InputValue::String("y".to_string()),
         ]),
     );
-    obj.insert("context".to_string(), Input::String("ctx".to_string()));
+    obj.insert("context".to_string(), InputValue::String("ctx".to_string()));
     let params = Params::Owned(ParamsOwned {
-        input: Input::Object(obj),
+        input: InputValue::Object(obj),
         output: None,
         map: None,
     });
-    let result = Vec::<Input>::from_special(
+    let result = Vec::<InputValue>::from_special(
         &Special::InputItemsOptionalContextSplit,
         &params,
     )
@@ -313,28 +313,28 @@ fn special_split_with_context() {
     assert_eq!(result.len(), 2);
     // First element: items=["x"], context="ctx"
     match &result[0] {
-        Input::Object(m) => {
+        InputValue::Object(m) => {
             assert_eq!(
                 m.get("items").unwrap(),
-                &Input::Array(vec![Input::String("x".to_string())])
+                &InputValue::Array(vec![InputValue::String("x".to_string())])
             );
             assert_eq!(
                 m.get("context").unwrap(),
-                &Input::String("ctx".to_string())
+                &InputValue::String("ctx".to_string())
             );
         }
         other => panic!("expected Object, got {:?}", other),
     }
     // Second element: items=["y"], context="ctx"
     match &result[1] {
-        Input::Object(m) => {
+        InputValue::Object(m) => {
             assert_eq!(
                 m.get("items").unwrap(),
-                &Input::Array(vec![Input::String("y".to_string())])
+                &InputValue::Array(vec![InputValue::String("y".to_string())])
             );
             assert_eq!(
                 m.get("context").unwrap(),
-                &Input::String("ctx".to_string())
+                &InputValue::String("ctx".to_string())
             );
         }
         other => panic!("expected Object, got {:?}", other),
@@ -346,38 +346,38 @@ fn special_split_without_context() {
     let mut obj = IndexMap::new();
     obj.insert(
         "items".to_string(),
-        Input::Array(vec![
-            Input::Integer(1),
-            Input::Integer(2),
-            Input::Integer(3),
+        InputValue::Array(vec![
+            InputValue::Integer(1),
+            InputValue::Integer(2),
+            InputValue::Integer(3),
         ]),
     );
     let params = Params::Owned(ParamsOwned {
-        input: Input::Object(obj),
+        input: InputValue::Object(obj),
         output: None,
         map: None,
     });
-    let result = Vec::<Input>::from_special(
+    let result = Vec::<InputValue>::from_special(
         &Special::InputItemsOptionalContextSplit,
         &params,
     )
     .unwrap();
     assert_eq!(result.len(), 3);
     match &result[0] {
-        Input::Object(m) => {
+        InputValue::Object(m) => {
             assert_eq!(
                 m.get("items").unwrap(),
-                &Input::Array(vec![Input::Integer(1)])
+                &InputValue::Array(vec![InputValue::Integer(1)])
             );
             assert!(m.get("context").is_none());
         }
         other => panic!("expected Object, got {:?}", other),
     }
     match &result[2] {
-        Input::Object(m) => {
+        InputValue::Object(m) => {
             assert_eq!(
                 m.get("items").unwrap(),
-                &Input::Array(vec![Input::Integer(3)])
+                &InputValue::Array(vec![InputValue::Integer(3)])
             );
         }
         other => panic!("expected Object, got {:?}", other),
@@ -389,11 +389,11 @@ fn special_split_without_context() {
 #[test]
 fn special_split_fails_for_non_object_input() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::String("hello".to_string()),
+        input: InputValue::String("hello".to_string()),
         output: None,
         map: None,
     });
-    let result = Vec::<Input>::from_special(
+    let result = Vec::<InputValue>::from_special(
         &Special::InputItemsOptionalContextSplit,
         &params,
     );
@@ -403,13 +403,13 @@ fn special_split_fails_for_non_object_input() {
 #[test]
 fn special_split_fails_for_missing_items() {
     let mut obj = IndexMap::new();
-    obj.insert("name".to_string(), Input::String("alice".to_string()));
+    obj.insert("name".to_string(), InputValue::String("alice".to_string()));
     let params = Params::Owned(ParamsOwned {
-        input: Input::Object(obj),
+        input: InputValue::Object(obj),
         output: None,
         map: None,
     });
-    let result = Vec::<Input>::from_special(
+    let result = Vec::<InputValue>::from_special(
         &Special::InputItemsOptionalContextSplit,
         &params,
     );
@@ -424,42 +424,42 @@ fn special_merge_with_context() {
         let mut m = IndexMap::new();
         m.insert(
             "items".to_string(),
-            Input::Array(vec![Input::String("a".to_string())]),
+            InputValue::Array(vec![InputValue::String("a".to_string())]),
         );
-        m.insert("context".to_string(), Input::String("ctx".to_string()));
-        Input::Object(m)
+        m.insert("context".to_string(), InputValue::String("ctx".to_string()));
+        InputValue::Object(m)
     };
     let sub2 = {
         let mut m = IndexMap::new();
         m.insert(
             "items".to_string(),
-            Input::Array(vec![Input::String("b".to_string())]),
+            InputValue::Array(vec![InputValue::String("b".to_string())]),
         );
-        m.insert("context".to_string(), Input::String("ctx".to_string()));
-        Input::Object(m)
+        m.insert("context".to_string(), InputValue::String("ctx".to_string()));
+        InputValue::Object(m)
     };
     let params = Params::Owned(ParamsOwned {
-        input: Input::Array(vec![sub1, sub2]),
+        input: InputValue::Array(vec![sub1, sub2]),
         output: None,
         map: None,
     });
-    let result = Input::from_special(
+    let result = InputValue::from_special(
         &Special::InputItemsOptionalContextMerge,
         &params,
     )
     .unwrap();
     match result {
-        Input::Object(m) => {
+        InputValue::Object(m) => {
             assert_eq!(
                 m.get("items").unwrap(),
-                &Input::Array(vec![
-                    Input::String("a".to_string()),
-                    Input::String("b".to_string()),
+                &InputValue::Array(vec![
+                    InputValue::String("a".to_string()),
+                    InputValue::String("b".to_string()),
                 ])
             );
             assert_eq!(
                 m.get("context").unwrap(),
-                &Input::String("ctx".to_string())
+                &InputValue::String("ctx".to_string())
             );
         }
         other => panic!("expected Object, got {:?}", other),
@@ -472,44 +472,44 @@ fn special_merge_without_context() {
         let mut m = IndexMap::new();
         m.insert(
             "items".to_string(),
-            Input::Array(vec![Input::Integer(10)]),
+            InputValue::Array(vec![InputValue::Integer(10)]),
         );
-        Input::Object(m)
+        InputValue::Object(m)
     };
     let sub2 = {
         let mut m = IndexMap::new();
         m.insert(
             "items".to_string(),
-            Input::Array(vec![Input::Integer(20)]),
+            InputValue::Array(vec![InputValue::Integer(20)]),
         );
-        Input::Object(m)
+        InputValue::Object(m)
     };
     let sub3 = {
         let mut m = IndexMap::new();
         m.insert(
             "items".to_string(),
-            Input::Array(vec![Input::Integer(30)]),
+            InputValue::Array(vec![InputValue::Integer(30)]),
         );
-        Input::Object(m)
+        InputValue::Object(m)
     };
     let params = Params::Owned(ParamsOwned {
-        input: Input::Array(vec![sub1, sub2, sub3]),
+        input: InputValue::Array(vec![sub1, sub2, sub3]),
         output: None,
         map: None,
     });
-    let result = Input::from_special(
+    let result = InputValue::from_special(
         &Special::InputItemsOptionalContextMerge,
         &params,
     )
     .unwrap();
     match result {
-        Input::Object(m) => {
+        InputValue::Object(m) => {
             assert_eq!(
                 m.get("items").unwrap(),
-                &Input::Array(vec![
-                    Input::Integer(10),
-                    Input::Integer(20),
-                    Input::Integer(30)
+                &InputValue::Array(vec![
+                    InputValue::Integer(10),
+                    InputValue::Integer(20),
+                    InputValue::Integer(30)
                 ])
             );
             assert!(m.get("context").is_none());
@@ -523,11 +523,11 @@ fn special_merge_without_context() {
 #[test]
 fn special_merge_fails_for_non_array_input() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::String("hello".to_string()),
+        input: InputValue::String("hello".to_string()),
         output: None,
         map: None,
     });
-    let result = Input::from_special(
+    let result = InputValue::from_special(
         &Special::InputItemsOptionalContextMerge,
         &params,
     );
@@ -537,11 +537,11 @@ fn special_merge_fails_for_non_array_input() {
 #[test]
 fn special_merge_fails_for_non_object_elements() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Array(vec![Input::Integer(1), Input::Integer(2)]),
+        input: InputValue::Array(vec![InputValue::Integer(1), InputValue::Integer(2)]),
         output: None,
         map: None,
     });
-    let result = Input::from_special(
+    let result = InputValue::from_special(
         &Special::InputItemsOptionalContextMerge,
         &params,
     );
@@ -553,7 +553,7 @@ fn special_merge_fails_for_non_object_elements() {
 #[test]
 fn special_output_returns_scores_vector() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(0.6), dec!(0.4)],
         )),
@@ -572,7 +572,7 @@ fn special_output_returns_scores_vector() {
 #[test]
 fn special_output_returns_three_scores() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(0.2), dec!(0.3), dec!(0.5)],
         )),
@@ -593,21 +593,21 @@ fn special_output_returns_three_scores() {
 #[test]
 fn special_output_fails_for_input_type() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(0.5), dec!(0.5)],
         )),
         map: None,
     });
     let result =
-        Input::from_special(&Special::Output, &params);
+        InputValue::from_special(&Special::Output, &params);
     assert!(matches!(result, Err(ExpressionError::UnsupportedSpecial)));
 }
 
 #[test]
 fn special_output_fails_for_no_output() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: None,
         map: None,
     });
@@ -623,7 +623,7 @@ fn special_weighted_sum_two_scores() {
     // scores=[0.6, 0.4], weights=[0/1, 1/1]=[0, 1]
     // weighted_sum = 0.6*0 + 0.4*1 = 0.4
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(0.6), dec!(0.4)],
         )),
@@ -642,7 +642,7 @@ fn special_weighted_sum_three_scores() {
     // scores=[0.2, 0.3, 0.5], weights=[0/2, 1/2, 2/2]=[0, 0.5, 1]
     // weighted_sum = 0.2*0 + 0.3*0.5 + 0.5*1 = 0 + 0.15 + 0.5 = 0.65
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(0.2), dec!(0.3), dec!(0.5)],
         )),
@@ -661,13 +661,13 @@ fn special_weighted_sum_three_scores() {
 #[test]
 fn special_weighted_sum_fails_for_input() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: Some(TaskOutputOwned::Vector(
             vec![dec!(0.5), dec!(0.5)],
         )),
         map: None,
     });
-    let result = Input::from_special(
+    let result = InputValue::from_special(
         &Special::TaskOutputWeightedSum,
         &params,
     );
@@ -677,7 +677,7 @@ fn special_weighted_sum_fails_for_input() {
 #[test]
 fn special_weighted_sum_fails_for_no_output() {
     let params = Params::Owned(ParamsOwned {
-        input: Input::Boolean(true),
+        input: InputValue::Boolean(true),
         output: None,
         map: None,
     });

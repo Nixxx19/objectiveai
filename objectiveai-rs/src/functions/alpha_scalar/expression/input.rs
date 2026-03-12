@@ -19,19 +19,19 @@ pub mod scalar_function_input_expression {
     pub fn transpile(
         this: super::ScalarFunctionInputExpression,
     ) -> functions::expression::WithExpression<
-        functions::expression::InputExpression,
+        functions::expression::InputValueExpression,
     > {
         functions::expression::WithExpression::Expression(this)
     }
 }
 
-pub type ScalarFunctionInput = IndexMap<String, functions::expression::Input>;
+pub type ScalarFunctionInput = IndexMap<String, functions::expression::InputValue>;
 
 pub mod scalar_function_input {
     use crate::functions;
     pub fn transpile(
         this: super::ScalarFunctionInput,
-    ) -> functions::expression::Input {
-        functions::expression::Input::Object(this)
+    ) -> functions::expression::InputValue {
+        functions::expression::InputValue::Object(this)
     }
 }

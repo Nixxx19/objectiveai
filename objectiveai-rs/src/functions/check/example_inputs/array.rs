@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use crate::functions::expression::{ArrayInputSchema, Input};
+use crate::functions::expression::{ArrayInputSchema, InputValue};
 
 fn length_range(schema: &ArrayInputSchema) -> (usize, usize) {
     match (schema.min_items, schema.max_items) {
@@ -65,8 +65,8 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         // Round-robin through shuffled length order, reshuffle each cycle
         let li = self.length_order[self.pos];
         self.pos += 1;
@@ -76,11 +76,11 @@ impl<R: Rng> Iterator for Generator<R> {
         }
 
         // Build array: each index has its own generator for this length
-        let arr: Vec<Input> = self.per_length[li]
+        let arr: Vec<InputValue> = self.per_length[li]
             .iter_mut()
             .map(|g| g.next().unwrap())
             .collect();
 
-        Some(Input::Array(arr))
+        Some(InputValue::Array(arr))
     }
 }

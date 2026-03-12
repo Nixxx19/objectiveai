@@ -10,7 +10,7 @@ use crate::agent::completions::message::{
     UserMessageExpression, VideoUrl,
 };
 use crate::functions::expression::{
-    Input, InputExpression, Params, ParamsOwned,
+    InputValue, InputValueExpression, Params, ParamsOwned,
     TaskOutputOwned, WithExpression,
 };
 use indexmap::IndexMap;
@@ -37,11 +37,11 @@ fn assert_starlark_deep_eq<T: FromStarlarkValue + Serialize>(
     );
 }
 
-fn empty_input() -> Input {
-    Input::Object(IndexMap::new())
+fn empty_input() -> InputValue {
+    InputValue::Object(IndexMap::new())
 }
 
-fn make_params(input: Input) -> Params<'static, 'static> {
+fn make_params(input: InputValue) -> Params<'static, 'static> {
     Params::Owned(ParamsOwned {
         input,
         output: None,
@@ -50,7 +50,7 @@ fn make_params(input: Input) -> Params<'static, 'static> {
 }
 
 fn make_params_with_output(
-    input: Input,
+    input: InputValue,
     output: TaskOutputOwned,
 ) -> Params<'static, 'static> {
     Params::Owned(ParamsOwned {
@@ -61,7 +61,7 @@ fn make_params_with_output(
 }
 
 fn make_params_with_map(
-    input: Input,
+    input: InputValue,
     map: u64,
 ) -> Params<'static, 'static> {
     Params::Owned(ParamsOwned {
@@ -72,7 +72,7 @@ fn make_params_with_map(
 }
 
 fn make_full_params(
-    input: Input,
+    input: InputValue,
     output: TaskOutputOwned,
     map: u64,
 ) -> Params<'static, 'static> {
@@ -83,16 +83,16 @@ fn make_full_params(
     })
 }
 
-// Helper to build an object Input
-fn obj(pairs: Vec<(&str, Input)>) -> Input {
-    Input::Object(
+// Helper to build an object InputValue
+fn obj(pairs: Vec<(&str, InputValue)>) -> InputValue {
+    InputValue::Object(
         pairs.into_iter().map(|(k, v)| (k.to_string(), v)).collect(),
     )
 }
 
-// Helper to build an array Input
-fn arr(items: Vec<Input>) -> Input {
-    Input::Array(items)
+// Helper to build an array InputValue
+fn arr(items: Vec<InputValue>) -> InputValue {
+    InputValue::Array(items)
 }
 
 #[test]
@@ -133,8 +133,8 @@ fn test_list_literal() {
 #[test]
 fn test_input_access() {
     let input = obj(vec![
-        ("name", Input::String("alice".to_string())),
-        ("age", Input::Integer(30)),
+        ("name", InputValue::String("alice".to_string())),
+        ("age", InputValue::Integer(30)),
     ]);
     let params = make_params(input);
     let name: String = starlark_eval("input['name']", &params).unwrap();
@@ -151,7 +151,7 @@ fn test_nested_input_access() {
             "profile",
             obj(vec![(
                 "email",
-                Input::String("test@example.com".to_string()),
+                InputValue::String("test@example.com".to_string()),
             )]),
         )]),
     )]);
@@ -167,9 +167,9 @@ fn test_array_indexing() {
     let input = obj(vec![(
         "items",
         arr(vec![
-            Input::String("a".to_string()),
-            Input::String("b".to_string()),
-            Input::String("c".to_string()),
+            InputValue::String("a".to_string()),
+            InputValue::String("b".to_string()),
+            InputValue::String("c".to_string()),
         ]),
     )]);
     let params = make_params(input);
@@ -184,9 +184,9 @@ fn test_list_comprehension() {
     let input = obj(vec![(
         "numbers",
         arr(vec![
-            Input::Integer(1),
-            Input::Integer(2),
-            Input::Integer(3),
+            InputValue::Integer(1),
+            InputValue::Integer(2),
+            InputValue::Integer(3),
         ]),
     )]);
     let params = make_params(input);
@@ -201,12 +201,12 @@ fn test_list_comprehension_with_filter() {
     let input = obj(vec![(
         "numbers",
         arr(vec![
-            Input::Integer(1),
-            Input::Integer(2),
-            Input::Integer(3),
-            Input::Integer(4),
-            Input::Integer(5),
-            Input::Integer(6),
+            InputValue::Integer(1),
+            InputValue::Integer(2),
+            InputValue::Integer(3),
+            InputValue::Integer(4),
+            InputValue::Integer(5),
+            InputValue::Integer(6),
         ]),
     )]);
     let params = make_params(input);
@@ -241,7 +241,7 @@ fn test_builtin_functions() {
 
 #[test]
 fn test_conditional_expression() {
-    let input = obj(vec![("value", Input::Integer(10))]);
+    let input = obj(vec![("value", InputValue::Integer(10))]);
     let params = make_params(input);
     let result: String = starlark_eval(
         "\"big\" if input['value'] > 5 else \"small\"",
@@ -250,7 +250,7 @@ fn test_conditional_expression() {
     .unwrap();
     assert_eq!(result, "big");
 
-    let input2 = obj(vec![("value", Input::Integer(3))]);
+    let input2 = obj(vec![("value", InputValue::Integer(3))]);
     let params2 = make_params(input2);
     let result2: String = starlark_eval(
         "\"big\" if input['value'] > 5 else \"small\"",
@@ -284,10 +284,10 @@ fn test_eval_error() {
 #[test]
 fn test_map_access() {
     let input = obj(vec![
-        ("base", Input::Integer(100)),
+        ("base", InputValue::Integer(100)),
         (
             "multipliers",
-            arr(vec![Input::Integer(3), Input::Integer(5)]),
+            arr(vec![InputValue::Integer(3), InputValue::Integer(5)]),
         ),
     ]);
     let params = make_params_with_map(input, 0);
@@ -303,8 +303,8 @@ fn test_map_as_index() {
     let input = obj(vec![(
         "items",
         arr(vec![
-            Input::String("Hello".to_string()),
-            Input::String("World".to_string()),
+            InputValue::String("Hello".to_string()),
+            InputValue::String("World".to_string()),
         ]),
     )]);
     let params = make_params_with_map(input, 1);
@@ -320,13 +320,13 @@ fn test_map_as_index() {
 #[test]
 fn test_map_in_list_comprehension() {
     let input = obj(vec![
-        ("factor", Input::Integer(2)),
+        ("factor", InputValue::Integer(2)),
         (
             "values",
             arr(vec![
-                Input::Integer(10),
-                Input::Integer(20),
-                Input::Integer(30),
+                InputValue::Integer(10),
+                InputValue::Integer(20),
+                InputValue::Integer(30),
             ]),
         ),
     ]);
@@ -388,7 +388,7 @@ fn test_output_none() {
 
 #[test]
 fn test_output_not_none() {
-    let input = obj(vec![("threshold", Input::Number(0.5))]);
+    let input = obj(vec![("threshold", InputValue::Number(0.5))]);
     let output = TaskOutputOwned::Scalar(dec!(0.7));
     let params = make_params_with_output(input, output);
 
@@ -400,7 +400,7 @@ fn test_output_not_none() {
 
 #[test]
 fn test_full_params_all_fields() {
-    let input = obj(vec![("base_score", Input::Number(0.5))]);
+    let input = obj(vec![("base_score", InputValue::Number(0.5))]);
     let output = TaskOutputOwned::Vector(
         vec![dec!(0.3), dec!(0.7)],
     );
@@ -419,9 +419,9 @@ fn test_full_params_complex_expression() {
     let input = obj(vec![(
         "items",
         arr(vec![
-            Input::String("a".to_string()),
-            Input::String("b".to_string()),
-            Input::String("c".to_string()),
+            InputValue::String("a".to_string()),
+            InputValue::String("b".to_string()),
+            InputValue::String("c".to_string()),
         ]),
     )]);
     let output = TaskOutputOwned::Scalar(dec!(0.5));
@@ -497,9 +497,9 @@ fn test_sum_from_input() {
     let input = obj(vec![(
         "values",
         arr(vec![
-            Input::Integer(10),
-            Input::Integer(20),
-            Input::Integer(30),
+            InputValue::Integer(10),
+            InputValue::Integer(20),
+            InputValue::Integer(30),
         ]),
     )]);
     let params = make_params(input);
@@ -565,10 +565,10 @@ fn test_average_from_input() {
     let input = obj(vec![(
         "scores",
         arr(vec![
-            Input::Number(0.8),
-            Input::Number(0.6),
-            Input::Number(0.9),
-            Input::Number(0.7),
+            InputValue::Number(0.8),
+            InputValue::Number(0.6),
+            InputValue::Number(0.9),
+            InputValue::Number(0.7),
         ]),
     )]);
     let params = make_params(input);
@@ -630,9 +630,9 @@ fn test_l1_normalize_from_input() {
     let input = obj(vec![(
         "weights",
         arr(vec![
-            Input::Integer(1),
-            Input::Integer(2),
-            Input::Integer(2),
+            InputValue::Integer(1),
+            InputValue::Integer(2),
+            InputValue::Integer(2),
         ]),
     )]);
     let params = make_params(input);
@@ -652,10 +652,10 @@ fn test_l1_normalize_sums_to_one() {
     let input = obj(vec![(
         "values",
         arr(vec![
-            Input::Number(0.3),
-            Input::Number(0.5),
-            Input::Number(0.1),
-            Input::Number(0.4),
+            InputValue::Number(0.3),
+            InputValue::Number(0.5),
+            InputValue::Number(0.1),
+            InputValue::Number(0.4),
         ]),
     )]);
     let params = make_params(input);
@@ -722,20 +722,20 @@ fn test_starlark_vec() {
 #[test]
 fn test_starlark_input_boolean() {
     let params = make_params(empty_input());
-    assert_starlark_deep_eq("True", &params, &Input::Boolean(true));
-    assert_starlark_deep_eq("False", &params, &Input::Boolean(false));
+    assert_starlark_deep_eq("True", &params, &InputValue::Boolean(true));
+    assert_starlark_deep_eq("False", &params, &InputValue::Boolean(false));
 }
 
 #[test]
 fn test_starlark_input_integer() {
     let params = make_params(empty_input());
-    assert_starlark_deep_eq("42", &params, &Input::Integer(42));
+    assert_starlark_deep_eq("42", &params, &InputValue::Integer(42));
 }
 
 #[test]
 fn test_starlark_input_number() {
     let params = make_params(empty_input());
-    assert_starlark_deep_eq("3.14", &params, &Input::Number(3.14));
+    assert_starlark_deep_eq("3.14", &params, &InputValue::Number(3.14));
 }
 
 #[test]
@@ -744,17 +744,17 @@ fn test_starlark_input_string() {
     assert_starlark_deep_eq(
         "\"hello\"",
         &params,
-        &Input::String("hello".to_string()),
+        &InputValue::String("hello".to_string()),
     );
 }
 
 #[test]
 fn test_starlark_input_array() {
     let params = make_params(empty_input());
-    let expected = Input::Array(vec![
-        Input::Integer(1),
-        Input::Integer(2),
-        Input::String("x".to_string()),
+    let expected = InputValue::Array(vec![
+        InputValue::Integer(1),
+        InputValue::Integer(2),
+        InputValue::String("x".to_string()),
     ]);
     assert_starlark_deep_eq("[1, 2, \"x\"]", &params, &expected);
 }
@@ -763,8 +763,8 @@ fn test_starlark_input_array() {
 fn test_starlark_input_object() {
     let params = make_params(empty_input());
     let expected = obj(vec![
-        ("a", Input::Integer(1)),
-        ("b", Input::String("two".to_string())),
+        ("a", InputValue::Integer(1)),
+        ("b", InputValue::String("two".to_string())),
     ]);
     assert_starlark_deep_eq(
         "{\"a\": 1, \"b\": \"two\"}",
@@ -779,20 +779,20 @@ fn test_starlark_input_expression_boolean() {
     assert_starlark_deep_eq(
         "True",
         &params,
-        &InputExpression::Boolean(true),
+        &InputValueExpression::Boolean(true),
     );
 }
 
 #[test]
 fn test_starlark_input_expression_integer() {
     let params = make_params(empty_input());
-    assert_starlark_deep_eq("0", &params, &InputExpression::Integer(0));
+    assert_starlark_deep_eq("0", &params, &InputValueExpression::Integer(0));
 }
 
 #[test]
 fn test_starlark_input_expression_number() {
     let params = make_params(empty_input());
-    assert_starlark_deep_eq("1.5", &params, &InputExpression::Number(1.5));
+    assert_starlark_deep_eq("1.5", &params, &InputValueExpression::Number(1.5));
 }
 
 #[test]
@@ -801,16 +801,16 @@ fn test_starlark_input_expression_string() {
     assert_starlark_deep_eq(
         "\"s\"",
         &params,
-        &InputExpression::String("s".to_string()),
+        &InputValueExpression::String("s".to_string()),
     );
 }
 
 #[test]
 fn test_starlark_input_expression_array() {
     let params = make_params(empty_input());
-    let expected = InputExpression::Array(vec![
-        WithExpression::Value(InputExpression::Integer(1)),
-        WithExpression::Value(InputExpression::String("y".to_string())),
+    let expected = InputValueExpression::Array(vec![
+        WithExpression::Value(InputValueExpression::Integer(1)),
+        WithExpression::Value(InputValueExpression::String("y".to_string())),
     ]);
     assert_starlark_deep_eq("[1, \"y\"]", &params, &expected);
 }
@@ -821,9 +821,9 @@ fn test_starlark_input_expression_object() {
     let mut map = IndexMap::new();
     map.insert(
         "k".to_string(),
-        WithExpression::Value(InputExpression::Boolean(true)),
+        WithExpression::Value(InputValueExpression::Boolean(true)),
     );
-    let expected = InputExpression::Object(map);
+    let expected = InputValueExpression::Object(map);
     assert_starlark_deep_eq("{\"k\": True}", &params, &expected);
 }
 

@@ -19,7 +19,7 @@
 use rust_decimal::Decimal;
 
 use crate::functions::expression::{
-    Input, TaskOutput, TaskOutputOwned,
+    InputValue, TaskOutput, TaskOutputOwned,
 };
 use crate::functions::Task;
 
@@ -146,7 +146,7 @@ pub(crate) enum ScalarOutputShape {
 /// user-facing error message.
 pub(crate) fn check_scalar_distribution(
     task_index: usize,
-    input: &Input,
+    input: &InputValue,
     task: &Task,
     shape: &ScalarOutputShape,
 ) -> Result<(), String> {
@@ -244,7 +244,7 @@ pub(crate) enum VectorOutputShape {
 /// user-facing error message.
 pub(crate) fn check_vector_distribution(
     task_index: usize,
-    input: &Input,
+    input: &InputValue,
     task: &Task,
     shape: &VectorOutputShape,
     output_length: usize,

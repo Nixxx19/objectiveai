@@ -1,7 +1,7 @@
 use rand::Rng;
 
 use crate::agent::completions::message::{InputAudio, RichContentPart};
-use crate::functions::expression::{AudioInputSchema, Input};
+use crate::functions::expression::{AudioInputSchema, InputValue};
 
 pub const fn permutations(_schema: &AudioInputSchema) -> usize {
     1usize
@@ -16,9 +16,9 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
-        Some(Input::RichContentPart(RichContentPart::InputAudio {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
+        Some(InputValue::RichContentPart(RichContentPart::InputAudio {
             input_audio: InputAudio {
                 data: super::string::random_string(&mut self.rng),
                 format: super::string::random_string(&mut self.rng),

@@ -848,7 +848,7 @@ impl super::InventionState for AlphaScalarBranchState {
             Self::read_predicted_tasks_length_tool(this),
             Self::edit_predicted_tasks_length_tool(this),
         ];
-        tools.extend(crate::functions::inventions::schema_tools(&["functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression", "functions.expression.Input"]));
+        tools.extend(crate::functions::inventions::schema_tools(&["functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression", "functions.expression.InputValue"]));
         tools
     }
     fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String> {

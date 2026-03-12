@@ -78,8 +78,8 @@ impl FromSpecial for u64 {
                     super::Params::Ref(r) => r.input,
                 };
                 match input {
-                    super::Input::Object(map) => match map.get("items") {
-                        Some(super::Input::Array(arr)) => Ok(arr.len() as u64),
+                    super::InputValue::Object(map) => match map.get("items") {
+                        Some(super::InputValue::Array(arr)) => Ok(arr.len() as u64),
                         _ => Err(super::ExpressionError::UnsupportedSpecial),
                     },
                     _ => Err(super::ExpressionError::UnsupportedSpecial),

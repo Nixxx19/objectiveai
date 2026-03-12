@@ -3,7 +3,7 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::functions::alpha_vector::{self, RemoteFunction};
-use crate::functions::expression::{Input, Params, ParamsRef};
+use crate::functions::expression::{InputValue, Params, ParamsRef};
 use crate::functions::{CompiledTask, Function, TaskExpression};
 
 use crate::functions::check::check_description;
@@ -282,9 +282,9 @@ pub fn check_alpha_branch_vector_function(
         if splits.len() >= 2 {
             let subsets = random_subsets(splits.len(), 3);
             for subset in &subsets {
-                let sub_splits: Vec<Input> =
+                let sub_splits: Vec<InputValue> =
                     subset.iter().map(|&idx| splits[idx].clone()).collect();
-                let merge_input = Input::Array(sub_splits);
+                let merge_input = InputValue::Array(sub_splits);
                 let merged = func_template
                     .clone()
                     .compile_input_merge(&merge_input)

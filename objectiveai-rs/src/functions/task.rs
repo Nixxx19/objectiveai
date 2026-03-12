@@ -140,7 +140,7 @@ pub enum Task {
 impl Task {
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
         super::expression::TaskOutputOwned,
@@ -191,7 +191,7 @@ pub struct ScalarFunctionTaskExpression {
     /// Expression for the input to pass to the function.
     /// Receives: `input`, `map` (if mapped).
     pub input:
-        super::expression::WithExpression<super::expression::InputExpression>,
+        super::expression::WithExpression<super::expression::InputValueExpression>,
 
     /// Expression to transform the task result into a valid function output.
     ///
@@ -246,7 +246,7 @@ pub struct ScalarFunctionTask {
     /// Git commit SHA for the function version.
     pub commit: String,
     /// The resolved input to pass to the function.
-    pub input: super::expression::Input,
+    pub input: super::expression::InputValue,
     /// Expression to transform the task result into a valid function output.
     ///
     /// Receives `output` as the nested function's result (Scalar or Vector).
@@ -262,7 +262,7 @@ impl ScalarFunctionTask {
 
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
         super::expression::TaskOutputOwned,
@@ -304,7 +304,7 @@ pub struct VectorFunctionTaskExpression {
     /// Expression for the input to pass to the function.
     /// Receives: `input`, `map` (if mapped).
     pub input:
-        super::expression::WithExpression<super::expression::InputExpression>,
+        super::expression::WithExpression<super::expression::InputValueExpression>,
 
     /// Expression to transform the task result into a valid function output.
     ///
@@ -359,7 +359,7 @@ pub struct VectorFunctionTask {
     /// Git commit SHA for the function version.
     pub commit: String,
     /// The resolved input to pass to the function.
-    pub input: super::expression::Input,
+    pub input: super::expression::InputValue,
     /// Expression to transform the task result into a valid function output.
     ///
     /// Receives `output` as the nested function's result (Scalar or Vector).
@@ -375,7 +375,7 @@ impl VectorFunctionTask {
 
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
         super::expression::TaskOutputOwned,
@@ -503,7 +503,7 @@ pub struct VectorCompletionTask {
 impl VectorCompletionTask {
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
         super::expression::TaskOutputOwned,
@@ -542,7 +542,7 @@ pub struct PlaceholderScalarFunctionTaskExpression {
     /// Expression for the input to pass to the placeholder function.
     /// Receives: `input`, `map` (if mapped).
     pub input:
-        super::expression::WithExpression<super::expression::InputExpression>,
+        super::expression::WithExpression<super::expression::InputValueExpression>,
 
     /// Expression to transform the fixed 0.5 output.
     /// Receives: `input`, `output` as `Scalar(0.5)`.
@@ -574,7 +574,7 @@ pub struct PlaceholderScalarFunctionTask {
     /// JSON Schema defining the expected input structure.
     pub input_schema: super::expression::InputSchema,
     /// The resolved input.
-    pub input: super::expression::Input,
+    pub input: super::expression::InputValue,
     /// Expression to transform the fixed 0.5 output.
     pub output: super::expression::Expression,
 }
@@ -582,7 +582,7 @@ pub struct PlaceholderScalarFunctionTask {
 impl PlaceholderScalarFunctionTask {
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
         super::expression::TaskOutputOwned,
@@ -633,7 +633,7 @@ pub struct PlaceholderVectorFunctionTaskExpression {
     /// Expression for the input to pass to the placeholder function.
     /// Receives: `input`, `map` (if mapped).
     pub input:
-        super::expression::WithExpression<super::expression::InputExpression>,
+        super::expression::WithExpression<super::expression::InputValueExpression>,
 
     /// Expression to transform the equalized vector output.
     /// Receives: `input`, `output` as `Vector(equalized)`.
@@ -674,7 +674,7 @@ pub struct PlaceholderVectorFunctionTask {
     /// Expression merging sub-inputs back into one input.
     pub input_merge: super::expression::Expression,
     /// The resolved input.
-    pub input: super::expression::Input,
+    pub input: super::expression::InputValue,
     /// Expression to transform the equalized vector output.
     pub output: super::expression::Expression,
 }
@@ -682,7 +682,7 @@ pub struct PlaceholderVectorFunctionTask {
 impl PlaceholderVectorFunctionTask {
     pub fn compile_output(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
         raw_output: super::expression::TaskOutput,
     ) -> Result<
         super::expression::TaskOutputOwned,

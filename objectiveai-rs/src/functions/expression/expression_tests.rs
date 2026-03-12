@@ -6,14 +6,14 @@ use crate::agent::completions::message::{
     SimpleContentPartExpression, VideoUrl,
 };
 use crate::functions::expression::{
-    ExpressionError, Input, InputExpression, Params,
+    ExpressionError, InputValue, InputValueExpression, Params,
     ParamsOwned, TaskOutputOwned,
 };
 use indexmap::IndexMap;
 
 fn empty_params() -> Params<'static, 'static> {
     Params::Owned(ParamsOwned {
-        input: Input::Object(IndexMap::new()),
+        input: InputValue::Object(IndexMap::new()),
         output: None,
         map: None,
     })
@@ -33,14 +33,14 @@ fn starlark_one<
 }
 
 fn params_with_object(
-    pairs: Vec<(&str, Input)>,
+    pairs: Vec<(&str, InputValue)>,
 ) -> Params<'static, 'static> {
     let mut map = IndexMap::new();
     for (k, v) in pairs {
         map.insert(k.to_string(), v);
     }
     Params::Owned(ParamsOwned {
-        input: Input::Object(map),
+        input: InputValue::Object(map),
         output: None,
         map: None,
     })
@@ -50,7 +50,7 @@ fn params_with_object(
 fn expression_compile_one_string_starlark() {
     let params = params_with_object(vec![(
         "name",
-        Input::String("alice".to_string()),
+        InputValue::String("alice".to_string()),
     )]);
     let expr = Expression::Starlark("input['name']".to_string());
 
@@ -62,10 +62,10 @@ fn expression_compile_one_string_starlark() {
 fn expression_compile_one_or_many_integers_from_array() {
     let params = params_with_object(vec![(
         "numbers",
-        Input::Array(vec![
-            Input::Integer(1),
-            Input::Integer(2),
-            Input::Integer(3),
+        InputValue::Array(vec![
+            InputValue::Integer(1),
+            InputValue::Integer(2),
+            InputValue::Integer(3),
         ]),
     )]);
     let expr = Expression::Starlark("input['numbers']".to_string());
@@ -133,13 +133,13 @@ fn withexpression_literal_passthrough_one_and_one_or_many() {
 fn withexpression_expression_uses_underlying_expression_for_one_and_many() {
     // Use an input with a scalar and an array to exercise both paths.
     let params = params_with_object(vec![
-        ("value", Input::Integer(42)),
+        ("value", InputValue::Integer(42)),
         (
             "values",
-            Input::Array(vec![
-                Input::Integer(1),
-                Input::Integer(2),
-                Input::Integer(3),
+            InputValue::Array(vec![
+                InputValue::Integer(1),
+                InputValue::Integer(2),
+                InputValue::Integer(3),
             ]),
         ),
     ]);
@@ -204,27 +204,27 @@ fn expression_outputs_primitives_and_options() {
 fn expression_outputs_input_and_vec_input() {
     let params = empty_params();
 
-    let input: Input = starlark_one("\"hello\"", &params);
-    assert!(matches!(input, Input::String(s) if s == "hello"));
+    let input: InputValue = starlark_one("\"hello\"", &params);
+    assert!(matches!(input, InputValue::String(s) if s == "hello"));
 
-    let inputs: Vec<Input> = starlark_one("[1, \"a\", True]", &params);
+    let inputs: Vec<InputValue> = starlark_one("[1, \"a\", True]", &params);
     assert_eq!(inputs.len(), 3);
-    assert!(matches!(&inputs[0], Input::Integer(1)));
-    assert!(matches!(&inputs[1], Input::String(s) if s == "a"));
-    assert!(matches!(&inputs[2], Input::Boolean(true)));
+    assert!(matches!(&inputs[0], InputValue::Integer(1)));
+    assert!(matches!(&inputs[1], InputValue::String(s) if s == "a"));
+    assert!(matches!(&inputs[2], InputValue::Boolean(true)));
 }
 
 #[test]
 fn expression_outputs_input_expression() {
     let params = empty_params();
 
-    let ie: InputExpression = starlark_one("{\"k\": \"v\"}", &params);
+    let ie: InputValueExpression = starlark_one("{\"k\": \"v\"}", &params);
     match ie {
-        InputExpression::Object(obj) => {
+        InputValueExpression::Object(obj) => {
             assert!(obj.contains_key("k"));
         }
         other => {
-            panic!("expected InputExpression::Object, got {:?}", other)
+            panic!("expected InputValueExpression::Object, got {:?}", other)
         }
     }
 }

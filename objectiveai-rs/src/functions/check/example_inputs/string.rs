@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use crate::functions::expression::{Input, StringInputSchema};
+use crate::functions::expression::{InputValue, StringInputSchema};
 
 pub fn permutations(schema: &StringInputSchema) -> usize {
     if let Some(ref e) = schema.r#enum {
@@ -39,8 +39,8 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         if self.indices.is_empty() {
             return None;
         }
@@ -51,11 +51,11 @@ impl<R: Rng> Iterator for Generator<R> {
         let index = self.indices[self.pos];
         self.pos += 1;
         Some(if let Some(ref e) = self.variants {
-            Input::String(e[index].clone())
+            InputValue::String(e[index].clone())
         } else if index == 0 {
-            Input::String(String::new())
+            InputValue::String(String::new())
         } else {
-            Input::String(random_string(&mut self.rng))
+            InputValue::String(random_string(&mut self.rng))
         })
     }
 }

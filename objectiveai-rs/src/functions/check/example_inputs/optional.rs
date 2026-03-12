@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use crate::functions::expression::{Input, InputSchema};
+use crate::functions::expression::{InputValue, InputSchema};
 
 pub fn permutations(schema: &InputSchema) -> usize {
     inner_permutations(schema) * 2
@@ -50,8 +50,8 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Option<Input>;
-    fn next(&mut self) -> Option<Option<Input>> {
+    type Item = Option<InputValue>;
+    fn next(&mut self) -> Option<Option<InputValue>> {
         if self.indices.is_empty() {
             return Some(None);
         }

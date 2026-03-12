@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use crate::functions::expression::{Input, NumberInputSchema};
+use crate::functions::expression::{InputValue, NumberInputSchema};
 
 pub fn permutations(schema: &NumberInputSchema) -> usize {
     let min = schema.minimum;
@@ -111,8 +111,8 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         if self.pos >= self.indices.len() {
             self.indices.shuffle(&mut self.rng);
             self.pos = 0;
@@ -134,6 +134,6 @@ impl<R: Rng> Iterator for Generator<R> {
             Variant::DecimalNeg => self.rng.random_range(-1.0..0.0),
             Variant::DecimalPos => self.rng.random_range(0.0..1.0),
         };
-        Some(Input::Number(value))
+        Some(InputValue::Number(value))
     }
 }

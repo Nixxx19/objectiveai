@@ -8,7 +8,7 @@ use serde::Deserialize;
 
 use super::check_input_schema::check_input_schema;
 use super::example_inputs;
-use crate::functions::expression::{Expression, Input, InputSchema};
+use crate::functions::expression::{Expression, InputValue, InputSchema};
 use crate::functions::{Function, RemoteFunction};
 use schemars::JsonSchema;
 
@@ -72,7 +72,7 @@ pub fn check_vector_fields(
 pub(crate) fn check_vector_fields_for_input(
     fields: &VectorFieldsValidation,
     input_label: &str,
-    input: &Input,
+    input: &InputValue,
 ) -> Result<(), String> {
     // 1. Compile output_length
     let output_length = fields
@@ -148,7 +148,7 @@ pub(crate) fn check_vector_fields_for_input(
     }
 
     // 4. Merge all splits — must equal original input
-    let merge_input = Input::Array(splits.clone());
+    let merge_input = InputValue::Array(splits.clone());
     let merged = fields
         .to_function()
         .compile_input_merge(&merge_input)
@@ -204,9 +204,9 @@ pub(crate) fn check_vector_fields_for_input(
         subsets.insert(0, vec![0, 1]);
     }
     for subset in &subsets {
-        let sub_splits: Vec<Input> =
+        let sub_splits: Vec<InputValue> =
             subset.iter().map(|&idx| splits[idx].clone()).collect();
-        let sub_merge_input = Input::Array(sub_splits);
+        let sub_merge_input = InputValue::Array(sub_splits);
         let sub_merged = fields
             .to_function()
             .compile_input_merge(&sub_merge_input)
@@ -271,12 +271,12 @@ pub(crate) fn check_vector_fields_for_input(
 /// Validate that an input satisfies the schema's structural constraints.
 /// Checks array min_items/max_items recursively through objects.
 fn validate_input_against_schema(
-    input: &Input,
+    input: &InputValue,
     schema: &InputSchema,
     path: &str,
 ) -> Result<(), String> {
     match (input, schema) {
-        (Input::Array(arr), InputSchema::Array(arr_schema)) => {
+        (InputValue::Array(arr), InputSchema::Array(arr_schema)) => {
             if let Some(min) = arr_schema.min_items {
                 if (arr.len() as u64) < min {
                     return Err(format!(
@@ -306,7 +306,7 @@ fn validate_input_against_schema(
             }
             Ok(())
         }
-        (Input::Object(obj), InputSchema::Object(obj_schema)) => {
+        (InputValue::Object(obj), InputSchema::Object(obj_schema)) => {
             for (key, prop_schema) in &obj_schema.properties {
                 if let Some(value) = obj.get(key) {
                     validate_input_against_schema(
@@ -323,23 +323,23 @@ fn validate_input_against_schema(
 }
 
 /// Deep equality check for Input values.
-pub(crate) fn inputs_equal(a: &Input, b: &Input) -> bool {
+pub(crate) fn inputs_equal(a: &InputValue, b: &InputValue) -> bool {
     match (a, b) {
-        (Input::String(a), Input::String(b)) => a == b,
-        (Input::Integer(a), Input::Integer(b)) => a == b,
-        (Input::Number(a), Input::Number(b)) => a == b,
-        (Input::Boolean(a), Input::Boolean(b)) => a == b,
-        (Input::Array(a), Input::Array(b)) => {
+        (InputValue::String(a), InputValue::String(b)) => a == b,
+        (InputValue::Integer(a), InputValue::Integer(b)) => a == b,
+        (InputValue::Number(a), InputValue::Number(b)) => a == b,
+        (InputValue::Boolean(a), InputValue::Boolean(b)) => a == b,
+        (InputValue::Array(a), InputValue::Array(b)) => {
             a.len() == b.len()
                 && a.iter().zip(b.iter()).all(|(x, y)| inputs_equal(x, y))
         }
-        (Input::Object(a), Input::Object(b)) => {
+        (InputValue::Object(a), InputValue::Object(b)) => {
             a.len() == b.len()
                 && a.iter().all(|(ka, va)| {
                     b.get(ka).is_some_and(|vb| inputs_equal(va, vb))
                 })
         }
-        (Input::RichContentPart(a), Input::RichContentPart(b)) => a == b,
+        (InputValue::RichContentPart(a), InputValue::RichContentPart(b)) => a == b,
         _ => false,
     }
 }

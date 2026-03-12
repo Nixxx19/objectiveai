@@ -52,7 +52,7 @@ impl Function {
     /// - `None` for inline functions (no schema to validate against)
     pub fn validate_input(
         &self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Option<bool> {
         match self {
             Function::Remote(remote_function) => {
@@ -76,7 +76,7 @@ impl Function {
     /// - `Some(CompiledTask::Many(...))` for mapped tasks
     pub fn compile_tasks(
         self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Result<
         Vec<Option<super::CompiledTask>>,
         super::expression::ExpressionError,
@@ -149,7 +149,7 @@ impl Function {
     // /// - Vector functions: output must sum to approximately 1
     // pub fn compile_output(
     //     self,
-    //     input: &super::expression::Input,
+    //     input: &super::expression::InputValue,
     //     task_outputs: &[Option<super::expression::TaskOutput>],
     // ) -> Result<
     //     super::expression::CompiledFunctionOutput,
@@ -256,7 +256,7 @@ impl Function {
     /// - `Err(ExpressionError)` - If the expression fails to compile
     pub fn compile_output_length(
         self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Result<Option<u64>, super::expression::ExpressionError> {
         let output_length_expr = match self {
             Function::Remote(RemoteFunction::Scalar { .. }) => None,
@@ -301,9 +301,9 @@ impl Function {
     /// - `Err(ExpressionError)` - If the expression fails to compile
     pub fn compile_input_split(
         self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Result<
-        Option<Vec<super::expression::Input>>,
+        Option<Vec<super::expression::InputValue>>,
         super::expression::ExpressionError,
     > {
         let input_split_expr = match self {
@@ -351,9 +351,9 @@ impl Function {
     /// - `Err(ExpressionError)` - If the expression fails to compile
     pub fn compile_input_merge(
         self,
-        input: &super::expression::Input,
+        input: &super::expression::InputValue,
     ) -> Result<
-        Option<super::expression::Input>,
+        Option<super::expression::InputValue>,
         super::expression::ExpressionError,
     > {
         let input_merge_expr = match self {

@@ -2,7 +2,7 @@ use rand::Rng;
 use rand::seq::SliceRandom;
 
 use crate::agent::completions::message::{RichContentPart, VideoUrl};
-use crate::functions::expression::{Input, VideoInputSchema};
+use crate::functions::expression::{InputValue, VideoInputSchema};
 
 pub const fn permutations(_schema: &VideoInputSchema) -> usize {
     2usize
@@ -28,8 +28,8 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         if self.pos >= self.indices.len() {
             self.indices.shuffle(&mut self.rng);
             self.pos = 0;
@@ -39,7 +39,7 @@ impl<R: Rng> Iterator for Generator<R> {
         let video_url = VideoUrl {
             url: super::string::random_string(&mut self.rng),
         };
-        Some(Input::RichContentPart(match index {
+        Some(InputValue::RichContentPart(match index {
             0 => RichContentPart::VideoUrl { video_url },
             _ => RichContentPart::InputVideo { video_url },
         }))

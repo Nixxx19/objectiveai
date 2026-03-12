@@ -66,7 +66,7 @@ pub struct FunctionRemoteProfileRemoteRequestBody {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub strategy: Option<super::Strategy>,
     /// The input data to pass to the Function.
-    pub input: functions::expression::Input,
+    pub input: functions::expression::InputValue,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub provider: Option<agent::completions::request::Provider>,

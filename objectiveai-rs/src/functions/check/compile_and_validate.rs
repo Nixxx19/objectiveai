@@ -1,10 +1,8 @@
 //! Per-input validation of compiled tasks and output expressions.
 
 use std::collections::{HashMap, HashSet};
-
 use rand::Rng;
 use rust_decimal::Decimal;
-
 use crate::agent::completions::message::{Message, RichContent, SimpleContent};
 use crate::functions::expression::{
     Params, ParamsRef, TaskOutput, TaskOutputOwned,
@@ -27,7 +25,7 @@ enum FunctionType {
 pub(crate) fn compile_and_validate_one_input(
     input_label: &str,
     function: &RemoteFunction,
-    input: &crate::functions::expression::Input,
+    input: &crate::functions::expression::InputValue,
     children: Option<&HashMap<String, RemoteFunction>>,
 ) -> Result<Vec<Option<CompiledTask>>, String> {
     // Determine parent function type (scalar or vector with output_length)
@@ -212,7 +210,7 @@ fn validate_compiled_task(
 fn validate_output_expression(
     input_label: &str,
     task_index: usize,
-    input: &crate::functions::expression::Input,
+    input: &crate::functions::expression::InputValue,
     compiled_task: &CompiledTask,
     representative_task: &Task,
     function_type: &FunctionType,
@@ -558,7 +556,7 @@ fn resolve_vector_function_output_length(
     owner: &str,
     repository: &str,
     commit: &str,
-    task_input: &crate::functions::expression::Input,
+    task_input: &crate::functions::expression::InputValue,
     children: Option<&HashMap<String, RemoteFunction>>,
     location: &str,
 ) -> Result<Option<u64>, String> {
@@ -652,7 +650,7 @@ pub(crate) fn extract_task_input(task: &Task) -> String {
 /// Returns a reference to the compiled input of a function/placeholder task.
 pub(crate) fn extract_task_input_value(
     task: &Task,
-) -> Option<&crate::functions::expression::Input> {
+) -> Option<&crate::functions::expression::InputValue> {
     match task {
         Task::ScalarFunction(t) => Some(&t.input),
         Task::VectorFunction(t) => Some(&t.input),

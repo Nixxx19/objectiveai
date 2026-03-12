@@ -1,7 +1,7 @@
 use rand::Rng;
 use rand::seq::SliceRandom;
 
-use crate::functions::expression::{AnyOfInputSchema, Input};
+use crate::functions::expression::{AnyOfInputSchema, InputValue};
 
 fn max_inner_permutations(schema: &AnyOfInputSchema) -> usize {
     schema
@@ -51,8 +51,8 @@ pub struct Generator<R: Rng> {
 }
 
 impl<R: Rng> Iterator for Generator<R> {
-    type Item = Input;
-    fn next(&mut self) -> Option<Input> {
+    type Item = InputValue;
+    fn next(&mut self) -> Option<InputValue> {
         if self.order.is_empty() {
             return None;
         }
