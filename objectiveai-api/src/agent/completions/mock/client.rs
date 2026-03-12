@@ -14,6 +14,9 @@ use super::State;
 pub struct Client {
     /// Delay before yielding each chunk.
     pub delay: Duration,
+    /// Maximum number of tool calls before returning an error.
+    /// Defaults to `MOCK_MAX_TOOL_CALLS` env var, or 1000.
+    pub max_tool_calls: u32,
 }
 
 /// Resolves the response format for this agent from the request params.
@@ -148,6 +151,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
             })
             .unwrap_or(0);
         let is_byok = byok.is_some();
+        let max_tool_calls = self.max_tool_calls;
 
         async move {
             use objectiveai::agent::completions::request::ResponseFormat;
@@ -218,6 +222,10 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 MockResponse::ToolCalls(calls) => calls.len() as u32,
                 _ => 0,
             };
+
+            if tool_call_count > max_tool_calls {
+                return Err(super::Error::MaxToolCallsExceeded(max_tool_calls));
+            }
 
             let state = State { tool_call_count };
 

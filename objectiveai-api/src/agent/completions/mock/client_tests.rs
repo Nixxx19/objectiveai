@@ -56,6 +56,7 @@ fn params_with_response_format(seed: i64, rf: ResponseFormat) -> AgentCompletion
 fn default_client() -> Client {
     Client {
         delay: Duration::ZERO,
+        max_tool_calls: 1000,
     }
 }
 

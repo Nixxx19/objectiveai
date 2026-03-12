@@ -144,6 +144,7 @@ fn make_client() -> Arc<TestClient> {
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
         mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
+            max_tool_calls: 1000,
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,
@@ -270,27 +271,15 @@ async fn run_recursive_invention(
     client: &Arc<TestClient>,
     request: Arc<FunctionInventionRecursiveCreateParams>,
 ) -> FunctionInventionRecursive {
-    let client = Arc::clone(client);
-    let (tx, rx) = std::sync::mpsc::channel();
-
-    std::thread::spawn(move || {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let result = rt.block_on(async {
-            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
-            let stream = client
-                .clone()
-                .create_streaming(ctx, request)
-                .await
-                .expect("create_streaming should succeed");
-            let chunks: Vec<_> = Box::pin(stream).collect::<Vec<_>>().await;
-            assert_chunk_invariants(&chunks);
-            aggregate(chunks)
-        });
-        let _ = tx.send(result);
-    });
-
-    rx.recv_timeout(Duration::from_secs(300))
-        .expect("recursive invention timed out after 300s — this may be caused by slow hardware or busy system resources")
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
+    let stream = client
+        .clone()
+        .create_streaming(ctx, request)
+        .await
+        .expect("create_streaming should succeed");
+    let chunks: Vec<_> = Box::pin(stream).collect::<Vec<_>>().await;
+    assert_chunk_invariants(&chunks);
+    aggregate(chunks)
 }
 
 // ---------------------------------------------------------------------------
@@ -636,37 +625,25 @@ async fn run_recursive_invention_err(
     client: &Arc<TestClient>,
     request: Arc<FunctionInventionRecursiveCreateParams>,
 ) -> String {
-    let client = Arc::clone(client);
-    let (tx, rx) = std::sync::mpsc::channel();
-
-    std::thread::spawn(move || {
-        let rt = tokio::runtime::Runtime::new().unwrap();
-        let result = rt.block_on(async {
-            let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
-            let stream = client
-                .clone()
-                .create_streaming(ctx, request)
-                .await
-                .expect("create_streaming should return Ok (errors come as chunks)");
-            let chunks: Vec<_> = Box::pin(stream).collect::<Vec<_>>().await;
-            let agg = aggregate(chunks);
-            assert!(
-                agg.inventions_errors,
-                "expected inventions_errors to be true",
-            );
-            // Find the first invention with an error and return its message.
-            for inv in &agg.inventions {
-                if let Some(ref err) = inv.inner.error {
-                    return err.message.to_string();
-                }
-            }
-            panic!("expected at least one invention with an error, but none found");
-        });
-        let _ = tx.send(result);
-    });
-
-    rx.recv_timeout(Duration::from_secs(300))
-        .expect("recursive invention error timed out after 300s — this may be caused by slow hardware or busy system resources")
+    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
+    let stream = client
+        .clone()
+        .create_streaming(ctx, request)
+        .await
+        .expect("create_streaming should return Ok (errors come as chunks)");
+    let chunks: Vec<_> = Box::pin(stream).collect::<Vec<_>>().await;
+    let agg = aggregate(chunks);
+    assert!(
+        agg.inventions_errors,
+        "expected inventions_errors to be true",
+    );
+    // Find the first invention with an error and return its message.
+    for inv in &agg.inventions {
+        if let Some(ref err) = inv.inner.error {
+            return err.message.to_string();
+        }
+    }
+    panic!("expected at least one invention with an error, but none found");
 }
 
 /// A valid scalar input schema: object with a required string enum of 2 values.

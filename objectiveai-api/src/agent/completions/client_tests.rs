@@ -90,6 +90,7 @@ fn make_client() -> super::Client<
         claude_agent_sdk: Arc::new(UnimplementedUpstreamClient),
         mock: Arc::new(crate::agent::completions::mock::Client {
             delay: Duration::ZERO,
+            max_tool_calls: 1000,
         }),
         backoff_current_interval: Duration::ZERO,
         backoff_initial_interval: Duration::ZERO,

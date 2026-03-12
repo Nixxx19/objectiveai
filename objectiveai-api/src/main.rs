@@ -155,6 +155,8 @@ struct Config {
     filesystem_commit_author_name: String,
     #[envconfig(from = "FILESYSTEM_COMMIT_AUTHOR_EMAIL", default = "admin@objective-ai.io")]
     filesystem_commit_author_email: String,
+    #[envconfig(from = "MOCK_MAX_TOOL_CALLS", default = "1000")]
+    mock_max_tool_calls: u32,
     #[envconfig(from = "ADDRESS", default = "0.0.0.0")]
     address: String,
     #[envconfig(from = "PORT", default = "5000")]
@@ -202,6 +204,7 @@ async fn main() {
         publish_github_token,
         filesystem_commit_author_name,
         filesystem_commit_author_email,
+        mock_max_tool_calls,
         address,
         port,
     } = Config::init_from_env().unwrap();
@@ -341,6 +344,7 @@ async fn main() {
         Arc::new(agent::completions::claude_agent_sdk::Client::new(None)),
         Arc::new(agent::completions::mock::Client {
             delay: std::time::Duration::from_millis(0),
+            max_tool_calls: mock_max_tool_calls,
         }),
         std::time::Duration::from_millis(
             agent_completions_backoff_current_interval,

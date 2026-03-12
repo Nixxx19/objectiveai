@@ -11,6 +11,9 @@ pub enum Error {
 
     #[error("invention agent requires invention tools")]
     InventionAgentWithoutInventionTools,
+
+    #[error("mock tool call limit exceeded ({0})")]
+    MaxToolCallsExceeded(u32),
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -20,6 +23,7 @@ impl objectiveai::error::StatusError for Error {
             Self::UnsupportedResponseFormat(_) => 400,
             Self::ToolsNotAllowedWithRequiredToolCall => 400,
             Self::InventionAgentWithoutInventionTools => 400,
+            Self::MaxToolCallsExceeded(_) => 429,
         }
     }
 
