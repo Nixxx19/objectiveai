@@ -12,8 +12,8 @@ pub use route::*;
 /// Pick an invention tool with weighted selection.
 ///
 /// 50% chance: return the key write tool for this step.
-/// 50% chance: pick randomly from `tool_names`, re-rolling non-invention tools.
-pub(super) async fn pick_invention_tool<'a>(
+/// 50% chance: pick randomly from the available invention tools.
+pub(super) fn pick_invention_tool<'a>(
     key_tool: &str,
     tool_names: &'a [String],
     tool_map: &std::collections::HashMap<String, crate::agent::completions::ResolvedTool>,
@@ -25,32 +25,26 @@ pub(super) async fn pick_invention_tool<'a>(
             return t.as_str();
         }
     }
-    // 50% chance: pick randomly, re-rolling non-invention tools
-    for attempt in 0u32.. {
-        if attempt > 0 && attempt % 100 == 0 {
-            // Yield so the tokio runtime can make progress (fire timeouts, etc.)
-            tokio::task::yield_now().await;
-        }
-        let name = &tool_names[rng.random_range(0..tool_names.len())];
-        if matches!(tool_map.get(name.as_str()), Some(crate::agent::completions::ResolvedTool::InventionTool(_))) {
-            return name.as_str();
-        }
-    }
-    unreachable!()
+    // 50% chance: pick randomly from invention tools only
+    let invention_tools: Vec<&'a str> = tool_names.iter()
+        .filter(|t| matches!(tool_map.get(t.as_str()), Some(crate::agent::completions::ResolvedTool::InventionTool(_))))
+        .map(|t| t.as_str())
+        .collect();
+    invention_tools[rng.random_range(0..invention_tools.len())]
 }
 
 /// Generate a mock tool call for the description step (shared across all routes).
 ///
 /// Tools: `[ReadSpec, ReadEssay, ReadInputSchema, ReadEssayTasks, ReadTask,
 /// ReadTasksLength, WriteDescription]`.
-pub async fn description_tool_call(
+pub fn description_tool_call(
     tool_names: &[String],
     tool_map: &std::collections::HashMap<String, crate::agent::completions::ResolvedTool>,
     rng: &mut impl rand::Rng,
 ) -> super::client::MockToolCall {
     use super::client::{MockToolCall, random_string};
 
-    let tool_name = pick_invention_tool("WriteDescription", tool_names, tool_map, rng).await;
+    let tool_name = pick_invention_tool("WriteDescription", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "WriteDescription" => {
             let description = random_string(rng, 50, 350);

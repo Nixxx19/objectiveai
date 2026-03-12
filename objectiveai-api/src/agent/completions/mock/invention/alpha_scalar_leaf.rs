@@ -12,13 +12,13 @@ use crate::agent::completions::ResolvedTool;
 /// obtained by calling the `ReadInputSchema` invention tool. It can be ANY
 /// valid ObjectInputSchema — arbitrary depth, arbitrary types, enums, etc.
 /// The generated expressions must correctly reference the schema's fields.
-pub async fn tasks_tool_call(
+pub fn tasks_tool_call(
     input_schema_json: &str,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
+    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "AppendTask" => {
             let modalities = super::parse_scalar_schema(input_schema_json);

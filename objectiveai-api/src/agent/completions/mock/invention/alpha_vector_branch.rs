@@ -15,7 +15,7 @@ use crate::agent::completions::ResolvedTool;
 ///
 /// `scalar_count` and `total_count` track how many scalar tasks have been
 /// appended so far, ensuring at most 50% are scalar.
-pub async fn tasks_tool_call(
+pub fn tasks_tool_call(
     input_schema_json: &str,
     scalar_count: u32,
     total_count: u32,
@@ -23,7 +23,7 @@ pub async fn tasks_tool_call(
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
+    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "AppendTask" => {
             // Parse the full input schema to extract items and context sub-schemas

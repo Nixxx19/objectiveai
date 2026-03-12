@@ -13,13 +13,13 @@ use crate::agent::completions::ResolvedTool;
 /// obtained by calling `ReadInputSchema`. It can be ANY valid ObjectInputSchema
 /// — arbitrary depth, types, constraints. The child schemas and input
 /// expressions are derived from the actual parent schema.
-pub async fn tasks_tool_call(
+pub fn tasks_tool_call(
     input_schema_json: &str,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
+    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "AppendTask" => {
             let field_schemas = super::extract_input_field_schemas(input_schema_json);

@@ -724,22 +724,22 @@ async fn resolve_invention_response(
     // Dispatch to the appropriate tool call generator.
     let tc = match step {
         InventionStep::EssayScalar => {
-            super::invention::alpha_scalar::essay_tool_call(tool_names, tool_map, rng).await
+            super::invention::alpha_scalar::essay_tool_call(tool_names, tool_map, rng)
         }
         InventionStep::EssayVector => {
-            super::invention::alpha_vector::essay_tool_call(tool_names, tool_map, rng).await
+            super::invention::alpha_vector::essay_tool_call(tool_names, tool_map, rng)
         }
         InventionStep::InputSchemaScalar => {
-            super::invention::alpha_scalar::input_schema_tool_call(tool_names, tool_map, rng).await
+            super::invention::alpha_scalar::input_schema_tool_call(tool_names, tool_map, rng)
         }
         InventionStep::InputSchemaVector => {
-            super::invention::alpha_vector::input_schema_tool_call(tool_names, tool_map, rng).await
+            super::invention::alpha_vector::input_schema_tool_call(tool_names, tool_map, rng)
         }
         InventionStep::EssayTasksScalar => {
-            super::invention::alpha_scalar::essay_tasks_tool_call(tool_names, tool_map, rng).await
+            super::invention::alpha_scalar::essay_tasks_tool_call(tool_names, tool_map, rng)
         }
         InventionStep::EssayTasksVector => {
-            super::invention::alpha_vector::essay_tasks_tool_call(tool_names, tool_map, rng).await
+            super::invention::alpha_vector::essay_tasks_tool_call(tool_names, tool_map, rng)
         }
         InventionStep::TasksScalarLeaf => {
             let input_schema_json = call_invention_tool(
@@ -760,7 +760,7 @@ async fn resolve_invention_response(
             }
             super::invention::alpha_scalar_leaf::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
-            ).await
+            )
         }
         InventionStep::TasksScalarBranch => {
             let input_schema_json = call_invention_tool(
@@ -781,7 +781,7 @@ async fn resolve_invention_response(
             }
             super::invention::alpha_scalar_branch::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
-            ).await
+            )
         }
         InventionStep::TasksVectorLeaf => {
             let input_schema_json = call_invention_tool(
@@ -802,7 +802,7 @@ async fn resolve_invention_response(
             }
             super::invention::alpha_vector_leaf::tasks_tool_call(
                 &input_schema_json, tool_names, tool_map, rng,
-            ).await
+            )
         }
         InventionStep::TasksVectorBranch => {
             let input_schema_json = call_invention_tool(
@@ -829,13 +829,13 @@ async fn resolve_invention_response(
             super::invention::alpha_vector_branch::tasks_tool_call(
                 &input_schema_json, scalar_count, total_count,
                 tool_names, tool_map, rng,
-            ).await
+            )
         }
         InventionStep::DescriptionScalarLeaf
         | InventionStep::DescriptionScalarBranch
         | InventionStep::DescriptionVectorLeaf
         | InventionStep::DescriptionVectorBranch => {
-            super::invention::description_tool_call(tool_names, tool_map, rng).await
+            super::invention::description_tool_call(tool_names, tool_map, rng)
         }
     };
 

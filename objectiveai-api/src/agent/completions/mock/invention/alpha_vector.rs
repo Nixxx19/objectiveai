@@ -5,12 +5,12 @@ use crate::agent::completions::ResolvedTool;
 
 
 /// Generate a mock tool call for the essay step of a vector function.
-pub async fn essay_tool_call(
+pub fn essay_tool_call(
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("WriteEssay", tool_names, tool_map, rng).await;
+    let tool_name = super::pick_invention_tool("WriteEssay", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "WriteEssay" => {
             let essay = random_string(rng, 200, 800);
@@ -31,12 +31,12 @@ pub async fn essay_tool_call(
 ///
 /// If the chosen tool is `WriteInputSchema`, generates a random
 /// `VectorFunctionInputSchema` with diverse item/context structures.
-pub async fn input_schema_tool_call(
+pub fn input_schema_tool_call(
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("WriteInputSchema", tool_names, tool_map, rng).await;
+    let tool_name = super::pick_invention_tool("WriteInputSchema", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "WriteInputSchema" => {
             super::schema_gen::random_vector_input_schema(rng)
@@ -53,12 +53,12 @@ pub async fn input_schema_tool_call(
 }
 
 /// Generate a mock tool call for the essay_tasks step of a vector function.
-pub async fn essay_tasks_tool_call(
+pub fn essay_tasks_tool_call(
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("WriteEssayTasks", tool_names, tool_map, rng).await;
+    let tool_name = super::pick_invention_tool("WriteEssayTasks", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "WriteEssayTasks" => {
             let essay_tasks = random_string(rng, 100, 500);

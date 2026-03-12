@@ -13,13 +13,13 @@ use crate::agent::completions::ResolvedTool;
 /// obtained by calling `ReadInputSchema`. It can be ANY valid vector input
 /// schema — items of any type, arbitrary item object depth, optional context
 /// with any structure, etc.
-pub async fn tasks_tool_call(
+pub fn tasks_tool_call(
     input_schema_json: &str,
     tool_names: &[String],
     tool_map: &HashMap<String, ResolvedTool>,
     rng: &mut impl Rng,
 ) -> MockToolCall {
-    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng).await;
+    let tool_name = super::pick_invention_tool("AppendTask", tool_names, tool_map, rng);
     let arguments = match tool_name {
         "AppendTask" => {
             let (ctx_modalities, items_modalities, has_context) =
