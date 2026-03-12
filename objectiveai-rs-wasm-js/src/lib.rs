@@ -457,3 +457,69 @@ pub fn vectorResponseId(response: JsValue) -> Result<String, JsValue> {
     let id = response.id();
     Ok(id)
 }
+
+/// Merges two `AgentCompletionChunk`s and returns the merged result.
+#[wasm_bindgen]
+pub fn agentCompletionChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+    let mut a: objectiveai::agent::completions::response::streaming::AgentCompletionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let b: objectiveai::agent::completions::response::streaming::AgentCompletionChunk =
+        serde_wasm_bindgen::from_value(b)?;
+    a.push(&b);
+    Ok(serde_wasm_bindgen::to_value(&a)?)
+}
+
+/// Merges two `VectorCompletionChunk`s and returns the merged result.
+#[wasm_bindgen]
+pub fn vectorCompletionChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+    let mut a: objectiveai::vector::completions::response::streaming::VectorCompletionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let b: objectiveai::vector::completions::response::streaming::VectorCompletionChunk =
+        serde_wasm_bindgen::from_value(b)?;
+    a.push(&b);
+    Ok(serde_wasm_bindgen::to_value(&a)?)
+}
+
+/// Merges two `FunctionExecutionChunk`s and returns the merged result.
+#[wasm_bindgen]
+pub fn functionExecutionChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+    let mut a: objectiveai::functions::executions::response::streaming::FunctionExecutionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let b: objectiveai::functions::executions::response::streaming::FunctionExecutionChunk =
+        serde_wasm_bindgen::from_value(b)?;
+    a.push(&b);
+    Ok(serde_wasm_bindgen::to_value(&a)?)
+}
+
+/// Merges two `FunctionInventionChunk`s and returns the merged result.
+#[wasm_bindgen]
+pub fn functionInventionChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+    let mut a: objectiveai::functions::inventions::response::streaming::FunctionInventionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let b: objectiveai::functions::inventions::response::streaming::FunctionInventionChunk =
+        serde_wasm_bindgen::from_value(b)?;
+    a.push(&b);
+    Ok(serde_wasm_bindgen::to_value(&a)?)
+}
+
+/// Merges two `FunctionInventionRecursiveChunk`s and returns the merged result.
+#[wasm_bindgen]
+pub fn functionInventionRecursiveChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+    let mut a: objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let b: objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk =
+        serde_wasm_bindgen::from_value(b)?;
+    a.push(&b);
+    Ok(serde_wasm_bindgen::to_value(&a)?)
+}
+
+/// Merges two `FunctionProfileComputationChunk`s and returns the merged result.
+#[wasm_bindgen]
+pub fn functionProfileComputationChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+    let mut a: objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let b: objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk =
+        serde_wasm_bindgen::from_value(b)?;
+    a.push(&b);
+    Ok(serde_wasm_bindgen::to_value(&a)?)
+}
