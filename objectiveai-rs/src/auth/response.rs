@@ -15,10 +15,13 @@ use schemars::JsonSchema;
 #[schemars(rename = "auth.GetCreditsResponse")]
 pub struct GetCreditsResponse {
     /// The current available credit balance.
+    #[schemars(with = "f64")]
     pub credits: rust_decimal::Decimal,
     /// The total amount of credits ever purchased.
+    #[schemars(with = "f64")]
     pub total_credits_purchased: rust_decimal::Decimal,
     /// The total amount of credits consumed by API usage.
+    #[schemars(with = "f64")]
     pub total_credits_used: rust_decimal::Decimal,
 }
 
@@ -51,6 +54,7 @@ pub struct ListApiKeyItem {
     #[serde(flatten)]
     pub inner: super::ApiKeyWithMetadata,
     /// The total cost incurred by this API key.
+    #[schemars(with = "f64")]
     pub cost: rust_decimal::Decimal,
 }
 

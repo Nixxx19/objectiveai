@@ -19,6 +19,7 @@ use schemars::JsonSchema;
 #[schemars(rename = "vector.completions.request.ProfileEntry")]
 pub struct ProfileEntry {
     /// The weight for this agent in the ensemble. Must be in [0, 1].
+    #[schemars(with = "f64")]
     pub weight: Decimal,
     /// If true, invert this agent's vote distribution before combining.
     ///
@@ -39,7 +40,7 @@ pub struct ProfileEntry {
 #[schemars(rename = "vector.completions.request.Profile")]
 pub enum Profile {
     /// Simple vector of decimal weights.
-    Weights(Vec<Decimal>),
+    Weights(#[schemars(with = "Vec<f64>")] Vec<Decimal>),
     /// Vector of entries with optional invert flags.
     Entries(Vec<ProfileEntry>),
 }

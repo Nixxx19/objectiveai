@@ -6,19 +6,13 @@
   "properties": {
     "upstream_inference_cost": {
       "description": "Cost charged by the immediate upstream (e.g., OpenRouter).",
-      "type": [
-        "string",
-        "number"
-      ],
-      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+      "type": "number",
+      "format": "double"
     },
     "upstream_upstream_inference_cost": {
       "description": "Cost charged by the upstream's upstream (e.g., the actual model provider).",
-      "type": [
-        "string",
-        "number"
-      ],
-      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+      "type": "number",
+      "format": "double"
     }
   },
   "required": [

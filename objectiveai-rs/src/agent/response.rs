@@ -41,5 +41,6 @@ pub struct UsageAgent {
     /// Total prompt tokens processed.
     pub prompt_tokens: u64,
     /// Total cost incurred.
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }

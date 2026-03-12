@@ -15,7 +15,7 @@ pub struct DatasetItem {
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "functions.profiles.computations.request.Target")]
 pub enum Target {
-    Scalar { value: rust_decimal::Decimal }, // desired scalar output
-    Vector { value: Vec<rust_decimal::Decimal> }, // desired vector output
+    Scalar { #[schemars(with = "f64")] value: rust_decimal::Decimal }, // desired scalar output
+    Vector { #[schemars(with = "Vec<f64>")] value: Vec<rust_decimal::Decimal> }, // desired vector output
     VectorWinner { value: usize }, // desired winning index in vector completion
 }

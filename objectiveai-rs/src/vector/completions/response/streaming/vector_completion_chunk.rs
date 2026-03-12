@@ -18,8 +18,10 @@ pub struct VectorCompletionChunk {
     /// Votes received so far. New votes are appended in subsequent chunks.
     pub votes: Vec<response::Vote>,
     /// Current weighted scores. Updated as new votes arrive.
+    #[schemars(with = "Vec<f64>")]
     pub scores: Vec<rust_decimal::Decimal>,
     /// Current weight distribution across responses. Updated as new votes arrive.
+    #[schemars(with = "Vec<f64>")]
     pub weights: Vec<rust_decimal::Decimal>,
     /// Unix timestamp when the completion was created.
     pub created: u64,

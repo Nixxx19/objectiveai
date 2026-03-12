@@ -5,21 +5,15 @@
   "anyOf": [
     {
       "description": "A single scalar score.",
-      "type": [
-        "string",
-        "number"
-      ],
-      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+      "type": "number",
+      "format": "double"
     },
     {
       "description": "A vector of scores.",
       "type": "array",
       "items": {
-        "type": [
-          "string",
-          "number"
-        ],
-        "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+        "type": "number",
+        "format": "double"
       }
     },
     {
@@ -28,11 +22,8 @@
       "items": {
         "type": "array",
         "items": {
-          "type": [
-            "string",
-            "number"
-          ],
-          "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+          "type": "number",
+          "format": "double"
         }
       }
     },

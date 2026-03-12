@@ -44,22 +44,16 @@
       "description": "Current weighted scores. Updated as new votes arrive.",
       "type": "array",
       "items": {
-        "type": [
-          "string",
-          "number"
-        ],
-        "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+        "type": "number",
+        "format": "double"
       }
     },
     "weights": {
       "description": "Current weight distribution across responses. Updated as new votes arrive.",
       "type": "array",
       "items": {
-        "type": [
-          "string",
-          "number"
-        ],
-        "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+        "type": "number",
+        "format": "double"
       }
     },
     "created": {

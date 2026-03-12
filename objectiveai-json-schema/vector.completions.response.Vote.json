@@ -35,20 +35,14 @@
       "description": "The vote distribution. Each index corresponds to a response from the\nrequest. Typically one element is 1.0 (selected) and the rest are 0.0.",
       "type": "array",
       "items": {
-        "type": [
-          "string",
-          "number"
-        ],
-        "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+        "type": "number",
+        "format": "double"
       }
     },
     "weight": {
       "description": "The weight applied to this vote when computing final scores.",
-      "type": [
-        "string",
-        "number"
-      ],
-      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+      "type": "number",
+      "format": "double"
     },
     "retry": {
       "description": "If true, this vote was reused from a previous request via the `retry`\nparameter. All fields reflect the original request's values.",

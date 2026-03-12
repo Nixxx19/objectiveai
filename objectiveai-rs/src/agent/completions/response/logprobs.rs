@@ -46,6 +46,7 @@ pub struct Logprob {
     /// The raw bytes of the token.
     pub bytes: Option<Vec<u8>>,
     /// The log probability of this token.
+    #[schemars(with = "f64")]
     pub logprob: rust_decimal::Decimal,
     /// The top alternative tokens and their log probabilities.
     pub top_logprobs: Vec<TopLogprob>,
@@ -60,5 +61,6 @@ pub struct TopLogprob {
     /// The raw bytes of the token.
     pub bytes: Option<Vec<u8>>,
     /// The log probability of this token.
+    #[schemars(with = "Option<f64>")]
     pub logprob: Option<rust_decimal::Decimal>,
 }

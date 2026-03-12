@@ -6,11 +6,8 @@
   "properties": {
     "weight": {
       "description": "The weight for this agent in the ensemble. Must be in [0, 1].",
-      "type": [
-        "string",
-        "number"
-      ],
-      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+      "type": "number",
+      "format": "double"
     },
     "invert": {
       "description": "If true, invert this agent's vote distribution before combining.\n\nWhen omitted or false, the vote distribution is used as-is.",

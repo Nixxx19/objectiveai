@@ -94,8 +94,10 @@ impl PromptTokensDetails {
 #[schemars(rename = "agent.completions.response.CostDetails")]
 pub struct CostDetails {
     /// Cost charged by the immediate upstream (e.g., OpenRouter).
+    #[schemars(with = "f64")]
     pub upstream_inference_cost: rust_decimal::Decimal,
     /// Cost charged by the upstream's upstream (e.g., the actual model provider).
+    #[schemars(with = "f64")]
     pub upstream_upstream_inference_cost: rust_decimal::Decimal,
 }
 

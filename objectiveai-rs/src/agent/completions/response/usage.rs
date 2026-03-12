@@ -24,12 +24,14 @@ pub struct Usage {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prompt_tokens_details: Option<PromptTokensDetails>,
     /// Cost charged by ObjectiveAI for this request.
+    #[schemars(with = "f64")]
     pub cost: rust_decimal::Decimal,
     /// Breakdown of upstream and upstream_upstream costs if available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cost_details: Option<CostDetails>,
     /// Total cost including upstream provider charges. Only differs from `cost`
     /// when using BYOK (Bring Your Own Key).
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }
 

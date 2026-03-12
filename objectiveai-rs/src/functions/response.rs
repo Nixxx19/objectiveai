@@ -48,6 +48,7 @@ pub struct UsageFunction {
     /// Total prompt tokens used.
     pub prompt_tokens: u64,
     /// Total cost incurred.
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }
 
@@ -90,5 +91,6 @@ pub struct UsageFunctionProfilePair {
     /// Total prompt tokens used.
     pub prompt_tokens: u64,
     /// Total cost incurred.
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }

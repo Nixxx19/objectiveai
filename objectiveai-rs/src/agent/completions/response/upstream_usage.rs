@@ -24,6 +24,7 @@ pub struct UpstreamUsage {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub prompt_tokens_details: Option<PromptTokensDetails>,
     /// The cost charged by ObjectiveAI for this request.
+    #[schemars(with = "f64")]
     pub cost: rust_decimal::Decimal,
     /// Detailed cost breakdown.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -31,8 +32,10 @@ pub struct UpstreamUsage {
     /// Total cost including ObjectiveAI's charge plus all upstream charges.
     /// For BYOK requests, ObjectiveAI only charges the cost_multiplier difference,
     /// but total_cost still includes what the upstream provider charged.
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
     /// The multiplier applied to compute ObjectiveAI's charge.
+    #[schemars(with = "f64")]
     pub cost_multiplier: rust_decimal::Decimal,
     /// Whether this request used Bring Your Own Key (BYOK).
     pub is_byok: bool,

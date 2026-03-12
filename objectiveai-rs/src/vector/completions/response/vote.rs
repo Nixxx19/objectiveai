@@ -38,9 +38,11 @@ pub struct Vote {
 
     /// The vote distribution. Each index corresponds to a response from the
     /// request. Typically one element is 1.0 (selected) and the rest are 0.0.
+    #[schemars(with = "Vec<f64>")]
     pub vote: Vec<rust_decimal::Decimal>,
 
     /// The weight applied to this vote when computing final scores.
+    #[schemars(with = "f64")]
     pub weight: rust_decimal::Decimal,
 
     // --- Source flags ---

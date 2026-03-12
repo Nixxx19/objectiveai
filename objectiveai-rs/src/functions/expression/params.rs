@@ -96,11 +96,11 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 #[schemars(rename = "functions.expression.TaskOutputOwned")]
 pub enum TaskOutputOwned {
     /// A single scalar score.
-    Scalar(rust_decimal::Decimal),
+    Scalar(#[schemars(with = "f64")] rust_decimal::Decimal),
     /// A vector of scores.
-    Vector(Vec<rust_decimal::Decimal>),
+    Vector(#[schemars(with = "Vec<f64>")] Vec<rust_decimal::Decimal>),
     /// Multiple vectors of scores (from mapped tasks).
-    Vectors(Vec<Vec<rust_decimal::Decimal>>),
+    Vectors(#[schemars(with = "Vec<Vec<f64>>")] Vec<Vec<rust_decimal::Decimal>>),
     /// An error occurred during execution.
     Err(serde_json::Value),
 }
@@ -290,11 +290,11 @@ impl TaskOutputOwned {
 #[schemars(rename = "functions.expression.TaskOutputRef")]
 pub enum TaskOutputRef<'a> {
     /// A single scalar score.
-    Scalar(&'a rust_decimal::Decimal),
+    Scalar(#[schemars(with = "f64")] &'a rust_decimal::Decimal),
     /// A vector of scores.
-    Vector(&'a [rust_decimal::Decimal]),
+    Vector(#[schemars(with = "Vec<f64>")] &'a [rust_decimal::Decimal]),
     /// Multiple vectors of scores (from mapped tasks).
-    Vectors(&'a [Vec<rust_decimal::Decimal>]),
+    Vectors(#[schemars(with = "Vec<Vec<f64>>")] &'a [Vec<rust_decimal::Decimal>]),
     /// An error occurred during execution.
     Err(&'a serde_json::Value),
 }

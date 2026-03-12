@@ -46,11 +46,8 @@
     },
     "cost": {
       "description": "Cost charged by ObjectiveAI for this request.",
-      "type": [
-        "string",
-        "number"
-      ],
-      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+      "type": "number",
+      "format": "double"
     },
     "cost_details": {
       "description": "Breakdown of upstream and upstream_upstream costs if available.",
@@ -65,11 +62,8 @@
     },
     "total_cost": {
       "description": "Total cost including upstream provider charges. Only differs from `cost`\nwhen using BYOK (Bring Your Own Key).",
-      "type": [
-        "string",
-        "number"
-      ],
-      "pattern": "^-?\\d+(\\.\\d+)?([eE]\\d+)?$"
+      "type": "number",
+      "format": "double"
     }
   },
   "required": [
