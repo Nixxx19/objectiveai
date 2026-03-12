@@ -116,7 +116,7 @@ pub fn validateFunctionInput(
     // deserialize
     let function: objectiveai::functions::Function =
         serde_wasm_bindgen::from_value(function)?;
-    let input: objectiveai::functions::expression::Input =
+    let input: objectiveai::functions::expression::InputValue =
         serde_wasm_bindgen::from_value(input)?;
     // validate input
     Ok(function.validate_input(&input))
@@ -151,7 +151,7 @@ pub fn compileFunctionTasks(
     // deserialize
     let function: objectiveai::functions::Function =
         serde_wasm_bindgen::from_value(function)?;
-    let input: objectiveai::functions::expression::Input =
+    let input: objectiveai::functions::expression::InputValue =
         serde_wasm_bindgen::from_value(input)?;
     // compile tasks
     let tasks = function
@@ -194,7 +194,7 @@ pub fn compileFunctionTasks(
 //     // deserialize
 //     let function: objectiveai::functions::Function =
 //         serde_wasm_bindgen::from_value(function)?;
-//     let input: objectiveai::functions::expression::Input =
+//     let input: objectiveai::functions::expression::InputValue =
 //         serde_wasm_bindgen::from_value(input)?;
 //     let task_outputs: Vec<
 //         Option<objectiveai::functions::expression::TaskOutput<'static>>,
@@ -235,7 +235,7 @@ pub fn compileFunctionOutputLength(
     // deserialize
     let function: objectiveai::functions::Function =
         serde_wasm_bindgen::from_value(function)?;
-    let input: objectiveai::functions::expression::Input =
+    let input: objectiveai::functions::expression::InputValue =
         serde_wasm_bindgen::from_value(input)?;
     // compile output length
     Ok(function
@@ -271,7 +271,7 @@ pub fn compileFunctionInputSplit(
     // deserialize
     let function: objectiveai::functions::Function =
         serde_wasm_bindgen::from_value(function)?;
-    let input: objectiveai::functions::expression::Input =
+    let input: objectiveai::functions::expression::InputValue =
         serde_wasm_bindgen::from_value(input)?;
     // compile input split
     let input_split = function
@@ -311,11 +311,11 @@ pub fn compileFunctionInputMerge(
     // deserialize
     let function: objectiveai::functions::Function =
         serde_wasm_bindgen::from_value(function)?;
-    let input: Vec<objectiveai::functions::expression::Input> =
+    let input: Vec<objectiveai::functions::expression::InputValue> =
         serde_wasm_bindgen::from_value(input)?;
     // compile input merge
     let input_merge = function
-        .compile_input_merge(&objectiveai::functions::expression::Input::Array(
+        .compile_input_merge(&objectiveai::functions::expression::InputValue::Array(
             input,
         ))
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
