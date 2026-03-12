@@ -103,7 +103,7 @@ pub struct ScalarFunctionTaskExpression {
     pub commit: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
-    pub input: super::expression::ScalarFunctionInputExpression,
+    pub input: super::expression::ScalarFunctionInputValueExpression,
 }
 
 impl ScalarFunctionTaskExpression {
@@ -120,7 +120,7 @@ impl ScalarFunctionTaskExpression {
             skip: self.skip,
             map: None,
             input:
-                super::expression::scalar_function_input_expression::transpile(
+                super::expression::scalar_function_input_value_expression::transpile(
                     self.input,
                 ),
             output: functions::expression::Expression::Special(
@@ -138,7 +138,7 @@ pub struct PlaceholderScalarFunctionTaskExpression {
     pub input_schema: super::expression::ScalarFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
-    pub input: super::expression::ScalarFunctionInputExpression,
+    pub input: super::expression::ScalarFunctionInputValueExpression,
 }
 
 impl PlaceholderScalarFunctionTaskExpression {
@@ -153,7 +153,7 @@ impl PlaceholderScalarFunctionTaskExpression {
             skip: self.skip,
             map: None,
             input:
-                super::expression::scalar_function_input_expression::transpile(
+                super::expression::scalar_function_input_value_expression::transpile(
                     self.input,
                 ),
             output: functions::expression::Expression::Special(
@@ -184,7 +184,7 @@ pub struct PartialPlaceholderScalarFunctionTaskExpression {
     pub input_schema: super::expression::ScalarFunctionInputSchema,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub skip: Option<functions::expression::Expression>,
-    pub input: super::expression::ScalarFunctionInputExpression,
+    pub input: super::expression::ScalarFunctionInputValueExpression,
 }
 
 impl PartialPlaceholderScalarFunctionTaskExpression {

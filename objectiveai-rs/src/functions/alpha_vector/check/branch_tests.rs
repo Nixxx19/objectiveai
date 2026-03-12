@@ -3,7 +3,7 @@
 #![cfg(test)]
 
 use crate::functions::alpha_vector::expression::{
-    VectorFunctionInputExpression, VectorFunctionInputSchema,
+    VectorFunctionInputValueExpression, VectorFunctionInputSchema,
 };
 use crate::functions::alpha_vector::{
     BranchTaskExpression, PlaceholderScalarFunctionTaskExpression,
@@ -66,7 +66,7 @@ fn description_empty() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -94,7 +94,7 @@ fn description_too_long() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -221,7 +221,7 @@ fn over_50_percent_scalar_tasks() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -251,7 +251,7 @@ fn valid_single_vector_function() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -291,7 +291,7 @@ fn valid_single_placeholder_vector() {
                     }),
                 },
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -319,7 +319,7 @@ fn valid_all_vector_tasks() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -330,7 +330,7 @@ fn valid_all_vector_tasks() {
                 repository: "test2".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -358,7 +358,7 @@ fn valid_mixed_placeholder_vector_tasks() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -382,7 +382,7 @@ fn valid_mixed_placeholder_vector_tasks() {
                         }),
                     },
                     skip: None,
-                    input: VectorFunctionInputExpression {
+                    input: VectorFunctionInputValueExpression {
                         context: None,
                         items: Expression::Starlark(
                             "[x + ' alt' for x in input['items']]".to_string(),
@@ -415,7 +415,7 @@ fn input_diversity_fail_fixed_input() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -426,7 +426,7 @@ fn input_diversity_fail_fixed_input() {
                 repository: "test2".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("['A', 'B']".to_string()),
                 },
@@ -454,7 +454,7 @@ fn input_diversity_pass_all_derived() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -465,7 +465,7 @@ fn input_diversity_pass_all_derived() {
                 repository: "test2".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -506,7 +506,7 @@ fn input_diversity_pass_placeholder_vector_tasks() {
                         }),
                     },
                     skip: None,
-                    input: VectorFunctionInputExpression {
+                    input: VectorFunctionInputValueExpression {
                         context: None,
                         items: Expression::Starlark("input['items']".to_string()),
                     },
@@ -531,7 +531,7 @@ fn input_diversity_pass_placeholder_vector_tasks() {
                         }),
                     },
                     skip: None,
-                    input: VectorFunctionInputExpression {
+                    input: VectorFunctionInputValueExpression {
                         context: None,
                         items: Expression::Starlark(
                             "[x + ' alt' for x in input['items']]".to_string(),
@@ -564,7 +564,7 @@ fn all_tasks_skipped() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: Some(Expression::Starlark("True".to_string())),
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -575,7 +575,7 @@ fn all_tasks_skipped() {
                 repository: "test2".to_string(),
                 commit: "abc123".to_string(),
                 skip: Some(Expression::Starlark("True".to_string())),
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -619,7 +619,7 @@ fn valid_with_skip_on_boolean() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -632,7 +632,7 @@ fn valid_with_skip_on_boolean() {
                 skip: Some(Expression::Starlark(
                     "input['items'][0]['skip_last']".to_string(),
                 )),
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -670,7 +670,7 @@ fn valid_with_skip_on_mode_enum() {
                 repository: "test".to_string(),
                 commit: "abc123".to_string(),
                 skip: None,
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
@@ -683,7 +683,7 @@ fn valid_with_skip_on_mode_enum() {
                 skip: Some(Expression::Starlark(
                     "input['items'][0]['mode'] == 'quick'".to_string(),
                 )),
-                input: VectorFunctionInputExpression {
+                input: VectorFunctionInputValueExpression {
                     context: None,
                     items: Expression::Starlark("input['items']".to_string()),
                 },
