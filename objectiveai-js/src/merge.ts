@@ -42,3 +42,16 @@ export function mergedString(a: string, b: string): [string, boolean] {
 // export function mergedNumber(a: number, b: number): [number, boolean] {
 //   return b === 0 ? [a, false] : [a + b, true];
 // }
+
+export function mergedDecimalArray(
+  a: (string | number)[],
+  b: (string | number)[],
+): [(string | number)[], boolean] {
+  if (a.length === b.length) {
+    for (let i = 0; i < a.length; i++) {
+      if (String(a[i]) !== String(b[i])) return [b, true];
+    }
+    return [a, false];
+  }
+  return [b, true];
+}
