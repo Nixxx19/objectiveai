@@ -150,10 +150,49 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                 })
             })
             .unwrap_or(0);
+        let last_tool_response = _continuation.and_then(|items| {
+            items.iter().rev().find_map(|item| match item {
+                ContinuationItem::ToolMessage(t) => Some(t.content.clone()),
+                _ => None,
+            })
+        });
         let is_byok = byok.is_some();
         let max_tool_calls = self.max_tool_calls;
 
         async move {
+            if invention {
+                eprintln!(
+                    "[mock] cont_len={cont_len} prior_tool_calls={prior_tool_call_count} prompt={:?} last_tool_resp={:?}",
+                    &prompt_text[..prompt_text.len().min(120)],
+                    last_tool_response.as_ref().map(|s| {
+                        let s = serde_json::to_string(s).unwrap_or_default();
+                        if s.len() > 200 { format!("{}…", &s[..200]) } else { s }
+                    }),
+                );
+            }
+
+            // Log the mock response for invention agents.
+            macro_rules! log_mock_response {
+                ($resp:expr) => {
+                    if invention {
+                        match &$resp {
+                            MockResponse::ToolCalls(calls) => {
+                                for tc in calls {
+                                    let args_preview = if tc.arguments.len() > 200 {
+                                        format!("{}…", &tc.arguments[..200])
+                                    } else {
+                                        tc.arguments.clone()
+                                    };
+                                    eprintln!("[mock]   -> tool={} args={}", tc.tool_name, args_preview);
+                                }
+                            }
+                            MockResponse::Content { text, .. } => {
+                                eprintln!("[mock]   -> content={:?}", &text[..text.len().min(100)]);
+                            }
+                        }
+                    }
+                };
+            }
             use objectiveai::agent::completions::request::ResponseFormat;
 
             if error {
@@ -218,6 +257,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                     &mut rng,
                 )
             };
+            log_mock_response!(mock_response);
             let tool_call_count = prior_tool_call_count + match &mock_response {
                 MockResponse::ToolCalls(calls) => calls.len() as u32,
                 _ => 0,
