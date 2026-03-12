@@ -1,5 +1,5 @@
 // Auto-generated schemas (from objectiveai-json-schema/)
-export * from "./generated";
+export * from "./generatedIndex";
 
 // Hand-written modules
 export * from "./client";

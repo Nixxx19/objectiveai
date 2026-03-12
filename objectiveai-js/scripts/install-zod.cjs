@@ -573,39 +573,38 @@ function main() {
     }
   }
 
-  // Generate index.ts files for each directory (deepest first so parents find child indexes).
-  // The root directory gets generated.ts instead of index.ts (index.ts is hand-written).
+  // Generate generatedIndex.ts for each directory (deepest first so parents find child indexes).
+  // If a directory has no hand-written index.ts, generate a simple one that re-exports generatedIndex.
   allDirs.add("");
 
   for (const dir of [...allDirs].sort((a, b) => b.length - a.length)) {
-    const isRoot = dir === "";
-    const absDir = isRoot ? SRC_DIR : path.join(SRC_DIR, dir);
+    const absDir = dir ? path.join(SRC_DIR, dir) : SRC_DIR;
     if (!fs.existsSync(absDir)) continue;
 
     const entries = fs.readdirSync(absDir, { withFileTypes: true });
     const exportLines = [];
 
-    // Export subdirectories (that have index.ts)
+    // Export subdirectories (that have an index.ts or generatedIndex.ts)
     for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
       if (entry.isDirectory()) {
-        const subIndexPath = path.join(absDir, entry.name, "index.ts");
-        if (fs.existsSync(subIndexPath)) {
+        const hasIndex = fs.existsSync(path.join(absDir, entry.name, "index.ts"))
+          || fs.existsSync(path.join(absDir, entry.name, "generatedIndex.ts"));
+        if (hasIndex) {
           exportLines.push(`export * from "./${entry.name}/index";`);
         }
       }
     }
 
-    // Export .ts files (skip index.ts, generated.ts, and test files)
+    // Export auto-generated .ts files (skip index.ts, generatedIndex.ts, and test files)
     for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
       if (
         entry.isFile() &&
         entry.name.endsWith(".ts") &&
         entry.name !== "index.ts" &&
-        entry.name !== "generated.ts" &&
+        entry.name !== "generatedIndex.ts" &&
         !entry.name.endsWith(".test.ts")
       ) {
         const name = entry.name.replace(/\.ts$/, "");
-        // Only export files we generated (check for auto-generated header)
         const fullFilePath = path.join(absDir, entry.name);
         const fileContent = fs.readFileSync(fullFilePath, "utf-8");
         if (fileContent.startsWith("// THIS FILE IS AUTO-GENERATED")) {
@@ -615,10 +614,15 @@ function main() {
     }
 
     if (exportLines.length > 0) {
-      // Root gets generated.ts; subdirectories get index.ts
-      const outName = isRoot ? "generated.ts" : "index.ts";
-      const outPath = path.join(absDir, outName);
-      fs.writeFileSync(outPath, GENERATED_HEADER + exportLines.join("\n") + "\n");
+      // Always write generatedIndex.ts
+      const generatedIndexPath = path.join(absDir, "generatedIndex.ts");
+      fs.writeFileSync(generatedIndexPath, GENERATED_HEADER + exportLines.join("\n") + "\n");
+
+      // If no hand-written index.ts exists, generate a simple one
+      const indexPath = path.join(absDir, "index.ts");
+      if (!fs.existsSync(indexPath)) {
+        fs.writeFileSync(indexPath, GENERATED_HEADER + `export * from "./generatedIndex";\n`);
+      }
     }
   }
 
