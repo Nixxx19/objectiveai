@@ -15,46 +15,45 @@
 //!
 //! # Functions
 //!
-//! - [`validateEnsembleLlm`] - Validate and compute ID for an Ensemble LLM
+//! - [`validateAgent`] - Validate and compute ID for an Agent
 //! - [`validateEnsemble`] - Validate and compute ID for an Ensemble
 //! - [`compileFunctionTasks`] - Compile function tasks for a given input
 //! - [`compileFunctionOutput`] - Compile function output from task results
 //! - [`promptId`] - Compute content-addressed ID for chat messages
-//! - [`toolsId`] - Compute content-addressed ID for tools
 //! - [`vectorResponseId`] - Compute content-addressed ID for a response option
 
 #![allow(non_snake_case)]
 use wasm_bindgen::prelude::*;
 
-/// Validates an Ensemble LLM configuration and computes its content-addressed ID.
+/// Validates an Agent configuration and computes its content-addressed ID.
 ///
-/// Takes an Ensemble LLM definition, normalizes it (removes defaults, deduplicates),
+/// Takes an Agent definition, normalizes it (removes defaults, deduplicates),
 /// validates all fields, and computes a deterministic ID using XXHash3-128.
 ///
 /// # Arguments
 ///
-/// * `llm` - JavaScript object representing an Ensemble LLM configuration
+/// * `agent` - JavaScript object representing an Agent configuration
 ///
 /// # Returns
 ///
-/// The validated Ensemble LLM with its computed `id` field populated.
+/// The validated Agent with its computed `id` field populated.
 ///
 /// # Errors
 ///
 /// Returns an error string if validation fails (e.g., invalid model name,
 /// out-of-range parameters, conflicting settings).
 #[wasm_bindgen]
-pub fn validateEnsembleLlm(llm: JsValue) -> Result<JsValue, JsValue> {
+pub fn validateAgent(agent: JsValue) -> Result<JsValue, JsValue> {
     // deserialize
-    let llm_base: objectiveai::ensemble_llm::EnsembleLlmBase =
-        serde_wasm_bindgen::from_value(llm)?;
+    let agent_base: objectiveai::agent::AgentBase =
+        serde_wasm_bindgen::from_value(agent)?;
     // prepare, validate, and compute ID
-    let llm: objectiveai::ensemble_llm::EnsembleLlm = llm_base
+    let agent: objectiveai::agent::Agent = agent_base
         .try_into()
         .map_err(|e: String| JsValue::from_str(&e))?;
     // serialize
-    let llm: JsValue = serde_wasm_bindgen::to_value(&llm)?;
-    Ok(llm)
+    let agent: JsValue = serde_wasm_bindgen::to_value(&agent)?;
+    Ok(agent)
 }
 
 /// Validates an Ensemble configuration and computes its content-addressed ID.
@@ -423,37 +422,11 @@ pub fn alphaCheckBranchVectorFunction(function: JsValue, children: JsValue) -> R
 #[wasm_bindgen]
 pub fn promptId(prompt: JsValue) -> Result<String, JsValue> {
     // deserialize
-    let mut prompt: Vec<objectiveai::chat::completions::request::Message> =
+    let mut prompt: Vec<objectiveai::agent::completions::message::Message> =
         serde_wasm_bindgen::from_value(prompt)?;
     // prepare and compute ID
-    objectiveai::chat::completions::request::prompt::prepare(&mut prompt);
-    let id = objectiveai::chat::completions::request::prompt::id(&prompt);
-    Ok(id)
-}
-
-/// Computes a content-addressed ID for a tools array.
-///
-/// Computes a deterministic hash for the tools configuration. This ID is
-/// used for caching and deduplicating requests with identical tool sets.
-///
-/// # Arguments
-///
-/// * `tools` - Array of tool definitions
-///
-/// # Returns
-///
-/// A base62-encoded hash string uniquely identifying the tools.
-///
-/// # Errors
-///
-/// Returns an error if the tools cannot be deserialized.
-#[wasm_bindgen]
-pub fn toolsId(tools: JsValue) -> Result<String, JsValue> {
-    // deserialize
-    let tools: Vec<objectiveai::chat::completions::request::Tool> =
-        serde_wasm_bindgen::from_value(tools)?;
-    // compute ID
-    let id = objectiveai::chat::completions::request::tools::id(&tools);
+    objectiveai::agent::completions::message::prompt::prepare(&mut prompt);
+    let id = objectiveai::agent::completions::message::prompt::id(&prompt);
     Ok(id)
 }
 
@@ -477,7 +450,7 @@ pub fn toolsId(tools: JsValue) -> Result<String, JsValue> {
 #[wasm_bindgen]
 pub fn vectorResponseId(response: JsValue) -> Result<String, JsValue> {
     // deserialize
-    let mut response: objectiveai::chat::completions::request::RichContent =
+    let mut response: objectiveai::agent::completions::message::RichContent =
         serde_wasm_bindgen::from_value(response)?;
     // prepare and compute ID
     response.prepare();
