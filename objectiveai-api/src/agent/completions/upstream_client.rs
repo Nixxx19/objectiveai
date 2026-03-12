@@ -62,7 +62,7 @@ pub trait UpstreamClient<AGENT> {
         tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
-            (Self::Stream, Self::State),
+            Self::Stream,
             Self::Error,
         >,
     > + Send
@@ -94,7 +94,7 @@ impl<AGENT> UpstreamClient<AGENT> for UnimplementedUpstreamClient {
         _tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
-            (Self::Stream, Self::State),
+            Self::Stream,
             Self::Error,
         >,
     > + Send

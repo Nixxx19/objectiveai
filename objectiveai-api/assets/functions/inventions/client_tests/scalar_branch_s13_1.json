@@ -363,9 +363,9 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_16966917673333101154",
+              "id": "call_mock_2807246610494634405",
               "function": {
-                "name": "Readagent.completions.message.FileSchema",
+                "name": "Readfunctions.expression.ObjectInputSchemaSchema",
                 "arguments": "{}"
               }
             }
@@ -387,8 +387,8 @@
         {
           "role": "tool",
           "index": 16,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.File\",\n  \"description\": \"A file attachment for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"file_data\": {\n      \"description\": \"Base64-encoded file data.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"file_id\": {\n      \"description\": \"The ID of a previously uploaded file.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"filename\": {\n      \"description\": \"The filename for display purposes.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"file_url\": {\n      \"description\": \"A URL to fetch the file from.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    }\n  }\n}\n",
-          "tool_call_id": "call_mock_16966917673333101154"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.ObjectInputSchema\",\n  \"description\": \"Schema for an object input with named properties.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the object.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"properties\": {\n      \"description\": \"Schema for each property in the object.\",\n      \"type\": \"object\",\n      \"additionalProperties\": {\n        \"$ref\": \"functions.expression.InputSchema\"\n      }\n    },\n    \"required\": {\n      \"description\": \"List of property names that must be present.\",\n      \"type\": [\n        \"array\",\n        \"null\"\n      ],\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\n    \"properties\"\n  ]\n}\n",
+          "tool_call_id": "call_mock_2807246610494634405"
         },
         {
           "role": "assistant",
@@ -397,14 +397,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "C6TbaCJThXAJOE1DEzKjCHsaYulsfIpXntgH0Xs397g2mxKTJnpB12p 8xpXAAmHb3YfEDUN8KglLKKcUHH3ncGBnZg8Sr uDIqglWalnHXSlheED0FSfNZNkB3wWP406pPezLnRymPWoDN2uhb1CI3125TEZeahb8fmgbhs6FrgDbJq118SmS1dZpQsHbaahyL37GulpI8T9ZwijhhpzbhSREHBzzNP obRqtVS1KhM0HsbXaARrS63e8EzlkitIgxv5f2Cz2uM1QNdCn0H9YxaFB6fuAHwFDEeL1dBBret0F zE521T3aZGJItBzyf4KuXKcEClsQ4ewoUqB4mP3sxvKusv8lR Mb1BPhP0QfdtXVVCQQnnLeVk9evXEFifD34CX1CIWnYEnyUKe7kX9XRYQzT2ftG1pVCI1VFIuKjIrL11a4QToSYmGuRoMkAu6CCvxsi1jA43YVBzP57I6tYkiSQSPdfAVZ4SHLUBD",
+          "reasoning": "cpbJdbr0KDh9iBvZLz7QtvDuUt4u zHTu4QPqEjAROTAc2jwjsP8cJJzD4GkjxpZsOgY8GQ12ZOohCY3562NAFGCTtvMqvghY3FajYVtjIxLWC b4 KLmenR162vTMRLMklzBf0GdY0IzEqGC4Vm8Xn7wlxfQdUlbPvjReUW3RiNrFFu0u1Mli7NBMz69QReVyjPea1SFuv4TY8n8glqesPg3cN0JHegVUfBusZQh HC0Lf0sRTAohCxnYsf7eYxCXeoCinNgMHRmZPFiIiKKQsK3vsrMZSmucrsn4eFv42OuOj1HJpwDiqpiZ2DMiM6IKMS25K5W731xtdjh",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8214165863203019113",
+              "id": "call_mock_6300737988520517047",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"FF2MGlsofHOyqPiaIeyr3 l8DG91p8Rb7iTM0fzb6K8CXSef87dIMBTTfAW1hGG5fK1HQmCZv4BZNjCQUdmcJswx2tA h85K23hLHpiM m\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"limit\":{\"type\":\"integer\",\"description\":\"The limit\"}},\"required\":[\"limit\"]},\"input\":{\"$starlark\":\"input\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"RA8sZvncLgvkEmivml6VC15NiEf1klTMC Z83pg6O2Ylj8qY7BjvCXlydKTQ\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"limit\":{\"type\":\"integer\",\"description\":\"The limit\"}},\"required\":[\"limit\"]},\"input\":{\"$starlark\":\"input\"}}"
               }
             }
           ],
@@ -426,7 +426,7 @@
           "role": "tool",
           "index": 18,
           "content": "1",
-          "tool_call_id": "call_mock_8214165863203019113"
+          "tool_call_id": "call_mock_6300737988520517047"
         },
         {
           "role": "assistant",
@@ -435,9 +435,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "paWfAwV2vHUl0l9JtomjVUlOHZ5eqPKQ8p5iw3BM mr80 Unz ",
+          "reasoning": "V5u6zk6H0Rg1Gt55DlP3XxAwOX8a4BdBTf6P6YADmAIJapMnNJjxBtm7QF s9yT7Nee5S THH78aF KHr11snf7USZRcrpF0v4OVudUaBleMDib0436m36jJb37PuZjO0J5eHLuuqxgmVi3lrFJdV2pYgEIGjgR6WOUI5jfgO4RBLnQ NlO0DRqd6 tsdO9fsXpgul56Ye4e7UPJizlri5m0TByjRzwXmg nztmUmO2006QoTuyhTWSSndRXtAC0jIBzezRvMpynGRhKC9FgBZRJAAlr QNb3kBTWSC12pWDMNuQ2CFHhlRTyo3CECxI7HMUnfNsie4XJlyWknkNrAopkTaTFyrIPkWnkAL7M9yPo0dzVZuc",
           "tool_calls": null,
-          "content": "xHItmxBcuPq6wBqppfXJVS1RNlxind9yJowzdcFmD8rNGQXu81uT3VF",
+          "content": "i51FI1xnch9w37r88Ob2aOQ8sprcF JP3LL3YNs3FTLug0hvrWL4ixhiOvoWuBOSMpU9WUHK",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -577,7 +577,7 @@
         "min_leaf_width": 1,
         "max_leaf_width": 1,
         "name": "sb-min-48",
-        "spec": "FF2MGlsofHOyqPiaIeyr3 l8DG91p8Rb7iTM0fzb6K8CXSef87dIMBTTfAW1hGG5fK1HQmCZv4BZNjCQUdmcJswx2tA h85K23hLHpiM m",
+        "spec": "RA8sZvncLgvkEmivml6VC15NiEf1klTMC Z83pg6O2Ylj8qY7BjvCXlydKTQ",
         "input_schema": {
           "properties": {
             "limit": {
@@ -626,7 +626,7 @@
         "min_leaf_width": 1,
         "max_leaf_width": 1,
         "name": "sb-min-48",
-        "spec": "FF2MGlsofHOyqPiaIeyr3 l8DG91p8Rb7iTM0fzb6K8CXSef87dIMBTTfAW1hGG5fK1HQmCZv4BZNjCQUdmcJswx2tA h85K23hLHpiM m",
+        "spec": "RA8sZvncLgvkEmivml6VC15NiEf1klTMC Z83pg6O2Ylj8qY7BjvCXlydKTQ",
         "input_schema": {
           "properties": {
             "limit": {

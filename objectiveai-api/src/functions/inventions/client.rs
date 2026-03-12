@@ -527,7 +527,14 @@ where
                 StepOutput::CompletionIndex(i) => { completion_index = i; }
             }
         }
-        if errored { return; }
+        if errored {
+            yield FunctionInventionChunk {
+                id: id.to_string(), completions: vec![], state: None,
+                path: None, function: None, created, object,
+                usage: Some(accumulated_usage), error: None,
+            };
+            return;
+        }
         }
         yield state_chunk(&state, &id, created, object);
 
@@ -569,7 +576,14 @@ where
                 StepOutput::CompletionIndex(i) => { completion_index = i; }
             }
         }
-        if errored { return; }
+        if errored {
+            yield FunctionInventionChunk {
+                id: id.to_string(), completions: vec![], state: None,
+                path: None, function: None, created, object,
+                usage: Some(accumulated_usage), error: None,
+            };
+            return;
+        }
         }
         yield state_chunk(&state, &id, created, object);
 
@@ -605,7 +619,14 @@ where
                 StepOutput::CompletionIndex(i) => { completion_index = i; }
             }
         }
-        if errored { return; }
+        if errored {
+            yield FunctionInventionChunk {
+                id: id.to_string(), completions: vec![], state: None,
+                path: None, function: None, created, object,
+                usage: Some(accumulated_usage), error: None,
+            };
+            return;
+        }
         }
         yield state_chunk(&state, &id, created, object);
 
@@ -798,7 +819,14 @@ where
                 StepOutput::CompletionIndex(i) => { completion_index = i; }
             }
         }
-        if errored { return; }
+        if errored {
+            yield FunctionInventionChunk {
+                id: id.to_string(), completions: vec![], state: None,
+                path: None, function: None, created, object,
+                usage: Some(accumulated_usage), error: None,
+            };
+            return;
+        }
         }
         yield state_chunk(&state, &id, created, object);
 
@@ -831,7 +859,14 @@ where
                 StepOutput::CompletionIndex(_) => {}
             }
         }
-        if errored { return; }
+        if errored {
+            yield FunctionInventionChunk {
+                id: id.to_string(), completions: vec![], state: None,
+                path: None, function: None, created, object,
+                usage: Some(accumulated_usage), error: None,
+            };
+            return;
+        }
         }
         yield state_chunk(&state, &id, created, object);
 

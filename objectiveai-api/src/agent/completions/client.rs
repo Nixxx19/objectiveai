@@ -573,7 +573,7 @@ where
             cost_multiplier,
             true,
         );
-        let (initial_stream, _state) =
+        let initial_stream =
             tokio::time::timeout(self.first_chunk_timeout, create_fut)
                 .await
                 .map_err(|_| super::Error::Timeout)?
@@ -599,6 +599,8 @@ where
             > = None;
             let mut usage =
                 objectiveai::agent::completions::response::Usage::default();
+            let mut upstream_kind = objectiveai::agent::Upstream::Unknown;
+            let mut final_error: Option<objectiveai::error::ResponseError> = None;
             let mut stream: Pin<Box<dyn futures::Stream<Item = super::StreamItem<U::State>> + Send>> =
                 Box::pin(initial_stream);
             loop {
@@ -618,6 +620,17 @@ where
                                         usage.push_upstream_usage(upstream_usage);
                                     }
                                 }
+                            }
+                            // Track upstream from the first chunk that sets it.
+                            if upstream_kind == objectiveai::agent::Upstream::Unknown
+                                && chunk.upstream != objectiveai::agent::Upstream::Unknown
+                            {
+                                upstream_kind = chunk.upstream;
+                            }
+                            // An error chunk means the upstream failed mid-stream.
+                            // Keep draining but prevent further continuation.
+                            if chunk.error.is_some() {
+                                had_error = true;
                             }
                             match &mut aggregate {
                                 Some(agg) => agg.push(&chunk),
@@ -641,17 +654,8 @@ where
                     }
                 }
 
-                // Yield the last buffered chunk (with usage if this is the final iteration).
-                if let Some(mut last) = pending_chunk.take() {
-                    if !had_error {
-                        if let Some(ref agg) = aggregate {
-                            let callable = extract_callable_tool_calls(agg, &tool_map);
-                            if callable.is_empty() {
-                                // Final iteration — attach aggregated usage.
-                                last.usage = Some(usage.clone());
-                            }
-                        }
-                    }
+                // Yield the last buffered chunk.
+                if let Some(last) = pending_chunk.take() {
                     yield super::StreamItem::Chunk(last);
                 }
 
@@ -664,8 +668,6 @@ where
                 let callable = extract_callable_tool_calls(agg, &tool_map);
 
                 if callable.is_empty() {
-                    let cont = wrap_continuation(continuation_items);
-                    yield super::StreamItem::State(cont);
                     break;
                 }
 
@@ -693,7 +695,7 @@ where
                             {
                                 Ok(tool_msg) => {
                                     let idx = continuation_items.len() as u64;
-                                    let chunk = make_tool_chunk(&id, created, idx, &tool_msg);
+                                    let chunk = make_tool_chunk(&id, created, upstream_kind, idx, &tool_msg);
                                     if let Some(ref mut agg) = aggregate {
                                         agg.push(&chunk);
                                     }
@@ -720,7 +722,7 @@ where
                                 tool_call_id: call_id.clone(),
                             };
                             let idx = continuation_items.len() as u64;
-                            let chunk = make_tool_chunk(&id, created, idx, &tool_msg);
+                            let chunk = make_tool_chunk(&id, created, upstream_kind, idx, &tool_msg);
                             if let Some(ref mut agg) = aggregate {
                                 agg.push(&chunk);
                             }
@@ -766,12 +768,35 @@ where
                     )
                     .await
                 {
-                    Ok((new_stream, _new_state)) => {
+                    Ok(new_stream) => {
                         stream = Box::pin(new_stream);
                     }
-                    Err(_) => break,
+                    Err(e) => {
+                        use objectiveai::error::StatusError;
+                        let e = map_upstream_err(e);
+                        final_error = Some(objectiveai::error::ResponseError {
+                            code: e.status(),
+                            message: e.message()
+                                .unwrap_or(serde_json::Value::Null),
+                        });
+                        break;
+                    }
                 }
             }
+
+            // Single site for usage (and error if a continuation call failed).
+            yield super::StreamItem::Chunk(
+                objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
+                    id: id.clone(),
+                    created,
+                    upstream: upstream_kind,
+                    usage: Some(usage),
+                    error: final_error,
+                    ..Default::default()
+                },
+            );
+            let cont = wrap_continuation(continuation_items);
+            yield super::StreamItem::State(cont);
         }))
     }
 
@@ -982,6 +1007,7 @@ fn extract_callable_tool_calls(
 fn make_tool_chunk(
     id: &str,
     created: u64,
+    upstream: objectiveai::agent::Upstream,
     index: u64,
     tool_msg: &objectiveai::agent::completions::message::ToolMessage,
 ) -> objectiveai::agent::completions::response::streaming::AgentCompletionChunk {
@@ -992,6 +1018,7 @@ fn make_tool_chunk(
     AgentCompletionChunk {
         id: id.to_string(),
         created,
+        upstream,
         messages: vec![MessageChunk::Tool(ToolResponse {
             role: Default::default(),
             index,

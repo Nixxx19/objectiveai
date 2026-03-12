@@ -139,7 +139,7 @@ fn compute_weighted_function_output(
 ///
 /// Returns the output (possibly as `TaskOutputOwned::Err` if invalid) and an optional error.
 fn apply_task_output_expression(
-    input: &objectiveai::functions::expression::Input,
+    input: &objectiveai::functions::expression::InputValue,
     task_output: objectiveai::functions::expression::TaskOutputOwned,
     output_expression: &objectiveai::functions::expression::Expression,
     invert_output: bool,
@@ -875,7 +875,7 @@ where
             }
 
             // split input
-            let split_input: Vec<objectiveai::functions::expression::Input> = input_split.compile_one(
+            let split_input: Vec<objectiveai::functions::expression::InputValue> = input_split.compile_one(
                 &objectiveai::functions::expression::Params::Ref(
                     objectiveai::functions::expression::ParamsRef {
                         input: &request.base().input,
@@ -897,10 +897,10 @@ where
             );
             for chunk in chunks {
                 pool_chunk_sizes.push(chunk.len());
-                let joined_input: objectiveai::functions::expression::Input = input_merge.compile_one(
+                let joined_input: objectiveai::functions::expression::InputValue = input_merge.compile_one(
                     &objectiveai::functions::expression::Params::Owned(
                         objectiveai::functions::expression::ParamsOwned {
-                            input: objectiveai::functions::expression::Input::Array(
+                            input: objectiveai::functions::expression::InputValue::Array(
                                 chunk.to_vec(),
                             ),
                             output: None,
@@ -1182,7 +1182,7 @@ where
                         current_to_original = sorted_indices.clone();
 
                         // rebuild split_input in new sorted order
-                        let sorted_split_input: Vec<objectiveai::functions::expression::Input> =
+                        let sorted_split_input: Vec<objectiveai::functions::expression::InputValue> =
                             sorted_indices.iter()
                                 .map(|&orig_idx| split_input[orig_idx].clone())
                                 .collect();
@@ -1201,10 +1201,10 @@ where
                         let mut ftp_futs = Vec::with_capacity(chunks.len());
                         for chunk in chunks {
                             pool_chunk_sizes.push(chunk.len());
-                            let joined_input: objectiveai::functions::expression::Input = match input_merge.compile_one(
+                            let joined_input: objectiveai::functions::expression::InputValue = match input_merge.compile_one(
                                 &objectiveai::functions::expression::Params::Owned(
                                     objectiveai::functions::expression::ParamsOwned {
-                                        input: objectiveai::functions::expression::Input::Array(
+                                        input: objectiveai::functions::expression::InputValue::Array(
                                             chunk.to_vec(),
                                         ),
                                         output: None,
@@ -1669,7 +1669,7 @@ where
         &self,
         ctx: ctx::Context<CTXEXT>,
         request: Arc<objectiveai::functions::executions::request::Request>,
-        input: Option<objectiveai::functions::expression::Input>,
+        input: Option<objectiveai::functions::expression::InputValue>,
     ) -> Result<functions::FunctionFlatTaskProfile, super::Error> {
         match &*request {
             objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
@@ -2987,8 +2987,8 @@ mod invert_output_tests {
     };
     use rust_decimal::dec;
 
-    fn empty_input() -> objectiveai::functions::expression::Input {
-        objectiveai::functions::expression::Input::Object(
+    fn empty_input() -> objectiveai::functions::expression::InputValue {
+        objectiveai::functions::expression::InputValue::Object(
             indexmap::IndexMap::new(),
         )
     }

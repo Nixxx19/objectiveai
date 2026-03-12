@@ -103,7 +103,7 @@ impl InventionStep {
                 } else {
                     Self::TasksVectorLeaf
                 }
-            } else if has("Readfunctions.expression.InputSchema") {
+            } else if has("Readfunctions.expression.InputValueSchema") {
                 // Branch
                 if tool_names.iter().any(|t| t.contains("alpha_scalar.Placeholder")) {
                     Self::TasksScalarBranch
@@ -111,8 +111,7 @@ impl InventionStep {
                     Self::TasksVectorBranch
                 }
             } else {
-                // Fallback — shouldn't happen
-                Self::TasksScalarLeaf
+                panic!("AppendTask present but neither leaf nor branch schema tools found. Tool names: {:?}", tool_names);
             });
         }
 

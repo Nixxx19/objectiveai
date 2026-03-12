@@ -194,7 +194,7 @@ pub struct FunctionFlatTaskProfile {
     /// Description from the Function definition.
     pub description: Option<String>,
     /// The compiled input for this Function.
-    pub input: objectiveai::functions::expression::Input,
+    pub input: objectiveai::functions::expression::InputValue,
     /// The flattened child tasks (None if task was skipped).
     pub tasks: Vec<Option<FlatTaskProfile>>,
     /// The weights for each task from the Profile (for weighted averaging).
@@ -328,7 +328,7 @@ impl VectorCompletionFlatTaskProfile {
 #[derive(Debug, Clone)]
 pub struct PlaceholderScalarFunctionFlatTaskProfile {
     pub path: Vec<u64>,
-    pub input: objectiveai::functions::expression::Input,
+    pub input: objectiveai::functions::expression::InputValue,
     pub output: objectiveai::functions::expression::Expression,
     pub invert_output: bool,
 }
@@ -366,7 +366,7 @@ impl MapPlaceholderScalarFunctionFlatTaskProfile {
 #[derive(Debug, Clone)]
 pub struct PlaceholderVectorFunctionFlatTaskProfile {
     pub path: Vec<u64>,
-    pub input: objectiveai::functions::expression::Input,
+    pub input: objectiveai::functions::expression::InputValue,
     pub output_length: u64,
     pub input_split: objectiveai::functions::expression::Expression,
     pub input_merge: objectiveai::functions::expression::Expression,
@@ -445,7 +445,7 @@ pub async fn get_flat_task_profile<CTXEXT>(
     mut path: Vec<u64>,
     function: FunctionParam,
     profile: ProfileParam,
-    input: objectiveai::functions::expression::Input,
+    input: objectiveai::functions::expression::InputValue,
     task_output: Option<objectiveai::functions::expression::Expression>,
     invert_output: bool,
     function_fetcher: Arc<

@@ -204,7 +204,13 @@ fn params(name: &str, depth: u64, min_b: u64, max_b: u64, min_l: u64, max_l: u64
 
 fn assert_chunk_invariants(chunks: &[FunctionInventionChunk]) {
     assert!(!chunks.is_empty(), "stream must not be empty");
+    let expected_created = chunks[0].created;
     for (i, chunk) in chunks.iter().enumerate() {
+        assert_eq!(
+            chunk.created, expected_created,
+            "chunk {i} has created {}, expected {expected_created}",
+            chunk.created,
+        );
         assert!(
             chunk.completions.len() <= 1,
             "chunk {i} has {} completions, expected at most 1",

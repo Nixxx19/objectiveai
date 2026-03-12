@@ -244,7 +244,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
         _tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
-            (Self::Stream, Self::State),
+            Self::Stream,
             Self::Error,
         >,
     > + Send
@@ -315,13 +315,6 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                 cost_multiplier,
             );
 
-            let initial_state = Self::State {
-                content: None,
-                name: None,
-                refusal: None,
-                tool_calls: None,
-                reasoning: None,
-            };
 
             // Await the first stream item. If it is an error,
             // return Err so the caller never sees an error as the
@@ -354,7 +347,7 @@ impl UpstreamClient<objectiveai::agent::openrouter::Agent> for Client {
                     });
                     let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
                         Box::pin(StreamOnce::new(first).chain(rest));
-                    Ok((boxed, initial_state))
+                    Ok(boxed)
                 }
                 None => {
                     return Err(super::Error::EmptyStream);

@@ -71,7 +71,7 @@ async fn run_mock(
     let messages = vec![];
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
 
-    let (stream, _state) = match client
+    let stream = match client
         .create(
             "mock-test-id",
             1000,
@@ -584,7 +584,7 @@ async fn collect_assistant_chunks(
     let messages = vec![];
     let mcp_connections: Vec<Arc<crate::mcp::Connection>> = vec![];
 
-    let (stream, _state) = client
+    let stream = client
         .create(
             "mock-test-id",
             1000,
@@ -1066,7 +1066,7 @@ async fn test_tools_not_allowed_no_tool_calls_generated() {
     });
     let tool_names = vec!["my_tool".into()];
 
-    let (stream, _state) = client
+    let stream = client
         .create(
             "test", 1000, &agent, &params, &[], &[], None, &tool_names,
             &tool_map, None, None, rust_decimal::Decimal::ONE, false,

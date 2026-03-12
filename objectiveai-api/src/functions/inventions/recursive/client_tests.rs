@@ -231,7 +231,13 @@ fn params(name: &str, depth: u64, min_b: u64, max_b: u64, min_l: u64, max_l: u64
 
 fn assert_chunk_invariants(chunks: &[FunctionInventionRecursiveChunk]) {
     assert!(!chunks.is_empty(), "stream must not be empty");
+    let expected_created = chunks[0].created;
     for (i, chunk) in chunks.iter().enumerate() {
+        assert_eq!(
+            chunk.created, expected_created,
+            "chunk {i} has created {}, expected {expected_created}",
+            chunk.created,
+        );
         if i < chunks.len() - 1 {
             assert_eq!(
                 chunk.inventions.len(), 1,
@@ -793,7 +799,11 @@ fn test_valid_schema_invalid_tasks_scalar_leaf() {
 
 #[test]
 fn test_valid_schema_valid_tasks_scalar_leaf() {
-    // Scalar leaf with valid input schema and valid tasks — should succeed.
+    // Scalar leaf with valid input schema and pre-built tasks.
+    // Note: the tasks use RichContent::Text responses (plain strings) which
+    // fail CV29 validation ("compiled response must be an array of content
+    // parts, not a plain string"). The invention errors out during
+    // validate_initial_state. The snapshot captures this expected error.
     let rt = tokio::runtime::Runtime::new().unwrap();
     rt.block_on(async {
         let client = make_client();

@@ -102,7 +102,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
         _tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
-            (Self::Stream, Self::State),
+            Self::Stream,
             Self::Error,
         >,
     > + Send
@@ -175,10 +175,6 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
             let tmp_id = client.next_id.fetch_add(1, Ordering::Relaxed);
             let agent_id = agent.id.clone();
 
-            let initial_state = super::State {
-                session_id: prompt.message.session_id.clone(),
-                message_count: 0,
-            };
 
             // Write JS to temp file.
             let tmp_dir = std::env::temp_dir();
@@ -358,7 +354,7 @@ impl UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> for Client {
                     });
                     let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
                         Box::pin(StreamOnce::new(first).chain(rest));
-                    Ok((boxed, initial_state))
+                    Ok(boxed)
                 }
                 None => {
                     return Err(super::Error::NoOutput);

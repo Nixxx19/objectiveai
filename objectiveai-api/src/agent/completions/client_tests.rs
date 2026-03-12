@@ -165,7 +165,19 @@ fn assert_chunk_invariants<S>(items: &[StreamItem<S>]) {
         })
         .collect();
     assert!(!chunks.is_empty(), "stream must have at least one chunk");
+    let expected_created = chunks[0].created;
+    let expected_upstream = chunks[0].upstream;
     for (i, chunk) in chunks.iter().enumerate() {
+        assert_eq!(
+            chunk.created, expected_created,
+            "chunk {i} has created {}, expected {expected_created}",
+            chunk.created,
+        );
+        assert_eq!(
+            chunk.upstream, expected_upstream,
+            "chunk {i} has upstream {:?}, expected {:?}",
+            chunk.upstream, expected_upstream,
+        );
         assert!(
             chunk.messages.len() <= 1,
             "chunk {i} has {} messages, expected at most 1",
@@ -1661,7 +1673,7 @@ async fn test_logprobs_with_continuation() {
     let continuation = crate::agent::completions::Continuation::Mock {
         items: vec![
             crate::agent::completions::ContinuationItem::State(
-                crate::agent::completions::mock::State { tool_call_count: 3 },
+                crate::agent::completions::mock::State { tool_calls: vec![("a".into(), "1".into()), ("b".into(), "2".into()), ("c".into(), "3".into())] },
             ),
         ],
         agent: mock_agent,

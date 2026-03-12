@@ -14,6 +14,12 @@ pub enum Error {
 
     #[error("mock tool call limit exceeded ({0})")]
     MaxToolCallsExceeded(u32),
+
+    #[error("mock invention AppendTask returned unexpected result: {0}")]
+    AppendTaskFailed(String),
+
+    #[error("mock invention WriteInputSchema returned unexpected result: {0}")]
+    WriteInputSchemaFailed(String),
 }
 
 impl objectiveai::error::StatusError for Error {
@@ -24,6 +30,8 @@ impl objectiveai::error::StatusError for Error {
             Self::ToolsNotAllowedWithRequiredToolCall => 400,
             Self::InventionAgentWithoutInventionTools => 400,
             Self::MaxToolCallsExceeded(_) => 429,
+            Self::AppendTaskFailed(_) => 500,
+            Self::WriteInputSchemaFailed(_) => 500,
         }
     }
 

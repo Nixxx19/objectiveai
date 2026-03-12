@@ -76,7 +76,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
         _tools_enabled: bool,
     ) -> impl Future<
         Output = Result<
-            (Self::Stream, Self::State),
+            Self::Stream,
             Self::Error,
         >,
     > + Send
@@ -142,14 +142,27 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
             }
             hasher.finish()
         });
-        let prior_tool_call_count = _continuation
-            .and_then(|items| {
-                items.iter().rev().find_map(|item| match item {
-                    ContinuationItem::State(s) => Some(s.tool_call_count),
+        let prior_tool_call_count: u32 = _continuation
+            .map(|items| {
+                items.iter().filter_map(|item| match item {
+                    ContinuationItem::State(s) => Some(s.tool_call_count() as u32),
                     _ => None,
-                })
+                }).sum()
             })
             .unwrap_or(0);
+        // Validate that AppendTask / WriteInputSchema results from the
+        // previous turn did not fail. Find the last State in the
+        // continuation and check all ToolMessages that follow it.
+        let continuation_validation = _continuation.and_then(|items| {
+            let last_state_idx = items.iter().rposition(|item| {
+                matches!(item, ContinuationItem::State(_))
+            })?;
+            let state = match &items[last_state_idx] {
+                ContinuationItem::State(s) => s,
+                _ => unreachable!(),
+            };
+            Some(state.validate_continuation(items[last_state_idx + 1..].iter()))
+        });
         let is_byok = byok.is_some();
         let max_tool_calls = self.max_tool_calls;
 
@@ -162,6 +175,10 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
 
             if invention && !has_invention_tools {
                 return Err(super::Error::InventionAgentWithoutInventionTools);
+            }
+
+            if let Some(result) = continuation_validation {
+                result?;
             }
 
             // Reject Grammar and Python response formats.
@@ -218,16 +235,19 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
                     &mut rng,
                 )
             };
-            let tool_call_count = prior_tool_call_count + match &mock_response {
-                MockResponse::ToolCalls(calls) => calls.len() as u32,
-                _ => 0,
+            let current_tool_calls: Vec<(String, String)> = match &mock_response {
+                MockResponse::ToolCalls(calls) => calls.iter()
+                    .map(|c| (c.tool_name.clone(), c.call_id.clone()))
+                    .collect(),
+                _ => Vec::new(),
             };
+            let total_tool_call_count = prior_tool_call_count + current_tool_calls.len() as u32;
 
-            if tool_call_count > max_tool_calls {
+            if total_tool_call_count > max_tool_calls {
                 return Err(super::Error::MaxToolCallsExceeded(max_tool_calls));
             }
 
-            let state = State { tool_call_count };
+            let state = State { tool_calls: current_tool_calls };
 
             let stream = async_stream::stream! {
                 use objectiveai::agent::completions::message::{
@@ -372,7 +392,7 @@ impl UpstreamClient<objectiveai::agent::mock::Agent> for Client {
 
             let boxed: Pin<Box<dyn Stream<Item = StreamItem<Self::State>> + Send>> =
                 Box::pin(stream);
-            Ok((boxed, State { tool_call_count }))
+            Ok(boxed)
         }
     }
 }
