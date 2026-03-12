@@ -25,7 +25,8 @@ impl MessageChunk {
             ) => {
                 self_chunk.push(other_chunk);
             }
-            _ => panic!("cannot push to or from tool chunks"),
+            // _ => panic!("cannot push to or from tool chunks"),
+            _ => {}
         }
     }
 }
