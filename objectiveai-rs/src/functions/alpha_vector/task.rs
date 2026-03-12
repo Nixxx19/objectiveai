@@ -2,7 +2,7 @@ use crate::functions;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_vector.BranchTaskExpression")]
 pub enum BranchTaskExpression {
@@ -57,7 +57,7 @@ impl BranchTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_vector.PartialPlaceholderBranchTaskExpression")]
 pub enum PartialPlaceholderBranchTaskExpression {
@@ -106,7 +106,7 @@ impl PartialPlaceholderBranchTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_vector.LeafTaskExpression")]
 pub enum LeafTaskExpression {
@@ -124,7 +124,7 @@ impl LeafTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.ScalarFunctionTaskExpression")]
 pub struct ScalarFunctionTaskExpression {
     pub remote: functions::Remote,
@@ -160,7 +160,7 @@ impl ScalarFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.VectorFunctionTaskExpression")]
 pub struct VectorFunctionTaskExpression {
     pub remote: functions::Remote,
@@ -193,7 +193,7 @@ impl VectorFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.PlaceholderScalarFunctionTaskExpression")]
 pub struct PlaceholderScalarFunctionTaskExpression {
     #[serde(flatten)]
@@ -242,7 +242,7 @@ impl PlaceholderScalarFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression")]
 pub struct PartialPlaceholderScalarFunctionTaskExpression {
     pub spec: String,
@@ -279,7 +279,7 @@ impl PartialPlaceholderScalarFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression")]
 pub struct PlaceholderVectorFunctionTaskExpression {
     #[serde(flatten)]
@@ -329,7 +329,7 @@ impl PlaceholderVectorFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression")]
 pub struct PartialPlaceholderVectorFunctionTaskExpression {
     pub spec: String,
@@ -366,7 +366,7 @@ impl PartialPlaceholderVectorFunctionTaskExpression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.VectorCompletionTaskExpression")]
 pub struct VectorCompletionTaskExpression {
     #[serde(skip_serializing_if = "Option::is_none")]

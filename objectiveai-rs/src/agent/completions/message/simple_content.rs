@@ -83,7 +83,7 @@ impl FromStarlarkValue for SimpleContent {
 }
 
 /// Expression variant of [`SimpleContent`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.SimpleContentExpression")]
 pub enum SimpleContentExpression {
@@ -172,7 +172,7 @@ impl FromStarlarkValue for SimpleContentPart {
 }
 
 /// Expression variant of [`SimpleContentPart`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.SimpleContentPartExpression")]
 pub enum SimpleContentPartExpression {

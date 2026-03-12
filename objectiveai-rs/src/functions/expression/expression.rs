@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize, de::DeserializeOwned};
 
 /// Result of an expression that may produce one or many values.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.expression.OneOrMany.{T}")]
 pub enum OneOrMany<T> {
@@ -30,7 +30,7 @@ pub enum OneOrMany<T> {
 /// ```json
 /// {"$starlark": "input['items'][0]['name']"}
 /// ```
-#[derive(Debug, Clone, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, JsonSchema)]
 #[schemars(rename = "functions.expression.Expression")]
 pub enum Expression {
     /// A JMESPath expression.
@@ -230,7 +230,7 @@ impl Expression {
 /// ```json
 /// {"$starlark": "input['greeting']"}
 /// ```
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.expression.WithExpression.{T}")]
 pub enum WithExpression<T> {

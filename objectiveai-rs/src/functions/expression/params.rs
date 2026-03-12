@@ -13,7 +13,7 @@ use starlark::values::{
 /// Context for evaluating expressions (JMESPath or Starlark).
 ///
 /// Contains all data accessible within expressions: `input`, `output`, and `map`.
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.expression.Params")]
 pub enum Params<'i, 'to> {
@@ -34,7 +34,7 @@ impl<'de> serde::Deserialize<'de> for Params<'static, 'static> {
 }
 
 /// Owned version of expression parameters.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.expression.ParamsOwned")]
 pub struct ParamsOwned {
     /// The function's input data.
@@ -46,7 +46,7 @@ pub struct ParamsOwned {
 }
 
 /// Borrowed version of expression parameters.
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 #[schemars(rename = "functions.expression.ParamsRef")]
 pub struct ParamsRef<'i, 'to> {
     /// The function's input data.
@@ -58,7 +58,7 @@ pub struct ParamsRef<'i, 'to> {
 }
 
 /// Output from an executed task.
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.expression.TaskOutput")]
 pub enum TaskOutput<'a> {
@@ -91,7 +91,7 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 }
 
 /// Owned task output variants.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.expression.TaskOutputOwned")]
 pub enum TaskOutputOwned {
@@ -285,7 +285,7 @@ impl TaskOutputOwned {
 }
 
 /// Borrowed task output variants.
-#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.expression.TaskOutputRef")]
 pub enum TaskOutputRef<'a> {

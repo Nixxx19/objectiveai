@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
 
 /// The base configuration for an OpenRouter Agent (without computed ID).
-#[derive(Clone, Debug, Default, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.openrouter.AgentBase")]
 pub struct AgentBase {
     /// The upstream provider marker.
@@ -352,7 +352,7 @@ impl AgentBase {
 }
 
 /// A validated OpenRouter Agent with its computed content-addressed ID.
-#[derive(Clone, Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.openrouter.Agent")]
 pub struct Agent {
     /// The deterministic content-addressed ID (22-character base62 string).

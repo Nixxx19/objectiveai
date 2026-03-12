@@ -2,7 +2,7 @@ use crate::{error, vector};
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
 #[schemars(rename = "functions.executions.response.streaming.VectorCompletionTaskChunk")]
 pub struct VectorCompletionTaskChunk {
     pub index: u64,

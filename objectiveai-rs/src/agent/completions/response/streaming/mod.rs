@@ -13,3 +13,6 @@ pub use agent_completion_chunk::*;
 pub use assistant_response_chunk::*;
 pub use message_chunk::*;
 pub use object::*;
+
+#[cfg(test)]
+mod agent_completion_chunk_tests;

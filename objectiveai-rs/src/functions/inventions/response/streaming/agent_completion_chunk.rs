@@ -2,7 +2,7 @@ use crate::agent;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
 #[schemars(rename = "functions.inventions.response.streaming.AgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     pub index: u64,

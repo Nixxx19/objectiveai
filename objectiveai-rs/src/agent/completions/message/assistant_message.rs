@@ -113,7 +113,7 @@ impl FromStarlarkValue for AssistantMessage {
 }
 
 /// Expression variant of [`AssistantMessage`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.completions.message.AssistantMessageExpression")]
 pub struct AssistantMessageExpression {
     /// The content expression.
@@ -369,7 +369,7 @@ impl FromStarlarkValue for AssistantToolCall {
 }
 
 /// Expression variant of [`AssistantToolCall`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.AssistantToolCallExpression")]
 pub enum AssistantToolCallExpression {
@@ -575,7 +575,7 @@ impl AssistantToolCallFunctionDelta {
 }
 
 /// Expression variant of [`AssistantToolCallFunction`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.completions.message.AssistantToolCallFunctionExpression")]
 pub struct AssistantToolCallFunctionExpression {
     /// The function name expression.

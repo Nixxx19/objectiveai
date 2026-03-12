@@ -14,7 +14,7 @@ pub mod scalar_function_input_schema {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInputSchema")]
 pub struct VectorFunctionInputSchema {
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -84,7 +84,7 @@ pub mod scalar_function_input_expression {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInputExpression")]
 pub struct VectorFunctionInputExpression {
     #[serde(skip_serializing_if = "Option::is_none")]

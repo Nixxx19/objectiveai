@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 ///
 /// Profiles contain the weights and nested configurations needed to execute
 /// a Function. They correspond to a Function's task structure.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.Profile")]
 pub enum Profile {
@@ -23,7 +23,7 @@ pub enum Profile {
 }
 
 /// A remote profile, either tasks-based or auto.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.RemoteProfile")]
 pub enum RemoteProfile {
@@ -34,7 +34,7 @@ pub enum RemoteProfile {
 }
 
 /// An inline profile, either tasks-based or auto.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.InlineProfile")]
 pub enum InlineProfile {
@@ -48,7 +48,7 @@ pub enum InlineProfile {
 ///
 /// Stored as `profile.json` in repositories and referenced by
 /// `remote/owner/repository`.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.RemoteTasksProfile")]
 pub struct RemoteTasksProfile {
     /// Human-readable description of the profile.
@@ -67,7 +67,7 @@ pub struct RemoteTasksProfile {
 ///
 /// Applies a single ensemble and weights to every vector completion task
 /// in the function, with equal task weights.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.RemoteAutoProfile")]
 pub struct RemoteAutoProfile {
     /// Human-readable description of the profile.
@@ -79,7 +79,7 @@ pub struct RemoteAutoProfile {
 }
 
 /// An inline tasks-based profile definition without metadata.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.InlineTasksProfile")]
 pub struct InlineTasksProfile {
     /// Configuration for each task in the corresponding Function.
@@ -96,7 +96,7 @@ pub struct InlineTasksProfile {
 ///
 /// Applies a single ensemble and weights to every vector completion task
 /// in the function, with equal task weights.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.InlineAutoProfile")]
 pub struct InlineAutoProfile {
     /// The ensemble to use for all vector completion tasks.
@@ -108,7 +108,7 @@ pub struct InlineAutoProfile {
 /// Configuration for a single task within a Profile.
 ///
 /// Each variant corresponds to a task type in the Function definition.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.TaskProfile")]
 pub enum TaskProfile {

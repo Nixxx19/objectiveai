@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 /// An entry in a profile with an explicit weight and optional invert flag.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "vector.completions.request.ProfileEntry")]
 pub struct ProfileEntry {
     /// The weight for this agent in the ensemble. Must be in [0, 1].
@@ -34,7 +34,7 @@ pub struct ProfileEntry {
 ///
 /// - `Weights(Vec<Decimal>)` - legacy representation (no inversion)
 /// - `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "vector.completions.request.Profile")]
 pub enum Profile {

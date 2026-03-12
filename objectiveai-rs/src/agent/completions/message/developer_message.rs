@@ -83,7 +83,7 @@ impl FromStarlarkValue for DeveloperMessage {
 }
 
 /// Expression variant of [`DeveloperMessage`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.completions.message.DeveloperMessageExpression")]
 pub struct DeveloperMessageExpression {
     /// The message content expression.

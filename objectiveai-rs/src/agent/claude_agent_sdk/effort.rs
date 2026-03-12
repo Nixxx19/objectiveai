@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 /// The effort level for model output.
 ///
 /// This setting hints to the model how detailed its responses should be.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.claude_agent_sdk.Effort")]
 pub enum Effort {
     /// Minimal output, concise responses.

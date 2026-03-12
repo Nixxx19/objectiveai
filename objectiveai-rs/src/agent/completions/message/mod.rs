@@ -194,7 +194,7 @@ impl FromStarlarkValue for Message {
 /// This is the expression variant of [`Message`] used in function definitions
 /// where message content can be computed from the function input at runtime.
 /// Supports both JMESPath and Starlark expressions.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "role")]
 #[schemars(rename = "agent.completions.message.MessageExpression")]
 pub enum MessageExpression {

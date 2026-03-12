@@ -2,7 +2,7 @@ use crate::{agent, error, functions};
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.executions.response.streaming.FunctionExecutionChunk")]
 pub struct FunctionExecutionChunk {
     pub id: String,

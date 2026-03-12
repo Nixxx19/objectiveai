@@ -77,7 +77,7 @@ impl FromStarlarkValue for ToolMessage {
 }
 
 /// Expression variant of [`ToolMessage`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "agent.completions.message.ToolMessageExpression")]
 pub struct ToolMessageExpression {
     /// The content expression.

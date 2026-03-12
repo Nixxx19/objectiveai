@@ -136,7 +136,7 @@ impl FromStarlarkValue for RichContent {
 }
 
 /// Expression variant of [`RichContent`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.RichContentExpression")]
 pub enum RichContentExpression {
@@ -384,7 +384,7 @@ impl FromStarlarkValue for RichContentPart {
 }
 
 /// Expression variant of [`RichContentPart`] for dynamic content.
-#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.RichContentPartExpression")]
 pub enum RichContentPartExpression {

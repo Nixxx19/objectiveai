@@ -11,3 +11,6 @@ mod vector_completion_chunk;
 pub use agent_completion_chunk::*;
 pub use object::*;
 pub use vector_completion_chunk::*;
+
+#[cfg(test)]
+mod vector_completion_chunk_tests;
