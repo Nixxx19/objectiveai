@@ -206,13 +206,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "Z6Ozczvcig65QSYKBD2Ty7LCojibdZ9BXNLb8g3dTMFekVuWJe9kUWJNvzhBHBTxTiuVW6NvfVZxbK81DVCx8G3ZMCBN7afzXudTOiTr2fywSDLn6vEHbI39ZWi1ckd0BOmllr1JuinPydF9ilmD8iqtuLMo5DX3aoK3HrStDi2kmr EehgBMSqPwoATYc7Vgan5D4gPUKFmkQfju6kQtb7XG41xuB7eoHavT7E9FeFAhX26jyqxPEAFw9nTArT6S96cl4hZ 88FBo7Zjbl2jA1ErX lvqSZ5FMJbhl8n14KRBl7zyFkEh1nsvvk37xpPAzs4N1DdRC4Z5SNXuqyJ 4t7zqy7vE2ouvaVWAdsH r",
+          "reasoning": "aPMA3MXPHRTjkphyEnm0g7MJfNFMniWR9s2ofr0AVVltbCmmTVGR3da w9uo7BXBxbnPcaAmTd212rUFxAyHtoAJL",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_5607591588250265921",
+              "id": "call_mock_7034472395328829706",
               "function": {
-                "name": "ReadAssistantMessageToolCallSchema",
+                "name": "Readvector.completions.VectorResponsesSchema",
                 "arguments": "{}"
               }
             }
@@ -234,8 +234,8 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\n  \"anyOf\": [\n    {\n      \"type\": \"object\",\n      \"properties\": {\n        \"type\": {\n          \"const\": \"function\"\n        },\n        \"id\": {\n          \"type\": \"string\",\n          \"description\": \"The unique identifier for the tool call.\"\n        },\n        \"function\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"name\": {\n              \"type\": \"string\",\n              \"description\": \"The name of the function called.\"\n            },\n            \"arguments\": {\n              \"type\": \"string\",\n              \"description\": \"The arguments passed to the function.\"\n            }\n          },\n          \"required\": [\n            \"name\",\n            \"arguments\"\n          ],\n          \"description\": \"The name and arguments of the function called.\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"id\",\n        \"function\"\n      ],\n      \"description\": \"A function tool call made by the assistant.\"\n    }\n  ],\n  \"description\": \"A tool call made by the assistant.\"\n}\n",
-          "tool_call_id": "call_mock_5607591588250265921"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"vector.completions.VectorResponses\",\n  \"description\": \"The list of response options in a vector completion request.\\n\\nEach element is a [`RichContent`] value that an LLM can vote for.\\nResponses can be plain text strings or multi-part content containing\\ntext, images, audio, video, or files.\\n\\n# Minimum Length\\n\\nA vector completion requires at least 2 responses to vote between.\\n\\n# Examples\\n\\nPlain text responses:\\n```json\\n[\\\"Yes\\\", \\\"No\\\", \\\"Maybe\\\"]\\n```\\n\\nMultimodal responses:\\n```json\\n[\\n  [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Option A\\\"}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/a.png\\\"}}],\\n  [{\\\"type\\\": \\\"text\\\", \\\"text\\\": \\\"Option B\\\"}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/b.png\\\"}}]\\n]\\n```\",\n  \"type\": \"array\",\n  \"items\": {\n    \"$ref\": \"agent.completions.message.RichContent\"\n  }\n}\n",
+          "tool_call_id": "call_mock_7034472395328829706"
         },
         {
           "role": "assistant",
@@ -244,11 +244,11 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "zMvJI6gONrycdF45F9hWnK4oQYNNHFuUft ARAY1VGxMqXEav8oae4Pzk4A9mosPXWYipy3SEUXvNjhGKff8XoqUBCfUmYX6HeAzdWHwccZvmeoSi1xOPcIJWC0zVFB4KTNEfUVIOQhnzD8uhw2J1y3a9oJ8EKEK6RXawuasUCxBnFuvmuqHRGaKL cJa1RS7JseLnQE6CkhE sgQlpoxsnzGNCq9Vo1ns8xDmTQZljQuX07e24yADgu4Z3gWH07x9pSyHWb6sd4pZOREJggXWr2lQ6W5v0F6AVtFOL56A7obYpxKinVAL6 7oAEmQIXN7Fmoye7gy4UcreSXTgp4178TWORFrqGjhlNOHxajTnyl6cw29ySAyRmKyQyYfcLu5QlW59uJU1yDSO",
+          "reasoning": "nFGnUZKgKCGhhlRn2657ivITDcujE GJMD9TVHuMhQGfcvEA1Kl2c5sW8CvnA6uAe1b5HhjtgOCPJa IB1bZtH1V6uzFO1iUK1xDfWC9VtXzJI9Z2gFBwv2BOIxhEggIWdRy2Cq6pSd53abYQS7LK6Ol PxE4wHncM iGzpEnQV NjlTvCa8UwsgRmK3xe3mQ3qJM h2 ZAN9zz9yMjV70p1gVchIH5",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_1571383176248360876",
+              "id": "call_mock_15952190352147134316",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}] for item in input['items']]\"}}"
@@ -273,7 +273,7 @@
           "role": "tool",
           "index": 11,
           "content": "1",
-          "tool_call_id": "call_mock_1571383176248360876"
+          "tool_call_id": "call_mock_15952190352147134316"
         },
         {
           "role": "assistant",
@@ -282,9 +282,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "BXahMEhPT2VuKUDD7c7jq4XTimAJYcK3V9BPnH1iF8lu2WB1chI0ytcEic",
+          "reasoning": "mROVIZia4y3eLMfcRqkm182kyWy2yt8zrgxTK8xukG64bTqAnNX8syRxQIJSRyyWx18pInbRVg8dFc18ERcR2v0t1 sChBTq0GFWHRrWAcbDdILZ5iCK9iQbftoYsqRFPSjt3QEKccmBKU6oa4h5olq5BaRn 8V4263wCdSw3Z0VMwKDSovRmxg5hdVveklQ7H7BIQ KhhqG7f RlrZ0 la3GrF0yOeS7wUx9nOfPg3Rgc59WmuVmYm8bhG6te1nSsLzGuIhHesz8X3CEIS2 UvicTiHqglRIpooxBaRMfYDF0QaxqTn FK aTlM13Y En2DpUFLU03lQ7qn dRzaXoVFQqKj6QtmQgxdgvru7xJBR2yxSxZ1E5e 5giKkLCgqDEVn KlNlafR0O5JAQ9XUBV7HgqOiUwcUcqXZFh16VZedNRLaU8y9n4kd7Z5f KU3WQebLcwKkVotoVMDAtIJCHMkeMvfkirjvEoThoKu2SeXebyI6z DpZ qTxYh0OQrAPBRHHqRMTEHGzA33ELJOlulYANB42SzQwa3LWij8we8hv7viKRT0G6tuxEKzNbG8BVUJ7b1PDTPTJtRUcds27KCncRNi63F5JizDUcQCH26u7fBRXLLwGUwwJHDcZr5r3ToqunRylHPB EBqBBZwV D110YJhJKileWYHDaGV5cfzJyelBH0BK6WBdW6ex TVXS0U3JH9AifF60C1ggzvMXpKh2HiYnqlsTPoMUtEbx7v2JqRHaN8mUUvfZln0HH7QN3 TTTGVvepz8iZLGQdyFYqOj7h51p4cfyZpchhzKUPNSJMw3YjkowBNNczqzgNOcYO6",
           "tool_calls": null,
-          "content": "wHyyQwFbPtBK5D1uG8BhRjNsbr",
+          "content": "S1r1DEsuJoxvm7MkcsRb0fqTM959PKsKM9CoBiaOR53ycUwPXBHO",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,

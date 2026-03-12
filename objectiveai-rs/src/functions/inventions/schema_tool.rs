@@ -16,20 +16,20 @@ pub fn schema_tools(schemas: &[&str]) -> Vec<InventionTool> {
             continue;
         }
 
-        if let Some(content) = schema_lookup::schema_content(name) {
-            let tool_name = schema_lookup::tool_name(name).unwrap();
-            let tool_desc = schema_lookup::tool_description(name).unwrap();
+        let content = schema_lookup::schema_content(name)
+            .unwrap_or_else(|| panic!("schema_tools: unknown schema {name:?}"));
+        let tool_name = schema_lookup::tool_name(name).unwrap();
+        let tool_desc = schema_lookup::tool_description(name).unwrap();
 
-            tools.push(InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
-                tool_name,
-                tool_desc,
-                move |_| Ok(content.to_string()),
-            ));
+        tools.push(InventionTool::new_sync::<crate::json_schema::EmptyObjectJsonSchema>(
+            tool_name,
+            tool_desc,
+            move |_| Ok(content.to_string()),
+        ));
 
-            for dep in schema_lookup::schema_refs(name) {
-                if !seen.contains(*dep) {
-                    stack.push(dep);
-                }
+        for dep in schema_lookup::schema_refs(name) {
+            if !seen.contains(*dep) {
+                stack.push(dep);
             }
         }
     }

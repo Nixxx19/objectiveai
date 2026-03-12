@@ -361,5 +361,6 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(vector::completions::response::unary::Object),
         schemars::schema_for!(vector::completions::response::unary::VectorCompletion),
         schemars::schema_for!(vector::completions::response::Vote),
+        schemars::schema_for!(vector::completions::VectorResponses),
     ]
 }

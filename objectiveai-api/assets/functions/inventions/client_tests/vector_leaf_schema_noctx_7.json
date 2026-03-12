@@ -169,13 +169,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "QrPa6SH8Jt0fkvuSqKTZUHWPuE WAL6Ll8rD2TaGVEosA4CMAU3UNbcxkBshGX973fGtsymBV97vQaKOvsy4TrBsk1CwOUTYJsXTQNXK5KZu3lHOTrfDg16CpxDs30Qk2mUGizZCTExZC8FIFPDSBkjjGfuUkcqde02e 6V1Lq2Z9dSljBxJw9vDQNgC2SL6Tw5RH9oB5HyciNRUKgHm qX2pbG5AL1lYWtzAjdtEagTtpyTqIvHD1KzIDtIXkFbrGtxP9hxEJekvNPj",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_15007649177182938738",
+              "id": "call_mock_11202065976215956940",
               "function": {
-                "name": "ReadTask",
-                "arguments": "{\"index\":0}"
+                "name": "Readagent.completions.message.ImageUrlSchema",
+                "arguments": "{}"
               }
             }
           ],
@@ -196,8 +197,8 @@
         {
           "role": "tool",
           "index": 7,
-          "content": "Error: Tasks have not been written",
-          "tool_call_id": "call_mock_15007649177182938738"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.ImageUrl\",\n  \"description\": \"An image URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"url\": {\n      \"description\": \"The URL of the image (can be a data URL or HTTP URL).\",\n      \"type\": \"string\"\n    },\n    \"detail\": {\n      \"description\": \"The detail level for image processing.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.ImageUrlDetail\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  },\n  \"required\": [\n    \"url\"\n  ]\n}\n",
+          "tool_call_id": "call_mock_11202065976215956940"
         },
         {
           "role": "assistant",
@@ -206,11 +207,10 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "qzRJ1JhwkPLtsYTuHiWuRgeoiVsz3SAFyV8Se67FndBfKMYR0v6O0Gky5eBYIyBh8X17ZhOdoOakv0SPv4m8B2gKz25SjcvznFL6kIS330QeCKYMCsRBmCy8SWeD3BP2u7lLrWWZBMO8hcvrgryQIFWEZYNvkcxhI6ZPBphhe3VlPldSCxq0h AoFEBpP 3ktnL3nYRMavTi5bg9WIcxpCz35l616BZ2FlDFRdL7zOfrr7aAWGhV4nMqo2JQeZMzheFJOrrB9dNnKMukjVHqsPR97IVvPa5PybUyY8AAHBB4j sS",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_10089377887014958055",
+              "id": "call_mock_5074463780212311907",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}] for item in input['items']]\"}}"
@@ -235,7 +235,7 @@
           "role": "tool",
           "index": 9,
           "content": "1",
-          "tool_call_id": "call_mock_10089377887014958055"
+          "tool_call_id": "call_mock_5074463780212311907"
         },
         {
           "role": "assistant",
@@ -244,9 +244,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "4HRey1tAkGiCElHrwu459lZZWiJWgbbhrIGdLYI1EKIc3wSu4GJB",
+          "reasoning": "nFa7rqcBpDiCSWDmUNHETOWBLm646mIU03zZ8OBsWxnO7Y3DQU00D",
           "tool_calls": null,
-          "content": "jt40NOnnxJGxJPA99TkdnKMNDMA31h6SnIi8GqySIF9WfccaC2afWvNEUCEKTBDIipwoE9MZmRfE74puNok9ONoZGG2N",
+          "content": "TfWaD0f fPSi6SSiKWVwGG2VZd0rc9lrGyeZR8z1oXAKbG67Je3jw4 DWrH9HCaJ5h9ND5F0ga49VkNGFSwvkxFvyl4c35FLFg",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,

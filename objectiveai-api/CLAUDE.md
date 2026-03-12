@@ -107,3 +107,36 @@ Both the agent completions client and vector completions client use one-ahead bu
 ## Testing
 
 - **Never use `--test-threads=1`** when running tests. It makes test runs extremely slow. Let tests run in parallel (the default).
+
+### Snapshot Tests
+
+Several test suites use snapshot files. Set the corresponding env var to `1` to regenerate snapshots. **Always run snapshot updates in a single command** — do NOT run them as separate commands (they share a Cargo build lock and will conflict).
+
+| Env Var | Test Filter | Snapshot Directory |
+|---------|-------------|--------------------|
+| `UPDATE_AGENT_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS` | `agent::completions::client_tests` | `assets/agent/completions/client_tests/` |
+| `UPDATE_AGENT_COMPLETIONS_MOCK_CLIENT_TESTS_SNAPSHOTS` | `agent::completions::mock::client_tests` | `assets/agent/completions/mock/client_tests/` |
+| `UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS` | `vector::completions::client_tests` | `assets/vector/completions/client_tests/` |
+| `UPDATE_FUNCTIONS_EXECUTIONS_CLIENT_TESTS_SNAPSHOTS` | `functions::executions::client_tests` | `assets/functions/executions/client_tests/` |
+| `UPDATE_FUNCTIONS_INVENTIONS_CLIENT_TESTS_SNAPSHOTS` | `functions::inventions::client_tests` | `assets/functions/inventions/client_tests/` |
+| `UPDATE_FUNCTIONS_INVENTIONS_RECURSIVE_CLIENT_TESTS_SNAPSHOTS` | `functions::inventions::recursive::client_tests` | `assets/functions/inventions/recursive/client_tests/` |
+
+Example — regenerate all invention snapshots (regular + recursive) in one command:
+
+```bash
+UPDATE_FUNCTIONS_INVENTIONS_CLIENT_TESTS_SNAPSHOTS=1 \
+UPDATE_FUNCTIONS_INVENTIONS_RECURSIVE_CLIENT_TESTS_SNAPSHOTS=1 \
+cargo test -p objectiveai-api "functions::inventions"
+```
+
+Example — regenerate all snapshots at once:
+
+```bash
+UPDATE_AGENT_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS=1 \
+UPDATE_AGENT_COMPLETIONS_MOCK_CLIENT_TESTS_SNAPSHOTS=1 \
+UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS=1 \
+UPDATE_FUNCTIONS_EXECUTIONS_CLIENT_TESTS_SNAPSHOTS=1 \
+UPDATE_FUNCTIONS_INVENTIONS_CLIENT_TESTS_SNAPSHOTS=1 \
+UPDATE_FUNCTIONS_INVENTIONS_RECURSIVE_CLIENT_TESTS_SNAPSHOTS=1 \
+cargo test -p objectiveai-api
+```

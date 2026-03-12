@@ -207,13 +207,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "VIax4uk4T4FUt jUxEYZqjL90tnkQBAjJjP9K1L MjY3tEgGiGDzvTZozW20Mgu3ezaLkoU9O4F9r52aW1eCxcK0H7j8UCv0q1bwDM2X1Oh44QI5ZvQrVoY9W3saqSpvhQM07n4hOkFBQac9AEjPIW LTu6QG5TxGEp6zEFGhx3h0E9vQxfwgoWqxmC1rILfq5  mcKsdTKAVfiVgj1 N9Nl70Z1L0Ntje tDEjxOjD0WuSbct8jjT",
+          "reasoning": "wR4cMguW5jvyRmC5IOlsSPlvo5QdDRYX94l9rRaxSE vZ4mrY4omhZXvG7yKnzVF6QzPCZB2CbmE7FKsTpIZTNbuourgLbUmyoZWnCpSmJvuJIFYYmiPFRs8cGsLxXxKIkhIbC3DweWHFZjfM6ASeNXljNYUwR6J58NmPl8sQk4ExdtJ1LBid5 Vv3F9VBLn15nopOTJK3N3p1a6jk6OApj5skt0QLG9TSn43cFu64qznmuR9CdInprXocqBx9Nw9onuro1DBf1EVIowRlyAotPiBC d4t1VkOr2sJIqv PSRBbRmmhbk0z4dVFfT7sFXzrYX6yF3LuPkvD3LfmHgXWwTvZvb9S0sNuoq13akCNOI79GURggpKy7e86yKMLEiX7nHzZiRht85uFpXKt35kVHREvHWL7FQIDkfuaR7cOTWEP11HFqSlikF4HlzYw8RoOjeiSgXaBfKLnYFQvGe3d1hRdNhf7 S8AV8RuDIzLzcR3jlpDkfXiyTvD 7hSRmHJz8LJhS3aJpUqrdl4Q2ggm1uCbY4175BGE8bBvPgAr0CzJBSaIUKoZrMlCWa9Y820QSiiYhczVtxTORxwaEzJ4AmT4LOvBVP0PkqOo8yjzAbMUVR79fTEpwqzhDznKR2nSL2yJe1EHG1SAwEEn8g9DypzFhiiAAaBEtj4TNX",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8030167432809445231",
+              "id": "call_mock_12401443089692740996",
               "function": {
-                "name": "ReadFileRichContentPartSchema",
+                "name": "Readfunctions.expression.InputSchemaSchema",
                 "arguments": "{}"
               }
             }
@@ -235,8 +235,8 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"file\"\n    },\n    \"file\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"file_data\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\",\n              \"description\": \"The base64 encoded file data, used when passing the file to the model as a string.\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ]\n        },\n        \"file_id\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\",\n              \"description\": \"The ID of an uploaded file to use as input.\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ]\n        },\n        \"filename\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\",\n              \"description\": \"The name of the file, used when passing the file to the model as a string.\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ]\n        },\n        \"file_url\": {\n          \"anyOf\": [\n            {\n              \"type\": \"string\",\n              \"description\": \"The URL of the file, used when passing the file to the model as a URL.\"\n            },\n            {\n              \"type\": \"null\"\n            }\n          ]\n        }\n      },\n      \"description\": \"The file to be used as input, either as base64 data, an uploaded file ID, or a URL.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"file\"\n  ],\n  \"description\": \"A file rich content part.\"\n}\n",
-          "tool_call_id": "call_mock_8030167432809445231"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.InputSchema\",\n  \"description\": \"Schema for validating Function input.\\n\\nDefines the expected structure and constraints for input data.\\nUsed by remote Functions to document and validate their inputs.\",\n  \"oneOf\": [\n    {\n      \"description\": \"An object with named properties.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Object\": {\n          \"$ref\": \"functions.expression.ObjectInputSchema\"\n        }\n      },\n      \"required\": [\n        \"Object\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"An array of items.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Array\": {\n          \"$ref\": \"functions.expression.ArrayInputSchema\"\n        }\n      },\n      \"required\": [\n        \"Array\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A string value.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"String\": {\n          \"$ref\": \"functions.expression.StringInputSchema\"\n        }\n      },\n      \"required\": [\n        \"String\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"An integer value.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Integer\": {\n          \"$ref\": \"functions.expression.IntegerInputSchema\"\n        }\n      },\n      \"required\": [\n        \"Integer\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A floating-point number.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Number\": {\n          \"$ref\": \"functions.expression.NumberInputSchema\"\n        }\n      },\n      \"required\": [\n        \"Number\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A boolean value.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Boolean\": {\n          \"$ref\": \"functions.expression.BooleanInputSchema\"\n        }\n      },\n      \"required\": [\n        \"Boolean\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"An image (URL or base64).\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Image\": {\n          \"$ref\": \"functions.expression.ImageInputSchema\"\n        }\n      },\n      \"required\": [\n        \"Image\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"Audio content.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Audio\": {\n          \"$ref\": \"functions.expression.AudioInputSchema\"\n        }\n      },\n      \"required\": [\n        \"Audio\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"Video content.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Video\": {\n          \"$ref\": \"functions.expression.VideoInputSchema\"\n        }\n      },\n      \"required\": [\n        \"Video\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A file.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"File\": {\n          \"$ref\": \"functions.expression.FileInputSchema\"\n        }\n      },\n      \"required\": [\n        \"File\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A union of schemas - input must match at least one.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"AnyOf\": {\n          \"$ref\": \"functions.expression.AnyOfInputSchema\"\n        }\n      },\n      \"required\": [\n        \"AnyOf\"\n      ],\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
+          "tool_call_id": "call_mock_12401443089692740996"
         },
         {
           "role": "assistant",
@@ -245,13 +245,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "bQy1KFDWyUHjSHo7QpJLyD1jV5cMZ3B0lL9s9dWmKCXPNlUTZn2JOLBIEIvVnAyT2KDyb1rxeuOiV43LHgDgKEuraCuDk2gAERE1vT4uwO2VbQFghX2NTfJ8iFZEe WziHr3VgiTJ3YPYcFSdIYqV9QWT9JQ0o7xc zHertdcA0lSkVxyCEN8slU rT9XcnhpZOqgkSviV6ZJhhZzqtCCm7yDTFVnVurYTgm906zuxipq9mdDA7Up20qjGrRLrA66ldYCsriThsyBaLVAP4eef41eF3HZSAPDXrqlhLBgsKr6rjlLWDYI48GijlYC8h",
+          "reasoning": "zfhmqnyCAaJ9zyZnigfcTk3s6Z5PlUiro7q3kvv6yhtmgCgWwKndofi7YZpgt59JM8NKBAeYHR0JKpav1MTCebTtJx6a2vHMye4TDmmT m38Wnyhan jNMEB4Q63G81 j5uOP 2s7T kIc 7wWNaU9RMdY96ga2yvfeVhSBcpIXMx2b3gCbqV8EmajIXFMoQ8bS2m5t1 tKvS53yg5ZEZ7 DuWQEVHvRo",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_17006031609891948320",
+              "id": "call_mock_17693223443423313446",
               "function": {
-                "name": "ReadAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema",
+                "name": "Readfunctions.expression.ArrayInputSchemaSchema",
                 "arguments": "{}"
               }
             }
@@ -273,8 +273,8 @@
         {
           "role": "tool",
           "index": 11,
-          "content": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"const\": \"placeholder.alpha.vector.function\"\n    },\n    \"name\": {\n      \"type\": \"string\",\n      \"description\": \"The name of the placeholder function.\"\n    },\n    \"spec\": {\n      \"type\": \"string\",\n      \"description\": \"The specification of the placeholder function.\"\n    },\n    \"input_schema\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"context\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"type\": {\n              \"const\": \"object\"\n            },\n            \"description\": {\n              \"anyOf\": [\n                {\n                  \"type\": \"string\"\n                },\n                {\n                  \"type\": \"null\"\n                }\n              ],\n              \"description\": \"The description of the object input.\"\n            },\n            \"properties\": {\n              \"type\": \"object\",\n              \"additionalProperties\": {\n                \"$ref\": \"InputSchema\"\n              },\n              \"description\": \"The properties of the object input.\"\n            },\n            \"required\": {\n              \"anyOf\": [\n                {\n                  \"type\": \"array\",\n                  \"items\": {\n                    \"type\": \"string\"\n                  }\n                },\n                {\n                  \"type\": \"null\"\n                }\n              ],\n              \"description\": \"The required properties of the object input.\"\n            }\n          },\n          \"required\": [\n            \"type\",\n            \"properties\"\n          ],\n          \"description\": \"The optional context input schema shared across all items.\"\n        },\n        \"items\": {\n          \"$ref\": \"InputSchema\",\n          \"description\": \"The input schema for each item.\"\n        }\n      },\n      \"required\": [\n        \"items\"\n      ],\n      \"description\": \"The input schema for the placeholder vector function.\"\n    },\n    \"skip\": {\n      \"$ref\": \"Expression\",\n      \"description\": \"An expression which evaluates to a boolean indicating whether to skip this task. Receives: `input`.\"\n    },\n    \"input\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"context\": {\n          \"$ref\": \"Expression\",\n          \"description\": \"An expression which evaluates to the context input. Receives: `input`.\"\n        },\n        \"items\": {\n          \"$ref\": \"Expression\",\n          \"description\": \"An expression which evaluates to the items input. Receives: `input`.\"\n        }\n      },\n      \"required\": [\n        \"items\"\n      ],\n      \"description\": \"The input expression for the placeholder vector function.\"\n    }\n  },\n  \"required\": [\n    \"type\",\n    \"name\",\n    \"spec\",\n    \"input_schema\",\n    \"input\"\n  ],\n  \"description\": \"A placeholder alpha vector function task expression. Always outputs an equalized vector.\"\n}\n",
-          "tool_call_id": "call_mock_17006031609891948320"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.ArrayInputSchema\",\n  \"description\": \"Schema for an array input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the array.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"minItems\": {\n      \"description\": \"Minimum number of items required.\",\n      \"type\": [\n        \"integer\",\n        \"null\"\n      ],\n      \"format\": \"uint64\",\n      \"minimum\": 0\n    },\n    \"maxItems\": {\n      \"description\": \"Maximum number of items allowed.\",\n      \"type\": [\n        \"integer\",\n        \"null\"\n      ],\n      \"format\": \"uint64\",\n      \"minimum\": 0\n    },\n    \"items\": {\n      \"description\": \"Schema for each item in the array.\",\n      \"$ref\": \"functions.expression.InputSchema\"\n    }\n  },\n  \"required\": [\n    \"items\"\n  ]\n}\n",
+          "tool_call_id": "call_mock_17693223443423313446"
         },
         {
           "role": "assistant",
@@ -283,13 +283,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "o4umrsXnWmPuTMb91m0evZb1NaLxVOwfQ9j0JXgeoBmoNrtw7UZ3rH8keaadsswOFBz7Xrnqwxz",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_11648649241452845168",
+              "id": "call_mock_14548494500128205398",
               "function": {
-                "name": "ReadSpec",
-                "arguments": "{}"
+                "name": "AppendTask",
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"6veRZBGmsckbLVhv9A6yMvUZIYnalkaVcUvX Irz26ltt V5DZDDe1Xk96tHmQV6Z7PBK6yfWXY5hJfp\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"string\"}},\"context\":{\"properties\":{\"rubric\":{\"type\":\"object\",\"properties\":{\"dimensions\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"weight\":{\"type\":\"number\"},\"examples\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"}]}}},\"required\":[\"name\",\"weight\"]}},\"passing_threshold\":{\"type\":\"number\"}},\"required\":[\"dimensions\",\"passing_threshold\"]},\"evaluator\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"credentials\":{\"type\":\"array\",\"minItems\":0,\"maxItems\":2,\"items\":{\"type\":\"string\"}}},\"required\":[\"id\"]}]}},\"required\":[\"rubric\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -310,8 +311,8 @@
         {
           "role": "tool",
           "index": 13,
-          "content": "Test function spec for mock invention.",
-          "tool_call_id": "call_mock_11648649241452845168"
+          "content": "1",
+          "tool_call_id": "call_mock_14548494500128205398"
         },
         {
           "role": "assistant",
@@ -320,47 +321,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "lAhOQZmXl844BXTy4xV2bQkYA55RLxgG6nhI DkWLOV7nLOi vHi5kUfwlHJ6F9WEKRH5rib4Rswkd3sO8rA3aSuHe34zrKvB1u0sQ20dTxmu53O7FRpNvJraHAUKjKQRYaPnt3FYWfP2Y1kbSkbmpY2gNNCvvkgXKRgZ3u3Gj4z vf3z7q5C8Q3ePDhfrWmgNF9PFbmcNznWzMQsLkckjNG24MvEIW7S fiNJezCl5wSFjzFCLelVGKLRatflUmxOIayOzmS6LGPn034Hb1XLSKT8FYn7wICDMJPkZB3pHtOhgdQDUwtdKkrEdYml DUmQ3pjVfDtQNJddSM2K8A dEA1ebr7hZtupCxAYF5uASAUBBE8OPocMQH4D6eaPBUE6hi1y 1AhidqHtOHCrdGy8ZF1qszuRpUekTFeaESLnIjlt8sKPlJNis4VpSvcsuD2C EsnwjN2mv9g1znvbeXtG1x6AGY05pkVKDxi0KtI47M6hmRRPWrGC4eUf1RoGa6mzdILzpdfwKJJpDFSrGyIco91pnpfsPeSH qGzYzSQLWe97Orw9OLq4pvLlWx",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_16884119310441349352",
-              "function": {
-                "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"5 zsobesP09oFyIpqeIoTA0ezbpdB24MtBYqXC4EiT MT1rCmpxauYiggA1uucWC9fUbIUuux3zJ4uf0JWMXYcC7BSm8a2wCJGE4a\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"string\"}},\"context\":{\"properties\":{\"rubric\":{\"type\":\"object\",\"properties\":{\"dimensions\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"weight\":{\"type\":\"number\"},\"examples\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"}]}}},\"required\":[\"name\",\"weight\"]}},\"passing_threshold\":{\"type\":\"number\"}},\"required\":[\"dimensions\",\"passing_threshold\"]},\"evaluator\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"id\":{\"type\":\"integer\"},\"credentials\":{\"type\":\"array\",\"minItems\":0,\"maxItems\":2,\"items\":{\"type\":\"string\"}}},\"required\":[\"id\"]}]}},\"required\":[\"rubric\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 15,
-          "content": "1",
-          "tool_call_id": "call_mock_16884119310441349352"
-        },
-        {
-          "role": "assistant",
-          "index": 16,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "xAdNJVibiig91FUgAJxlPIx 9vexYsdjRXAUts8D9Bw25l9 7tT8ltkq GL2WNUMrW4v29FnbUfN4bBC05MuGEx1c64bQ9yazLsLm5RxVdiUMlw0DPi8qagUYjZOSxQG0ifvXLdRAL8yFaDCz70ZabzVp4tEY6GJADNMU1n9zkUaSsTWpZl7KZMTJUwCMk1dom2HcjuBXx32A7VZZykMiPiyZhVxLeiHjvaR hkKW59yEEJMtFTTPaBd68dQdzYx",
+          "reasoning": "eNEDCvCaUYEAbUzqNFiIhmRUKcIhZZGXmO8aam5gRbvmVNPOm3XMCEdxU6yQIUcbSpBColZpOnYR32XtY BCtstmOljR4vK3rYEv8r d",
           "tool_calls": null,
-          "content": "nKAU3VIF5NRgk7VmsJK08w93bHqPyL6jEjL9hdXIxeczPNrelCIbBcvYQ814rszV7kh3DSungyNuyPX8tIF1",
+          "content": "w8Uko7oNPAAZqx4skERhG2 YIbFSRBIs8FnTx5xuwujL",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -393,19 +356,19 @@
       "messages": [
         {
           "role": "assistant",
-          "index": 17,
+          "index": 15,
           "created": 0,
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "qQTxlptgejtqggl8vtbvY1Zjqc eerztw8qccxIZvG",
+          "reasoning": "dgBR FcJ6tPPpl0lT8gtrKi39FTEQAi04RKjHCH6UZPUgfq3WaLlUGR93LEXa AYK5OoWvf2Epq5CKIRg0OLXbRJNyqJqYgdJKDo5VTSfHfAf8vnEuPnggoONRUpS3XEDahlEhlUJrBr1",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8353781397762124900",
+              "id": "call_mock_13607725116286615586",
               "function": {
                 "name": "WriteDescription",
-                "arguments": "{\"description\":\"KxmIArsJEf3RPH47eyFgk6z4qtkwUxA XBNbEB3gt0MJysBC Uj9fcHk2vbzODuelVSJAJ0PShbDMf\"}"
+                "arguments": "{\"description\":\"Ed9Dx6qXh9hzFiPyWnidwQRSWQjF9tasQz21aDQ89zUBUIAB3EmzT1SrOB0Xqu72w1fuDvJhQAGLogYrF5ls\"}"
               }
             }
           ],
@@ -425,20 +388,20 @@
         },
         {
           "role": "tool",
-          "index": 18,
+          "index": 16,
           "content": "Ok",
-          "tool_call_id": "call_mock_8353781397762124900"
+          "tool_call_id": "call_mock_13607725116286615586"
         },
         {
           "role": "assistant",
-          "index": 19,
+          "index": 17,
           "created": 0,
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "y9vqPL46iP3OzBbkAd1dHV8",
+          "reasoning": "qQTxlptgejtqggl8vtbvY1Zjqc eerztw8qccxIZvG",
           "tool_calls": null,
-          "content": "48 YvFWt62igt 5wDvWnJSHct6NNAoSdgbGjDg0jIl mB1n9xXISUkxEtCJf4cM8lKc2hqDZC7rBVfjw5w0HcGHhz2DYjan",
+          "content": "gKxmIArsJEf3RPH47eyFgk6z4qtkwUxA XBNbEB3gt0",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -575,7 +538,7 @@
         "min_leaf_width": 1,
         "max_leaf_width": 2,
         "name": "vb-3YwXBR07g",
-        "spec": "5 zsobesP09oFyIpqeIoTA0ezbpdB24MtBYqXC4EiT MT1rCmpxauYiggA1uucWC9fUbIUuux3zJ4uf0JWMXYcC7BSm8a2wCJGE4a",
+        "spec": "6veRZBGmsckbLVhv9A6yMvUZIYnalkaVcUvX Irz26ltt V5DZDDe1Xk96tHmQV6Z7PBK6yfWXY5hJfp",
         "input_schema": {
           "context": {
             "properties": {
@@ -677,13 +640,13 @@
       }
     ],
     "tasks_length": 1,
-    "description": "KxmIArsJEf3RPH47eyFgk6z4qtkwUxA XBNbEB3gt0MJysBC Uj9fcHk2vbzODuelVSJAJ0PShbDMf",
-    "readme": "# vb-richctx\n\nKxmIArsJEf3RPH47eyFgk6z4qtkwUxA XBNbEB3gt0MJysBC Uj9fcHk2vbzODuelVSJAJ0PShbDMf\n"
+    "description": "Ed9Dx6qXh9hzFiPyWnidwQRSWQjF9tasQz21aDQ89zUBUIAB3EmzT1SrOB0Xqu72w1fuDvJhQAGLogYrF5ls",
+    "readme": "# vb-richctx\n\nEd9Dx6qXh9hzFiPyWnidwQRSWQjF9tasQz21aDQ89zUBUIAB3EmzT1SrOB0Xqu72w1fuDvJhQAGLogYrF5ls\n"
   },
   "path": null,
   "function": {
     "type": "alpha.vector.branch.function",
-    "description": "KxmIArsJEf3RPH47eyFgk6z4qtkwUxA XBNbEB3gt0MJysBC Uj9fcHk2vbzODuelVSJAJ0PShbDMf",
+    "description": "Ed9Dx6qXh9hzFiPyWnidwQRSWQjF9tasQz21aDQ89zUBUIAB3EmzT1SrOB0Xqu72w1fuDvJhQAGLogYrF5ls",
     "input_schema": {
       "context": {
         "properties": {
@@ -783,7 +746,7 @@
         "min_leaf_width": 1,
         "max_leaf_width": 2,
         "name": "vb-3YwXBR07g",
-        "spec": "5 zsobesP09oFyIpqeIoTA0ezbpdB24MtBYqXC4EiT MT1rCmpxauYiggA1uucWC9fUbIUuux3zJ4uf0JWMXYcC7BSm8a2wCJGE4a",
+        "spec": "6veRZBGmsckbLVhv9A6yMvUZIYnalkaVcUvX Irz26ltt V5DZDDe1Xk96tHmQV6Z7PBK6yfWXY5hJfp",
         "input_schema": {
           "context": {
             "properties": {

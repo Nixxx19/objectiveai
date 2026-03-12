@@ -23,8 +23,8 @@ pub enum InventionStep {
     EssayVector,
 
     // Step 2: Input Schema
-    // Schema tool names differ: ReadObjectInputSchemaSchema (scalar)
-    // vs ReadAlphaVectorFunctionInputSchemaJsonSchema (vector).
+    // Vector has Readfunctions.alpha_vector.expression.VectorFunctionInputSchemaSchema;
+    // scalar does not.
     InputSchemaScalar,
     InputSchemaVector,
 
@@ -79,10 +79,10 @@ impl InventionStep {
         // Step 2: InputSchema — WriteInputSchema present
         if has("WriteInputSchema") {
             return Some(
-                if has("ReadObjectInputSchemaSchema") {
-                    Self::InputSchemaScalar
-                } else {
+                if has("Readfunctions.alpha_vector.expression.VectorFunctionInputSchemaSchema") {
                     Self::InputSchemaVector
+                } else {
+                    Self::InputSchemaScalar
                 },
             );
         }
@@ -96,16 +96,16 @@ impl InventionStep {
 
         // Step 4: Tasks — AppendTask present
         if has("AppendTask") {
-            return Some(if has("ReadMessagesSchema") {
+            return Some(if has("Readagent.completions.message.MessageExpressionSchema") {
                 // Leaf
-                if tool_names.iter().any(|t| t.contains("AlphaScalar")) {
+                if tool_names.iter().any(|t| t.contains("alpha_scalar")) {
                     Self::TasksScalarLeaf
                 } else {
                     Self::TasksVectorLeaf
                 }
-            } else if has("ReadInputValueSchema") {
+            } else if has("Readfunctions.expression.InputSchema") {
                 // Branch
-                if tool_names.iter().any(|t| t.contains("AlphaScalarPlaceholder")) {
+                if tool_names.iter().any(|t| t.contains("alpha_scalar.Placeholder")) {
                     Self::TasksScalarBranch
                 } else {
                     Self::TasksVectorBranch

@@ -821,7 +821,7 @@ impl super::InventionState for AlphaScalarBranchState {
             Self::read_spec_tool(this), Self::read_essay_tool(this),
             Self::write_input_schema_tool(this),
         ];
-        tools.extend(crate::functions::inventions::schema_tools(&["ObjectInputSchema"]));
+        tools.extend(crate::functions::inventions::schema_tools(&["functions.expression.ObjectInputSchema"]));
         tools
     }
     fn validate_input_schema(this: &Arc<Mutex<Self>>) -> Result<(), String> {
@@ -848,7 +848,7 @@ impl super::InventionState for AlphaScalarBranchState {
             Self::read_predicted_tasks_length_tool(this),
             Self::edit_predicted_tasks_length_tool(this),
         ];
-        tools.extend(crate::functions::inventions::schema_tools(&["AlphaScalarPlaceholderScalarFunctionTaskExpression", "InputValue"]));
+        tools.extend(crate::functions::inventions::schema_tools(&["functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression", "functions.expression.Input"]));
         tools
     }
     fn validate_function(this: &Arc<Mutex<Self>>) -> Result<(), String> {

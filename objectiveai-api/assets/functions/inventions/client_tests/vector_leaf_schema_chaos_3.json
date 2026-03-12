@@ -209,7 +209,45 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_444259211174399586",
+              "id": "call_mock_17647979872416986482",
+              "function": {
+                "name": "Readagent.completions.message.AssistantToolCallFunctionExpressionSchema",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 9,
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.AssistantToolCallFunctionExpression\",\n  \"description\": \"Expression variant of [`AssistantToolCallFunction`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"name\": {\n      \"description\": \"The function name expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    },\n    \"arguments\": {\n      \"description\": \"The arguments expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    }\n  },\n  \"required\": [\n    \"name\",\n    \"arguments\"\n  ]\n}\n",
+          "tool_call_id": "call_mock_17647979872416986482"
+        },
+        {
+          "role": "assistant",
+          "index": 10,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "t hBEcTpz9jx9vXrNblY6fVKL5rEOTo3oEVJ36eTbDxmq6TuXHBhTL99TEWC4 w5KfIhvbecp1NVJZxkUhjpDErSdzIsCFR1cz4YDfdzljZWFhQFSwvDqkq3nvlW1cVu7tB0nkIddmQCCM4g5zXc9wxdct7Cd8cnf9Wip3snosH7iy7QRqSMxY1xCH7SjgFfPCkvpsBcV2vEL9J8MODVGLI7olVZQU3dQbK0pEGTLH2IvNAP",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_1359268166673482786",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}] for item in input['items']]\"}}"
@@ -232,20 +270,20 @@
         },
         {
           "role": "tool",
-          "index": 9,
+          "index": 11,
           "content": "1",
-          "tool_call_id": "call_mock_444259211174399586"
+          "tool_call_id": "call_mock_1359268166673482786"
         },
         {
           "role": "assistant",
-          "index": 10,
+          "index": 12,
           "created": 0,
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "8b2sprY0RPEClITQ9KNJVb cJ2uuukLGA40HkeChHmpKfY63oBd ALEuo4SWdnsv2FVC62ZeVZT5umzVMKCJ8RCVgZVKHkgHL 6MqhWxWHQqzkjbzihnOjCdcqvwEHP4uOV5QGvPlOGDBN3gouUVzTte8wUu7SWX9lNLi0SvHRNvJ2VbMu814XWp189ulogRhwpdyKipSGzv GrgPo9 qH3n4TA Krq4SchxjLRXQFpYv8fyHHVZqpLPS7WwDbr1pBJw6OE8X43j32acUD dDr3gTWy0d5Caa2Pf3Unne8i7 EJ7B0 HUEmtgMfVI4BSLkBths9MMzuybF61JD2qAOYIs56lioj62VLP2EZT6R6ghW9XSaiqvEQNrSJ9bnk2CuKxXMxQUBxeJF1wHzBZIWjm WBmdS2 RxKZ9JQbIOpNlGxk6y7EsTXyfaaFtILSXJg1UNwuLawUjPVcKtCdcZBnUX3ORXrBwKrjHL9t7QCPoDpGnekPheylagdN3HXkEWgL8gVpaop1za95QmozXvt717X7BSe73Pcdi01ZCgF 84TYrbgGeSBjTrr",
+          "reasoning": "EEI0C0019RFeyHTNyryz2ztr1LYZLP2J69A8oLhZSnV2ZCsHkiUe7iEJ3C7Qe7lVMaVL6oRV0unzj5egrtpfDaKBO mLEgftm6gspqPPCtNh1ZSsDSnNBJ5gg9PZFW N0DgmegNdwCB lAoumUQjUmbyfadNqD8A8iPy9N1jrYju31xwkeUEdJ2xjhCtLotUf08fyxDr7knsK7Tz9xc80z7Yll7C5JGwJyxEo83O7788nebQI2j65LiYsHwKVGpNnELXoY3zdXb84MH9jiv40knyYw4fNPxhh 8D SXTTt5 N 0Bgkj7wpae9ipRA zAZ",
           "tool_calls": null,
-          "content": "u4qBEyYSLBL Yf jgrGIVu9sqRrwSGrfEGH21UHR8m81cP9EUkHo tTM9fSbxxnukjgFIPIxaHm8d6r7",
+          "content": "sftcJ958PY33f8dQbYlJCwloGH",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -276,44 +314,6 @@
       "id": "",
       "created": 0,
       "messages": [
-        {
-          "role": "assistant",
-          "index": 11,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "KrsRDFbHAH0FkfkqHlCH7Dv5uObIIeVP3Nwc1s6Ot4nb8XllRfrZKxVsTABCwszgAbt4GdFPOJkFgteGBE52Um0Qm5wGTojtVovyunSZaj80RcTmFNpEnZRJLv8lVZdVVGCg DSqLEO0zKjnzPx9Bkvv2DVsWMliE0Q1a6lQ6Gs36nMHyuDgmNh2fVpClJ4n9LBYSatZrnA1PD6qfiJGU5g ChU GB0VnIp91ZVS6F75zzeME9fUB4OzZ5jDGQB7ByCX2KlcH E7LqGF2x38MKIDuuz2M6N0BAySdEZY XOv8FveMKC4nUFEtuYHqInm3XSshsJjRayaYXZUwVGgTg7Qh6z4WRs4rrAYcC6x0tozs90uTKUFcRaCXSKHgh58BY2TKjMKMl",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_4878791427412653763",
-              "function": {
-                "name": "ReadTasksLength",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 12,
-          "content": "1",
-          "tool_call_id": "call_mock_4878791427412653763"
-        },
         {
           "role": "assistant",
           "index": 13,
