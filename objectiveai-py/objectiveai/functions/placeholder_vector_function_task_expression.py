@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel
 from objectiveai.functions.expression.expression import FunctionsExpressionExpression
 from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
-from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputExpression
+from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
 
 
 class FunctionsPlaceholderVectorFunctionTaskExpression(BaseModel):
@@ -19,6 +19,6 @@ Always produces an equalized vector of length `output_length`."""
     input_merge: FunctionsExpressionExpression
     skip: Optional[FunctionsExpressionExpression] = None
     map: Optional[FunctionsExpressionExpression] = None
-    input: FunctionsExpressionWithExpressionFunctionsExpressionInputExpression
+    input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
     output: FunctionsExpressionExpression
 

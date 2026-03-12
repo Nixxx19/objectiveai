@@ -3,10 +3,10 @@
 from __future__ import annotations
 from typing import Optional, Union
 from pydantic import BaseModel
-from objectiveai.functions.expression.input import FunctionsExpressionInput
+from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
 
 
 class FunctionsAlphaVectorExpressionVectorFunctionInput(BaseModel):
-    context: Optional[Union[dict[str, FunctionsExpressionInput], None]] = None
-    items: list[FunctionsExpressionInput]
+    context: Optional[Union[dict[str, FunctionsExpressionInputValue], None]] = None
+    items: list[FunctionsExpressionInputValue]
 

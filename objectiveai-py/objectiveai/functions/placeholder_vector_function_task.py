@@ -3,8 +3,8 @@
 from __future__ import annotations
 from pydantic import BaseModel
 from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.input import FunctionsExpressionInput
 from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
+from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
 
 
 class FunctionsPlaceholderVectorFunctionTask(BaseModel):
@@ -16,6 +16,6 @@ the output expression is applied."""
     output_length: FunctionsExpressionExpression
     input_split: FunctionsExpressionExpression
     input_merge: FunctionsExpressionExpression
-    input: FunctionsExpressionInput
+    input: FunctionsExpressionInputValue
     output: FunctionsExpressionExpression
 

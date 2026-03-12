@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional, Union
 from pydantic import BaseModel
-from objectiveai.functions.expression.input import FunctionsExpressionInput
+from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
 from objectiveai.functions.expression.task_output import FunctionsExpressionTaskOutput
 
 
 class FunctionsExpressionParamsRef(BaseModel):
     """Borrowed version of expression parameters."""
-    input: FunctionsExpressionInput
+    input: FunctionsExpressionInputValue
     output: Optional[FunctionsExpressionTaskOutput] = None
     map: Optional[Union[int, None]] = None
 

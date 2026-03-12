@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel
 from objectiveai.functions.expression.expression import FunctionsExpressionExpression
 from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
-from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputExpression
+from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
 
 
 class FunctionsPlaceholderScalarFunctionTaskExpression(BaseModel):
@@ -16,6 +16,6 @@ Always produces a fixed output of 0.5."""
     input_schema: FunctionsExpressionInputSchema
     skip: Optional[FunctionsExpressionExpression] = None
     map: Optional[FunctionsExpressionExpression] = None
-    input: FunctionsExpressionWithExpressionFunctionsExpressionInputExpression
+    input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
     output: FunctionsExpressionExpression
 

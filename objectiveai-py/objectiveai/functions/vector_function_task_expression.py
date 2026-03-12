@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel
 from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputExpression
+from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
 from objectiveai.functions.remote import FunctionsRemote
 
 
@@ -16,6 +16,6 @@ class FunctionsVectorFunctionTaskExpression(BaseModel):
     commit: str
     skip: Optional[FunctionsExpressionExpression] = None
     map: Optional[FunctionsExpressionExpression] = None
-    input: FunctionsExpressionWithExpressionFunctionsExpressionInputExpression
+    input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
     output: FunctionsExpressionExpression
 

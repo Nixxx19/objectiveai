@@ -6,10 +6,10 @@ from pydantic import RootModel
 from objectiveai.agent.completions.message.rich_content_part import AgentCompletionsMessageRichContentPart
 
 
-class FunctionsExpressionInput(RootModel):
+class FunctionsExpressionInputValue(RootModel):
     """A concrete input value (post-compilation).
 
 Represents any JSON-like value that can be passed to a Function,
 including rich content types (images, audio, video, files)."""
-    root: Union[AgentCompletionsMessageRichContentPart, dict[str, FunctionsExpressionInput], list[FunctionsExpressionInput], str, int, float, bool]
+    root: Union[AgentCompletionsMessageRichContentPart, dict[str, FunctionsExpressionInputValue], list[FunctionsExpressionInputValue], str, int, float, bool]
 

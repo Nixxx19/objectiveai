@@ -3,7 +3,7 @@
 from __future__ import annotations
 from pydantic import BaseModel
 from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.input import FunctionsExpressionInput
+from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
 from objectiveai.functions.remote import FunctionsRemote
 
 
@@ -13,6 +13,6 @@ class FunctionsVectorFunctionTask(BaseModel):
     owner: str
     repository: str
     commit: str
-    input: FunctionsExpressionInput
+    input: FunctionsExpressionInputValue
     output: FunctionsExpressionExpression
 

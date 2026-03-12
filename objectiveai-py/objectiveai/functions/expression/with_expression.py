@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from objectiveai.agent.completions.message.rich_content_part_expression import AgentCompletionsMessageRichContentPartExpression
     from objectiveai.agent.completions.message.simple_content_expression import AgentCompletionsMessageSimpleContentExpression
     from objectiveai.agent.completions.message.simple_content_part_expression import AgentCompletionsMessageSimpleContentPartExpression
-    from objectiveai.functions.expression.input_expression import FunctionsExpressionInputExpression
+    from objectiveai.functions.expression.input_value_expression import FunctionsExpressionInputValueExpression
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression(RootModel):
@@ -358,7 +358,7 @@ Starlark expression:
     root: Union[FunctionsExpressionExpression, list[FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression]]
 
 
-class FunctionsExpressionWithExpressionFunctionsExpressionInputExpression(RootModel):
+class FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -381,7 +381,7 @@ Starlark expression:
 ```json
 {"$starlark": "input['greeting']"}
 ```"""
-    root: Union[FunctionsExpressionExpression, FunctionsExpressionInputExpression]
+    root: Union[FunctionsExpressionExpression, FunctionsExpressionInputValueExpression]
 
 
 class FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpression(RootModel):

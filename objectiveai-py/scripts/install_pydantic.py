@@ -456,12 +456,67 @@ def _generate_flattened_model(
     pascal_name: str,
     safe_desc: str,
 ) -> str:
-    """Generate a model for schemas with properties AND anyOf/oneOf (serde flatten)."""
-    code = _generate_object_model(title, schema, refs, all_titles, pascal_name, safe_desc)
+    """Generate a model for schemas with properties AND anyOf/oneOf (serde flatten).
+
+    Serde flatten merges the inner variant's fields with the outer properties.
+    We generate a BaseModel with the outer properties + extra='allow' so the
+    variant fields pass through, and a _variant field typed as the union of
+    anyOf types for documentation purposes. The model also stores which variant
+    type it represents.
+    """
+    # Build the object model with extra='allow' so variant fields are accepted
+    properties = schema.get("properties", {})
+    required = set(schema.get("required", []))
     variants = schema.get("anyOf") or schema.get("oneOf", [])
-    for v in variants:
-        collect_refs(v, refs)
-    return code
+
+    # Generate the model with extra='allow' to accept flattened variant fields
+    lines = [f"class {pascal_name}(BaseModel):"]
+    if safe_desc:
+        lines.append(f'    """{safe_desc}"""')
+    lines.append("    model_config = ConfigDict(extra='allow')")
+    lines.append("")
+
+    # Add the outer properties
+    for prop_name, prop_schema in properties.items():
+        collect_refs(prop_schema, refs)
+        prop_type = convert_to_type(prop_schema, title, all_titles)
+        field_name = _to_snake(prop_name) if not _is_snake(prop_name) else prop_name
+        if field_name in ("from", "type", "class", "import", "in", "is", "not", "and", "or"):
+            alias = prop_name
+            field_name = field_name + "_"
+        else:
+            alias = prop_name if prop_name != field_name else None
+
+        is_required = prop_name in required
+
+        if not is_required:
+            default = prop_schema.get("default")
+            if default is not None:
+                default_repr = repr(default)
+                if alias:
+                    lines.append(
+                        f"    {field_name}: {prop_type} = Field({default_repr}, alias={alias!r})"
+                    )
+                else:
+                    lines.append(f"    {field_name}: {prop_type} = {default_repr}")
+            else:
+                if not prop_type.startswith("Optional["):
+                    prop_type = f"Optional[{prop_type}]"
+                if alias:
+                    lines.append(
+                        f"    {field_name}: {prop_type} = Field(None, alias={alias!r})"
+                    )
+                else:
+                    lines.append(f"    {field_name}: {prop_type} = None")
+        else:
+            if alias:
+                lines.append(
+                    f"    {field_name}: {prop_type} = Field(..., alias={alias!r})"
+                )
+            else:
+                lines.append(f"    {field_name}: {prop_type}")
+
+    return "\n".join(lines) + "\n"
 
 
 # ---------------------------------------------------------------------------

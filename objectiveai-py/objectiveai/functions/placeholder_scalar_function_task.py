@@ -3,8 +3,8 @@
 from __future__ import annotations
 from pydantic import BaseModel
 from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.input import FunctionsExpressionInput
 from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
+from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
 
 
 class FunctionsPlaceholderScalarFunctionTask(BaseModel):
@@ -13,6 +13,6 @@ class FunctionsPlaceholderScalarFunctionTask(BaseModel):
 Always produces `Scalar(0.5)` before the output expression
 is applied."""
     input_schema: FunctionsExpressionInputSchema
-    input: FunctionsExpressionInput
+    input: FunctionsExpressionInputValue
     output: FunctionsExpressionExpression
 

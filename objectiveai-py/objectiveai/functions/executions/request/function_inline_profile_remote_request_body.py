@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from objectiveai.agent.completions.request.provider import AgentCompletionsRequestProvider
 from objectiveai.functions.executions.request.reasoning import FunctionsExecutionsRequestReasoning
 from objectiveai.functions.executions.request.strategy import FunctionsExecutionsRequestStrategy
-from objectiveai.functions.expression.input import FunctionsExpressionInput
+from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
 from objectiveai.functions.inline_function import FunctionsInlineFunction
 
 
@@ -17,7 +17,7 @@ class FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody(BaseModel
     from_cache: Optional[Union[bool, None]] = None
     reasoning: Optional[FunctionsExecutionsRequestReasoning] = None
     strategy: Optional[FunctionsExecutionsRequestStrategy] = None
-    input: FunctionsExpressionInput
+    input: FunctionsExpressionInputValue
     provider: Optional[AgentCompletionsRequestProvider] = None
     seed: Optional[Union[int, None]] = None
     stream: Optional[Union[bool, None]] = None
