@@ -1,5 +1,4 @@
 import z from "zod";
-import { convert, type JsonSchema } from "./jsonSchema";
 import { Stream } from "./stream";
 import { ObjectiveAIFetchError } from "./error";
 
@@ -43,10 +42,21 @@ export const ObjectiveAIOptionsSchema = z
       .string()
       .nullish()
       .describe("HTTP-Referer header. Falls back to HTTP_REFERER env var."),
+    xGithubAuthorization: z
+      .string()
+      .nullish()
+      .describe("X-GITHUB-AUTHORIZATION header for GitHub-hosted function/profile access."),
+    xOpenrouterAuthorization: z
+      .string()
+      .nullish()
+      .describe("X-OPENROUTER-AUTHORIZATION header for BYOK (Bring Your Own Key) support."),
+    xMcpAuthorization: z
+      .record(z.string(), z.string())
+      .nullish()
+      .describe("X-MCP-AUTHORIZATION header (JSON-encoded map of MCP authorization headers)."),
   })
   .describe("Options for the ObjectiveAI client.");
 export type ObjectiveAIOptions = z.infer<typeof ObjectiveAIOptionsSchema>;
-export const ObjectiveAIOptionsJsonSchema: JsonSchema = convert(ObjectiveAIOptionsSchema);
 
 /**
  * Schema for request options.
@@ -68,7 +78,6 @@ export const RequestOptionsSchema = z
   })
   .describe("Options for individual requests.");
 export type RequestOptions = z.infer<typeof RequestOptionsSchema>;
-export const RequestOptionsJsonSchema: JsonSchema = convert(RequestOptionsSchema);
 
 /**
  * ObjectiveAI API client.
@@ -79,6 +88,9 @@ export class ObjectiveAI {
   readonly userAgent: string | undefined;
   readonly xTitle: string | undefined;
   readonly httpReferer: string | undefined;
+  readonly xGithubAuthorization: string | undefined;
+  readonly xOpenrouterAuthorization: string | undefined;
+  readonly xMcpAuthorization: Record<string, string> | undefined;
 
   constructor(options?: ObjectiveAIOptions | null) {
     this.apiKey =
@@ -92,6 +104,12 @@ export class ObjectiveAI {
     this.xTitle = options?.xTitle ?? readEnv("X_TITLE") ?? undefined;
     this.httpReferer =
       options?.httpReferer ?? readEnv("HTTP_REFERER") ?? undefined;
+    this.xGithubAuthorization =
+      options?.xGithubAuthorization ?? undefined;
+    this.xOpenrouterAuthorization =
+      options?.xOpenrouterAuthorization ?? undefined;
+    this.xMcpAuthorization =
+      options?.xMcpAuthorization ?? undefined;
   }
 
   /**
@@ -114,6 +132,15 @@ export class ObjectiveAI {
     }
     if (this.httpReferer) {
       headers.set("HTTP-Referer", this.httpReferer);
+    }
+    if (this.xGithubAuthorization) {
+      headers.set("X-GITHUB-AUTHORIZATION", this.xGithubAuthorization);
+    }
+    if (this.xOpenrouterAuthorization) {
+      headers.set("X-OPENROUTER-AUTHORIZATION", this.xOpenrouterAuthorization);
+    }
+    if (this.xMcpAuthorization) {
+      headers.set("X-MCP-AUTHORIZATION", JSON.stringify(this.xMcpAuthorization));
     }
 
     // Merge in request-specific headers

@@ -573,11 +573,13 @@ function main() {
     }
   }
 
-  // Generate index.ts files for each directory (deepest first so parents find child indexes)
+  // Generate index.ts files for each directory (deepest first so parents find child indexes).
+  // The root directory gets generated.ts instead of index.ts (index.ts is hand-written).
   allDirs.add("");
 
   for (const dir of [...allDirs].sort((a, b) => b.length - a.length)) {
-    const absDir = dir ? path.join(SRC_DIR, dir) : SRC_DIR;
+    const isRoot = dir === "";
+    const absDir = isRoot ? SRC_DIR : path.join(SRC_DIR, dir);
     if (!fs.existsSync(absDir)) continue;
 
     const entries = fs.readdirSync(absDir, { withFileTypes: true });
@@ -593,30 +595,34 @@ function main() {
       }
     }
 
-    // Export .ts files (but not index.ts itself)
+    // Export .ts files (skip index.ts, generated.ts, and test files)
     for (const entry of entries.sort((a, b) => a.name.localeCompare(b.name))) {
       if (
         entry.isFile() &&
         entry.name.endsWith(".ts") &&
-        entry.name !== "index.ts"
+        entry.name !== "index.ts" &&
+        entry.name !== "generated.ts" &&
+        !entry.name.endsWith(".test.ts")
       ) {
         const name = entry.name.replace(/\.ts$/, "");
-        // Only export files we generated (check if they have a Schema export)
+        // Only export files we generated (check for auto-generated header)
         const fullFilePath = path.join(absDir, entry.name);
         const fileContent = fs.readFileSync(fullFilePath, "utf-8");
-        if (fileContent.includes("Schema =")) {
+        if (fileContent.startsWith("// THIS FILE IS AUTO-GENERATED")) {
           exportLines.push(`export * from "./${name}";`);
         }
       }
     }
 
     if (exportLines.length > 0) {
-      const indexPath = path.join(absDir, "index.ts");
-      fs.writeFileSync(indexPath, GENERATED_HEADER + exportLines.join("\n") + "\n");
+      // Root gets generated.ts; subdirectories get index.ts
+      const outName = isRoot ? "generated.ts" : "index.ts";
+      const outPath = path.join(absDir, outName);
+      fs.writeFileSync(outPath, GENERATED_HEADER + exportLines.join("\n") + "\n");
     }
   }
 
-  console.log(`Generated index.ts for ${allDirs.size} directories`);
+  console.log(`Generated barrel exports for ${allDirs.size} directories`);
   console.log("Done!");
 }
 

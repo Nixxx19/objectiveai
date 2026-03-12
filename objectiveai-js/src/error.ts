@@ -1,50 +1,40 @@
-import z from "zod";
-import { convert, type JsonSchema } from "./jsonSchema";
-import { JsonValueSchema, type JsonValue } from "./json";
+import { ResponseError } from "./responseError";
 
-export const ObjectiveAIErrorSchema = z
-  .object({
-    code: z.uint32().describe("The status code of the error."),
-    message: JsonValueSchema.describe("The message or details of the error."),
-  })
-  .describe("An error returned by the ObjectiveAI API.")
-  .meta({ title: "ObjectiveAIError" });
-export type ObjectiveAIError = z.infer<typeof ObjectiveAIErrorSchema>;
-export const ObjectiveAIErrorJsonSchema: JsonSchema = convert(ObjectiveAIErrorSchema);
+export { ResponseError };
 
 /**
  * Error thrown when an API request fails.
  *
- * - `body`: The complete ObjectiveAIError (contains code and message)
+ * - `body`: The complete ResponseError (contains code and message)
  * - `message` (inherited from Error): JSON-serialized body for stack traces
  */
 export class ObjectiveAIFetchError extends Error {
-  readonly body: ObjectiveAIError;
+  readonly body: ResponseError;
 
   /**
-   * Construct directly from an ObjectiveAIError (e.g., when streaming yields an error).
+   * Construct directly from a ResponseError (e.g., when streaming yields an error).
    */
-  constructor(body: ObjectiveAIError);
+  constructor(body: ResponseError);
   /**
    * Construct from a status code and optional raw body string.
    *
    * - If rawBody is missing/null/undefined, constructs with null message
-   * - If rawBody parses to an ObjectiveAIError, uses that (ignores code param)
-   * - Otherwise, constructs ObjectiveAIError with code and parsed JSON (or raw string) as message
+   * - If rawBody parses to a ResponseError, uses that (ignores code param)
+   * - Otherwise, constructs ResponseError with code and parsed JSON (or raw string) as message
    */
   constructor(code: number, rawBody?: string | null);
-  constructor(codeOrBody: number | ObjectiveAIError, rawBody?: string | null) {
-    let body: ObjectiveAIError;
+  constructor(codeOrBody: number | ResponseError, rawBody?: string | null) {
+    let body: ResponseError;
 
     if (typeof codeOrBody !== "number") {
-      // Direct ObjectiveAIError
+      // Direct ResponseError
       body = codeOrBody;
     } else if (rawBody === null || rawBody === undefined) {
       // No body, construct with null message
       body = { code: codeOrBody, message: null };
     } else {
       // Try to parse as JSON
-      let parsed: JsonValue;
+      let parsed: unknown;
       try {
         parsed = JSON.parse(rawBody);
       } catch {
@@ -56,9 +46,9 @@ export class ObjectiveAIFetchError extends Error {
         return;
       }
 
-      // Check if parsed is already an ObjectiveAIError
-      if (isObjectiveAIError(parsed)) {
-        // Use the parsed ObjectiveAIError, ignore the code param
+      // Check if parsed is already a ResponseError
+      if (isResponseError(parsed)) {
+        // Use the parsed ResponseError, ignore the code param
         body = parsed;
       } else {
         // Use parsed JSON as the message
@@ -66,7 +56,7 @@ export class ObjectiveAIFetchError extends Error {
       }
     }
 
-    // Error.message is a JSON-serialized ObjectiveAIError for complete error info
+    // Error.message is a JSON-serialized ResponseError for complete error info
     super(JSON.stringify(body));
     this.name = "ObjectiveAIFetchError";
     this.body = body;
@@ -80,17 +70,17 @@ export class ObjectiveAIFetchError extends Error {
   }
 
   /**
-   * Serialize to ObjectiveAIError JSON format.
+   * Serialize to ResponseError JSON format.
    */
-  toJSON(): ObjectiveAIError {
+  toJSON(): ResponseError {
     return this.body;
   }
 }
 
 /**
- * Check if an object looks like an ObjectiveAI error response.
+ * Check if an object looks like a ResponseError.
  */
-export function isObjectiveAIError(obj: unknown): obj is ObjectiveAIError {
+export function isResponseError(obj: unknown): obj is ResponseError {
   return (
     typeof obj === "object" &&
     obj !== null &&
