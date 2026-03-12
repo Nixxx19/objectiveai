@@ -161,7 +161,12 @@ fn make_client() -> Arc<TestClient> {
         None,
         None,
         None,
-        backoff::ExponentialBackoff::default(),
+        Duration::ZERO,
+        Duration::ZERO,
+        0.0,
+        1.0,
+        Duration::ZERO,
+        Duration::ZERO,
     ));
     let filesystem_client = Arc::new(crate::filesystem::Client::new(
         std::path::PathBuf::from("/tmp/objectiveai-test-recursive"),
@@ -191,7 +196,6 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionRecursive
     Arc::new(FunctionInventionRecursiveCreateParams {
         remote: objectiveai::functions::Remote::Mock,
         name: "test/recursive".to_string(),
-        github_token: None,
         state,
         provider: None,
         agent: AgentParam::Provided(AgentBase::Mock(

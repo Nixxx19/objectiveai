@@ -29,40 +29,12 @@ where
         objectiveai::error::ResponseError,
     > {
         let client = self.client.with_authorization(&ctx).await;
-        objectiveai::functions::list_function_profile_pairs(&client)
+        objectiveai::functions::list_function_profile_pairs(
+                &client,
+                Some(objectiveai::functions::request::ListFunctionProfilePairsSource::Objectiveai),
+            )
             .await
             .map_err(|e| objectiveai::error::ResponseError::from(&e))
-    }
-
-    async fn get_function_profile_pair(
-        &self,
-        ctx: ctx::Context<CTXEXT>,
-        fremote: objectiveai::functions::Remote,
-        fowner: &str,
-        frepository: &str,
-        fcommit: Option<&str>,
-        premote: objectiveai::functions::Remote,
-        powner: &str,
-        prepository: &str,
-        pcommit: Option<&str>,
-    ) -> Result<
-        objectiveai::functions::response::GetFunctionProfilePair,
-        objectiveai::error::ResponseError,
-    > {
-        let client = self.client.with_authorization(&ctx).await;
-        objectiveai::functions::get_function_profile_pair(
-            &client,
-            fremote,
-            fowner,
-            frepository,
-            fcommit,
-            premote,
-            powner,
-            prepository,
-            pcommit,
-        )
-        .await
-        .map_err(|e| objectiveai::error::ResponseError::from(&e))
     }
 
     async fn get_function_profile_pair_usage(

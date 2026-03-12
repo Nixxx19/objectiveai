@@ -138,7 +138,12 @@ fn make_client() -> Arc<TestClient> {
         None,
         None,
         None,
-        backoff::ExponentialBackoff::default(),
+        Duration::ZERO,
+        Duration::ZERO,
+        0.0,
+        1.0,
+        Duration::ZERO,
+        Duration::ZERO,
     ));
     let filesystem_client = Arc::new(crate::filesystem::Client::new(
         std::path::PathBuf::from("/tmp/objectiveai-test"),
@@ -164,7 +169,6 @@ fn make_request(state: ParamsState, seed: i64) -> Arc<FunctionInventionCreatePar
     Arc::new(FunctionInventionCreateParams {
         remote: None,
         overwrite: None,
-        github_token: None,
         state,
         provider: None,
         agent: AgentParam::Provided(AgentBase::Mock(

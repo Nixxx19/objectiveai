@@ -29,7 +29,10 @@ where
         objectiveai::error::ResponseError,
     > {
         let client = self.client.with_authorization(&ctx).await;
-        objectiveai::functions::profiles::list_profiles(&client)
+        objectiveai::functions::profiles::list_profiles(
+                &client,
+                Some(objectiveai::functions::profiles::request::ListProfilesSource::Objectiveai),
+            )
             .await
             .map_err(|e| objectiveai::error::ResponseError::from(&e))
     }
