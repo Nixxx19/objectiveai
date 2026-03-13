@@ -76,7 +76,7 @@ function entityNameToString(name: ts.EntityName): string {
 }
 
 function findMergedFunctions(): MergedFn[] {
-  const configPath = path.resolve(__dirname, "../tsconfig.json");
+  const configPath = path.resolve(__dirname, "../../tsconfig.json");
   const configFile = ts.readConfigFile(configPath, ts.sys.readFile);
   const parsedConfig = ts.parseJsonConfigFileContent(
     configFile.config,
@@ -115,7 +115,7 @@ function findMergedFunctions(): MergedFn[] {
       const returnTypeName = getTypeNameFromAnnotation(node);
 
       const relFile = path
-        .relative(path.resolve(__dirname, ".."), sourceFile.fileName)
+        .relative(path.resolve(__dirname, "../.."), sourceFile.fileName)
         .replace(/\\/g, "/");
 
       results.push({ name, file: relFile, returnTypeName });

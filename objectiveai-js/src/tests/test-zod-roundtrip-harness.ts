@@ -22,14 +22,18 @@
  * logic or in the Zod code generator — never in this file.
  */
 
-const fs = require("fs");
-const path = require("path");
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
 
-const SCHEMA_DIR = path.resolve(__dirname, "../../objectiveai-json-schema");
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const SCHEMA_DIR = path.resolve(__dirname, "../../../objectiveai-json-schema");
 
 // Canonical key ordering for JSON Schema keywords.
 // Matches KEYWORD_ORDER in objectiveai-json-schema/builder/src/main.rs.
-const KEYWORD_ORDER = [
+export const KEYWORD_ORDER = [
   "title",
   "description",
   "type",
@@ -58,14 +62,14 @@ const UNKNOWN_RANK = KEYWORD_ORDER.length;
  * - Outside `properties`: keys are sorted by KEYWORD_ORDER, with
  *   unknown keys placed at the end (preserving their relative order).
  */
-function orderKeys(value, insideProperties) {
+export function orderKeys(value: unknown, insideProperties: boolean): unknown {
   if (value === null || typeof value !== "object") return value;
   if (Array.isArray(value)) {
     return value.map((v) => orderKeys(v, false));
   }
 
   // Recurse first
-  const recursed = {};
+  const recursed: Record<string, unknown> = {};
   for (const [k, v] of Object.entries(value)) {
     recursed[k] = orderKeys(v, k === "properties");
   }
@@ -76,13 +80,13 @@ function orderKeys(value, insideProperties) {
     entries.sort(([a], [b]) => a.localeCompare(b));
   } else {
     entries.sort(([a], [b]) => {
-      const ra = KEYWORD_RANK.has(a) ? KEYWORD_RANK.get(a) : UNKNOWN_RANK;
-      const rb = KEYWORD_RANK.has(b) ? KEYWORD_RANK.get(b) : UNKNOWN_RANK;
+      const ra = KEYWORD_RANK.has(a) ? KEYWORD_RANK.get(a)! : UNKNOWN_RANK;
+      const rb = KEYWORD_RANK.has(b) ? KEYWORD_RANK.get(b)! : UNKNOWN_RANK;
       return ra - rb;
     });
   }
 
-  const result = {};
+  const result: Record<string, unknown> = {};
   for (const [k, v] of entries) {
     result[k] = v;
   }
@@ -95,7 +99,7 @@ function orderKeys(value, insideProperties) {
  * Applies the builder's key ordering, then pretty-prints with 2-space
  * indent (matching `serde_json::to_string_pretty`).
  */
-function serialize(schema) {
+export function serialize(schema: unknown): string {
   const ordered = orderKeys(schema, false);
   return JSON.stringify(ordered, null, 2);
 }
@@ -106,8 +110,8 @@ function serialize(schema) {
  * Returns a Map mapping each schema's `title` to its raw parsed content.
  * No normalization is applied.
  */
-function loadOriginalJsonSchemas() {
-  const schemas = new Map();
+export function loadOriginalJsonSchemas(): Map<string, Record<string, unknown>> {
+  const schemas = new Map<string, Record<string, unknown>>();
   const files = fs.readdirSync(SCHEMA_DIR).filter((f) => f.endsWith(".json"));
   files.sort();
   for (const file of files) {
@@ -125,8 +129,8 @@ function loadOriginalJsonSchemas() {
 // Preloaded schemas — available to importers
 // ---------------------------------------------------------------------------
 
-const ORIGINAL_SCHEMAS = loadOriginalJsonSchemas();
-const ALL_TITLES = new Set(ORIGINAL_SCHEMAS.keys());
+export const ORIGINAL_SCHEMAS = loadOriginalJsonSchemas();
+export const ALL_TITLES = new Set(ORIGINAL_SCHEMAS.keys());
 
 /**
  * Assert that a converted schema exactly matches the original on disk.
@@ -136,13 +140,13 @@ const ALL_TITLES = new Set(ORIGINAL_SCHEMAS.keys());
  * cause spurious failures — but every key, value, and nesting level must
  * match exactly.
  *
- * @param {string} title - The schema title. Must exist in ORIGINAL_SCHEMAS.
- * @param {object} converted - The caller's Zod-derived JSON Schema object,
+ * @param title - The schema title. Must exist in ORIGINAL_SCHEMAS.
+ * @param converted - The caller's Zod-derived JSON Schema object,
  *   already normalized however the caller sees fit.
- * @throws {Error} If the serialized forms differ.
- * @throws {Error} If `title` is not found in the original schemas.
+ * @throws If the serialized forms differ.
+ * @throws If `title` is not found in the original schemas.
  */
-function assertSchemaMatches(title, converted) {
+export function assertSchemaMatches(title: string, converted: Record<string, unknown>): void {
   const original = ORIGINAL_SCHEMAS.get(title);
   if (!original) {
     throw new Error(`Schema title not found in originals: '${title}'`);
@@ -159,13 +163,3 @@ function assertSchemaMatches(title, converted) {
     );
   }
 }
-
-module.exports = {
-  KEYWORD_ORDER,
-  ORIGINAL_SCHEMAS,
-  ALL_TITLES,
-  orderKeys,
-  serialize,
-  loadOriginalJsonSchemas,
-  assertSchemaMatches,
-};

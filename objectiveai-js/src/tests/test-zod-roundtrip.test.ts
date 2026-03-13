@@ -17,11 +17,11 @@
  *    in the normalization logic below — never in a per-schema workaround.
  *
  * 3. To make tests pass, you may modify:
- *    - This file (test-zod-roundtrip.cjs) — conversion logic
+ *    - This file (test-zod-roundtrip.test.ts) — conversion logic
  *    - scripts/install-zod.cjs — the Zod code generator
  *
  * 4. You MUST NEVER modify:
- *    - test-zod-roundtrip-harness.cjs — the comparison harness
+ *    - test-zod-roundtrip-harness.ts — the comparison harness
  *    - Any file in objectiveai-json-schema/ — the canonical source of truth
  *
  * DESIGN CHOICE
@@ -41,29 +41,33 @@
  * round trip.
  */
 
-const SDK = require("../dist/index.cjs");
-const harness = require("./test-zod-roundtrip-harness.cjs");
+import { describe, it, expect } from "vitest";
+import * as SDK from "../index";
+import { ALL_TITLES, assertSchemaMatches } from "./test-zod-roundtrip-harness";
 
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ZodSchema = any;
 
 /**
  * Detect if a Zod schema is JsonValueSchema (the "any JSON value" type).
  * It's a union of [string, number, boolean, null, array(lazy→self), record(string, lazy→self)]
  * where the lazy getters' results share the same options array identity.
  */
-function isJsonValueSchema(schema) {
+function isJsonValueSchema(schema: ZodSchema): boolean {
   if (schema._zod.def.type !== "union") return false;
   const opts = schema._zod.def.options;
   if (!opts || opts.length !== 6) return false;
-  const types = opts.map((o) => o._zod.def.type);
+  const types = opts.map((o: ZodSchema) => o._zod.def.type);
   if (!["string", "number", "boolean", "null", "array", "record"].every((t) => types.includes(t))) {
     return false;
   }
   // Verify the array element and record value are lazy self-references
-  const arr = opts.find((o) => o._zod.def.type === "array");
-  const rec = opts.find((o) => o._zod.def.type === "record");
+  const arr = opts.find((o: ZodSchema) => o._zod.def.type === "array");
+  const rec = opts.find((o: ZodSchema) => o._zod.def.type === "record");
   const arrEl = arr?._zod.def.element;
   const recVal = rec?._zod.def.valueType;
   if (arrEl?._zod.def.type !== "lazy" || recVal?._zod.def.type !== "lazy") return false;
@@ -73,7 +77,7 @@ function isJsonValueSchema(schema) {
 }
 
 /** "agent.Agent" → "AgentAgentSchema" */
-function titleToSchemaName(title) {
+function titleToSchemaName(title: string): string {
   return title
     .split(/[._]/)
     .filter(Boolean)
@@ -90,21 +94,16 @@ function titleToSchemaName(title) {
 
 /**
  * Convert a Zod schema to a JSON Schema object.
- *
- * @param {object} schema - A Zod schema instance
- * @param {Set<string>} allTitles - All known schema titles (for $ref detection)
- * @param {string} rootTitle - Title of the root schema being converted
- * @param {Set} [seen] - Cycle detection set
- * @returns {object} JSON Schema object
  */
-function convert(schema, allTitles, rootTitle, seen) {
+function convert(
+  schema: ZodSchema,
+  allTitles: Set<string>,
+  rootTitle: string | undefined,
+  seen: Set<ZodSchema>,
+): Record<string, unknown> {
   if (!seen) seen = new Set();
-  const def = schema._zod.def;
 
   // Detect "any JSON value" schemas (JsonValueSchema and its lazy wrappers).
-  // JsonValueSchema is a union of [string, number, boolean, null, array, record]
-  // where the array element and record value are lazy self-references.
-  // These collapse to {} (any JSON value), preserving description if present.
   if (isJsonValueSchema(schema)) {
     const desc = schema.description;
     return desc ? { description: desc } : {};
@@ -116,9 +115,9 @@ function convert(schema, allTitles, rootTitle, seen) {
   if (title && allTitles.has(title)) {
     // Self-reference: if we've already seen this schema (entered it), emit $ref
     if (seen.has(schema)) {
-      const result = { $ref: title };
+      const result: Record<string, unknown> = { $ref: title };
       const desc = schema.description;
-      const targetSchema = SDK[titleToSchemaName(title)];
+      const targetSchema = (SDK as Record<string, ZodSchema>)[titleToSchemaName(title)];
       const targetDesc = targetSchema?.description;
       if (desc && desc !== targetDesc) {
         result.description = desc;
@@ -127,9 +126,9 @@ function convert(schema, allTitles, rootTitle, seen) {
     }
     // Non-root ref: emit $ref immediately
     if (title !== rootTitle) {
-      const result = { $ref: title };
+      const result: Record<string, unknown> = { $ref: title };
       const desc = schema.description;
-      const targetSchema = SDK[titleToSchemaName(title)];
+      const targetSchema = (SDK as Record<string, ZodSchema>)[titleToSchemaName(title)];
       const targetDesc = targetSchema?.description;
       if (desc && desc !== targetDesc) {
         result.description = desc;
@@ -144,10 +143,15 @@ function convert(schema, allTitles, rootTitle, seen) {
 }
 
 /** Convert the core of a Zod schema (after $ref check). */
-function convertInner(schema, allTitles, rootTitle, seen) {
+function convertInner(
+  schema: ZodSchema,
+  allTitles: Set<string>,
+  rootTitle: string | undefined,
+  seen: Set<ZodSchema>,
+): Record<string, unknown> {
   const def = schema._zod.def;
   const type = def.type;
-  let result;
+  let result: Record<string, unknown>;
 
   switch (type) {
     case "string":
@@ -216,7 +220,7 @@ function convertInner(schema, allTitles, rootTitle, seen) {
   return result;
 }
 
-function convertLiteral(schema) {
+function convertLiteral(schema: ZodSchema): Record<string, unknown> {
   const values = [...schema._zod.def.values];
   const result = { enum: values };
   // Add type annotation matching the value's JS type
@@ -227,8 +231,8 @@ function convertLiteral(schema) {
   return result;
 }
 
-function convertString(schema) {
-  const result = { type: "string" };
+function convertString(schema: ZodSchema): Record<string, unknown> {
+  const result: Record<string, unknown> = { type: "string" };
   // Check for regex pattern
   if (schema._zod.def.checks) {
     for (const check of schema._zod.def.checks) {
@@ -245,9 +249,9 @@ function convertString(schema) {
   return result;
 }
 
-function convertNumber(schema) {
+function convertNumber(schema: ZodSchema): Record<string, unknown> {
   const isInt = schema.isInt === true;
-  const result = { type: isInt ? "integer" : "number" };
+  const result: Record<string, unknown> = { type: isInt ? "integer" : "number" };
 
   // Read min/max directly from checks (accessors clamp to safe integer range)
   if (schema._zod.def.checks) {
@@ -262,8 +266,13 @@ function convertNumber(schema) {
   return result;
 }
 
-function convertArray(schema, allTitles, rootTitle, seen) {
-  const result = { type: "array" };
+function convertArray(
+  schema: ZodSchema,
+  allTitles: Set<string>,
+  rootTitle: string | undefined,
+  seen: Set<ZodSchema>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { type: "array" };
   if (schema._zod.def.element) {
     result.items = convert(schema._zod.def.element, allTitles, rootTitle, seen);
   }
@@ -278,13 +287,18 @@ function convertArray(schema, allTitles, rootTitle, seen) {
   return result;
 }
 
-function convertObject(schema, allTitles, rootTitle, seen) {
-  const result = { type: "object" };
+function convertObject(
+  schema: ZodSchema,
+  allTitles: Set<string>,
+  rootTitle: string | undefined,
+  seen: Set<ZodSchema>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { type: "object" };
   const shape = schema._zod.def.shape;
 
   if (shape && Object.keys(shape).length > 0) {
-    const properties = {};
-    for (const [key, propSchema] of Object.entries(shape)) {
+    const properties: Record<string, unknown> = {};
+    for (const [key, propSchema] of Object.entries(shape) as [string, ZodSchema][]) {
       // Unwrap optional — the optional wrapper itself just signals optionality
       let inner = propSchema;
       if (inner._zod.def.type === "optional") {
@@ -308,8 +322,13 @@ function convertObject(schema, allTitles, rootTitle, seen) {
   return result;
 }
 
-function convertRecord(schema, allTitles, rootTitle, seen) {
-  const result = { type: "object" };
+function convertRecord(
+  schema: ZodSchema,
+  allTitles: Set<string>,
+  rootTitle: string | undefined,
+  seen: Set<ZodSchema>,
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { type: "object" };
   if (schema._zod.def.valueType) {
     const valSchema = convert(schema._zod.def.valueType, allTitles, rootTitle, seen);
     // {} (any JSON value) → additionalProperties: true
@@ -318,15 +337,20 @@ function convertRecord(schema, allTitles, rootTitle, seen) {
   return result;
 }
 
-function convertUnion(schema, allTitles, rootTitle, seen) {
+function convertUnion(
+  schema: ZodSchema,
+  allTitles: Set<string>,
+  rootTitle: string | undefined,
+  seen: Set<ZodSchema>,
+): Record<string, unknown> {
   const options = schema._zod.def.options;
 
   // Check if all options are literals with no individual descriptions → emit as flat enum
-  const allLiterals = options.every((o) => o._zod.def.type === "literal");
+  const allLiterals = options.every((o: ZodSchema) => o._zod.def.type === "literal");
   if (allLiterals) {
-    const anyHasDesc = options.some((o) => o.description);
+    const anyHasDesc = options.some((o: ZodSchema) => o.description);
     if (!anyHasDesc) {
-      const values = options.flatMap((o) => [...o._zod.def.values]);
+      const values = options.flatMap((o: ZodSchema) => [...o._zod.def.values]);
       return { enum: values };
     }
     // Literals with descriptions → anyOf of typed enums
@@ -334,24 +358,34 @@ function convertUnion(schema, allTitles, rootTitle, seen) {
   }
 
   // Check for nullable pattern: [...variants, null-typed option]
-  const nullIdx = options.findIndex((o) => o._zod.def.type === "null");
+  const nullIdx = options.findIndex((o: ZodSchema) => o._zod.def.type === "null");
   if (nullIdx !== -1) {
-    const nonNull = options.filter((_, i) => i !== nullIdx);
+    const nonNull = options.filter((_: ZodSchema, i: number) => i !== nullIdx);
     const inner = nonNull.length === 1
       ? convert(nonNull[0], allTitles, rootTitle, seen)
-      : { anyOf: nonNull.map((o) => convert(o, allTitles, rootTitle, seen)) };
+      : { anyOf: nonNull.map((o: ZodSchema) => convert(o, allTitles, rootTitle, seen)) };
     return { anyOf: [inner, { type: "null" }] };
   }
 
-  return { anyOf: options.map((o) => convert(o, allTitles, rootTitle, seen)) };
+  return { anyOf: options.map((o: ZodSchema) => convert(o, allTitles, rootTitle, seen)) };
 }
 
-function convertNullable(schema, allTitles, rootTitle, seen) {
+function convertNullable(
+  schema: ZodSchema,
+  allTitles: Set<string>,
+  rootTitle: string | undefined,
+  seen: Set<ZodSchema>,
+): Record<string, unknown> {
   const inner = convert(schema._zod.def.innerType, allTitles, rootTitle, seen);
   return { anyOf: [inner, { type: "null" }] };
 }
 
-function convertIntersection(schema, allTitles, rootTitle, seen) {
+function convertIntersection(
+  schema: ZodSchema,
+  allTitles: Set<string>,
+  rootTitle: string | undefined,
+  seen: Set<ZodSchema>,
+): Record<string, unknown> {
   // Intersection (.and()) is used for $ref + properties (adjacently-tagged enums)
   // and for anyOf + properties (serde flatten).
   // Left side is typically the union/ref, right side is the object with extra properties.
@@ -360,7 +394,7 @@ function convertIntersection(schema, allTitles, rootTitle, seen) {
 
   // If left is a $ref node, merge right's properties as siblings
   if (left.$ref) {
-    const result = {};
+    const result: Record<string, unknown> = {};
     if (left.description) result.description = left.description;
     if (right.type) result.type = right.type;
     result.$ref = left.$ref;
@@ -373,7 +407,7 @@ function convertIntersection(schema, allTitles, rootTitle, seen) {
 
   // If left has anyOf (serde flatten), combine with right's object part
   if (left.anyOf) {
-    const result = {};
+    const result: Record<string, unknown> = {};
     if (left.description) result.description = left.description;
     result.anyOf = left.anyOf;
     if (right.properties) result.properties = right.properties;
@@ -393,18 +427,18 @@ function convertIntersection(schema, allTitles, rootTitle, seen) {
  * Convert a top-level Zod schema to JSON Schema, including the title and
  * root-level description.
  */
-function convertTopLevel(schema, allTitles) {
+function convertTopLevel(schema: ZodSchema, allTitles: Set<string>): Record<string, unknown> {
   const meta = typeof schema.meta === "function" ? schema.meta() : {};
   const title = meta?.title;
   const desc = schema.description;
 
   // Convert without $ref-ifying the root itself (but add it to seen for self-ref detection)
-  const seen = new Set();
+  const seen = new Set<ZodSchema>();
   seen.add(schema);
   const result = convertInner(schema, allTitles, title, seen);
 
   // Add title and description at the top
-  const output = {};
+  const output: Record<string, unknown> = {};
   if (title) output.title = title;
   if (desc) output.description = desc;
   Object.assign(output, result);
@@ -418,45 +452,21 @@ function convertTopLevel(schema, allTitles) {
 // Test runner
 // ---------------------------------------------------------------------------
 
-let passed = 0;
-let failed = 0;
-const failures = [];
+describe("Zod → JSON Schema roundtrip", () => {
+  for (const title of ALL_TITLES) {
+    const schemaName = titleToSchemaName(title);
+    const zodSchema = (SDK as Record<string, ZodSchema>)[schemaName];
 
-for (const title of harness.ALL_TITLES) {
-  const schemaName = titleToSchemaName(title);
-  const zodSchema = SDK[schemaName];
+    if (!zodSchema) {
+      it(`${title} — has matching export: ${schemaName}`, () => {
+        expect.fail(`Missing Zod schema export: ${schemaName}`);
+      });
+      continue;
+    }
 
-  if (!zodSchema) {
-    console.log(`  \u2717 ${title} — missing export: ${schemaName}`);
-    failed++;
-    failures.push({ title, error: `Missing Zod schema export: ${schemaName}` });
-    continue;
+    it(title, () => {
+      const converted = convertTopLevel(zodSchema, ALL_TITLES);
+      assertSchemaMatches(title, converted);
+    });
   }
-
-  try {
-    const converted = convertTopLevel(zodSchema, harness.ALL_TITLES);
-    harness.assertSchemaMatches(title, converted);
-    passed++;
-  } catch (err) {
-    console.log(`  \u2717 ${title}`);
-    failed++;
-    failures.push({ title, error: err.message });
-  }
-}
-
-console.log(`\n${passed} passed, ${failed} failed out of ${passed + failed}`);
-
-if (failures.length > 0) {
-  console.log("\nFailures:\n");
-  for (const { title, error } of failures.slice(0, 10)) {
-    console.log(`--- ${title} ---`);
-    console.log(error.slice(0, 2000));
-    console.log();
-  }
-  if (failures.length > 10) {
-    console.log(`... and ${failures.length - 10} more`);
-  }
-  process.exit(1);
-}
-
-console.log("\nAll schemas match!");
+});
