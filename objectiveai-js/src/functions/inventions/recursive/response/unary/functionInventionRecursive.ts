@@ -6,10 +6,10 @@ import { FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema } from
 import { FunctionsInventionsRecursiveResponseUnaryObjectSchema } from "./object";
 
 export const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema = z.object({
+  created: z.number().int().min(0).max(18446744073709552000),
   id: z.string(),
   inventions: z.array(FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema),
   inventions_errors: z.boolean(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
   object: FunctionsInventionsRecursiveResponseUnaryObjectSchema,
   usage: AgentCompletionsResponseUsageSchema,
 }).meta({ title: "functions.inventions.recursive.response.unary.FunctionInventionRecursive" });

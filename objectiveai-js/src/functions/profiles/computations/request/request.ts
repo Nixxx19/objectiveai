@@ -8,7 +8,7 @@ import { FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema } f
 export const FunctionsProfilesComputationsRequestRequestSchema = z.union([z.object({
   body: FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema,
 }), z.object({
-  path: FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema,
   body: FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema,
+  path: FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema,
 })]).meta({ title: "functions.profiles.computations.request.Request" });
 export type FunctionsProfilesComputationsRequestRequest = z.infer<typeof FunctionsProfilesComputationsRequestRequestSchema>;

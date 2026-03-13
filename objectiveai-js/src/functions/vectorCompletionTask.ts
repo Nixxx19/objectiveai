@@ -7,7 +7,7 @@ import { FunctionsExpressionExpressionSchema } from "./expression/expression";
 
 export const FunctionsVectorCompletionTaskSchema = z.object({
   messages: z.array(AgentCompletionsMessageMessageSchema).describe("The resolved conversation messages."),
-  responses: z.array(AgentCompletionsMessageRichContentSchema).describe("The resolved response options the LLMs can vote for."),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` as the task's raw result (typically `Vector(scores)`).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`VectorCompletionTaskExpression::output`] for full documentation."),
+  responses: z.array(AgentCompletionsMessageRichContentSchema).describe("The resolved response options the LLMs can vote for."),
 }).describe("A compiled vector completion task ready for execution.").meta({ title: "functions.VectorCompletionTask" });
 export type FunctionsVectorCompletionTask = z.infer<typeof FunctionsVectorCompletionTaskSchema>;

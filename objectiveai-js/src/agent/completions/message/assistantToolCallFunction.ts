@@ -3,7 +3,7 @@
 import { z } from "zod";
 
 export const AgentCompletionsMessageAssistantToolCallFunctionSchema = z.object({
-  name: z.string().describe("The name of the function to call."),
   arguments: z.string().describe("The arguments to pass to the function, as a JSON string."),
+  name: z.string().describe("The name of the function to call."),
 }).describe("Details of a function call made by the assistant.").meta({ title: "agent.completions.message.AssistantToolCallFunction" });
 export type AgentCompletionsMessageAssistantToolCallFunction = z.infer<typeof AgentCompletionsMessageAssistantToolCallFunctionSchema>;

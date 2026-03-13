@@ -3,10 +3,10 @@
 import { z } from "zod";
 
 export const FunctionsProfilesComputationsResponseFittingStatsSchema = z.object({
-  loss: z.number().meta({ format: "double" }),
-  executions: z.number().int().min(0).meta({ format: "uint" }),
-  starts: z.number().int().min(0).meta({ format: "uint" }),
-  rounds: z.number().int().min(0).meta({ format: "uint" }),
-  errors: z.number().int().min(0).meta({ format: "uint" }),
+  errors: z.number().int().min(0).max(4294967295),
+  executions: z.number().int().min(0).max(4294967295),
+  loss: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38),
+  rounds: z.number().int().min(0).max(4294967295),
+  starts: z.number().int().min(0).max(4294967295),
 }).meta({ title: "functions.profiles.computations.response.FittingStats" });
 export type FunctionsProfilesComputationsResponseFittingStats = z.infer<typeof FunctionsProfilesComputationsResponseFittingStatsSchema>;

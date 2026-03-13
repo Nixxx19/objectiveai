@@ -3,10 +3,10 @@
 import { z } from "zod";
 
 export const AgentCompletionsRequestProviderMaxPriceSchema = z.object({
-  prompt: z.number().meta({ format: "double" }).nullable().describe("Maximum price per prompt token.").optional(),
-  completion: z.number().meta({ format: "double" }).nullable().describe("Maximum price per completion token.").optional(),
-  image: z.number().meta({ format: "double" }).nullable().describe("Maximum price per image.").optional(),
-  audio: z.number().meta({ format: "double" }).nullable().describe("Maximum price per audio second.").optional(),
-  request: z.number().meta({ format: "double" }).nullable().describe("Maximum price per request.").optional(),
+  audio: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Maximum price per audio second.").optional(),
+  completion: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Maximum price per completion token.").optional(),
+  image: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Maximum price per image.").optional(),
+  prompt: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Maximum price per prompt token.").optional(),
+  request: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Maximum price per request.").optional(),
 }).describe("Maximum price constraints per token type.").meta({ title: "agent.completions.request.ProviderMaxPrice" });
 export type AgentCompletionsRequestProviderMaxPrice = z.infer<typeof AgentCompletionsRequestProviderMaxPriceSchema>;

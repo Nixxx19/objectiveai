@@ -148,64 +148,65 @@ function resolveDefs(obj: any, defs: Record<string, any>, resolving = new Set<st
 
 /** Clean the Zod→JSON Schema output: strip $schema, $defs, additionalProperties: false,
  *  Zod's auto-generated safe integer bounds, and flatten nested anyOf. */
-function cleanConverted(obj: any): any {
+function cleanConverted(obj: any, insideProperties = false): any {
   if (obj === null || typeof obj !== "object") return obj;
-  if (Array.isArray(obj)) return obj.map(cleanConverted);
+  if (Array.isArray(obj)) return obj.map((v) => cleanConverted(v));
 
   const result: any = {};
   for (const [key, value] of Object.entries(obj)) {
-    if (key === "$schema") continue;
-    if (key === "$defs") continue;
-    // Strip additionalProperties: {} (semantically default — any additional properties allowed)
-    if (key === "additionalProperties" && typeof value === "object" && value !== null && !Array.isArray(value) && Object.keys(value).length === 0) continue;
+    // Keys inside "properties" are field names, not JSON Schema keywords — skip normalization
+    if (!insideProperties) {
+      if (key === "$schema") continue;
+      if (key === "$defs") continue;
+      // Strip additionalProperties: {} (semantically default — any additional properties allowed)
+      if (key === "additionalProperties" && typeof value === "object" && value !== null && !Array.isArray(value) && Object.keys(value).length === 0) continue;
 
-    // Strip Zod's auto-generated safe integer bounds on integer types
-    if (key === "minimum" && value === SAFE_INT_MIN && obj.type === "integer") continue;
-    if (key === "maximum" && value === SAFE_INT_MAX && obj.type === "integer") continue;
+      // Strip Zod's auto-generated safe integer bounds on integer types
+      if (key === "minimum" && value === SAFE_INT_MIN && obj.type === "integer") continue;
+      if (key === "maximum" && value === SAFE_INT_MAX && obj.type === "integer") continue;
 
-    // Strip propertyNames (Zod adds { type: "string" } for z.record())
-    if (key === "propertyNames") continue;
+      // Strip propertyNames (Zod adds { type: "string" } for z.record())
+      if (key === "propertyNames") continue;
 
-    // Flatten nested anyOf: anyOf: [anyOf: [A, B], C] → anyOf: [A, B, C]
-    if (key === "anyOf" && Array.isArray(value)) {
-      const flat: any[] = [];
-      for (const item of value) {
-        const cleaned = cleanConverted(item);
-        // If item is JUST an anyOf wrapper (no other keys), flatten it
-        if (cleaned && typeof cleaned === "object" && !Array.isArray(cleaned) &&
-            cleaned.anyOf && Object.keys(cleaned).length === 1) {
-          flat.push(...cleaned.anyOf);
-        } else {
-          flat.push(cleaned);
-        }
+      // Convert const → single-element enum (matching the JSON schema builder's convention)
+      if (key === "const") {
+        result["enum"] = [value];
+        continue;
       }
-      result[key] = flat;
-      continue;
+
+      // Flatten nested anyOf: anyOf: [anyOf: [A, B], C] → anyOf: [A, B, C]
+      if (key === "anyOf" && Array.isArray(value)) {
+        const flat: any[] = [];
+        for (const item of value) {
+          const cleaned = cleanConverted(item);
+          // If item is JUST an anyOf wrapper (no other keys), flatten it
+          if (cleaned && typeof cleaned === "object" && !Array.isArray(cleaned) &&
+              cleaned.anyOf && Object.keys(cleaned).length === 1) {
+            flat.push(...cleaned.anyOf);
+          } else {
+            flat.push(cleaned);
+          }
+        }
+        result[key] = flat;
+        continue;
+      }
     }
 
-    result[key] = cleanConverted(value);
+    result[key] = cleanConverted(value, key === "properties");
   }
   return result;
 }
 
 /** Normalize the original JSON Schema: convert oneOf→anyOf, type-array
- *  nullables to anyOf form, and single-element enum to const
- *  (matching what Zod's toJSONSchema produces). */
+ *  nullables to anyOf form (matching what Zod's toJSONSchema produces). */
 function normalizeOriginal(obj: any, titleDescs?: Map<string, string>, allSchemas?: Map<string, any>): any {
   if (obj === null || typeof obj !== "object") return obj;
   if (Array.isArray(obj)) return obj.map((v) => normalizeOriginal(v, titleDescs, allSchemas));
 
   const result: any = {};
   for (const [key, value] of Object.entries(obj)) {
-    if (key === "$schema") continue;
     // Strip additionalProperties: true (semantically default — any additional properties allowed)
     if (key === "additionalProperties" && value === true) continue;
-
-    // Convert single-element enum to const
-    if (key === "enum" && Array.isArray(value) && value.length === 1) {
-      result["const"] = value[0];
-      continue;
-    }
 
     // Convert oneOf → anyOf
     if (key === "oneOf") {
@@ -224,7 +225,7 @@ function normalizeOriginal(obj: any, titleDescs?: Map<string, string>, allSchema
         const outerResult: any = {};
 
         for (const [k2, v2] of Object.entries(obj)) {
-          if (k2 === "$schema" || k2 === "type") continue;
+          if (k2 === "type") continue;
           // Type-specific constraints go on the inner type
           if (["items", "properties", "required", "additionalProperties",
                "minimum", "maximum", "format", "pattern",
@@ -247,7 +248,7 @@ function normalizeOriginal(obj: any, titleDescs?: Map<string, string>, allSchema
         const numberConstraints: any = {};
 
         for (const [k2, v2] of Object.entries(obj)) {
-          if (k2 === "$schema" || k2 === "type") continue;
+          if (k2 === "type") continue;
           // pattern only applies to strings
           if (k2 === "pattern") {
             stringConstraints[k2] = normalizeOriginal(v2, titleDescs, allSchemas);

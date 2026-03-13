@@ -7,12 +7,12 @@ import { AgentCompletionsRequestProviderSortSchema } from "./providerSort";
 
 export const AgentCompletionsRequestProviderSchema = z.object({
   data_collection: AgentCompletionsRequestProviderDataCollectionSchema.nullable().describe("Whether to allow providers to collect data.").optional(),
-  zdr: z.boolean().nullable().describe("Whether to use zero data retention providers only.").optional(),
-  sort: AgentCompletionsRequestProviderSortSchema.nullable().describe("How to sort/prioritize providers.").optional(),
+  max_latency: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Hard maximum latency requirement (seconds).").optional(),
   max_price: AgentCompletionsRequestProviderMaxPriceSchema.nullable().describe("Maximum price constraints.").optional(),
-  preferred_min_throughput: z.number().meta({ format: "double" }).nullable().describe("Preferred minimum throughput (tokens/second).").optional(),
-  preferred_max_latency: z.number().meta({ format: "double" }).nullable().describe("Preferred maximum latency (seconds).").optional(),
-  min_throughput: z.number().meta({ format: "double" }).nullable().describe("Hard minimum throughput requirement (tokens/second).").optional(),
-  max_latency: z.number().meta({ format: "double" }).nullable().describe("Hard maximum latency requirement (seconds).").optional(),
+  min_throughput: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Hard minimum throughput requirement (tokens/second).").optional(),
+  preferred_max_latency: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Preferred maximum latency (seconds).").optional(),
+  preferred_min_throughput: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Preferred minimum throughput (tokens/second).").optional(),
+  sort: AgentCompletionsRequestProviderSortSchema.nullable().describe("How to sort/prioritize providers.").optional(),
+  zdr: z.boolean().nullable().describe("Whether to use zero data retention providers only.").optional(),
 }).describe("Provider routing and selection preferences.").meta({ title: "agent.completions.request.Provider" });
 export type AgentCompletionsRequestProvider = z.infer<typeof AgentCompletionsRequestProviderSchema>;

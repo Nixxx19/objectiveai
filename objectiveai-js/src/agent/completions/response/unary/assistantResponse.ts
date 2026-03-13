@@ -9,21 +9,21 @@ import { AgentCompletionsResponseLogprobsSchema } from "../logprobs";
 import { AgentCompletionsResponseUpstreamUsageSchema } from "../upstreamUsage";
 
 export const AgentCompletionsResponseUnaryAssistantResponseSchema = z.object({
-  role: AgentCompletionsResponseAssistantRoleSchema,
-  index: z.number().int().min(0).meta({ format: "uint64" }),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
   agent: z.string(),
-  model: z.string(),
-  upstream_id: z.string(),
-  reasoning: z.string().nullable().optional(),
-  tool_calls: z.array(AgentCompletionsMessageAssistantToolCallSchema).nullable().optional(),
   content: AgentCompletionsMessageRichContentSchema.nullable().optional(),
-  refusal: z.string().nullable().optional(),
+  created: z.number().int().min(0).max(18446744073709552000),
   finish_reason: AgentCompletionsResponseFinishReasonSchema,
+  index: z.number().int().min(0).max(18446744073709552000),
   logprobs: AgentCompletionsResponseLogprobsSchema.nullable().optional(),
+  model: z.string(),
+  provider: z.string().nullable().optional(),
+  reasoning: z.string().nullable().optional(),
+  refusal: z.string().nullable().optional(),
+  role: AgentCompletionsResponseAssistantRoleSchema,
   service_tier: z.string().nullable().optional(),
   system_fingerprint: z.string().nullable().optional(),
-  provider: z.string().nullable().optional(),
+  tool_calls: z.array(AgentCompletionsMessageAssistantToolCallSchema).nullable().optional(),
+  upstream_id: z.string(),
   usage: AgentCompletionsResponseUpstreamUsageSchema.describe("Upstream usage for this assistant response (set by upstream clients)."),
 }).describe("An assistant response in a unary agent completion.").meta({ title: "agent.completions.response.unary.AssistantResponse" });
 export type AgentCompletionsResponseUnaryAssistantResponse = z.infer<typeof AgentCompletionsResponseUnaryAssistantResponseSchema>;

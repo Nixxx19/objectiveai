@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FunctionsExpressionFileInputSchemaTypeSchema } from "./fileInputSchemaType";
 
 export const FunctionsExpressionFileInputSchemaSchema = z.object({
-  type: FunctionsExpressionFileInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the expected file.").optional(),
+  type: FunctionsExpressionFileInputSchemaTypeSchema,
 }).describe("Schema for a file input.").meta({ title: "functions.expression.FileInputSchema" });
 export type FunctionsExpressionFileInputSchema = z.infer<typeof FunctionsExpressionFileInputSchemaSchema>;

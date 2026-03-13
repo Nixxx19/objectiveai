@@ -4,7 +4,7 @@ import { z } from "zod";
 import { FunctionsExpressionImageInputSchemaTypeSchema } from "./imageInputSchemaType";
 
 export const FunctionsExpressionImageInputSchemaSchema = z.object({
-  type: FunctionsExpressionImageInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the expected image.").optional(),
+  type: FunctionsExpressionImageInputSchemaTypeSchema,
 }).describe("Schema for an image input (URL or base64-encoded).").meta({ title: "functions.expression.ImageInputSchema" });
 export type FunctionsExpressionImageInputSchema = z.infer<typeof FunctionsExpressionImageInputSchemaSchema>;

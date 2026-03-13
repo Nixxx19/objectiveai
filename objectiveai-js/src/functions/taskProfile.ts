@@ -6,14 +6,14 @@ import { FunctionsInlineProfileSchema, type FunctionsInlineProfile } from "./inl
 import { FunctionsRemoteSchema, type FunctionsRemote } from "./remote";
 
 export type FunctionsTaskProfile = {
-  remote: FunctionsRemote;
+  commit?: (string) | null;
   owner: string;
+  remote: FunctionsRemote;
   repository: string;
-  commit?: string | null;
 } | FunctionsInlineProfile | Record<string, JsonValue>;
 export const FunctionsTaskProfileSchema: z.ZodType<FunctionsTaskProfile> = z.union([z.object({
-  remote: FunctionsRemoteSchema.describe("The remote source where the profile is hosted."),
-  owner: z.string().describe("Repository owner."),
-  repository: z.string().describe("Repository name."),
   commit: z.string().nullable().describe("Git commit SHA. Highly recommended for remote profiles to\nensure compatibility if the referenced profile's shape changes.").optional(),
+  owner: z.string().describe("Repository owner."),
+  remote: FunctionsRemoteSchema.describe("The remote source where the profile is hosted."),
+  repository: z.string().describe("Repository name."),
 }).describe("Profile for a nested function task (references another profile)."), z.lazy(() => FunctionsInlineProfileSchema).describe("Inline profile for a task (tasks-based or auto)."), z.record(z.string(), JsonValueSchema).describe("Placeholder task — no configuration needed, output is fixed.")]).describe("Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.").meta({ title: "functions.TaskProfile" });

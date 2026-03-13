@@ -4,9 +4,9 @@ import { z } from "zod";
 import { FunctionsRemoteSchema } from "../../remote";
 
 export const FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema = z.object({
-  premote: FunctionsRemoteSchema.describe("Profile remote source."),
-  powner: z.string().describe("Profile repository owner."),
-  prepository: z.string().describe("Profile repository name."),
   pcommit: z.string().nullable().describe("Profile Git commit SHA (optional).").optional(),
+  powner: z.string().describe("Profile repository owner."),
+  premote: FunctionsRemoteSchema.describe("Profile remote source."),
+  prepository: z.string().describe("Profile repository name."),
 }).describe("Path parameters for inline Function with remote Profile.").meta({ title: "functions.executions.request.FunctionInlineProfileRemoteRequestPath" });
 export type FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPath = z.infer<typeof FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema>;

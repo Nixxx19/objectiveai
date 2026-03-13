@@ -16,11 +16,11 @@ export const AgentCompletionsMessageRichContentPartSchema = z.union([z.object({
   input_audio: AgentCompletionsMessageInputAudioSchema,
   type: z.literal("input_audio"),
 }).describe("Audio input."), z.object({
-  video_url: AgentCompletionsMessageVideoUrlSchema,
   type: z.literal("input_video"),
-}).describe("Video input."), z.object({
   video_url: AgentCompletionsMessageVideoUrlSchema,
+}).describe("Video input."), z.object({
   type: z.literal("video_url"),
+  video_url: AgentCompletionsMessageVideoUrlSchema,
 }).describe("A video URL."), z.object({
   file: AgentCompletionsMessageFileSchema,
   type: z.literal("file"),

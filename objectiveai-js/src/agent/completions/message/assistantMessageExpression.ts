@@ -6,14 +6,14 @@ import { FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichCon
 export interface AgentCompletionsMessageAssistantMessageExpression {
   content?: (FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpression) | null;
   name?: (FunctionsExpressionWithExpressionNullableString) | null;
+  reasoning?: (FunctionsExpressionWithExpressionNullableString) | null;
   refusal?: (FunctionsExpressionWithExpressionNullableString) | null;
   tool_calls?: (FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression) | null;
-  reasoning?: (FunctionsExpressionWithExpressionNullableString) | null;
 }
 export const AgentCompletionsMessageAssistantMessageExpressionSchema: z.ZodType<AgentCompletionsMessageAssistantMessageExpression> = z.object({
   content: z.lazy(() => FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema).nullable().describe("The content expression.").optional(),
   name: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
+  reasoning: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
   refusal: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
   tool_calls: z.lazy(() => FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema).nullable().optional(),
-  reasoning: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
 }).describe("Expression variant of [`AssistantMessage`] for dynamic content.").meta({ title: "agent.completions.message.AssistantMessageExpression" });

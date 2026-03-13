@@ -9,21 +9,21 @@ import { FunctionsExpressionTaskOutputOwnedSchema } from "../../../../expression
 import { ResponseErrorSchema } from "../../../../../responseError";
 
 export const FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema = z.object({
-  index: z.number().int().min(0).meta({ format: "uint64" }),
-  dataset: z.number().int().min(0).meta({ format: "uint64" }),
-  n: z.number().int().min(0).meta({ format: "uint64" }),
-  retry: z.number().int().min(0).meta({ format: "uint64" }),
+  created: z.number().int().min(0).max(18446744073709552000),
+  dataset: z.number().int().min(0).max(18446744073709552000),
+  error: ResponseErrorSchema.nullable().optional(),
+  function: z.string().nullable().optional(),
   id: z.string(),
+  index: z.number().int().min(0).max(18446744073709552000),
+  n: z.number().int().min(0).max(18446744073709552000),
+  object: FunctionsExecutionsResponseStreamingObjectSchema,
+  output: FunctionsExpressionTaskOutputOwnedSchema.nullable().optional(),
+  profile: z.string().nullable().optional(),
+  reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().optional(),
+  retry: z.number().int().min(0).max(18446744073709552000),
+  retry_token: z.string().nullable().optional(),
   tasks: z.array(FunctionsExecutionsResponseStreamingTaskChunkSchema),
   tasks_errors: z.boolean().nullable().optional(),
-  reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().optional(),
-  output: FunctionsExpressionTaskOutputOwnedSchema.nullable().optional(),
-  error: ResponseErrorSchema.nullable().optional(),
-  retry_token: z.string().nullable().optional(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
-  function: z.string().nullable().optional(),
-  profile: z.string().nullable().optional(),
-  object: FunctionsExecutionsResponseStreamingObjectSchema,
   usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
 }).meta({ title: "functions.profiles.computations.response.streaming.FunctionExecutionChunk" });
 export type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk = z.infer<typeof FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema>;

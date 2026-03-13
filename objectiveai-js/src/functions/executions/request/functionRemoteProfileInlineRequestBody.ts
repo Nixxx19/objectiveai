@@ -8,15 +8,15 @@ import { FunctionsExpressionInputValueSchema } from "../../expression/inputValue
 import { FunctionsInlineProfileSchema } from "../../inlineProfile";
 
 export const FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema = z.object({
-  profile: FunctionsInlineProfileSchema.describe("The inline Profile definition."),
-  retry_token: z.string().nullable().describe("If present, reuses votes from a previous execution with this token.").optional(),
   from_cache: z.boolean().nullable().describe("If true, uses cached votes when available.").optional(),
-  reasoning: FunctionsExecutionsRequestReasoningSchema.nullable().describe("Reasoning summary configuration.").optional(),
-  strategy: FunctionsExecutionsRequestStrategySchema.nullable().describe("Execution strategy.\nDefaults to `Default` strategy if not specified.").optional(),
   input: FunctionsExpressionInputValueSchema.describe("The input data to pass to the Function."),
-  provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").optional(),
-  seed: z.number().int().meta({ format: "int64" }).nullable().describe("Random seed for deterministic results.").optional(),
-  stream: z.boolean().nullable().describe("Whether to stream the response.").optional(),
   mcp_server_authorization: z.record(z.string(), z.string()).nullable().describe("Map from MCP server URL to authorization header value.").optional(),
+  profile: FunctionsInlineProfileSchema.describe("The inline Profile definition."),
+  provider: AgentCompletionsRequestProviderSchema.nullable().describe("Provider routing preferences.").optional(),
+  reasoning: FunctionsExecutionsRequestReasoningSchema.nullable().describe("Reasoning summary configuration.").optional(),
+  retry_token: z.string().nullable().describe("If present, reuses votes from a previous execution with this token.").optional(),
+  seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().describe("Random seed for deterministic results.").optional(),
+  strategy: FunctionsExecutionsRequestStrategySchema.nullable().describe("Execution strategy.\nDefaults to `Default` strategy if not specified.").optional(),
+  stream: z.boolean().nullable().describe("Whether to stream the response.").optional(),
 }).describe("Request body for remote Function with inline Profile.").meta({ title: "functions.executions.request.FunctionRemoteProfileInlineRequestBody" });
 export type FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody = z.infer<typeof FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema>;

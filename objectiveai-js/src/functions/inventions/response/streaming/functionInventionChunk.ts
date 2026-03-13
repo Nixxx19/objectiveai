@@ -10,14 +10,14 @@ import { FunctionsRemoteFunctionPathSchema } from "../../../remoteFunctionPath";
 import { ResponseErrorSchema } from "../../../../responseError";
 
 export const FunctionsInventionsResponseStreamingFunctionInventionChunkSchema = z.object({
-  id: z.string(),
   completions: z.array(FunctionsInventionsResponseStreamingAgentCompletionChunkSchema),
-  state: FunctionsInventionsStateStateSchema.nullable().optional(),
-  path: FunctionsRemoteFunctionPathSchema.nullable().optional(),
-  function: FunctionsFullRemoteFunctionSchema.nullable().optional(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
-  object: FunctionsInventionsResponseStreamingObjectSchema,
-  usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
+  created: z.number().int().min(0).max(18446744073709552000),
   error: ResponseErrorSchema.nullable().optional(),
+  function: FunctionsFullRemoteFunctionSchema.nullable().optional(),
+  id: z.string(),
+  object: FunctionsInventionsResponseStreamingObjectSchema,
+  path: FunctionsRemoteFunctionPathSchema.nullable().optional(),
+  state: FunctionsInventionsStateStateSchema.nullable().optional(),
+  usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
 }).meta({ title: "functions.inventions.response.streaming.FunctionInventionChunk" });
 export type FunctionsInventionsResponseStreamingFunctionInventionChunk = z.infer<typeof FunctionsInventionsResponseStreamingFunctionInventionChunkSchema>;

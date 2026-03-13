@@ -6,9 +6,9 @@ import { FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema 
 import { FunctionsExpressionExpressionSchema } from "../expression/expression";
 
 export const FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema = z.object({
-  spec: z.string(),
+  input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().optional(),
-  input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
+  spec: z.string(),
 }).meta({ title: "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression" });
 export type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression = z.infer<typeof FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema>;

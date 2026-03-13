@@ -4,10 +4,10 @@ import { z } from "zod";
 import { FunctionsExpressionWithExpressionStringSchema, type FunctionsExpressionWithExpressionString } from "../../../functions/expression/withExpression";
 
 export interface AgentCompletionsMessageAssistantToolCallFunctionExpression {
-  name: FunctionsExpressionWithExpressionString;
   arguments: FunctionsExpressionWithExpressionString;
+  name: FunctionsExpressionWithExpressionString;
 }
 export const AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema: z.ZodType<AgentCompletionsMessageAssistantToolCallFunctionExpression> = z.object({
-  name: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The function name expression."),
   arguments: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The arguments expression."),
+  name: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The function name expression."),
 }).describe("Expression variant of [`AssistantToolCallFunction`] for dynamic content.").meta({ title: "agent.completions.message.AssistantToolCallFunctionExpression" });

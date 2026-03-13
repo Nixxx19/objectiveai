@@ -5,11 +5,11 @@ import { PrefixedUuidSchema } from "../prefixedUuid";
 
 export const AuthListApiKeyItemSchema = z.object({
   api_key: PrefixedUuidSchema.describe("The API key itself."),
+  cost: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).describe("The total cost incurred by this API key."),
   created: z.string().meta({ format: "date-time" }).describe("The timestamp when the API key was created (RFC 3339 format)."),
-  expires: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
-  disabled: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
-  name: z.string().describe("The user-provided name of the API key."),
   description: z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
-  cost: z.number().meta({ format: "double" }).describe("The total cost incurred by this API key."),
+  disabled: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
+  expires: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
+  name: z.string().describe("The user-provided name of the API key."),
 }).describe("An API key with metadata and accumulated cost information.\n\nThis extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with\nthe total cost incurred by requests using this key.").meta({ title: "auth.ListApiKeyItem" });
 export type AuthListApiKeyItem = z.infer<typeof AuthListApiKeyItemSchema>;

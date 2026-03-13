@@ -13,11 +13,11 @@ export type AgentCompletionsMessageRichContentPartExpression = {
   input_audio: FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudio;
   type: "input_audio";
 } | {
-  video_url: FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl;
   type: "input_video";
-} | {
   video_url: FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl;
+} | {
   type: "video_url";
+  video_url: FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl;
 } | {
   file: FunctionsExpressionWithExpressionAgentCompletionsMessageFile;
   type: "file";
@@ -32,11 +32,11 @@ export const AgentCompletionsMessageRichContentPartExpressionSchema: z.ZodType<A
   input_audio: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioSchema),
   type: z.literal("input_audio"),
 }), z.object({
-  video_url: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema),
   type: z.literal("input_video"),
-}), z.object({
   video_url: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema),
+}), z.object({
   type: z.literal("video_url"),
+  video_url: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema),
 }), z.object({
   file: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageFileSchema),
   type: z.literal("file"),

@@ -3,11 +3,11 @@
 import { z } from "zod";
 import { FunctionsExpressionWithExpressionStringSchema, type FunctionsExpressionWithExpressionString } from "../../../functions/expression/withExpression";
 
-export type AgentCompletionsMessageSimpleContentPartExpression = {
+export interface AgentCompletionsMessageSimpleContentPartExpression {
   text: FunctionsExpressionWithExpressionString;
   type: "text";
-};
-export const AgentCompletionsMessageSimpleContentPartExpressionSchema: z.ZodType<AgentCompletionsMessageSimpleContentPartExpression> = z.union([z.object({
+}
+export const AgentCompletionsMessageSimpleContentPartExpressionSchema: z.ZodType<AgentCompletionsMessageSimpleContentPartExpression> = z.object({
   text: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The text expression."),
   type: z.literal("text"),
-}).describe("A text part expression.")]).describe("Expression variant of [`SimpleContentPart`] for dynamic content.").meta({ title: "agent.completions.message.SimpleContentPartExpression" });
+}).describe("A text part expression.").meta({ title: "agent.completions.message.SimpleContentPartExpression" });

@@ -6,11 +6,11 @@ import { FunctionsExpressionExpressionSchema } from "../expression/expression";
 import { FunctionsRemoteSchema } from "../remote";
 
 export const FunctionsAlphaVectorVectorFunctionTaskExpressionSchema = z.object({
-  remote: FunctionsRemoteSchema,
-  owner: z.string(),
-  repository: z.string(),
   commit: z.string(),
-  skip: FunctionsExpressionExpressionSchema.nullable().optional(),
   input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema,
+  owner: z.string(),
+  remote: FunctionsRemoteSchema,
+  repository: z.string(),
+  skip: FunctionsExpressionExpressionSchema.nullable().optional(),
 }).meta({ title: "functions.alpha_vector.VectorFunctionTaskExpression" });
 export type FunctionsAlphaVectorVectorFunctionTaskExpression = z.infer<typeof FunctionsAlphaVectorVectorFunctionTaskExpressionSchema>;

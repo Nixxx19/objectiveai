@@ -6,13 +6,13 @@ import { FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressio
 import { FunctionsRemoteSchema } from "./remote";
 
 export const FunctionsScalarFunctionTaskExpressionSchema = z.object({
-  remote: FunctionsRemoteSchema.describe("The remote source where the function is hosted."),
-  owner: z.string().describe("Repository owner."),
-  repository: z.string().describe("Repository name."),
   commit: z.string().describe("Git commit SHA for the function version."),
-  skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").optional(),
-  map: FunctionsExpressionExpressionSchema.nullable().describe("Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).").optional(),
   input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema.describe("Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped)."),
+  map: FunctionsExpressionExpressionSchema.nullable().describe("Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).").optional(),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly."),
+  owner: z.string().describe("Repository owner."),
+  remote: FunctionsRemoteSchema.describe("The remote source where the function is hosted."),
+  repository: z.string().describe("Repository name."),
+  skip: FunctionsExpressionExpressionSchema.nullable().describe("If this expression evaluates to true, skip the task. Receives: `input`.").optional(),
 }).describe("Expression for a task that calls a scalar function (pre-compilation).").meta({ title: "functions.ScalarFunctionTaskExpression" });
 export type FunctionsScalarFunctionTaskExpression = z.infer<typeof FunctionsScalarFunctionTaskExpressionSchema>;

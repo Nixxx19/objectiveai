@@ -4,9 +4,9 @@ import { z } from "zod";
 import { FunctionsRemoteSchema } from "./remote";
 
 export const FunctionsRemoteFunctionPathSchema = z.object({
-  remote: FunctionsRemoteSchema,
-  owner: z.string(),
-  repository: z.string(),
   commit: z.string(),
+  owner: z.string(),
+  remote: FunctionsRemoteSchema,
+  repository: z.string(),
 }).meta({ title: "functions.RemoteFunctionPath" });
 export type FunctionsRemoteFunctionPath = z.infer<typeof FunctionsRemoteFunctionPathSchema>;

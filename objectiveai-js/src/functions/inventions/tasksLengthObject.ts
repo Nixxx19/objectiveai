@@ -3,6 +3,6 @@
 import { z } from "zod";
 
 export const FunctionsInventionsTasksLengthObjectSchema = z.object({
-  tasks_length: z.number().int().min(0).meta({ format: "uint64" }),
+  tasks_length: z.number().int().min(0).max(18446744073709552000),
 }).meta({ title: "functions.inventions.TasksLengthObject" });
 export type FunctionsInventionsTasksLengthObject = z.infer<typeof FunctionsInventionsTasksLengthObjectSchema>;

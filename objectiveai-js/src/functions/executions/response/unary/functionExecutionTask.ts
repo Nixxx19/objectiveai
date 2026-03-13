@@ -9,40 +9,40 @@ import { FunctionsExpressionTaskOutputOwnedSchema, type FunctionsExpressionTaskO
 import { ResponseErrorSchema, type ResponseError } from "../../../../responseError";
 
 export interface FunctionsExecutionsResponseUnaryFunctionExecutionTask {
+  created: number;
+  error?: (ResponseError) | null;
+  function?: (string) | null;
+  id: string;
   index: number;
+  object: FunctionsExecutionsResponseUnaryObject;
+  output: FunctionsExpressionTaskOutputOwned;
+  profile?: (string) | null;
+  reasoning?: (FunctionsExecutionsResponseUnaryReasoningSummary) | null;
+  retry_token?: (string) | null;
+  swiss_pool_index?: (number) | null;
+  swiss_round?: (number) | null;
   task_index: number;
   task_path: number[];
-  swiss_pool_index?: number | null;
-  swiss_round?: number | null;
-  id: string;
   tasks: FunctionsExecutionsResponseUnaryTask[];
   tasks_errors: boolean;
-  reasoning?: (FunctionsExecutionsResponseUnaryReasoningSummary) | null;
-  output: FunctionsExpressionTaskOutputOwned;
-  error?: (ResponseError) | null;
-  retry_token?: string | null;
-  created: number;
-  function?: string | null;
-  profile?: string | null;
-  object: FunctionsExecutionsResponseUnaryObject;
   usage: AgentCompletionsResponseUsage;
 }
 export const FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema: z.ZodType<FunctionsExecutionsResponseUnaryFunctionExecutionTask> = z.object({
-  index: z.number().int().min(0).meta({ format: "uint64" }),
-  task_index: z.number().int().min(0).meta({ format: "uint64" }),
-  task_path: z.array(z.number().int().min(0).meta({ format: "uint64" })),
-  swiss_pool_index: z.number().int().min(0).meta({ format: "uint64" }).nullable().optional(),
-  swiss_round: z.number().int().min(0).meta({ format: "uint64" }).nullable().optional(),
+  created: z.number().int().min(0).max(18446744073709552000).describe("Unix timestamp when the execution was created."),
+  error: ResponseErrorSchema.nullable().describe("Error details if the execution failed.").optional(),
+  function: z.string().nullable().describe("ID of the function used (if remote).").optional(),
   id: z.string().describe("Unique identifier for this execution."),
+  index: z.number().int().min(0).max(18446744073709552000),
+  object: FunctionsExecutionsResponseUnaryObjectSchema.describe("Object type identifier."),
+  output: FunctionsExpressionTaskOutputOwnedSchema.describe("The final output (scalar or vector score)."),
+  profile: z.string().nullable().describe("ID of the profile used (if remote).").optional(),
+  reasoning: FunctionsExecutionsResponseUnaryReasoningSummarySchema.nullable().describe("Reasoning summary if reasoning was enabled.").optional(),
+  retry_token: z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
+  swiss_pool_index: z.number().int().min(0).max(18446744073709552000).nullable().optional(),
+  swiss_round: z.number().int().min(0).max(18446744073709552000).nullable().optional(),
+  task_index: z.number().int().min(0).max(18446744073709552000),
+  task_path: z.array(z.number().int().min(0).max(18446744073709552000)),
   tasks: z.array(z.lazy(() => FunctionsExecutionsResponseUnaryTaskSchema)).describe("Results from each task in the function."),
   tasks_errors: z.boolean().describe("Whether any tasks encountered errors."),
-  reasoning: FunctionsExecutionsResponseUnaryReasoningSummarySchema.nullable().describe("Reasoning summary if reasoning was enabled.").optional(),
-  output: FunctionsExpressionTaskOutputOwnedSchema.describe("The final output (scalar or vector score)."),
-  error: ResponseErrorSchema.nullable().describe("Error details if the execution failed.").optional(),
-  retry_token: z.string().nullable().describe("Token for retrying this execution with cached votes.").optional(),
-  created: z.number().int().min(0).meta({ format: "uint64" }).describe("Unix timestamp when the execution was created."),
-  function: z.string().nullable().describe("ID of the function used (if remote).").optional(),
-  profile: z.string().nullable().describe("ID of the profile used (if remote).").optional(),
-  object: FunctionsExecutionsResponseUnaryObjectSchema.describe("Object type identifier."),
   usage: AgentCompletionsResponseUsageSchema.describe("Aggregated token and cost usage."),
 }).describe("A complete function execution response (non-streaming).").meta({ title: "functions.executions.response.unary.FunctionExecutionTask" });

@@ -8,15 +8,15 @@ import { FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSch
 import { FunctionsProfilesComputationsResponseStreamingObjectSchema } from "./object";
 
 export const FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema = z.object({
-  id: z.string(),
+  created: z.number().int().min(0).max(18446744073709552000),
   executions: z.array(FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema),
   executions_errors: z.boolean().nullable().optional(),
-  profile: FunctionsInlineTasksProfileSchema.nullable().optional(),
   fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema.nullable().optional(),
-  retry_token: z.string().nullable().optional(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
   function: z.string().nullable().optional(),
+  id: z.string(),
   object: FunctionsProfilesComputationsResponseStreamingObjectSchema,
+  profile: FunctionsInlineTasksProfileSchema.nullable().optional(),
+  retry_token: z.string().nullable().optional(),
   usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
 }).meta({ title: "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk" });
 export type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk = z.infer<typeof FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema>;

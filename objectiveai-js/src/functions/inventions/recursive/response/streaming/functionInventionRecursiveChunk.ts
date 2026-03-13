@@ -6,10 +6,10 @@ import { FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSche
 import { FunctionsInventionsRecursiveResponseStreamingObjectSchema } from "./object";
 
 export const FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema = z.object({
+  created: z.number().int().min(0).max(18446744073709552000),
   id: z.string(),
   inventions: z.array(FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema),
   inventions_errors: z.boolean().nullable().optional(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
   object: FunctionsInventionsRecursiveResponseStreamingObjectSchema,
   usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
 }).meta({ title: "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk" });

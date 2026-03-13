@@ -3,13 +3,13 @@
 import { z } from "zod";
 
 export const FunctionsProfilesComputationsRequestTargetSchema = z.union([z.object({
-  value: z.number().meta({ format: "double" }),
   type: z.literal("scalar"),
+  value: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38),
 }), z.object({
-  value: z.array(z.number().meta({ format: "double" })),
   type: z.literal("vector"),
+  value: z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38)),
 }), z.object({
-  value: z.number().int().min(0).meta({ format: "uint" }),
   type: z.literal("vector_winner"),
+  value: z.number().int().min(0).max(4294967295),
 })]).meta({ title: "functions.profiles.computations.request.Target" });
 export type FunctionsProfilesComputationsRequestTarget = z.infer<typeof FunctionsProfilesComputationsRequestTargetSchema>;

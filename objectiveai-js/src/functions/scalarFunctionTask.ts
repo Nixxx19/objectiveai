@@ -6,11 +6,11 @@ import { FunctionsExpressionInputValueSchema } from "./expression/inputValue";
 import { FunctionsRemoteSchema } from "./remote";
 
 export const FunctionsScalarFunctionTaskSchema = z.object({
-  remote: FunctionsRemoteSchema.describe("The remote source where the function is hosted."),
-  owner: z.string().describe("Repository owner."),
-  repository: z.string().describe("Repository name."),
   commit: z.string().describe("Git commit SHA for the function version."),
   input: FunctionsExpressionInputValueSchema.describe("The resolved input to pass to the function."),
   output: FunctionsExpressionExpressionSchema.describe("Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`ScalarFunctionTaskExpression::output`] for full documentation."),
+  owner: z.string().describe("Repository owner."),
+  remote: FunctionsRemoteSchema.describe("The remote source where the function is hosted."),
+  repository: z.string().describe("Repository name."),
 }).describe("A compiled scalar function task ready for execution.").meta({ title: "functions.ScalarFunctionTask" });
 export type FunctionsScalarFunctionTask = z.infer<typeof FunctionsScalarFunctionTaskSchema>;

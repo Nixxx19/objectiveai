@@ -5,14 +5,14 @@ import { FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputSche
 import { FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchemaType } from "./objectInputSchemaType";
 
 export interface FunctionsExpressionObjectInputSchema {
-  type: FunctionsExpressionObjectInputSchemaType;
-  description?: string | null;
+  description?: (string) | null;
   properties: Record<string, FunctionsExpressionInputSchema>;
-  required?: string[] | null;
+  required?: (string[]) | null;
+  type: FunctionsExpressionObjectInputSchemaType;
 }
 export const FunctionsExpressionObjectInputSchemaSchema: z.ZodType<FunctionsExpressionObjectInputSchema> = z.object({
-  type: FunctionsExpressionObjectInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the object.").optional(),
   properties: z.record(z.string(), z.lazy(() => FunctionsExpressionInputSchemaSchema)).describe("Schema for each property in the object."),
   required: z.array(z.string()).nullable().describe("List of property names that must be present.").optional(),
+  type: FunctionsExpressionObjectInputSchemaTypeSchema,
 }).describe("Schema for an object input with named properties.").meta({ title: "functions.expression.ObjectInputSchema" });

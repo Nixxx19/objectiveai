@@ -8,15 +8,15 @@ import { FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema } fro
 import { FunctionsProfilesComputationsResponseUnaryObjectSchema } from "./object";
 
 export const FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema = z.object({
-  id: z.string(),
+  created: z.number().int().min(0).max(18446744073709552000),
   executions: z.array(FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema),
   executions_errors: z.boolean(),
-  profile: FunctionsInlineTasksProfileSchema,
   fitting_stats: FunctionsProfilesComputationsResponseFittingStatsSchema,
-  retry_token: z.string().nullable().optional(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
   function: z.string().nullable().optional(),
+  id: z.string(),
   object: FunctionsProfilesComputationsResponseUnaryObjectSchema,
+  profile: FunctionsInlineTasksProfileSchema,
+  retry_token: z.string().nullable().optional(),
   usage: AgentCompletionsResponseUsageSchema,
 }).meta({ title: "functions.profiles.computations.response.unary.FunctionProfileComputation" });
 export type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation = z.infer<typeof FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema>;

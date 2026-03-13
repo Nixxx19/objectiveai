@@ -1,6 +1,15 @@
 // install-zod.js
 // Reads JSON schemas from objectiveai-json-schema/ and generates Zod schemas
 // in objectiveai-js/src/ with proper imports and index.ts barrel exports.
+//
+// Relies on objectiveai-json-schema builder guarantees:
+// - No $defs, $schema, required, oneOf, const
+// - type is always a string (never an array) — nullability uses anyOf
+// - No numeric format (integers/numbers have explicit min/max)
+// - $ref targets are bare type names (never JSON Pointer paths)
+// - Self-references use the schema's own title (not "#")
+// - anyOf and $ref never coexist as siblings
+// - Keywords are in canonical order, properties are sorted alphabetically
 
 const fs = require("fs");
 const path = require("path");
@@ -90,12 +99,12 @@ function relativeImport(fromFile, toFile) {
 // JSON Schema → TypeScript type conversion (for breaking circular z.infer)
 // ---------------------------------------------------------------------------
 
-/** Recursively check if a schema contains a self-reference ($ref: "#"). */
-function hasSelfRef(schema) {
+/** Recursively check if a schema contains a self-reference ($ref === title). */
+function hasSelfRef(schema, title) {
   if (!schema || typeof schema !== "object") return false;
-  if (Array.isArray(schema)) return schema.some((s) => hasSelfRef(s));
-  if (schema.$ref === "#") return true;
-  return Object.values(schema).some((v) => hasSelfRef(v));
+  if (Array.isArray(schema)) return schema.some((s) => hasSelfRef(s, title));
+  if (schema.$ref === title) return true;
+  return Object.values(schema).some((v) => hasSelfRef(v, title));
 }
 
 /**
@@ -108,23 +117,14 @@ function convertToTS(schema, selfTitle) {
 
   // $ref
   if (schema.$ref) {
-    const refTitle = schema.$ref === "#" ? selfTitle : schema.$ref;
-    const baseType = titleToPascal(refTitle);
+    const baseType = titleToPascal(schema.$ref);
 
     // $ref with sibling properties (adjacently-tagged enum discriminant)
     if (schema.properties) {
-      const objType = convertObjectTS(
-        { type: "object", properties: schema.properties, required: schema.required },
-        selfTitle
-      );
+      const objType = convertObjectTS({ type: "object", properties: schema.properties }, selfTitle);
       return `${baseType} & ${objType}`;
     }
     return baseType;
-  }
-
-  // const
-  if (schema.const !== undefined) {
-    return JSON.stringify(schema.const);
   }
 
   // enum
@@ -132,27 +132,14 @@ function convertToTS(schema, selfTitle) {
     return schema.enum.map((v) => JSON.stringify(v)).join(" | ");
   }
 
-  // oneOf
-  if (schema.oneOf) {
-    return schema.oneOf.map((v) => convertToTS(v, selfTitle)).join(" | ");
-  }
-
   // anyOf
   if (schema.anyOf) {
     return convertAnyOfTS(schema.anyOf, selfTitle);
   }
 
-  // type handling
-  const type = schema.type;
-  if (Array.isArray(type)) {
-    const parts = type.map((t) => {
-      if (t === "null") return "null";
-      return convertSingleTypeTS(t, schema, selfTitle);
-    });
-    return parts.join(" | ");
-  }
-  if (typeof type === "string") {
-    return convertSingleTypeTS(type, schema, selfTitle);
+  // type is always a string (never an array)
+  if (typeof schema.type === "string") {
+    return convertSingleTypeTS(schema.type, schema, selfTitle);
   }
   if (schema.properties) {
     return convertSingleTypeTS("object", schema, selfTitle);
@@ -161,12 +148,14 @@ function convertToTS(schema, selfTitle) {
 }
 
 function convertAnyOfTS(anyOf, selfTitle) {
-  const nullVariant = anyOf.find(
-    (v) => v.type === "null" || (Array.isArray(v.type) && v.type.length === 1 && v.type[0] === "null")
-  );
+  const nullVariant = anyOf.find((v) => v.type === "null");
   const nonNull = anyOf.filter((v) => v !== nullVariant);
   if (nullVariant && nonNull.length === 1) {
     return `(${convertToTS(nonNull[0], selfTitle)}) | null`;
+  }
+  if (nullVariant && nonNull.length > 1) {
+    // 3+ variants with null: exclude null from union, wrap in | null
+    return `(${nonNull.map((v) => convertToTS(v, selfTitle)).join(" | ")}) | null`;
   }
   return anyOf.map((v) => convertToTS(v, selfTitle)).join(" | ");
 }
@@ -202,28 +191,27 @@ function convertObjectTS(schema, selfTitle) {
     if (schema.additionalProperties === false) return "Record<string, never>";
     return "Record<string, JsonValue>";
   }
-  const required = new Set(schema.required || []);
+  // Nullable properties (anyOf with a null variant) are optional; all others are required
   const props = [];
   for (const [key, propSchema] of Object.entries(schema.properties)) {
     const safeKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
     const propType = convertToTS(propSchema, selfTitle);
-    if (required.has(key)) {
-      props.push(`  ${safeKey}: ${propType}`);
-    } else {
+    if (isNullableSchema(propSchema)) {
       props.push(`  ${safeKey}?: ${propType}`);
+    } else {
+      props.push(`  ${safeKey}: ${propType}`);
     }
   }
   return `{\n${props.join(";\n")};\n}`;
 }
 
 function convertTopLevelTS(schema, selfTitle) {
-  if (schema.properties && (schema.anyOf || schema.oneOf)) {
-    const anyOfVariants = schema.anyOf || schema.oneOf;
+  if (schema.properties && schema.anyOf) {
     const objectPart = convertObjectTS(
-      { type: "object", properties: schema.properties, required: schema.required },
+      { type: "object", properties: schema.properties },
       selfTitle
     );
-    const anyOfPart = convertAnyOfTS(anyOfVariants, selfTitle);
+    const anyOfPart = convertAnyOfTS(schema.anyOf, selfTitle);
     return `(${anyOfPart}) & ${objectPart}`;
   }
   return convertToTS(schema, selfTitle);
@@ -235,13 +223,11 @@ function convertTopLevelTS(schema, selfTitle) {
  * on mutually-recursive type aliases.
  */
 function convertTopLevelTSWithHelpers(schema, selfTitle, pascalName, helpers) {
-  const variants = schema.anyOf || schema.oneOf;
+  const variants = schema.anyOf;
   if (!variants) return convertTopLevelTS(schema, selfTitle);
 
-  // Check for nullable pattern
-  const nullVariant = variants.find(
-    (v) => v.type === "null" || (Array.isArray(v.type) && v.type.length === 1 && v.type[0] === "null")
-  );
+  // Check for nullable pattern — exclude null from union members
+  const nullVariant = variants.find((v) => v.type === "null");
   const nonNull = variants.filter((v) => v !== nullVariant);
   if (nullVariant && nonNull.length === 1) {
     const inner = convertTopLevelTSWithHelpers(
@@ -249,10 +235,12 @@ function convertTopLevelTSWithHelpers(schema, selfTitle, pascalName, helpers) {
     );
     return `(${inner}) | null`;
   }
+  // Use non-null variants when null is present (null handled via | null wrapper)
+  const effectiveVariants = nullVariant ? nonNull : variants;
 
   // Process each variant, extracting Record/Array into interfaces
   let helperIdx = 0;
-  const parts = variants.map((v) => {
+  const parts = effectiveVariants.map((v) => {
     // Object with only additionalProperties → Record<string, T> → interface
     if (v.type === "object" && !v.properties && v.additionalProperties) {
       const valType = convertToTS(
@@ -266,14 +254,11 @@ function convertTopLevelTSWithHelpers(schema, selfTitle, pascalName, helpers) {
       });
       return helperName;
     }
-    // Array referencing a cyclic type → interface with numeric index
-    // Actually, TypeScript handles T[] in type aliases fine as long as
-    // the cycle goes through at least one interface elsewhere.
-    // So we only need interfaces for Records.
     return convertToTS(v, selfTitle);
   });
 
-  return parts.join(" | ");
+  const result = parts.join(" | ");
+  return nullVariant ? `(${result}) | null` : result;
 }
 
 // ---------------------------------------------------------------------------
@@ -281,29 +266,29 @@ function convertTopLevelTSWithHelpers(schema, selfTitle, pascalName, helpers) {
 // ---------------------------------------------------------------------------
 
 /** Recursively collect all $ref titles from a schema. */
-function collectRefs(schema, refs) {
+function collectRefs(schema, refs, selfTitle) {
   if (!schema || typeof schema !== "object") return;
   if (Array.isArray(schema)) {
-    for (const item of schema) collectRefs(item, refs);
+    for (const item of schema) collectRefs(item, refs, selfTitle);
     return;
   }
   if (schema.$ref) {
-    if (schema.$ref !== "#") refs.add(schema.$ref);
+    if (schema.$ref !== selfTitle) refs.add(schema.$ref);
     // Also recurse into sibling properties (adjacently-tagged enum discriminants)
     for (const [key, value] of Object.entries(schema)) {
-      if (key !== "$ref") collectRefs(value, refs);
+      if (key !== "$ref") collectRefs(value, refs, selfTitle);
     }
     return;
   }
   for (const value of Object.values(schema)) {
-    collectRefs(value, refs);
+    collectRefs(value, refs, selfTitle);
   }
 }
 
 /**
  * Convert a JSON schema node to a Zod expression string.
  * `lazyRefs` is a Set of titles that must use z.lazy() to break cycles.
- * `selfTitle` is the current schema's title, used to resolve `$ref: "#"` (self-reference).
+ * `selfTitle` is the current schema's title, used to resolve self-references.
  */
 function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
   if (!schema || typeof schema !== "object") {
@@ -311,37 +296,31 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
     return "JsonValueSchema";
   }
 
-  // $ref
+  // $ref (anyOf + $ref never coexist, so $ref is always standalone or with properties)
   if (schema.$ref) {
-    const isSelfRef = schema.$ref === "#";
+    const isSelfRef = schema.$ref === selfTitle;
     if (!isSelfRef) refs.add(schema.$ref);
-    const name = titleToPascal(schema.$ref) + "Schema";
-    const isLazy = isSelfRef || (lazyRefs && lazyRefs.has(schema.$ref));
-    const baseName = isSelfRef && selfTitle
-      ? titleToPascal(selfTitle) + "Schema"
-      : name;
-    // Schemas in cycles are annotated as z.ZodType<T>, so .extend() is
-    // unavailable. Use .and(z.object({...})) instead.
-    const refTitle = isSelfRef ? selfTitle : schema.$ref;
+    const refTitle = schema.$ref;
+    const baseName = titleToPascal(refTitle) + "Schema";
+    const isLazy = isSelfRef || (lazyRefs && lazyRefs.has(refTitle));
     const isCyclic = cyclicTitles && cyclicTitles.has(refTitle);
 
     let expr;
 
     // $ref with sibling properties (adjacently-tagged enum discriminant)
     if (schema.properties) {
-      const required = new Set(schema.required || []);
       const props = [];
       for (const [key, propSchema] of Object.entries(schema.properties)) {
         const propCode = convert(propSchema, refs, lazyRefs, selfTitle, cyclicTitles);
         const safeKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
-        if (required.has(key)) {
-          props.push(`  ${safeKey}: ${propCode}`);
-        } else {
+        if (isNullableSchema(propSchema)) {
           props.push(`  ${safeKey}: ${propCode}.optional()`);
+        } else {
+          props.push(`  ${safeKey}: ${propCode}`);
         }
       }
+      // Cyclic schemas use z.ZodType<T> annotation, so .extend() is unavailable
       if (isCyclic || isLazy) {
-        // Can't use .extend() on z.ZodType<T>, use .and() instead
         const andBlock = `.and(z.object({\n${props.join(",\n")},\n}))`;
         if (isLazy) {
           expr = `z.lazy(() => ${baseName})${andBlock}`;
@@ -358,7 +337,7 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
       expr = baseName;
     }
 
-    // $ref can have description alongside it (draft-2020-12)
+    // $ref can have description alongside it
     if (schema.description) {
       expr += `.describe(${JSON.stringify(schema.description)})`;
     }
@@ -367,53 +346,30 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
 
   let expr;
 
-  // const (string enum literal)
-  if (schema.const !== undefined) {
-    expr = `z.literal(${JSON.stringify(schema.const)})`;
-  }
-  // enum (string enum)
-  else if (schema.enum) {
+  // enum (single-element enums are z.literal, multi-element are z.enum)
+  if (schema.enum) {
     if (schema.enum.length === 1) {
       expr = `z.literal(${JSON.stringify(schema.enum[0])})`;
     } else {
       expr = `z.enum(${JSON.stringify(schema.enum)})`;
     }
   }
-  // oneOf
-  else if (schema.oneOf) {
-    const variants = schema.oneOf.map((v) => convert(v, refs, lazyRefs, selfTitle, cyclicTitles));
-    expr = `z.union([${variants.join(", ")}])`;
-  }
   // anyOf
   else if (schema.anyOf) {
     expr = convertAnyOf(schema, refs, lazyRefs, selfTitle, cyclicTitles);
   }
-  // type handling
+  // type (always a string, never an array)
+  else if (typeof schema.type === "string") {
+    expr = convertSingleType(schema.type, schema, refs, lazyRefs, selfTitle, cyclicTitles);
+  }
+  // object with properties but no explicit type
+  else if (schema.properties) {
+    expr = convertSingleType("object", schema, refs, lazyRefs, selfTitle, cyclicTitles);
+  }
+  // bare schema {} means any JSON value
   else {
-    const type = schema.type;
-
-    if (Array.isArray(type)) {
-      const nonNull = type.filter((t) => t !== "null");
-      const isNullable = type.includes("null");
-      if (nonNull.length === 1) {
-        const inner = convertSingleType(nonNull[0], schema, refs, lazyRefs, selfTitle, cyclicTitles);
-        expr = isNullable ? `${inner}.nullable()` : inner;
-      } else {
-        const variants = nonNull.map((t) =>
-          convertSingleType(t, schema, refs, lazyRefs, selfTitle, cyclicTitles)
-        );
-        expr = isNullable
-          ? `z.union([${variants.join(", ")}]).nullable()`
-          : `z.union([${variants.join(", ")}])`;
-      }
-    } else if (typeof type === "string") {
-      expr = convertSingleType(type, schema, refs, lazyRefs, selfTitle, cyclicTitles);
-    } else if (schema.properties) {
-      expr = convertSingleType("object", schema, refs, lazyRefs, selfTitle, cyclicTitles);
-    } else {
-      refs.add(JSON_VALUE_REF);
-      expr = "JsonValueSchema";
-    }
+    refs.add(JSON_VALUE_REF);
+    expr = "JsonValueSchema";
   }
 
   // Apply default
@@ -429,21 +385,31 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
   return expr;
 }
 
+/** Check if a property schema is nullable (anyOf containing {type: "null"}). */
+function isNullableSchema(schema) {
+  if (!schema || !schema.anyOf) return false;
+  return schema.anyOf.some((v) => v.type === "null");
+}
+
 function convertAnyOf(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
   const { anyOf } = schema;
 
-  // Check if it's a simple nullable: [something, {"type":"null"}]
-  const nullVariant = anyOf.find(
-    (v) => v.type === "null" || (Array.isArray(v.type) && v.type.length === 1 && v.type[0] === "null")
-  );
+  // Check for nullable: [...variants, {"type":"null"}]
+  const nullVariant = anyOf.find((v) => v.type === "null");
   const nonNullVariants = anyOf.filter((v) => v !== nullVariant);
 
   if (nullVariant && nonNullVariants.length === 1) {
+    // 2-variant nullable: T | null → T.nullable()
     return `${convert(nonNullVariants[0], refs, lazyRefs, selfTitle, cyclicTitles)}.nullable()`;
   }
 
-  // If the parent schema also has properties + anyOf (like WithFallbacksAndCount),
-  // we handle this in the caller. Here just do union.
+  if (nullVariant && nonNullVariants.length > 1) {
+    // 3+ variant nullable: A | B | null → z.union([A, B]).nullable()
+    const variants = nonNullVariants.map((v) => convert(v, refs, lazyRefs, selfTitle, cyclicTitles));
+    return `z.union([${variants.join(", ")}]).nullable()`;
+  }
+
+  // No null variant — plain union
   const variants = anyOf.map((v) => convert(v, refs, lazyRefs, selfTitle, cyclicTitles));
   return `z.union([${variants.join(", ")}])`;
 }
@@ -455,27 +421,23 @@ function convertSingleType(type, schema, refs, lazyRefs, selfTitle, cyclicTitles
       if (schema.pattern) {
         expr += `.regex(new RegExp(${JSON.stringify(schema.pattern)}))`;
       }
+      // format exists only on strings (never on integers/numbers)
       if (schema.format) {
         expr += `.meta({ format: ${JSON.stringify(schema.format)} })`;
       }
       return expr;
     }
     case "number": {
+      // Integers/numbers always have explicit min/max, never format
       let expr = "z.number()";
       if (schema.minimum !== undefined) expr += `.min(${schema.minimum})`;
       if (schema.maximum !== undefined) expr += `.max(${schema.maximum})`;
-      if (schema.format) {
-        expr += `.meta({ format: ${JSON.stringify(schema.format)} })`;
-      }
       return expr;
     }
     case "integer": {
       let expr = "z.number().int()";
       if (schema.minimum !== undefined) expr += `.min(${schema.minimum})`;
       if (schema.maximum !== undefined) expr += `.max(${schema.maximum})`;
-      if (schema.format) {
-        expr += `.meta({ format: ${JSON.stringify(schema.format)} })`;
-      }
       return expr;
     }
     case "boolean":
@@ -511,23 +473,15 @@ function convertObject(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
     return "z.record(z.string(), JsonValueSchema)";
   }
 
-  const required = new Set(schema.required || []);
+  // Nullable properties (anyOf with a null variant) are optional; all others are required
   const props = [];
   for (const [key, propSchema] of Object.entries(schema.properties)) {
     const propCode = convert(propSchema, refs, lazyRefs, selfTitle, cyclicTitles);
-    const isRequired = required.has(key);
-    // Use safe key
     const safeKey = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(key) ? key : JSON.stringify(key);
-
-    if (isRequired) {
-      props.push(`  ${safeKey}: ${propCode}`);
+    if (isNullableSchema(propSchema)) {
+      props.push(`  ${safeKey}: ${propCode}.optional()`);
     } else {
-      // Check if the prop is already nullable — if so, just make it optional
-      if (propCode.endsWith(".nullable()")) {
-        props.push(`  ${safeKey}: ${propCode}.optional()`);
-      } else {
-        props.push(`  ${safeKey}: ${propCode}.optional()`);
-      }
+      props.push(`  ${safeKey}: ${propCode}`);
     }
   }
 
@@ -545,28 +499,25 @@ function convertObject(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
 
 /**
  * Convert a top-level schema. Handles the special case where a schema has
- * both `properties` and `anyOf` (like WithFallbacksAndCount which flattens
- * the inner type).
+ * both `properties` and `anyOf` (serde flatten produces this).
  */
 function convertTopLevel(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
-  // Special case: object with properties AND anyOf/oneOf (serde flatten)
-  if (schema.properties && (schema.anyOf || schema.oneOf)) {
-    const anyOfVariants = schema.anyOf || schema.oneOf;
+  if (schema.properties && schema.anyOf) {
     // Build the object part with its own properties
     const objectPart = convertObject(
       {
         type: "object",
         properties: schema.properties,
-        required: schema.required,
         additionalProperties: true,
       },
       refs,
       lazyRefs,
-      selfTitle
+      selfTitle,
+      cyclicTitles
     );
 
-    // The anyOf/oneOf represents the flattened inner type
-    const anyOfPart = convertAnyOf({ anyOf: anyOfVariants }, refs, lazyRefs, selfTitle, cyclicTitles);
+    // The anyOf represents the flattened inner type
+    const anyOfPart = convertAnyOf({ anyOf: schema.anyOf }, refs, lazyRefs, selfTitle, cyclicTitles);
 
     // Merge/intersection
     let expr = `${anyOfPart}.and(${objectPart})`;
@@ -649,11 +600,11 @@ function main() {
   // ---------------------------------------------------------------------------
 
   // First pass: collect refs for each file to build the dependency graph
-  const fileRefs = new Map(); // filePath -> Set<refFilePath>
+  const fileRefMap = new Map(); // filePath -> Set<refFilePath>
   for (const [filePath, entries] of fileGroups) {
     const refs = new Set();
-    for (const { schema } of entries) {
-      collectRefs(schema, refs);
+    for (const { title, schema } of entries) {
+      collectRefs(schema, refs, title);
     }
     const depFiles = new Set();
     for (const ref of refs) {
@@ -663,17 +614,15 @@ function main() {
         depFiles.add(refPath);
       }
     }
-    fileRefs.set(filePath, depFiles);
+    fileRefMap.set(filePath, depFiles);
   }
 
   // Find all files that participate in dependency cycles or have self-references.
-  // Every such file needs an explicit type definition (not z.infer)
-  // because z.infer can't resolve through circular const type inference.
   const filesInCycles = new Set();
   for (const [f, entries] of fileGroups) {
-    // Check for self-referencing schemas ($ref: "#" or z.lazy to own schema)
-    for (const { schema } of entries) {
-      if (hasSelfRef(schema)) {
+    // Check for self-referencing schemas ($ref === title)
+    for (const { title, schema } of entries) {
+      if (hasSelfRef(schema, title)) {
         filesInCycles.add(f);
         break;
       }
@@ -682,7 +631,7 @@ function main() {
     if (!filesInCycles.has(f)) {
       const visited = new Set();
       const queue = [];
-      for (const dep of fileRefs.get(f) || []) {
+      for (const dep of fileRefMap.get(f) || []) {
         if (dep !== f) queue.push(dep);
       }
       while (queue.length > 0) {
@@ -690,7 +639,7 @@ function main() {
         if (v === f) { filesInCycles.add(f); break; }
         if (visited.has(v)) continue;
         visited.add(v);
-        for (const w of fileRefs.get(v) || []) {
+        for (const w of fileRefMap.get(v) || []) {
           queue.push(w);
         }
       }
@@ -698,12 +647,9 @@ function main() {
   }
 
   // Mark ALL edges between cyclic files as lazy.
-  // A single DFS back-edge per cycle is insufficient because the cycle can be
-  // entered from any node — every edge in the cycle must use z.lazy() to
-  // guarantee the imported schema is initialized regardless of import order.
   const lazyEdges = new Set();
   for (const f of filesInCycles) {
-    for (const dep of fileRefs.get(f) || []) {
+    for (const dep of fileRefMap.get(f) || []) {
       if (filesInCycles.has(dep)) {
         lazyEdges.add(`${f}->${dep}`);
       }
@@ -715,14 +661,12 @@ function main() {
   }
 
   // Build a set of titles whose refs are lazy (from a given file)
-  // lazyRefTitles: filePath -> Set<title> where the ref should use z.lazy()
   const lazyRefTitles = new Map();
   for (const edge of lazyEdges) {
     const [fromFile, toFile] = edge.split("->");
-    // Find which titles in toFile are referenced by fromFile
-    for (const { schema } of fileGroups.get(fromFile) || []) {
+    for (const { title, schema } of fileGroups.get(fromFile) || []) {
       const refs = new Set();
-      collectRefs(schema, refs);
+      collectRefs(schema, refs, title);
       for (const ref of refs) {
         const { dir: refDir, file: refFile } = titleToPath(ref);
         const refPath = refDir ? `${refDir}/${refFile}` : refFile;
@@ -768,9 +712,7 @@ function main() {
         // File is in a dependency cycle — z.infer can't resolve through
         // circular const type inference. Generate an explicit type from
         // the JSON schema and annotate with z.ZodType<T>.
-        // Use interface for object types (supports recursive refs natively),
-        // type alias only when required (unions, primitives).
-        const canInterface = schema.properties && !schema.anyOf && !schema.oneOf;
+        const canInterface = schema.properties && !schema.anyOf;
         if (canInterface) {
           const body = convertObjectTS(schema, title);
           exports.push(
@@ -832,8 +774,6 @@ function main() {
         .map((t) => titleToPascal(t) + "Schema")
         .sort();
       const relPath = relativeImport(filePath, refPath);
-      // Lazy refs are still imported statically — z.lazy() defers evaluation,
-      // which breaks the initialization-time cycle.
       if (fileInCycle) {
         // Also import type names for use in explicit type definitions
         const typeNames = refTitles

@@ -8,13 +8,13 @@ import { AgentUpstreamSchema } from "../../../../agent/upstream";
 import { ResponseErrorSchema } from "../../../../responseError";
 
 export const VectorCompletionsResponseUnaryAgentCompletionSchema = z.object({
-  index: z.number().int().min(0).meta({ format: "uint64" }).describe("Index of this completion within the vector completion."),
+  created: z.number().int().min(0).max(18446744073709552000),
+  error: ResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
   id: z.string(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
+  index: z.number().int().min(0).max(18446744073709552000).describe("Index of this completion within the vector completion."),
   messages: z.array(AgentCompletionsResponseUnaryMessageSchema),
   object: AgentCompletionsResponseUnaryObjectSchema.describe("The object type (always \"agent.completion\")."),
-  usage: AgentCompletionsResponseUsageSchema,
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
-  error: ResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
+  usage: AgentCompletionsResponseUsageSchema,
 }).describe("A agent completion from a single agent within a vector completion.\n\nWraps the standard agent completion response with an index to identify\nwhich agent in the ensemble produced it.").meta({ title: "vector.completions.response.unary.AgentCompletion" });
 export type VectorCompletionsResponseUnaryAgentCompletion = z.infer<typeof VectorCompletionsResponseUnaryAgentCompletionSchema>;

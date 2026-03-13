@@ -3,9 +3,9 @@
 import { z } from "zod";
 import { AgentCompletionsMessageAssistantToolCallFunctionSchema } from "./assistantToolCallFunction";
 
-export const AgentCompletionsMessageAssistantToolCallSchema = z.union([z.object({
-  id: z.string().describe("The unique ID of this tool call."),
+export const AgentCompletionsMessageAssistantToolCallSchema = z.object({
   function: AgentCompletionsMessageAssistantToolCallFunctionSchema.describe("The function being called."),
+  id: z.string().describe("The unique ID of this tool call."),
   type: z.literal("function"),
-}).describe("A function call with an ID and function details.")]).describe("A tool call made by the assistant.").meta({ title: "agent.completions.message.AssistantToolCall" });
+}).describe("A function call with an ID and function details.").meta({ title: "agent.completions.message.AssistantToolCall" });
 export type AgentCompletionsMessageAssistantToolCall = z.infer<typeof AgentCompletionsMessageAssistantToolCallSchema>;

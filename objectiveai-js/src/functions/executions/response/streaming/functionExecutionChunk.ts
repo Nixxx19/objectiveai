@@ -9,17 +9,17 @@ import { FunctionsExpressionTaskOutputOwnedSchema } from "../../../expression/ta
 import { ResponseErrorSchema } from "../../../../responseError";
 
 export const FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema = z.object({
+  created: z.number().int().min(0).max(18446744073709552000),
+  error: ResponseErrorSchema.nullable().optional(),
+  function: z.string().nullable().optional(),
   id: z.string(),
+  object: FunctionsExecutionsResponseStreamingObjectSchema,
+  output: FunctionsExpressionTaskOutputOwnedSchema.nullable().optional(),
+  profile: z.string().nullable().optional(),
+  reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().optional(),
+  retry_token: z.string().nullable().optional(),
   tasks: z.array(FunctionsExecutionsResponseStreamingTaskChunkSchema),
   tasks_errors: z.boolean().nullable().optional(),
-  reasoning: FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema.nullable().optional(),
-  output: FunctionsExpressionTaskOutputOwnedSchema.nullable().optional(),
-  error: ResponseErrorSchema.nullable().optional(),
-  retry_token: z.string().nullable().optional(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
-  function: z.string().nullable().optional(),
-  profile: z.string().nullable().optional(),
-  object: FunctionsExecutionsResponseStreamingObjectSchema,
   usage: AgentCompletionsResponseUsageSchema.nullable().optional(),
 }).meta({ title: "functions.executions.response.streaming.FunctionExecutionChunk" });
 export type FunctionsExecutionsResponseStreamingFunctionExecutionChunk = z.infer<typeof FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema>;

@@ -7,15 +7,15 @@ import { FunctionsInventionsStateParamsStateSchema } from "../../state/paramsSta
 import { FunctionsRemoteSchema } from "../../../remote";
 
 export const FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema = z.object({
-  remote: FunctionsRemoteSchema,
-  name: z.string(),
-  state: FunctionsInventionsStateParamsStateSchema,
-  provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
   agent: AgentCompletionsRequestAgentSchema,
   agents: z.array(AgentCompletionsRequestAgentSchema).nullable().optional(),
-  seed: z.number().int().meta({ format: "int64" }).nullable().optional(),
-  stream: z.boolean().nullable().optional(),
-  max_step_retries: z.number().int().min(0).meta({ format: "uint32" }).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").optional(),
+  max_step_retries: z.number().int().min(0).max(4294967295).nullable().describe("Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.").optional(),
   mcp_server_authorization: z.record(z.string(), z.string()).nullable().describe("Map from MCP server URL to authorization header value.").optional(),
+  name: z.string(),
+  provider: AgentCompletionsRequestProviderSchema.nullable().optional(),
+  remote: FunctionsRemoteSchema,
+  seed: z.number().int().min(-9223372036854776000).max(9223372036854776000).nullable().optional(),
+  state: FunctionsInventionsStateParamsStateSchema,
+  stream: z.boolean().nullable().optional(),
 }).meta({ title: "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams" });
 export type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams = z.infer<typeof FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema>;

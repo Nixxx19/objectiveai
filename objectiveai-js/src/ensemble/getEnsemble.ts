@@ -4,8 +4,8 @@ import { z } from "zod";
 import { AgentWithFallbacksAndCountAgentAgentSchema } from "../agent/withFallbacksAndCount";
 
 export const EnsembleGetEnsembleSchema = z.object({
-  created: z.number().int().min(0).meta({ format: "uint64" }).describe("Unix timestamp when this Ensemble was first used."),
-  id: z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
   agents: z.array(AgentWithFallbacksAndCountAgentAgentSchema).describe("The validated and deduplicated LLMs, sorted by full_id."),
+  created: z.number().int().min(0).max(18446744073709552000).describe("Unix timestamp when this Ensemble was first used."),
+  id: z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
 }).describe("Response containing a single Ensemble with creation timestamp.").meta({ title: "ensemble.GetEnsemble" });
 export type EnsembleGetEnsemble = z.infer<typeof EnsembleGetEnsembleSchema>;

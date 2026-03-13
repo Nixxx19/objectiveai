@@ -5,9 +5,9 @@ import { FunctionsExpressionExpressionSchema } from "../expression/expression";
 import { FunctionsExpressionObjectInputSchemaSchema } from "../expression/objectInputSchema";
 
 export const FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema = z.object({
-  spec: z.string(),
+  input: FunctionsExpressionExpressionSchema,
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
   skip: FunctionsExpressionExpressionSchema.nullable().optional(),
-  input: FunctionsExpressionExpressionSchema,
+  spec: z.string(),
 }).meta({ title: "functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression" });
 export type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression = z.infer<typeof FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema>;

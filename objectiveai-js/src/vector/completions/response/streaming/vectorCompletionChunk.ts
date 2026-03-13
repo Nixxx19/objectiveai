@@ -7,14 +7,14 @@ import { VectorCompletionsResponseStreamingObjectSchema } from "./object";
 import { VectorCompletionsResponseVoteSchema } from "../vote";
 
 export const VectorCompletionsResponseStreamingVectorCompletionChunkSchema = z.object({
-  id: z.string().describe("Unique identifier for this vector completion."),
   completions: z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
-  votes: z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
-  scores: z.array(z.number().meta({ format: "double" })).describe("Current weighted scores. Updated as new votes arrive."),
-  weights: z.array(z.number().meta({ format: "double" })).describe("Current weight distribution across responses. Updated as new votes arrive."),
-  created: z.number().int().min(0).meta({ format: "uint64" }).describe("Unix timestamp when the completion was created."),
+  created: z.number().int().min(0).max(18446744073709552000).describe("Unix timestamp when the completion was created."),
   ensemble: z.string().describe("ID of the ensemble used for this completion."),
+  id: z.string().describe("Unique identifier for this vector completion."),
   object: VectorCompletionsResponseStreamingObjectSchema.describe("Object type identifier (`\"vector.completion.chunk\"`)."),
+  scores: z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38)).describe("Current weighted scores. Updated as new votes arrive."),
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Aggregated usage statistics. Typically present only in the final chunk.").optional(),
+  votes: z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
+  weights: z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38)).describe("Current weight distribution across responses. Updated as new votes arrive."),
 }).describe("A chunk in a streaming vector completion response.\n\nEach chunk contains incremental updates to the completion. Use the\n[`push`](Self::push) method to accumulate chunks into a complete response.").meta({ title: "vector.completions.response.streaming.VectorCompletionChunk" });
 export type VectorCompletionsResponseStreamingVectorCompletionChunk = z.infer<typeof VectorCompletionsResponseStreamingVectorCompletionChunkSchema>;

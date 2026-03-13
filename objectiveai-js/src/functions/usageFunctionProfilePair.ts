@@ -3,9 +3,9 @@
 import { z } from "zod";
 
 export const FunctionsUsageFunctionProfilePairSchema = z.object({
-  requests: z.number().int().min(0).meta({ format: "uint64" }).describe("Total number of requests made with this function-profile pair."),
-  completion_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total completion tokens used."),
-  prompt_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total prompt tokens used."),
-  total_cost: z.number().meta({ format: "double" }).describe("Total cost incurred."),
+  completion_tokens: z.number().int().min(0).max(18446744073709552000).describe("Total completion tokens used."),
+  prompt_tokens: z.number().int().min(0).max(18446744073709552000).describe("Total prompt tokens used."),
+  requests: z.number().int().min(0).max(18446744073709552000).describe("Total number of requests made with this function-profile pair."),
+  total_cost: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).describe("Total cost incurred."),
 }).describe("Usage statistics for a function-profile pair.").meta({ title: "functions.UsageFunctionProfilePair" });
 export type FunctionsUsageFunctionProfilePair = z.infer<typeof FunctionsUsageFunctionProfilePairSchema>;

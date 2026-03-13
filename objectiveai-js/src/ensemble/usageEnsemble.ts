@@ -3,9 +3,9 @@
 import { z } from "zod";
 
 export const EnsembleUsageEnsembleSchema = z.object({
-  requests: z.number().int().min(0).meta({ format: "uint64" }).describe("Total number of requests made with this Ensemble."),
-  completion_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total completion tokens generated across all agents."),
-  prompt_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total prompt tokens processed across all agents."),
-  total_cost: z.number().meta({ format: "double" }).describe("Total cost incurred."),
+  completion_tokens: z.number().int().min(0).max(18446744073709552000).describe("Total completion tokens generated across all agents."),
+  prompt_tokens: z.number().int().min(0).max(18446744073709552000).describe("Total prompt tokens processed across all agents."),
+  requests: z.number().int().min(0).max(18446744073709552000).describe("Total number of requests made with this Ensemble."),
+  total_cost: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).describe("Total cost incurred."),
 }).describe("Usage statistics for an Ensemble.").meta({ title: "ensemble.UsageEnsemble" });
 export type EnsembleUsageEnsemble = z.infer<typeof EnsembleUsageEnsembleSchema>;

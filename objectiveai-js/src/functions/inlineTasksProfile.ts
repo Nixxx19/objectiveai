@@ -5,10 +5,10 @@ import { FunctionsTaskProfileSchema, type FunctionsTaskProfile } from "./taskPro
 import { VectorCompletionsRequestProfileSchema, type VectorCompletionsRequestProfile } from "../vector/completions/request/profile";
 
 export interface FunctionsInlineTasksProfile {
-  tasks: FunctionsTaskProfile[];
   profile: VectorCompletionsRequestProfile;
+  tasks: FunctionsTaskProfile[];
 }
 export const FunctionsInlineTasksProfileSchema: z.ZodType<FunctionsInlineTasksProfile> = z.object({
-  tasks: z.array(z.lazy(() => FunctionsTaskProfileSchema)).describe("Configuration for each task in the corresponding Function."),
   profile: VectorCompletionsRequestProfileSchema.describe("Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields."),
+  tasks: z.array(z.lazy(() => FunctionsTaskProfileSchema)).describe("Configuration for each task in the corresponding Function."),
 }).describe("An inline tasks-based profile definition without metadata.").meta({ title: "functions.InlineTasksProfile" });

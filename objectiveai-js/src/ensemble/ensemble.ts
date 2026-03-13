@@ -4,7 +4,7 @@ import { z } from "zod";
 import { AgentWithFallbacksAndCountAgentAgentSchema } from "../agent/withFallbacksAndCount";
 
 export const EnsembleEnsembleSchema = z.object({
-  id: z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
   agents: z.array(AgentWithFallbacksAndCountAgentAgentSchema).describe("The validated and deduplicated LLMs, sorted by full_id."),
+  id: z.string().describe("The deterministic content-addressed ID (22-character base62 string)."),
 }).describe("A validated Ensemble with its computed content-addressed ID.\n\nCreated by converting from [`EnsembleBase`] via [`TryFrom`]. The conversion:\n1. Validates and normalizes each agent\n2. Merges duplicate LLMs (by full_id) and sums their counts\n3. Sorts LLMs by full_id for deterministic ordering\n4. Computes the ensemble ID from the sorted (full_id, count) pairs\n\n# Constraints\n\n- Individual LLMs with `count: 0` are skipped\n- Total agent count (sum of all counts) must be between 1 and 128").meta({ title: "ensemble.Ensemble" });
 export type EnsembleEnsemble = z.infer<typeof EnsembleEnsembleSchema>;

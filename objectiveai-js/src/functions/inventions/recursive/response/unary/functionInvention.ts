@@ -10,15 +10,15 @@ import { FunctionsRemoteFunctionPathSchema } from "../../../../remoteFunctionPat
 import { ResponseErrorSchema } from "../../../../../responseError";
 
 export const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema = z.object({
-  index: z.number().int().min(0).meta({ format: "uint64" }),
-  id: z.string(),
   completions: z.array(FunctionsInventionsResponseUnaryAgentCompletionSchema),
-  state: FunctionsInventionsStateStateSchema,
-  path: FunctionsRemoteFunctionPathSchema.nullable().optional(),
-  function: FunctionsFullRemoteFunctionSchema.nullable().optional(),
-  created: z.number().int().min(0).meta({ format: "uint64" }),
-  object: FunctionsInventionsResponseUnaryObjectSchema,
-  usage: AgentCompletionsResponseUsageSchema,
+  created: z.number().int().min(0).max(18446744073709552000),
   error: ResponseErrorSchema.nullable().optional(),
+  function: FunctionsFullRemoteFunctionSchema.nullable().optional(),
+  id: z.string(),
+  index: z.number().int().min(0).max(18446744073709552000),
+  object: FunctionsInventionsResponseUnaryObjectSchema,
+  path: FunctionsRemoteFunctionPathSchema.nullable().optional(),
+  state: FunctionsInventionsStateStateSchema,
+  usage: AgentCompletionsResponseUsageSchema,
 }).meta({ title: "functions.inventions.recursive.response.unary.FunctionInvention" });
 export type FunctionsInventionsRecursiveResponseUnaryFunctionInvention = z.infer<typeof FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema>;

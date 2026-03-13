@@ -3,5 +3,5 @@
 import { z } from "zod";
 import { JsonValueSchema } from "../../json";
 
-export const FunctionsExpressionTaskOutputOwnedSchema = z.union([z.number().meta({ format: "double" }).describe("A single scalar score."), z.array(z.number().meta({ format: "double" })).describe("A vector of scores."), z.array(z.array(z.number().meta({ format: "double" }))).describe("Multiple vectors of scores (from mapped tasks)."), JsonValueSchema.describe("An error occurred during execution.")]).describe("Owned task output variants.").meta({ title: "functions.expression.TaskOutputOwned" });
+export const FunctionsExpressionTaskOutputOwnedSchema = z.union([z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).describe("A single scalar score."), z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38)).describe("A vector of scores."), z.array(z.array(z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38))).describe("Multiple vectors of scores (from mapped tasks)."), JsonValueSchema.describe("An error occurred during execution.")]).describe("Owned task output variants.").meta({ title: "functions.expression.TaskOutputOwned" });
 export type FunctionsExpressionTaskOutputOwned = z.infer<typeof FunctionsExpressionTaskOutputOwnedSchema>;

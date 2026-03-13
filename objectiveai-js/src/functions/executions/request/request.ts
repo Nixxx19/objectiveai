@@ -12,13 +12,13 @@ import { FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema 
 export const FunctionsExecutionsRequestRequestSchema = z.union([z.object({
   body: FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema,
 }), z.object({
-  path: FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema,
   body: FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema,
+  path: FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema,
 }), z.object({
-  path: FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPathSchema,
   body: FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema,
+  path: FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPathSchema,
 }), z.object({
-  path: FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema,
   body: FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema,
+  path: FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema,
 })]).describe("Internal request representation with path and body separated.\n\nUsed internally to route requests to the appropriate API endpoint.").meta({ title: "functions.executions.request.Request" });
 export type FunctionsExecutionsRequestRequest = z.infer<typeof FunctionsExecutionsRequestRequestSchema>;

@@ -3,13 +3,13 @@
 import { z } from "zod";
 import { FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, FunctionsExpressionWithExpressionStringSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpression, type FunctionsExpressionWithExpressionString } from "../../../functions/expression/withExpression";
 
-export type AgentCompletionsMessageAssistantToolCallExpression = {
-  id: FunctionsExpressionWithExpressionString;
+export interface AgentCompletionsMessageAssistantToolCallExpression {
   function: FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpression;
+  id: FunctionsExpressionWithExpressionString;
   type: "function";
-};
-export const AgentCompletionsMessageAssistantToolCallExpressionSchema: z.ZodType<AgentCompletionsMessageAssistantToolCallExpression> = z.union([z.object({
-  id: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The tool call ID expression."),
+}
+export const AgentCompletionsMessageAssistantToolCallExpressionSchema: z.ZodType<AgentCompletionsMessageAssistantToolCallExpression> = z.object({
   function: z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema).describe("The function expression."),
+  id: z.lazy(() => FunctionsExpressionWithExpressionStringSchema).describe("The tool call ID expression."),
   type: z.literal("function"),
-}).describe("A function call expression.")]).describe("Expression variant of [`AssistantToolCall`] for dynamic content.").meta({ title: "agent.completions.message.AssistantToolCallExpression" });
+}).describe("A function call expression.").meta({ title: "agent.completions.message.AssistantToolCallExpression" });
