@@ -4,6 +4,9 @@
   "description": "Schema for a boolean input.",
   "type": "object",
   "properties": {
+    "type": {
+      "$ref": "functions.expression.BooleanInputSchemaType"
+    },
     "description": {
       "description": "Human-readable description of the boolean.",
       "type": [
@@ -11,5 +14,8 @@
         "null"
       ]
     }
-  }
+  },
+  "required": [
+    "type"
+  ]
 }

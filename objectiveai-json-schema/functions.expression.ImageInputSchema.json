@@ -4,6 +4,9 @@
   "description": "Schema for an image input (URL or base64-encoded).",
   "type": "object",
   "properties": {
+    "type": {
+      "$ref": "functions.expression.ImageInputSchemaType"
+    },
     "description": {
       "description": "Human-readable description of the expected image.",
       "type": [
@@ -11,5 +14,8 @@
         "null"
       ]
     }
-  }
+  },
+  "required": [
+    "type"
+  ]
 }

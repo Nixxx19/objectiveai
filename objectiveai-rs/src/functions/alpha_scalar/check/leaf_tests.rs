@@ -32,9 +32,11 @@ fn wrong_type_branch() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -53,9 +55,11 @@ fn description_empty() {
     let f = RemoteFunction::Leaf {
         description: "  ".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -88,9 +92,11 @@ fn description_too_long() {
     let f = RemoteFunction::Leaf {
         description: "a".repeat(10001),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -125,9 +131,11 @@ fn rejects_no_tasks() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -146,9 +154,11 @@ fn responses_less_than_2() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -179,9 +189,11 @@ fn valid_single_task() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -214,9 +226,11 @@ fn valid_multiple_tasks() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -285,9 +299,11 @@ fn valid_expression_messages() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -322,9 +338,11 @@ fn diversity_fail_all_fixed_parameters() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -357,9 +375,11 @@ fn diversity_fail_second_task_fixed() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -411,13 +431,16 @@ fn diversity_fail_object_input_ignored() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "name" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "score" => InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(0),
                     maximum: Some(100),
@@ -451,9 +474,11 @@ fn diversity_pass_message_derives_from_input() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -486,13 +511,16 @@ fn diversity_pass_object_fields_in_messages() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "question" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "context" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -547,9 +575,11 @@ fn diversity_pass_both_messages_derived() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -603,14 +633,17 @@ fn valid_with_skip_last_task_boolean() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "skip_last_task" => InputSchema::Boolean(
                     crate::functions::expression::BooleanInputSchema {
+                        r#type: Default::default(),
                         description: None,
                     },
                 )
@@ -664,13 +697,16 @@ fn valid_with_skip_on_high_confidence() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "confidence" => InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(0),
                     maximum: Some(100),
@@ -730,9 +766,11 @@ fn all_tasks_skipped() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -786,9 +824,11 @@ fn rejects_single_permutation_string_enum() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: Some(vec!["only".to_string()]),
                 })
@@ -821,9 +861,11 @@ fn rejects_single_permutation_integer() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(0),
                     maximum: Some(0),
@@ -859,12 +901,15 @@ fn modality_fail_image_in_schema_but_str_in_messages() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "photo" => InputSchema::Image(ImageInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 }),
                 "label" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -897,12 +942,15 @@ fn modality_pass_image_in_messages() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "photo" => InputSchema::Image(ImageInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 }),
                 "label" => InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })

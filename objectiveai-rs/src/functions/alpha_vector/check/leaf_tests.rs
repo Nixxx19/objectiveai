@@ -34,6 +34,7 @@ fn wrong_type_branch() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -52,6 +53,7 @@ fn description_empty() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -80,6 +82,7 @@ fn description_too_long() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -110,6 +113,7 @@ fn no_tasks() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -128,6 +132,7 @@ fn valid_simple_string_items() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -156,6 +161,7 @@ fn valid_multiple_tasks() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -195,14 +201,17 @@ fn valid_integer_items() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "value" => InputSchema::Integer(IntegerInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         minimum: Some(0),
                         maximum: Some(999),
                     }),
                     "label" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     })
@@ -245,10 +254,11 @@ fn valid_object_items() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "name" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                    "tags" => InputSchema::Array(ArrayInputSchema { description: None, min_items: Some(1), max_items: Some(3), items: Box::new(InputSchema::String(StringInputSchema { description: None, r#enum: None })) })
+                    "name" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None }),
+                    "tags" => InputSchema::Array(ArrayInputSchema { r#type: Default::default(), description: None, min_items: Some(1), max_items: Some(3), items: Box::new(InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None })) })
                 },
                 required: Some(vec!["name".to_string(), "tags".to_string()]),
             }),
@@ -288,6 +298,7 @@ fn valid_no_max_items() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -318,6 +329,7 @@ fn responses_fixed_expression_fails_diversity() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -346,6 +358,7 @@ fn responses_fixed_pool_expression_fails_diversity() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -374,6 +387,7 @@ fn responses_derived_from_input_passes_diversity() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -402,6 +416,7 @@ fn diversity_fail_third_task_fixed_responses() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -452,6 +467,7 @@ fn diversity_fail_positional_labels() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -504,6 +520,7 @@ fn diversity_pass_ranking_with_enum_items() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -543,6 +560,7 @@ fn diversity_pass_multiple_tasks_with_varied_responses() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -595,6 +613,7 @@ fn within_input_responses_all_cloned() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -623,6 +642,7 @@ fn within_input_responses_cloned_two_elements() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -653,6 +673,7 @@ fn all_tasks_skipped() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -694,6 +715,7 @@ fn rejects_single_permutation_string_enum() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: Some(vec!["only".to_string()]),
             }),
@@ -722,6 +744,7 @@ fn rejects_single_permutation_integer() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Integer(IntegerInputSchema {
+                r#type: Default::default(),
                 description: None,
                 minimum: Some(0),
                 maximum: Some(0),
@@ -753,12 +776,15 @@ fn modality_fail_image_in_schema_but_text_only() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "photo" => InputSchema::Image(ImageInputSchema {
+                        r#type: Default::default(),
                         description: None,
                     }),
                     "name" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     })
@@ -790,12 +816,15 @@ fn modality_pass_image_in_responses() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "photo" => InputSchema::Image(ImageInputSchema {
+                        r#type: Default::default(),
                         description: None,
                     }),
                     "name" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     })
@@ -826,12 +855,15 @@ fn modality_pass_image_in_messages() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "photo" => InputSchema::Image(ImageInputSchema {
+                        r#type: Default::default(),
                         description: None,
                     }),
                     "name" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     })
@@ -865,6 +897,7 @@ fn valid_merged_subsets_simple() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -895,13 +928,16 @@ fn valid_with_skip_last_task_boolean() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "text" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
                     "skip_last_task" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
                         description: None,
                     })
                 },
@@ -945,6 +981,7 @@ fn valid_with_skip_on_quick_mode() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -988,11 +1025,12 @@ fn valid_people_ranking_with_skip() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "fullName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                    "firstName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                    "lastName" => InputSchema::String(StringInputSchema { description: None, r#enum: None })
+                    "fullName" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None }),
+                    "firstName" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None }),
+                    "lastName" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None })
                 },
                 required: Some(vec!["fullName".to_string(), "firstName".to_string()]),
             }),
@@ -1045,11 +1083,12 @@ fn people_ranking_null_lastname_replaced() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "fullName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                    "firstName" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                    "lastName" => InputSchema::String(StringInputSchema { description: None, r#enum: None })
+                    "fullName" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None }),
+                    "firstName" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None }),
+                    "lastName" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None })
                 },
                 required: Some(vec!["fullName".to_string(), "firstName".to_string()]),
             }),
@@ -1102,10 +1141,11 @@ fn response_diversity_pass_boolean_derived() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "label" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                    "flag" => InputSchema::Boolean(BooleanInputSchema { description: None })
+                    "label" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None }),
+                    "flag" => InputSchema::Boolean(BooleanInputSchema { r#type: Default::default(), description: None })
                 },
                 required: None,
             }),
@@ -1134,10 +1174,11 @@ fn response_diversity_fail_fixed_responses() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "label" => InputSchema::String(StringInputSchema { description: None, r#enum: None }),
-                    "flag" => InputSchema::Boolean(BooleanInputSchema { description: None })
+                    "label" => InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None }),
+                    "flag" => InputSchema::Boolean(BooleanInputSchema { r#type: Default::default(), description: None })
                 },
                 required: None,
             }),
@@ -1168,6 +1209,7 @@ fn job_application_ranker_pass() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),

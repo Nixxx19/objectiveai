@@ -30,101 +30,19 @@ pub enum OneOrMany<T> {
 /// ```json
 /// {"$starlark": "input['items'][0]['name']"}
 /// ```
-#[derive(Debug, Clone, PartialEq, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
 #[schemars(rename = "functions.expression.Expression")]
 pub enum Expression {
     /// A JMESPath expression.
+    #[serde(rename = "$jmespath")]
     JMESPath(String),
     /// A Starlark expression.
+    #[serde(rename = "$starlark")]
     Starlark(String),
     /// A predefined special expression variant.
+    #[serde(rename = "$special")]
     Special(super::Special),
-}
-
-impl Serialize for Expression {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: serde::Serializer,
-    {
-        use serde::ser::SerializeMap;
-        let mut map = serializer.serialize_map(Some(1))?;
-        match self {
-            Expression::JMESPath(expr) => {
-                map.serialize_entry("$jmespath", expr)?
-            }
-            Expression::Starlark(expr) => {
-                map.serialize_entry("$starlark", expr)?
-            }
-            Expression::Special(special) => {
-                map.serialize_entry("$special", special)?
-            }
-        }
-        map.end()
-    }
-}
-
-impl<'de> Deserialize<'de> for Expression {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: serde::Deserializer<'de>,
-    {
-        use serde::de::{self, MapAccess, Visitor};
-        use std::fmt;
-
-        struct ExpressionVisitor;
-
-        impl<'de> Visitor<'de> for ExpressionVisitor {
-            type Value = Expression;
-
-            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
-                formatter.write_str(
-                    "a map with exactly one key '$jmespath', '$starlark', or '$special'",
-                )
-            }
-
-            fn visit_map<M>(self, mut map: M) -> Result<Expression, M::Error>
-            where
-                M: MapAccess<'de>,
-            {
-                // Get the first (and should be only) key
-                let Some(key) = map.next_key::<String>()? else {
-                    return Err(de::Error::custom(
-                        "expected '$jmespath' or '$starlark' key, found empty map",
-                    ));
-                };
-
-                let result = match key.as_str() {
-                    "$jmespath" => {
-                        let expr: String = map.next_value()?;
-                        Ok(Expression::JMESPath(expr))
-                    }
-                    "$starlark" => {
-                        let expr: String = map.next_value()?;
-                        Ok(Expression::Starlark(expr))
-                    }
-                    "$special" => {
-                        let special: super::Special = map.next_value()?;
-                        Ok(Expression::Special(special))
-                    }
-                    other => Err(de::Error::custom(format!(
-                        "expected '$jmespath', '$starlark', or '$special', found '{}'",
-                        other
-                    ))),
-                };
-
-                // Ensure there are no more keys
-                if map.next_key::<String>()?.is_some() {
-                    return Err(de::Error::custom(
-                        "expected exactly one expression key, found additional keys",
-                    ));
-                }
-
-                result
-            }
-        }
-
-        deserializer.deserialize_map(ExpressionVisitor)
-    }
 }
 
 impl Expression {

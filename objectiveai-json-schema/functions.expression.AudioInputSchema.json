@@ -4,6 +4,9 @@
   "description": "Schema for an audio input.",
   "type": "object",
   "properties": {
+    "type": {
+      "$ref": "functions.expression.AudioInputSchemaType"
+    },
     "description": {
       "description": "Human-readable description of the expected audio.",
       "type": [
@@ -11,5 +14,8 @@
         "null"
       ]
     }
-  }
+  },
+  "required": [
+    "type"
+  ]
 }

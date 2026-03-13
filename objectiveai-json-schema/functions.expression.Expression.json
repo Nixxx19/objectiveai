@@ -7,12 +7,12 @@
       "description": "A JMESPath expression.",
       "type": "object",
       "properties": {
-        "JMESPath": {
+        "$jmespath": {
           "type": "string"
         }
       },
       "required": [
-        "JMESPath"
+        "$jmespath"
       ],
       "additionalProperties": false
     },
@@ -20,12 +20,12 @@
       "description": "A Starlark expression.",
       "type": "object",
       "properties": {
-        "Starlark": {
+        "$starlark": {
           "type": "string"
         }
       },
       "required": [
-        "Starlark"
+        "$starlark"
       ],
       "additionalProperties": false
     },
@@ -33,12 +33,12 @@
       "description": "A predefined special expression variant.",
       "type": "object",
       "properties": {
-        "Special": {
+        "$special": {
           "$ref": "functions.expression.Special"
         }
       },
       "required": [
-        "Special"
+        "$special"
       ],
       "additionalProperties": false
     }

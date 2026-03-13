@@ -34,6 +34,7 @@ mod tests {
     fn test_1() {
         test(
             &InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: Some(vec![]),
             }),
@@ -45,7 +46,10 @@ mod tests {
     #[test]
     fn test_2() {
         test(
-            &InputSchema::Audio(AudioInputSchema { description: None }),
+            &InputSchema::Audio(AudioInputSchema {
+                r#type: Default::default(),
+                description: None,
+            }),
             2,
         );
     }
@@ -54,7 +58,10 @@ mod tests {
     #[test]
     fn test_3() {
         test(
-            &InputSchema::Boolean(BooleanInputSchema { description: None }),
+            &InputSchema::Boolean(BooleanInputSchema {
+                r#type: Default::default(),
+                description: None,
+            }),
             2,
         );
     }
@@ -64,6 +71,7 @@ mod tests {
     fn test_4() {
         test(
             &InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -75,7 +83,10 @@ mod tests {
     #[test]
     fn test_5() {
         test(
-            &InputSchema::Video(VideoInputSchema { description: None }),
+            &InputSchema::Video(VideoInputSchema {
+                r#type: Default::default(),
+                description: None,
+            }),
             2,
         );
     }
@@ -85,6 +96,7 @@ mod tests {
     fn test_6() {
         test(
             &InputSchema::Integer(IntegerInputSchema {
+                r#type: Default::default(),
                 description: None,
                 minimum: Some(-5),
                 maximum: Some(5),
@@ -98,6 +110,7 @@ mod tests {
     fn test_7() {
         test(
             &InputSchema::Integer(IntegerInputSchema {
+                r#type: Default::default(),
                 description: None,
                 minimum: None,
                 maximum: None,
@@ -110,7 +123,10 @@ mod tests {
     #[test]
     fn test_8() {
         test(
-            &InputSchema::Image(ImageInputSchema { description: None }),
+            &InputSchema::Image(ImageInputSchema {
+                r#type: Default::default(),
+                description: None,
+            }),
             4,
         );
     }
@@ -121,8 +137,14 @@ mod tests {
         test(
             &InputSchema::AnyOf(AnyOfInputSchema {
                 any_of: vec![
-                    InputSchema::Boolean(BooleanInputSchema { description: None }),
-                    InputSchema::Audio(AudioInputSchema { description: None }),
+                    InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    InputSchema::Audio(AudioInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                 ],
             }),
             4,
@@ -134,6 +156,7 @@ mod tests {
     fn test_10() {
         test(
             &InputSchema::Number(NumberInputSchema {
+                r#type: Default::default(),
                 description: None,
                 minimum: None,
                 maximum: None,
@@ -147,10 +170,12 @@ mod tests {
     fn test_11() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(1),
                 max_items: Some(2),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -164,12 +189,17 @@ mod tests {
         test(
             &InputSchema::AnyOf(AnyOfInputSchema {
                 any_of: vec![
-                    InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                     InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
                     InputSchema::Integer(IntegerInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         minimum: None,
                         maximum: None,
@@ -185,14 +215,20 @@ mod tests {
     fn test_13() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "a" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
-                    "b" => InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    "b" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                     "c" => InputSchema::Integer(IntegerInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         minimum: None,
                         maximum: None,
@@ -213,10 +249,12 @@ mod tests {
     fn test_14() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(0),
                 max_items: Some(3),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -228,7 +266,10 @@ mod tests {
     #[test]
     fn test_15() {
         test(
-            &InputSchema::File(FileInputSchema { description: None }),
+            &InputSchema::File(FileInputSchema {
+                r#type: Default::default(),
+                description: None,
+            }),
             16,
         );
     }
@@ -238,14 +279,20 @@ mod tests {
     fn test_16() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "name" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
-                    "active" => InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    "active" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                     "nickname" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
@@ -261,10 +308,12 @@ mod tests {
     fn test_17() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(2),
                 max_items: Some(3),
                 items: Box::new(InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: Some(vec![
                         "x".to_string(),
@@ -282,11 +331,21 @@ mod tests {
     fn test_18() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "a" => InputSchema::Boolean(BooleanInputSchema { description: None }),
-                    "b" => InputSchema::Boolean(BooleanInputSchema { description: None }),
-                    "c" => InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    "a" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    "b" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    "c" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                 },
                 required: None,
             }),
@@ -299,10 +358,17 @@ mod tests {
     fn test_19() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "a" => InputSchema::File(FileInputSchema { description: None }),
-                    "b" => InputSchema::Image(ImageInputSchema { description: None }),
+                    "a" => InputSchema::File(FileInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    "b" => InputSchema::Image(ImageInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                 },
                 required: None,
             }),
@@ -315,13 +381,29 @@ mod tests {
     fn test_20() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "a" => InputSchema::Boolean(BooleanInputSchema { description: None }),
-                    "b" => InputSchema::Boolean(BooleanInputSchema { description: None }),
-                    "c" => InputSchema::Boolean(BooleanInputSchema { description: None }),
-                    "d" => InputSchema::Boolean(BooleanInputSchema { description: None }),
-                    "e" => InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    "a" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    "b" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    "c" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    "d" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    "e" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                 },
                 required: None,
             }),
@@ -336,10 +418,12 @@ mod tests {
     fn test_21() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(0),
                 max_items: Some(1),
                 items: Box::new(InputSchema::Audio(AudioInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -352,10 +436,12 @@ mod tests {
     fn test_22() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(1),
                 max_items: Some(1),
                 items: Box::new(InputSchema::Image(ImageInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -368,10 +454,12 @@ mod tests {
     fn test_23() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(1),
                 max_items: Some(2),
                 items: Box::new(InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: None,
                     maximum: None,
@@ -386,10 +474,12 @@ mod tests {
     fn test_24() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(1),
                 max_items: Some(1),
                 items: Box::new(InputSchema::File(FileInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -402,10 +492,12 @@ mod tests {
     fn test_25() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(1),
                 max_items: Some(3),
                 items: Box::new(InputSchema::Number(NumberInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: None,
                     maximum: None,
@@ -422,13 +514,16 @@ mod tests {
     fn test_26() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "tags" => InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(1),
                         max_items: Some(1),
                         items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                            r#type: Default::default(),
                             description: None,
                         })),
                     }),
@@ -444,19 +539,25 @@ mod tests {
     fn test_27() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "scores" => InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(1),
                         max_items: Some(1),
                         items: Box::new(InputSchema::Integer(IntegerInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             minimum: None,
                             maximum: None,
                         })),
                     }),
-                    "active" => InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    "active" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                 },
                 required: Some(vec!["scores".to_string(), "active".to_string()]),
             }),
@@ -469,17 +570,21 @@ mod tests {
     fn test_28() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "name" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
                     "items" => InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(1),
                         max_items: Some(2),
                         items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                            r#type: Default::default(),
                             description: None,
                         })),
                     }),
@@ -495,13 +600,16 @@ mod tests {
     fn test_29() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "items" => InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(1),
                         max_items: Some(2),
                         items: Box::new(InputSchema::String(StringInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             r#enum: Some(vec![
                                 "a".to_string(),
@@ -510,7 +618,10 @@ mod tests {
                             ]),
                         })),
                     }),
-                    "flag" => InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    "flag" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                 },
                 required: Some(vec!["items".to_string()]),
             }),
@@ -523,21 +634,26 @@ mod tests {
     fn test_30() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "images" => InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(1),
                         max_items: Some(1),
                         items: Box::new(InputSchema::Image(ImageInputSchema {
+                            r#type: Default::default(),
                             description: None,
                         })),
                     }),
                     "files" => InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(1),
                         max_items: Some(1),
                         items: Box::new(InputSchema::File(FileInputSchema {
+                            r#type: Default::default(),
                             description: None,
                         })),
                     }),
@@ -555,10 +671,12 @@ mod tests {
     fn test_31() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(0),
                 max_items: None,
                 items: Box::new(InputSchema::Audio(AudioInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -571,10 +689,12 @@ mod tests {
     fn test_32() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(0),
                 max_items: None,
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -587,10 +707,12 @@ mod tests {
     fn test_33() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(3),
                 max_items: None,
                 items: Box::new(InputSchema::Audio(AudioInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -603,10 +725,12 @@ mod tests {
     fn test_34() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(1),
                 max_items: None,
                 items: Box::new(InputSchema::Video(VideoInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -619,10 +743,12 @@ mod tests {
     fn test_35() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(2),
                 max_items: None,
                 items: Box::new(InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(10),
@@ -639,10 +765,12 @@ mod tests {
     fn test_36() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: Some(0),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -655,10 +783,12 @@ mod tests {
     fn test_37() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: Some(5),
                 items: Box::new(InputSchema::Audio(AudioInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -671,10 +801,12 @@ mod tests {
     fn test_38() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: Some(3),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -687,10 +819,12 @@ mod tests {
     fn test_39() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: Some(15),
                 items: Box::new(InputSchema::Audio(AudioInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -703,10 +837,12 @@ mod tests {
     fn test_40() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: Some(8),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -721,10 +857,12 @@ mod tests {
     fn test_41() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: None,
                 items: Box::new(InputSchema::Audio(AudioInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -737,10 +875,12 @@ mod tests {
     fn test_42() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: None,
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -753,10 +893,12 @@ mod tests {
     fn test_43() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: None,
                 items: Box::new(InputSchema::Image(ImageInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -769,10 +911,12 @@ mod tests {
     fn test_44() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: None,
                 items: Box::new(InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: None,
                     maximum: None,
@@ -787,10 +931,12 @@ mod tests {
     fn test_45() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: None,
                 max_items: None,
                 items: Box::new(InputSchema::Video(VideoInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -806,10 +952,12 @@ mod tests {
     fn test_46() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(0),
                 max_items: Some(0),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -823,10 +971,12 @@ mod tests {
     fn test_47() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(5),
                 max_items: Some(5),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -840,10 +990,12 @@ mod tests {
     fn test_48() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(3),
                 max_items: Some(4),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -857,10 +1009,12 @@ mod tests {
     fn test_49() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(2),
                 max_items: Some(4),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -874,10 +1028,12 @@ mod tests {
     fn test_50() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(0),
                 max_items: Some(4),
                 items: Box::new(InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: None,
                     maximum: None,
@@ -893,10 +1049,12 @@ mod tests {
     fn test_51() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(10),
                 max_items: Some(11),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -910,10 +1068,12 @@ mod tests {
     fn test_52() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(0),
                 max_items: Some(100),
                 items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+                    r#type: Default::default(),
                     description: None,
                 })),
             }),
@@ -929,18 +1089,22 @@ mod tests {
     fn test_53() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(1),
                 max_items: Some(3),
                 items: Box::new(InputSchema::Array(ArrayInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     min_items: Some(1),
                     max_items: Some(3),
                     items: Box::new(InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(1),
                         max_items: Some(3),
                         items: Box::new(InputSchema::Image(ImageInputSchema {
+                            r#type: Default::default(),
                             description: None,
                         })),
                     })),
@@ -956,30 +1120,49 @@ mod tests {
     fn test_54() {
         test(
             &InputSchema::Array(ArrayInputSchema {
+                r#type: Default::default(),
                 description: None,
                 min_items: Some(1),
                 max_items: Some(5),
                 items: Box::new(InputSchema::AnyOf(AnyOfInputSchema {
                     any_of: vec![
-                        InputSchema::Boolean(BooleanInputSchema { description: None }),
+                        InputSchema::Boolean(BooleanInputSchema {
+                            r#type: Default::default(),
+                            description: None,
+                        }),
                         InputSchema::String(StringInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             r#enum: None,
                         }),
                         InputSchema::Integer(IntegerInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             minimum: None,
                             maximum: None,
                         }),
                         InputSchema::Number(NumberInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             minimum: None,
                             maximum: None,
                         }),
-                        InputSchema::Image(ImageInputSchema { description: None }),
-                        InputSchema::File(FileInputSchema { description: None }),
-                        InputSchema::Audio(AudioInputSchema { description: None }),
-                        InputSchema::Video(VideoInputSchema { description: None }),
+                        InputSchema::Image(ImageInputSchema {
+                            r#type: Default::default(),
+                            description: None,
+                        }),
+                        InputSchema::File(FileInputSchema {
+                            r#type: Default::default(),
+                            description: None,
+                        }),
+                        InputSchema::Audio(AudioInputSchema {
+                            r#type: Default::default(),
+                            description: None,
+                        }),
+                        InputSchema::Video(VideoInputSchema {
+                            r#type: Default::default(),
+                            description: None,
+                        }),
                     ],
                 })),
             }),
@@ -993,18 +1176,23 @@ mod tests {
     fn test_55() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "a" => InputSchema::Object(ObjectInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         properties: index_map! {
                             "b" => InputSchema::Object(ObjectInputSchema {
+                                r#type: Default::default(),
                                 description: None,
                                 properties: index_map! {
                                     "c" => InputSchema::Object(ObjectInputSchema {
+                                        r#type: Default::default(),
                                         description: None,
                                         properties: index_map! {
                                             "d" => InputSchema::File(FileInputSchema {
+                                                r#type: Default::default(),
                                                 description: None,
                                             }),
                                         },
@@ -1029,34 +1217,57 @@ mod tests {
     fn test_56() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
-                    "a" => InputSchema::File(FileInputSchema { description: None }),
-                    "b" => InputSchema::Image(ImageInputSchema { description: None }),
+                    "a" => InputSchema::File(FileInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
+                    "b" => InputSchema::Image(ImageInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                     "c" => InputSchema::Number(NumberInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         minimum: None,
                         maximum: None,
                     }),
                     "d" => InputSchema::Integer(IntegerInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         minimum: None,
                         maximum: None,
                     }),
-                    "e" => InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    "e" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                     "f" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
-                    "g" => InputSchema::Audio(AudioInputSchema { description: None }),
+                    "g" => InputSchema::Audio(AudioInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                     "h" => InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(2),
                         max_items: Some(8),
                         items: Box::new(InputSchema::AnyOf(AnyOfInputSchema {
                             any_of: vec![
-                                InputSchema::File(FileInputSchema { description: None }),
-                                InputSchema::Image(ImageInputSchema { description: None }),
+                                InputSchema::File(FileInputSchema {
+                                    r#type: Default::default(),
+                                    description: None,
+                                }),
+                                InputSchema::Image(ImageInputSchema {
+                                    r#type: Default::default(),
+                                    description: None,
+                                }),
                             ],
                         })),
                     }),
@@ -1082,17 +1293,26 @@ mod tests {
     fn test_57() {
         test(
             &InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "items" => InputSchema::Array(ArrayInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         min_items: Some(1),
                         max_items: Some(5),
                         items: Box::new(InputSchema::AnyOf(AnyOfInputSchema {
                             any_of: vec![
-                                InputSchema::File(FileInputSchema { description: None }),
-                                InputSchema::Image(ImageInputSchema { description: None }),
+                                InputSchema::File(FileInputSchema {
+                                    r#type: Default::default(),
+                                    description: None,
+                                }),
+                                InputSchema::Image(ImageInputSchema {
+                                    r#type: Default::default(),
+                                    description: None,
+                                }),
                                 InputSchema::Number(NumberInputSchema {
+                                    r#type: Default::default(),
                                     description: None,
                                     minimum: None,
                                     maximum: None,
@@ -1101,10 +1321,14 @@ mod tests {
                         })),
                     }),
                     "name" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
-                    "active" => InputSchema::Boolean(BooleanInputSchema { description: None }),
+                    "active" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
+                        description: None,
+                    }),
                 },
                 required: Some(vec![
                     "items".to_string(),

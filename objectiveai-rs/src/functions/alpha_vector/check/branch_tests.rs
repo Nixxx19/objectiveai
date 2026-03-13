@@ -39,6 +39,7 @@ fn wrong_type_leaf() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -55,6 +56,7 @@ fn description_empty() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -83,6 +85,7 @@ fn description_too_long() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -111,6 +114,7 @@ fn no_tasks() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -129,6 +133,7 @@ fn single_scalar_task_rejected() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -154,6 +159,7 @@ fn single_placeholder_scalar_task_rejected() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -170,9 +176,11 @@ fn single_placeholder_scalar_task_rejected() {
                     name: "test".to_string(),
                 },
                 input_schema: ObjectInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     properties: index_map! {
                         "text" => InputSchema::String(StringInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             r#enum: None,
                         })
@@ -194,6 +202,7 @@ fn over_50_percent_scalar_tasks() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -240,6 +249,7 @@ fn valid_single_vector_function() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -268,6 +278,7 @@ fn valid_single_placeholder_vector() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -286,6 +297,7 @@ fn valid_single_placeholder_vector() {
                 input_schema: VectorFunctionInputSchema {
                     context: None,
                     items: InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
@@ -308,6 +320,7 @@ fn valid_all_vector_tasks() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -347,6 +360,7 @@ fn valid_mixed_placeholder_vector_tasks() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -377,6 +391,7 @@ fn valid_mixed_placeholder_vector_tasks() {
                     input_schema: VectorFunctionInputSchema {
                         context: None,
                         items: InputSchema::String(StringInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             r#enum: None,
                         }),
@@ -404,6 +419,7 @@ fn input_diversity_fail_fixed_input() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -443,6 +459,7 @@ fn input_diversity_pass_all_derived() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -482,6 +499,7 @@ fn input_diversity_pass_placeholder_vector_tasks() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -501,6 +519,7 @@ fn input_diversity_pass_placeholder_vector_tasks() {
                     input_schema: VectorFunctionInputSchema {
                         context: None,
                         items: InputSchema::String(StringInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             r#enum: None,
                         }),
@@ -526,6 +545,7 @@ fn input_diversity_pass_placeholder_vector_tasks() {
                     input_schema: VectorFunctionInputSchema {
                         context: None,
                         items: InputSchema::String(StringInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             r#enum: None,
                         }),
@@ -553,6 +573,7 @@ fn all_tasks_skipped() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::String(StringInputSchema {
+                r#type: Default::default(),
                 description: None,
                 r#enum: None,
             }),
@@ -599,13 +620,16 @@ fn valid_with_skip_on_boolean() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "text" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
                     "skip_last" => InputSchema::Boolean(BooleanInputSchema {
+                        r#type: Default::default(),
                         description: None,
                     })
                 },
@@ -649,13 +673,16 @@ fn valid_with_skip_on_mode_enum() {
         input_schema: VectorFunctionInputSchema {
             context: None,
             items: InputSchema::Object(ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 properties: index_map! {
                     "text" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: None,
                     }),
                     "mode" => InputSchema::String(StringInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         r#enum: Some(vec!["quick".to_string(), "thorough".to_string()]),
                     })

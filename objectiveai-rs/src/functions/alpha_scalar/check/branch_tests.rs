@@ -32,9 +32,11 @@ fn wrong_type_leaf() {
     let f = RemoteFunction::Leaf {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(10),
@@ -54,9 +56,11 @@ fn description_empty() {
     let f = RemoteFunction::Branch {
         description: "  ".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -82,9 +86,11 @@ fn description_too_long() {
     let f = RemoteFunction::Branch {
         description: "a".repeat(351),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -112,9 +118,11 @@ fn rejects_no_tasks() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(10),
@@ -134,9 +142,11 @@ fn valid_single_scalar_function() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(10),
@@ -163,9 +173,11 @@ fn valid_single_placeholder_scalar() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(10),
@@ -185,9 +197,11 @@ fn valid_single_placeholder_scalar() {
                     name: "test".to_string(),
                 },
                 input_schema: ObjectInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     properties: index_map! {
                         "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                            r#type: Default::default(),
                             description: None,
                             minimum: Some(1),
                             maximum: Some(10),
@@ -208,9 +222,11 @@ fn valid_multiple_tasks() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(10),
@@ -239,9 +255,11 @@ fn valid_multiple_tasks() {
                         name: "test".to_string(),
                     },
                     input_schema: ObjectInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         properties: index_map! {
                             "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                                r#type: Default::default(),
                                 description: None,
                                 minimum: Some(1),
                                 maximum: Some(10),
@@ -265,9 +283,11 @@ fn scalar_diversity_fail_fixed_input() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -301,9 +321,11 @@ fn scalar_diversity_fail_fixed_integer() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(100),
@@ -338,13 +360,16 @@ fn scalar_diversity_fail_third_task_fixed_object() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "name" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "score" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(0),
                     maximum: Some(100),
@@ -391,9 +416,11 @@ fn scalar_diversity_pass_string_passthrough() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -429,9 +456,11 @@ fn scalar_diversity_pass_integer_derived() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(1000),
@@ -466,13 +495,16 @@ fn scalar_diversity_pass_object_extract_field() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "title" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "author" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -506,13 +538,16 @@ fn scalar_diversity_pass_placeholder_with_transform() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "category" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -532,9 +567,11 @@ fn scalar_diversity_pass_placeholder_with_transform() {
                         name: "test".to_string(),
                     },
                     input_schema: ObjectInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         properties: index_map! {
                             "text" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                                r#type: Default::default(),
                                 description: None,
                                 r#enum: None,
                             })
@@ -559,9 +596,11 @@ fn scalar_diversity_pass_placeholder_with_transform() {
                         name: "test".to_string(),
                     },
                     input_schema: ObjectInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         properties: index_map! {
                             "text" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                                r#type: Default::default(),
                                 description: None,
                                 r#enum: None,
                             })
@@ -585,13 +624,16 @@ fn scalar_diversity_pass_optional_field_used() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "name" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "notes" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -627,14 +669,17 @@ fn valid_with_skip_last_task_boolean() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "skip_last_task" => crate::functions::expression::InputSchema::Boolean(
                     crate::functions::expression::BooleanInputSchema {
+                        r#type: Default::default(),
                         description: None,
                     }
                 )
@@ -670,13 +715,16 @@ fn valid_with_skip_on_low_priority() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "text" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "priority" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(1),
                     maximum: Some(10),
@@ -718,9 +766,11 @@ fn rejects_single_permutation_integer() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(0),
                     maximum: Some(0),
@@ -747,9 +797,11 @@ fn rejects_single_permutation_string_enum() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: Some(vec!["only".to_string()]),
                 })
@@ -777,9 +829,11 @@ fn all_tasks_skipped() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "value" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 })
@@ -832,13 +886,16 @@ fn placeholder_field_validation_single_permutation() {
     let f = RemoteFunction::Branch {
         description: "test".to_string(),
         input_schema: ObjectInputSchema {
+            r#type: Default::default(),
             description: None,
             properties: index_map! {
                 "name" => crate::functions::expression::InputSchema::String(StringInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     r#enum: None,
                 }),
                 "x" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                    r#type: Default::default(),
                     description: None,
                     minimum: Some(5),
                     maximum: Some(5),
@@ -867,9 +924,11 @@ fn placeholder_field_validation_single_permutation() {
                         name: "test".to_string(),
                     },
                     input_schema: ObjectInputSchema {
+                        r#type: Default::default(),
                         description: None,
                         properties: index_map! {
                             "x" => crate::functions::expression::InputSchema::Integer(IntegerInputSchema {
+                                r#type: Default::default(),
                                 description: None,
                                 minimum: Some(5),
                                 maximum: Some(5),

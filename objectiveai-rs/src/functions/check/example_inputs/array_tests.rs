@@ -68,8 +68,10 @@ fn bool_array_three_lengths() {
     // min=2, max=6 → distinct lengths: 2, 4, 6 → multiplier 3
     // item_perms = 2, total = 6
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+            r#type: Default::default(),
             description: None,
         })),
         min_items: Some(2),
@@ -83,8 +85,10 @@ fn bool_array_two_lengths() {
     // min=3, max=4 → mid=3 (dedup with min) → distinct lengths: 3, 4 → multiplier 2
     // item_perms = 2, total = 4
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+            r#type: Default::default(),
             description: None,
         })),
         min_items: Some(3),
@@ -98,8 +102,10 @@ fn bool_array_one_length() {
     // min=5, max=5 → distinct lengths: 5 → multiplier 1
     // item_perms = 2, total = 2
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+            r#type: Default::default(),
             description: None,
         })),
         min_items: Some(5),
@@ -115,8 +121,10 @@ fn enum_array_three_lengths() {
     // min=1, max=5 → distinct lengths: 1, 3, 5 → multiplier 3
     // item_perms = 3, total = 9
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::String(StringInputSchema {
+            r#type: Default::default(),
             description: None,
             r#enum: Some(vec!["a".into(), "b".into(), "c".into()]),
         })),
@@ -131,8 +139,10 @@ fn enum_array_one_length() {
     // min=2, max=2 → distinct lengths: 2 → multiplier 1
     // item_perms = 3, total = 3
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::String(StringInputSchema {
+            r#type: Default::default(),
             description: None,
             r#enum: Some(vec!["x".into(), "y".into(), "z".into()]),
         })),
@@ -150,8 +160,10 @@ fn plain_string_array_two_lengths() {
     // item_perms = 2, total = 4
     // Length 0 has no indices to check, length 1 has index 0.
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::String(StringInputSchema {
+            r#type: Default::default(),
             description: None,
             r#enum: None,
         })),
@@ -168,8 +180,10 @@ fn defaults_no_bounds() {
     // (None, None) → range (0, 10) → lengths: 0, 5, 10 → multiplier 3
     // item_perms = 2, total = 6
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+            r#type: Default::default(),
             description: None,
         })),
         min_items: None,
@@ -183,8 +197,10 @@ fn defaults_only_min() {
     // (Some(3), None) → range (3, 13) → lengths: 3, 8, 13 → multiplier 3
     // item_perms = 2, total = 6
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+            r#type: Default::default(),
             description: None,
         })),
         min_items: Some(3),
@@ -198,8 +214,10 @@ fn defaults_only_max() {
     // (None, Some(8)) → range (0, 8) → lengths: 0, 4, 8 → multiplier 3
     // item_perms = 2, total = 6
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::Boolean(BooleanInputSchema {
+            r#type: Default::default(),
             description: None,
         })),
         min_items: None,
@@ -215,8 +233,10 @@ fn enum_4_variants_three_lengths() {
     // min=1, max=3 → lengths: 1, 2, 3 → multiplier 3
     // item_perms = 4, total = 12
     let schema = ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(InputSchema::String(StringInputSchema {
+            r#type: Default::default(),
             description: None,
             r#enum: Some(vec!["w".into(), "x".into(), "y".into(), "z".into()]),
         })),

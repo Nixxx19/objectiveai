@@ -34,6 +34,7 @@ impl VectorFunctionInputSchema {
     pub fn transpile(self) -> functions::expression::InputSchema {
         functions::expression::InputSchema::Object(
             functions::expression::ObjectInputSchema {
+                r#type: Default::default(),
                 description: None,
                 required: Some(if self.context.is_some() {
                     vec!["context".to_string(), "items".to_string()]
@@ -57,6 +58,7 @@ impl VectorFunctionInputSchema {
                         "items".to_string(),
                         functions::expression::InputSchema::Array(
                             functions::expression::ArrayInputSchema {
+                                r#type: Default::default(),
                                 description: None,
                                 min_items: Some(2),
                                 max_items: None,

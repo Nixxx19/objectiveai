@@ -5,8 +5,7 @@
 
 use crate::agent;
 use indexmap::IndexMap;
-use serde::de::Error as _;
-use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 use super::InputValue;
 
@@ -14,9 +13,12 @@ use super::InputValue;
 ///
 /// Defines the expected structure and constraints for input data.
 /// Used by remote Functions to document and validate their inputs.
-#[derive(Debug, Clone, PartialEq, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(untagged)]
 #[schemars(rename = "functions.expression.InputSchema")]
 pub enum InputSchema {
+    /// A union of schemas - input must match at least one.
+    AnyOf(AnyOfInputSchema),
     /// An object with named properties.
     Object(ObjectInputSchema),
     /// An array of items.
@@ -37,8 +39,6 @@ pub enum InputSchema {
     Video(VideoInputSchema),
     /// A file.
     File(FileInputSchema),
-    /// A union of schemas - input must match at least one.
-    AnyOf(AnyOfInputSchema),
 }
 
 impl InputSchema {
@@ -75,210 +75,6 @@ impl InputSchema {
     }
 }
 
-/// Helper enum for deserializing typed schemas (those with a `type` field).
-#[derive(Deserialize)]
-#[serde(tag = "type", rename_all = "camelCase")]
-enum TypedInputSchema {
-    Object(ObjectInputSchema),
-    Array(ArrayInputSchema),
-    String(StringInputSchema),
-    Integer(IntegerInputSchema),
-    Number(NumberInputSchema),
-    Boolean(BooleanInputSchema),
-    Image(ImageInputSchema),
-    Audio(AudioInputSchema),
-    Video(VideoInputSchema),
-    File(FileInputSchema),
-}
-
-impl From<TypedInputSchema> for InputSchema {
-    fn from(typed: TypedInputSchema) -> Self {
-        match typed {
-            TypedInputSchema::Object(s) => InputSchema::Object(s),
-            TypedInputSchema::Array(s) => InputSchema::Array(s),
-            TypedInputSchema::String(s) => InputSchema::String(s),
-            TypedInputSchema::Integer(s) => InputSchema::Integer(s),
-            TypedInputSchema::Number(s) => InputSchema::Number(s),
-            TypedInputSchema::Boolean(s) => InputSchema::Boolean(s),
-            TypedInputSchema::Image(s) => InputSchema::Image(s),
-            TypedInputSchema::Audio(s) => InputSchema::Audio(s),
-            TypedInputSchema::Video(s) => InputSchema::Video(s),
-            TypedInputSchema::File(s) => InputSchema::File(s),
-        }
-    }
-}
-
-impl<'de> Deserialize<'de> for InputSchema {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let value = serde_json::Value::deserialize(deserializer)?;
-
-        // Check if this is an AnyOf schema (has anyOf field, no type field)
-        if value.get("anyOf").is_some() {
-            let schema: AnyOfInputSchema =
-                serde_json::from_value(value).map_err(D::Error::custom)?;
-            Ok(InputSchema::AnyOf(schema))
-        } else {
-            // Deserialize as a typed schema
-            let typed: TypedInputSchema =
-                serde_json::from_value(value).map_err(D::Error::custom)?;
-            Ok(typed.into())
-        }
-    }
-}
-
-impl Serialize for InputSchema {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        match self {
-            InputSchema::AnyOf(schema) => schema.serialize(serializer),
-            InputSchema::Object(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a ObjectInputSchema,
-                }
-                Tagged {
-                    r#type: "object",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::Array(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a ArrayInputSchema,
-                }
-                Tagged {
-                    r#type: "array",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::String(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a StringInputSchema,
-                }
-                Tagged {
-                    r#type: "string",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::Integer(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a IntegerInputSchema,
-                }
-                Tagged {
-                    r#type: "integer",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::Number(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a NumberInputSchema,
-                }
-                Tagged {
-                    r#type: "number",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::Boolean(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a BooleanInputSchema,
-                }
-                Tagged {
-                    r#type: "boolean",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::Image(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a ImageInputSchema,
-                }
-                Tagged {
-                    r#type: "image",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::Audio(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a AudioInputSchema,
-                }
-                Tagged {
-                    r#type: "audio",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::Video(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a VideoInputSchema,
-                }
-                Tagged {
-                    r#type: "video",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-            InputSchema::File(schema) => {
-                #[derive(Serialize)]
-                #[serde(rename_all = "camelCase")]
-                struct Tagged<'a> {
-                    r#type: &'static str,
-                    #[serde(flatten)]
-                    schema: &'a FileInputSchema,
-                }
-                Tagged {
-                    r#type: "file",
-                    schema,
-                }
-                .serialize(serializer)
-            }
-        }
-    }
-}
 
 /// Which media modalities are present in a schema.
 #[derive(Debug, Clone, Copy, Default, PartialEq, Eq)]
@@ -324,11 +120,20 @@ impl AnyOfInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.ObjectInputSchemaType")]
+pub enum ObjectInputSchemaType {
+    #[default]
+    Object,
+}
+
 /// Schema for an object input with named properties.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.ObjectInputSchema")]
 pub struct ObjectInputSchema {
+    pub r#type: ObjectInputSchemaType,
     /// Human-readable description of the object.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -362,11 +167,20 @@ impl ObjectInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.ArrayInputSchemaType")]
+pub enum ArrayInputSchemaType {
+    #[default]
+    Array,
+}
+
 /// Schema for an array input.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.ArrayInputSchema")]
 pub struct ArrayInputSchema {
+    pub r#type: ArrayInputSchemaType,
     /// Human-readable description of the array.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -407,11 +221,20 @@ impl ArrayInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.StringInputSchemaType")]
+pub enum StringInputSchemaType {
+    #[default]
+    String,
+}
+
 /// Schema for a string input.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.StringInputSchema")]
 pub struct StringInputSchema {
+    pub r#type: StringInputSchemaType,
     /// Human-readable description of the string.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -436,11 +259,20 @@ impl StringInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.IntegerInputSchemaType")]
+pub enum IntegerInputSchemaType {
+    #[default]
+    Integer,
+}
+
 /// Schema for an integer input.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.IntegerInputSchema")]
 pub struct IntegerInputSchema {
+    pub r#type: IntegerInputSchemaType,
     /// Human-readable description of the integer.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -490,11 +322,20 @@ impl IntegerInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.NumberInputSchemaType")]
+pub enum NumberInputSchemaType {
+    #[default]
+    Number,
+}
+
 /// Schema for a floating-point number input.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.NumberInputSchema")]
 pub struct NumberInputSchema {
+    pub r#type: NumberInputSchemaType,
     /// Human-readable description of the number.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -542,11 +383,20 @@ impl NumberInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.BooleanInputSchemaType")]
+pub enum BooleanInputSchemaType {
+    #[default]
+    Boolean,
+}
+
 /// Schema for a boolean input.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.BooleanInputSchema")]
 pub struct BooleanInputSchema {
+    pub r#type: BooleanInputSchemaType,
     /// Human-readable description of the boolean.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -562,11 +412,20 @@ impl BooleanInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.ImageInputSchemaType")]
+pub enum ImageInputSchemaType {
+    #[default]
+    Image,
+}
+
 /// Schema for an image input (URL or base64-encoded).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.ImageInputSchema")]
 pub struct ImageInputSchema {
+    pub r#type: ImageInputSchemaType,
     /// Human-readable description of the expected image.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -586,11 +445,20 @@ impl ImageInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.AudioInputSchemaType")]
+pub enum AudioInputSchemaType {
+    #[default]
+    Audio,
+}
+
 /// Schema for an audio input.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.AudioInputSchema")]
 pub struct AudioInputSchema {
+    pub r#type: AudioInputSchemaType,
     /// Human-readable description of the expected audio.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -610,11 +478,20 @@ impl AudioInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.VideoInputSchemaType")]
+pub enum VideoInputSchemaType {
+    #[default]
+    Video,
+}
+
 /// Schema for a video input (URL or base64-encoded).
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.VideoInputSchema")]
 pub struct VideoInputSchema {
+    pub r#type: VideoInputSchemaType,
     /// Human-readable description of the expected video.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -639,11 +516,20 @@ impl VideoInputSchema {
     }
 }
 
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "lowercase")]
+#[schemars(rename = "functions.expression.FileInputSchemaType")]
+pub enum FileInputSchemaType {
+    #[default]
+    File,
+}
+
 /// Schema for a file input.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.FileInputSchema")]
 pub struct FileInputSchema {
+    pub r#type: FileInputSchemaType,
     /// Human-readable description of the expected file.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,

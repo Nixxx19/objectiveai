@@ -4,6 +4,9 @@
   "description": "Schema for an integer input.",
   "type": "object",
   "properties": {
+    "type": {
+      "$ref": "functions.expression.IntegerInputSchemaType"
+    },
     "description": {
       "description": "Human-readable description of the integer.",
       "type": [
@@ -27,5 +30,8 @@
       ],
       "format": "int64"
     }
-  }
+  },
+  "required": [
+    "type"
+  ]
 }

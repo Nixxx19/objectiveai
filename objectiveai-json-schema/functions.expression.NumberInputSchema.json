@@ -4,6 +4,9 @@
   "description": "Schema for a floating-point number input.",
   "type": "object",
   "properties": {
+    "type": {
+      "$ref": "functions.expression.NumberInputSchemaType"
+    },
     "description": {
       "description": "Human-readable description of the number.",
       "type": [
@@ -27,5 +30,8 @@
       ],
       "format": "double"
     }
-  }
+  },
+  "required": [
+    "type"
+  ]
 }

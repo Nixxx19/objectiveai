@@ -4,6 +4,9 @@
   "description": "Schema for a file input.",
   "type": "object",
   "properties": {
+    "type": {
+      "$ref": "functions.expression.FileInputSchemaType"
+    },
     "description": {
       "description": "Human-readable description of the expected file.",
       "type": [
@@ -11,5 +14,8 @@
         "null"
       ]
     }
-  }
+  },
+  "required": [
+    "type"
+  ]
 }

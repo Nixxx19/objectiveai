@@ -4,6 +4,9 @@
   "description": "Schema for an array input.",
   "type": "object",
   "properties": {
+    "type": {
+      "$ref": "functions.expression.ArrayInputSchemaType"
+    },
     "description": {
       "description": "Human-readable description of the array.",
       "type": [
@@ -35,6 +38,7 @@
     }
   },
   "required": [
+    "type",
     "items"
   ]
 }

@@ -4,6 +4,9 @@
   "description": "Schema for an object input with named properties.",
   "type": "object",
   "properties": {
+    "type": {
+      "$ref": "functions.expression.ObjectInputSchemaType"
+    },
     "description": {
       "description": "Human-readable description of the object.",
       "type": [
@@ -30,6 +33,7 @@
     }
   },
   "required": [
+    "type",
     "properties"
   ]
 }
