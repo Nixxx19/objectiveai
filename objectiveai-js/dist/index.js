@@ -1927,21 +1927,21 @@ function wasmAgentValidateAgent(agent) {
   return JSON.parse(validateAgent(agent));
 }
 var PrefixedUuidSchema = z.object({
-  uuid: z.string().meta({ format: "uuid" })
+  uuid: z.string().uuid()
 }).describe("A UUID with a 3-character prefix for type-safe identifiers.\n\nThis struct wraps a standard UUID and adds a compile-time prefix,\nensuring that different types of identifiers (API keys, ensemble IDs, etc.)\ncannot be confused at the type level.\n\nThe prefix is specified as three `const char` generic parameters.\n\n# Type Parameters\n\n* `PFX_1` - First character of the prefix\n* `PFX_2` - Second character of the prefix\n* `PFX_3` - Third character of the prefix\n\n# Examples\n\n```\nuse objectiveai::prefixed_uuid::PrefixedUuid;\n\n// Define an API key type with prefix \"apk\"\ntype ApiKey = PrefixedUuid<'a', 'p', 'k'>;\n\n// Create a new API key\nlet key = ApiKey::new();\nprintln!(\"{}\", key); // Outputs: apk<uuid>\n```").meta({ title: "PrefixedUuid" });
 
 // src/auth/apiKeyWithMetadata.ts
 var AuthApiKeyWithMetadataSchema = z.object({
   api_key: PrefixedUuidSchema.describe("The API key itself."),
-  created: z.string().meta({ format: "date-time" }).describe("The timestamp when the API key was created (RFC 3339 format)."),
+  created: z.string().datetime({ offset: true }).describe("The timestamp when the API key was created (RFC 3339 format)."),
   description: z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
-  disabled: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
-  expires: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
+  disabled: z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
+  expires: z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
   name: z.string().describe("The user-provided name of the API key.")
 }).describe("An ObjectiveAI API Key with associated metadata.\n\nThis struct contains the API key itself along with information about\nwhen it was created, when it expires (if ever), whether it has been\ndisabled, and user-provided name and description.").meta({ title: "auth.ApiKeyWithMetadata" });
 var AuthCreateApiKeyRequestSchema = z.object({
   description: z.string().nullable().describe("An optional description providing additional context about the key's purpose.").optional(),
-  expires: z.string().meta({ format: "date-time" }).nullable().describe("The expiration timestamp for the API key, or `None` for a non-expiring key.").optional(),
+  expires: z.string().datetime({ offset: true }).nullable().describe("The expiration timestamp for the API key, or `None` for a non-expiring key.").optional(),
   name: z.string().describe("A user-provided name to identify this API key.")
 }).describe("Request to create a new API key.\n\n# Fields\n\n* `expires` - Optional expiration timestamp. If `None`, the key never expires.\n* `name` - A user-provided name for identifying the key.\n* `description` - Optional description providing additional context.").meta({ title: "auth.CreateApiKeyRequest" });
 var AuthCreateOpenRouterByokApiKeyRequestSchema = z.object({
@@ -1961,10 +1961,10 @@ var AuthGetOpenRouterByokApiKeyResponseSchema = z.object({
 var AuthListApiKeyItemSchema = z.object({
   api_key: PrefixedUuidSchema.describe("The API key itself."),
   cost: z.number().min(-34028234663852886e22).max(34028234663852886e22).describe("The total cost incurred by this API key."),
-  created: z.string().meta({ format: "date-time" }).describe("The timestamp when the API key was created (RFC 3339 format)."),
+  created: z.string().datetime({ offset: true }).describe("The timestamp when the API key was created (RFC 3339 format)."),
   description: z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
-  disabled: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
-  expires: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
+  disabled: z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
+  expires: z.string().datetime({ offset: true }).nullable().describe("The timestamp when the API key expires, or `None` if it does not expire.").optional(),
   name: z.string().describe("The user-provided name of the API key.")
 }).describe("An API key with metadata and accumulated cost information.\n\nThis extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with\nthe total cost incurred by requests using this key.").meta({ title: "auth.ListApiKeyItem" });
 var AuthListApiKeyResponseSchema = z.object({

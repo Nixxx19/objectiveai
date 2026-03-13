@@ -233,18 +233,17 @@ function convertLiteral(schema: ZodSchema): Record<string, unknown> {
 
 function convertString(schema: ZodSchema): Record<string, unknown> {
   const result: Record<string, unknown> = { type: "string" };
-  // Check for regex pattern
+  // Check for regex pattern and format validators
   if (schema._zod.def.checks) {
     for (const check of schema._zod.def.checks) {
-      if (check._zod?.def?.check === "string_format" && check._zod.def.pattern) {
+      if (check._zod?.def?.check === "string_format" && check._zod.def.format === "uuid") {
+        result.format = "uuid";
+      } else if (check._zod?.def?.check === "string_format" && check._zod.def.format === "datetime") {
+        result.format = "date-time";
+      } else if (check._zod?.def?.check === "string_format" && check._zod.def.pattern) {
         result.pattern = check._zod.def.pattern.source;
       }
     }
-  }
-  // Check for format in meta
-  const meta = typeof schema.meta === "function" ? schema.meta() : undefined;
-  if (meta?.format) {
-    result.format = meta.format;
   }
   return result;
 }

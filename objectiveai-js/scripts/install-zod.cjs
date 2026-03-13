@@ -422,8 +422,10 @@ function convertSingleType(type, schema, refs, lazyRefs, selfTitle, cyclicTitles
         expr += `.regex(new RegExp(${JSON.stringify(schema.pattern)}))`;
       }
       // format exists only on strings (never on integers/numbers)
-      if (schema.format) {
-        expr += `.meta({ format: ${JSON.stringify(schema.format)} })`;
+      if (schema.format === "uuid") {
+        expr += ".uuid()";
+      } else if (schema.format === "date-time") {
+        expr += ".datetime({ offset: true })";
       }
       return expr;
     }
