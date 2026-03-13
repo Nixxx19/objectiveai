@@ -1,0 +1,10 @@
+import { functionInventionRecursiveChunkMerged, functionInventionRecursiveChunkNormalized } from "../../../../../wasm/loader.js";
+import type { FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk } from "./functionInventionRecursiveChunk";
+
+export function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, b: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk {
+  return JSON.parse(functionInventionRecursiveChunkMerged(a, b));
+}
+
+export function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk {
+  return JSON.parse(functionInventionRecursiveChunkNormalized(a));
+}

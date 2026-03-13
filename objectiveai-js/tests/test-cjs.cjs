@@ -15,7 +15,8 @@ if (moduleExports.length === 0) {
   process.exit(1);
 }
 
-ObjectiveAI.EnsembleLlm.validate({
+ObjectiveAI.wasmAgentValidateAgent({
+  upstream: "openrouter",
   model: "openai/gpt-5-nano",
   output_mode: "instruction",
 });

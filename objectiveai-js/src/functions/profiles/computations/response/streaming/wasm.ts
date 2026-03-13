@@ -1,0 +1,10 @@
+import { functionProfileComputationChunkMerged, functionProfileComputationChunkNormalized } from "../../../../../wasm/loader.js";
+import type { FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk } from "./functionProfileComputationChunk";
+
+export function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, b: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk {
+  return JSON.parse(functionProfileComputationChunkMerged(a, b));
+}
+
+export function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk {
+  return JSON.parse(functionProfileComputationChunkNormalized(a));
+}
