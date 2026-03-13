@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { zocker } from "zocker";
 import { VectorCompletionsResponseStreamingVectorCompletionChunkSchema } from "./vectorCompletionChunk";
 import { vectorCompletionsResponseStreamingVectorCompletionChunkMerged } from "./vectorCompletionChunkMerged";
-import { vectorCompletionChunkMerged as wasmMerged, vectorCompletionChunkNormalized as wasmNormalized } from "../../../../../dist/wasm/loader.js";
+import { vectorCompletionChunkMerged as wasmMerged, vectorCompletionChunkNormalized as wasmNormalized } from "../../../../wasm/loader.js";
 import { zockerParse } from "../../../../zockerParse";
 
 const gen = zocker(VectorCompletionsResponseStreamingVectorCompletionChunkSchema).array({ max: 3 });

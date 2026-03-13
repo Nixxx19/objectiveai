@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { zocker } from "zocker";
 import { FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema } from "./functionInventionRecursiveChunk";
 import { functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged } from "./functionInventionRecursiveChunkMerged";
-import { functionInventionRecursiveChunkMerged as wasmMerged, functionInventionRecursiveChunkNormalized as wasmNormalized } from "../../../../../../dist/wasm/loader.js";
+import { functionInventionRecursiveChunkMerged as wasmMerged, functionInventionRecursiveChunkNormalized as wasmNormalized } from "../../../../../wasm/loader.js";
 import { zockerParse } from "../../../../../zockerParse";
 
 const gen = zocker(FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema).array({ max: 3 });
