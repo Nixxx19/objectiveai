@@ -5,7 +5,7 @@ from typing import Union
 from objectiveai.vector.completions.request.profile_entry import VectorCompletionsRequestProfileEntry
 
 
-VectorCompletionsRequestProfile = Union[list[Union[str, float]], list[VectorCompletionsRequestProfileEntry]]
+VectorCompletionsRequestProfile = Union[list[float], list[VectorCompletionsRequestProfileEntry]]
 """Profile weights for a vector completion.
 
 Previously this was a simple `Vec<Decimal>`. To support per-agent inversion

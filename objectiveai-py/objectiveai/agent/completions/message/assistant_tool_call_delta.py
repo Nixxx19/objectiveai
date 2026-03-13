@@ -9,8 +9,8 @@ from objectiveai.agent.completions.message.assistant_tool_call_type import Agent
 
 class AgentCompletionsMessageAssistantToolCallDelta(BaseModel):
     """A tool call delta in a streaming response."""
-    index: int
-    type_: Optional[AgentCompletionsMessageAssistantToolCallType] = Field(None, alias='type')
-    id: Optional[Union[str, None]] = None
-    function: Optional[AgentCompletionsMessageAssistantToolCallFunctionDelta] = None
+    index: int = Field(..., description='The index of this tool call.', ge=0, json_schema_extra={'format': 'uint64'})
+    type_: Optional[AgentCompletionsMessageAssistantToolCallType] = Field(None, alias='type', description='The type of tool call (always "function").')
+    id: Optional[Union[str, None]] = Field(None, description='The unique ID of this tool call.')
+    function: Optional[AgentCompletionsMessageAssistantToolCallFunctionDelta] = Field(None, description='The function call details.')
 

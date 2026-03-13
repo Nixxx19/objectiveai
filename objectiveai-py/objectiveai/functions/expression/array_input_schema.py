@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
 class FunctionsExpressionArrayInputSchema(BaseModel):
     """Schema for an array input."""
-    description: Optional[Union[str, None]] = None
-    min_items: Optional[Union[int, None]] = Field(None, alias='minItems')
-    max_items: Optional[Union[int, None]] = Field(None, alias='maxItems')
-    items: FunctionsExpressionInputSchema
+    description: Optional[Union[str, None]] = Field(None, description='Human-readable description of the array.')
+    min_items: Optional[Union[int, None]] = Field(None, alias='minItems', description='Minimum number of items required.', ge=0, json_schema_extra={'format': 'uint64'})
+    max_items: Optional[Union[int, None]] = Field(None, alias='maxItems', description='Maximum number of items allowed.', ge=0, json_schema_extra={'format': 'uint64'})
+    items: FunctionsExpressionInputSchema = Field(..., description='Schema for each item in the array.')
 

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
 
 
-class FunctionsAlphaVectorExpressionVectorFunctionInput(BaseModel):
+class FunctionsAlphaVectorExpressionVectorFunctionInputValue(BaseModel):
     context: Optional[Union[dict[str, FunctionsExpressionInputValue], None]] = None
     items: list[FunctionsExpressionInputValue]
 

@@ -6,7 +6,7 @@ from pydantic import BaseModel
 from objectiveai.functions.expression.expression import FunctionsExpressionExpression
 
 
-class FunctionsAlphaVectorExpressionVectorFunctionInputExpression(BaseModel):
+class FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression(BaseModel):
     context: Optional[FunctionsExpressionExpression] = None
     items: FunctionsExpressionExpression
 

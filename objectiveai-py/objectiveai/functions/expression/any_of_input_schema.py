@@ -10,5 +10,5 @@ if TYPE_CHECKING:
 
 class FunctionsExpressionAnyOfInputSchema(BaseModel):
     """Schema for a union of possible types - input must match at least one."""
-    any_of: list[FunctionsExpressionInputSchema] = Field(..., alias='anyOf')
+    any_of: list[FunctionsExpressionInputSchema] = Field(..., alias='anyOf', description='The possible schemas that the input can match.')
 

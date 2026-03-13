@@ -4,6 +4,6 @@ from __future__ import annotations
 from typing import Union
 
 
-FunctionsExpressionTaskOutputRef = Union[Union[str, float], list[Union[str, float]], list[list[Union[str, float]]], object]
+FunctionsExpressionTaskOutputRef = Union[float, list[float], list[list[float]], object]
 """Borrowed task output variants."""
 

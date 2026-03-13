@@ -3,8 +3,8 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel
-from objectiveai.functions.alpha_vector.expression.vector_function_input_expression import FunctionsAlphaVectorExpressionVectorFunctionInputExpression
 from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import FunctionsAlphaVectorExpressionVectorFunctionInputSchema
+from objectiveai.functions.alpha_vector.expression.vector_function_input_value_expression import FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression
 from objectiveai.functions.expression.expression import FunctionsExpressionExpression
 
 
@@ -12,5 +12,5 @@ class FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression(BaseMod
     spec: str
     input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchema
     skip: Optional[FunctionsExpressionExpression] = None
-    input: FunctionsAlphaVectorExpressionVectorFunctionInputExpression
+    input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression
 
