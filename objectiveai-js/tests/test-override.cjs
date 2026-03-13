@@ -1,3 +1,11 @@
+// Tests Zod's toJSONSchema `override` callback to verify that referenced schemas
+// can be replaced with `$ref` pointers. This is the mechanism the SDK uses to strip
+// inline `$defs` and rewrite nested types as bare `$ref` titles — matching the same
+// ref-rewriting the JSON schema builder does on the Rust side.
+//
+// Expected output: the inner "inner.Title" schema is replaced with { "$ref": "inner.Title" }
+// while the root "outer.Title" schema keeps its full definition.
+
 const { z, toJSONSchema } = require('zod');
 const Inner = z.string().meta({ title: 'inner.Title' });
 const Outer = z.object({ x: Inner }).meta({ title: 'outer.Title' });
