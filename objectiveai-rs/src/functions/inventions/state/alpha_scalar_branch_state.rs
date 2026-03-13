@@ -23,6 +23,9 @@ pub struct AlphaScalarBranchState {
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub readme: Option<String>,
+    #[serde(skip_serializing, default)]
+    #[schemars(skip)]
+    pub checker_seed: Option<i64>,
 }
 
 impl AlphaScalarBranchState {
@@ -50,7 +53,7 @@ impl AlphaScalarBranchState {
                 tasks: tasks.clone(),
             };
             functions::alpha_scalar::check::check_alpha_branch_scalar_function(
-                &function, children,
+                &function, children, self.checker_seed,
             )?;
         }
         Ok(())
@@ -545,6 +548,7 @@ impl AlphaScalarBranchState {
                     match functions::alpha_scalar::check::check_alpha_branch_scalar_function(
                         &function,
                         None,
+                        state.checker_seed,
                     ) {
                         Ok(_) => Ok("Function is valid".to_string()),
                         Err(e) => Err(format!("Function is invalid: {}", e)),
@@ -644,7 +648,7 @@ impl AlphaScalarBranchState {
                 .ok_or_else(|| "Tasks have not been written".to_string())?,
         };
         functions::alpha_scalar::check::check_alpha_branch_scalar_function(
-            &function, None,
+            &function, None, state.checker_seed,
         )
     }
 

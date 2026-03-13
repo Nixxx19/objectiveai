@@ -41,3 +41,6 @@ pub mod objectiveai_http;
 pub mod util;
 /// Vector completions for scoring and ranking responses.
 pub mod vector;
+
+#[cfg(test)]
+pub(crate) mod stream_harness;

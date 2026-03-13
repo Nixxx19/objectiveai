@@ -41,12 +41,12 @@ mod tests {
         );
     }
 
-    // 1 permutation
+    // 2 permutations: wav + mp3
     #[test]
     fn test_2() {
         test(
             &InputSchema::Audio(AudioInputSchema { description: None }),
-            1,
+            2,
         );
     }
 
@@ -115,7 +115,7 @@ mod tests {
         );
     }
 
-    // 4 permutations: anyOf [bool(2), audio(1)] → 2 * max(2,1) = 4
+    // 4 permutations: anyOf [bool(2), audio(2)] → 2 * max(2,2) = 4
     #[test]
     fn test_9() {
         test(
@@ -331,7 +331,7 @@ mod tests {
 
     // --- Array tests ---
 
-    // 2 permutations: array of audio(1), min=0 max=1 → mid=0, lengths={0,1}, mult=2 → 1*2 = 2
+    // 4 permutations: array of audio(2), min=0 max=1 → mid=0, lengths={0,1}, mult=2 → 2*2 = 4
     #[test]
     fn test_21() {
         test(
@@ -343,7 +343,7 @@ mod tests {
                     description: None,
                 })),
             }),
-            2,
+            4,
         );
     }
 
@@ -550,7 +550,7 @@ mod tests {
 
     // --- Array: min set, no max (range = min..=min+10) ---
 
-    // 3 permutations: array of audio(1), min=0 → 0..=10, mid=5, lengths={0,5,10}, mult=3 → 1*3 = 3
+    // 6 permutations: array of audio(2), min=0 → 0..=10, mid=5, lengths={0,5,10}, mult=3 → 2*3 = 6
     #[test]
     fn test_31() {
         test(
@@ -562,7 +562,7 @@ mod tests {
                     description: None,
                 })),
             }),
-            3,
+            6,
         );
     }
 
@@ -582,7 +582,7 @@ mod tests {
         );
     }
 
-    // 3 permutations: array of audio(1), min=3 → 3..=13, mid=8, lengths={3,8,13}, mult=3 → 1*3 = 3
+    // 6 permutations: array of audio(2), min=3 → 3..=13, mid=8, lengths={3,8,13}, mult=3 → 2*3 = 6
     #[test]
     fn test_33() {
         test(
@@ -594,7 +594,7 @@ mod tests {
                     description: None,
                 })),
             }),
-            3,
+            6,
         );
     }
 
@@ -650,7 +650,7 @@ mod tests {
         );
     }
 
-    // 3 permutations: array of audio(1), max=5 → 0..=5, mid=2, lengths={0,2,5}, mult=3 → 1*3 = 3
+    // 6 permutations: array of audio(2), max=5 → 0..=5, mid=2, lengths={0,2,5}, mult=3 → 2*3 = 6
     #[test]
     fn test_37() {
         test(
@@ -662,7 +662,7 @@ mod tests {
                     description: None,
                 })),
             }),
-            3,
+            6,
         );
     }
 
@@ -682,7 +682,7 @@ mod tests {
         );
     }
 
-    // 3 permutations: array of audio(1), max=15 → 5..=15, mid=10, lengths={5,10,15}, mult=3 → 1*3 = 3
+    // 6 permutations: array of audio(2), max=15 → 5..=15, mid=10, lengths={5,10,15}, mult=3 → 2*3 = 6
     #[test]
     fn test_39() {
         test(
@@ -694,7 +694,7 @@ mod tests {
                     description: None,
                 })),
             }),
-            3,
+            6,
         );
     }
 
@@ -716,7 +716,7 @@ mod tests {
 
     // --- Array: no min, no max (range = 0..=10) ---
 
-    // 3 permutations: array of audio(1) → 0..=10, mid=5, lengths={0,5,10}, mult=3 → 1*3 = 3
+    // 6 permutations: array of audio(2) → 0..=10, mid=5, lengths={0,5,10}, mult=3 → 2*3 = 6
     #[test]
     fn test_41() {
         test(
@@ -728,7 +728,7 @@ mod tests {
                     description: None,
                 })),
             }),
-            3,
+            6,
         );
     }
 
@@ -951,7 +951,7 @@ mod tests {
     }
 
     // 384 permutations: array(anyOf[8 types], 1..5)
-    // high width: 8 anyOf variants. 8*max(2,2,3,5,4,16,1,2)=128, *3=384
+    // high width: 8 anyOf variants. 8*max(2,2,3,5,4,16,2,2)=128, *3=384
     #[test]
     fn test_54() {
         test(

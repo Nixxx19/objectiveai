@@ -23,6 +23,9 @@ pub struct AlphaVectorBranchState {
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub readme: Option<String>,
+    #[serde(skip_serializing, default)]
+    #[schemars(skip)]
+    pub checker_seed: Option<i64>,
 }
 
 impl AlphaVectorBranchState {
@@ -48,7 +51,7 @@ impl AlphaVectorBranchState {
                 tasks: tasks.clone(),
             };
             functions::alpha_vector::check::check_alpha_branch_vector_function(
-                &function, children,
+                &function, children, self.checker_seed,
             )?;
         }
         Ok(())
@@ -549,6 +552,7 @@ impl AlphaVectorBranchState {
                     match functions::alpha_vector::check::check_alpha_branch_vector_function(
                         &function,
                         None,
+                        state.checker_seed,
                     ) {
                         Ok(_) => Ok("Function is valid".to_string()),
                         Err(e) => Err(format!("Function is invalid: {}", e)),
@@ -649,7 +653,7 @@ impl AlphaVectorBranchState {
             tasks: tasks.clone(),
         };
         functions::alpha_vector::check::check_alpha_branch_vector_function(
-            &function, None,
+            &function, None, state.checker_seed,
         )
     }
 

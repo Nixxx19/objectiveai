@@ -1,6 +1,11 @@
 //! Quality checks for alpha leaf vector functions.
 
-use std::collections::{HashMap, HashSet}; 
+use std::collections::{HashMap, HashSet};
+
+use rand::Rng;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
+
 use crate::functions::alpha_vector::RemoteFunction;
 use crate::functions::expression::InputValue;
 use crate::functions::{CompiledTask, Function, Task};
@@ -31,6 +36,7 @@ use crate::functions::check::example_inputs;
 /// This checker validates the remaining runtime concerns.
 pub fn check_alpha_leaf_vector_function(
     function: &RemoteFunction,
+    seed: Option<i64>,
 ) -> Result<(), String> {
     let (description, input_schema, _tasks) = match function {
         RemoteFunction::Leaf {
@@ -101,12 +107,17 @@ pub fn check_alpha_leaf_vector_function(
     collect_schema_modalities(transpiled_input_schema_ref, &mut schema_modalities);
     let mut task_modalities: ModalityFlags = [false; 4];
 
-    for ref input in example_inputs::generate(transpiled_input_schema_ref) {
+    let mut rng = match seed {
+        Some(s) => StdRng::seed_from_u64(s as u64),
+        None => StdRng::from_os_rng(),
+    };
+
+    for ref input in example_inputs::generate_seeded(transpiled_input_schema_ref, StdRng::seed_from_u64(rng.random::<u64>())) {
         count += 1;
         let input_label = serde_json::to_string(input).unwrap_or_default();
 
         // Vector fields validation
-        check_vector_fields_for_input(&vector_fields, &input_label, input)?;
+        check_vector_fields_for_input(&vector_fields, &input_label, input, &mut rng)?;
 
         // Compile and validate
         let compiled_tasks = compile_and_validate_one_input(
@@ -196,7 +207,7 @@ pub fn check_alpha_leaf_vector_function(
             })?;
 
         if splits.len() >= 2 {
-            let subsets = random_subsets(splits.len(), 3);
+            let subsets = random_subsets(splits.len(), 3, &mut rng);
             for subset in &subsets {
                 let sub_splits: Vec<InputValue> =
                     subset.iter().map(|&idx| splits[idx].clone()).collect();

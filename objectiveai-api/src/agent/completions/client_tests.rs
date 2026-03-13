@@ -1,8 +1,6 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use futures::StreamExt;
-
 use objectiveai::agent::completions::message::{
     Message, RichContent, SimpleContent, UserMessage, DeveloperMessage,
 };
@@ -115,21 +113,50 @@ fn make_ctx() -> ctx::Context<ctx::DefaultContextExt> {
 // Snapshot helpers
 // ---------------------------------------------------------------------------
 
-fn aggregate<S>(
-    items: &[StreamItem<S>],
-) -> AgentCompletion {
-    let mut agg: Option<
-        objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
-    > = None;
-    for item in items {
-        if let StreamItem::Chunk(chunk) = item {
-            match &mut agg {
-                Some(a) => a.push(chunk),
-                None => agg = Some(chunk.clone()),
-            }
-        }
+fn check_created_and_upstream(
+    expected_created: &std::cell::Cell<Option<u64>>,
+    expected_upstream: &std::cell::Cell<Option<objectiveai::agent::Upstream>>,
+    i: usize,
+    chunk: &objectiveai::agent::completions::response::streaming::AgentCompletionChunk,
+) {
+    match expected_created.get() {
+        None => expected_created.set(Some(chunk.created)),
+        Some(exp) => assert_eq!(chunk.created, exp, "chunk {i} has created {}, expected {exp}", chunk.created),
     }
-    agg.expect("stream should have at least one chunk").into()
+    match expected_upstream.get() {
+        None => expected_upstream.set(Some(chunk.upstream)),
+        Some(exp) => assert_eq!(chunk.upstream, exp, "chunk {i} has upstream {:?}, expected {:?}", chunk.upstream, exp),
+    }
+}
+
+async fn run_and_check<S: 'static>(
+    stream: impl futures::Stream<Item = StreamItem<S>> + Unpin,
+) -> AgentCompletion {
+    let expected_created = std::cell::Cell::new(None);
+    let expected_upstream: std::cell::Cell<Option<objectiveai::agent::Upstream>> = std::cell::Cell::new(None);
+    let agg = crate::stream_harness::consume_stream_items(
+        stream,
+        |item| match item {
+            StreamItem::Chunk(c) => Some(c),
+            StreamItem::State(_) => None,
+        },
+        |agg, c| agg.push(c),
+        |i, chunk| {
+            check_created_and_upstream(&expected_created, &expected_upstream, i, chunk);
+            assert!(chunk.messages.len() <= 1, "chunk {i} has {} messages, expected at most 1", chunk.messages.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created_and_upstream(&expected_created, &expected_upstream, i, chunk);
+            assert!(chunk.messages.len() <= 1, "chunk {i} has {} messages, expected at most 1", chunk.messages.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created_and_upstream(&expected_created, &expected_upstream, i, chunk);
+            assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
+        },
+    ).await;
+    AgentCompletion::from(agg)
 }
 
 fn normalize(mut c: AgentCompletion) -> AgentCompletion {
@@ -146,58 +173,9 @@ fn normalize(mut c: AgentCompletion) -> AgentCompletion {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_AGENT_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
-        std::fs::write(path, json).unwrap();
-        eprintln!("Updated snapshot: {path}");
-        let written = std::fs::read_to_string(path).unwrap();
-        assert_eq!(json, written.trim_end());
-    } else {
-        assert_eq!(json, expected.trim_end());
-    }
-}
-
-fn assert_chunk_invariants<S>(items: &[StreamItem<S>]) {
-    let chunks: Vec<_> = items
-        .iter()
-        .filter_map(|item| match item {
-            StreamItem::Chunk(c) => Some(c),
-            _ => None,
-        })
-        .collect();
-    assert!(!chunks.is_empty(), "stream must have at least one chunk");
-    let expected_created = chunks[0].created;
-    let expected_upstream = chunks[0].upstream;
-    for (i, chunk) in chunks.iter().enumerate() {
-        assert_eq!(
-            chunk.created, expected_created,
-            "chunk {i} has created {}, expected {expected_created}",
-            chunk.created,
-        );
-        assert_eq!(
-            chunk.upstream, expected_upstream,
-            "chunk {i} has upstream {:?}, expected {:?}",
-            chunk.upstream, expected_upstream,
-        );
-        assert!(
-            chunk.messages.len() <= 1,
-            "chunk {i} has {} messages, expected at most 1",
-            chunk.messages.len(),
-        );
-        if i < chunks.len() - 1 {
-            assert!(
-                chunk.usage.is_none(),
-                "chunk {i} (non-final) has usage, expected None",
-            );
-        } else {
-            assert!(
-                chunk.usage.is_some(),
-                "final chunk {i} has no usage, expected Some",
-            );
-        }
-    }
-    assert!(
-        matches!(items.last(), Some(StreamItem::State(_))),
-        "final stream item must be a State",
+    crate::stream_harness::assert_snapshot(
+        json, path, expected,
+        "UPDATE_AGENT_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS",
     );
 }
 
@@ -227,10 +205,7 @@ async fn test_basic_mock_agent_seed_42() {
         .await
         .expect("create_streaming should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -261,10 +236,7 @@ async fn test_basic_mock_agent_seed_123() {
         .await
         .expect("create_streaming should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -294,29 +266,14 @@ async fn test_deterministic_with_same_seed() {
         .create_streaming(make_ctx(), params.clone(), None, None, None, None)
         .await
         .unwrap();
-    let items_a: Vec<_> = Box::pin(stream_a).collect().await;
-    assert_chunk_invariants(&items_a);
+    let completion_a = normalize(run_and_check(Box::pin(stream_a)).await);
 
     let client_b = make_client();
     let stream_b = client_b
         .create_streaming(make_ctx(), params, None, None, None, None)
         .await
         .unwrap();
-    let items_b: Vec<_> = Box::pin(stream_b).collect().await;
-    assert_chunk_invariants(&items_b);
-
-    let chunks_a: Vec<_> = items_a.iter().filter_map(|i| match i {
-        StreamItem::Chunk(c) => Some(c),
-        _ => None,
-    }).collect();
-    let chunks_b: Vec<_> = items_b.iter().filter_map(|i| match i {
-        StreamItem::Chunk(c) => Some(c),
-        _ => None,
-    }).collect();
-    assert_eq!(chunks_a.len(), chunks_b.len());
-
-    let completion_a = normalize(aggregate(&items_a));
-    let completion_b = normalize(aggregate(&items_b));
+    let completion_b = normalize(run_and_check(Box::pin(stream_b)).await);
     assert_eq!(completion_a, completion_b);
 
     let json_a = serde_json::to_string_pretty(&completion_a).unwrap();
@@ -360,29 +317,16 @@ async fn test_different_seeds_differ() {
         .create_streaming(make_ctx(), params_a, None, None, None, None)
         .await
         .unwrap();
-    let items_a: Vec<_> = Box::pin(stream_a).collect().await;
-    assert_chunk_invariants(&items_a);
+    let completion_a = normalize(run_and_check(Box::pin(stream_a)).await);
 
     let client_b = make_client();
     let stream_b = client_b
         .create_streaming(make_ctx(), params_b, None, None, None, None)
         .await
         .unwrap();
-    let items_b: Vec<_> = Box::pin(stream_b).collect().await;
-    assert_chunk_invariants(&items_b);
+    let completion_b = normalize(run_and_check(Box::pin(stream_b)).await);
 
-    let chunks_a: Vec<_> = items_a.iter().filter_map(|i| match i {
-        StreamItem::Chunk(c) => Some(serde_json::to_string(c).unwrap()),
-        _ => None,
-    }).collect();
-    let chunks_b: Vec<_> = items_b.iter().filter_map(|i| match i {
-        StreamItem::Chunk(c) => Some(serde_json::to_string(c).unwrap()),
-        _ => None,
-    }).collect();
-    assert_ne!(chunks_a, chunks_b);
-
-    let completion_a = normalize(aggregate(&items_a));
-    let completion_b = normalize(aggregate(&items_b));
+    assert_ne!(completion_a, completion_b);
 
     let json_a = serde_json::to_string_pretty(&completion_a).unwrap();
     assert_snapshot(
@@ -450,10 +394,7 @@ async fn test_with_single_user_message() {
         .await
         .expect("should succeed with user message");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -493,10 +434,7 @@ async fn test_with_developer_and_user_messages() {
         .await
         .expect("should succeed with developer+user messages");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -527,10 +465,7 @@ async fn test_json_object_response_format() {
         .await
         .expect("JsonObject should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -569,10 +504,7 @@ async fn test_json_schema_response_format() {
         .await
         .expect("JsonSchema should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -603,10 +535,7 @@ async fn test_text_response_format() {
         .await
         .expect("Text should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -695,10 +624,7 @@ async fn test_required_tool_call_response_format() {
         .await
         .expect("required ToolCall should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -740,10 +666,7 @@ async fn test_optional_tool_call_response_format() {
         .await
         .expect("optional ToolCall should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -801,10 +724,7 @@ async fn test_with_invention_tools() {
         .await
         .expect("should succeed with invention tools");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
 
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -858,10 +778,7 @@ async fn test_invention_tools_with_tool_call_response_format() {
         .await
         .expect("should succeed with invention tools and response format");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
 
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
@@ -905,10 +822,7 @@ async fn test_invention_tool_returns_error() {
         .await
         .expect("should succeed even with failing invention tool");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -948,10 +862,7 @@ async fn test_multiple_user_messages() {
         .await
         .expect("should succeed with multiple user messages");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -985,10 +896,7 @@ async fn test_mock_agent_error_false_succeeds() {
         .await
         .expect("error=false should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1019,19 +927,7 @@ async fn test_final_item_is_mock_continuation() {
         .await
         .unwrap();
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-    match items.last() {
-        Some(StreamItem::State(cont)) => {
-            assert!(
-                matches!(cont, crate::agent::completions::Continuation::Mock { .. }),
-                "continuation should be Mock variant",
-            );
-        }
-        other => panic!("expected State(Continuation::Mock), got {other:?}"),
-    }
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1069,10 +965,7 @@ async fn test_per_agent_response_format() {
         .await
         .expect("PerAgent response format should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1109,10 +1002,7 @@ async fn test_per_agent_response_format_unknown_id() {
         .await
         .expect("PerAgent with unknown ID should succeed (no format applied)");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1165,10 +1055,7 @@ async fn test_json_schema_nested_object() {
         .await
         .expect("nested JsonSchema should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1204,10 +1091,7 @@ async fn test_fallback_agent_on_error() {
         .await
         .expect("fallback agent should succeed when primary errors");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1282,10 +1166,7 @@ async fn test_multiple_fallback_agents() {
         .await
         .expect("third agent should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1326,10 +1207,7 @@ async fn test_with_mock_continuation() {
         .await
         .expect("should succeed with continuation");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1360,13 +1238,7 @@ async fn test_stream_yields_chunks_before_state() {
         .await
         .unwrap();
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let state_count = items.iter().filter(|i| matches!(i, StreamItem::State(_))).count();
-    assert_eq!(state_count, 1, "should have exactly one state");
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1397,10 +1269,7 @@ async fn test_large_seed_value() {
         .await
         .expect("large seed should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1431,10 +1300,7 @@ async fn test_seed_zero() {
         .await
         .expect("seed 0 should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     let json = serde_json::to_string_pretty(&completion).unwrap();
     assert_snapshot(
         &json,
@@ -1507,9 +1373,7 @@ async fn test_logprobs_basic_seed_42() {
         .await
         .expect("logprobs basic should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     assert_completion_logprobs(&completion);
 
     let json = serde_json::to_string_pretty(&completion).unwrap();
@@ -1561,9 +1425,7 @@ async fn test_logprobs_json_schema_nested() {
         .await
         .expect("logprobs json_schema nested should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     assert_completion_logprobs(&completion);
 
     // The content should parse as valid JSON.
@@ -1624,9 +1486,7 @@ async fn test_logprobs_with_invention_tools() {
         .await
         .expect("logprobs with invention tools should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
 
     // Assistant messages with content should have logprobs; those with
     // only tool_calls should not.
@@ -1685,9 +1545,7 @@ async fn test_logprobs_with_continuation() {
         .await
         .expect("logprobs with continuation should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     assert_completion_logprobs(&completion);
 
     let json = serde_json::to_string_pretty(&completion).unwrap();
@@ -1728,9 +1586,7 @@ async fn test_logprobs_fallback_agent() {
         .await
         .expect("fallback with logprobs should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     assert_completion_logprobs(&completion);
 
     let json = serde_json::to_string_pretty(&completion).unwrap();
@@ -1773,9 +1629,7 @@ async fn test_logprobs_per_agent_json_object() {
         .await
         .expect("logprobs per-agent json_object should succeed");
 
-    let items: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&items);
-    let completion = normalize(aggregate(&items));
+    let completion = normalize(run_and_check(Box::pin(stream)).await);
     assert_completion_logprobs(&completion);
 
     // Content should be valid JSON.

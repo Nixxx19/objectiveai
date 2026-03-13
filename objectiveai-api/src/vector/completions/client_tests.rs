@@ -1,7 +1,6 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use futures::StreamExt;
 use rust_decimal::Decimal;
 
 use objectiveai::agent::completions::message::{
@@ -128,19 +127,38 @@ impl super::usage_handler::UsageHandler<ctx::DefaultContextExt>
 // Snapshot helpers
 // ---------------------------------------------------------------------------
 
-fn aggregate(
-    chunks: Vec<objectiveai::vector::completions::response::streaming::VectorCompletionChunk>,
-) -> VectorCompletion {
-    let mut agg: Option<
-        objectiveai::vector::completions::response::streaming::VectorCompletionChunk,
-    > = None;
-    for chunk in &chunks {
-        match &mut agg {
-            Some(a) => a.push(chunk),
-            None => agg = Some(chunk.clone()),
-        }
+fn check_created(expected: &std::cell::Cell<Option<u64>>, i: usize, created: u64) {
+    match expected.get() {
+        None => expected.set(Some(created)),
+        Some(exp) => assert_eq!(created, exp, "chunk {i} has created {created}, expected {exp}"),
     }
-    agg.expect("stream should have at least one chunk").into()
+}
+
+async fn run_and_check(
+    stream: impl futures::Stream<
+        Item = objectiveai::vector::completions::response::streaming::VectorCompletionChunk,
+    > + Unpin,
+) -> VectorCompletion {
+    let expected_created = std::cell::Cell::new(None);
+    let agg = crate::stream_harness::consume_stream(
+        stream,
+        |agg, c| agg.push(c),
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.completions.len() <= 1, "chunk {i} has {} completions, expected at most 1", chunk.completions.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.completions.len() <= 1, "chunk {i} has {} completions, expected at most 1", chunk.completions.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
+        },
+    ).await;
+    VectorCompletion::from(agg)
 }
 
 fn normalize(mut vc: VectorCompletion) -> VectorCompletion {
@@ -165,44 +183,10 @@ fn normalize(mut vc: VectorCompletion) -> VectorCompletion {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
-        std::fs::write(path, json).unwrap();
-        eprintln!("Updated snapshot: {path}");
-        let written = std::fs::read_to_string(path).unwrap();
-        assert_eq!(json, written.trim_end());
-    } else {
-        assert_eq!(json, expected.trim_end());
-    }
-}
-
-fn assert_chunk_invariants(
-    chunks: &[objectiveai::vector::completions::response::streaming::VectorCompletionChunk],
-) {
-    assert!(!chunks.is_empty(), "stream must not be empty");
-    let expected_created = chunks[0].created;
-    for (i, chunk) in chunks.iter().enumerate() {
-        assert_eq!(
-            chunk.created, expected_created,
-            "chunk {i} has created {}, expected {expected_created}",
-            chunk.created,
-        );
-        assert!(
-            chunk.completions.len() <= 1,
-            "chunk {i} has {} completions, expected at most 1",
-            chunk.completions.len(),
-        );
-        if i < chunks.len() - 1 {
-            assert!(
-                chunk.usage.is_none(),
-                "chunk {i} (non-final) has usage, expected None",
-            );
-        } else {
-            assert!(
-                chunk.usage.is_some(),
-                "final chunk {i} has no usage, expected Some",
-            );
-        }
-    }
+    crate::stream_harness::assert_snapshot(
+        json, path, expected,
+        "UPDATE_VECTOR_COMPLETIONS_CLIENT_TESTS_SNAPSHOTS",
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -297,9 +281,7 @@ async fn test_single_agent_2_responses_instruction_seed_42() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 2);
     assert_eq!(result.votes.len(), 0);
 
@@ -400,9 +382,7 @@ async fn test_single_agent_3_responses_instruction_seed_42() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 2);
     assert_eq!(result.votes.len(), 0);
 
@@ -502,9 +482,7 @@ async fn test_two_agents_equal_weights_seed_42() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 4);
     assert_eq!(result.votes.len(), 0);
 
@@ -618,9 +596,7 @@ async fn test_two_agents_unequal_weights_seed_42() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 4);
     assert_eq!(result.votes.len(), 0);
 
@@ -722,9 +698,7 @@ async fn test_three_agents_4_responses_seed_99() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 6);
     assert_eq!(result.votes.len(), 0);
 
@@ -827,9 +801,7 @@ async fn test_invert_vote_seed_42() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 2);
     assert_eq!(result.votes.len(), 0);
 
@@ -935,9 +907,7 @@ async fn test_deterministic_same_seed() {
             )
             .await
             .expect("should succeed");
-        let chunks: Vec<_> = Box::pin(stream).collect().await;
-        assert_chunk_invariants(&chunks);
-        normalize(aggregate(chunks))
+        normalize(run_and_check(Box::pin(stream)).await)
     };
 
     let result1 = run(make_client(), make_request()).await;
@@ -1041,9 +1011,7 @@ async fn test_different_seeds_differ() {
             )
             .await
             .expect("should succeed");
-        let chunks: Vec<_> = Box::pin(stream).collect().await;
-        assert_chunk_invariants(&chunks);
-        normalize(aggregate(chunks))
+        normalize(run_and_check(Box::pin(stream)).await)
     };
 
     let result1 = run(client.clone(), make_request(42)).await;
@@ -1142,9 +1110,7 @@ async fn test_many_responses_deep_prefix_tree_seed_42() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 2);
     assert_eq!(result.votes.len(), 0);
 
@@ -1245,9 +1211,7 @@ async fn test_json_schema_single_agent_seed_77() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 1);
     assert_eq!(result.votes.len(), 1);
 
@@ -1347,9 +1311,7 @@ async fn test_tool_call_single_agent_seed_55() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert!(result.completions.len() >= 1, "should have at least one completion");
     assert_eq!(result.votes.len(), 1);
 
@@ -1449,9 +1411,7 @@ async fn test_error_agent_skipped_seed_42() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 1);
     assert_eq!(result.votes.len(), 0);
 
@@ -1578,9 +1538,7 @@ async fn test_mixed_output_modes_seed_88() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 5);
     assert_eq!(result.votes.len(), 2);
 
@@ -1705,9 +1663,7 @@ async fn test_image_responses_instruction_seed_33() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 2);
     assert_eq!(result.votes.len(), 0);
 
@@ -1846,9 +1802,7 @@ async fn test_video_and_file_responses_seed_66() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 1);
     assert_eq!(result.votes.len(), 1);
 
@@ -1984,9 +1938,7 @@ async fn test_three_different_agents_seed_11() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert!(result.completions.len() >= 3, "should have at least one completion per agent");
     assert_eq!(result.votes.len(), 2);
 
@@ -2092,9 +2044,7 @@ async fn test_json_schema_many_responses_seed_22() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 2);
     assert_eq!(result.votes.len(), 2);
 
@@ -2232,9 +2182,7 @@ async fn test_tool_call_two_agents_seed_44() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 3);
     assert_eq!(result.votes.len(), 2);
 
@@ -2391,9 +2339,7 @@ async fn test_error_and_healthy_agents_seed_99() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.completions.len(), 4);
     assert_eq!(result.votes.len(), 1);
 
@@ -2493,9 +2439,7 @@ async fn test_only_final_chunk_has_usage() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    assert!(chunks.len() >= 2, "need at least 2 chunks to test usage placement, got {}", chunks.len());
+    run_and_check(Box::pin(stream)).await;
 }
 
 // ---------------------------------------------------------------------------
@@ -3037,9 +2981,7 @@ async fn test_logprobs_json_schema_2_agents_seed_42() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.scores.len(), 3);
 
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -3124,9 +3066,7 @@ async fn test_logprobs_json_schema_3_agents_unequal_seed_77() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.scores.len(), 4);
 
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -3183,9 +3123,7 @@ async fn test_logprobs_tool_call_single_agent_seed_55() {
         )
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.scores.len(), 2);
 
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -3249,9 +3187,7 @@ async fn test_logprobs_error_with_fallback_seed_99() {
         )
         .await
         .expect("fallback should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.scores.len(), 3);
 
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -3314,9 +3250,7 @@ async fn test_logprobs_all_errors_seed_42() {
         )
         .await
         .expect("create_streaming should succeed even with all errors");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     // All agents errored — no votes produced.
     assert_eq!(result.votes.len(), 0);
 
@@ -3374,9 +3308,7 @@ async fn test_logprobs_instruction_seed_33() {
         )
         .await
         .expect("instruction with logprobs should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.scores.len(), 2);
 
     let json = serde_json::to_string_pretty(&result).unwrap();
@@ -3469,9 +3401,7 @@ async fn test_logprobs_mixed_modes_with_fallback_seed_88() {
         )
         .await
         .expect("mixed modes with fallback should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    let result = normalize(aggregate(chunks));
+    let result = normalize(run_and_check(Box::pin(stream)).await);
     assert_eq!(result.scores.len(), 3);
     // 3 agents, but the error primary should have been replaced by its fallback.
     assert!(result.completions.len() >= 3);

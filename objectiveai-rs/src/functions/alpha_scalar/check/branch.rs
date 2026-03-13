@@ -2,6 +2,10 @@
 
 use std::collections::{HashMap, HashSet};
 
+use rand::Rng;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
+
 use crate::functions::alpha_scalar::RemoteFunction;
 use crate::functions::{CompiledTask, TaskExpression};
 
@@ -27,6 +31,7 @@ use crate::functions::check::example_inputs;
 pub fn check_alpha_branch_scalar_function(
     function: &RemoteFunction,
     children: Option<&HashMap<String, crate::functions::RemoteFunction>>,
+    seed: Option<i64>,
 ) -> Result<(), String> {
     let (description, input_schema, tasks) = match function {
         RemoteFunction::Branch {
@@ -70,7 +75,12 @@ pub fn check_alpha_branch_scalar_function(
     let mut seen_dist_tasks: HashSet<usize> = HashSet::new();
     let mut count = 0usize;
 
-    for ref input in example_inputs::generate(input_schema) {
+    let mut rng = match seed {
+        Some(s) => StdRng::seed_from_u64(s as u64),
+        None => StdRng::from_os_rng(),
+    };
+
+    for ref input in example_inputs::generate_seeded(input_schema, StdRng::seed_from_u64(rng.random::<u64>())) {
         count += 1;
         let input_label = serde_json::to_string(input).unwrap_or_default();
         let compiled_tasks = compile_and_validate_one_input(
@@ -140,7 +150,7 @@ pub fn check_alpha_branch_scalar_function(
         if let TaskExpression::PlaceholderScalarFunction(psf) = task {
             check_scalar_fields(ScalarFieldsValidation {
                 input_schema: psf.input_schema.clone(),
-            })
+            }, seed)
             .map_err(|e| {
                 format!(
                     "AB11: Task [{}]: placeholder scalar field validation failed: {}",

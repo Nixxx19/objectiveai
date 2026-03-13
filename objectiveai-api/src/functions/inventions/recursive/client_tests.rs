@@ -3,13 +3,11 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use futures::StreamExt;
 use rust_decimal::Decimal;
 
 use objectiveai::agent::completions::request::Agent as AgentParam;
 use objectiveai::agent::AgentBase;
 use objectiveai::functions::inventions::recursive::request::FunctionInventionRecursiveCreateParams;
-use objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk;
 use objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive;
 use objectiveai::functions::inventions::state::{Params, ParamsState};
 use objectiveai::functions::inventions::state::{
@@ -229,48 +227,11 @@ fn params(name: &str, depth: u64, min_b: u64, max_b: u64, min_l: u64, max_l: u64
 // Streaming + aggregation helpers
 // ---------------------------------------------------------------------------
 
-fn assert_chunk_invariants(chunks: &[FunctionInventionRecursiveChunk]) {
-    assert!(!chunks.is_empty(), "stream must not be empty");
-    let expected_created = chunks[0].created;
-    for (i, chunk) in chunks.iter().enumerate() {
-        assert_eq!(
-            chunk.created, expected_created,
-            "chunk {i} has created {}, expected {expected_created}",
-            chunk.created,
-        );
-        if i < chunks.len() - 1 {
-            assert_eq!(
-                chunk.inventions.len(), 1,
-                "chunk {i} (non-final) has {} invention chunks, expected exactly 1",
-                chunk.inventions.len(),
-            );
-            assert!(
-                chunk.usage.is_none(),
-                "chunk {i} (non-final) has usage, expected None",
-            );
-        } else {
-            assert_eq!(
-                chunk.inventions.len(), 0,
-                "final chunk {i} has {} invention chunks, expected 0",
-                chunk.inventions.len(),
-            );
-            assert!(
-                chunk.usage.is_some(),
-                "final chunk {i} has no usage, expected Some",
-            );
-        }
+fn check_created(expected: &std::cell::Cell<Option<u64>>, i: usize, created: u64) {
+    match expected.get() {
+        None => expected.set(Some(created)),
+        Some(exp) => assert_eq!(created, exp, "chunk {i} has created {created}, expected {exp}"),
     }
-}
-
-fn aggregate(chunks: Vec<FunctionInventionRecursiveChunk>) -> FunctionInventionRecursive {
-    let mut agg: Option<FunctionInventionRecursiveChunk> = None;
-    for chunk in &chunks {
-        match &mut agg {
-            Some(a) => a.push(chunk),
-            None => agg = Some(chunk.clone()),
-        }
-    }
-    FunctionInventionRecursive::from(agg.expect("stream should have at least one chunk"))
 }
 
 async fn run_recursive_invention(
@@ -283,9 +244,27 @@ async fn run_recursive_invention(
         .create_streaming(ctx, request)
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect::<Vec<_>>().await;
-    assert_chunk_invariants(&chunks);
-    aggregate(chunks)
+    let expected_created = std::cell::Cell::new(None);
+    let agg = crate::stream_harness::consume_stream(
+        Box::pin(stream),
+        |agg, c| agg.push(c),
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert_eq!(chunk.inventions.len(), 1, "chunk {i} (non-final) has {} invention chunks, expected exactly 1", chunk.inventions.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert_eq!(chunk.inventions.len(), 1, "chunk {i} (non-final) has {} invention chunks, expected exactly 1", chunk.inventions.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert_eq!(chunk.inventions.len(), 0, "final chunk {i} has {} invention chunks, expected 0", chunk.inventions.len());
+            assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
+        },
+    ).await;
+    FunctionInventionRecursive::from(agg)
 }
 
 // ---------------------------------------------------------------------------
@@ -323,14 +302,10 @@ fn normalize(mut fi: FunctionInventionRecursive) -> FunctionInventionRecursive {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_FUNCTIONS_INVENTIONS_RECURSIVE_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
-        std::fs::write(path, json).unwrap();
-        eprintln!("Updated snapshot: {path}");
-        let written = std::fs::read_to_string(path).unwrap();
-        assert_eq!(json, written.trim_end());
-    } else {
-        assert_eq!(json, expected.trim_end());
-    }
+    crate::stream_harness::assert_snapshot(
+        json, path, expected,
+        "UPDATE_FUNCTIONS_INVENTIONS_RECURSIVE_CLIENT_TESTS_SNAPSHOTS",
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -360,6 +335,7 @@ macro_rules! recursive_test_3x {
                         tasks_length: None,
                         description: None,
                         readme: None,
+                        checker_seed: None,
                     }),
                     ($base_seed as i64) + seed_offset,
                 )
@@ -637,8 +613,14 @@ async fn run_recursive_invention_err(
         .create_streaming(ctx, request)
         .await
         .expect("create_streaming should return Ok (errors come as chunks)");
-    let chunks: Vec<_> = Box::pin(stream).collect::<Vec<_>>().await;
-    let agg = aggregate(chunks);
+    let chunk_agg = crate::stream_harness::consume_stream(
+        Box::pin(stream),
+        |agg, c| agg.push(c),
+        |_, _| {},
+        |_, _| {},
+        |_, _| {},
+    ).await;
+    let agg = FunctionInventionRecursive::from(chunk_agg);
     assert!(
         agg.inventions_errors,
         "expected inventions_errors to be true",
@@ -761,6 +743,7 @@ fn test_invalid_scalar_input_schema() {
             tasks_length: None,
             description: None,
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5000);
         let err = run_recursive_invention_err(&client, request).await;
@@ -790,6 +773,7 @@ fn test_valid_schema_invalid_tasks_scalar_leaf() {
             tasks_length: Some(2),
             description: None,
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5200);
         let err = run_recursive_invention_err(&client, request).await;
@@ -819,6 +803,7 @@ fn test_valid_schema_valid_tasks_scalar_leaf() {
             tasks_length: Some(2),
             description: Some("A valid scalar function.".to_string()),
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5300);
         let result = normalize(run_recursive_invention(&client, request).await);
@@ -849,6 +834,7 @@ fn test_valid_vector_schema_valid_tasks() {
             tasks_length: Some(2),
             description: None,
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5400);
         let result = normalize(run_recursive_invention(&client, request).await);
@@ -876,6 +862,7 @@ fn test_predicted_tasks_length_too_low() {
             tasks_length: Some(0),
             description: None,
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5500);
         let err = run_recursive_invention_err(&client, request).await;
@@ -901,6 +888,7 @@ fn test_predicted_tasks_length_too_high() {
             tasks_length: Some(99),
             description: Some("Description present.".to_string()),
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5600);
         let err = run_recursive_invention_err(&client, request).await;
@@ -926,6 +914,7 @@ fn test_predicted_tasks_length_too_high_branch() {
             tasks_length: Some(50),
             description: None,
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5700);
         let err = run_recursive_invention_err(&client, request).await;
@@ -951,6 +940,7 @@ fn test_predicted_tasks_length_below_branch_min() {
             tasks_length: Some(1),
             description: Some("Vector branch description.".to_string()),
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5800);
         let err = run_recursive_invention_err(&client, request).await;
@@ -976,6 +966,7 @@ fn test_valid_schema_no_tasks_with_essay() {
             tasks_length: None,
             description: None,
             readme: None,
+            checker_seed: None,
         });
         let request = make_request(state, 5900);
         let result = normalize(run_recursive_invention(&client, request).await);
@@ -1003,6 +994,7 @@ fn test_invalid_schema_with_tasks_and_description() {
             tasks_length: Some(1),
             description: Some("A complete but invalid function.".to_string()),
             readme: Some("# README\nThis is invalid.".to_string()),
+            checker_seed: None,
         });
         let request = make_request(state, 6000);
         let err = run_recursive_invention_err(&client, request).await;

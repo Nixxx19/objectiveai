@@ -121,6 +121,16 @@ impl State {
         }
     }
 
+    /// Sets the checker seed on the inner state variant.
+    pub fn set_checker_seed(&mut self, seed: Option<i64>) {
+        match self {
+            State::AlphaScalarBranch(s) => s.checker_seed = seed,
+            State::AlphaScalarLeaf(s) => s.checker_seed = seed,
+            State::AlphaVectorBranch(s) => s.checker_seed = seed,
+            State::AlphaVectorLeaf(s) => s.checker_seed = seed,
+        }
+    }
+
     /// Returns the predicted tasks length, if set.
     pub fn tasks_length(&self) -> Option<u64> {
         match self {
@@ -273,6 +283,7 @@ impl ParamsState {
                         tasks_length: None,
                         description: None,
                         readme: None,
+                        checker_seed: None,
                     })
                 } else {
                     State::AlphaScalarBranch(AlphaScalarBranchState {
@@ -284,6 +295,7 @@ impl ParamsState {
                         tasks_length: None,
                         description: None,
                         readme: None,
+                        checker_seed: None,
                     })
                 }
             }
@@ -298,6 +310,7 @@ impl ParamsState {
                         tasks_length: None,
                         description: None,
                         readme: None,
+                        checker_seed: None,
                     })
                 } else {
                     State::AlphaVectorBranch(AlphaVectorBranchState {
@@ -309,6 +322,7 @@ impl ParamsState {
                         tasks_length: None,
                         description: None,
                         readme: None,
+                        checker_seed: None,
                     })
                 }
             }

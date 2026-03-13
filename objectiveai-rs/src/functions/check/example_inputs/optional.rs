@@ -1,5 +1,7 @@
 use rand::Rng;
+use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
+use rand::SeedableRng;
 
 use crate::functions::expression::{InputValue, InputSchema};
 
@@ -23,14 +25,14 @@ pub fn inner_permutations(schema: &InputSchema) -> usize {
     }
 }
 
-pub fn generate<R: Rng>(schema: &InputSchema, mut rng: R) -> Generator<R> {
+pub fn generate(schema: &InputSchema, mut rng: StdRng) -> Generator {
     let inner_count = inner_permutations(schema);
     // 0..inner_count = present, inner_count..inner_count*2 = absent
     let total = inner_count * 2;
     let mut indices: Vec<usize> = (0..total).collect();
     indices.shuffle(&mut rng);
 
-    let inner = super::multi::generate(schema);
+    let inner = super::multi::generate(schema, StdRng::seed_from_u64(rng.random::<u64>()));
 
     Generator {
         inner,
@@ -41,15 +43,15 @@ pub fn generate<R: Rng>(schema: &InputSchema, mut rng: R) -> Generator<R> {
     }
 }
 
-pub struct Generator<R: Rng> {
+pub struct Generator {
     inner: super::multi::Generator,
     inner_count: usize,
     indices: Vec<usize>,
     pos: usize,
-    rng: R,
+    rng: StdRng,
 }
 
-impl<R: Rng> Iterator for Generator<R> {
+impl Iterator for Generator {
     type Item = Option<InputValue>;
     fn next(&mut self) -> Option<Option<InputValue>> {
         if self.indices.is_empty() {

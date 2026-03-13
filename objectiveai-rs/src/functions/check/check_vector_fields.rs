@@ -4,6 +4,8 @@
 //! against randomized example inputs.
 
 use rand::Rng;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 use serde::Deserialize;
 
 use super::check_input_schema::check_input_schema;
@@ -42,15 +44,21 @@ impl VectorFieldsValidation {
 /// validates each one via [`check_vector_fields_for_input`].
 pub fn check_vector_fields(
     fields: VectorFieldsValidation,
+    seed: Option<i64>,
 ) -> Result<(), String> {
     // Input schema permutations
     check_input_schema(&fields.input_schema)?;
 
+    let mut rng = match seed {
+        Some(s) => StdRng::seed_from_u64(s as u64),
+        None => StdRng::from_os_rng(),
+    };
+
     let mut count = 0usize;
-    for ref input in example_inputs::generate(&fields.input_schema) {
+    for ref input in example_inputs::generate_seeded(&fields.input_schema, StdRng::seed_from_u64(rng.random::<u64>())) {
         count += 1;
         let input_label = serde_json::to_string(input).unwrap_or_default();
-        check_vector_fields_for_input(&fields, &input_label, input)?;
+        check_vector_fields_for_input(&fields, &input_label, input, &mut rng)?;
     }
 
     if count == 0 {
@@ -73,6 +81,7 @@ pub(crate) fn check_vector_fields_for_input(
     fields: &VectorFieldsValidation,
     input_label: &str,
     input: &InputValue,
+    rng: &mut impl Rng,
 ) -> Result<(), String> {
     // 1. Compile output_length
     let output_length = fields
@@ -197,7 +206,7 @@ pub(crate) fn check_vector_fields_for_input(
 
     // 6. Random subsets — merge and verify output_length = subset size
     //    and merged input satisfies input_schema constraints.
-    let mut subsets = random_subsets(splits.len(), 5);
+    let mut subsets = random_subsets(splits.len(), 5, rng);
     // Always test a 2-element subset deterministically so that
     // min_items violations are caught reliably.
     if splits.len() >= 3 {
@@ -345,12 +354,11 @@ pub(crate) fn inputs_equal(a: &InputValue, b: &InputValue) -> bool {
 }
 
 /// Generate random subsets of indices for subset merge testing.
-pub(crate) fn random_subsets(length: usize, count: usize) -> Vec<Vec<usize>> {
+pub(crate) fn random_subsets(length: usize, count: usize, rng: &mut impl Rng) -> Vec<Vec<usize>> {
     if length < 2 {
         return vec![];
     }
 
-    let mut rng = rand::rng();
     let mut result = Vec::new();
 
     for _ in 0..count {

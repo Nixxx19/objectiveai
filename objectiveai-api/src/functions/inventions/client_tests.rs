@@ -3,10 +3,7 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use futures::StreamExt;
 use rust_decimal::Decimal;
-
-use indexmap::IndexMap;
 
 use objectiveai::agent::completions::request::Agent as AgentParam;
 use objectiveai::agent::AgentBase;
@@ -17,7 +14,6 @@ use objectiveai::functions::expression::{
     VideoInputSchema, FileInputSchema,
 };
 use objectiveai::functions::inventions::request::FunctionInventionCreateParams;
-use objectiveai::functions::inventions::response::streaming::FunctionInventionChunk;
 use objectiveai::functions::inventions::response::unary::FunctionInvention;
 use objectiveai::functions::inventions::state::{Params, ParamsState};
 use objectiveai::functions::inventions::state::{
@@ -202,55 +198,11 @@ fn params(name: &str, depth: u64, min_b: u64, max_b: u64, min_l: u64, max_l: u64
 // Streaming + aggregation helpers
 // ---------------------------------------------------------------------------
 
-fn assert_chunk_invariants(chunks: &[FunctionInventionChunk]) {
-    assert!(!chunks.is_empty(), "stream must not be empty");
-    let expected_created = chunks[0].created;
-    for (i, chunk) in chunks.iter().enumerate() {
-        assert_eq!(
-            chunk.created, expected_created,
-            "chunk {i} has created {}, expected {expected_created}",
-            chunk.created,
-        );
-        assert!(
-            chunk.completions.len() <= 1,
-            "chunk {i} has {} completions, expected at most 1",
-            chunk.completions.len(),
-        );
-        if i < chunks.len() - 1 {
-            assert!(
-                chunk.usage.is_none(),
-                "chunk {i} (non-final) has usage, expected None",
-            );
-            assert!(
-                chunk.function.is_none(),
-                "chunk {i} (non-final) has function, expected None",
-            );
-        } else {
-            assert!(
-                chunk.usage.is_some(),
-                "final chunk {i} has no usage, expected Some",
-            );
-            assert!(
-                chunk.function.is_some(),
-                "final chunk {i} has no function, expected Some",
-            );
-            assert!(
-                chunk.state.is_some(),
-                "final chunk {i} has no state, expected Some",
-            );
-        }
+fn check_created(expected: &std::cell::Cell<Option<u64>>, i: usize, created: u64) {
+    match expected.get() {
+        None => expected.set(Some(created)),
+        Some(exp) => assert_eq!(created, exp, "chunk {i} has created {created}, expected {exp}"),
     }
-}
-
-fn aggregate(chunks: Vec<FunctionInventionChunk>) -> FunctionInvention {
-    let mut agg: Option<FunctionInventionChunk> = None;
-    for chunk in &chunks {
-        match &mut agg {
-            Some(a) => a.push(chunk),
-            None => agg = Some(chunk.clone()),
-        }
-    }
-    FunctionInvention::from(agg.expect("stream should have at least one chunk"))
 }
 
 async fn run_invention(
@@ -263,9 +215,30 @@ async fn run_invention(
         .create_streaming(ctx, request)
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect::<Vec<_>>().await;
-    assert_chunk_invariants(&chunks);
-    aggregate(chunks)
+    let expected_created = std::cell::Cell::new(None);
+    let agg = crate::stream_harness::consume_stream(
+        Box::pin(stream),
+        |agg, c| agg.push(c),
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.completions.len() <= 1, "chunk {i} has {} completions, expected at most 1", chunk.completions.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+            assert!(chunk.function.is_none(), "chunk {i} (non-final) has function, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.completions.len() <= 1, "chunk {i} has {} completions, expected at most 1", chunk.completions.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+            assert!(chunk.function.is_none(), "chunk {i} (non-final) has function, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
+            assert!(chunk.function.is_some(), "final chunk {i} has no function, expected Some");
+            assert!(chunk.state.is_some(), "final chunk {i} has no state, expected Some");
+        },
+    ).await;
+    FunctionInvention::from(agg)
 }
 
 // ---------------------------------------------------------------------------
@@ -290,14 +263,10 @@ fn normalize(mut fi: FunctionInvention) -> FunctionInvention {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_FUNCTIONS_INVENTIONS_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
-        std::fs::write(path, json).unwrap();
-        eprintln!("Updated snapshot: {path}");
-        let written = std::fs::read_to_string(path).unwrap();
-        assert_eq!(json, written.trim_end());
-    } else {
-        assert_eq!(json, expected.trim_end());
-    }
+    crate::stream_harness::assert_snapshot(
+        json, path, expected,
+        "UPDATE_FUNCTIONS_INVENTIONS_CLIENT_TESTS_SNAPSHOTS",
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -330,6 +299,7 @@ macro_rules! invention_test_10x {
                         tasks_length: None,
                         description: None,
                         readme: None,
+                        checker_seed: None,
                     }),
                     ($base_seed as i64) + seed_offset,
                 )
@@ -466,6 +436,7 @@ macro_rules! invention_test_10x_schema {
                         tasks_length: None,
                         description: None,
                         readme: None,
+                        checker_seed: None,
                     }),
                     ($base_seed as i64) + seed_offset,
                 )
@@ -1103,7 +1074,7 @@ async fn test_zero_leaf_width_rejected() {
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params("bad-zero", 0, 3, 5, 0, 0),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         1,
     );
@@ -1119,7 +1090,7 @@ async fn test_zero_branch_width_rejected() {
         ParamsState::AlphaScalarBranch(AlphaScalarBranchState {
             params: params("bad-zero-branch", 1, 0, 0, 3, 5),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         2,
     );
@@ -1135,7 +1106,7 @@ async fn test_min_greater_than_max_rejected() {
         ParamsState::AlphaVectorLeaf(AlphaVectorLeafState {
             params: params("bad-inverted", 0, 5, 3, 5, 3),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         3,
     );
@@ -1179,7 +1150,7 @@ async fn test_name_over_100_bytes_rejected() {
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params(&long_name, 0, 3, 5, 3, 5),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         1,
     );
@@ -1197,7 +1168,7 @@ async fn test_name_without_path_over_77_bytes_rejected() {
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params(&name, 0, 3, 5, 3, 5),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         1,
     );
@@ -1214,7 +1185,7 @@ async fn test_name_without_path_at_77_bytes_accepted() {
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params(&name, 0, 3, 5, 3, 5),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         1,
     );
@@ -1232,7 +1203,7 @@ async fn test_name_with_valid_path_over_77_bytes_accepted() {
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params(&name, 0, 3, 5, 3, 5),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         1,
     );
@@ -1251,7 +1222,7 @@ async fn test_name_78_bytes_ending_in_dash_rejected() {
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params(&name, 0, 3, 5, 3, 5),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         1,
     );
@@ -1270,7 +1241,7 @@ async fn test_name_100_bytes_ending_in_dash_rejected() {
         ParamsState::AlphaScalarLeaf(AlphaScalarLeafState {
             params: params(&name, 0, 3, 5, 3, 5),
             essay: None, input_schema: None, essay_tasks: None,
-            tasks: None, tasks_length: None, description: None, readme: None,
+            tasks: None, tasks_length: None, description: None, readme: None, checker_seed: None,
         }),
         1,
     );

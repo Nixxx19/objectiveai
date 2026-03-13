@@ -23,6 +23,9 @@ pub struct AlphaScalarLeafState {
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub readme: Option<String>,
+    #[serde(skip_serializing, default)]
+    #[schemars(skip)]
+    pub checker_seed: Option<i64>,
 }
 
 impl AlphaScalarLeafState {
@@ -47,7 +50,7 @@ impl AlphaScalarLeafState {
                 tasks: tasks.clone(),
             };
             functions::alpha_scalar::check::check_alpha_leaf_scalar_function(
-                &function,
+                &function, self.checker_seed,
             )?;
         }
         Ok(())
@@ -506,7 +509,7 @@ impl AlphaScalarLeafState {
                             })?,
                         };
                     match functions::alpha_scalar::check::check_alpha_leaf_scalar_function(
-                        &function,
+                        &function, state.checker_seed,
                     ) {
                         Ok(_) => Ok("Function is valid".to_string()),
                         Err(e) => Err(format!("Function is invalid: {}", e)),
@@ -606,7 +609,7 @@ impl AlphaScalarLeafState {
                 .ok_or_else(|| "Tasks have not been written".to_string())?,
         };
         functions::alpha_scalar::check::check_alpha_leaf_scalar_function(
-            &function,
+            &function, state.checker_seed,
         )
     }
 

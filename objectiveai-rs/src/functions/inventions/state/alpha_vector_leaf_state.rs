@@ -23,6 +23,9 @@ pub struct AlphaVectorLeafState {
     pub description: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub readme: Option<String>,
+    #[serde(skip_serializing, default)]
+    #[schemars(skip)]
+    pub checker_seed: Option<i64>,
 }
 
 impl AlphaVectorLeafState {
@@ -45,7 +48,7 @@ impl AlphaVectorLeafState {
                 tasks: tasks.clone(),
             };
             functions::alpha_vector::check::check_alpha_leaf_vector_function(
-                &function,
+                &function, self.checker_seed,
             )?;
         }
         Ok(())
@@ -492,7 +495,7 @@ impl AlphaVectorLeafState {
                             })?,
                         };
                     match functions::alpha_vector::check::check_alpha_leaf_vector_function(
-                        &function,
+                        &function, state.checker_seed,
                     ) {
                         Ok(_) => Ok("Function is valid".to_string()),
                         Err(e) => Err(format!("Function is invalid: {}", e)),
@@ -592,7 +595,7 @@ impl AlphaVectorLeafState {
                 .ok_or_else(|| "Tasks have not been written".to_string())?,
         };
         functions::alpha_vector::check::check_alpha_leaf_vector_function(
-            &function,
+            &function, state.checker_seed,
         )
     }
 

@@ -273,7 +273,8 @@ where
             .unwrap()
             .as_secs();
         let id = invention_response_id(created);
-        let state = request.state.clone().route();
+        let mut state = request.state.clone().route();
+        state.set_checker_seed(request.seed);
 
         // Validate predicted tasks_length against params bounds.
         if let Some(tasks_length) = state.tasks_length() {

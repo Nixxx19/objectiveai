@@ -1,9 +1,8 @@
+use rand::rngs::StdRng;
+
 use crate::functions::expression::{InputValue, InputSchema};
 
-type Rng = rand::rngs::ThreadRng;
-
-pub fn generate(schema: &InputSchema) -> Generator {
-    let rng = rand::rng();
+pub fn generate(schema: &InputSchema, rng: StdRng) -> Generator {
     match schema {
         InputSchema::Boolean(s) => {
             Generator::Boolean(super::boolean::generate(s, rng))
@@ -42,17 +41,17 @@ pub fn generate(schema: &InputSchema) -> Generator {
 }
 
 pub enum Generator {
-    Boolean(super::boolean::Generator<Rng>),
-    String(super::string::Generator<Rng>),
-    Integer(super::integer::Generator<Rng>),
-    Number(super::number::Generator<Rng>),
-    Image(super::image::Generator<Rng>),
-    Audio(super::audio::Generator<Rng>),
-    Video(super::video::Generator<Rng>),
-    File(super::file::Generator<Rng>),
-    Object(super::object::Generator<Rng>),
-    Array(super::array::Generator<Rng>),
-    AnyOf(super::any_of::Generator<Rng>),
+    Boolean(super::boolean::Generator<StdRng>),
+    String(super::string::Generator<StdRng>),
+    Integer(super::integer::Generator<StdRng>),
+    Number(super::number::Generator<StdRng>),
+    Image(super::image::Generator<StdRng>),
+    Audio(super::audio::Generator<StdRng>),
+    Video(super::video::Generator<StdRng>),
+    File(super::file::Generator<StdRng>),
+    Object(super::object::Generator),
+    Array(super::array::Generator<StdRng>),
+    AnyOf(super::any_of::Generator<StdRng>),
 }
 
 impl Iterator for Generator {

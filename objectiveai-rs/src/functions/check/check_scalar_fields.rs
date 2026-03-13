@@ -2,6 +2,8 @@
 //!
 //! Verifies that the input schema produces enough diverse example inputs.
 
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 use serde::Deserialize;
 
 use super::check_input_schema::check_input_schema;
@@ -22,12 +24,18 @@ pub struct ScalarFieldsValidation {
 /// one input can be produced.
 pub fn check_scalar_fields(
     fields: ScalarFieldsValidation,
+    seed: Option<i64>,
 ) -> Result<(), String> {
     check_input_schema(&fields.input_schema)?;
 
+    let rng = match seed {
+        Some(s) => StdRng::seed_from_u64(s as u64),
+        None => StdRng::from_os_rng(),
+    };
+
     let mut count = 0usize;
     for (_, ref _input) in
-        example_inputs::generate(&fields.input_schema).enumerate()
+        example_inputs::generate_seeded(&fields.input_schema, rng).enumerate()
     {
         count += 1;
     }

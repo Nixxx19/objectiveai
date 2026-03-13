@@ -14,11 +14,11 @@ use crate::functions::alpha_scalar::check::check_alpha_leaf_scalar_function;
 use crate::util::index_map;
 
 fn test(f: &RemoteFunction) {
-    check_alpha_leaf_scalar_function(f).unwrap();
+    check_alpha_leaf_scalar_function(f, None).unwrap();
 }
 
 fn test_err(f: &RemoteFunction, expected: &str) {
-    let err = check_alpha_leaf_scalar_function(f).unwrap_err();
+    let err = check_alpha_leaf_scalar_function(f, None).unwrap_err();
     assert!(
         err.contains(expected),
         "expected '{expected}' in error, got: {err}"

@@ -1,5 +1,7 @@
 use indexmap::IndexMap;
 use rand::Rng;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
 
 use crate::functions::expression::{InputValue, InputSchema, ObjectInputSchema};
 
@@ -19,7 +21,7 @@ pub fn permutations(schema: &ObjectInputSchema) -> usize {
         .unwrap_or(1)
 }
 
-pub fn generate<R: Rng>(schema: &ObjectInputSchema, _rng: R) -> Generator<R> {
+pub fn generate(schema: &ObjectInputSchema, mut rng: StdRng) -> Generator {
     let required = schema.required.as_deref().unwrap_or(&[]);
 
     let fields: Vec<FieldSlot> = schema
@@ -27,7 +29,8 @@ pub fn generate<R: Rng>(schema: &ObjectInputSchema, _rng: R) -> Generator<R> {
         .iter()
         .map(|(key, prop)| {
             let is_optional = !required.contains(key);
-            let source = make_field_source(prop, is_optional);
+            let sub_rng = StdRng::seed_from_u64(rng.random::<u64>());
+            let source = make_field_source(prop, is_optional, sub_rng);
             FieldSlot {
                 name: key.clone(),
                 source,
@@ -35,7 +38,7 @@ pub fn generate<R: Rng>(schema: &ObjectInputSchema, _rng: R) -> Generator<R> {
         })
         .collect();
 
-    Generator { fields, _rng }
+    Generator { fields }
 }
 
 struct FieldSlot {
@@ -45,7 +48,7 @@ struct FieldSlot {
 
 enum FieldSource {
     Required(super::multi::Generator),
-    Optional(super::optional::Generator<rand::rngs::ThreadRng>),
+    Optional(super::optional::Generator),
 }
 
 impl FieldSource {
@@ -57,20 +60,19 @@ impl FieldSource {
     }
 }
 
-fn make_field_source(schema: &InputSchema, is_optional: bool) -> FieldSource {
+fn make_field_source(schema: &InputSchema, is_optional: bool, rng: StdRng) -> FieldSource {
     if is_optional {
-        FieldSource::Optional(super::optional::generate(schema, rand::rng()))
+        FieldSource::Optional(super::optional::generate(schema, rng))
     } else {
-        FieldSource::Required(super::multi::generate(schema))
+        FieldSource::Required(super::multi::generate(schema, rng))
     }
 }
 
-pub struct Generator<R: Rng> {
+pub struct Generator {
     fields: Vec<FieldSlot>,
-    _rng: R,
 }
 
-impl<R: Rng> Iterator for Generator<R> {
+impl Iterator for Generator {
     type Item = InputValue;
     fn next(&mut self) -> Option<InputValue> {
         if self.fields.is_empty() {

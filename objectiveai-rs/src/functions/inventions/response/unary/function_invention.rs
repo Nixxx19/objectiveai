@@ -56,6 +56,7 @@ impl From<response::streaming::FunctionInventionChunk> for FunctionInvention {
                         tasks_length: None,
                         description: None,
                         readme: None,
+                        checker_seed: None,
                     },
                 ),
             ),

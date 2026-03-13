@@ -143,14 +143,10 @@ fn normalize(mut c: AgentCompletion) -> AgentCompletion {
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_AGENT_COMPLETIONS_MOCK_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
-        std::fs::write(path, json).unwrap();
-        eprintln!("Updated snapshot: {path}");
-        let written = std::fs::read_to_string(path).unwrap();
-        assert_eq!(json, written.trim_end());
-    } else {
-        assert_eq!(json, expected.trim_end());
-    }
+    crate::stream_harness::assert_snapshot(
+        json, path, expected,
+        "UPDATE_AGENT_COMPLETIONS_MOCK_CLIENT_TESTS_SNAPSHOTS",
+    );
 }
 
 // ---------------------------------------------------------------------------

@@ -3,14 +3,12 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use futures::StreamExt;
 use rust_decimal::Decimal;
 
 use objectiveai::functions::executions::request::{
     FunctionRemoteProfileRemoteRequestBody, FunctionRemoteProfileRemoteRequestPath, Request,
     Strategy,
 };
-use objectiveai::functions::executions::response::streaming::FunctionExecutionChunk;
 use objectiveai::functions::executions::response::unary::FunctionExecution;
 use objectiveai::functions::expression::InputValue;
 use objectiveai::functions::Remote;
@@ -354,42 +352,10 @@ fn make_request(
 // Streaming + aggregation helpers
 // ---------------------------------------------------------------------------
 
-fn aggregate(chunks: Vec<FunctionExecutionChunk>) -> FunctionExecution {
-    let mut agg: Option<FunctionExecutionChunk> = None;
-    for chunk in &chunks {
-        match &mut agg {
-            Some(a) => a.push(chunk),
-            None => agg = Some(chunk.clone()),
-        }
-    }
-    FunctionExecution::from(agg.expect("stream should have at least one chunk"))
-}
-
-fn assert_chunk_invariants(chunks: &[FunctionExecutionChunk]) {
-    assert!(!chunks.is_empty(), "stream must not be empty");
-    let expected_created = chunks[0].created;
-    for (i, chunk) in chunks.iter().enumerate() {
-        assert_eq!(
-            chunk.created, expected_created,
-            "chunk {i} has created {}, expected {expected_created}",
-            chunk.created,
-        );
-        assert!(
-            chunk.tasks.len() <= 1,
-            "chunk {i} has {} tasks, expected at most 1",
-            chunk.tasks.len(),
-        );
-        if i < chunks.len() - 1 {
-            assert!(
-                chunk.usage.is_none(),
-                "chunk {i} (non-final) has usage, expected None",
-            );
-        } else {
-            assert!(
-                chunk.usage.is_some(),
-                "final chunk {i} has no usage, expected Some",
-            );
-        }
+fn check_created(expected: &std::cell::Cell<Option<u64>>, i: usize, created: u64) {
+    match expected.get() {
+        None => expected.set(Some(created)),
+        Some(exp) => assert_eq!(created, exp, "chunk {i} has created {created}, expected {exp}"),
     }
 }
 
@@ -400,9 +366,26 @@ async fn run_execution(client: &Arc<TestClient>, request: Arc<Request>) -> Funct
         .create_streaming(ctx, request)
         .await
         .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    aggregate(chunks)
+    let expected_created = std::cell::Cell::new(None);
+    let agg = crate::stream_harness::consume_stream(
+        Box::pin(stream),
+        |agg, c| agg.push(c),
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.tasks.len() <= 1, "chunk {i} has {} tasks, expected at most 1", chunk.tasks.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.tasks.len() <= 1, "chunk {i} has {} tasks, expected at most 1", chunk.tasks.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+        },
+        |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
+        },
+    ).await;
+    FunctionExecution::from(agg)
 }
 
 // ---------------------------------------------------------------------------
@@ -453,14 +436,10 @@ fn normalize_vc(
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {
-    if std::env::var("UPDATE_FUNCTIONS_EXECUTIONS_CLIENT_TESTS_SNAPSHOTS").as_deref() == Ok("1") {
-        std::fs::write(path, json).unwrap();
-        eprintln!("Updated snapshot: {path}");
-        let written = std::fs::read_to_string(path).unwrap();
-        assert_eq!(json, written.trim_end());
-    } else {
-        assert_eq!(json, expected.trim_end());
-    }
+    crate::stream_harness::assert_snapshot(
+        json, path, expected,
+        "UPDATE_FUNCTIONS_EXECUTIONS_CLIENT_TESTS_SNAPSHOTS",
+    );
 }
 
 // ---------------------------------------------------------------------------
@@ -1187,15 +1166,7 @@ async fn expect_err(client: &Arc<TestClient>, request: Arc<Request>, expected_st
 /// Helper: run execution and return the aggregated result (for tests where
 /// the stream succeeds but the response contains error fields).
 async fn run_execution_allow_error(client: &Arc<TestClient>, request: Arc<Request>) -> FunctionExecution {
-    let ctx = ctx::Context::new(Arc::new(ctx::DefaultContextExt), Decimal::ONE, &axum::http::HeaderMap::new());
-    let stream = client
-        .clone()
-        .create_streaming(ctx, request)
-        .await
-        .expect("create_streaming should succeed");
-    let chunks: Vec<_> = Box::pin(stream).collect().await;
-    assert_chunk_invariants(&chunks);
-    aggregate(chunks)
+    run_execution(client, request).await
 }
 
 // ---------------------------------------------------------------------------

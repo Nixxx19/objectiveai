@@ -19,11 +19,11 @@ use crate::functions::Remote;
 use crate::util::index_map;
 
 fn test(f: &RemoteFunction) {
-    check_alpha_branch_vector_function(f, None).unwrap();
+    check_alpha_branch_vector_function(f, None, None).unwrap();
 }
 
 fn test_err(f: &RemoteFunction, expected: &str) {
-    let err = check_alpha_branch_vector_function(f, None).unwrap_err();
+    let err = check_alpha_branch_vector_function(f, None, None).unwrap_err();
     assert!(
         err.contains(expected),
         "expected '{expected}' in error, got: {err}"

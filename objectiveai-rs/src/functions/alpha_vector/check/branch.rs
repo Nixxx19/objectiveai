@@ -2,6 +2,10 @@
 
 use std::collections::{HashMap, HashSet};
 
+use rand::Rng;
+use rand::rngs::StdRng;
+use rand::SeedableRng;
+
 use crate::functions::alpha_vector::{self, RemoteFunction};
 use crate::functions::expression::{InputValue, Params, ParamsRef};
 use crate::functions::{CompiledTask, Function, TaskExpression};
@@ -33,6 +37,7 @@ use crate::functions::check::example_inputs;
 pub fn check_alpha_branch_vector_function(
     function: &RemoteFunction,
     children: Option<&HashMap<String, crate::functions::RemoteFunction>>,
+    seed: Option<i64>,
 ) -> Result<(), String> {
     let (description, input_schema, tasks) = match function {
         RemoteFunction::Branch {
@@ -141,12 +146,17 @@ pub fn check_alpha_branch_vector_function(
     let mut seen_dist_tasks: HashSet<(usize, usize)> = HashSet::new();
     let mut count = 0usize;
 
-    for ref input in example_inputs::generate(transpiled_input_schema_ref) {
+    let mut rng = match seed {
+        Some(s) => StdRng::seed_from_u64(s as u64),
+        None => StdRng::from_os_rng(),
+    };
+
+    for ref input in example_inputs::generate_seeded(transpiled_input_schema_ref, StdRng::seed_from_u64(rng.random::<u64>())) {
         count += 1;
         let input_label = serde_json::to_string(input).unwrap_or_default();
 
         // Vector fields validation
-        check_vector_fields_for_input(&vector_fields, &input_label, input)?;
+        check_vector_fields_for_input(&vector_fields, &input_label, input, &mut rng)?;
 
         // Compile and validate
         let compiled_tasks = compile_and_validate_one_input(
@@ -280,7 +290,7 @@ pub fn check_alpha_branch_vector_function(
             })?;
 
         if splits.len() >= 2 {
-            let subsets = random_subsets(splits.len(), 3);
+            let subsets = random_subsets(splits.len(), 3, &mut rng);
             for subset in &subsets {
                 let sub_splits: Vec<InputValue> =
                     subset.iter().map(|&idx| splits[idx].clone()).collect();
@@ -382,7 +392,7 @@ pub fn check_alpha_branch_vector_function(
             TaskExpression::PlaceholderScalarFunction(psf) => {
                 check_scalar_fields(ScalarFieldsValidation {
                     input_schema: psf.input_schema.clone(),
-                })
+                }, seed)
                 .map_err(|e| {
                     format!(
                         "AW21: Task [{}]: placeholder scalar field validation failed: {}",
@@ -396,7 +406,7 @@ pub fn check_alpha_branch_vector_function(
                     output_length: pvf.output_length.clone(),
                     input_split: pvf.input_split.clone(),
                     input_merge: pvf.input_merge.clone(),
-                })
+                }, seed)
                 .map_err(|e| {
                     format!(
                         "AW22: Task [{}]: placeholder vector field validation failed: {}",
