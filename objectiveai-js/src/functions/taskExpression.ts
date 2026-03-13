@@ -7,15 +7,15 @@ import { FunctionsScalarFunctionTaskExpressionSchema } from "./scalarFunctionTas
 import { FunctionsVectorCompletionTaskExpressionSchema } from "./vectorCompletionTaskExpression";
 import { FunctionsVectorFunctionTaskExpressionSchema } from "./vectorFunctionTaskExpression";
 
-export const FunctionsTaskExpressionSchema = z.union([FunctionsScalarFunctionTaskExpressionSchema.extend({
+export const FunctionsTaskExpressionSchema = z.union([FunctionsScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("scalar.function"),
-}), FunctionsVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsVectorFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("vector.function"),
-}), FunctionsVectorCompletionTaskExpressionSchema.extend({
+})), FunctionsVectorCompletionTaskExpressionSchema.and(z.object({
   type: z.literal("vector.completion"),
-}), FunctionsPlaceholderScalarFunctionTaskExpressionSchema.extend({
+})), FunctionsPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.scalar.function"),
-}), FunctionsPlaceholderVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsPlaceholderVectorFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.vector.function"),
-})]).describe("A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].").meta({ title: "functions.TaskExpression" });
+}))]).describe("A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].").meta({ title: "functions.TaskExpression" });
 export type FunctionsTaskExpression = z.infer<typeof FunctionsTaskExpressionSchema>;

@@ -8,17 +8,17 @@ import { FunctionsInventionsStateAlphaVectorBranchStateSchema } from "./alphaVec
 import { FunctionsInventionsStateAlphaVectorLeafStateSchema } from "./alphaVectorLeafState";
 import { FunctionsInventionsStateAlphaVectorStateSchema } from "./alphaVectorState";
 
-export const FunctionsInventionsStateParamsStateSchema = z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.extend({
+export const FunctionsInventionsStateParamsStateSchema = z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z.object({
   type: z.literal("alpha.scalar.branch.function"),
-}), FunctionsInventionsStateAlphaScalarLeafStateSchema.extend({
+})), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z.object({
   type: z.literal("alpha.scalar.leaf.function"),
-}), FunctionsInventionsStateAlphaVectorBranchStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z.object({
   type: z.literal("alpha.vector.branch.function"),
-}), FunctionsInventionsStateAlphaVectorLeafStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z.object({
   type: z.literal("alpha.vector.leaf.function"),
-}), FunctionsInventionsStateAlphaScalarStateSchema.extend({
+})), FunctionsInventionsStateAlphaScalarStateSchema.and(z.object({
   type: z.literal("alpha.scalar.function"),
-}), FunctionsInventionsStateAlphaVectorStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorStateSchema.and(z.object({
   type: z.literal("alpha.vector.function"),
-})]).meta({ title: "functions.inventions.state.ParamsState" });
+}))]).meta({ title: "functions.inventions.state.ParamsState" });
 export type FunctionsInventionsStateParamsState = z.infer<typeof FunctionsInventionsStateParamsStateSchema>;

@@ -189,6 +189,7 @@ function convertObjectTS(schema, selfTitle) {
   }
   if (!schema.properties) {
     if (schema.additionalProperties === false) return "Record<string, never>";
+    if (!schema.additionalProperties) return "Record<string, unknown>";
     return "Record<string, JsonValue>";
   }
   // Nullable properties (anyOf with a null variant) are optional; all others are required
@@ -319,17 +320,12 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
           props.push(`  ${safeKey}: ${propCode}`);
         }
       }
-      // Cyclic schemas use z.ZodType<T> annotation, so .extend() is unavailable
-      if (isCyclic || isLazy) {
-        const andBlock = `.and(z.object({\n${props.join(",\n")},\n}))`;
-        if (isLazy) {
-          expr = `z.lazy(() => ${baseName})${andBlock}`;
-        } else {
-          expr = `${baseName}${andBlock}`;
-        }
+      // Always use .and() to preserve the intersection structure for roundtrip
+      const andBlock = `.and(z.object({\n${props.join(",\n")},\n}))`;
+      if (isLazy) {
+        expr = `z.lazy(() => ${baseName})${andBlock}`;
       } else {
-        const extendBlock = `.extend({\n${props.join(",\n")},\n})`;
-        expr = `${baseName}${extendBlock}`;
+        expr = `${baseName}${andBlock}`;
       }
     } else if (isLazy) {
       expr = `z.lazy(() => ${baseName})`;
@@ -337,6 +333,10 @@ function convert(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
       expr = baseName;
     }
 
+    // $ref can have default alongside it
+    if (schema.default !== undefined) {
+      expr += `.default(${JSON.stringify(schema.default)})`;
+    }
     // $ref can have description alongside it
     if (schema.description) {
       expr += `.describe(${JSON.stringify(schema.description)})`;
@@ -469,8 +469,16 @@ function convertObject(schema, refs, lazyRefs, selfTitle, cyclicTitles) {
     if (schema.additionalProperties === false) {
       return "z.object({}).strict()";
     }
-    refs.add(JSON_VALUE_REF);
-    return "z.record(z.string(), JsonValueSchema)";
+    if (!schema.additionalProperties) {
+      // {type: "object"} with no additionalProperties → bare object
+      return "z.object({})";
+    }
+    // {type: "object", additionalProperties: X} → record
+    if (schema.additionalProperties === true) {
+      refs.add(JSON_VALUE_REF);
+      return "z.record(z.string(), JsonValueSchema)";
+    }
+    return `z.record(z.string(), ${convert(schema.additionalProperties, refs, lazyRefs, selfTitle, cyclicTitles)})`;
   }
 
   // Nullable properties (anyOf with a null variant) are optional; all others are required

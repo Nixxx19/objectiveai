@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { FunctionsAlphaScalarVectorCompletionTaskExpressionSchema } from "./vectorCompletionTaskExpression";
 
-export const FunctionsAlphaScalarLeafTaskExpressionSchema = FunctionsAlphaScalarVectorCompletionTaskExpressionSchema.extend({
+export const FunctionsAlphaScalarLeafTaskExpressionSchema = FunctionsAlphaScalarVectorCompletionTaskExpressionSchema.and(z.object({
   type: z.literal("vector.completion"),
-}).meta({ title: "functions.alpha_scalar.LeafTaskExpression" });
+})).meta({ title: "functions.alpha_scalar.LeafTaskExpression" });
 export type FunctionsAlphaScalarLeafTaskExpression = z.infer<typeof FunctionsAlphaScalarLeafTaskExpressionSchema>;

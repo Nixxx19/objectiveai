@@ -6,13 +6,13 @@ import { FunctionsInventionsStateAlphaScalarLeafStateSchema } from "./alphaScala
 import { FunctionsInventionsStateAlphaVectorBranchStateSchema } from "./alphaVectorBranchState";
 import { FunctionsInventionsStateAlphaVectorLeafStateSchema } from "./alphaVectorLeafState";
 
-export const FunctionsInventionsStateStateSchema = z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.extend({
+export const FunctionsInventionsStateStateSchema = z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z.object({
   type: z.literal("alpha.scalar.branch.function"),
-}), FunctionsInventionsStateAlphaScalarLeafStateSchema.extend({
+})), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z.object({
   type: z.literal("alpha.scalar.leaf.function"),
-}), FunctionsInventionsStateAlphaVectorBranchStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z.object({
   type: z.literal("alpha.vector.branch.function"),
-}), FunctionsInventionsStateAlphaVectorLeafStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z.object({
   type: z.literal("alpha.vector.leaf.function"),
-})]).meta({ title: "functions.inventions.state.State" });
+}))]).meta({ title: "functions.inventions.state.State" });
 export type FunctionsInventionsStateState = z.infer<typeof FunctionsInventionsStateStateSchema>;

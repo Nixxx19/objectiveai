@@ -18,7 +18,7 @@ export const AgentOpenrouterAgentBaseSchema = z.object({
   mcp_servers: z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").optional(),
   min_p: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Minimum probability threshold for sampling (0.0 to 1.0).").optional(),
   model: z.string().describe("The upstream language model identifier (e.g., `\"gpt-4\"`, `\"claude-3-opus\"`)."),
-  output_mode: AgentOpenrouterOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
+  output_mode: AgentOpenrouterOutputModeSchema.default("instruction").describe("The output mode for vector completions. Ignored for agent completions."),
   post_system_prefix_messages: z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages inserted after the leading chain of system/developer messages.").optional(),
   prefix_messages: z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages prepended to the user's prompt.").optional(),
   presence_penalty: z.number().min(-3.4028234663852886e+38).max(3.4028234663852886e+38).nullable().describe("Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).").optional(),

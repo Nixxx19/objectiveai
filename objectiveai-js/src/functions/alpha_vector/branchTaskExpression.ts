@@ -6,13 +6,13 @@ import { FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema } fro
 import { FunctionsAlphaVectorScalarFunctionTaskExpressionSchema } from "./scalarFunctionTaskExpression";
 import { FunctionsAlphaVectorVectorFunctionTaskExpressionSchema } from "./vectorFunctionTaskExpression";
 
-export const FunctionsAlphaVectorBranchTaskExpressionSchema = z.union([FunctionsAlphaVectorScalarFunctionTaskExpressionSchema.extend({
+export const FunctionsAlphaVectorBranchTaskExpressionSchema = z.union([FunctionsAlphaVectorScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("alpha.scalar.function"),
-}), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("alpha.vector.function"),
-}), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.scalar.function"),
-}), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.vector.function"),
-})]).meta({ title: "functions.alpha_vector.BranchTaskExpression" });
+}))]).meta({ title: "functions.alpha_vector.BranchTaskExpression" });
 export type FunctionsAlphaVectorBranchTaskExpression = z.infer<typeof FunctionsAlphaVectorBranchTaskExpressionSchema>;

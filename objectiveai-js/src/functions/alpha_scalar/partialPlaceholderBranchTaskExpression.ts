@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema } from "./partialPlaceholderScalarFunctionTaskExpression";
 
-export const FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema = FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema.extend({
+export const FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema = FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.scalar.function"),
-}).meta({ title: "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression" });
+})).meta({ title: "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression" });
 export type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression = z.infer<typeof FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema>;

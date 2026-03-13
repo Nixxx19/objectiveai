@@ -248,17 +248,17 @@ var AgentCompletionsMessageUserMessageSchema = z305.z.object({
 }).describe("A user message from the end user.").meta({ title: "agent.completions.message.UserMessage" });
 
 // src/agent/completions/message/message.ts
-var AgentCompletionsMessageMessageSchema = z305.z.union([AgentCompletionsMessageDeveloperMessageSchema.extend({
+var AgentCompletionsMessageMessageSchema = z305.z.union([AgentCompletionsMessageDeveloperMessageSchema.and(z305.z.object({
   role: z305.z.literal("developer")
-}).describe("A developer message (similar to system, but from the developer)."), AgentCompletionsMessageSystemMessageSchema.extend({
+})).describe("A developer message (similar to system, but from the developer)."), AgentCompletionsMessageSystemMessageSchema.and(z305.z.object({
   role: z305.z.literal("system")
-}).describe("A system message setting context or instructions."), AgentCompletionsMessageUserMessageSchema.extend({
+})).describe("A system message setting context or instructions."), AgentCompletionsMessageUserMessageSchema.and(z305.z.object({
   role: z305.z.literal("user")
-}).describe("A user message from the end user."), AgentCompletionsMessageAssistantMessageSchema.extend({
+})).describe("A user message from the end user."), AgentCompletionsMessageAssistantMessageSchema.and(z305.z.object({
   role: z305.z.literal("assistant")
-}).describe("An assistant message (model's previous response)."), AgentCompletionsMessageToolMessageSchema.extend({
+})).describe("An assistant message (model's previous response)."), AgentCompletionsMessageToolMessageSchema.and(z305.z.object({
   role: z305.z.literal("tool")
-}).describe("A tool message containing the result of a tool call.")]).describe("A message in the conversation.").meta({ title: "agent.completions.message.Message" });
+})).describe("A tool message containing the result of a tool call.")]).describe("A message in the conversation.").meta({ title: "agent.completions.message.Message" });
 
 // src/agent/completions/message/richContentMerged.ts
 function agentCompletionsMessageRichContentMerged(a, b) {
@@ -433,7 +433,7 @@ var AgentOpenrouterAgentBaseSchema = z305.z.object({
   mcp_servers: z305.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").optional(),
   min_p: z305.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Minimum probability threshold for sampling (0.0 to 1.0).").optional(),
   model: z305.z.string().describe('The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).'),
-  output_mode: AgentOpenrouterOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
+  output_mode: AgentOpenrouterOutputModeSchema.default("instruction").describe("The output mode for vector completions. Ignored for agent completions."),
   post_system_prefix_messages: z305.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages inserted after the leading chain of system/developer messages.").optional(),
   prefix_messages: z305.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages prepended to the user's prompt.").optional(),
   presence_penalty: z305.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).").optional(),
@@ -1016,7 +1016,7 @@ var AgentOpenrouterAgentSchema = z305.z.object({
   mcp_servers: z305.z.array(AgentMcpServerSchema).nullable().describe("MCP servers the agent can connect to.").optional(),
   min_p: z305.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Minimum probability threshold for sampling (0.0 to 1.0).").optional(),
   model: z305.z.string().describe('The upstream language model identifier (e.g., `"gpt-4"`, `"claude-3-opus"`).'),
-  output_mode: AgentOpenrouterOutputModeSchema.describe("The output mode for vector completions. Ignored for agent completions."),
+  output_mode: AgentOpenrouterOutputModeSchema.default("instruction").describe("The output mode for vector completions. Ignored for agent completions."),
   post_system_prefix_messages: z305.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages inserted after the leading chain of system/developer messages.").optional(),
   prefix_messages: z305.z.array(AgentCompletionsMessageMessageSchema).nullable().describe("Messages prepended to the user's prompt.").optional(),
   presence_penalty: z305.z.number().min(-34028234663852886e22).max(34028234663852886e22).nullable().describe("Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).").optional(),
@@ -1309,11 +1309,11 @@ var FunctionsAlphaScalarScalarFunctionTaskExpressionSchema = z305.z.object({
 }).meta({ title: "functions.alpha_scalar.ScalarFunctionTaskExpression" });
 
 // src/functions/alpha_scalar/branchTaskExpression.ts
-var FunctionsAlphaScalarBranchTaskExpressionSchema = z305.z.union([FunctionsAlphaScalarScalarFunctionTaskExpressionSchema.extend({
+var FunctionsAlphaScalarBranchTaskExpressionSchema = z305.z.union([FunctionsAlphaScalarScalarFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("alpha.scalar.function")
-}), FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.alpha.scalar.function")
-})]).meta({ title: "functions.alpha_scalar.BranchTaskExpression" });
+}))]).meta({ title: "functions.alpha_scalar.BranchTaskExpression" });
 var FunctionsAlphaScalarVectorCompletionTaskExpressionSchema = z305.z.object({
   messages: FunctionsExpressionExpressionSchema,
   responses: z305.z.array(AgentCompletionsMessageRichContentSchema),
@@ -1321,9 +1321,9 @@ var FunctionsAlphaScalarVectorCompletionTaskExpressionSchema = z305.z.object({
 }).meta({ title: "functions.alpha_scalar.VectorCompletionTaskExpression" });
 
 // src/functions/alpha_scalar/leafTaskExpression.ts
-var FunctionsAlphaScalarLeafTaskExpressionSchema = FunctionsAlphaScalarVectorCompletionTaskExpressionSchema.extend({
+var FunctionsAlphaScalarLeafTaskExpressionSchema = FunctionsAlphaScalarVectorCompletionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("vector.completion")
-}).meta({ title: "functions.alpha_scalar.LeafTaskExpression" });
+})).meta({ title: "functions.alpha_scalar.LeafTaskExpression" });
 
 // src/functions/alpha_scalar/inlineFunction.ts
 var FunctionsAlphaScalarInlineFunctionSchema = z305.z.union([z305.z.object({
@@ -1341,9 +1341,9 @@ var FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema = z
 }).meta({ title: "functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression" });
 
 // src/functions/alpha_scalar/partialPlaceholderBranchTaskExpression.ts
-var FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema = FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema.extend({
+var FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema = FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.alpha.scalar.function")
-}).meta({ title: "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression" });
+})).meta({ title: "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression" });
 var FunctionsAlphaScalarRemoteFunctionSchema = z305.z.union([z305.z.object({
   description: z305.z.string(),
   input_schema: FunctionsExpressionObjectInputSchemaSchema,
@@ -1412,15 +1412,15 @@ var FunctionsAlphaVectorVectorFunctionTaskExpressionSchema = z305.z.object({
 }).meta({ title: "functions.alpha_vector.VectorFunctionTaskExpression" });
 
 // src/functions/alpha_vector/branchTaskExpression.ts
-var FunctionsAlphaVectorBranchTaskExpressionSchema = z305.z.union([FunctionsAlphaVectorScalarFunctionTaskExpressionSchema.extend({
+var FunctionsAlphaVectorBranchTaskExpressionSchema = z305.z.union([FunctionsAlphaVectorScalarFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("alpha.scalar.function")
-}), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaVectorVectorFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("alpha.vector.function")
-}), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.alpha.scalar.function")
-}), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.alpha.vector.function")
-})]).meta({ title: "functions.alpha_vector.BranchTaskExpression" });
+}))]).meta({ title: "functions.alpha_vector.BranchTaskExpression" });
 var FunctionsAlphaVectorVectorCompletionTaskExpressionSchema = z305.z.object({
   messages: FunctionsExpressionExpressionSchema,
   responses: FunctionsExpressionExpressionSchema,
@@ -1428,9 +1428,9 @@ var FunctionsAlphaVectorVectorCompletionTaskExpressionSchema = z305.z.object({
 }).meta({ title: "functions.alpha_vector.VectorCompletionTaskExpression" });
 
 // src/functions/alpha_vector/leafTaskExpression.ts
-var FunctionsAlphaVectorLeafTaskExpressionSchema = FunctionsAlphaVectorVectorCompletionTaskExpressionSchema.extend({
+var FunctionsAlphaVectorLeafTaskExpressionSchema = FunctionsAlphaVectorVectorCompletionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("vector.completion")
-}).meta({ title: "functions.alpha_vector.LeafTaskExpression" });
+})).meta({ title: "functions.alpha_vector.LeafTaskExpression" });
 
 // src/functions/alpha_vector/inlineFunction.ts
 var FunctionsAlphaVectorInlineFunctionSchema = z305.z.union([z305.z.object({
@@ -1454,11 +1454,11 @@ var FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema = z
 }).meta({ title: "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression" });
 
 // src/functions/alpha_vector/partialPlaceholderBranchTaskExpression.ts
-var FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema = z305.z.union([FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema.extend({
+var FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema = z305.z.union([FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.alpha.scalar.function")
-}), FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.alpha.vector.function")
-})]).meta({ title: "functions.alpha_vector.PartialPlaceholderBranchTaskExpression" });
+}))]).meta({ title: "functions.alpha_vector.PartialPlaceholderBranchTaskExpression" });
 var FunctionsAlphaVectorRemoteFunctionSchema = z305.z.union([z305.z.object({
   description: z305.z.string(),
   input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema,
@@ -1536,17 +1536,17 @@ var FunctionsVectorFunctionTaskExpressionSchema = z305.z.object({
 }).describe("Expression for a task that calls a vector function (pre-compilation).").meta({ title: "functions.VectorFunctionTaskExpression" });
 
 // src/functions/taskExpression.ts
-var FunctionsTaskExpressionSchema = z305.z.union([FunctionsScalarFunctionTaskExpressionSchema.extend({
+var FunctionsTaskExpressionSchema = z305.z.union([FunctionsScalarFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("scalar.function")
-}), FunctionsVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsVectorFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("vector.function")
-}), FunctionsVectorCompletionTaskExpressionSchema.extend({
+})), FunctionsVectorCompletionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("vector.completion")
-}), FunctionsPlaceholderScalarFunctionTaskExpressionSchema.extend({
+})), FunctionsPlaceholderScalarFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.scalar.function")
-}), FunctionsPlaceholderVectorFunctionTaskExpressionSchema.extend({
+})), FunctionsPlaceholderVectorFunctionTaskExpressionSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.vector.function")
-})]).describe("A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].").meta({ title: "functions.TaskExpression" });
+}))]).describe("A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].").meta({ title: "functions.TaskExpression" });
 
 // src/functions/inlineFunction.ts
 var FunctionsInlineFunctionSchema = z305.z.union([z305.z.object({
@@ -1577,7 +1577,7 @@ var FunctionsTaskProfileSchema = z305.z.union([z305.z.object({
   owner: z305.z.string().describe("Repository owner."),
   remote: FunctionsRemoteSchema.describe("The remote source where the profile is hosted."),
   repository: z305.z.string().describe("Repository name.")
-}).describe("Profile for a nested function task (references another profile)."), z305.z.lazy(() => FunctionsInlineProfileSchema).describe("Inline profile for a task (tasks-based or auto)."), z305.z.record(z305.z.string(), JsonValueSchema).describe("Placeholder task \u2014 no configuration needed, output is fixed.")]).describe("Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.").meta({ title: "functions.TaskProfile" });
+}).describe("Profile for a nested function task (references another profile)."), z305.z.lazy(() => FunctionsInlineProfileSchema).describe("Inline profile for a task (tasks-based or auto)."), z305.z.object({}).describe("Placeholder task \u2014 no configuration needed, output is fixed.")]).describe("Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.").meta({ title: "functions.TaskProfile" });
 
 // src/functions/inlineTasksProfile.ts
 var FunctionsInlineTasksProfileSchema = z305.z.object({
@@ -2276,19 +2276,19 @@ var FunctionsInventionsStateAlphaVectorStateSchema = z305.z.object({
 }).meta({ title: "functions.inventions.state.AlphaVectorState" });
 
 // src/functions/inventions/state/paramsState.ts
-var FunctionsInventionsStateParamsStateSchema = z305.z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.extend({
+var FunctionsInventionsStateParamsStateSchema = z305.z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.scalar.branch.function")
-}), FunctionsInventionsStateAlphaScalarLeafStateSchema.extend({
+})), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.scalar.leaf.function")
-}), FunctionsInventionsStateAlphaVectorBranchStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.vector.branch.function")
-}), FunctionsInventionsStateAlphaVectorLeafStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.vector.leaf.function")
-}), FunctionsInventionsStateAlphaScalarStateSchema.extend({
+})), FunctionsInventionsStateAlphaScalarStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.scalar.function")
-}), FunctionsInventionsStateAlphaVectorStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.vector.function")
-})]).meta({ title: "functions.inventions.state.ParamsState" });
+}))]).meta({ title: "functions.inventions.state.ParamsState" });
 
 // src/functions/inventions/recursive/request/functionInventionRecursiveCreateParams.ts
 var FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema = z305.z.object({
@@ -2332,15 +2332,15 @@ var FunctionsInventionsResponseStreamingAgentCompletionChunkSchema = z305.z.obje
   usage: AgentCompletionsResponseUsageSchema.nullable().describe("Token usage (only present in the final chunk).").optional()
 }).describe("A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.").meta({ title: "functions.inventions.response.streaming.AgentCompletionChunk" });
 var FunctionsInventionsResponseStreamingObjectSchema = z305.z.enum(["alpha.scalar.function.invention.chunk", "alpha.vector.function.invention.chunk"]).meta({ title: "functions.inventions.response.streaming.Object" });
-var FunctionsInventionsStateStateSchema = z305.z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.extend({
+var FunctionsInventionsStateStateSchema = z305.z.union([FunctionsInventionsStateAlphaScalarBranchStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.scalar.branch.function")
-}), FunctionsInventionsStateAlphaScalarLeafStateSchema.extend({
+})), FunctionsInventionsStateAlphaScalarLeafStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.scalar.leaf.function")
-}), FunctionsInventionsStateAlphaVectorBranchStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorBranchStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.vector.branch.function")
-}), FunctionsInventionsStateAlphaVectorLeafStateSchema.extend({
+})), FunctionsInventionsStateAlphaVectorLeafStateSchema.and(z305.z.object({
   type: z305.z.literal("alpha.vector.leaf.function")
-})]).meta({ title: "functions.inventions.state.State" });
+}))]).meta({ title: "functions.inventions.state.State" });
 var FunctionsRemoteFunctionPathSchema = z305.z.object({
   commit: z305.z.string(),
   owner: z305.z.string(),
@@ -3081,17 +3081,17 @@ var FunctionsVectorFunctionTaskSchema = z305.z.object({
 }).describe("A compiled vector function task ready for execution.").meta({ title: "functions.VectorFunctionTask" });
 
 // src/functions/task.ts
-var FunctionsTaskSchema = z305.z.union([FunctionsScalarFunctionTaskSchema.extend({
+var FunctionsTaskSchema = z305.z.union([FunctionsScalarFunctionTaskSchema.and(z305.z.object({
   type: z305.z.literal("scalar.function")
-}).describe("Calls a scalar function (produces a single score)."), FunctionsVectorFunctionTaskSchema.extend({
+})).describe("Calls a scalar function (produces a single score)."), FunctionsVectorFunctionTaskSchema.and(z305.z.object({
   type: z305.z.literal("vector.function")
-}).describe("Calls a vector function (produces a vector of scores)."), FunctionsVectorCompletionTaskSchema.extend({
+})).describe("Calls a vector function (produces a vector of scores)."), FunctionsVectorCompletionTaskSchema.and(z305.z.object({
   type: z305.z.literal("vector.completion")
-}).describe("Runs a vector completion."), FunctionsPlaceholderScalarFunctionTaskSchema.extend({
+})).describe("Runs a vector completion."), FunctionsPlaceholderScalarFunctionTaskSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.scalar.function")
-}).describe("Placeholder scalar function (always outputs 0.5)."), FunctionsPlaceholderVectorFunctionTaskSchema.extend({
+})).describe("Placeholder scalar function (always outputs 0.5)."), FunctionsPlaceholderVectorFunctionTaskSchema.and(z305.z.object({
   type: z305.z.literal("placeholder.vector.function")
-}).describe("Placeholder vector function (always outputs equalized vector).")]).describe("A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.").meta({ title: "functions.Task" });
+})).describe("Placeholder vector function (always outputs equalized vector).")]).describe("A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.").meta({ title: "functions.Task" });
 
 // src/functions/compiledTask.ts
 var FunctionsCompiledTaskSchema = z305.z.union([FunctionsTaskSchema.describe("A single task (no mapping)."), z305.z.array(FunctionsTaskSchema).describe("Multiple task instances from mapped execution.")]).describe("The result of compiling a task expression.\n\nTasks without a `map` field compile to a single task. Tasks with a `map`\nexpression are expanded into multiple tasks, one per integer index from\n0 to the evaluated count.").meta({ title: "functions.CompiledTask" });

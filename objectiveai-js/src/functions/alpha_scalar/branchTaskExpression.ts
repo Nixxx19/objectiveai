@@ -4,9 +4,9 @@ import { z } from "zod";
 import { FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema } from "./placeholderScalarFunctionTaskExpression";
 import { FunctionsAlphaScalarScalarFunctionTaskExpressionSchema } from "./scalarFunctionTaskExpression";
 
-export const FunctionsAlphaScalarBranchTaskExpressionSchema = z.union([FunctionsAlphaScalarScalarFunctionTaskExpressionSchema.extend({
+export const FunctionsAlphaScalarBranchTaskExpressionSchema = z.union([FunctionsAlphaScalarScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("alpha.scalar.function"),
-}), FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema.extend({
+})), FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema.and(z.object({
   type: z.literal("placeholder.alpha.scalar.function"),
-})]).meta({ title: "functions.alpha_scalar.BranchTaskExpression" });
+}))]).meta({ title: "functions.alpha_scalar.BranchTaskExpression" });
 export type FunctionsAlphaScalarBranchTaskExpression = z.infer<typeof FunctionsAlphaScalarBranchTaskExpressionSchema>;
