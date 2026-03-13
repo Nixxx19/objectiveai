@@ -43,7 +43,7 @@ use wasm_bindgen::prelude::*;
 /// Returns an error string if validation fails (e.g., invalid model name,
 /// out-of-range parameters, conflicting settings).
 #[wasm_bindgen]
-pub fn validateAgent(agent: JsValue) -> Result<JsValue, JsValue> {
+pub fn validateAgent(agent: JsValue) -> Result<String, JsValue> {
     // deserialize
     let agent_base: objectiveai::agent::AgentBase =
         serde_wasm_bindgen::from_value(agent)?;
@@ -52,8 +52,7 @@ pub fn validateAgent(agent: JsValue) -> Result<JsValue, JsValue> {
         .try_into()
         .map_err(|e: String| JsValue::from_str(&e))?;
     // serialize
-    let agent: JsValue = serde_wasm_bindgen::to_value(&agent)?;
-    Ok(agent)
+    serde_json::to_string(&agent).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Validates an Ensemble configuration and computes its content-addressed ID.
@@ -75,7 +74,7 @@ pub fn validateAgent(agent: JsValue) -> Result<JsValue, JsValue> {
 /// Returns an error string if any LLM validation fails or the ensemble
 /// structure is invalid.
 #[wasm_bindgen]
-pub fn validateEnsemble(ensemble: JsValue) -> Result<JsValue, JsValue> {
+pub fn validateEnsemble(ensemble: JsValue) -> Result<String, JsValue> {
     // deserialize
     let ensemble_base: objectiveai::ensemble::EnsembleBase =
         serde_wasm_bindgen::from_value(ensemble)?;
@@ -84,8 +83,7 @@ pub fn validateEnsemble(ensemble: JsValue) -> Result<JsValue, JsValue> {
         .try_into()
         .map_err(|e: String| JsValue::from_str(&e))?;
     // serialize
-    let ensemble: JsValue = serde_wasm_bindgen::to_value(&ensemble)?;
-    Ok(ensemble)
+    serde_json::to_string(&ensemble).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Validates function input against its schema.
@@ -147,7 +145,7 @@ pub fn validateFunctionInput(
 pub fn compileFunctionTasks(
     function: JsValue,
     input: JsValue,
-) -> Result<JsValue, JsValue> {
+) -> Result<String, JsValue> {
     // deserialize
     let function: objectiveai::functions::Function =
         serde_wasm_bindgen::from_value(function)?;
@@ -158,8 +156,7 @@ pub fn compileFunctionTasks(
         .compile_tasks(&input)
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
     // serialize
-    let tasks: JsValue = serde_wasm_bindgen::to_value(&tasks)?;
-    Ok(tasks)
+    serde_json::to_string(&tasks).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 // TODO: Update for new per-task output expression architecture
@@ -267,7 +264,7 @@ pub fn compileFunctionOutputLength(
 pub fn compileFunctionInputSplit(
     function: JsValue,
     input: JsValue,
-) -> Result<Option<JsValue>, JsValue> {
+) -> Result<Option<String>, JsValue> {
     // deserialize
     let function: objectiveai::functions::Function =
         serde_wasm_bindgen::from_value(function)?;
@@ -278,10 +275,9 @@ pub fn compileFunctionInputSplit(
         .compile_input_split(&input)
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
     // serialize
-    let input_split: Option<JsValue> = input_split
-        .map(|split| serde_wasm_bindgen::to_value(&split))
-        .transpose()?;
-    Ok(input_split)
+    input_split
+        .map(|split| serde_json::to_string(&split).map_err(|e| JsValue::from_str(&e.to_string())))
+        .transpose()
 }
 
 /// Compiles the `input_merge` expression to merge multiple sub-inputs back into one.
@@ -307,7 +303,7 @@ pub fn compileFunctionInputSplit(
 pub fn compileFunctionInputMerge(
     function: JsValue,
     input: JsValue,
-) -> Result<Option<JsValue>, JsValue> {
+) -> Result<Option<String>, JsValue> {
     // deserialize
     let function: objectiveai::functions::Function =
         serde_wasm_bindgen::from_value(function)?;
@@ -320,10 +316,9 @@ pub fn compileFunctionInputMerge(
         ))
         .map_err(|e| JsValue::from_str(&e.to_string()))?;
     // serialize
-    let input_merge: Option<JsValue> = input_merge
-        .map(|merge| serde_wasm_bindgen::to_value(&merge))
-        .transpose()?;
-    Ok(input_merge)
+    input_merge
+        .map(|merge| serde_json::to_string(&merge).map_err(|e| JsValue::from_str(&e.to_string())))
+        .transpose()
 }
 
 /// Validates vector function fields (output_length, input_split, input_merge).
@@ -460,66 +455,114 @@ pub fn vectorResponseId(response: JsValue) -> Result<String, JsValue> {
 
 /// Merges two `AgentCompletionChunk`s and returns the merged result.
 #[wasm_bindgen]
-pub fn agentCompletionChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+pub fn agentCompletionChunkMerged(a: JsValue, b: JsValue) -> Result<String, JsValue> {
     let mut a: objectiveai::agent::completions::response::streaming::AgentCompletionChunk =
         serde_wasm_bindgen::from_value(a)?;
     let b: objectiveai::agent::completions::response::streaming::AgentCompletionChunk =
         serde_wasm_bindgen::from_value(b)?;
     a.push(&b);
-    Ok(serde_wasm_bindgen::to_value(&a)?)
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Merges two `VectorCompletionChunk`s and returns the merged result.
 #[wasm_bindgen]
-pub fn vectorCompletionChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+pub fn vectorCompletionChunkMerged(a: JsValue, b: JsValue) -> Result<String, JsValue> {
     let mut a: objectiveai::vector::completions::response::streaming::VectorCompletionChunk =
         serde_wasm_bindgen::from_value(a)?;
     let b: objectiveai::vector::completions::response::streaming::VectorCompletionChunk =
         serde_wasm_bindgen::from_value(b)?;
     a.push(&b);
-    Ok(serde_wasm_bindgen::to_value(&a)?)
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Merges two `FunctionExecutionChunk`s and returns the merged result.
 #[wasm_bindgen]
-pub fn functionExecutionChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+pub fn functionExecutionChunkMerged(a: JsValue, b: JsValue) -> Result<String, JsValue> {
     let mut a: objectiveai::functions::executions::response::streaming::FunctionExecutionChunk =
         serde_wasm_bindgen::from_value(a)?;
     let b: objectiveai::functions::executions::response::streaming::FunctionExecutionChunk =
         serde_wasm_bindgen::from_value(b)?;
     a.push(&b);
-    Ok(serde_wasm_bindgen::to_value(&a)?)
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Merges two `FunctionInventionChunk`s and returns the merged result.
 #[wasm_bindgen]
-pub fn functionInventionChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+pub fn functionInventionChunkMerged(a: JsValue, b: JsValue) -> Result<String, JsValue> {
     let mut a: objectiveai::functions::inventions::response::streaming::FunctionInventionChunk =
         serde_wasm_bindgen::from_value(a)?;
     let b: objectiveai::functions::inventions::response::streaming::FunctionInventionChunk =
         serde_wasm_bindgen::from_value(b)?;
     a.push(&b);
-    Ok(serde_wasm_bindgen::to_value(&a)?)
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Merges two `FunctionInventionRecursiveChunk`s and returns the merged result.
 #[wasm_bindgen]
-pub fn functionInventionRecursiveChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+pub fn functionInventionRecursiveChunkMerged(a: JsValue, b: JsValue) -> Result<String, JsValue> {
     let mut a: objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk =
         serde_wasm_bindgen::from_value(a)?;
     let b: objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk =
         serde_wasm_bindgen::from_value(b)?;
     a.push(&b);
-    Ok(serde_wasm_bindgen::to_value(&a)?)
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
 /// Merges two `FunctionProfileComputationChunk`s and returns the merged result.
 #[wasm_bindgen]
-pub fn functionProfileComputationChunkMerged(a: JsValue, b: JsValue) -> Result<JsValue, JsValue> {
+pub fn functionProfileComputationChunkMerged(a: JsValue, b: JsValue) -> Result<String, JsValue> {
     let mut a: objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk =
         serde_wasm_bindgen::from_value(a)?;
     let b: objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk =
         serde_wasm_bindgen::from_value(b)?;
     a.push(&b);
-    Ok(serde_wasm_bindgen::to_value(&a)?)
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes an `AgentCompletionChunk` by round-tripping through serde.
+#[wasm_bindgen]
+pub fn agentCompletionChunkNormalized(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::agent::completions::response::streaming::AgentCompletionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `VectorCompletionChunk` by round-tripping through serde.
+#[wasm_bindgen]
+pub fn vectorCompletionChunkNormalized(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::vector::completions::response::streaming::VectorCompletionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `FunctionExecutionChunk` by round-tripping through serde.
+#[wasm_bindgen]
+pub fn functionExecutionChunkNormalized(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::functions::executions::response::streaming::FunctionExecutionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `FunctionInventionChunk` by round-tripping through serde.
+#[wasm_bindgen]
+pub fn functionInventionChunkNormalized(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::functions::inventions::response::streaming::FunctionInventionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `FunctionInventionRecursiveChunk` by round-tripping through serde.
+#[wasm_bindgen]
+pub fn functionInventionRecursiveChunkNormalized(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `FunctionProfileComputationChunk` by round-tripping through serde.
+#[wasm_bindgen]
+pub fn functionProfileComputationChunkNormalized(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
 }
