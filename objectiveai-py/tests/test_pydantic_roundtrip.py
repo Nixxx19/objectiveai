@@ -1,30 +1,67 @@
 """
-Roundtrip test: Pydantic model → JSON Schema must match the original
-objectiveai-json-schema/ files, ensuring no information is lost
-during the Pydantic conversion.
+Roundtrip test: Pydantic model → JSON Schema must exactly match the original
+objectiveai-json-schema/ files, proving no information is lost during the
+Pydantic code generation.
 
-This is the Python equivalent of objectiveai-js/src/zod-roundtrip.test.ts.
+RULES FOR THIS FILE
+===================
+
+1. This test code is FORBIDDEN from reading or deserializing the original
+   JSON schema files. Doing so would amount to cheating — the whole point
+   is that schemas must be reconstructible entirely from the generated
+   Pydantic types.
+
+2. The only things imported from the harness are:
+   - ALL_TITLES: the set of schema title strings (metadata, not content)
+   - assert_schema_matches(title, dict): the strict equality check
+
+3. To make tests pass, the assistant is allowed to modify:
+   - This test file (conversion / normalization logic)
+   - The auto-generation script (scripts/install_pydantic.py)
+
+4. The assistant is FORBIDDEN from modifying:
+   - The harness (test_pydantic_roundtrip_harness.py)
+   - The original JSON schemas (objectiveai-json-schema/*.json)
+
+5. This test MUST be entirely generic. It must not contain any
+   schema-specific logic, hardcoded titles, special cases, or
+   conditional branches for particular types. It must work unchanged
+   even if all existing JSON schemas are removed and replaced with
+   entirely new ones. The only schema-aware code lives in the
+   auto-generation script.
+
+This is an information-loss and reconstructibility test.
 """
 
 import importlib
-import json
 import sys
+import typing
 from pathlib import Path
-from typing import Any
+from typing import Any, Union, get_args, get_origin
 
 import pytest
-from pydantic import BaseModel, RootModel, TypeAdapter
+from pydantic import BaseModel, RootModel
+from pydantic.fields import FieldInfo
+from pydantic_core import PydanticUndefined
+
+from test_pydantic_roundtrip_harness import ALL_TITLES, assert_schema_matches
 
 # Import helpers from the generator so the test stays in sync automatically.
-# If install_pydantic.py changes how it maps titles → modules, the test follows.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import install_pydantic  # noqa: E402
 from install_pydantic import (  # noqa: E402
-    SCHEMA_DIR,
     detect_generic_prefixes,
     title_to_pascal,
 )
 from install_pydantic import title_to_path as _title_to_path  # noqa: E402
+
+
+# ---------------------------------------------------------------------------
+# Setup
+# ---------------------------------------------------------------------------
+
+# Populate GENERIC_PREFIXES so title_to_path works correctly.
+install_pydantic.GENERIC_PREFIXES = detect_generic_prefixes(ALL_TITLES)
 
 
 def title_to_module_and_name(title: str) -> tuple[str, str]:
@@ -37,28 +74,14 @@ def title_to_module_and_name(title: str) -> tuple[str, str]:
 
 
 # ---------------------------------------------------------------------------
-# Load JSON schemas from objectiveai-json-schema/
+# Load all Pydantic types
 # ---------------------------------------------------------------------------
 
 
-def load_json_schemas() -> dict[str, dict]:
-    schemas = {}
-    for f in sorted(SCHEMA_DIR.glob("*.json")):
-        content = json.loads(f.read_text(encoding="utf-8"))
-        if "title" in content:
-            schemas[content["title"]] = content
-    return schemas
-
-
-# ---------------------------------------------------------------------------
-# Load Pydantic types dynamically
-# ---------------------------------------------------------------------------
-
-
-def load_pydantic_types(schemas: dict[str, dict]) -> dict[str, Any]:
+def load_pydantic_types() -> dict[str, Any]:
     """Import all generated Pydantic types."""
-    types = {}
-    for title in schemas:
+    types: dict[str, Any] = {}
+    for title in ALL_TITLES:
         module_path, class_name = title_to_module_and_name(title)
         try:
             mod = importlib.import_module(module_path)
@@ -67,698 +90,423 @@ def load_pydantic_types(schemas: dict[str, dict]) -> dict[str, Any]:
         except (ImportError, AttributeError) as e:
             types[title] = e
 
-    # Build a namespace with all type names for resolving forward references
-    # from TYPE_CHECKING-guarded imports
+    # Build namespace for resolving forward references
     namespace = {}
     for title, cls in types.items():
         if not isinstance(cls, Exception):
-            pascal = title_to_pascal(title)
-            namespace[pascal] = cls
+            namespace[title_to_pascal(title)] = cls
 
-    # Rebuild all BaseModel/RootModel classes with the full namespace
+    # Collect all variant types from loaded modules
+    all_classes: list[type] = []
     for title, cls in types.items():
         if isinstance(cls, type) and issubclass(cls, (BaseModel, RootModel)):
-            try:
-                cls.model_rebuild(_types_namespace=namespace)
-            except Exception:
-                pass  # Some may fail, that's OK — we'll catch it later
+            all_classes.append(cls)
+            # Find variant types in the same module
+            mod = sys.modules.get(cls.__module__)
+            if mod:
+                for attr_name in dir(mod):
+                    if "Variant" in attr_name:
+                        attr = getattr(mod, attr_name, None)
+                        if isinstance(attr, type) and issubclass(attr, (BaseModel, RootModel)):
+                            all_classes.append(attr)
+
+    # Rebuild all models (including variant types) with the full namespace
+    for cls in all_classes:
+        try:
+            cls.model_rebuild(_types_namespace=namespace)
+        except Exception:
+            pass
 
     return types
 
 
+pydantic_types = load_pydantic_types()
+
+# Build reverse mapping: PascalCase name → schema title
+_pascal_to_title: dict[str, str] = {}
+for _t in ALL_TITLES:
+    _pascal_to_title[title_to_pascal(_t)] = _t
+
+
 # ---------------------------------------------------------------------------
-# Convert Pydantic type → JSON Schema
+# Custom Pydantic → JSON Schema converter
 # ---------------------------------------------------------------------------
 
 
-def pydantic_to_json_schema(
-    pydantic_type: Any,
-    all_titles: set[str],
-    root_title: str,
-    title_descriptions: dict[str, str],
-    fingerprints: dict[str, str] | None = None,
-) -> dict:
-    """Convert a Pydantic type to JSON Schema, then normalize."""
-    import sys
-    old_limit = sys.getrecursionlimit()
-    sys.setrecursionlimit(max(old_limit, 5000))
-    try:
-        if isinstance(pydantic_type, type) and issubclass(pydantic_type, (BaseModel, RootModel)):
-            raw = pydantic_type.model_json_schema()
-        else:
-            ta = TypeAdapter(pydantic_type)
-            raw = ta.json_schema()
-    finally:
-        sys.setrecursionlimit(old_limit)
-
-    # Resolve $defs references
-    defs = raw.pop("$defs", {})
-    resolved = resolve_defs(raw, defs, all_titles, title_descriptions)
-    result = clean_converted(resolved, all_titles, root_title, title_descriptions, fingerprints=fingerprints)
-
-    # Ensure title matches the original schema title.
-    # Pydantic generates titles like "AgentListAgent" from class names, but
-    # originals use dot-separated paths like "agent.ListAgent". The mapping is
-    # deterministic (title_to_pascal is invertible given the title set).
-    # For type aliases, title isn't in the schema at all.
-    if root_title in all_titles:
-        if "title" in result:
-            result["title"] = root_title
-        else:
-            result = {"title": root_title, **result}
-
-    # For type aliases, description isn't accessible at runtime
-    is_type_alias = not (
-        isinstance(pydantic_type, type)
-        and issubclass(pydantic_type, (BaseModel, RootModel))
-    )
-    if is_type_alias:
-        if "description" not in result and root_title in title_descriptions:
-            result = _insert_after_title(result, "description", title_descriptions[root_title])
-
-    return result
-
-
-def _insert_after_title(d: dict, key: str, value: Any) -> dict:
-    """Insert a key-value pair right after 'title' in a dict."""
-    new = {}
-    for k, v in d.items():
-        new[k] = v
-        if k == "title":
-            new[key] = value
-    if key not in new:
-        new[key] = value
-    return new
-
-
-def resolve_defs(
-    obj: Any,
-    defs: dict[str, Any],
-    all_titles: set[str],
-    title_descriptions: dict[str, str],
-) -> Any:
-    """Replace internal $ref: '#/$defs/...' with the actual content or external $ref."""
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [resolve_defs(v, defs, all_titles, title_descriptions) for v in obj]
-
-    if "$ref" in obj and isinstance(obj["$ref"], str) and obj["$ref"].startswith("#/$defs/"):
-        def_name = obj["$ref"][len("#/$defs/"):]
-        defn = defs.get(def_name)
-        if defn:
-            resolved_def = resolve_defs(defn, defs, all_titles, title_descriptions)
-            siblings = {k: v for k, v in obj.items() if k != "$ref"}
-            if siblings:
-                return {**resolved_def, **siblings}
-            return resolved_def
-        return obj
-
-    return {k: resolve_defs(v, defs, all_titles, title_descriptions) for k, v in obj.items()}
-
-
-def _build_pascal_to_title_map(all_titles: set[str]) -> dict[str, str]:
-    """Build a mapping from PascalCase name → original title."""
-    mapping = {}
-    for title in all_titles:
-        pascal = title_to_pascal(title)
-        mapping[pascal] = title
-    return mapping
-
-
-def _build_inline_fingerprints(
-    pydantic_types: dict[str, Any],
-    all_titles: set[str],
-) -> dict[str, str]:
-    """Build a mapping from JSON-serialized schema content → title.
-
-    For type aliases (Literal, Union), Pydantic inlines them instead of
-    using $defs/$ref. We precompute each type alias's JSON Schema fingerprint
-    so we can recognize and convert them back to $ref.
-
-    If multiple titles produce the same fingerprint (identical schemas),
-    we exclude that fingerprint to avoid ambiguous matches.
-    """
-    fp_to_titles: dict[str, list[str]] = {}
-    for title, ptype in pydantic_types.items():
-        if isinstance(ptype, Exception):
-            continue
-        # Only for non-class types (type aliases)
-        if isinstance(ptype, type) and issubclass(ptype, (BaseModel, RootModel)):
-            continue
-        try:
-            ta = TypeAdapter(ptype)
-            raw = ta.json_schema()
-            raw.pop("$defs", None)
-            raw.pop("title", None)
-            fp = json.dumps(raw, sort_keys=True)
-            fp_to_titles.setdefault(fp, []).append(title)
-        except Exception:
-            pass
-
-    # Only keep unambiguous fingerprints
-    fingerprints: dict[str, str] = {}
-    ambiguous: set[str] = set()
-    for fp, titles in fp_to_titles.items():
-        if len(titles) == 1:
-            fingerprints[fp] = titles[0]
-        else:
-            ambiguous.update(titles)
-    return fingerprints, ambiguous
-
-
-def _try_match_inline(
-    schema: dict,
-    fingerprints: dict[str, str],
-    root_title: str,
-    title_descriptions: dict[str, str],
-) -> dict | None:
-    """Check if an inlined schema matches a known type alias."""
-    # Remove title (could be auto-generated property title)
-    test = {k: v for k, v in schema.items() if k not in ("title", "description", "default")}
-    fp = json.dumps(test, sort_keys=True)
-    matched_title = fingerprints.get(fp)
-    if matched_title and matched_title != root_title:
-        ref: dict = {"$ref": matched_title}
-        desc = schema.get("description")
-        own_desc = title_descriptions.get(matched_title)
-        if desc and desc != own_desc:
-            ref["description"] = desc
-        return ref
+def _get_extra_setting(cls: type) -> str | None:
+    """Get the 'extra' setting from model_config."""
+    config = getattr(cls, "model_config", None)
+    if config and isinstance(config, dict):
+        return config.get("extra")
     return None
 
 
-def clean_converted(
-    obj: Any,
-    all_titles: set[str],
-    root_title: str,
-    title_descriptions: dict[str, str],
-    pascal_to_title: dict[str, str] | None = None,
-    fingerprints: dict[str, str] | None = None,
-) -> Any:
-    """Clean Pydantic→JSON Schema output to match original conventions."""
-    if pascal_to_title is None:
-        pascal_to_title = _build_pascal_to_title_map(all_titles)
-    if fingerprints is None:
-        fingerprints = {}
-
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [clean_converted(v, all_titles, root_title, title_descriptions, pascal_to_title, fingerprints) for v in obj]
-
-    # First check: if this object has a Pydantic title that maps to a known
-    # schema title (and it's not the root), convert to $ref
-    pydantic_title = obj.get("title")
-    if isinstance(pydantic_title, str) and pydantic_title in pascal_to_title:
-        original_title = pascal_to_title[pydantic_title]
-        if original_title != root_title and original_title in all_titles:
-            ref: dict = {"$ref": original_title}
-            desc = obj.get("description")
-            own_desc = title_descriptions.get(original_title)
-            if desc and desc != own_desc:
-                ref["description"] = desc
-            return ref
-
-    # Second check: try to match inlined type aliases by content fingerprint
-    if fingerprints:
-        matched = _try_match_inline(obj, fingerprints, root_title, title_descriptions)
-        if matched:
-            return matched
-
-    result = {}
-    for key, value in obj.items():
-        # Strip $schema and $defs
-        if key in ("$schema", "$defs"):
-            continue
-        # Strip all titles — root title is added back by pydantic_to_json_schema
-        if key == "title":
-            continue
-        # Strip additionalProperties: false (Pydantic default for BaseModel)
-        if key == "additionalProperties" and value is False:
-            continue
-        # Strip empty additionalProperties: {}
-        if key == "additionalProperties" and isinstance(value, dict) and len(value) == 0:
-            continue
-        # Strip additionalProperties: true (Pydantic default for dict types)
-        if key == "additionalProperties" and value is True:
-            continue
-        # Strip default: null for nullable fields (Pydantic auto-adds this
-        # for Optional[X] = None, but originals don't include it)
-        if key == "default" and value is None:
-            # Only strip if this is a nullable type (anyOf includes null)
-            any_of = obj.get("anyOf", [])
-            has_null_variant = any(
-                isinstance(v, dict) and v.get("type") == "null"
-                for v in any_of
-            )
-            if has_null_variant:
-                continue
-        # Flatten nested anyOf
-        if key == "anyOf" and isinstance(value, list):
-            flat = []
-            for item in value:
-                cleaned = clean_converted(item, all_titles, root_title, title_descriptions, pascal_to_title, fingerprints)
-                if (isinstance(cleaned, dict) and "anyOf" in cleaned
-                        and len(cleaned) == 1):
-                    flat.extend(cleaned["anyOf"])
-                else:
-                    flat.append(cleaned)
-            result[key] = flat
-            continue
-
-        result[key] = clean_converted(value, all_titles, root_title, title_descriptions, pascal_to_title, fingerprints)
-
-    return result
+def _is_known_type(tp: Any) -> str | None:
+    """If tp is a known Pydantic type (in ALL_TITLES), return its title."""
+    if isinstance(tp, type):
+        name = tp.__name__
+        return _pascal_to_title.get(name)
+    return None
 
 
-# ---------------------------------------------------------------------------
-# Normalize original JSON schema
-# ---------------------------------------------------------------------------
+def _is_none_type(tp: Any) -> bool:
+    return tp is type(None)
 
 
-def normalize_original(
-    obj: Any,
-    title_descs: dict[str, str] | None = None,
-    all_schemas: dict[str, dict] | None = None,
-    ambiguous: set[str] | None = None,
-) -> Any:
-    """Normalize the original JSON Schema to match what Pydantic produces."""
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [normalize_original(v, title_descs, all_schemas, ambiguous) for v in obj]
-
-    result = {}
-    for key, value in obj.items():
-        if key == "$schema":
-            continue
-        # Strip additionalProperties: true (semantically default)
-        if key == "additionalProperties" and value is True:
-            continue
-        # Convert single-element enum to const
-        if key == "enum" and isinstance(value, list) and len(value) == 1:
-            result["const"] = value[0]
-            continue
-        # Convert oneOf → anyOf
-        if key == "oneOf":
-            result["anyOf"] = normalize_original(value, title_descs, all_schemas, ambiguous)
-            continue
-        # Convert type-array nullables to anyOf form
-        if key == "type" and isinstance(value, list):
-            return _normalize_type_array(obj, value, title_descs, all_schemas, ambiguous)
-        # Flatten nested anyOf
-        if key == "anyOf" and isinstance(value, list):
-            flat = []
-            for item in value:
-                cleaned = normalize_original(item, title_descs, all_schemas, ambiguous)
-                if (isinstance(cleaned, dict) and "anyOf" in cleaned
-                        and len(cleaned) == 1):
-                    flat.extend(cleaned["anyOf"])
-                else:
-                    flat.append(cleaned)
-            result[key] = flat
-            continue
-
-        result[key] = normalize_original(value, title_descs, all_schemas, ambiguous)
-
-    # Handle $ref nodes
-    if "$ref" in result:
-        return _normalize_ref(result, title_descs, all_schemas, ambiguous)
-
-    # Collapse anyOf of string consts → enum form.
-    # Python's Literal can't carry per-variant descriptions, so we normalize
-    # both sides to the simpler {type: "string", enum: [...]} form.
-    if "anyOf" in result and isinstance(result["anyOf"], list):
-        if _is_all_string_consts(result["anyOf"]):
-            values = [v["const"] for v in result["anyOf"]]
-            collapsed: dict = {}
-            for k, v in result.items():
-                if k == "anyOf":
-                    if len(values) == 1:
-                        collapsed["const"] = values[0]
-                        collapsed["type"] = "string"
-                    else:
-                        collapsed["type"] = "string"
-                        collapsed["enum"] = values
-                else:
-                    collapsed[k] = v
-            return collapsed
-
-    # Handle anyOf variants with $ref
-    if "anyOf" in result and isinstance(result["anyOf"], list):
-        result["anyOf"] = [
-            _normalize_anyof_variant(v, title_descs, all_schemas, ambiguous)
-            for v in result["anyOf"]
-        ]
-
-    # Flatten schemas with both anyOf and properties into allOf form
-    # (serde flatten produces flat, Pydantic extra='allow' loses the anyOf)
-    if "anyOf" in result and "properties" in result:
-        any_of_part = {"anyOf": result["anyOf"]}
-        object_part: dict = {"type": result.get("type", "object"), "properties": result["properties"]}
-        if "required" in result:
-            object_part["required"] = result["required"]
-        all_of_result: dict = {"allOf": [any_of_part, object_part]}
-        if "title" in result:
-            all_of_result["title"] = result["title"]
-        if "description" in result:
-            all_of_result["description"] = result["description"]
-        return all_of_result
-
-    return result
+def _is_nullable_type(tp: Any) -> bool:
+    """Check if tp is Optional[X] (Union[X, None])."""
+    origin = get_origin(tp)
+    if origin is Union:
+        return any(_is_none_type(a) for a in get_args(tp))
+    return False
 
 
-def _is_all_string_consts(variants: list) -> bool:
-    """Check if all variants in an anyOf are string const values."""
-    if not variants:
-        return False
-    for v in variants:
-        if not isinstance(v, dict):
-            return False
-        if "const" not in v:
-            return False
-        if not isinstance(v["const"], str):
-            return False
-    return True
+def _unwrap_annotated(tp: Any) -> tuple[Any, list[Any]]:
+    """Unwrap Annotated[X, ...] → (X, [metadata...])."""
+    origin = get_origin(tp)
+    if origin is typing.Annotated:
+        args = get_args(tp)
+        return args[0], list(args[1:])
+    return tp, []
 
 
-def _strip_descriptions(obj: Any) -> Any:
-    """Recursively strip title and description from an inlined schema.
-
-    Used when inlining ambiguous $refs — Pydantic can't preserve
-    descriptions on type aliases, so we strip them from the original
-    for fair comparison.
-    """
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [_strip_descriptions(v) for v in obj]
-    return {
-        k: _strip_descriptions(v)
-        for k, v in obj.items()
-        if k not in ("title", "description")
-    }
-
-
-def _normalize_type_array(
-    obj: dict,
-    type_array: list,
-    title_descs: dict[str, str] | None,
-    all_schemas: dict[str, dict] | None,
-    ambiguous: set[str] | None = None,
-) -> dict:
-    """Normalize type: ["X", "null"] or type: ["X", "Y"] to anyOf form."""
-    non_null = [t for t in type_array if t != "null"]
-    is_nullable = "null" in type_array
-
-    if is_nullable and len(non_null) == 1:
-        # type: ["X", "null"] → anyOf: [{type: "X", ...constraints}, {type: "null"}]
-        inner: dict = {"type": non_null[0]}
-        outer: dict = {}
-        type_constraints = {
-            "items", "properties", "required", "additionalProperties",
-            "minimum", "maximum", "format", "pattern", "minItems", "maxItems",
-        }
-        for k, v in obj.items():
-            if k in ("$schema", "type"):
-                continue
-            if k in type_constraints:
-                inner[k] = normalize_original(v, title_descs, all_schemas, ambiguous)
-            else:
-                outer[k] = normalize_original(v, title_descs, all_schemas, ambiguous)
-        outer["anyOf"] = [
-            normalize_original(inner, title_descs, all_schemas, ambiguous),
-            {"type": "null"},
-        ]
-        return outer
-
-    if len(non_null) > 1:
-        # type: ["string", "number"] → anyOf form with constraint distribution
-        outer: dict = {}
-        string_constraints: dict = {}
-        number_constraints: dict = {}
-        for k, v in obj.items():
-            if k in ("$schema", "type"):
-                continue
-            if k == "pattern":
-                string_constraints[k] = normalize_original(v, title_descs, all_schemas, ambiguous)
-            elif k in ("format", "minimum", "maximum"):
-                number_constraints[k] = normalize_original(v, title_descs, all_schemas, ambiguous)
-                string_constraints[k] = normalize_original(v, title_descs, all_schemas, ambiguous)
-            else:
-                outer[k] = normalize_original(v, title_descs, all_schemas, ambiguous)
-
-        variants = []
-        for t in non_null:
-            if t == "string":
-                constraints = string_constraints
-            elif t in ("number", "integer"):
-                constraints = number_constraints
-            else:
-                constraints = {}
-            v: dict = {"type": t, **constraints}
-            variants.append(normalize_original(v, title_descs, all_schemas, ambiguous))
-
-        if is_nullable:
-            variants.append({"type": "null"})
-
-        outer["anyOf"] = variants
-        return outer
-
-    # Single type in array (shouldn't happen, but handle gracefully)
-    return {k: normalize_original(v, title_descs, all_schemas, ambiguous) for k, v in obj.items()}
-
-
-def _normalize_ref(
-    result: dict,
-    title_descs: dict[str, str] | None,
-    all_schemas: dict[str, dict] | None,
-    ambiguous: set[str] | None = None,
-) -> dict:
-    """Normalize a $ref node."""
-    # If the $ref target is ambiguous (identical to another schema), inline it.
-    # Strip the target's own descriptions since Pydantic can't preserve them
-    # on inlined type aliases. But preserve the usage-site description.
-    if ambiguous and result["$ref"] in ambiguous and all_schemas:
-        target = all_schemas.get(result["$ref"])
-        if target:
-            normalized = normalize_original(target, title_descs, all_schemas, ambiguous)
-            inlined = _strip_descriptions(normalized)
-            # Preserve usage-site description if present and different from target's
-            usage_desc = result.get("description")
-            if usage_desc and isinstance(inlined, dict):
-                target_desc = target.get("description")
-                if usage_desc != target_desc:
-                    inlined = {"description": usage_desc, **inlined}
-            return inlined
-
-    # $ref with sibling properties (adjacently-tagged enum): resolve and merge
-    if "properties" in result and all_schemas:
-        target = all_schemas.get(result["$ref"])
-        if target:
-            normalized = normalize_original(target, title_descs, all_schemas, ambiguous)
-            merged: dict = {}
-            if "description" in result:
-                merged["description"] = result["description"]
-            merged["type"] = normalized.get("type", result.get("type", "object"))
-            merged["properties"] = {
-                **(normalized.get("properties") or {}),
-                **(result.get("properties") or {}),
-            }
-            req_set = set(normalized.get("required", [])) | set(result.get("required", []))
-            if req_set:
-                merged["required"] = sorted(req_set)
-            for k, v in normalized.items():
-                if k not in ("$schema", "title", "description", "type", "properties", "required"):
-                    merged[k] = v
-            return merged
-
-    # $ref without sibling properties
-    cleaned: dict = {"$ref": result["$ref"]}
-    if "description" in result and title_descs:
-        if result["description"] != title_descs.get(result["$ref"]):
-            cleaned["description"] = result["description"]
-    return cleaned
-
-
-def _normalize_anyof_variant(
-    variant: Any,
-    title_descs: dict[str, str] | None,
-    all_schemas: dict[str, dict] | None,
-    ambiguous: set[str] | None = None,
-) -> Any:
-    """Normalize a variant inside an anyOf array."""
-    if not isinstance(variant, dict) or "$ref" not in variant:
-        return variant
-
-    # Inline ambiguous $refs
-    if ambiguous and variant["$ref"] in ambiguous and all_schemas:
-        target = all_schemas.get(variant["$ref"])
-        if target:
-            normalized = normalize_original(target, title_descs, all_schemas, ambiguous)
-            inlined = _strip_descriptions(normalized)
-            usage_desc = variant.get("description")
-            if usage_desc and isinstance(inlined, dict):
-                target_desc = target.get("description")
-                if usage_desc != target_desc:
-                    inlined = {"description": usage_desc, **inlined}
-            return inlined
-
-    if "properties" in variant and all_schemas:
-        target = all_schemas.get(variant["$ref"])
-        if target:
-            normalized = normalize_original(target, title_descs, all_schemas, ambiguous)
-            merged: dict = {}
-            if "description" in variant:
-                merged["description"] = variant["description"]
-            merged["type"] = normalized.get("type", variant.get("type", "object"))
-            merged["properties"] = {
-                **(normalized.get("properties") or {}),
-                **(variant.get("properties") or {}),
-            }
-            req_set = set(normalized.get("required", [])) | set(variant.get("required", []))
-            if req_set:
-                merged["required"] = sorted(req_set)
-            for k, v in normalized.items():
-                if k not in ("$schema", "title", "description", "type", "properties", "required"):
-                    merged[k] = v
-            return merged
-
-    cleaned: dict = {"$ref": variant["$ref"]}
-    if "description" in variant and title_descs:
-        if variant["description"] != title_descs.get(variant["$ref"]):
-            cleaned["description"] = variant["description"]
-    return cleaned
-
-
-# ---------------------------------------------------------------------------
-# Sorting for order-independent comparison
-# ---------------------------------------------------------------------------
-
-
-def sort_required_arrays(obj: Any) -> Any:
-    """Sort `required` arrays for order-independent comparison."""
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [sort_required_arrays(v) for v in obj]
-    result = {}
-    for key, value in obj.items():
-        if key == "required" and isinstance(value, list):
-            result[key] = sorted(value)
+def _extract_annotated_constraints(metadata: list[Any]) -> dict:
+    """Extract JSON Schema constraints from Annotated metadata (FieldInfo, Ge, Le, etc.)."""
+    result: dict = {}
+    for m in metadata:
+        if isinstance(m, FieldInfo):
+            # Check FieldInfo's own metadata list
+            for mm in (m.metadata or []):
+                if hasattr(mm, "ge") and mm.ge is not None:
+                    result["minimum"] = mm.ge
+                if hasattr(mm, "le") and mm.le is not None:
+                    result["maximum"] = mm.le
+                if hasattr(mm, "pattern") and mm.pattern is not None:
+                    result["pattern"] = mm.pattern
+            # Check json_schema_extra
+            extra = m.json_schema_extra
+            if isinstance(extra, dict):
+                if "format" in extra:
+                    result["format"] = extra["format"]
+                if "pattern" in extra:
+                    result["pattern"] = extra["pattern"]
         else:
-            result[key] = sort_required_arrays(value)
+            # Direct constraint objects (Ge, Le, etc.)
+            if hasattr(m, "ge") and m.ge is not None:
+                result["minimum"] = m.ge
+            if hasattr(m, "le") and m.le is not None:
+                result["maximum"] = m.le
+            if hasattr(m, "pattern") and m.pattern is not None:
+                result["pattern"] = m.pattern
     return result
 
 
-# ---------------------------------------------------------------------------
-# Reconcile structural differences between Pydantic and original
-# ---------------------------------------------------------------------------
+def convert_type(tp: Any, root_title: str) -> dict:
+    """Convert a Python type annotation to JSON Schema.
 
-
-def strip_nested_format(obj: Any, in_nested: bool = False) -> Any:
-    """Strip format/minimum/maximum from nested types (array items, anyOf variants)
-    where Pydantic can't represent them.
-
-    Pydantic Field() can add format/ge/le to direct properties, but not to:
-    - Array item schemas
-    - Union variant schemas
-    - Nested object properties within these
-
-    We normalize BOTH sides by stripping these from nested contexts.
+    Handles Annotated wrappers, extracting constraints from Field metadata.
     """
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [strip_nested_format(v, in_nested) for v in obj]
+    # Unwrap Annotated[T, Field(...)]
+    base_tp, metadata = _unwrap_annotated(tp)
+    constraints = _extract_annotated_constraints(metadata)
 
-    result = {}
-    for key, value in obj.items():
-        if in_nested and key in ("format", "minimum", "maximum", "description"):
-            # Strip format/constraints/descriptions in nested contexts where
-            # Pydantic can't represent them (array items, anyOf variants).
-            # Per-variant descriptions are lost because Python type aliases
-            # (Union, Literal) can't carry per-variant documentation.
-            continue
-        if key == "items":
-            result[key] = strip_nested_format(value, in_nested=True)
-        elif key == "anyOf" and isinstance(value, list):
-            result[key] = [strip_nested_format(v, in_nested=True) for v in value]
+    result = _convert_type_inner(base_tp, root_title)
+    result.update(constraints)
+    return result
+
+
+def _convert_type_inner(tp: Any, root_title: str) -> dict:
+    """Inner conversion without Annotated unwrapping."""
+    if _is_none_type(tp):
+        return {"type": "null"}
+
+    # Check if it's a known type → emit $ref
+    known = _is_known_type(tp)
+    if known:
+        return {"$ref": known}
+
+    # RootModel subclass → check for metadata, then unwrap
+    if isinstance(tp, type) and issubclass(tp, RootModel) and tp is not RootModel:
+        return _convert_root_model(tp, root_title)
+
+    # BaseModel subclass → object with properties
+    if isinstance(tp, type) and issubclass(tp, BaseModel) and tp is not BaseModel:
+        return _convert_base_model(tp, root_title)
+
+    # Primitive types
+    if tp is str:
+        return {"type": "string"}
+    if tp is int:
+        return {"type": "integer"}
+    if tp is float:
+        return {"type": "number"}
+    if tp is bool:
+        return {"type": "boolean"}
+
+    # Native types with JSON Schema format
+    from datetime import datetime as _datetime
+    from uuid import UUID as _UUID
+    if tp is _datetime:
+        return {"type": "string", "format": "date-time"}
+    if tp is _UUID:
+        return {"type": "string", "format": "uuid"}
+
+    # object (bare schema — any JSON value)
+    if tp is object:
+        return {}
+
+    origin = get_origin(tp)
+    args = get_args(tp)
+
+    # Union
+    if origin is Union:
+        return _convert_union(list(args), root_title)
+
+    # list
+    if origin is list:
+        result: dict = {"type": "array"}
+        if args:
+            result["items"] = convert_type(args[0], root_title)
+        return result
+
+    # dict
+    if origin is dict:
+        if args and len(args) == 2:
+            val_type = args[1]
+            if val_type is object:
+                return {"type": "object"}
+            val_schema = convert_type(val_type, root_title)
+            return {"type": "object", "additionalProperties": val_schema}
+        return {"type": "object"}
+
+    # Literal
+    if origin is typing.Literal:
+        values = list(args)
+        result: dict = {}
+        # Infer type from literal values
+        if values and all(isinstance(v, str) for v in values):
+            result["type"] = "string"
+        elif values and all(isinstance(v, int) for v in values):
+            result["type"] = "integer"
+        result["enum"] = values
+        return result
+
+    return {}
+
+
+def _convert_union(args: list[Any], root_title: str) -> dict:
+    """Convert a Union type to anyOf schema."""
+    none_args = [a for a in args if _is_none_type(a)]
+    non_none_args = [a for a in args if not _is_none_type(a)]
+
+    if none_args and len(non_none_args) == 1:
+        inner = _convert_union_member(non_none_args[0], root_title)
+        return {"anyOf": [inner, {"type": "null"}]}
+
+    variants = [_convert_union_member(a, root_title) for a in args]
+    return {"anyOf": variants}
+
+
+def _convert_union_member(tp: Any, root_title: str) -> dict:
+    """Convert a single Union member to a JSON Schema dict.
+
+    For inline variant types (not in ALL_TITLES), includes description
+    from docstring and converts the type inline.
+    """
+    if _is_none_type(tp):
+        return {"type": "null"}
+
+    known = _is_known_type(tp)
+    if known:
+        return {"$ref": known}
+
+    # Inline variant type — include description from docstring
+    if isinstance(tp, type) and issubclass(tp, (BaseModel, RootModel)):
+        result: dict = {}
+        doc = getattr(tp, "__doc__", None)
+        if doc:
+            result["description"] = doc
+        if issubclass(tp, RootModel):
+            inner = _convert_root_model(tp, root_title)
         else:
-            result[key] = strip_nested_format(value, in_nested)
+            inner = _convert_base_model(tp, root_title)
+        result.update(inner)
+        return result
+
+    return convert_type(tp, root_title)
+
+
+def _convert_root_model(cls: type, root_title: str) -> dict:
+    """Convert a RootModel subclass to JSON Schema."""
+    # Plain RootModel — unwrap root type and extract field constraints
+    fields = cls.model_fields
+    if "root" not in fields:
+        return {}
+    field_info = fields["root"]
+    root_type = field_info.annotation
+    result = convert_type(root_type, root_title)
+
+    # Extract constraints from field_info.metadata (Pydantic unwraps Annotated)
+    for m in (field_info.metadata or []):
+        if hasattr(m, "ge") and m.ge is not None:
+            result["minimum"] = m.ge
+        if hasattr(m, "le") and m.le is not None:
+            result["maximum"] = m.le
+        if hasattr(m, "pattern") and m.pattern is not None:
+            result["pattern"] = m.pattern
+    fi_extra = field_info.json_schema_extra
+    if isinstance(fi_extra, dict):
+        if "format" in fi_extra:
+            result["format"] = fi_extra["format"]
+        if "pattern" in fi_extra:
+            result["pattern"] = fi_extra["pattern"]
+
     return result
 
 
-def flatten_nested_anyof(obj: Any) -> Any:
-    """Flatten nested anyOf: {anyOf: [{anyOf: [A, B]}, C]} → {anyOf: [A, B, C]}.
+def _get_root_annotation(cls: type) -> Any:
+    """Get the root field type annotation from a RootModel."""
+    fields = cls.model_fields
+    if "root" in fields:
+        return fields["root"].annotation
+    return object
 
-    Also deduplicates variants (can happen when multiple ambiguous $refs
-    with identical content are inlined and flattened).
+
+def _find_variant_types(cls: type) -> list[type]:
+    """Find variant types for a class by scanning its module.
+
+    Looks for {ClassName}Variant1, Variant2, etc. in the same module.
     """
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [flatten_nested_anyof(v) for v in obj]
+    mod = sys.modules.get(cls.__module__)
+    if not mod:
+        return []
+    base_name = cls.__name__
+    variants: list[type] = []
+    i = 1
+    while True:
+        variant_cls = getattr(mod, f"{base_name}Variant{i}", None)
+        if variant_cls is None:
+            break
+        variants.append(variant_cls)
+        i += 1
+    return variants
 
-    result = {}
-    for key, value in obj.items():
-        if key == "anyOf" and isinstance(value, list):
-            flat: list = []
-            seen: set[str] = set()
-            for item in value:
-                cleaned = flatten_nested_anyof(item)
-                if (isinstance(cleaned, dict) and "anyOf" in cleaned
-                        and len(cleaned) == 1):
-                    for sub in cleaned["anyOf"]:
-                        fp = json.dumps(sub, sort_keys=True)
-                        if fp not in seen:
-                            seen.add(fp)
-                            flat.append(sub)
-                else:
-                    fp = json.dumps(cleaned, sort_keys=True)
-                    if fp not in seen:
-                        seen.add(fp)
-                        flat.append(cleaned)
-            result[key] = flat
+
+def _convert_base_model(cls: type, root_title: str) -> dict:
+    """Convert a BaseModel subclass to a JSON Schema object."""
+    result: dict = {"type": "object"}
+
+    # Discover variant types by naming convention (flatten pattern)
+    variants = _find_variant_types(cls)
+    if len(variants) == 1:
+        # Single variant → emit its schema directly (e.g. $ref)
+        variant_schema = _convert_union_member(variants[0], root_title)
+        result.update(variant_schema)
+    elif len(variants) > 1:
+        # Multiple variants → emit anyOf
+        result["anyOf"] = [_convert_union_member(v, root_title) for v in variants]
+
+    properties = _convert_properties(cls, root_title)
+    if properties:
+        result["properties"] = properties
+
+    # additionalProperties: false
+    extra_setting = _get_extra_setting(cls)
+    if extra_setting == "forbid":
+        result["additionalProperties"] = False
+
+    return result
+
+
+def _convert_properties(cls: type, root_title: str) -> dict:
+    """Convert BaseModel fields to JSON Schema properties."""
+    properties: dict = {}
+    fields = cls.model_fields
+
+    for field_name, field_info in fields.items():
+        prop_name = field_info.alias if field_info.alias else field_name
+        tp = field_info.annotation
+        prop_schema = _convert_property(tp, field_info, root_title)
+        properties[prop_name] = prop_schema
+
+    return properties
+
+
+def _convert_property(tp: Any, field_info: FieldInfo, root_title: str) -> dict:
+    """Convert a single property (type + field info) to JSON Schema."""
+    result: dict = {}
+
+    # Description from Field
+    if field_info.description:
+        result["description"] = field_info.description
+
+    # Convert the type annotation to JSON Schema
+    type_schema = convert_type(tp, root_title)
+
+    # Extract constraints from field_info.metadata (for non-nullable props
+    # where Pydantic merges Annotated Field into field_info.metadata)
+    fi_constraints: dict = {}
+    for m in (field_info.metadata or []):
+        if hasattr(m, "ge") and m.ge is not None:
+            fi_constraints["minimum"] = m.ge
+        if hasattr(m, "le") and m.le is not None:
+            fi_constraints["maximum"] = m.le
+        if hasattr(m, "pattern") and m.pattern is not None:
+            fi_constraints["pattern"] = m.pattern
+    fi_extra = field_info.json_schema_extra
+    if isinstance(fi_extra, dict):
+        if "format" in fi_extra:
+            fi_constraints["format"] = fi_extra["format"]
+        if "pattern" in fi_extra:
+            fi_constraints["pattern"] = fi_extra["pattern"]
+        if "additionalProperties" in fi_extra:
+            fi_constraints["additionalProperties"] = fi_extra["additionalProperties"]
+
+    # Place constraints correctly:
+    # - For nullable types: constraints should go inside the non-null anyOf variant
+    # - For non-nullable types: constraints go directly on the property
+    if fi_constraints:
+        if "anyOf" in type_schema:
+            # Nullable: overlay constraints on the non-null variant
+            for variant in type_schema["anyOf"]:
+                if variant.get("type") != "null":
+                    variant.update(fi_constraints)
+                    break
         else:
-            result[key] = flatten_nested_anyof(value)
+            type_schema.update(fi_constraints)
+
+    result.update(type_schema)
+
+    # Default value — but don't emit "default: null" for nullable fields
+    # since that's just the implicit Optional default, not an explicit schema default
+    if field_info.default is not PydanticUndefined:
+        if field_info.default is None and _is_nullable_type(tp):
+            pass  # Suppress implicit default: null for nullable fields
+        else:
+            result["default"] = field_info.default
+
     return result
 
 
-def reconcile_pydantic_constraints(obj: Any) -> Any:
-    """Move property-level json_schema_extra fields into anyOf variants.
+def convert_top_level(cls: Any, title: str) -> dict:
+    """Convert a Pydantic type to a complete JSON Schema with title and description."""
+    result: dict = {"title": title}
 
-    When Pydantic emits json_schema_extra (format, pattern) at the property level
-    alongside anyOf, we need to distribute them into the appropriate variants
-    to match how the originals normalize.
+    # Get description from docstring
+    doc = getattr(cls, "__doc__", None)
+    if doc:
+        result["description"] = doc
 
-    This is NOT cheating — the information is preserved, just in a different
-    structural location. We reconcile the structural difference.
-    """
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [reconcile_pydantic_constraints(v) for v in obj]
-
-    result = {k: reconcile_pydantic_constraints(v) for k, v in obj.items()}
-
-    if "anyOf" in result and isinstance(result["anyOf"], list):
-        # Move pattern from property level into string variants
-        if "pattern" in result:
-            pattern = result.pop("pattern")
-            for variant in result["anyOf"]:
-                if isinstance(variant, dict) and variant.get("type") == "string":
-                    variant["pattern"] = pattern
-
-        # Move format from property level into typed variants
-        if "format" in result:
-            fmt = result.pop("format")
-            for variant in result["anyOf"]:
-                if isinstance(variant, dict) and variant.get("type") in (
-                    "integer", "number", "string",
-                ):
-                    variant["format"] = fmt
+    # Convert the type itself
+    if isinstance(cls, type) and issubclass(cls, BaseModel) and not issubclass(cls, RootModel):
+        inner = _convert_base_model(cls, title)
+        result.update(inner)
+    elif isinstance(cls, type) and issubclass(cls, RootModel):
+        inner = _convert_root_model(cls, title)
+        result.update(inner)
+    else:
+        inner = convert_type(cls, title)
+        result.update(inner)
 
     return result
 
@@ -767,200 +515,14 @@ def reconcile_pydantic_constraints(obj: Any) -> Any:
 # Tests
 # ---------------------------------------------------------------------------
 
-# Schemas with both properties and anyOf (serde flatten) can't fully
-# round-trip through Pydantic because BaseModel(extra='allow') loses
-# the anyOf constraint. We test these separately.
-FLATTENED_SCHEMAS: set[str] = set()
 
-
-def _is_flattened(schema: dict) -> bool:
-    return "properties" in schema and ("anyOf" in schema or "oneOf" in schema)
-
-
-def _has_inline_objects(schema: Any, depth: int = 0) -> bool:
-    """Check if a schema contains inline objects (oneOf/anyOf with properties, not $ref)."""
-    if not isinstance(schema, dict) or depth > 10:
-        return False
-    for key in ("oneOf", "anyOf"):
-        if key in schema:
-            for variant in schema[key]:
-                if isinstance(variant, dict) and "properties" in variant and "$ref" not in variant:
-                    return True
-    for v in schema.values():
-        if isinstance(v, dict) and _has_inline_objects(v, depth + 1):
-            return True
-        if isinstance(v, list):
-            for item in v:
-                if isinstance(item, dict) and _has_inline_objects(item, depth + 1):
-                    return True
-    return False
-
-
-def _get_all_refs(schema: Any) -> set[str]:
-    """Get all $ref targets from a schema (non-self)."""
-    refs: set[str] = set()
-    if isinstance(schema, dict):
-        if "$ref" in schema and schema["$ref"] != "#":
-            refs.add(schema["$ref"])
-        for v in schema.values():
-            refs |= _get_all_refs(v)
-    elif isinstance(schema, list):
-        for item in schema:
-            refs |= _get_all_refs(item)
-    return refs
-
-
-def _find_affected_by_inline_objects(schemas: dict[str, dict]) -> set[str]:
-    """Find schemas that directly or transitively reference inline objects."""
-    # Direct: schemas that contain inline objects
-    affected = {title for title, schema in schemas.items() if _has_inline_objects(schema)}
-    # Transitive: schemas referencing affected schemas
-    changed = True
-    while changed:
-        changed = False
-        for title, schema in schemas.items():
-            if title in affected:
-                continue
-            if _get_all_refs(schema) & affected:
-                affected.add(title)
-                changed = True
-    return affected
-
-
-json_schemas = load_json_schemas()
-all_titles = set(json_schemas.keys())
-
-# Populate GENERIC_PREFIXES so title_to_path works correctly.
-# This mirrors what install_pydantic.main() does before generating code.
-install_pydantic.GENERIC_PREFIXES = detect_generic_prefixes(all_titles)
-
-title_descriptions = {
-    title: schema["description"]
-    for title, schema in json_schemas.items()
-    if "description" in schema
-}
-pydantic_types = load_pydantic_types(json_schemas)
-inline_fingerprints, ambiguous_titles = _build_inline_fingerprints(pydantic_types, all_titles)
-
-# Identify flattened schemas
-for title, schema in json_schemas.items():
-    if _is_flattened(schema):
-        FLATTENED_SCHEMAS.add(title)
-
-# Schemas affected by inline objects — Python type aliases can't represent
-# anonymous inline objects with properties (they become dict[str, object]).
-INLINE_OBJECT_AFFECTED = _find_affected_by_inline_objects(json_schemas)
-
-
-@pytest.mark.parametrize(
-    "title",
-    sorted(t for t in json_schemas if t not in FLATTENED_SCHEMAS),
-)
+@pytest.mark.parametrize("title", sorted(ALL_TITLES))
 def test_roundtrip(title: str) -> None:
-    """Verify Pydantic model → JSON Schema matches the original."""
-    if title in INLINE_OBJECT_AFFECTED:
-        pytest.xfail(
-            "Schema references inline objects (oneOf/anyOf with properties) "
-            "which Python type aliases represent as dict[str, object]"
-        )
-
-    original = json_schemas[title]
+    """Verify Pydantic model → JSON Schema exactly matches the original."""
     pydantic_type = pydantic_types[title]
 
     if isinstance(pydantic_type, Exception):
-        pytest.fail(f"Failed to import Pydantic type: {pydantic_type}")
+        pytest.fail(f"Failed to import Pydantic type for '{title}': {pydantic_type}")
 
-    converted = pydantic_to_json_schema(
-        pydantic_type, all_titles, title, title_descriptions, inline_fingerprints,
-    )
-    converted = reconcile_pydantic_constraints(converted)
-    expected = normalize_original(original, title_descriptions, json_schemas, ambiguous_titles)
-
-    # Strip format/constraints/descriptions from nested contexts
-    # (array items, anyOf variants) where Pydantic can't represent them
-    converted = strip_nested_format(converted)
-    expected = strip_nested_format(expected)
-
-    # Flatten nested anyOf (may be created by stripping descriptions)
-    converted = flatten_nested_anyof(converted)
-    expected = flatten_nested_anyof(expected)
-
-    converted = sort_required_arrays(converted)
-    expected = sort_required_arrays(expected)
-
-    assert converted == expected, (
-        f"\n--- Expected (normalized original) ---\n"
-        f"{json.dumps(expected, indent=2)}\n"
-        f"\n--- Got (Pydantic → JSON Schema) ---\n"
-        f"{json.dumps(converted, indent=2)}"
-    )
-
-
-@pytest.mark.parametrize(
-    "title",
-    sorted(FLATTENED_SCHEMAS),
-)
-def test_roundtrip_flattened_properties(title: str) -> None:
-    """For flattened schemas (properties + anyOf), verify at least the
-    properties portion round-trips correctly.
-
-    The anyOf constraint is lost because Pydantic BaseModel(extra='allow')
-    doesn't encode which union variant the extra fields came from.
-    """
-    if title in INLINE_OBJECT_AFFECTED:
-        pytest.xfail(
-            "Schema references inline objects (oneOf/anyOf with properties) "
-            "which Python type aliases represent as dict[str, object]"
-        )
-
-    original = json_schemas[title]
-    pydantic_type = pydantic_types[title]
-
-    if isinstance(pydantic_type, Exception):
-        pytest.fail(f"Failed to import Pydantic type: {pydantic_type}")
-
-    converted = pydantic_to_json_schema(
-        pydantic_type, all_titles, title, title_descriptions, inline_fingerprints,
-    )
-    converted = reconcile_pydantic_constraints(converted)
-
-    # Extract just the properties from the converted schema
-    converted_props = converted.get("properties", {})
-
-    # Normalize the original's properties
-    expected_props = {}
-    for prop_name, prop_schema in original.get("properties", {}).items():
-        expected_props[prop_name] = normalize_original(
-            prop_schema, title_descriptions, json_schemas, ambiguous_titles,
-        )
-
-    # Compare property by property
-    for prop_name in set(list(converted_props.keys()) + list(expected_props.keys())):
-        conv_prop = _strip_property_title(converted_props.get(prop_name, {}))
-        exp_prop = expected_props.get(prop_name, {})
-        # Apply same normalizations as main test
-        conv_prop = strip_nested_format(conv_prop)
-        exp_prop = strip_nested_format(exp_prop)
-        conv_prop = flatten_nested_anyof(conv_prop)
-        exp_prop = flatten_nested_anyof(exp_prop)
-        conv_prop = sort_required_arrays(conv_prop)
-        exp_prop = sort_required_arrays(exp_prop)
-        assert conv_prop == exp_prop, (
-            f"Property '{prop_name}' mismatch in flattened schema '{title}':\n"
-            f"Expected: {json.dumps(exp_prop, indent=2)}\n"
-            f"Got: {json.dumps(conv_prop, indent=2)}"
-        )
-
-
-def _strip_property_title(obj: Any) -> Any:
-    """Strip Pydantic auto-generated titles from a property schema."""
-    if obj is None or not isinstance(obj, (dict, list)):
-        return obj
-    if isinstance(obj, list):
-        return [_strip_property_title(v) for v in obj]
-    result = {}
-    for k, v in obj.items():
-        if k == "title":
-            continue
-        result[k] = _strip_property_title(v)
-    return result
+    converted = convert_top_level(pydantic_type, title)
+    assert_schema_matches(title, converted)

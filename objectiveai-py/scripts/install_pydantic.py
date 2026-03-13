@@ -113,10 +113,29 @@ def _is_snake(name: str) -> bool:
 def convert_to_type(schema: dict, self_title: str, all_titles: set[str]) -> str:
     """Recursively convert a JSON schema node to a Python type annotation string.
 
-    Self-references ($ref: "#") produce the PascalCase name of self_title,
-    which works as a forward reference when `from __future__ import annotations`
-    is active and the type is used as a class field annotation.
+    This is used for property-level types. Constraints (ge/le/format) on
+    the property itself are NOT embedded in the type — they're handled by
+    _extract_field_metadata and go into Field().
+
+    Sub-schemas (array items, dict values, nullable inner types) use
+    _convert_inner_type which wraps constrained primitives in Annotated[].
     """
+    return _convert_type_impl(schema, self_title, all_titles, annotate=False)
+
+
+def _convert_inner_type(schema: dict, self_title: str, all_titles: set[str]) -> str:
+    """Convert a sub-schema (items, values, nullable inner) to a type string.
+
+    Unlike convert_to_type, this wraps constrained primitives in
+    Annotated[T, Field(ge=..., le=...)] so constraints survive in contexts
+    where there's no Field() call (e.g., list items, dict values).
+    """
+    return _convert_type_impl(schema, self_title, all_titles, annotate=True)
+
+
+def _convert_type_impl(
+    schema: dict, self_title: str, all_titles: set[str], *, annotate: bool
+) -> str:
     if not schema or not isinstance(schema, dict):
         return "object"
 
@@ -124,65 +143,83 @@ def convert_to_type(schema: dict, self_title: str, all_titles: set[str]) -> str:
     if "$ref" in schema:
         ref = schema["$ref"]
         ref_title = self_title if ref == "#" else ref
-        base_type = title_to_pascal(ref_title)
-        if "properties" in schema:
-            return base_type
-        return base_type
-
-    # const
-    if "const" in schema:
-        val = schema["const"]
-        if isinstance(val, str):
-            return f"Literal[{val!r}]"
-        return f"Literal[{json.dumps(val)}]"
+        return title_to_pascal(ref_title)
 
     # enum
     if "enum" in schema:
         literals = ", ".join(repr(v) for v in schema["enum"])
         return f"Literal[{literals}]"
 
-    # oneOf
-    if "oneOf" in schema:
-        variants = [convert_to_type(v, self_title, all_titles) for v in schema["oneOf"]]
-        return _union_type(variants)
-
-    # anyOf
+    # anyOf — inner types within anyOf always use annotate=True
     if "anyOf" in schema:
         return _convert_any_of_type(schema["anyOf"], self_title, all_titles)
 
     # type handling
     type_ = schema.get("type")
-    if isinstance(type_, list):
-        parts = [_convert_single_type(t, schema, self_title, all_titles) for t in type_]
-        return _union_type(parts)
     if isinstance(type_, str):
-        return _convert_single_type(type_, schema, self_title, all_titles)
+        return _convert_single_type(type_, schema, self_title, all_titles, annotate=annotate)
     if "properties" in schema:
-        return _convert_single_type("object", schema, self_title, all_titles)
+        return _convert_single_type("object", schema, self_title, all_titles, annotate=annotate)
     return "object"
 
 
 def _convert_any_of_type(any_of: list[dict], self_title: str, all_titles: set[str]) -> str:
     null_variant = next(
-        (v for v in any_of if v.get("type") == "null" or v.get("type") == ["null"]),
+        (v for v in any_of if v.get("type") == "null"),
         None,
     )
     non_null = [v for v in any_of if v is not null_variant]
     if null_variant and len(non_null) == 1:
-        inner = convert_to_type(non_null[0], self_title, all_titles)
+        # Nullable — use _convert_inner_type so constraints are preserved
+        inner = _convert_inner_type(non_null[0], self_title, all_titles)
         return f"Optional[{inner}]"
-    variants = [convert_to_type(v, self_title, all_titles) for v in any_of]
+    # General union — each variant uses inner type
+    variants = [_convert_inner_type(v, self_title, all_titles) for v in any_of]
     return _union_type(variants)
 
 
-def _convert_single_type(type_: str, schema: dict, self_title: str, all_titles: set[str]) -> str:
+def _annotate_primitive(base: str, schema: dict) -> str:
+    """Wrap a primitive type in Annotated[T, Field(...)] if it has constraints."""
+    field_args: list[str] = []
+    if "minimum" in schema:
+        field_args.append(f"ge={schema['minimum']!r}")
+    if "maximum" in schema:
+        field_args.append(f"le={schema['maximum']!r}")
+
+    extra: dict = {}
+    fmt = schema.get("format")
+    if fmt and fmt not in ("date-time", "uuid"):
+        extra["format"] = fmt
+    if "pattern" in schema:
+        extra["pattern"] = schema["pattern"]
+    if extra:
+        field_args.append(f"json_schema_extra={extra!r}")
+
+    if field_args:
+        return f"Annotated[{base}, Field({', '.join(field_args)})]"
+    return base
+
+
+def _convert_single_type(
+    type_: str, schema: dict, self_title: str, all_titles: set[str],
+    *, annotate: bool = False,
+) -> str:
     if type_ == "string":
+        fmt = schema.get("format")
+        if fmt == "date-time":
+            return "datetime"
+        if fmt == "uuid":
+            return "UUID"
+        if annotate and ("format" in schema or "pattern" in schema):
+            return _annotate_primitive("str", schema)
         return "str"
-    if type_ in ("number", "integer"):
-        if schema.get("format") in ("uint64", "int64"):
-            return "int"
-        if type_ == "integer":
-            return "int"
+    if type_ == "integer":
+        if annotate and ("minimum" in schema or "maximum" in schema):
+            return _annotate_primitive("int", schema)
+        return "int"
+    if type_ == "number":
+        if annotate and ("minimum" in schema or "maximum" in schema):
+            return _annotate_primitive("float", schema)
         return "float"
     if type_ == "boolean":
         return "bool"
@@ -190,7 +227,8 @@ def _convert_single_type(type_: str, schema: dict, self_title: str, all_titles: 
         return "None"
     if type_ == "array":
         if "items" in schema:
-            inner = convert_to_type(schema["items"], self_title, all_titles)
+            # Items always use inner type (annotate=True) for constraint preservation
+            inner = _convert_inner_type(schema["items"], self_title, all_titles)
             return f"list[{inner}]"
         return "list[object]"
     if type_ == "object":
@@ -200,13 +238,13 @@ def _convert_single_type(type_: str, schema: dict, self_title: str, all_titles: 
 
 def _convert_object_type(schema: dict, self_title: str, all_titles: set[str]) -> str:
     if "properties" not in schema and schema.get("additionalProperties"):
-        val_type = convert_to_type(
+        val_schema = (
             schema["additionalProperties"]
             if isinstance(schema["additionalProperties"], dict)
-            else {},
-            self_title,
-            all_titles,
+            else {}
         )
+        # Dict values always use inner type for constraint preservation
+        val_type = _convert_inner_type(val_schema, self_title, all_titles)
         return f"dict[str, {val_type}]"
     if "properties" not in schema:
         return "dict[str, object]"
@@ -260,8 +298,25 @@ def has_self_ref(schema: dict | list | None) -> bool:
     return any(has_self_ref(v) for v in schema.values())
 
 
+def _is_nullable(prop_schema: dict) -> bool:
+    """Check if a property schema is nullable (has a null variant in anyOf).
+
+    In the ObjectiveAI JSON Schema convention, nullable = optional:
+    if a field's type includes null, the key can be omitted from the object.
+    """
+    any_of = prop_schema.get("anyOf", [])
+    return any(
+        isinstance(v, dict) and v.get("type") == "null"
+        for v in any_of
+    )
+
+
 def _is_type_alias_schema(schema: dict) -> bool:
-    """Check if a schema would generate a type alias (not a BaseModel class)."""
+    """Check if a schema would generate a type alias (not a BaseModel class).
+
+    Note: With the new approach, all non-BaseModel types become RootModel,
+    but this is still used for cycle detection purposes.
+    """
     if "properties" in schema:
         return False
     if schema.get("type") == "object":
@@ -273,18 +328,12 @@ def generate_model(
     title: str,
     schema: dict,
     all_titles: set[str],
-    *,
-    use_root_model: bool = False,
 ) -> tuple[str, set[str]]:
-    """Generate a Pydantic model or type alias for a schema.
+    """Generate a Pydantic model for a schema.
 
-    If use_root_model is True, union/alias types are generated as RootModel
-    subclasses instead of plain type aliases. This is required when:
-    - The type has self-references ($ref: "#")
-    - The type participates in an import cycle with other type alias files
-
-    RootModel field annotations are deferred via `from __future__ import annotations`,
-    so forward refs and TYPE_CHECKING guards work correctly.
+    All non-BaseModel types become RootModel subclasses (never plain type aliases).
+    This ensures every type has model_config for storing metadata needed for
+    lossless JSON Schema roundtrip.
 
     Returns (code_string, set_of_ref_titles).
     """
@@ -293,109 +342,197 @@ def generate_model(
 
     has_properties = "properties" in schema
     has_any_of = "anyOf" in schema
-    has_one_of = "oneOf" in schema
     type_ = schema.get("type")
 
     description = schema.get("description", "")
     safe_desc = description.replace('"""', '\\"\\"\\"') if description else ""
 
-    # Case 1: Object with properties AND anyOf/oneOf (serde flatten)
-    if has_properties and (has_any_of or has_one_of):
-        code = _generate_flattened_model(title, schema, refs, all_titles, pascal_name, safe_desc)
+    # Case 1a: Object with properties AND anyOf (serde flatten)
+    if has_properties and has_any_of:
+        code = _generate_flattened_model(title, schema, refs, all_titles, pascal_name, safe_desc, schema_title=title)
+        return code, refs
+
+    # Case 1b: Object with properties AND $ref (adjacently-tagged enum variant)
+    if has_properties and "$ref" in schema:
+        ref_target = schema["$ref"]
+        if ref_target == "#":
+            ref_target = title
+        code = _generate_flattened_ref_model(title, schema, refs, all_titles, pascal_name, safe_desc, ref_target, schema_title=title)
         return code, refs
 
     # Case 2: Simple object with properties → Pydantic BaseModel
     if has_properties or type_ == "object":
-        code = _generate_object_model(title, schema, refs, all_titles, pascal_name, safe_desc)
+        code = _generate_object_model(title, schema, refs, all_titles, pascal_name, safe_desc, schema_title=title)
         return code, refs
 
-    # Case 3: oneOf/anyOf without properties → Union type alias or RootModel
-    if has_one_of or has_any_of:
-        variants_schema = schema.get("oneOf") or schema.get("anyOf", [])
+    # Case 3: anyOf without properties → variant types or simple nullable
+    if has_any_of:
+        variants_schema = schema.get("anyOf", [])
 
-        # String enums (all const strings) → Literal (never needs RootModel)
-        if all(
-            v.get("const") is not None and isinstance(v.get("const"), str)
-            for v in variants_schema
-        ):
-            literals = ", ".join(repr(v["const"]) for v in variants_schema)
-            code = f"{pascal_name} = Literal[{literals}]"
-            if safe_desc:
-                code += f'\n"""{safe_desc}"""'
-            code += "\n"
+        if _needs_variant_types(variants_schema):
+            # Generate dedicated variant types for each non-null variant
+            variant_codes: list[str] = []
+            union_members: list[str] = []
+            for i, v in enumerate(variants_schema, 1):
+                if _is_simple_null_variant(v):
+                    union_members.append("None")
+                    continue
+                var_code, var_name, var_refs = _generate_variant_class(
+                    v, pascal_name, i, title, all_titles,
+                )
+                variant_codes.append(var_code)
+                union_members.append(var_name)
+                refs.update(var_refs)
+
+            root_type = _union_type(union_members)
+            main_code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=title)
+            code = "\n\n".join(variant_codes + [main_code])
             return code, refs
-
-        # Nullable union: [something, null]
-        null_variant = next(
-            (v for v in variants_schema if v.get("type") == "null"),
-            None,
-        )
-        non_null = [v for v in variants_schema if v is not null_variant]
-
-        if null_variant and len(non_null) == 1:
-            inner_type = convert_to_type(non_null[0], title, all_titles)
-            collect_refs(non_null[0], refs)
-            if use_root_model:
-                code = _make_root_model(pascal_name, safe_desc, f"Optional[{inner_type}]")
-            else:
-                code = f"{pascal_name} = Optional[{inner_type}]"
-                if safe_desc:
-                    code += f'\n"""{safe_desc}"""'
-                code += "\n"
-            return code, refs
-
-        # General union
-        variant_types = []
-        for v in variants_schema:
-            collect_refs(v, refs)
-            variant_types.append(convert_to_type(v, title, all_titles))
-        union_str = _union_type(variant_types)
-
-        if use_root_model:
-            code = _make_root_model(pascal_name, safe_desc, union_str)
         else:
-            code = f"{pascal_name} = {union_str}"
-            if safe_desc:
-                code += f'\n"""{safe_desc}"""'
-            code += "\n"
-        return code, refs
+            # Simple nullable (2 variants, one null) — Optional[X]
+            non_null = [v for v in variants_schema if not _is_simple_null_variant(v)]
+            collect_refs(non_null[0], refs)
+            inner_type = _convert_inner_type(non_null[0], title, all_titles)
+            root_type = f"Optional[{inner_type}]"
+            code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=title)
+            return code, refs
 
-    # Case 4: enum of strings → Literal
+    # Case 4: enum → RootModel with Literal
     if "enum" in schema:
         literals = ", ".join(repr(v) for v in schema["enum"])
-        code = f"{pascal_name} = Literal[{literals}]"
-        if safe_desc:
-            code += f'\n"""{safe_desc}"""'
-        code += "\n"
+        root_type = f"Literal[{literals}]"
+        code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=title)
         return code, refs
 
-    # Case 5: const
-    if "const" in schema:
-        val = schema["const"]
-        code = f"{pascal_name} = Literal[{val!r}]"
-        if safe_desc:
-            code += f'\n"""{safe_desc}"""'
-        code += "\n"
-        return code, refs
-
-    # Case 6: Primitive type alias
+    # Case 5: Primitive type → RootModel
     type_str = convert_to_type(schema, title, all_titles)
     collect_refs(schema, refs)
-    if use_root_model:
-        code = _make_root_model(pascal_name, safe_desc, type_str)
-    else:
-        code = f"{pascal_name} = {type_str}"
-        if safe_desc:
-            code += f'\n"""{safe_desc}"""'
-        code += "\n"
+    code = _make_root_model(pascal_name, safe_desc, type_str, schema_title=title)
     return code, refs
 
 
-def _make_root_model(pascal_name: str, safe_desc: str, root_type: str) -> str:
-    """Generate a RootModel subclass with a root field annotation."""
+def _is_simple_null_variant(v: dict) -> bool:
+    """Check if a variant is just {"type": "null"} with no other content."""
+    return v == {"type": "null"}
+
+
+def _needs_variant_types(any_of: list[dict]) -> bool:
+    """Check if an anyOf needs variant type generation.
+
+    Returns True for >2 variants, or 2 variants where neither is null.
+    Returns False for exactly 2 variants where one is null (simple nullable).
+    """
+    if len(any_of) > 2:
+        return True
+    if len(any_of) == 2:
+        return not any(_is_simple_null_variant(v) for v in any_of)
+    return False
+
+
+def _generate_variant_class(
+    variant_schema: dict,
+    parent_name: str,
+    variant_index: int,
+    self_title: str,
+    all_titles: set[str],
+) -> tuple[str, str, set[str]]:
+    """Generate a Pydantic class for a single anyOf variant.
+
+    Returns (code, class_name, refs).
+    """
+    class_name = f"{parent_name}Variant{variant_index}"
+    refs: set[str] = set()
+    desc = variant_schema.get("description", "")
+    safe_desc = desc.replace('"""', '\\"\\"\\"') if desc else ""
+
+    has_properties = "properties" in variant_schema
+    has_any_of = "anyOf" in variant_schema
+    has_ref = "$ref" in variant_schema
+
+    # $ref + properties → BaseModel with a sub-variant for the $ref
+    if has_ref and has_properties:
+        ref_target = variant_schema["$ref"]
+        if ref_target == "#":
+            ref_target = self_title
+        code = _generate_flattened_ref_model(
+            self_title, variant_schema, refs, all_titles,
+            class_name, safe_desc, ref_target,
+        )
+        return code, class_name, refs
+
+    # Object with properties → BaseModel
+    if has_properties:
+        code = _generate_object_model(
+            self_title, variant_schema, refs, all_titles,
+            class_name, safe_desc,
+        )
+        return code, class_name, refs
+
+    # Nested anyOf → recursively generate sub-variant types or nullable
+    if has_any_of:
+        inner_variants = variant_schema["anyOf"]
+        if _needs_variant_types(inner_variants):
+            sub_codes: list[str] = []
+            union_members: list[str] = []
+            for j, sv in enumerate(inner_variants, 1):
+                if _is_simple_null_variant(sv):
+                    union_members.append("None")
+                    continue
+                sub_code, sub_name, sub_refs = _generate_variant_class(
+                    sv, class_name, j, self_title, all_titles,
+                )
+                sub_codes.append(sub_code)
+                union_members.append(sub_name)
+                refs.update(sub_refs)
+
+            root_type = _union_type(union_members)
+            main_code = _make_root_model(class_name, safe_desc, root_type)
+            code = "\n\n".join(sub_codes + [main_code])
+            return code, class_name, refs
+        else:
+            # Simple nullable inner anyOf → Optional[X]
+            non_null = [v for v in inner_variants if not _is_simple_null_variant(v)]
+            collect_refs(non_null[0], refs)
+            inner_type = _convert_inner_type(non_null[0], self_title, all_titles)
+            root_type = f"Optional[{inner_type}]"
+            code = _make_root_model(class_name, safe_desc, root_type)
+            return code, class_name, refs
+
+    # Pure $ref
+    if has_ref:
+        ref_type = _convert_inner_type(variant_schema, self_title, all_titles)
+        collect_refs(variant_schema, refs)
+        code = _make_root_model(class_name, safe_desc, ref_type)
+        return code, class_name, refs
+
+    # enum (Literal)
+    if "enum" in variant_schema:
+        literals = ", ".join(repr(v) for v in variant_schema["enum"])
+        root_type = f"Literal[{literals}]"
+        code = _make_root_model(class_name, safe_desc, root_type)
+        return code, class_name, refs
+
+    # Simple type (string, integer, number, boolean, array, etc.)
+    type_str = _convert_inner_type(variant_schema, self_title, all_titles)
+    collect_refs(variant_schema, refs)
+    code = _make_root_model(class_name, safe_desc, type_str)
+    return code, class_name, refs
+
+
+def _make_root_model(
+    pascal_name: str,
+    safe_desc: str,
+    root_type: str,
+    *,
+    schema_title: str | None = None,
+) -> str:
+    """Generate a plain RootModel."""
     lines = [f"class {pascal_name}(RootModel):"]
     if safe_desc:
         lines.append(f'    """{safe_desc}"""')
+    if schema_title:
+        lines.append(f"    model_config = ConfigDict(title={schema_title!r})")
+        lines.append("")
     lines.append(f"    root: {root_type}")
     return "\n".join(lines) + "\n"
 
@@ -404,7 +541,14 @@ def _extract_field_metadata(prop_schema: dict) -> dict:
     """Extract Field() keyword arguments from a property schema.
 
     Returns a dict of keyword arguments to pass to Field().
-    Handles description, constraints (minimum/maximum/pattern), and format.
+    Handles description and direct constraints (minimum/maximum/pattern/format).
+
+    For nullable properties (anyOf with null variant), constraints are
+    embedded in the inner type via Annotated[] by convert_to_type, so
+    we DON'T extract them here — only the description.
+
+    For non-nullable properties, constraints are at the top level and
+    go into Field(ge=..., le=...) since Pydantic merges them into metadata.
     """
     kwargs: dict = {}
 
@@ -412,14 +556,18 @@ def _extract_field_metadata(prop_schema: dict) -> dict:
     if desc:
         kwargs["description"] = desc
 
-    # Direct constraints (on simple typed properties)
+    # For nullable properties, constraints are inside the non-null variant.
+    # Those are handled by Annotated[] in the type, not by Field().
+    if _is_nullable(prop_schema):
+        return kwargs
+
+    # Direct constraints (on non-nullable typed properties)
     if "minimum" in prop_schema:
         kwargs["ge"] = prop_schema["minimum"]
     if "maximum" in prop_schema:
         kwargs["le"] = prop_schema["maximum"]
 
-    # Pattern — only works on simple str fields via Field(pattern=...).
-    # For union types (type: ["string", "number"]), we use json_schema_extra.
+    # Pattern
     type_ = prop_schema.get("type")
     if "pattern" in prop_schema:
         if type_ == "string":
@@ -427,10 +575,14 @@ def _extract_field_metadata(prop_schema: dict) -> dict:
         else:
             kwargs.setdefault("json_schema_extra", {})["pattern"] = prop_schema["pattern"]
 
-    # Format — use json_schema_extra since Pydantic doesn't natively
-    # support custom formats like uint16/uint64/double.
-    if "format" in prop_schema:
-        kwargs.setdefault("json_schema_extra", {})["format"] = prop_schema["format"]
+    # Format — skip formats handled by native Python types
+    fmt = prop_schema.get("format")
+    if fmt and fmt not in ("date-time", "uuid"):
+        kwargs.setdefault("json_schema_extra", {})["format"] = fmt
+
+    # additionalProperties: true (explicit, distinct from absent)
+    if prop_schema.get("additionalProperties") is True:
+        kwargs.setdefault("json_schema_extra", {})["additionalProperties"] = True
 
     return kwargs
 
@@ -443,6 +595,9 @@ def _generate_field_line(
 ) -> str:
     """Generate a single field line for a BaseModel class."""
     field_name = _to_snake(prop_name) if not _is_snake(prop_name) else prop_name
+    # Strip leading characters that are invalid in Python identifiers
+    if field_name and not field_name[0].isalpha() and field_name[0] != "_":
+        field_name = field_name.lstrip("$")
     if field_name in ("from", "type", "class", "import", "in", "is", "not", "and", "or"):
         alias = prop_name
         field_name = field_name + "_"
@@ -451,15 +606,24 @@ def _generate_field_line(
 
     meta = _extract_field_metadata(prop_schema)
 
-    if is_required:
+    # A property with an explicit default is never "required" in our generation,
+    # even if it's not nullable.
+    has_default = "default" in prop_schema
+    if is_required and not has_default:
         if alias or meta:
             args = _build_field_call("...", alias, meta)
             return f"{field_name}: {prop_type} = {args}"
         return f"{field_name}: {prop_type}"
     else:
-        default = prop_schema.get("default")
-        if default is not None:
-            default_repr = repr(default)
+        if "default" in prop_schema:
+            default = prop_schema["default"]
+            if default is None:
+                # default: null → need Optional wrapper + None default
+                if not prop_type.startswith("Optional["):
+                    prop_type = f"Optional[{prop_type}]"
+                default_repr = "None"
+            else:
+                default_repr = repr(default)
             if alias or meta:
                 args = _build_field_call(default_repr, alias, meta)
                 return f"{field_name}: {prop_type} = {args}"
@@ -498,29 +662,37 @@ def _generate_object_model(
     all_titles: set[str],
     pascal_name: str,
     safe_desc: str,
+    *,
+    schema_title: str | None = None,
 ) -> str:
     """Generate a Pydantic BaseModel for an object schema."""
     properties = schema.get("properties", {})
-    required = set(schema.get("required", []))
 
     lines = [f"class {pascal_name}(BaseModel):"]
     if safe_desc:
         lines.append(f'    """{safe_desc}"""')
+
+    config_parts: list[str] = []
+    if schema_title:
+        config_parts.append(f"title={schema_title!r}")
+    if schema.get("additionalProperties") is False:
+        config_parts.append("extra='forbid'")
+
     if not properties:
-        if schema.get("additionalProperties") is False:
-            lines.append("    model_config = ConfigDict(extra='forbid')")
+        if config_parts:
+            lines.append(f"    model_config = ConfigDict({', '.join(config_parts)})")
         else:
             lines.append("    pass")
         return "\n".join(lines) + "\n"
 
-    if schema.get("additionalProperties") is False:
-        lines.append("    model_config = ConfigDict(extra='forbid')")
+    if config_parts:
+        lines.append(f"    model_config = ConfigDict({', '.join(config_parts)})")
         lines.append("")
 
     for prop_name, prop_schema in properties.items():
         collect_refs(prop_schema, refs)
         prop_type = convert_to_type(prop_schema, title, all_titles)
-        is_required = prop_name in required
+        is_required = not _is_nullable(prop_schema)
         line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
         lines.append(f"    {line}")
 
@@ -534,30 +706,90 @@ def _generate_flattened_model(
     all_titles: set[str],
     pascal_name: str,
     safe_desc: str,
+    *,
+    schema_title: str | None = None,
 ) -> str:
-    """Generate a model for schemas with properties AND anyOf/oneOf (serde flatten).
+    """Generate a model for schemas with properties AND anyOf (serde flatten).
 
-    Serde flatten merges the inner variant's fields with the outer properties.
-    We generate a BaseModel with the outer properties + extra='allow' so the
-    variant fields pass through.
+    Generates variant types for the anyOf entries alongside the BaseModel.
+    The converter discovers them by naming convention.
     """
     properties = schema.get("properties", {})
-    required = set(schema.get("required", []))
+    any_of = schema.get("anyOf", [])
 
+    # Generate variant types for the anyOf entries
+    variant_codes: list[str] = []
+    for i, v in enumerate(any_of, 1):
+        var_code, _, var_refs = _generate_variant_class(
+            v, pascal_name, i, title, all_titles,
+        )
+        variant_codes.append(var_code)
+        refs.update(var_refs)
+
+    # Generate the BaseModel with properties
     lines = [f"class {pascal_name}(BaseModel):"]
     if safe_desc:
         lines.append(f'    """{safe_desc}"""')
-    lines.append("    model_config = ConfigDict(extra='allow')")
-    lines.append("")
+    if schema_title:
+        lines.append(f"    model_config = ConfigDict(title={schema_title!r})")
+        lines.append("")
 
     for prop_name, prop_schema in properties.items():
         collect_refs(prop_schema, refs)
         prop_type = convert_to_type(prop_schema, title, all_titles)
-        is_required = prop_name in required
+        is_required = not _is_nullable(prop_schema)
         line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
         lines.append(f"    {line}")
 
-    return "\n".join(lines) + "\n"
+    if not properties:
+        lines.append("    pass")
+
+    main_code = "\n".join(lines) + "\n"
+    return "\n\n".join(variant_codes + [main_code])
+
+
+def _generate_flattened_ref_model(
+    title: str,
+    schema: dict,
+    refs: set[str],
+    all_titles: set[str],
+    pascal_name: str,
+    safe_desc: str,
+    ref_target: str,
+    *,
+    schema_title: str | None = None,
+) -> str:
+    """Generate a model for schemas with properties AND a $ref.
+
+    Generates a single variant type for the $ref. The converter discovers
+    it by naming convention and emits $ref directly (not anyOf).
+    """
+    properties = schema.get("properties", {})
+
+    # Generate a variant type for the $ref
+    ref_schema = {"$ref": ref_target}
+    var_code, _, var_refs = _generate_variant_class(
+        ref_schema, pascal_name, 1, title, all_titles,
+    )
+    refs.update(var_refs)
+
+    # Generate the BaseModel with properties
+    lines = [f"class {pascal_name}(BaseModel):"]
+    if safe_desc:
+        lines.append(f'    """{safe_desc}"""')
+    if schema_title:
+        lines.append(f"    model_config = ConfigDict(title={schema_title!r})")
+        lines.append("")
+
+    for prop_name, prop_schema in properties.items():
+        collect_refs(prop_schema, refs)
+        prop_type = convert_to_type(prop_schema, title, all_titles)
+        is_required = not _is_nullable(prop_schema)
+        line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
+        lines.append(f"    {line}")
+
+    main_code = "\n".join(lines) + "\n"
+    return "\n\n".join([var_code, main_code])
 
 
 # ---------------------------------------------------------------------------
@@ -674,24 +906,6 @@ def main() -> None:
     if files_in_cycles:
         print(f"Found {len(files_in_cycles)} file(s) in dependency cycles")
 
-    # Determine which files need RootModel for their type aliases.
-    # A file needs RootModel if it's a type-alias-only file in a cycle,
-    # OR if any of its schemas have self-references.
-    files_needing_root_model: set[str] = set()
-    for file_path, entries in file_groups.items():
-        for entry in entries:
-            if has_self_ref(entry["schema"]) and _is_type_alias_schema(entry["schema"]):
-                files_needing_root_model.add(file_path)
-                break
-        if file_path in files_in_cycles:
-            # Check if this file has type aliases (non-BaseModel schemas)
-            has_type_alias = any(_is_type_alias_schema(e["schema"]) for e in entries)
-            if has_type_alias:
-                files_needing_root_model.add(file_path)
-
-    if files_needing_root_model:
-        print(f"Using RootModel for {len(files_needing_root_model)} file(s) with cyclic/self-referential type aliases")
-
     # Track all directories for __init__.py generation
     all_dirs: set[str] = set()
 
@@ -700,14 +914,12 @@ def main() -> None:
         all_refs: set[str] = set()
         model_codes: list[str] = []
         file_in_cycle = file_path in files_in_cycles
-        use_root_model = file_path in files_needing_root_model
 
         for entry in entries:
             code, refs = generate_model(
                 entry["title"],
                 entry["schema"],
                 all_titles,
-                use_root_model=use_root_model,
             )
             model_codes.append(code)
             all_refs |= refs
@@ -717,6 +929,8 @@ def main() -> None:
 
         full_code = "\n".join(model_codes)
         typing_imports: list[str] = []
+        if "Annotated[" in full_code:
+            typing_imports.append("Annotated")
         if "Literal[" in full_code:
             typing_imports.append("Literal")
         if "Optional[" in full_code:
@@ -726,6 +940,12 @@ def main() -> None:
 
         # Always add future annotations for forward reference support
         import_lines.append("from __future__ import annotations")
+
+        # Standard library imports
+        if ": datetime" in full_code or "[datetime" in full_code:
+            import_lines.append("from datetime import datetime")
+        if ": UUID" in full_code or "[UUID" in full_code:
+            import_lines.append("from uuid import UUID")
 
         if typing_imports:
             import_lines.append(f"from typing import {', '.join(sorted(typing_imports))}")
@@ -756,7 +976,7 @@ def main() -> None:
             refs_by_file.setdefault(ref_path, []).append(ref)
 
         # Split imports: regular vs TYPE_CHECKING-guarded
-        # All files in cycles now use classes (BaseModel or RootModel), so
+        # All files now use classes (BaseModel or RootModel), so
         # TYPE_CHECKING guards work for all inter-cycle imports.
         regular_imports: list[str] = []
         type_checking_imports: list[str] = []
