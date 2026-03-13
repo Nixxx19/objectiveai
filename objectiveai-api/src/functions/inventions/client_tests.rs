@@ -216,14 +216,18 @@ async fn run_invention(
         .await
         .expect("create_streaming should succeed");
     let expected_created = std::cell::Cell::new(None);
-    let agg = crate::stream_harness::consume_stream(
+    let agg = crate::stream_harness::consume_stream_acc(
         Box::pin(stream),
         |agg, c| agg.push(c),
-        |i, chunk| {
-            check_created(&expected_created, i, chunk.created);
-            assert!(chunk.completions.len() <= 1, "chunk {i} has {} completions, expected at most 1", chunk.completions.len());
-            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
-            assert!(chunk.function.is_none(), "chunk {i} (non-final) has function, expected None");
+        |chunk, errors: &mut Vec<objectiveai::error::ResponseError>| {
+            if let Some(e) = &chunk.error {
+                errors.push(e.clone());
+            }
+            for completion in &chunk.completions {
+                if let Some(e) = &completion.inner.error {
+                    errors.push(e.clone());
+                }
+            }
         },
         |i, chunk| {
             check_created(&expected_created, i, chunk.created);
@@ -232,11 +236,18 @@ async fn run_invention(
             assert!(chunk.function.is_none(), "chunk {i} (non-final) has function, expected None");
         },
         |i, chunk| {
+            check_created(&expected_created, i, chunk.created);
+            assert!(chunk.completions.len() <= 1, "chunk {i} has {} completions, expected at most 1", chunk.completions.len());
+            assert!(chunk.usage.is_none(), "chunk {i} (non-final) has usage, expected None");
+            assert!(chunk.function.is_none(), "chunk {i} (non-final) has function, expected None");
+        },
+        |i, chunk, errors| {
             check_created(&expected_created, i, chunk.created);
             assert!(chunk.usage.is_some(), "final chunk {i} has no usage, expected Some");
-            assert!(chunk.function.is_some(), "final chunk {i} has no function, expected Some");
+            assert!(chunk.function.is_some(), "final chunk {i} has no function, expected Some. errors: {}", serde_json::to_string(errors).unwrap());
             assert!(chunk.state.is_some(), "final chunk {i} has no state, expected Some");
         },
+        Vec::new(),
     ).await;
     FunctionInvention::from(agg)
 }
@@ -312,7 +323,7 @@ macro_rules! invention_test_10x {
                     let (state, seed) = make_state(offset);
                     let request = make_request(state, seed);
                     let result = normalize(run_invention(&client, request).await);
-                    assert!(result.function.is_some(), "seed {seed}: function should be built");
+                    assert!(result.function.is_some(), "seed {seed}: function should be built. error: {:?}", result.error);
                     let json = serde_json::to_string_pretty(&result).unwrap();
                     assert_snapshot(&json, path, expected);
                 });
@@ -449,7 +460,7 @@ macro_rules! invention_test_10x_schema {
                     let (state, seed) = make_state(offset);
                     let request = make_request(state, seed);
                     let result = normalize(run_invention(&client, request).await);
-                    assert!(result.function.is_some(), "seed {seed}: function should be built");
+                    assert!(result.function.is_some(), "seed {seed}: function should be built. error: {:?}", result.error);
                     let json = serde_json::to_string_pretty(&result).unwrap();
                     assert_snapshot(&json, path, expected);
                 });
@@ -554,6 +565,7 @@ macro_rules! invention_test_10x_schema {
 
 fn obj(props: Vec<(&str, InputSchema)>, required: Vec<&str>) -> ObjectInputSchema {
     ObjectInputSchema {
+        r#type: Default::default(),
         description: None,
         properties: props.into_iter().map(|(k, v)| (k.to_string(), v)).collect(),
         required: Some(required.into_iter().map(String::from).collect()),
@@ -562,6 +574,7 @@ fn obj(props: Vec<(&str, InputSchema)>, required: Vec<&str>) -> ObjectInputSchem
 
 fn arr(items: InputSchema, min: u64, max: u64) -> InputSchema {
     InputSchema::Array(ArrayInputSchema {
+        r#type: Default::default(),
         description: None,
         items: Box::new(items),
         min_items: Some(min),
@@ -573,14 +586,14 @@ fn any_of(schemas: Vec<InputSchema>) -> InputSchema {
     InputSchema::AnyOf(AnyOfInputSchema { any_of: schemas })
 }
 
-fn string() -> InputSchema { InputSchema::String(StringInputSchema { description: None, r#enum: None }) }
-fn integer() -> InputSchema { InputSchema::Integer(IntegerInputSchema { description: None, minimum: None, maximum: None }) }
-fn number() -> InputSchema { InputSchema::Number(NumberInputSchema { description: None, minimum: None, maximum: None }) }
-fn boolean() -> InputSchema { InputSchema::Boolean(BooleanInputSchema { description: None }) }
-fn image() -> InputSchema { InputSchema::Image(ImageInputSchema { description: None }) }
-fn audio() -> InputSchema { InputSchema::Audio(AudioInputSchema { description: None }) }
-fn video() -> InputSchema { InputSchema::Video(VideoInputSchema { description: None }) }
-fn file() -> InputSchema { InputSchema::File(FileInputSchema { description: None }) }
+fn string() -> InputSchema { InputSchema::String(StringInputSchema { r#type: Default::default(), description: None, r#enum: None }) }
+fn integer() -> InputSchema { InputSchema::Integer(IntegerInputSchema { r#type: Default::default(), description: None, minimum: None, maximum: None }) }
+fn number() -> InputSchema { InputSchema::Number(NumberInputSchema { r#type: Default::default(), description: None, minimum: None, maximum: None }) }
+fn boolean() -> InputSchema { InputSchema::Boolean(BooleanInputSchema { r#type: Default::default(), description: None }) }
+fn image() -> InputSchema { InputSchema::Image(ImageInputSchema { r#type: Default::default(), description: None }) }
+fn audio() -> InputSchema { InputSchema::Audio(AudioInputSchema { r#type: Default::default(), description: None }) }
+fn video() -> InputSchema { InputSchema::Video(VideoInputSchema { r#type: Default::default(), description: None }) }
+fn file() -> InputSchema { InputSchema::File(FileInputSchema { r#type: Default::default(), description: None }) }
 fn nested_obj(props: Vec<(&str, InputSchema)>, required: Vec<&str>) -> InputSchema {
     InputSchema::Object(obj(props, required))
 }

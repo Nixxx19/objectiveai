@@ -179,6 +179,7 @@ pub fn random_scalar_input_schema(rng: &mut impl Rng) -> String {
         .collect();
 
     serde_json::json!({
+        "type": "object",
         "properties": properties,
         "required": required_json,
     }).to_string()
@@ -213,6 +214,7 @@ pub fn random_vector_input_schema(rng: &mut impl Rng) -> String {
             }
         }
         schema.insert("context".into(), serde_json::json!({
+            "type": "object",
             "properties": ctx_props,
             "required": ctx_required,
         }));

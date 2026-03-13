@@ -195,7 +195,7 @@
         {
           "role": "tool",
           "index": 8,
-          "content": "{\"context\":{\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
+          "content": "{\"context\":{\"type\":\"object\",\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
           "tool_call_id": "call_mock_9928032379647971880"
         },
         {
@@ -664,6 +664,7 @@
     "essay": "9KPYvAqddyzVcDIjDsJSqqe6YTJKRzQWSyFsnwZYCN5R9KQuCKNRB4bU LKYAlAUuSiP1ZPvib9DoBIIFfeYRJtOiOhxS78VRe0ckBdRW60MphZPB18zV6GBo5hf 6yVYBTW5NWH1DWrg8C7NuMiYHJJxvjngGyz72ORwIOdiEjMH0DUjR6z EYx 9eWuOxY03kEX4xIoPOFpDTtWnMHdt5L iR9CD8KoP1lR9VIUXAxHEp177R4HyU13Rza3lH7 jk3GSllGMZuFOKW0 nRhUU762Uu0Bwpt43NnLPiZVBimkQzNcFfaJ1iFadWjgUp4PiCtUGIgOgQ30wA4hD7YL05AhjktLlnbOJo5lcxBm8ExXQhn7h3Nm bZZ6UGy2VO9gOCdp5DvRvqfK1wawEHbQVxxpiSeqTzizSV9b5DmNF9Id8JlFNju",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "criteria": {
             "type": "array",
@@ -754,6 +755,7 @@
     "description": "wAoFAmxtmJa0 Vxvx72Cn6hTdudT IyQ8nbVbjd5ZVBK0VObCjyIdd daRWsLmn1nDRvqNr4w6apfMQYGRHaGA9q9GmFtRsl7xfuc9EFe1 0fBt5AdaXw9R1ADS7YmP52KprnjjPe6ePJqSklhPs3QBJxirK2tgyv8P1LFnQeeoV7eECePP9XvLqB2r gcdCSm71dcI1KtdvmiN3W5Wgf0kDUC8RYJbJa5 fc6qMIO9gE56ZURTRLFsNiRS514b0aiWC34N6KS7zVeui sfzVUD68x95ahlBzQe8JFyqSzCBWl svIocbyGrKfthiY",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "criteria": {
             "type": "array",

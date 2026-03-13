@@ -312,7 +312,7 @@
         {
           "role": "tool",
           "index": 12,
-          "content": "{\"context\":{\"properties\":{\"prompt\":{\"type\":\"string\"},\"settings\":{\"type\":\"object\",\"properties\":{\"temperature\":{\"type\":\"number\"},\"mode\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}},\"required\":[\"temperature\"]}},\"required\":[\"prompt\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"object\",\"properties\":{\"content\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"parts\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"audio\"}]}},\"format\":{\"type\":\"string\"}},\"required\":[\"parts\",\"format\"]}]},\"scores\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"number\"}}},\"required\":[\"content\",\"scores\"]}}}",
+          "content": "{\"context\":{\"type\":\"object\",\"properties\":{\"prompt\":{\"type\":\"string\"},\"settings\":{\"type\":\"object\",\"properties\":{\"temperature\":{\"type\":\"number\"},\"mode\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}},\"required\":[\"temperature\"]}},\"required\":[\"prompt\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"object\",\"properties\":{\"content\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"parts\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"audio\"}]}},\"format\":{\"type\":\"string\"}},\"required\":[\"parts\",\"format\"]}]},\"scores\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"number\"}}},\"required\":[\"content\",\"scores\"]}}}",
           "tool_call_id": "call_mock_1773744277734253874"
         },
         {
@@ -401,6 +401,7 @@
     "essay": "BNnvHUkkCPn80VQf8aFQbE4g8zhtnNXhNpZsWMVDIYS0puS9gTtGnLekkXIaoVVZ1Lg6C3gY3qJ0VaWnQluxjlJ0at8BTZixIcxCqk sW1oOgP3NwSCJrOvTjcOseQyGcdX MJ7av7S0R7jGPbmu2JQHW97aD 1bOjamMA3PQPOTh0PkFRS3zLpsPJtqKLXHgIaCiddg5YIT8XG P9qRibtaNbUUTGNMeAFw0VnByMZCiQjyoDIPa SBuTKgHDV2sjJ16htbSveqBW7u7QopOdLeVBzQ3xSWmUgZ0goJnPkUKy9YNcOhTV95VsH8ncPhiUGNaiYlsOJoZAd5ZjtBeE7Bid5nD3qIPqorWg0f0Ed3rDwWGhyqlzwcw9wcJbD7d6OoVP7SeE8 0mQA3SN0dMRvMPtSPYv88CcmzF 2XkslPOXKJrfi4l26IUDJvLYzkShzLl4yyDcUOt5hzizeaA0t3VRRzLOByCh7ayQ5otXmG83bIeCdRN1rLnhPX5fsT8luKC1XxWRqRwacoNgO9Wp1rO69TMAEoetiBhGNydCr PmQyFBhWWZneUMI39ym6qhwvS6 EyYp2Q8H9nnvbzXxJtVAFJ6 hkOaModRHdNxJwB4yHzravtnRDazEW8kOx60BFRQqbBNVTMcuolfxN4ix CjR0KxzaLIT0N73SAz3MBHWhoMhDFcPQDkxYiF2vEOwgBIqcF1BXCoHsrQdRZW1Y31ljPIIr6BS8QohDM7ZWMew71ISpXhPyNS7A8Z1q42qsGN23GXtxNoi3ZosarC4T",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "prompt": {
             "type": "string"
@@ -513,6 +514,7 @@
     "description": "yqWOGyoWQuvBiv1muXDUs1MHpT Mnhnm8 zm399E5Bz4Vn6Yvjr30f1",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "prompt": {
             "type": "string"

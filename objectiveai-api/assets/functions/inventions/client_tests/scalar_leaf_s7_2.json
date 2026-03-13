@@ -91,14 +91,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "tCxSPz 2ZB8pdsPkTkvCUjwQhbwoSA6FvVsyYIOda3Dxkr1kJVdXqw0Tg4Kdw",
+          "reasoning": "q7tVZFb0L7ApbEAJG0EBFt9nHLMbqI99bX54uZqxfwXnM2BpLbQLF80ijGQE  6DnYUOruho4USdeEOHh39EQQOZgv2H3MQGvDaULjGPmdlP6iD1ZpAF4w0v LyFHwYkmnoNp lJDSGoP11VwaD2 wtRLP9F1ypOhGR2HMJjqxYlDjA2KuVDGHh4lv8q8KQskLgm19KJUYcp6xSlO95a16HObyC911Wm6HuYPgg7T4EOM uFwpYw751Fz5JoOKAacFrTdnNjxxH0YUVfYBppMpe02LU5tib ED4VBdZa3NwMQUKFTiq0Fy5u1Fm3O HX2DqSUZJN",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_13252456276136072141",
+              "id": "call_mock_11624711568381097666",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"properties\":{\"voice\":{\"type\":\"audio\",\"description\":\"The voice\"},\"question\":{\"type\":\"string\"},\"footage\":{\"type\":\"video\"},\"video\":{\"type\":\"video\",\"description\":\"The video\"}},\"required\":[\"voice\",\"question\",\"footage\",\"video\"]}"
+                "arguments": "{\"type\":\"object\",\"properties\":{\"attachment\":{\"type\":\"file\",\"description\":\"The attachment\"},\"animation\":{\"type\":\"video\"},\"author\":{\"type\":\"string\"},\"items\":{\"type\":\"string\",\"description\":\"The items\"},\"video\":{\"type\":\"video\",\"description\":\"The video\"}},\"required\":[\"attachment\",\"animation\",\"video\",\"author\"]}"
               }
             }
           ],
@@ -120,7 +120,7 @@
           "role": "tool",
           "index": 4,
           "content": "Ok",
-          "tool_call_id": "call_mock_13252456276136072141"
+          "tool_call_id": "call_mock_11624711568381097666"
         },
         {
           "role": "assistant",
@@ -129,9 +129,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "5BadYbt4L26U9On2JJ0sjUE 2xPv03iqAsq5iKyVFGHrxBGaSyMaA7W9gMmOC0WAb WDDPLHCOgrvneT25faLHAfXayxyCnOZCRkA0RAvpOv4 hh1gD2u85vyt146hwbxpt 60Iw59apUUukTdnookcGyT1R6tbSK91vGBBZv7Dmuh",
+          "reasoning": "zqAz9Kw0Df49jL9p48aoKc3U7y1QXF3tSKD1TJ5hj1An15RUqZbYDxExeQg4FRWL vt Z42taPjJ4hBF1mX476jcYDYS1swUz6ZLdxGbXBxpSjHPBqpgLdJzZL8xBaRtLI3E6AmTw942yY0NUxQhqGaH5ZzwmuM3C7Fp33JGzVXTv3jGbt7dXRCM7kgX08DhIBTu3haSTz51P9bdTvpZPWCKoigb aIOiBa3CZmc2YnTXFCZ57ovOW7EodBCNfHTjl8ldwtGw8PTzbk",
           "tool_calls": null,
-          "content": "Qmxzq08A58gvsBn7kUrFkkD0 I4DBgBf0v6FuTjyPsypckKotqNF1",
+          "content": "Q2EOprVZwcUtxkptlDdugmZQIrHlOXbf5YyqVmZnaRPNCLUKGW MWjL ZLOJPvKhe9QiB6cGNcS03 t3roqyocmkX9Xzw",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -196,7 +196,7 @@
         {
           "role": "tool",
           "index": 7,
-          "content": "{\"properties\":{\"voice\":{\"type\":\"audio\",\"description\":\"The voice\"},\"question\":{\"type\":\"string\"},\"footage\":{\"type\":\"video\"},\"video\":{\"type\":\"video\",\"description\":\"The video\"}},\"required\":[\"voice\",\"question\",\"footage\",\"video\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"attachment\":{\"type\":\"file\",\"description\":\"The attachment\"},\"animation\":{\"type\":\"video\"},\"author\":{\"type\":\"string\"},\"items\":{\"type\":\"string\",\"description\":\"The items\"},\"video\":{\"type\":\"video\",\"description\":\"The video\"}},\"required\":[\"attachment\",\"animation\",\"video\",\"author\"]}",
           "tool_call_id": "call_mock_15004382180891635325"
         },
         {
@@ -405,7 +405,7 @@
               "id": "call_mock_14071640158140765552",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"olLTUkdK023LOM0fo\"}],[{\"type\":\"text\",\"text\":\"ufgXe0tZ13\"}],[{\"type\":\"text\",\"text\":\"QrofxqCDw 8qmgx YkAKD2vWisqk8\"}],[{\"type\":\"text\",\"text\":\"pfNQWVHHkc6t\"}],[{\"type\":\"text\",\"text\":\"G160htDS7wflx6I6TPOfXlCcCsnsRLZBwsDsku\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"olLTUkdK023LOM0fo\"}],[{\"type\":\"text\",\"text\":\"ufgXe0tZ13\"}],[{\"type\":\"text\",\"text\":\"QrofxqCDw 8qmgx YkAKD2vWisqk8\"}],[{\"type\":\"text\",\"text\":\"pfNQWVHHkc6t\"}],[{\"type\":\"text\",\"text\":\"G160htDS7wflx6I6TPOfXlCcCsnsRLZBwsDsku\"}]]}"
               }
             }
           ],
@@ -554,16 +554,21 @@
     "spec": "Test function spec for mock invention.",
     "essay": "7lRsiJ6NB6yN7UODVQzd5nrAL1q7JUSCSwiBc 0y Bj0MkdJSnVZNdJK0irXsLfUYliDb6NoJk Riw0BXgQi9N3z9eIBczCDFN2OJQD6zXvdOgfwQDjcGIWGU0bfSpaPjXK6 QR4WrBcXZ06X6oglWh N5K06Weg7A9Y09fGPGYpQvdKNnROgBtfyKHPN7jFESkBw6K3BuEAPTOjjptNLf5JvsQGJhpwwq fv5PuVEbYAYkj0f0mT93Bh8Pg7Faa7xpF91YJd59No2T9wjGlvoHDmp1v 3RUsALrQvlfgiqxA4diWbo3lw5o8VYfdpf8tm34nDT",
     "input_schema": {
+      "type": "object",
       "properties": {
-        "voice": {
-          "type": "audio",
-          "description": "The voice"
+        "attachment": {
+          "type": "file",
+          "description": "The attachment"
         },
-        "question": {
+        "animation": {
+          "type": "video"
+        },
+        "author": {
           "type": "string"
         },
-        "footage": {
-          "type": "video"
+        "items": {
+          "type": "string",
+          "description": "The items"
         },
         "video": {
           "type": "video",
@@ -571,10 +576,10 @@
         }
       },
       "required": [
-        "voice",
-        "question",
-        "footage",
-        "video"
+        "attachment",
+        "animation",
+        "video",
+        "author"
       ]
     },
     "essay_tasks": "zed2l3NibLzIzbK2Xw ZWcMGZ0pvTzVWrklqcz4LcCF8aFw37 oHndWQ5noE2pdTu1DpoNx4StvYOiBdnu4Q7Ewg9RwLIJgjLNmoDk7JzGmJ7qKs6fS7w6LRNxkP7QasqhE ",
@@ -582,7 +587,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [
@@ -627,16 +632,21 @@
     "type": "alpha.scalar.leaf.function",
     "description": "v62YVuReE9deX0d6r60Exyq5Y1ZbsoJ7jrTWaEm2ubXnLXAmqH4fKwakqdYGalp27R K5jWMuhaNgdXyXxS6QtjujKlY7GFoJDY8JLD6bc1Kma85uqIHRbTlnSVpRli3w9QntMPDrgsyNYZzKT55Rw5Ivvk1l5w6kJDt5LbELTBlT4Og0p4Segu5VrFGGbtrD4hoR9BSDEq86N3RKeatuTqKD u37pXcW6sCqQuF17iGVvy2FJRiz8auA5 s0gPc0kxKNCIeryoA",
     "input_schema": {
+      "type": "object",
       "properties": {
-        "voice": {
-          "type": "audio",
-          "description": "The voice"
+        "attachment": {
+          "type": "file",
+          "description": "The attachment"
         },
-        "question": {
+        "animation": {
+          "type": "video"
+        },
+        "author": {
           "type": "string"
         },
-        "footage": {
-          "type": "video"
+        "items": {
+          "type": "string",
+          "description": "The items"
         },
         "video": {
           "type": "video",
@@ -644,17 +654,17 @@
         }
       },
       "required": [
-        "voice",
-        "question",
-        "footage",
-        "video"
+        "attachment",
+        "animation",
+        "video",
+        "author"
       ]
     },
     "tasks": [
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
         },
         "responses": [
           [

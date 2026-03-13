@@ -91,13 +91,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "pJTzsjMpaNlMFihF4WmUKBM0WKsdu9EXBuR3dQvCQbTjrbL3XFBHR5okDrTXyTFqsbp23GtljzxJqrInpdmQ0sn5VYZHL Sp79NAyK5VBfJfofn3nsf8EXPPCSlUaoE4gz03HU16qH 4bi4MdcEnlL9io5bvXjs6Oh0lskPI0wbyEax6mfM7G8nXFsqRAoF1TwflbBwb2Jq7KadmDFfWUQWCzRvmbls6Zlyblfj0wTy ALt06wWCeAFvbzUjzJdQSDM2timp9 qECknc9d2tP",
+          "reasoning": "T0xFU ckveSyippswoEOhEwW1i8XTUpVat8Ujwm79ydIiGNFcvW99Sll1UMtJtOaKUXD1lvOiwG8TXpAvbn3IEkozYqRtYeWKuldveQVMmrchQHg4rzlSqzC2wUGwjyc5zCroGyPv rIFi5rgmJrkVYj6ISgPj2SpzqT11nyIo1iJ9Rq2BGab0lgULlfomTvMv D3vx R4E HHLwEtWQ5ZIyjVBJySZ88T9Q5Tl KeBETEiWTskYXoz8I373zEM7fZf6pIebLhcmBsI6r rHz4zXq0iDbgWXtvNx5bxYd UgcW3eDFr tKmYslB3x",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_9982458654230049486",
+              "id": "call_mock_4214029815961530683",
               "function": {
-                "name": "Readfunctions.expression.ArrayInputSchemaSchema",
+                "name": "Readfunctions.expression.ObjectInputSchemaTypeSchema",
                 "arguments": "{}"
               }
             }
@@ -119,8 +119,8 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.ArrayInputSchema\",\n  \"description\": \"Schema for an array input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the array.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"minItems\": {\n      \"description\": \"Minimum number of items required.\",\n      \"type\": [\n        \"integer\",\n        \"null\"\n      ],\n      \"format\": \"uint64\",\n      \"minimum\": 0\n    },\n    \"maxItems\": {\n      \"description\": \"Maximum number of items allowed.\",\n      \"type\": [\n        \"integer\",\n        \"null\"\n      ],\n      \"format\": \"uint64\",\n      \"minimum\": 0\n    },\n    \"items\": {\n      \"description\": \"Schema for each item in the array.\",\n      \"$ref\": \"functions.expression.InputSchema\"\n    }\n  },\n  \"required\": [\n    \"items\"\n  ]\n}\n",
-          "tool_call_id": "call_mock_9982458654230049486"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.ObjectInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"object\"\n  ]\n}\n",
+          "tool_call_id": "call_mock_4214029815961530683"
         },
         {
           "role": "assistant",
@@ -132,10 +132,10 @@
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_10075859168175275000",
+              "id": "call_mock_18202182296683742152",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"threshold\":{\"type\":\"number\"}},\"required\":[\"threshold\"]}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"kind\":{\"type\":\"integer\"}},\"required\":[\"values\",\"kind\"]}}"
               }
             }
           ],
@@ -157,7 +157,7 @@
           "role": "tool",
           "index": 6,
           "content": "Ok",
-          "tool_call_id": "call_mock_10075859168175275000"
+          "tool_call_id": "call_mock_18202182296683742152"
         },
         {
           "role": "assistant",
@@ -166,9 +166,8 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "4ltlKHyNvex1iVCKROub64VeDlzI65bXO6CcPuP2CJVmNodAIHURHAQw1wOatr05z4cGoQFWMPIGDaa0l0Dm1qmwmsJHrFuQ8PDfDf1AzYYH2IcIPUzY5ZfUKYTbjt6sbvbfSoH1WM27SCFAv8e QlR9RaETYGt5JEJNmKvNo2dXsA8QA5rH6ENiwKQz0lBJ 2oU73lrBAiL Zkx  nbfvwznWSu3ddVMJ5WX7sIoQxTPom 9WFFOKpqu",
           "tool_calls": null,
-          "content": "xH7bp7CErRJiF07kIwpwacIcVqofEfI7Hv0Bpozksvi02b9N 3RxysXv23OkRzOGOHSQ1XMS5eruOekw21CbkuIj0uCDzwl",
+          "content": "DfCwuat4pxbUEsmHHmwLbrNVF7to5WW2WSyjYAmieh7DuAPowd9pr",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -690,7 +689,7 @@
         {
           "role": "tool",
           "index": 32,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Expression\",\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\n  \"oneOf\": [\n    {\n      \"description\": \"A JMESPath expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"JMESPath\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"JMESPath\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A Starlark expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Starlark\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"Starlark\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A predefined special expression variant.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Special\": {\n          \"$ref\": \"functions.expression.Special\"\n        }\n      },\n      \"required\": [\n        \"Special\"\n      ],\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Expression\",\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\n  \"oneOf\": [\n    {\n      \"description\": \"A JMESPath expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$jmespath\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"$jmespath\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A Starlark expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$starlark\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"$starlark\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A predefined special expression variant.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$special\": {\n          \"$ref\": \"functions.expression.Special\"\n        }\n      },\n      \"required\": [\n        \"$special\"\n      ],\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_1557346270035566954"
         },
         {
@@ -1200,12 +1199,19 @@
       "items": {
         "type": "object",
         "properties": {
-          "threshold": {
-            "type": "number"
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "kind": {
+            "type": "integer"
           }
         },
         "required": [
-          "threshold"
+          "values",
+          "kind"
         ]
       }
     },
@@ -1314,12 +1320,19 @@
       "items": {
         "type": "object",
         "properties": {
-          "threshold": {
-            "type": "number"
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "kind": {
+            "type": "integer"
           }
         },
         "required": [
-          "threshold"
+          "values",
+          "kind"
         ]
       }
     },

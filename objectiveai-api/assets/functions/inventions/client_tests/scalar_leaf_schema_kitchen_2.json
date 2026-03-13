@@ -118,7 +118,7 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\"properties\":{\"name\":{\"type\":\"string\"},\"age\":{\"type\":\"integer\"},\"score\":{\"type\":\"number\"},\"active\":{\"type\":\"boolean\"},\"avatar\":{\"type\":\"image\"},\"voicemail\":{\"type\":\"audio\"},\"demo\":{\"type\":\"video\"},\"resume\":{\"type\":\"file\"},\"aliases\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":8,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}},\"extra\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"array\",\"minItems\":1,\"maxItems\":3,\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"},\"val\":{\"anyOf\":[{\"type\":\"number\"},{\"type\":\"boolean\"},{\"type\":\"image\"}]}},\"required\":[\"key\",\"val\"]}}]}},\"required\":[\"name\",\"age\",\"score\",\"active\",\"avatar\",\"voicemail\",\"demo\",\"resume\",\"aliases\",\"extra\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"name\":{\"type\":\"string\"},\"age\":{\"type\":\"integer\"},\"score\":{\"type\":\"number\"},\"active\":{\"type\":\"boolean\"},\"avatar\":{\"type\":\"image\"},\"voicemail\":{\"type\":\"audio\"},\"demo\":{\"type\":\"video\"},\"resume\":{\"type\":\"file\"},\"aliases\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":8,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}},\"extra\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"array\",\"minItems\":1,\"maxItems\":3,\"items\":{\"type\":\"object\",\"properties\":{\"key\":{\"type\":\"string\"},\"val\":{\"anyOf\":[{\"type\":\"number\"},{\"type\":\"boolean\"},{\"type\":\"image\"}]}},\"required\":[\"key\",\"val\"]}}]}},\"required\":[\"name\",\"age\",\"score\",\"active\",\"avatar\",\"voicemail\",\"demo\",\"resume\",\"aliases\",\"extra\"]}",
           "tool_call_id": "call_mock_2019590291162810668"
         },
         {
@@ -929,6 +929,7 @@
     "spec": "Test function spec for mock invention.",
     "essay": "wDbdgiMq6bv0z AhwMvyOHfb4JS08n2XTgExk6rc7s6O1RlhnOFQGbFu6lsstSXcYl2iUNHaEgDCKC7ytq1fxvPqO5NU6em2IWZrRY1o7TmEHgY2y846YKBFdvar JPih2TFTi Ff9iq3TevsJylt4UZ1NAlTGATT9JooOH8rsMtx EvUL yzZExuE24rLmvtLv9uDliCXC3sH4fToykrJ9byJushWnImhWBTTQfC28nM1Kcy3K0CLcLgp8G6dthm GM4Qj09RqrlMwlR6K4RDFnuY ennvribhmQpDK6bWAy7snIp",
     "input_schema": {
+      "type": "object",
       "properties": {
         "name": {
           "type": "string"
@@ -1134,6 +1135,7 @@
     "type": "alpha.scalar.leaf.function",
     "description": "HhZHdGGUGdUoHLiuvW1J7d8wtwyQ8Qdkt1svAI2fBWPVHjRJCG9sEJMSwpTp13",
     "input_schema": {
+      "type": "object",
       "properties": {
         "name": {
           "type": "string"

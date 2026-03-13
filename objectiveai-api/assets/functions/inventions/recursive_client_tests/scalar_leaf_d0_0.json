@@ -95,14 +95,14 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "NYzXppKUXAgUIVGhiD8v29M3grvM2uYlzvBsoP8Bg rD3LvwmCLsQt rZRyuHbyxXPrrt4OVqWBNySBbeYJZZ RAa7qYE8v1z5NRycLHXSJacKrQdNd UN0Gul2xNOgYqpuKYFV7PM0JXKMEQYyPmy2RtF3U0uSS21GiuiADfjR6TllBNhbXHPTg7pPTgCNBAGTMJNZT0muilC5AzMBzJGlLDfoIU7kVyr3vAV9S8VSaWH1RmNcGXp9cgZD5u igOhX75KKmHPZf9pCq4li6gX36S9t5nMYRhd9c64ikTLPYxwMslG iKc1ALt03MOKnbna4XpOA9oEynaAReb3RWh1Bz4TCzp 7NtqvO1FMn24DgN38YkZOZe2ij0gSvWkkVfg73p49D0Lxu72HhpO9MeapaIhP oLgninuK7Inf1opqDAdJsf9oLBAl2hzmlJ4sqp4DOeuiP2VwcFfBLiNPxFFzoGqXCwfUtSB8kOSkjtb2ru28U5Z48qNl2ysOKAHvwYR",
+              "reasoning": "lyod9H1Df7OB7XcjMlc2GbjFxqSkThKLNvULA8s2g94pTtj4MLCLKUAXkg5Vct3wlOuj3FbFaHnX69dULYebbtYfBFOodKESNJCIKHJcue2rSzc9hbxyqm0giwCg5nPLZGpbUWXGenF idZN0Wt5d8qX ODlh24tRA68HXw4eCiin6PgpwF5gRtgtjfgH7b44yCV9J7wct8dx8oSGYCXbt2kpCLjiLCkmgqZCkfFWfKnXcY3znLRjsPqlnOQVeRzYPOEuJlkVSlsDZhUXR2TVsqnScwYHtVJjSdoMJK",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_9921097051540227901",
+                  "id": "call_mock_1084260808347477656",
                   "function": {
                     "name": "WriteInputSchema",
-                    "arguments": "{\"properties\":{\"key\":{\"type\":\"string\",\"description\":\"The key\"},\"slug\":{\"type\":\"string\"}},\"required\":[\"key\",\"slug\"]}"
+                    "arguments": "{\"type\":\"object\",\"properties\":{\"is_active\":{\"type\":\"boolean\"}},\"required\":[\"is_active\"]}"
                   }
                 }
               ],
@@ -124,7 +124,7 @@
               "role": "tool",
               "index": 4,
               "content": "Ok",
-              "tool_call_id": "call_mock_9921097051540227901"
+              "tool_call_id": "call_mock_1084260808347477656"
             },
             {
               "role": "assistant",
@@ -134,7 +134,7 @@
               "model": "mock",
               "upstream_id": "",
               "tool_calls": null,
-              "content": "3sXkFqjhVlx06Rpwhb7dNTdsBjqjj469Bps9y7C6WqiSnGcHnr6Uxq5xjuWPtTQbxQjNAYdiwOipgB",
+              "content": "jt5IMlUYR7Ynot6RaDCetcDsoEMqvJWeQpH1Hxwps2nf827LJih",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -518,18 +518,14 @@
         "spec": "Test function spec for mock recursive invention.",
         "essay": "vzg706639B6lAC0cNXAvAnekHWGCcDqeDHBnsnwdjnQbnHA9BnI62L9qCjkRpi IKPxP8pFkbgZkO21FRz tNbcnJIiFK9dcqHey7bybvoCFwq65G74ZwHmgS3pqe3DWD5AnlyybKbazVnZ2Fev6OEV1koQ30ozLxvurj6KFAZaj0v8c2533PbWxU9cZffGGaI9jAdMsqgsxABjDeqsnz8fdoamNB8m3qEdAcWOFcwzAJwGqk3bUQcywVrgO8uNzB  3eurF84Q0tZP25O1ft8 Q2Juh4CShQrq4T0NmPTReJi00UUncAOjX7moJwPOiEdb58ekEJQ1JQQ28osd62Srw5BbcHnbtEwIh2qUdhEZwUTFJDQ7DLVcUjQtQDNBkZudKTFn540II8BN3m8P ijuDtKNFl Wm yvrxFypwYedQ4J6np78HiRZpmpW8 kGQcHLMgONMgUlsiSMkdf7LQLQT1CCZKxEca4IlZsf5qE KR7Td5hwC7Eg2pSzpA5ib3zviKJX0oDYHL1jGdkQOFQcEAYVGPCQ5hi5vknypRpdtAJoP1IXCMP2KiHFTuQApA0Y06GpecqJpgGlp3hfd5Fp45mWCkJEjX3UUwFgPuUy71xKA fUB1w4ZRbw8UkJgGMej0FvD4vxh9uoaxtYs6Dl0kav5OtFksxREYkNWDT HLXLZDlv63DhtOPHln4dCruPYNd9RNHcCkgInJu4kvx9uk3YFqkIhv1Ok8nDRCcsCVMXcN sNgYDHBNDoEUrCpXacsW9oBOQc2wnHyWDJ 5NTdv",
         "input_schema": {
+          "type": "object",
           "properties": {
-            "key": {
-              "type": "string",
-              "description": "The key"
-            },
-            "slug": {
-              "type": "string"
+            "is_active": {
+              "type": "boolean"
             }
           },
           "required": [
-            "key",
-            "slug"
+            "is_active"
           ]
         },
         "essay_tasks": "UVrEi9LW6N2VnYu2eQjfbeQRjfdanq71XYYjtaroXjAaVxo8RfTxKPNHqHzpXNktCnR6pBZS0W4MQ fbaIybQsCMphAkIiUe8q6VGJzcksQ fPrnAP3hXg9POzknmoTI7gPXqJJ6ejN5WaQoLt1YZP3BmcE2YZbw1FG4alq42f4yEYKApyAclgfFFYG1Ti60MvaaLR0vgIDXNSIoNHS8G6MQTLCetem4U3FKtTDSLbOrjbEcFVChSFHIEUCUhfxtJHRAstT1eizZyeqvxU2gHkO3 com0VEIFCoBz hO0WOo 61OVDvfw5JzdnFXCgt6k6fZ4FXaS1omE6o0MgLlm9oxHs88e1eh9QOQ2l",
@@ -602,18 +598,14 @@
         "type": "alpha.scalar.leaf.function",
         "description": "PdiCatELpbvdq bykIQZTWCjYEgdboO0DKcLvD9t0ZBcmpP4m0yWfRfZd2JMPCpZ2QUEPbC1skBNZuYOqa4lkVdXv2K tCpArXmtWDJBR4vB4MNwzO7abBffbnwCAYKYOrf qPBpIWzF6VTkBNmbr1E8OlR9VUaN5ro4dzVAOYcjRGQSd4M",
         "input_schema": {
+          "type": "object",
           "properties": {
-            "key": {
-              "type": "string",
-              "description": "The key"
-            },
-            "slug": {
-              "type": "string"
+            "is_active": {
+              "type": "boolean"
             }
           },
           "required": [
-            "key",
-            "slug"
+            "is_active"
           ]
         },
         "tasks": [

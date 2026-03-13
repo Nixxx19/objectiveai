@@ -235,7 +235,7 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\"context\":{\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
+          "content": "{\"context\":{\"type\":\"object\",\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
           "tool_call_id": "call_mock_8762186872167541148"
         },
         {
@@ -477,6 +477,7 @@
     "essay": "N6ri2FFhuUdVZNrykHHhw4XKiEARJ6OQUMvcpdjXzlUl PRu90Eu4NFnOWdxpp9i6bpT0wRtI9cXrny0zubGBIAaa1xOa5j LVifxz10y5FvWFPRyJK0XowZX hzZPa2XbbgidM94X7Bg6qsBl8VA1jUDKNhYb55YRMB8qTqHu50cSr1jhdCOoC8ShnaT nOovVlJ8nFLmEIRFjQaTTYML4OSFFXpchCta8nwvRStBAVJWoBS2pzTt7Yc2wDLocc7WsarqULcQfMlMuzH7XiwFSzTbOFnB8shVC15RlMn y5zWgKIy0QqmB0lk9RMcOb3TxPXhyrQs6DIl52U7AVoXnl3m40o0Aa4DcsFAsSau515AywGUbiO0w1PcU0Ku6NGDzZbBuKrm7eSmXCks7ER91h0K7bszJkFNVwJiIIqOqSNvEy6HfHZNJztjYKT9 Uj7x2tUqrlykRCQzMgq7NBZRExG0a6NDaUu5FXjRX0pqVNfI kT4GJkdqHA5UjSO4IsIlBJr485BN5t2k4eFKLeDArQSgikt4oqyIqIJhb1L6JSsZ5XCr lSZSwBn9wKt2KKwiD77Xc0RHIE3egmyDjhbvscASjSTiIYQWH8fHtdrqCGE6A25ySiWkbgUEsC3WadtdvZqxVvcz",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "criteria": {
             "type": "array",
@@ -567,6 +568,7 @@
     "description": "gQDGzcTyFK5TXJYdHuub49owNDKnRZWrfIUFKKtqXVjaarv2FX5UEDd9d6c0V5cCrNxaVYKLkKyq9RjatLjpF9ylhw3v89AvTX7wU6fm9s8Xl96p9nl4XFF0VcJ5yQTX",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "criteria": {
             "type": "array",

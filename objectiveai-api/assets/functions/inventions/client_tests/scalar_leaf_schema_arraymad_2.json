@@ -119,7 +119,7 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\"properties\":{\"entries\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":20,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"label\":{\"type\":\"string\"},\"values\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"anyOf\":[{\"type\":\"number\"},{\"type\":\"integer\"},{\"type\":\"boolean\"}]}},\"photo\":{\"type\":\"image\"}},\"required\":[\"label\",\"values\",\"photo\"]}]}},\"query\":{\"type\":\"string\"}},\"required\":[\"entries\",\"query\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"entries\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":20,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"label\":{\"type\":\"string\"},\"values\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"anyOf\":[{\"type\":\"number\"},{\"type\":\"integer\"},{\"type\":\"boolean\"}]}},\"photo\":{\"type\":\"image\"}},\"required\":[\"label\",\"values\",\"photo\"]}]}},\"query\":{\"type\":\"string\"}},\"required\":[\"entries\",\"query\"]}",
           "tool_call_id": "call_mock_16481636006280738538"
         },
         {
@@ -400,6 +400,7 @@
     "spec": "Test function spec for mock invention.",
     "essay": "pX5NkE6GuBxVCk4g2B0t1 nEDlMcENB7RtlrTUUiG81ZOpUrjAw4wbS V0GAQXm4mm8QhFPHSnTZIsxm9Zz3cRQqYQVTaIso5Ajd2du936pMQS8Lj4XhtQIMkRauFLFbEoYFmr3ltHmV5CEWQePbl V39AX16mknIWlmmOc1thh4IF93jXtqB0oRuBGmJSh67FuvgvFFvukJse5IK7n5gbdvFtreS narcR7ECKvpwrmNt1e7apq0wWpbyIkWjTeClzOLyqx ciogz3c37h2pWfC7fFmuXX3QsAV2pyRcTqkQcxYORYyS7DsQWxu46oB oclaNx0dPK9UY46AViEAPE4ZeJoAPWTLEHRvdgSiukNwITTpDmAn0kM1mpgRF11XAjHcxRrFiTE7ZEqBI0S8Hf0lmjuVNKhoB0r1DPi7RqIqXDF60aOJLhIi3KYTOZjKNkFLw900gXY33aYyWpCy56cn4xEACx50vZSfQkBWJdNUnGH",
     "input_schema": {
+      "type": "object",
       "properties": {
         "entries": {
           "type": "array",
@@ -506,6 +507,7 @@
     "type": "alpha.scalar.leaf.function",
     "description": "ddKHIKNrqC F3hqGNcMV tX6XcPSM5bNNv6lXKNeiVkjsBVZRdl2MawtaaSw5pUShE3G6VFUAADoKiK2SY9o4WgonqUCToA1fKnk7UqzJAeCbYLh7t8lo aOryK948KsBfAqIx4KPvkfSBtNfsF5vPJxhzsipUFw5niec6RJUdSZcx8B0YrOpuqkuVEolImn9xbXrPdTf6CuuQ0NCNIpgtrsBsE",
     "input_schema": {
+      "type": "object",
       "properties": {
         "entries": {
           "type": "array",

@@ -44,7 +44,7 @@
             {
               "role": "tool",
               "index": 1,
-              "content": "3GuBfS25V7fkjZP L8GV2IPbj  xrCptlAU8BmC3fh9afnRvHCN9YJpq9Ihz8d9BZXYICjR2fJCVom  Mc8r3fs6nx3lBbZP2wXWXjVKt3MrMXuLdAT7AWLfQe7 v4YwgQrzkVcIIsnBmZIkpAbf9uKxH5hV9AoIjYU6dVEBAxdNQUt9YEvTHTk5Uwc",
+              "content": "KjqRWhQu7D12ke YxUawwx4tnNJBSfKzJXdY66acRtFzcAP3KDNqDY91U Xwj8nKmanIjDwEMKyBrd pzHhS8R3DmLT34FsclCJxbg4aIRILYQNrgBFzUftPuFzBlTq6MnH1ABxvUFsE0D6TTYVeDQ52NEQO6kdg0VF5KHUWubzDTiK6grFmvfX369Qyfn",
               "tool_call_id": "call_mock_7153409506115456498"
             },
             {
@@ -160,7 +160,7 @@
             {
               "role": "tool",
               "index": 6,
-              "content": "{\"properties\":{\"headline\":{\"type\":\"string\"}},\"required\":[\"headline\"]}",
+              "content": "{\"type\":\"object\",\"properties\":{\"attachment\":{\"type\":\"file\",\"description\":\"The attachment\"}},\"required\":[\"attachment\"]}",
               "tool_call_id": "call_mock_16649299985020297500"
             },
             {
@@ -248,14 +248,14 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "fdx8d56k5aTYBCnVsy9x ugjlXQPucjM2ZKJZualhd1l49904a0BcRpPr3 Tysmf8UCjjipu6buw5oHOqfaBFHK0GzSiul6CnjiMCNiWTV5s7 vFzevR0uQdrPlxOceRP8",
+              "reasoning": "JAhPxnzCsQWCoVSuGQ6SZWtYBaEQZvMWbbpvbYAPGPyeH9vsTsWEsg6 uZBj99ZMROBe3wHjh4HmMEI WfpwdWMQn 9ZNnTAq24S78JCXRoKsYiguLBoR9CcntbAHKcT3NNBm8Dqlwmwbc6JYMmTo2IE0Gz5pWZ8DdlJ9zBr u1tqt5ghlk8U7PQRylOEm9LB7j iGjRzJuWc9b39CBLivfsgJ K10p0VdJrhue0TEjjqNtMOtQNnhZSIgq EuivNwJH3qzJea9bKtW XfS2 oqu yxJfGUlRQ1H wQP5NcO0PL1Cz7RhLccIinVgim1MVn4F96nTd2R9UcJcvoqJ0HQdQeYGBlPyJuzjn9thj00TE4JKINVSP kDHHGXJGcMMidQV4oZFofYY0UpWBr7Lkv68jgnDqk8UCS08piVT8wUPZrPU a2 lcCD6wgQV1iYTXq3C",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_13738245396135686292",
+                  "id": "call_mock_2245117224730511030",
                   "function": {
-                    "name": "AppendTask",
-                    "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"8t696kZAOBQJRWw0diNhYxbZ6LhGOzeFOlSh7CnxE3i2GoATAtx\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"headline\":{\"type\":\"string\"}},\"required\":[\"headline\"]},\"input\":{\"$starlark\":\"input\"}}"
+                    "name": "Readagent.completions.message.VideoUrlSchema",
+                    "arguments": "{}"
                   }
                 }
               ],
@@ -276,8 +276,8 @@
             {
               "role": "tool",
               "index": 11,
-              "content": "1",
-              "tool_call_id": "call_mock_13738245396135686292"
+              "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.VideoUrl\",\n  \"description\": \"A video URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"url\": {\n      \"description\": \"The URL of the video.\",\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"url\"\n  ]\n}\n",
+              "tool_call_id": "call_mock_2245117224730511030"
             },
             {
               "role": "assistant",
@@ -286,9 +286,46 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "z6q3WAKCe2rkm37Eh21Xc4OOvm20apccUKZ9 kSJ7DDrE75Ao84Na17xWgww5SqN6kPzQSv4LxLuGv2vOsgmKLtO8CU7Aqvs gUGa5xpsheaOBoArwFSBoZrpVJvWHFnRYjyq5emlZrB9jZoGZtOASvaud vYx2psFwIT9HJkW35NRH4EKHxKstatXG0a277VCLLgjKzbMdwEvJQ7LOT3qBebwcTNkJ6TeP JXhRxjeB4MoS2gVFHFH5wLC6mBYBqzPvrG7Y7kUDl e6DN8jL7LGCsoARxJGPwxi1Ro64hZX dlU3zhbq8dveA 6ugocLrXyK9Q0baNSzNNwNWK6wR90v8ecM38YEW6ck22f",
+              "reasoning": "adoivkFGwYaXmF89dCEKM0cSv2Blz6OyXrZY2Bdf709TteDulm19RVuLHKFicuWvvKQvDf1IwOSVfC11aBTerfDbFmAqlHMLcV5qLGWnPslk5qa282Rjo JEGXSzWZaUVDo9ILFKgxl3sVpBPRv tgYCDL5Pr1t9BM9Yp9NPNMvTeBbUKfUl91jp9ziw6fK77 SUMwTCtkbVW0sMiSk75WahxWk0VqoK7zujnyokSyKiF 59YZ9m3bTBdIqQdPI0m7LCuRfsd0UoVxOo14SWoVSfKO9LdT0Zd vBcIgv0iZXSrHiNYvf0IncVE22kg PbJ7LOe2Una9hLLFP0mGhlrpdV86V5mQH4bqnX5GhrOvrb5OrXj6en6jYXaE8NPgJThdgoQkJF8n8VGJV7qKyWQTfBwuE4vuBsm2r2JkjUUet kZ9GQB1eLZnYyD2Fv9UviuQjxRGT u",
+              "tool_calls": [
+                {
+                  "type": "function",
+                  "id": "call_mock_4636144144238789046",
+                  "function": {
+                    "name": "AppendTask",
+                    "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"9jeRsTOwTGywMx68IsndzQlaFNI2qWevCyzvzJYzS12BSmdKFerKvprUSH4z0sQeQRGUPxrwEgUrtbIYWBmZqgYFlrR5WjbGF89dHtIgaaXONLRzKMmDIseSlLcBp5gbCkfnikWHffOCWPfAzeeSeJPAnF2ONVTcrsMrC4tbpQJNb2qk\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"attachment\":{\"type\":\"file\",\"description\":\"The attachment\"}},\"required\":[\"attachment\"]},\"input\":{\"$starlark\":\"input\"}}"
+                  }
+                }
+              ],
+              "content": null,
+              "refusal": null,
+              "finish_reason": "tool_calls",
+              "logprobs": null,
+              "usage": {
+                "completion_tokens": 0,
+                "prompt_tokens": 0,
+                "total_tokens": 0,
+                "cost": 0.0,
+                "total_cost": 0.0,
+                "cost_multiplier": 0.0,
+                "is_byok": false
+              }
+            },
+            {
+              "role": "tool",
+              "index": 13,
+              "content": "1",
+              "tool_call_id": "call_mock_4636144144238789046"
+            },
+            {
+              "role": "assistant",
+              "index": 14,
+              "created": 0,
+              "agent": "70edSCzVEtHRLSaFexKISH",
+              "model": "mock",
+              "upstream_id": "",
               "tool_calls": null,
-              "content": "5JYc2dq4AAcnavlyVokFJk1X5KVJ6TFt Cm1JqXv80qMqqsu1nfW 1Qgij0YClRqV1w44i0i2Ghm6U4ZK qdby5NkL5Pjw8Hh",
+              "content": "RqyPuG 4ujRKJs8xm7mDNJoQF3LdzeBOG",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -321,18 +358,19 @@
           "messages": [
             {
               "role": "assistant",
-              "index": 13,
+              "index": 15,
               "created": 0,
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
+              "reasoning": "35q 3PKD4 DdY0AHJyQtTg3OlS7T8w9uQRv0K2V5BlbIhbsOeuXzA2tYICvPKjfgVdELDzRET1W3wUmrNxSQs5qSRgaUdrch7MBauaDRQK25h9nYFQT8GcGr05fvCqgPpPK3UNVyWR8cwLwb0OsT6dHoE5Xd2FTa7996",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_4264408736843849562",
+                  "id": "call_mock_4808644479825428713",
                   "function": {
                     "name": "WriteDescription",
-                    "arguments": "{\"description\":\"LLBmFbcJ0mDDseYiTAt6xlowCqhokq5uK4wm88B6flb3lU9M7ky7eUOwCXxkfsZ3EFGa0Cyqt9N6Rd7Bqx7lfvWD8jZWw2VpA36hbBei b9WtJhQY1dhq5e2Yl99eeXnng8EvCxW2FDnZGPlGItZjxaBDkc\"}"
+                    "arguments": "{\"description\":\"bayyFQLZzdK8mXVvZ7yqQE4ji Ja6uWnjueenetEAdQQpD6RqxklgcYJZ1e9t8C2HHEMn51dvn6u358lVO1vlHEsHo Tjy55C5SxFgt5KsoqeCG52m20wHGdH8vtCjg GAJLCYxN9f5l0o\"}"
                   }
                 }
               ],
@@ -352,20 +390,19 @@
             },
             {
               "role": "tool",
-              "index": 14,
+              "index": 16,
               "content": "Ok",
-              "tool_call_id": "call_mock_4264408736843849562"
+              "tool_call_id": "call_mock_4808644479825428713"
             },
             {
               "role": "assistant",
-              "index": 15,
+              "index": 17,
               "created": 0,
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "35q 3PKD4 DdY0AHJyQtTg3OlS7T8w9uQRv0K2V5BlbIhbsOeuXzA2tYICvPKjfgVdELDzRET1W3wUmrNxSQs5qSRgaUdrch7MBauaDRQK25h9nYFQT8GcGr05fvCqgPpPK3UNVyWR8cwLwb0OsT6dHoE5Xd2FTa7996",
               "tool_calls": null,
-              "content": "tbayyFQLZzdK8mXVvZ7yqQE4ji Ja6uWnjueenetEAdQQ",
+              "content": "vMKtztH47jWOEe2XeINR6 tBX3zBcpwRkxx7JOwmFHPR2X3FmZuAmt yjqE5H5plIBoQ6vhPx",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -400,16 +437,18 @@
         "min_leaf_width": 1,
         "max_leaf_width": 2,
         "name": "rs-d2-3ld6MQ0u6Q",
-        "spec": "3GuBfS25V7fkjZP L8GV2IPbj  xrCptlAU8BmC3fh9afnRvHCN9YJpq9Ihz8d9BZXYICjR2fJCVom  Mc8r3fs6nx3lBbZP2wXWXjVKt3MrMXuLdAT7AWLfQe7 v4YwgQrzkVcIIsnBmZIkpAbf9uKxH5hV9AoIjYU6dVEBAxdNQUt9YEvTHTk5Uwc",
+        "spec": "KjqRWhQu7D12ke YxUawwx4tnNJBSfKzJXdY66acRtFzcAP3KDNqDY91U Xwj8nKmanIjDwEMKyBrd pzHhS8R3DmLT34FsclCJxbg4aIRILYQNrgBFzUftPuFzBlTq6MnH1ABxvUFsE0D6TTYVeDQ52NEQO6kdg0VF5KHUWubzDTiK6grFmvfX369Qyfn",
         "essay": "8prkzSpg2dV9IsPPtoC3ixfkEHHl2MLATxwAqBtlgQrKnyfgpYMXkYXqnNaIaXnKfMBb csUE7y7d3CCIbtI7UZJZ3unW1iCtk6VB5HOsXWKVeGJM3K2hfKv8IvB6G8fBpMontkpE3kfxqb6z0 u1ROCElq3UwAr9RtsYQvyj47QEqKoSkBMI7zBU9pPuNH6JkuLZXBxlHl KRdakfm8Sg4auuaRCxF9DQOTVn6aX9OrRLXG  UldMKLKErCR3bzlVLxIDDKvUC5vCX7kZc6Fe28WNNewYuqAeqo08TYhDmoguaozptPmv 5MMrahZ6KsPaRqJtawhl59uhJ4D 8DaK2pzoyMWzg07oRvzlpg9WaqmspVyS94P8KOVO0ni4uRf6I0",
         "input_schema": {
+          "type": "object",
           "properties": {
-            "headline": {
-              "type": "string"
+            "attachment": {
+              "type": "file",
+              "description": "The attachment"
             }
           },
           "required": [
-            "headline"
+            "attachment"
           ]
         },
         "essay_tasks": "coVqhjcRBZ6vfBmcDbKk1KH4dqhcU vqRTZ6xrCL PuLzEJiTbKR3GWNY2s0qE6mKSwxumYs0SqlXHaANkv2AryakRJMNlYGznBez1X3nNoSpzfBYHs8tCIbFqXinF9W6nIdPd3xfX7 NQhrohG2GxicVUnVlHXqivLJlLVAf2akEomQdjgrvSjtbbuTLnUqO3csHMMcVbpBrNrqy8xem2 jeKwlbvlaaO7hWFJJTgQtnHiF9y casUrZKt53I3zKfTYUaPD5K5LIlxa0VTxV7968WD0I WVWpUO57Vhp3R2TXOzrFT9aNwOoDw6Yo4chlRjj8cGYUOZgGupSdJMxTln345xrA6KQXnDazuouRl2WZKrTgAdNFNwLQ",
@@ -422,15 +461,17 @@
             "min_leaf_width": 1,
             "max_leaf_width": 2,
             "name": "rs-d2-FUtpACzikOx",
-            "spec": "8t696kZAOBQJRWw0diNhYxbZ6LhGOzeFOlSh7CnxE3i2GoATAtx",
+            "spec": "9jeRsTOwTGywMx68IsndzQlaFNI2qWevCyzvzJYzS12BSmdKFerKvprUSH4z0sQeQRGUPxrwEgUrtbIYWBmZqgYFlrR5WjbGF89dHtIgaaXONLRzKMmDIseSlLcBp5gbCkfnikWHffOCWPfAzeeSeJPAnF2ONVTcrsMrC4tbpQJNb2qk",
             "input_schema": {
+              "type": "object",
               "properties": {
-                "headline": {
-                  "type": "string"
+                "attachment": {
+                  "type": "file",
+                  "description": "The attachment"
                 }
               },
               "required": [
-                "headline"
+                "attachment"
               ]
             },
             "input": {
@@ -439,21 +480,23 @@
           }
         ],
         "tasks_length": 1,
-        "description": "LLBmFbcJ0mDDseYiTAt6xlowCqhokq5uK4wm88B6flb3lU9M7ky7eUOwCXxkfsZ3EFGa0Cyqt9N6Rd7Bqx7lfvWD8jZWw2VpA36hbBei b9WtJhQY1dhq5e2Yl99eeXnng8EvCxW2FDnZGPlGItZjxaBDkc",
-        "readme": "# rs-d2-3ld6MQ0u6Q\n\nLLBmFbcJ0mDDseYiTAt6xlowCqhokq5uK4wm88B6flb3lU9M7ky7eUOwCXxkfsZ3EFGa0Cyqt9N6Rd7Bqx7lfvWD8jZWw2VpA36hbBei b9WtJhQY1dhq5e2Yl99eeXnng8EvCxW2FDnZGPlGItZjxaBDkc\n"
+        "description": "bayyFQLZzdK8mXVvZ7yqQE4ji Ja6uWnjueenetEAdQQpD6RqxklgcYJZ1e9t8C2HHEMn51dvn6u358lVO1vlHEsHo Tjy55C5SxFgt5KsoqeCG52m20wHGdH8vtCjg GAJLCYxN9f5l0o",
+        "readme": "# rs-d2-3ld6MQ0u6Q\n\nbayyFQLZzdK8mXVvZ7yqQE4ji Ja6uWnjueenetEAdQQpD6RqxklgcYJZ1e9t8C2HHEMn51dvn6u358lVO1vlHEsHo Tjy55C5SxFgt5KsoqeCG52m20wHGdH8vtCjg GAJLCYxN9f5l0o\n"
       },
       "path": null,
       "function": {
         "type": "alpha.scalar.branch.function",
-        "description": "LLBmFbcJ0mDDseYiTAt6xlowCqhokq5uK4wm88B6flb3lU9M7ky7eUOwCXxkfsZ3EFGa0Cyqt9N6Rd7Bqx7lfvWD8jZWw2VpA36hbBei b9WtJhQY1dhq5e2Yl99eeXnng8EvCxW2FDnZGPlGItZjxaBDkc",
+        "description": "bayyFQLZzdK8mXVvZ7yqQE4ji Ja6uWnjueenetEAdQQpD6RqxklgcYJZ1e9t8C2HHEMn51dvn6u358lVO1vlHEsHo Tjy55C5SxFgt5KsoqeCG52m20wHGdH8vtCjg GAJLCYxN9f5l0o",
         "input_schema": {
+          "type": "object",
           "properties": {
-            "headline": {
-              "type": "string"
+            "attachment": {
+              "type": "file",
+              "description": "The attachment"
             }
           },
           "required": [
-            "headline"
+            "attachment"
           ]
         },
         "tasks": [
@@ -465,15 +508,17 @@
             "min_leaf_width": 1,
             "max_leaf_width": 2,
             "name": "rs-d2-FUtpACzikOx",
-            "spec": "8t696kZAOBQJRWw0diNhYxbZ6LhGOzeFOlSh7CnxE3i2GoATAtx",
+            "spec": "9jeRsTOwTGywMx68IsndzQlaFNI2qWevCyzvzJYzS12BSmdKFerKvprUSH4z0sQeQRGUPxrwEgUrtbIYWBmZqgYFlrR5WjbGF89dHtIgaaXONLRzKMmDIseSlLcBp5gbCkfnikWHffOCWPfAzeeSeJPAnF2ONVTcrsMrC4tbpQJNb2qk",
             "input_schema": {
+              "type": "object",
               "properties": {
-                "headline": {
-                  "type": "string"
+                "attachment": {
+                  "type": "file",
+                  "description": "The attachment"
                 }
               },
               "required": [
-                "headline"
+                "attachment"
               ]
             },
             "input": {
@@ -536,7 +581,7 @@
             {
               "role": "tool",
               "index": 1,
-              "content": "8t696kZAOBQJRWw0diNhYxbZ6LhGOzeFOlSh7CnxE3i2GoATAtx",
+              "content": "9jeRsTOwTGywMx68IsndzQlaFNI2qWevCyzvzJYzS12BSmdKFerKvprUSH4z0sQeQRGUPxrwEgUrtbIYWBmZqgYFlrR5WjbGF89dHtIgaaXONLRzKMmDIseSlLcBp5gbCkfnikWHffOCWPfAzeeSeJPAnF2ONVTcrsMrC4tbpQJNb2qk",
               "tool_call_id": "call_mock_7153409506115456498"
             },
             {
@@ -652,7 +697,7 @@
             {
               "role": "tool",
               "index": 6,
-              "content": "{\"properties\":{\"headline\":{\"type\":\"string\"}},\"required\":[\"headline\"]}",
+              "content": "{\"type\":\"object\",\"properties\":{\"attachment\":{\"type\":\"file\",\"description\":\"The attachment\"}},\"required\":[\"attachment\"]}",
               "tool_call_id": "call_mock_16649299985020297500"
             },
             {
@@ -747,7 +792,7 @@
                   "id": "call_mock_18155062596824838585",
                   "function": {
                     "name": "AppendTask",
-                    "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"kXq14LKc9f89ZLUfA lk4 I5Ar71axl\"}],[{\"type\":\"text\",\"text\":\"3fOQmwA\"}],[{\"type\":\"text\",\"text\":\"XzwyaAF2cIlDssXWOdBxtqdvTUUlFIT Q\"}]]}"
+                    "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"kXq14LKc9f89ZLUfA lk4 I5Ar71axl\"}],[{\"type\":\"text\",\"text\":\"3fOQmwA\"}],[{\"type\":\"text\",\"text\":\"XzwyaAF2cIlDssXWOdBxtqdvTUUlFIT Q\"}]]}"
                   }
                 }
               ],
@@ -892,16 +937,18 @@
         "min_leaf_width": 1,
         "max_leaf_width": 2,
         "name": "rs-d2-FUtpACzikOx",
-        "spec": "8t696kZAOBQJRWw0diNhYxbZ6LhGOzeFOlSh7CnxE3i2GoATAtx",
+        "spec": "9jeRsTOwTGywMx68IsndzQlaFNI2qWevCyzvzJYzS12BSmdKFerKvprUSH4z0sQeQRGUPxrwEgUrtbIYWBmZqgYFlrR5WjbGF89dHtIgaaXONLRzKMmDIseSlLcBp5gbCkfnikWHffOCWPfAzeeSeJPAnF2ONVTcrsMrC4tbpQJNb2qk",
         "essay": "8prkzSpg2dV9IsPPtoC3ixfkEHHl2MLATxwAqBtlgQrKnyfgpYMXkYXqnNaIaXnKfMBb csUE7y7d3CCIbtI7UZJZ3unW1iCtk6VB5HOsXWKVeGJM3K2hfKv8IvB6G8fBpMontkpE3kfxqb6z0 u1ROCElq3UwAr9RtsYQvyj47QEqKoSkBMI7zBU9pPuNH6JkuLZXBxlHl KRdakfm8Sg4auuaRCxF9DQOTVn6aX9OrRLXG  UldMKLKErCR3bzlVLxIDDKvUC5vCX7kZc6Fe28WNNewYuqAeqo08TYhDmoguaozptPmv 5MMrahZ6KsPaRqJtawhl59uhJ4D 8DaK2pzoyMWzg07oRvzlpg9WaqmspVyS94P8KOVO0ni4uRf6I0",
         "input_schema": {
+          "type": "object",
           "properties": {
-            "headline": {
-              "type": "string"
+            "attachment": {
+              "type": "file",
+              "description": "The attachment"
             }
           },
           "required": [
-            "headline"
+            "attachment"
           ]
         },
         "essay_tasks": "coVqhjcRBZ6vfBmcDbKk1KH4dqhcU vqRTZ6xrCL PuLzEJiTbKR3GWNY2s0qE6mKSwxumYs0SqlXHaANkv2AryakRJMNlYGznBez1X3nNoSpzfBYHs8tCIbFqXinF9W6nIdPd3xfX7 NQhrohG2GxicVUnVlHXqivLJlLVAf2akEomQdjgrvSjtbbuTLnUqO3csHMMcVbpBrNrqy8xem2 jeKwlbvlaaO7hWFJJTgQtnHiF9y casUrZKt53I3zKfTYUaPD5K5LIlxa0VTxV7968WD0I WVWpUO57Vhp3R2TXOzrFT9aNwOoDw6Yo4chlRjj8cGYUOZgGupSdJMxTln345xrA6KQXnDazuouRl2WZKrTgAdNFNwLQ",
@@ -909,7 +956,7 @@
           {
             "type": "vector.completion",
             "messages": {
-              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
+              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
             },
             "responses": [
               [
@@ -942,20 +989,22 @@
         "type": "alpha.scalar.leaf.function",
         "description": "LLBmFbcJ0mDDseYiTAt6xlowCqhokq5uK4wm88B6flb3lU9M7ky7eUOwCXxkfsZ3EFGa0Cyqt9N6Rd7Bqx7lfvWD8jZWw2VpA36hbBei b9WtJhQY1dhq5e2Yl99eeXnng8EvCxW2FDnZGPlGItZjxaBDkc",
         "input_schema": {
+          "type": "object",
           "properties": {
-            "headline": {
-              "type": "string"
+            "attachment": {
+              "type": "file",
+              "description": "The attachment"
             }
           },
           "required": [
-            "headline"
+            "attachment"
           ]
         },
         "tasks": [
           {
             "type": "vector.completion",
             "messages": {
-              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
+              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
             },
             "responses": [
               [
@@ -1122,13 +1171,14 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
+              "reasoning": "SdBDXhSKy9SKK1owiEC0HIg6PaDVLzDj12OBT7N4D89LbZQyW8dSuabbjo9hnvOkdkzMLdSpAiFe7sp2aqzXtpJ99648u0eauFDwxRji9LEHQ45EsT646IZGuH2I3lOC1bndUm1Lb qgU5u35hExdK5 aH4p0Hsg6evg6Yr32j03F4P9vBAJxGpawGUkXRsul7 QRkBD4MENykfjIbFs l9ARF",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_3569644787345415798",
+                  "id": "call_mock_6319297483073635594",
                   "function": {
                     "name": "WriteInputSchema",
-                    "arguments": "{\"properties\":{\"headline\":{\"type\":\"string\"}},\"required\":[\"headline\"]}"
+                    "arguments": "{\"type\":\"object\",\"properties\":{\"attachment\":{\"type\":\"file\",\"description\":\"The attachment\"},\"source\":{\"type\":\"string\",\"description\":\"The source\"}},\"required\":[\"attachment\",\"source\"]}"
                   }
                 }
               ],
@@ -1150,7 +1200,7 @@
               "role": "tool",
               "index": 6,
               "content": "Ok",
-              "tool_call_id": "call_mock_3569644787345415798"
+              "tool_call_id": "call_mock_6319297483073635594"
             },
             {
               "role": "assistant",
@@ -1159,9 +1209,9 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "JRuDO7sGX ZHc7qkpq09UayIWDCGqoDY7taF TOmNQ792J5FPpJSWbrWL79TBmNUNOFHCCaSYfXB8Rg6k5bhs XtI7Pbw7bvQyO7TTgAjYjB 3blf 0yaJrkREBQzC9LiAn533j0JrGEYH2No7deQY8hOVlbGToHGhcmvS50dX s9DjrQ7NMv8xMgYJUsHOXim6PJI2ToMAhs1hoWlHfjPJm86qnkElCaPXj8yn6fiAo8TPs646XerfWHfz8oGYVeihebJSnXhM0lMGEWm1pUJLDwrtX5kzdqmeWCMG3urxCUHhGRLhipZSQjEG 0 dQWzJ9QUygJ q7mJKdH58VnlpyYO5WqEkNeh HRWCDJJ7iFI01v2Td48604oSRjFKhwsMKliyX3iKEWu8CT4pcx7zeS TcBJd87dt6scRp1A1kmN23UsRtMIUlh6Y3odToWUAYJmynx3M8SfDGfbEHdR9Ri",
+              "reasoning": "2kw47qL77TmMxC16m29ZcYIRpKI4x11gLYJCYMtZN8epgdKAdC3UlMhBCrrbpRKq6PCdfT21kq0eSwGzKaWkDCYTJ42V5dtS88M5RsO1DkLHVZaWJCjEttr9OjBXbRA1aaMsCrG1eHVKlDaCTe1357BAqqF4kwwgeMougsNEBFlk70MfrkZNLLFxX OQLbhMu2UcSytKuldgtb8i Y",
               "tool_calls": null,
-              "content": "fxTZlpPNsvKfso7xvcpCoKVBU",
+              "content": "HTfl XmaR3Fpf2LZOGiiLDC uqVVIPAivDfM4rH1xtj5plGTlinL5wtXByltJ8q6dUbZYj5NpEuTeRY6H8Q2Di6qgzybjxv",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -1276,14 +1326,14 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "PvCTDCsAvhFQARTUSjZQ3g3QwOG 4LErKBkv1nres0uzZMq3Y3 Q1cZPqV dYRd2IkMRLa7 oFY5KAWlVAOQuIuvrqTyRVIBC EOwOuKYKufFoBvXxv1A LPuzv9aqyBT35hZkTgF7zNcWe2pb6q9nCmdzEX1YdCFUE4ojr50hv82WG3lblGBOPUBALCzmU1TZNDqfxcCdMula9gibNNzm10QFfuh7KqMu6gkjXbvUQSVAt2iTwV",
+              "reasoning": "EvoFaehQl5xSrTjXRtxyuwIfLBt00pxMetJY44VuZddK8pZ EsqRwveYE0kOCEVGVeY10M36MzK8pEoM2so5W8Bqz2VKftpA33fBccocttCW2yJbDv0xUpekDABdS 5Y1SY3fNZEB6DesTe8vg4JIwMxiExT0xhfTPyj1cJvpO7U8NBYPM wapAK4pw5apab5Pceuq2oEKgkOQOV6W2884fvLL ha3bKhR7rtLvCiOF7qVzC8HhOuKvn0kEOk7FpTjTtGUBoYqIky0IMdTqdUItD41uq3vLAjRJyrZizx6lgzXuJBCalVvMDKsR6fOpYLR2UhyH7oZy zN0uLrtylV6JvUI eRhZTzaWDw5EdewNj0jLzPgiM9AKfA6ukwymMV5mTaA0Po6swlXgnhuWTY lSbHCxnYxggLGywIZIcIyUswypYbrakhYIL",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_13923560784919219976",
+                  "id": "call_mock_17196986082362484195",
                   "function": {
-                    "name": "Readagent.completions.message.InputAudioSchema",
-                    "arguments": "{}"
+                    "name": "AppendTask",
+                    "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"KjqRWhQu7D12ke YxUawwx4tnNJBSfKzJXdY66acRtFzcAP3KDNqDY91U Xwj8nKmanIjDwEMKyBrd pzHhS8R3DmLT34FsclCJxbg4aIRILYQNrgBFzUftPuFzBlTq6MnH1ABxvUFsE0D6TTYVeDQ52NEQO6kdg0VF5KHUWubzDTiK6grFmvfX369Qyfn\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"attachment\":{\"type\":\"file\",\"description\":\"The attachment\"}},\"required\":[\"attachment\"]},\"input\":{\"$starlark\":\"{'attachment': input['attachment']}\"}}"
                   }
                 }
               ],
@@ -1304,8 +1354,8 @@
             {
               "role": "tool",
               "index": 12,
-              "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.InputAudio\",\n  \"description\": \"Audio input for multimodal messages.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"description\": \"Base64-encoded audio data.\",\n      \"type\": \"string\"\n    },\n    \"format\": {\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"data\",\n    \"format\"\n  ]\n}\n",
-              "tool_call_id": "call_mock_13923560784919219976"
+              "content": "1",
+              "tool_call_id": "call_mock_17196986082362484195"
             },
             {
               "role": "assistant",
@@ -1314,46 +1364,9 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "FIUuoCPwCtjaFpdZrDVCbX9bGrZO5cWxmtSAg1kx6dq6G0caITfE7y3sdVkEm2f6",
-              "tool_calls": [
-                {
-                  "type": "function",
-                  "id": "call_mock_3057661716346935306",
-                  "function": {
-                    "name": "AppendTask",
-                    "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"3GuBfS25V7fkjZP L8GV2IPbj  xrCptlAU8BmC3fh9afnRvHCN9YJpq9Ihz8d9BZXYICjR2fJCVom  Mc8r3fs6nx3lBbZP2wXWXjVKt3MrMXuLdAT7AWLfQe7 v4YwgQrzkVcIIsnBmZIkpAbf9uKxH5hV9AoIjYU6dVEBAxdNQUt9YEvTHTk5Uwc\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"headline\":{\"type\":\"string\"}},\"required\":[\"headline\"]},\"input\":{\"$starlark\":\"input\"}}"
-                  }
-                }
-              ],
-              "content": null,
-              "refusal": null,
-              "finish_reason": "tool_calls",
-              "logprobs": null,
-              "usage": {
-                "completion_tokens": 0,
-                "prompt_tokens": 0,
-                "total_tokens": 0,
-                "cost": 0.0,
-                "total_cost": 0.0,
-                "cost_multiplier": 0.0,
-                "is_byok": false
-              }
-            },
-            {
-              "role": "tool",
-              "index": 14,
-              "content": "1",
-              "tool_call_id": "call_mock_3057661716346935306"
-            },
-            {
-              "role": "assistant",
-              "index": 15,
-              "created": 0,
-              "agent": "70edSCzVEtHRLSaFexKISH",
-              "model": "mock",
-              "upstream_id": "",
+              "reasoning": "ruvkrxcwRTE4uHL9Eaz8chgHzPBmOOs0bOMXbsvgdccTSiKuJ313ze6Vd4Nx3Fyx9aVaQIKT188DpYwHMVflf2ttq6ABDW d9r4vAgmZw8uP1IZ5 aGvVIhO7hiDR2Nss88PoTV8AUEBipv9bUAB43Pza4Emd Ug0bOJv5deZRXPq8b1qsqXO RqcXb6XLA7dz8fiowOB6offnveuWkoyyfevezv7j1K0nQh5H8igPyKA4y5AjSxxAqztVgid9x7qT7tBOS8VsogpK72cL2KIbHCtabv0r7NCPCSeNSbVuLbfAD5qLNUAWM6X1q8VrbqEk5bIv1B6lSySVSfyj HHzFGoiBOEqMw1p5chisM0xtXQ0sd0l7CuPcWkP9PPQrA sZyyF32a4MLcdAq93sr5f17Jp8FTV9gmeIC1gRrtGcgEM8jPyPkBZRiURlE99YPoHh1t9ebNCOjrHzJBJk6ZA5wwqv8gXiUpf6FGoHigQDfjwCwB",
               "tool_calls": null,
-              "content": "7nHS gz9hM9HNKGIhySXcz8e8c47umZCdC8VD93oYq ",
+              "content": "PyNERjDq5vb28Vy5y RJ6jD66L",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -1386,19 +1399,19 @@
           "messages": [
             {
               "role": "assistant",
-              "index": 16,
+              "index": 14,
               "created": 0,
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "rHLFG1GqHErI0qrVDccMW d86RMpilwR7Xk5mh1dokUWy",
+              "reasoning": "J1s7kCwZO4HyNgaSwVNV5caMr v1t91VH5IafqNHdgpaxpkb07X1RsNuhmGB4nPMNuoLXlG4rBlXHcVlEpV6gzE9ehVSVgLhgDK0i5vhM3p7Or7Z8r Q14LSdJFmprjnGS9RhsGZ0QlIyvB15ERmJSS0UpmpFpO4Ibw1GGDIQvchrj9 HQl11HrVC6cZsTdWDSG8lHrRz5vbbuycyLE7UqtNqltIlcKMPIEmuCe0WC6WjA0 5FEXeWZkxwHRAzOVIbQQ BF7gNK5avk ed1KEt3ESRRbFnQ0QEW58jzp1lR2Vyt9vUo0YEp9NUcrmlTwri2Sp1YBVkgxfTmXw2iz1Yp1cOBw6wHmzW",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_8709612419538899579",
+                  "id": "call_mock_8885771064967300041",
                   "function": {
                     "name": "WriteDescription",
-                    "arguments": "{\"description\":\"0MOe3avHFS2Xh19az QIRuA7bla1FDPTo8nSnKhZ8yZ9Kl6R1TOaExu3dy9EAoa7hI6MGVQOcObZTPiFhzoQBD8ABjtOc1ME8VoPOzgNnFwVYHCPTt1RIXPb7w nWHpeO8RcyZzPbAEgx6RViia3Xez7zeLKCAcz1t5sZiJOtZdYZU28TX\"}"
+                    "arguments": "{\"description\":\"PTDO0BzAuEQU64iZsQ0SztzQ83o0wJFZTWrl5cp6LPeBH88qvl cWSvC Eo1JVi66e5p4GDWIWHIWdlUWueUt98JzNXyxsJPGk Wnd3K3 OcWANN3F8v3NndU2CFi2wPkQN68GRWiQ8SOqVdFtMX4QYSFBBDrioCQwgNRyxX8E1 xq0u7Su PMppwnBCGGfajUVYpF7PTaMz0yhQfDbatlnVWrTnz2O2JAvtkzKxV6McEyKui7PTXCppceaE8aWKzzytYMZOKSnmkmblhU6jQtHkdJKt2j1YxJiETOU3jLoufUJf9vLGCvi\"}"
                   }
                 }
               ],
@@ -1418,20 +1431,20 @@
             },
             {
               "role": "tool",
-              "index": 17,
+              "index": 15,
               "content": "Ok",
-              "tool_call_id": "call_mock_8709612419538899579"
+              "tool_call_id": "call_mock_8885771064967300041"
             },
             {
               "role": "assistant",
-              "index": 18,
+              "index": 16,
               "created": 0,
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "DVnQSgXYA w2CVX3QqgwC2DJ7jde Sb5DpGQScL QN9gidUX9vtbqlfKA0SOfik55RRJASDIMou24 fKVNtVHZQgGEmAGTOb1PY9MUkOMBo KzWRhT iaH9eEdKfTFhoMXpJ2pnuTdxu1JCzn6G",
+              "reasoning": "rHLFG1GqHErI0qrVDccMW d86RMpilwR7Xk5mh1dokUWy",
               "tool_calls": null,
-              "content": "TSN7U EBSoIXmhmwqNm4ZjT1B B52pXHvseJ3Kwo7",
+              "content": "A0MOe3avHFS2Xh19az QI",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -1469,13 +1482,20 @@
         "spec": "Test function spec for mock recursive invention.",
         "essay": "8prkzSpg2dV9IsPPtoC3ixfkEHHl2MLATxwAqBtlgQrKnyfgpYMXkYXqnNaIaXnKfMBb csUE7y7d3CCIbtI7UZJZ3unW1iCtk6VB5HOsXWKVeGJM3K2hfKv8IvB6G8fBpMontkpE3kfxqb6z0 u1ROCElq3UwAr9RtsYQvyj47QEqKoSkBMI7zBU9pPuNH6JkuLZXBxlHl KRdakfm8Sg4auuaRCxF9DQOTVn6aX9OrRLXG  UldMKLKErCR3bzlVLxIDDKvUC5vCX7kZc6Fe28WNNewYuqAeqo08TYhDmoguaozptPmv 5MMrahZ6KsPaRqJtawhl59uhJ4D 8DaK2pzoyMWzg07oRvzlpg9WaqmspVyS94P8KOVO0ni4uRf6I0",
         "input_schema": {
+          "type": "object",
           "properties": {
-            "headline": {
-              "type": "string"
+            "attachment": {
+              "type": "file",
+              "description": "The attachment"
+            },
+            "source": {
+              "type": "string",
+              "description": "The source"
             }
           },
           "required": [
-            "headline"
+            "attachment",
+            "source"
           ]
         },
         "essay_tasks": "YCSPYkX72Ff4PsEnOf5RdcYz2 tLnZEMvlEXzK4e5 u4YL9dFljx9nBPmO29otcrSt3FjGoxEDasVS8ypptZ1F7VxpJs Va3ZwC96DhzdyHM8ZZ3DAys1lRd1pIVlADFmfiwK75xy6dzv03l60lNoYlaf3IW4c7Lzx1vDNjc3xHamVhYp E0t8EPdL0secIWJRcyN1G2kFS1Ozo5UP3lYYX2caxSSbo4Yq9IiDgpUKWaI5Dv2hrxxRR5yrDHwoDa0HJG9vdNR7Y6mQuT4BMC17MF6XXieoTtT7n  EGw2aKvLxr1oJDPdDEEw2LDd6hXeN7LMfSYMbRXwwbZJdaFzKy1Q7aT5RMxzPMqQZDjNgA4etl9OrgywthQEHv9SU1dikQz NfcPqITUTvmfuBQWdlLkxolCNIyJ92YAAcB6bjN42VqhnB06vfdPIzdoh",
@@ -1488,38 +1508,47 @@
             "min_leaf_width": 1,
             "max_leaf_width": 2,
             "name": "rs-d2-3ld6MQ0u6Q",
-            "spec": "3GuBfS25V7fkjZP L8GV2IPbj  xrCptlAU8BmC3fh9afnRvHCN9YJpq9Ihz8d9BZXYICjR2fJCVom  Mc8r3fs6nx3lBbZP2wXWXjVKt3MrMXuLdAT7AWLfQe7 v4YwgQrzkVcIIsnBmZIkpAbf9uKxH5hV9AoIjYU6dVEBAxdNQUt9YEvTHTk5Uwc",
+            "spec": "KjqRWhQu7D12ke YxUawwx4tnNJBSfKzJXdY66acRtFzcAP3KDNqDY91U Xwj8nKmanIjDwEMKyBrd pzHhS8R3DmLT34FsclCJxbg4aIRILYQNrgBFzUftPuFzBlTq6MnH1ABxvUFsE0D6TTYVeDQ52NEQO6kdg0VF5KHUWubzDTiK6grFmvfX369Qyfn",
             "input_schema": {
+              "type": "object",
               "properties": {
-                "headline": {
-                  "type": "string"
+                "attachment": {
+                  "type": "file",
+                  "description": "The attachment"
                 }
               },
               "required": [
-                "headline"
+                "attachment"
               ]
             },
             "input": {
-              "$starlark": "input"
+              "$starlark": "{'attachment': input['attachment']}"
             }
           }
         ],
         "tasks_length": 1,
-        "description": "0MOe3avHFS2Xh19az QIRuA7bla1FDPTo8nSnKhZ8yZ9Kl6R1TOaExu3dy9EAoa7hI6MGVQOcObZTPiFhzoQBD8ABjtOc1ME8VoPOzgNnFwVYHCPTt1RIXPb7w nWHpeO8RcyZzPbAEgx6RViia3Xez7zeLKCAcz1t5sZiJOtZdYZU28TX",
-        "readme": "# rs-d2-unrouted\n\n0MOe3avHFS2Xh19az QIRuA7bla1FDPTo8nSnKhZ8yZ9Kl6R1TOaExu3dy9EAoa7hI6MGVQOcObZTPiFhzoQBD8ABjtOc1ME8VoPOzgNnFwVYHCPTt1RIXPb7w nWHpeO8RcyZzPbAEgx6RViia3Xez7zeLKCAcz1t5sZiJOtZdYZU28TX\n"
+        "description": "PTDO0BzAuEQU64iZsQ0SztzQ83o0wJFZTWrl5cp6LPeBH88qvl cWSvC Eo1JVi66e5p4GDWIWHIWdlUWueUt98JzNXyxsJPGk Wnd3K3 OcWANN3F8v3NndU2CFi2wPkQN68GRWiQ8SOqVdFtMX4QYSFBBDrioCQwgNRyxX8E1 xq0u7Su PMppwnBCGGfajUVYpF7PTaMz0yhQfDbatlnVWrTnz2O2JAvtkzKxV6McEyKui7PTXCppceaE8aWKzzytYMZOKSnmkmblhU6jQtHkdJKt2j1YxJiETOU3jLoufUJf9vLGCvi",
+        "readme": "# rs-d2-unrouted\n\nPTDO0BzAuEQU64iZsQ0SztzQ83o0wJFZTWrl5cp6LPeBH88qvl cWSvC Eo1JVi66e5p4GDWIWHIWdlUWueUt98JzNXyxsJPGk Wnd3K3 OcWANN3F8v3NndU2CFi2wPkQN68GRWiQ8SOqVdFtMX4QYSFBBDrioCQwgNRyxX8E1 xq0u7Su PMppwnBCGGfajUVYpF7PTaMz0yhQfDbatlnVWrTnz2O2JAvtkzKxV6McEyKui7PTXCppceaE8aWKzzytYMZOKSnmkmblhU6jQtHkdJKt2j1YxJiETOU3jLoufUJf9vLGCvi\n"
       },
       "path": null,
       "function": {
         "type": "alpha.scalar.branch.function",
-        "description": "0MOe3avHFS2Xh19az QIRuA7bla1FDPTo8nSnKhZ8yZ9Kl6R1TOaExu3dy9EAoa7hI6MGVQOcObZTPiFhzoQBD8ABjtOc1ME8VoPOzgNnFwVYHCPTt1RIXPb7w nWHpeO8RcyZzPbAEgx6RViia3Xez7zeLKCAcz1t5sZiJOtZdYZU28TX",
+        "description": "PTDO0BzAuEQU64iZsQ0SztzQ83o0wJFZTWrl5cp6LPeBH88qvl cWSvC Eo1JVi66e5p4GDWIWHIWdlUWueUt98JzNXyxsJPGk Wnd3K3 OcWANN3F8v3NndU2CFi2wPkQN68GRWiQ8SOqVdFtMX4QYSFBBDrioCQwgNRyxX8E1 xq0u7Su PMppwnBCGGfajUVYpF7PTaMz0yhQfDbatlnVWrTnz2O2JAvtkzKxV6McEyKui7PTXCppceaE8aWKzzytYMZOKSnmkmblhU6jQtHkdJKt2j1YxJiETOU3jLoufUJf9vLGCvi",
         "input_schema": {
+          "type": "object",
           "properties": {
-            "headline": {
-              "type": "string"
+            "attachment": {
+              "type": "file",
+              "description": "The attachment"
+            },
+            "source": {
+              "type": "string",
+              "description": "The source"
             }
           },
           "required": [
-            "headline"
+            "attachment",
+            "source"
           ]
         },
         "tasks": [
@@ -1531,19 +1560,21 @@
             "min_leaf_width": 1,
             "max_leaf_width": 2,
             "name": "rs-d2-3ld6MQ0u6Q",
-            "spec": "3GuBfS25V7fkjZP L8GV2IPbj  xrCptlAU8BmC3fh9afnRvHCN9YJpq9Ihz8d9BZXYICjR2fJCVom  Mc8r3fs6nx3lBbZP2wXWXjVKt3MrMXuLdAT7AWLfQe7 v4YwgQrzkVcIIsnBmZIkpAbf9uKxH5hV9AoIjYU6dVEBAxdNQUt9YEvTHTk5Uwc",
+            "spec": "KjqRWhQu7D12ke YxUawwx4tnNJBSfKzJXdY66acRtFzcAP3KDNqDY91U Xwj8nKmanIjDwEMKyBrd pzHhS8R3DmLT34FsclCJxbg4aIRILYQNrgBFzUftPuFzBlTq6MnH1ABxvUFsE0D6TTYVeDQ52NEQO6kdg0VF5KHUWubzDTiK6grFmvfX369Qyfn",
             "input_schema": {
+              "type": "object",
               "properties": {
-                "headline": {
-                  "type": "string"
+                "attachment": {
+                  "type": "file",
+                  "description": "The attachment"
                 }
               },
               "required": [
-                "headline"
+                "attachment"
               ]
             },
             "input": {
-              "$starlark": "input"
+              "$starlark": "{'attachment': input['attachment']}"
             }
           }
         ]

@@ -91,14 +91,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "6Ypjjqbr95kAbi4LaCr7SRmKEvMHCdT8ezW68noke7zfwxcuOsmCjjwkhTpPJXY5ljaUEs rKjOMWV2cMoDnO2V12swckX26jHT1k1P0vmJWsefRNnCzJ1SuI5fXkPU8HXp6y9o2bzWFhT3TjWbNqskh2r1UXFWnXG2GhFvKu0fkpkAFioYkkPhAjXwh Pf0WRSEqx mjAdQ8Ju6CGG0l9YVZckQ2pRz5FTqpmLoRYBXZ7bqJHS9",
+          "reasoning": "zFnHyOgREasSi7200I4NU4QhOuauCc1ugEksrjJoI4z8a2HGefEPhgvb0REpxIyrAQasoYGS2vxy50OC9tC6lTFR571SQ9Ag4WkDVkVky44AsPdYWxLVhh0L4QkaDEGfoW43sl67UrWXla2lMxZP9AjNPQzQ0yc0BNS 8smcNXzq2oJyCW9d86x4sjtZhsd5Ce JteaPxbRWz3JVIop0hdyVUlcL7 7JsqcznolIAF5EN3CbxV AF8",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_6833308746593468646",
+              "id": "call_mock_10695738254350914343",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"name\":{\"type\":\"integer\"},\"version\":{\"type\":\"string\"}},\"required\":[\"name\",\"version\"]},\"items\":{\"type\":\"image\",\"description\":\"A candidate to assess\"}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"}},\"required\":[\"title\"]}}"
               }
             }
           ],
@@ -120,7 +120,7 @@
           "role": "tool",
           "index": 4,
           "content": "Ok",
-          "tool_call_id": "call_mock_6833308746593468646"
+          "tool_call_id": "call_mock_10695738254350914343"
         },
         {
           "role": "assistant",
@@ -129,9 +129,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "n1nPbP6m45BbJCgABLV7hYx4r2iAZ19iXxKkxxk4MN8uSfGV3sVEAuo3RYyuPxLbH1iuqX6tOZVaZRXuGiu6XCbeIMMs2kgRh8vJR7VKpXoRj9RSOO1U3wOdhGPmnKbt6NrWIpHzHIqxrO3Ma6QWEdlYX3VEv7",
+          "reasoning": "Sbr0JdmZ7ewf8xwpdFXSmXX eNzpwhHqCUY5 ImY9HUKFdewTX ZLGKBbLe8V9jkJDO2gH4vPHWcmkCA5mFKDm6VmqqeKGiiVACfEo9q50XOBSX50Bcuti4gEe9iQeyZkL3L71LesgmXylaKYCQshq88qcNVe031AQUpjRgwyt8",
           "tool_calls": null,
-          "content": "FKe2ZIByBSsb2fmU1323cAVJVLxWFAllatNr9g1QfAW4y8yiCFTD1zXrcPc ofU4 znZQQ7Zuld",
+          "content": "6yGxWSCaj1S7NC4RYNogbfkbkPOAYccA89n2A1xy8UgTmbyhSLZJd7HtKu1nQYzSEsTKB6YFlEX0dellcGVeiPqDOI",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -291,7 +291,7 @@
               "id": "call_mock_8659609119032464813",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}] for item in input['items']]\"}}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
               }
             }
           ],
@@ -389,7 +389,7 @@
         {
           "role": "tool",
           "index": 15,
-          "content": "{\"context\":{\"properties\":{\"name\":{\"type\":\"integer\"},\"version\":{\"type\":\"string\"}},\"required\":[\"name\",\"version\"]},\"items\":{\"type\":\"image\",\"description\":\"A candidate to assess\"}}",
+          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"title\":{\"type\":\"string\"}},\"required\":[\"title\"]}}",
           "tool_call_id": "call_mock_5153492892844000348"
         },
         {
@@ -477,23 +477,16 @@
     "spec": "Test function spec for mock invention.",
     "essay": "juqDHigBlZ5pfP8sNLrwGm7bsjsJjc46OFqrB2oPG0fV7Sur RxHYQjGt0xiN9IGf 0SH3IhXrRV7utWmGb1Bin4uzCisagDZqWUTwz86ILxicmQt7YHRBp1YzUt0rHHgahXRPuEMhIlYTOoqD7vGv3dufPI9yyz5cOJ5N uz3qWnFxgNrF3N5BIcIaq JkQht0Ttg1eS4HIX Zp2P2FVa8FKM pnyfP1Frt j MLZl9zkEDAuZ0mmRzvg1snISnjWWMnXodf1l99HHAvB0rwpTVnl7qToTisskHK 3W3uOTizmOtzcn FMMc9eHwyfA F55VYUWGfPfVtbcjwwdOzlDDJhttMmsS kVHyXJMIUsw wmyBN8oDSV MZOhTrDyOnmKfrNajEzhjtyvuD9XjtHc66V0qGrpqpG0clNfVwx2SKXA1PwQ41JwieIlSMeot3sXRrp3i0xqj6Ffh8iJ yFXSB4rau6DQ FurfdBeNQgygHUTM7pjgfYa7p7c9urlsc4d a7DxmaxMtSqNJPkiETPZdWwqNYTOd7tb6RHvmiRdmd8MEII6r dk4eISVJ7DFHFF5XgCAhgv4BUJ6DdEjnsVCVF8FyykHYk4LpAbewuM3VHq 7o7R4oDqIxzc5bLF2UDRIRcBfHfci8CN OGrB2iDrrHVGnf0qWyYBZMJDZoaMYyzcH0VGWte8EbFDjZ",
     "input_schema": {
-      "context": {
+      "items": {
+        "type": "object",
         "properties": {
-          "name": {
-            "type": "integer"
-          },
-          "version": {
+          "title": {
             "type": "string"
           }
         },
         "required": [
-          "name",
-          "version"
+          "title"
         ]
-      },
-      "items": {
-        "type": "image",
-        "description": "A candidate to assess"
       }
     },
     "essay_tasks": "hyfZ4f p81QQi1NqMct7KshB7uOXefn5LgVVLsSmXQZMbMGWgjX50WYw85e9GuxltY13ehjhS2svarMOcFNNaEYcpXue9loUCCkp5jO8T29khYFkiKqSXfQevHot6TwYUeSme2OdYZxRqgFy0cySBO72DmG9Uskas7wCp",
@@ -501,10 +494,10 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
-          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}] for item in input['items']]"
+          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
         }
       }
     ],
@@ -517,33 +510,26 @@
     "type": "alpha.vector.leaf.function",
     "description": "fo8oDNV3iLNnQb3IXtNISuzJ5z7mYgl96PQqD3m4rkh73sKV3RKAeh6aDkYr3ZB6DjJup3hqYjtXcNOJDd8qZdr00NRtkOAGgiQA18kd8 UC Mv5fluOlhHBHfrxeHK8eBIVmEDMIEykMyxNWM6Q5ocW0ZtaK hrs04134qyZt7UMiNkWbxYSXaB1YpqHsqN2otLtHrUojcVXbJ32gOuUf9VfCX3pS1C4JKkOlVYjTkzF5LDbPL4p8okzjmrV014rFvW0SlCYwPHbIeI9rDdWi3DJcZiFQzPAW j5k4xijmrbZiX",
     "input_schema": {
-      "context": {
+      "items": {
+        "type": "object",
         "properties": {
-          "name": {
-            "type": "integer"
-          },
-          "version": {
+          "title": {
             "type": "string"
           }
         },
         "required": [
-          "name",
-          "version"
+          "title"
         ]
-      },
-      "items": {
-        "type": "image",
-        "description": "A candidate to assess"
       }
     },
     "tasks": [
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
-          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}] for item in input['items']]"
+          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
         }
       }
     ]

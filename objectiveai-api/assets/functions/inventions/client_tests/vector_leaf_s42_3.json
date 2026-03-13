@@ -166,14 +166,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "9oLWu fjwzAJ0vIQ1rVgchCfEUXZYBLc0mijtArpP3ymRyxZkbildILGGKTgeuGQHihce9iJjSmehHEvw2gk0Z2iUDh6ZuFxU3GEubz7FNNSfd8jJaAB6sckHAXsOF06YLr8QMHvpzVR8eYXdZhOBCZJNNIRBknpSylEQgSgLhZf35yOdSKhu74iWN5dILHC8bIQEIRzUe1zktsE 6YcNIG6u6JvXCNB97ZUTAhGItFFixsXMbiTlNuv0KyBymzuvHxe6VVHOkgnP5KdSi0QJjVa1L4NcfIpXCTSS5of6IshJ7U5qL9IgdqcvuggwaOmmXx1HiRGC49cM0PTJ74MrcFZG0iuzL6v52lrwnHH5s5fTyD8K9yzuoZlBNBH01VaRK f5mjw4esKJ059YHX2Z0SUVP10iIxqcszCfdRtfHvZQ9bJikepZ2STQK6jEyejLw4tkSpNEPA9GVj3H7hnvGBeaSn5G0t4aGBNDKA UPB3hKTc95Vjj3Cow7bCp8H9K4v6oefTFve00moLfeSitq9LL0hrE1gJmVvMQe2oa TaEe lpzvgupSzNuU6Ukltvk1GSllzI5WHeRGz aCkJlTbnQAzEgnyoPshTH",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_18129071812747008300",
+              "id": "call_mock_14985319841422563069",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"format\":{\"type\":\"string\"},\"recording\":{\"type\":\"audio\"}},\"required\":[\"format\",\"recording\"]},\"items\":{\"type\":\"string\",\"description\":\"A submission to score\"}}"
+                "arguments": "{\"items\":{\"type\":\"string\",\"description\":\"A candidate to assess\"}}"
               }
             }
           ],
@@ -195,7 +194,7 @@
           "role": "tool",
           "index": 8,
           "content": "Ok",
-          "tool_call_id": "call_mock_18129071812747008300"
+          "tool_call_id": "call_mock_14985319841422563069"
         },
         {
           "role": "assistant",
@@ -204,9 +203,8 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "9KUppmoJwwJBwWfs8h3P2fq7kEmOWXW1XzpB3GlibjgjwUi06XPXgwXFAVKvMD02WPBQ3Sf0twurXM9MGOyvjZHSjVgjj19yjpHSD9BnDGt5p9yx64c8m5NV67q UmShd1FiV7f SrKv5mOovvcLxn 3 a0u7S Wh0a6tCcjCHoP8AnRnDLsAgmw27N0H4uk8aiBy4FzMRXcNM0CstFLbNB3lY1KrJ5smCir7u fMBMVr66eyzQVo9HGGo1vJN9UAPYrz UoGyQhd0i5yHyiCIFn64HfoAxZN RWgXzn6mYbnI3bUah0SdKqgP0bCjxhCTvZt4ax9mLszNmelJTLbM6QFgCZFs1JfCFQvZDvrPOyTEvil5v1c9vTzDGkddgvvjMo3IULDVrLwuw8L T62HzjSMU3ORJ1zjLm3rwvrzqdwSkVqGAPmED94NFGf15Y0J6zs06gaV7uCuDCqgdoyC5MLyXI7t8RPeEKsKNK8Zx3AEKF pRKFXezmON89jrd",
           "tool_calls": null,
-          "content": "ub8HVy06LFdMezHfyPjpKscp Sne1MM322B68G8hXxpHXvwlNGou7oaei3wydcOFxXuREqI4LV0IfM2C7jO",
+          "content": "TksEbiI71y90khSO1t2JAN",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -272,7 +270,7 @@
         {
           "role": "tool",
           "index": 11,
-          "content": "{\"context\":{\"properties\":{\"format\":{\"type\":\"string\"},\"recording\":{\"type\":\"audio\"}},\"required\":[\"format\",\"recording\"]},\"items\":{\"type\":\"string\",\"description\":\"A submission to score\"}}",
+          "content": "{\"items\":{\"type\":\"string\",\"description\":\"A candidate to assess\"}}",
           "tool_call_id": "call_mock_18155547430049236563"
         },
         {
@@ -310,7 +308,7 @@
         {
           "role": "tool",
           "index": 13,
-          "content": "{\"context\":{\"properties\":{\"format\":{\"type\":\"string\"},\"recording\":{\"type\":\"audio\"}},\"required\":[\"format\",\"recording\"]},\"items\":{\"type\":\"string\",\"description\":\"A submission to score\"}}",
+          "content": "{\"items\":{\"type\":\"string\",\"description\":\"A candidate to assess\"}}",
           "tool_call_id": "call_mock_6767634455456211101"
         },
         {
@@ -481,7 +479,7 @@
               "id": "call_mock_6584211158693551044",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
               }
             }
           ],
@@ -653,7 +651,7 @@
         {
           "role": "tool",
           "index": 30,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Expression\",\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\n  \"oneOf\": [\n    {\n      \"description\": \"A JMESPath expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"JMESPath\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"JMESPath\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A Starlark expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Starlark\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"Starlark\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A predefined special expression variant.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Special\": {\n          \"$ref\": \"functions.expression.Special\"\n        }\n      },\n      \"required\": [\n        \"Special\"\n      ],\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Expression\",\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\n  \"oneOf\": [\n    {\n      \"description\": \"A JMESPath expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$jmespath\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"$jmespath\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A Starlark expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$starlark\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"$starlark\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A predefined special expression variant.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$special\": {\n          \"$ref\": \"functions.expression.Special\"\n        }\n      },\n      \"required\": [\n        \"$special\"\n      ],\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_18254644459267794970"
         },
         {
@@ -708,7 +706,7 @@
               "id": "call_mock_16422501349861171260",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
               }
             }
           ],
@@ -783,7 +781,7 @@
               "id": "call_mock_1278828999802507062",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
               }
             }
           ],
@@ -882,7 +880,7 @@
         {
           "role": "tool",
           "index": 41,
-          "content": "{\"context\":{\"properties\":{\"format\":{\"type\":\"string\"},\"recording\":{\"type\":\"audio\"}},\"required\":[\"format\",\"recording\"]},\"items\":{\"type\":\"string\",\"description\":\"A submission to score\"}}",
+          "content": "{\"items\":{\"type\":\"string\",\"description\":\"A candidate to assess\"}}",
           "tool_call_id": "call_mock_3816323624126343082"
         },
         {
@@ -970,23 +968,9 @@
     "spec": "Test function spec for mock invention.",
     "essay": "gqdMt8NdYB3ISe3YBMyrqCJUNnkcUgqDm4IT3FIjHDyAJmys4ZRldn47JtUIxBLYb3tQsz9 a6K5rEHrtDKURWkw9JmG0kFuZHhNs1ynX0HitgQ3xxw0pm7XYfJriNRnIKdmPVt XipxDk6l8Y4LutzkO2eGuYbQtCTeT3Td4d5fW1nv4nbzOZ5IA6YbFPzGrfYOJNXMTK6eM c8MN6vZskh84CsRgOeuA0fryojW1ZT J4rF 6ioXn9zdBkSx8iap7c2NlNEJTlC3eGR 0FVsgEnA5Li5zfqqBLV6nKqTlgG3LhGXRJiKkBOrYLM0A42HhNQ621y3sfrYAx4hNH1IWJRdrUt9CDnCYFKb9JvzK0UmcQcH8S Lcg7tuCInPDGdOgfi43ymackA8KfCDoz1VeGmDNnyMKdmcFkjVe3PyRB0vtUTbP46ZFlQX3rlt0sqK 8ilvzZ5mE9vZ1237wsjHDdT7FAwrjNa DDWErdtdVNqTu5HLJPi ZpMUsWTx0Y6VzAVmNjlCdkWk13lUggiLneY9AIB7gne9N66qtrEF uFFNUq0BImKaJlkA6X5ksXtGc7p4iF41WsY0XBXpJK8tLMfZL9BJp 0DwINuelUFypugQ7MlRsUnFrs9JqfGlnzozOzc21m1m4dJVQFLdilkDqmyI CtBnNMPlboJi61CmoxTVIlhgVt0AcJIADK1afIdijXqdL1EML3",
     "input_schema": {
-      "context": {
-        "properties": {
-          "format": {
-            "type": "string"
-          },
-          "recording": {
-            "type": "audio"
-          }
-        },
-        "required": [
-          "format",
-          "recording"
-        ]
-      },
       "items": {
         "type": "string",
-        "description": "A submission to score"
+        "description": "A candidate to assess"
       }
     },
     "essay_tasks": "LABaEbNX ARju9Hj33uhgpMmdvRqjRBqooUYZmrFOLNynqqRxm7HbDGHPS91j5KsrUskCrbCMtinqt4As3PL7VVElUk9UNvSkGF6ZNfvo2UN5uwNsHXqD4lcGjA9KiaN8DsTKQyQDOoWGnCzA4xri4WJWJepZyhjNPrwNmSvZwuR3Dq7I3gP0z672FXBFpFbnbfWSiW5n5deFM50Eo9jFIzGdXIDvTC66f9z4LuoSuEqPNuqstJYAdpuvBDLcw2n5JNeTsUud 99x19Nj65MJJoGpmVeGwKK1VV5DC140Ih2mHaDZiSSjeI24dnNovYrTKdMjB8F6oSb6wF5Um 6W7G7GpMlDacNHRptFoOq68zGX GkQQwlZK2ZJ",
@@ -994,7 +978,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
           "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
@@ -1003,7 +987,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
           "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
@@ -1012,7 +996,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
           "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
@@ -1028,30 +1012,16 @@
     "type": "alpha.vector.leaf.function",
     "description": "LueAJiK4Rg2S2AUdRSXYANZy9gOkjOsf9Zu1ggfylI3fJcPzEQnbepf4CEpdqanE8OxpFyqd5KA7k VMsQ30OaJ9bYhoq6JfNs2IIfWYQH8jS3ryvm2z3QNLRyloMciAHljH5Jmfe4WiqV1UDFm3Qn0E7pGo07co0gseMBfWLY2gVqke CD59a5hLKJe pcjFLtxmAjX1",
     "input_schema": {
-      "context": {
-        "properties": {
-          "format": {
-            "type": "string"
-          },
-          "recording": {
-            "type": "audio"
-          }
-        },
-        "required": [
-          "format",
-          "recording"
-        ]
-      },
       "items": {
         "type": "string",
-        "description": "A submission to score"
+        "description": "A candidate to assess"
       }
     },
     "tasks": [
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
           "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
@@ -1060,7 +1030,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
           "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
@@ -1069,7 +1039,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
           "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"

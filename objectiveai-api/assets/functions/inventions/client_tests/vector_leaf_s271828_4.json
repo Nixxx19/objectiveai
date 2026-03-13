@@ -91,13 +91,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "ol2tL2NTd2RWcVBDAVxai4tPH I0jHH35oJowWxQysuOSN UQ0EUY grkznK5pZuX7qSGWALscMM5913IrcfsS7M851BLHKy4CNpUp2H8T4qMxK3IOMpBL181Iy9rog8wh9wyQkbKKmlLSSbynByjK4Gf93EVLqPUbY560t94hRg0b4 sOxm7qvMzdGsvGM7Tmsrfxq8vM SKn6Ya79bEl4qVdss9boAmKBcpephM0tcRCS9rQNnPZktEMoVqTLJhPQG0woNQMEYfw2X7a",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_6790486050660706130",
+              "id": "call_mock_12082607625632549524",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"context\":{\"properties\":{\"approved\":{\"type\":\"boolean\"}},\"required\":[\"approved\"]},\"items\":{\"type\":\"string\",\"description\":\"A sample to judge\"}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"description\":{\"type\":\"number\"},\"id\":{\"type\":\"number\"}},\"required\":[\"description\",\"id\"]}}"
               }
             }
           ],
@@ -119,7 +120,7 @@
           "role": "tool",
           "index": 4,
           "content": "Ok",
-          "tool_call_id": "call_mock_6790486050660706130"
+          "tool_call_id": "call_mock_12082607625632549524"
         },
         {
           "role": "assistant",
@@ -128,9 +129,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "y8VjoKbOUp9z9SLFkV3d yove",
+          "reasoning": "HvBSSgWeGblBxNpIirw05HODrdTeIXWAa1jHryFjGiwJjvRTYU2uWMxxo6Gq6 FEzCoR7UkLA2bOY1fwdQ1i0z5lMC4nhjHyjYhZ FP8yZltLjNTgd0O4e9auKbtOV1pjHOTKixjr0tyIkJByBcOuOHli6CZ",
           "tool_calls": null,
-          "content": "CtEsRfRnnizlSC Gxf4Kx1J2Y2rRiQmh4IjlDvOcYwuaowROxvq4iBYG0hjXWJVvk4RLNDmCGqGyj8ykI10fG8AJ",
+          "content": "YDSnMkiz5vJM9xTy6CSqFf4VpxVZ63ihHNp0RkWlpMh0v77Sunw3abL5iCGNATruNcRyBaRk",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -253,7 +254,7 @@
               "id": "call_mock_11021362576264997727",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
               }
             }
           ],
@@ -401,19 +402,20 @@
     "spec": "Test function spec for mock invention.",
     "essay": "nbgvXUB 7UcfLbGFziZ3BrPXS7EwhJA8qRxnftcDDqOMv7RTXETVZVrFhetA7lSfip0u5uCIC6DQHmS0 H2S6xvlNJKFsqcwTZly75sp3zV9 j0RkVYvIenBmSoqbyBU21NP2fyxAuTVvu4jgqCjIrrcJnFHKo9vgv2F2e9Wxa5 xYcsBGyzrRO99OFPnuqayLll8zTdwEW0wc3V 7HRYgfiOHrzHIeZI6CDM9wNf4moUHvyKA3ghXSuexNf1K06w8CNOT7xZn67AKcf8qA1OeGqrteTx2UEam7Pey 4nKWe7TY5SSDYSkqE9806WTox3p6WY97ZHbOJs0TcqhX2HCzwGfDqImj6PrcDmPpuQnVUClsKkBkqQV5HIN4xd4qox0qKPXiNT8WdLxfBSFJ1jqEk7gC9F1bgYR2T4qV5ojW9jFPVrovsTpPfM9tMuhakpLmz4lX0C4LFX64VimH8u5R VOrnthsX51PRK3SNjHHAiIxr2Sb88IV 3hRoJuUkBQIoTH1ma12JJryzDXGWFqpc84FW7nRJ534gMXlrR2lRzzhN4PumN1uJAXxjBCMrA3Z6l1K4VPLYQvFREqiA8jzqYhw8eziK6V09qd 6oPMDIG5eMuna155jJCK1DKsgj 9mKGeB1YBgACN8i58ESSrcWhySUOMcazMQkSODrUw47XrGLlgEKKlVlHBGKFoMOGFUl1zkArZC",
     "input_schema": {
-      "context": {
+      "items": {
+        "type": "object",
         "properties": {
-          "approved": {
-            "type": "boolean"
+          "description": {
+            "type": "number"
+          },
+          "id": {
+            "type": "number"
           }
         },
         "required": [
-          "approved"
+          "description",
+          "id"
         ]
-      },
-      "items": {
-        "type": "string",
-        "description": "A sample to judge"
       }
     },
     "essay_tasks": "MvR5cAu kdRIdnyZliqNZshByRd6utAgZVUvF3KypVMamqilFMVvDrsmYzt9s18aMO18BmjFI6HisN6jMKjgadAgUweSi4gMxo TnEXn801G92WgQbwlz2vxa6BO9B65srfVoWruGK f2SkA4Z3Z6nMXPyHGkeD0lwCRicATs0fZkFFad8K35Cgv ADJHIdJnVYjGbsMKgjcNXZlMMyizV5FIrpAErlR h6BUOAqZx2Yy4NksyLRKH795sTVpAx3qK5OCmuJexi4rR h5oATkJmE84v3oj97xw1xyLw3tNuWWfbZMIhbDhWd6pYSbKg e8dd3C6",
@@ -421,7 +423,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
           "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
@@ -437,26 +439,27 @@
     "type": "alpha.vector.leaf.function",
     "description": "I1uZRsbzWR9qvAu2fXt3hga6nJLpxwjaatjzlsPPUw0G79OR14OaSJtlK1fnRyvTEs8ZWH8PQ08yZJsmu8UJNSLMJDM0AvKVBZpw7PuG97jtT",
     "input_schema": {
-      "context": {
+      "items": {
+        "type": "object",
         "properties": {
-          "approved": {
-            "type": "boolean"
+          "description": {
+            "type": "number"
+          },
+          "id": {
+            "type": "number"
           }
         },
         "required": [
-          "approved"
+          "description",
+          "id"
         ]
-      },
-      "items": {
-        "type": "string",
-        "description": "A sample to judge"
       }
     },
     "tasks": [
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
           "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"

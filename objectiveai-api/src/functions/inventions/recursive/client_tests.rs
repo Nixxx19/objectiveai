@@ -640,11 +640,13 @@ fn valid_scalar_schema() -> alpha_scalar::expression::ScalarFunctionInputSchema 
     properties.insert(
         "sentiment".to_string(),
         InputSchema::String(StringInputSchema {
+            r#type: Default::default(),
             description: None,
             r#enum: Some(vec!["positive".to_string(), "negative".to_string()]),
         }),
     );
     ObjectInputSchema {
+        r#type: Default::default(),
         description: None,
         properties,
         required: Some(vec!["sentiment".to_string()]),
@@ -657,11 +659,13 @@ fn invalid_scalar_schema() -> alpha_scalar::expression::ScalarFunctionInputSchem
     properties.insert(
         "mood".to_string(),
         InputSchema::String(StringInputSchema {
+            r#type: Default::default(),
             description: None,
             r#enum: Some(vec!["sad".to_string()]),
         }),
     );
     ObjectInputSchema {
+        r#type: Default::default(),
         description: None,
         properties,
         required: Some(vec!["mood".to_string()]),
@@ -673,6 +677,7 @@ fn valid_vector_schema() -> alpha_vector::expression::VectorFunctionInputSchema 
     alpha_vector::expression::VectorFunctionInputSchema {
         context: None,
         items: InputSchema::String(StringInputSchema {
+            r#type: Default::default(),
             description: None,
             r#enum: Some(vec!["apple".to_string(), "banana".to_string()]),
         }),

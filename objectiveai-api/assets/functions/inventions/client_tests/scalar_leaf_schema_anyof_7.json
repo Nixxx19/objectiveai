@@ -157,7 +157,7 @@
         {
           "role": "tool",
           "index": 6,
-          "content": "{\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]}",
           "tool_call_id": "call_mock_3512624550622009134"
         },
         {
@@ -689,7 +689,7 @@
         {
           "role": "tool",
           "index": 32,
-          "content": "{\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]}",
           "tool_call_id": "call_mock_6476347515464866621"
         },
         {
@@ -776,6 +776,7 @@
     "spec": "Test function spec for mock invention.",
     "essay": "JrwSd2fDymiTqjQMpkVzboQtBsWmySnpp46ZCusD0XUDGL9M HiwcYOcADKPl5ZKapmSPC5jYosNlv0F4ia EghxF1T E3YrY6Q 53WtTMfOx2n9mqYnfLy82NCoPa1sVEFtsE xJgvIHhXxXmKKS65g3I2vibgQUgdbtxze14Msx6q1VvuWKEzUnRXgRPrPedZ1JwqR1blIFXsu36Bq5xD y27Yrz30klLOdzJO51MkRsXk3p4yAzVIUozx7JRRhzJIrnLsReeink3bx",
     "input_schema": {
+      "type": "object",
       "properties": {
         "payload": {
           "anyOf": [
@@ -909,6 +910,7 @@
     "type": "alpha.scalar.leaf.function",
     "description": "aLgej4ZXRbdEVByj2o24JPBvO7DmplSa8ib6PMukQvhvjV83ewIreUkqASJx0eNjFO70ixJiW8eunuTj1WHsEYnRgW301Qgc63StyxEnnq1rMDaDiTYG45H2yRPhP Ubg00cUoi5dswZncP2rd4f01XvEQyWKyGeoXdBUTqkxdDkp6eo1LK89G7ZywC6 M8TI5lo4FL9E2b97xsH4poGZBqolQgiwUx4zeyPPjSr0GcNrVgkQv F31O9B7QI9IWJN1xIkFttymUX4sQMpbKFGL",
     "input_schema": {
+      "type": "object",
       "properties": {
         "payload": {
           "anyOf": [

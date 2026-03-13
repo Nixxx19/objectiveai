@@ -91,14 +91,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": " fclWgmE6cXGHi1G5pwW8mUjswYwVPUuTOn1FZ0Tzx7Uc6RNRhWatfoaH4e5kRXBUd8PalwCsdLkGpQKYeZ7yNPWxX2mfvNhiaeNWufHIgW24CgEnyaCziYXYfZ1 t1PMQbLIZe1g8FADrb3bJZ6d ZNEN4k4N8jhW9IOMVEUvKjbAkTRiOlN2syE5mHTUyylSTqPMmJuH7D7VcQQk4Lsutb2mOxS4j5pPaUe1EHKAylYPF6U",
+          "reasoning": "l6kbGX0erMHS9pCMEtTCAGqHfd80 TYszudwSC0yJ5PegQCQ4DDuZAUH KT8XGlDTsKgAAO3RCGOGb6cMbSlp8277rrmGzsYWYddwxqEVB0hJVnMg4eLPodWdDVCFD8EA1fKBTaI3gG2ru4Mvxc2R3rpCguOF1ChojmByCWkC7aQYDlHYoYRjQKI8JH9l3l8XNCRr9QYbS6uNatuG6jmNxRsd52dhZUMTy2ORd6LN9IbQ3ZCx9ng7JdWoKWYQdNqJgyCGR cl7w4vMsSBgGghRZgK2oRChQxh8wMxW2BWn0OdmWjRLxcXln7ghHb33ejySQHnPGzI1SGq C7tU3HNRcR1Sta9dMTzP7lfg3x6lX4rRkZz4N0txwfbaJaLFriS4sz",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_12174141404236238593",
+              "id": "call_mock_9925704857380006302",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"string\",\"description\":\"An alternative to compare\"}}"
+                "arguments": "{\"context\":{\"type\":\"object\",\"properties\":{\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"caption\":{\"type\":\"string\"},\"author\":{\"type\":\"string\"}},\"required\":[\"tags\",\"caption\",\"author\"]},\"items\":{\"type\":\"object\",\"properties\":{\"question\":{\"type\":\"number\"},\"avatar\":{\"type\":\"image\"}},\"required\":[\"question\",\"avatar\"]}}"
               }
             }
           ],
@@ -120,7 +120,7 @@
           "role": "tool",
           "index": 4,
           "content": "Ok",
-          "tool_call_id": "call_mock_12174141404236238593"
+          "tool_call_id": "call_mock_9925704857380006302"
         },
         {
           "role": "assistant",
@@ -129,9 +129,8 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "noHDbmkQ1z98vjYkXpzMDomytgh2wnRhtCNAnsTKEVuA0M CbhWBkU XU rRHYUFQA fhq sKdndxGjV1AF d7ohYgbF5QJKI2ILQvuw6CC41uAn7ZAQeLJni xvX6ikjO hKJjERnc8ci9WS1E3Tvrlt2jHlMSB 5Ed6",
           "tool_calls": null,
-          "content": "OIP3W5D2A7fRkosvtdZU4b0VklqvUn8LCzwKv",
+          "content": "ubFatZpixZhVB1oaaGjbCscejdu izavkJ5I1CEzdIZ orx1kIcEeaQ8VmXNccw3qq",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -254,7 +253,7 @@
               "id": "call_mock_5348358124470485279",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}] for item in input['items']]\"}}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}] for item in input['items']]\"}}"
               }
             }
           ],
@@ -403,9 +402,42 @@
     "spec": "Test function spec for mock invention.",
     "essay": "2Uavo5WJ9ru5yWN5pjtvwAFL3H004UsynuHUeP02BqvDwbnr9Bib0VVv3kb pJD0VdmelgkfceeYLW5uOZFRAhrnhRYQFZ TlzNMzFvvculXgou8DRKu hpgU22DwQQxmCqHQE0D62LEt3rAwYqUIPLznCNmIKKuCoBYxyVOGZqyN8UYS5cdHs7H6C 1xN24Rku6B5XwnrwFhD9ORZZy4KdihWCp9cV35uxHVLHOxc1slvtS 9KJpn6XPKlakgkJks4V7NuQe4qR6avV1qKmO8UHd0hRjYYcZFadY0GEaWnolWNjb r 8lq13PLmGmbAHpf7kDdwv8nJx9jqO7R9QLw0hecZMITVr3y7CeK62HbhdYqDtU7xdQzV7AAiQyIMS139eMoD4ZzPWfOEal8eannaJm72feSKGPm e1TJqh0U9BLAg6PGuauw6k3VAN2j8qEXsGooad6Xhpd Rw7E7Vm5S9GEcca2a8rXEf7SYRJcas3Be2m9qCrgNEwEEQ6jb6I2t3S0GAmhMim6Z33BkZNQ0UWWXn3FkAGPNt9PePbHnJmFhcRBGivMCm1gZq6ZSgbdfHR1ilOSfZbJYR1edzXGpp4RHNFdCyMUFenYYBCxX7KlcRewoQFKSf1BJvIsVC2bUDuKb3MJYCpKn1yMmQ5zlgx5FhXrSiONZRGpH9PdokgLGpeQBg1pPnN02yg7CwgK7alLgUMXQuxOZWHDE4K1nuZ0mqgHdd 5rIpDs 3lZxQSsOzTxVAtimSqZNqhwaI2RT",
     "input_schema": {
+      "context": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "caption": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tags",
+          "caption",
+          "author"
+        ]
+      },
       "items": {
-        "type": "string",
-        "description": "An alternative to compare"
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "number"
+          },
+          "avatar": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "question",
+          "avatar"
+        ]
       }
     },
     "essay_tasks": "izwbOzvM9I1yNu7055hKHIIGNxaD4D23or i46obJsEGNmFNjqmIZnDGJetLMy78oOlnCF9t44aefqugi9QVPkyvhr1Lzf7aiFTjKkPiAWNkGb6FhxCjIcECk4oFXHi5W62vDipjMRRykP 1J6PmBzHrY9sN6GJWemYZH fKTFfJRc0TdAunBCu eR7uavgKuI4Y56QOKiTkavc",
@@ -413,10 +445,10 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}]}]"
         },
         "responses": {
-          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
+          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}] for item in input['items']]"
         }
       }
     ],
@@ -429,19 +461,52 @@
     "type": "alpha.vector.leaf.function",
     "description": "R36JGdAL5FAxcd9187PbTvPO1YRkZqjtNtphBTPC9kvKzijvNXZ79yAp60E5T1lQ1mEol9pFEvn06EGI7o722NHWwBJZQuf9pV4J5hdyNc2c61HrYtEX5gvaor1GZrtseJOW9JRGdZBnZOpkBpBfoLgqLVKZmb1wSRgn9SvFMMxgc4dMnFzZk8b26 g8SbpOfbXlwYX6948OOGK3gYnB2oQlzQYUESmJBooaCCnwHT3iaDf6KedU57H5JBALWe BYXNRW4 A4mR5tmIprbeE8MsMZzXWNHOn8Qr1PBQK4TDNqqfkSDaufbRokZ3WrEJBD9ty",
     "input_schema": {
+      "context": {
+        "type": "object",
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "caption": {
+            "type": "string"
+          },
+          "author": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "tags",
+          "caption",
+          "author"
+        ]
+      },
       "items": {
-        "type": "string",
-        "description": "An alternative to compare"
+        "type": "object",
+        "properties": {
+          "question": {
+            "type": "number"
+          },
+          "avatar": {
+            "type": "image"
+          }
+        },
+        "required": [
+          "question",
+          "avatar"
+        ]
       }
     },
     "tasks": [
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input['context'])}]}]"
         },
         "responses": {
-          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}] for item in input['items']]"
+          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}] for item in input['items']]"
         }
       }
     ]

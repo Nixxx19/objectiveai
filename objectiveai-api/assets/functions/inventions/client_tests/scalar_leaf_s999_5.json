@@ -129,13 +129,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "OTqf61EJCAwdl1tZBVFl zBLWycImqD0SWqvM9ASfQGJzS3xL9k8U06s00 mzGqPdYV8aDoe65vDpl7d9pSZ5wPgmMgFUntp NZ rmdAWKWAokWSooAjJS d5OE8jRtcBk1I0KOOdtVdi7GeHebqnBFituakr8x6YSi7aCq6VLo6YQSFitftDoZuK2yLgsXjDF5G81tuT0sLV Vsap0DpOR9aSqAlIFTvfhCli33D9FCMXRdZRfF2 ZhNSbVrAwv0gFBjJD4ewXstGuO2J0NjHFrjiddxr2k50geRcxyTMsR1pxUpBW2ByTDMOt9J U74NmlbuX68TgSjwV6EZs83srcsh0MHXD30Z0wQHG zk5tALsGvKUcSJqD5NVzrEH5W5k9CyOef FYbQAlUrRn4S4JzVtcv5o55nvP aWdw5JEFCxe3ZAOUh o9Wh5S8Rxok2aKoq1gwogTtm9dHlkpoiHT94htiWYh37kV 2RnUvYj9yBcBvvqISSeEQRo5rgTlYmXRaqmh 9JVIrUo7Q81gNcB75uA85UCWSgjMshHk1otrlozq7",
+          "reasoning": "Z8HIBuVljsSzJD R3mQ 0AeMLAydWDlMZBzPoD5ExZWiyMTK62XqhFrilK0akcrgTbi6XcaaTQWHdcFbJGSUvJxYCgCX3f86VpojW8MWublgpIFUsprx0KX0yqyQhyP078PRAvpvlnO8ogSNaekYIHaG9LmATDvuQBQWS0GBCGB7Mm6Giwkx8BvlVFZdQvoLEEZzy4WuukBreHHcdaPEtfdJNXPy495L6SuG8vmeZsxHbGyJpZHbh7Ge40R4BGEEM6dnblTmAS2JUHNhzAm1terLb343Zqse4gjV3nvKSvsfdy eo8dSP21yWgxIE1U2SHeLHpij1abTEcdI8vKEJvGG3c5XCrgPKwHfaxNXkOaMhVjpsxCpqxM3hDozTfFgpG0SiK5oYk K6lOA39qt2Rk2pjzaVdudv2X4py0oniS7iUqi1Ggch6o6oaK",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_5968858974290949259",
+              "id": "call_mock_1892701263773842346",
               "function": {
-                "name": "Readfunctions.expression.IntegerInputSchemaSchema",
+                "name": "Readfunctions.expression.ImageInputSchemaSchema",
                 "arguments": "{}"
               }
             }
@@ -157,8 +157,8 @@
         {
           "role": "tool",
           "index": 6,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.IntegerInputSchema\",\n  \"description\": \"Schema for an integer input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the integer.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"type\": [\n        \"integer\",\n        \"null\"\n      ],\n      \"format\": \"int64\"\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"type\": [\n        \"integer\",\n        \"null\"\n      ],\n      \"format\": \"int64\"\n    }\n  }\n}\n",
-          "tool_call_id": "call_mock_5968858974290949259"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    },\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    }\n  },\n  \"required\": [\n    \"type\"\n  ]\n}\n",
+          "tool_call_id": "call_mock_1892701263773842346"
         },
         {
           "role": "assistant",
@@ -167,14 +167,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "uXNT1qEyhOMRogSRDI6GpEZhxG9I0H3gUVgiTRl8qIRIqTg0sRXrrjBSaM3GvBkdQRTQkCVTkF22QsSWFjLyHHdTIfTXP9muP8044x6rlX1EghotNvcGT3 rRhaTQxX jWH6bRik4mIE",
+          "reasoning": "lCdeEFuzibBNPeBjyUl66S6vDd8aizAAw4R6JkIRBTFGZ2HuvjFtIPcdlGXoMGPvgBPVPPnutSinxLiFktVLvdzzMwsThSS03FaWmyjW",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8269027480196403949",
+              "id": "call_mock_8110493800762380811",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"properties\":{\"format\":{\"type\":\"string\"},\"photo\":{\"type\":\"image\"}},\"required\":[\"format\",\"photo\"]}"
+                "arguments": "{\"type\":\"object\",\"properties\":{\"photo\":{\"type\":\"image\",\"description\":\"The photo\"},\"kind\":{\"type\":\"boolean\"}},\"required\":[\"photo\",\"kind\"]}"
               }
             }
           ],
@@ -196,7 +196,7 @@
           "role": "tool",
           "index": 8,
           "content": "Ok",
-          "tool_call_id": "call_mock_8269027480196403949"
+          "tool_call_id": "call_mock_8110493800762380811"
         },
         {
           "role": "assistant",
@@ -205,8 +205,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "aWdgSc66g3VqlL6lTzI6kwrxcxcUNQj1wVZQLZuGxI4Du4YCh4LuIIDOLUVtJ6Zr B7HSdcjoBxQKOBjNmFB CAvzZWnATrbr473iw3FqSgn8L2MWdeIhWA1W WvYITChxsCim2jeYGRgM8rt9jWXi G6kFgAviU61A4SniQm8xobxWDltA1EgWCOyF72vTaQRGdGNRnjqFxP0bw5eVbNg4kNwACdcpTM3JXQs27qglKq58lQPIB5TsBSpeFmynHze bOFErXPjta dfraLqhERBT1mCdyTfQAz11ai0BXnmcNQRQjpIq5Ig5wkm1RITZng1ZiA",
           "tool_calls": null,
-          "content": "3sDcyj33YGt5YddVHJIw51GTkVC9CTcdhAMBj1WFYZ0yEga2nLoMI5QFJwaeZgnQTbtDnF3imwaowgL2w7w",
+          "content": "TWcmro VdRXX l4ke6lVx9McMVsbmgPa6tRLniREKTNJ1rQbOV5A4wJbI",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -1002,17 +1003,19 @@
     "spec": "Test function spec for mock invention.",
     "essay": "7vBxGiUiaY32LzYuexrn17792MJ04IaaZSlnoeXZcONWtytuTSX4i8PgeiTjLAbOCyQ5LBZhbjvohOgJWJrsdVVgxAhkT66 nJnRjI481nWuEr1h8AH9QH7N36jwoRiPfvfWxMgKVmnsZhoKuIFV5sR7prZfXr4vKVfQocLP02VEPs86ZO0KLz74dlIzsFXnxF5JE4TRQ3A5DGuY10lEJ16MdPbe XVVrffWDf4cocRKEN5LElmU9icZeD6JVoxSySADfQuvNgVkZSFoAjMO88aYlzGejF4bpeHOAL0aAqPjdyyyfDV9K3q fLbYq MQ4CR ZLpJvfXfF",
     "input_schema": {
+      "type": "object",
       "properties": {
-        "format": {
-          "type": "string"
-        },
         "photo": {
-          "type": "image"
+          "type": "image",
+          "description": "The photo"
+        },
+        "kind": {
+          "type": "boolean"
         }
       },
       "required": [
-        "format",
-        "photo"
+        "photo",
+        "kind"
       ]
     },
     "essay_tasks": "hkw7hgzqOPXbeqG0 wdHJbkNw7lp5Um xosXCASXhaFWMoavvv5thBkbLIctSgak5aVQ9fIduDbxJxje CB MZ4FXV3VCK7Dd4X4ZaATHVvwY0YmPrRCyeKzk8vcEw93BcKTEtcTAHYM4Sc3hlEajDAzBsN65Xz3d6w7pBPfBHWcACabrdGkvoREF4fFqUGqVuJXAzh6MpD1xl A4pySQFF i5 giJfP6aVBXowQtGxsTiA 0JNhp8FlWv4XuvvUEltFbzx0tgpExSxZK SXPGoV3dCRug2OQZrCKE2fJ lKvvSkxVTpFb829Aly",
@@ -1317,17 +1320,19 @@
     "type": "alpha.scalar.leaf.function",
     "description": "dqEbPkDsJHLdEU4IS NMFivnMEMIpgVIP4K3a3Zc3zJZQk3xlbeNU0dz2VPBEqSZiJC8j4XH02ZAgUJBKt1dOeGTh3fKH4PI2b Wrx8wb05qtZ",
     "input_schema": {
+      "type": "object",
       "properties": {
-        "format": {
-          "type": "string"
-        },
         "photo": {
-          "type": "image"
+          "type": "image",
+          "description": "The photo"
+        },
+        "kind": {
+          "type": "boolean"
         }
       },
       "required": [
-        "format",
-        "photo"
+        "photo",
+        "kind"
       ]
     },
     "tasks": [

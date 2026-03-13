@@ -193,7 +193,7 @@
         {
           "role": "tool",
           "index": 8,
-          "content": "{\"context\":{\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
+          "content": "{\"context\":{\"type\":\"object\",\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
           "tool_call_id": "call_mock_16894524806297315324"
         },
         {
@@ -436,6 +436,7 @@
     "essay": "nCnOa1PJi0KBJR1vXrDZjEuArWJgURXrzrC3KeSlm1fQBkYbNZyd RBD ymuL92g4 FneuHTl9EvRfSK9WmWNmsHToZGk8JjuBsgnNNdYg NebIgeEYTgltJ PIHOWMAYGSBUUxZJncOqtb4HzC6H y  jfG9q3w7B65dSlE8b  PRAbZ6MOAp4IOOatr17aW7OR9Wdmn5YSIGJYkwSp3NHEQUtr3GlPTXRz9JtAzJR CJbOS2PoXZSB0vDWehQhEqHx8vNzYxNoMiPl0S7qNd1wcBhtAdJc1G71H3RR4LR0Sg5CeIt1hHMeZp1dq8u2jlKZo1DQYKIO7rSyDcZYqQRAs18L6ZDtvsRx0oLUI8nKQG4Q88QJXYpuWicBkvHZCkFtvYR0j3f0ESEiNmi1tc3775sTt5GUspPn7 SyxA34Aeqm 3HhmjmiQhCCOuUtEHdCzNSSecinhlUPgsogGHVWx5f8ZA1IVWNmKTYHKdsFYMXjrLkc8VC35xt20aFGKUTImjrwJt6C8",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "criteria": {
             "type": "array",
@@ -526,6 +527,7 @@
     "description": "nkBBxteV Tnpiw6 dlxU6XwxYtrCUQ8L5T8XYxmWRj5DQUhrigFosa0nviJIjO6TqeyeItS7 iN1rX9BZD1vqlxpGDlMB7NTzgthSlS9poPjXiJFnSbVi9",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "criteria": {
             "type": "array",

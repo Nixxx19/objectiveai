@@ -118,7 +118,7 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\"context\":{\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
+          "content": "{\"context\":{\"type\":\"object\",\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
           "tool_call_id": "call_mock_3937912244883279377"
         },
         {
@@ -590,6 +590,7 @@
     "essay": "EQzUWQRVbNC5hCFcgctRfENOiKDsmI9GSQjwV2TJr0bJnm84iszx2HJZeD2NHC0SXEAYQZ36xF mIdGQZdlv0VPs3H6njQjpgRpnlQSC1S7sijAt82j50Si1qn8RxnmKhiAO2pnva0YDbjvG4wly7GxbqH3bdGJ77g I5gLuoPAvY5OoXbHqIAIvMo9j9FZhK YN443o64k8gRYio9WAYgMFX55VRtWqi8JcABDl6gtfkvdzZqCqd52OWJ0CyPWlplyZsg aTThi1CGsCyJ6DY5iXHe7wHAHvcS13GtYAscw2g9JS2SOWEFrJjlmxYonHoyPZVFdkiFbo9YrfcrDkliWHsrsZ3N6W3kkI6VAC4ZJSuE2wHLUwia0K0ttL64JU9EZNw3cbO4AuW4Tgt3c4 NxC7cfbCgoe McM6gQvNWna95DnRls9hRGY6xVZGmcgtybr7dUDKqFpJPcvgEYyeGfFaO83TQeJY3 QRcIaQtUK7wWkkWbNG6nE8W8Vq24kAYLkh3wcwNJTAnacjlIE4PtB1WAIDQLqlJMvcpq1KSbimRH2CMyP8uT18refsv3K3EzjaHSNX72JvB4F7CD20qw pZEwX1i0cW8Eci7JHzn9PGWGW5kMIQL351nxhTi6ldrScOu2IvMoRJlZpSU JR4zqGG2ogU 5RcFBbp5tLWX8dOCh187Ok6ViagxZHjOYdUruQ3hzdaIV7HqJXDVDDn8mAapBNR86mboZbzZZQvLDB1tUD6KpVzb5JTsOxXVnHpJwjYQK8",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "criteria": {
             "type": "array",
@@ -680,6 +681,7 @@
     "description": "WRzqhTnJwyPfMQ1zvyye7TiK77fZBj5hucZhxnttwLMwBXOXm dZKleGZ5TiyeSB EQE pJwqV8dw3RdtkD1njI1yEgigpfKJqp95a7swJHXZRhWoVeHFcWHGEZr0XyrnkqohYKnBF2X3U1CkvlOt KAs46tMl32vne9U7KN MTcZj9vneZnc9idKBWZD3iHnq77jtOqdXC163CNFNpA71",
     "input_schema": {
       "context": {
+        "type": "object",
         "properties": {
           "criteria": {
             "type": "array",

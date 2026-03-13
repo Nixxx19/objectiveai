@@ -231,7 +231,7 @@
         {
           "role": "tool",
           "index": 10,
-          "content": "{\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]}",
           "tool_call_id": "call_mock_11932037498357848161"
         },
         {
@@ -663,6 +663,7 @@
     "spec": "Test function spec for mock invention.",
     "essay": "KUUtzyJyAKkwU5fAQZOCVsSSgwtzfpQAfORDPcwY73NrIWWHykpgA EbTKPncLf3nASv0mLhljxe8vMNjPeEbNRxiA5Yl6iK5pAqQZ2nKt KDdsN2f57R59xajvNKSO85pkXrec3T WcB8b fe mrxBdbt1DnrlQvifYNGbgvCQWbcY92L Xm7RsVn8vcYokKCHBHDIw5mSgnQAQyDerZ1roWRIvoQozkSeRqmxtLyntrmUZPjHXZ9Cdwzsrhx0bTdYGNvQRc6cU4 34Ixa8v37ZEnHJ0CJfeO1 1TDk1ro3AlQdKUpoM6ZDSqRrXQg5XF1Tz8AxDg7ZLOzIJQjkG2R6sZ4ySlO4Ww0NRgBtV5tpkUonSkkaj8Cj1R7iqlEkFgeFtPsRN0J29tX7i0PeI5gF5H5bXd3XOREHzm78hXgU8MmM57Fekld5githqqxqYXPUoKjNP9fhRIqz3fW1ccnV 8w3j9LxtDpf8uYlIsgTdnfzZUgyiQV4hsX IDCO5YLaqQaV0ZoyUVOEMLk26HzzOir2GJzJKcrmCNTGL 2RDhc5aBjSFGeFxFmkQmso5596puiWZXLC9s8Q2b94f5g4fE8O1 HmFrzci3bHM5UpGO2JlSKKxH VdmwDcX1Ldii8agjwnnOYzosz82fXixzuKxtGVvsNmHtmmpF1EI8uA2VXtr73t6lG1d5J0 hiO0a0 6h",
     "input_schema": {
+      "type": "object",
       "properties": {
         "payload": {
           "anyOf": [
@@ -796,6 +797,7 @@
     "type": "alpha.scalar.leaf.function",
     "description": "YZObmlDJL4j8YLQKNhR3cDwkHweO5rrF2BPzVDMAazaXHD7OF0a93kzKqNRd2VanOimThOIYi8tQoD7T v1rWlGqamFEMcLqFOYUrSoPr2zd361pf33qEecqdQL5WONYFgja8BE1qd4MhON3O p5bn7laKY44xMb6vZ70EQ",
     "input_schema": {
+      "type": "object",
       "properties": {
         "payload": {
           "anyOf": [

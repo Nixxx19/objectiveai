@@ -91,14 +91,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "GvWr7jOEJbUSbkeiz3P1uTl5eXMkNqfJYbrf6P6sAYJFMwhSWMnL7o kZ6Hb6GC6xXhvtJP9ZN5KsEAe1rij6IU2mkCrgXASCBsgdvipyk Oc62NCbSTzX1aMCiaPvv eQt52rzjk",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_13828646782962746300",
+              "id": "call_mock_8741440093979271934",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"url\":{\"type\":\"boolean\"},\"stream\":{\"type\":\"video\"},\"label\":{\"type\":\"string\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"url\",\"stream\"]}}"
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"topic\":{\"type\":\"boolean\"},\"key\":{\"type\":\"number\"},\"slug\":{\"type\":\"string\"},\"attachment\":{\"type\":\"file\"}},\"required\":[\"topic\",\"attachment\"]}}"
               }
             }
           ],
@@ -120,7 +119,7 @@
           "role": "tool",
           "index": 4,
           "content": "Ok",
-          "tool_call_id": "call_mock_13828646782962746300"
+          "tool_call_id": "call_mock_8741440093979271934"
         },
         {
           "role": "assistant",
@@ -129,9 +128,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "MBBNgnHDCwcHQWy4l1qx2FUfEAo3cYOzIZ R6XlGE2PsCUzZHg0A8btGx hkj bDXwhkBrHC8SGDFrz3zaSJGFFjgrja5CauAd4ZBxI5q8i8yDvleGKPMwU0hga8qSmQS7ylWm0bhOClF5hAVReewgfVPjam4nsU7W819DsJCOMABC zt9trb2rmOvrV0UA3yib5SxypbcyUhZORbk8JKWDAPixbc lH0Y4t0rIf2UpsKZNKNBzE3yoIActmADGFH1DiXjcqaH1ilkOzndIyVYhKs08NmNlPJevlT124F6S0sEDAyqKRMo7vfuudLquwZUHCV82CLKT023iJ98C2xyBJKfugTFY207a3Ru1fXSnShD52QJy3AGUjALcfJOImC5Lwq7DMwi8psc7c5bsxsW1hEn8c1Hksg3mtjrzfzD7RyEVUyKWhHkdP47MKbXtZBVEeS9u BbQBflZj9CGPVskAR6NegZq7XVNA4F0By1LdoX4LBKxzJPqBb3e1W3WGkLBqgBkJshrvV29Ezm0mkqY0NKXNccIEweE1j le nGNRe0urdl93bpVazWlAYe3KT zLyLoEflcnfSB0M52amULUH2Oh4 nQBuIeSrp2nh8XF8C9DbmrQVRfUzfEyKJ iCmtOLiVue8qAxzIy7WG1vngO3r06xwoXlqOEd1La8hTyMoFZhR0vjht2DvwQf9w28oIwhE1rfugWYIr0ZdcRTAOnJm2vf3bw6S52fQupRyAVQqozl ZyyLsf8wbwcxVCPugHklKu3bqv4zj4RlW43vbw2IJnC1WUDkpFtkCrS FTKRJnJwM8Y8YPEJEwuW8CmIpEta",
+          "reasoning": "adasBwknEQmUSBsJPgZ8MeHv8lqxJaDzdHMWAnc5vYML7cTUpXWsOdONtcUz kYy1dXKsi3dYJZjyjXx7zucF4VJtomloyj6rUYmrlKdBSkqlEMScDmWLt96a4uSkiwCUlaMBk1hVLqFR77gd9ZnYKCn5P0uLhPpIURD2MN3zXMSgL4yflhUX9u8JaTLJ4RENlRVSmkQyTeD9ToqSERxfGBgbRWFwZ8o3avk1ptvEQ45UcG QFNI23mhKQ4nR2i9U3w8ncJzyOO03nnzvh3n8HkeIyevNpOQ9M1kMNCMjvWzOa d0Tu2hMV1K7E81AN7jYsdeoxawHUb0TafEliFt5KqaP9vXLY9te3ikzxNkwwAztxWujRWdHVgxdbxYTkHfN7bAImPsRW29SeFYqtBzRE0HdlhJPMM1LJdJvLY0DcuLK4WDBeus2TQk4ksbQ5Ue3NQ7wp0 hdGDTsq3oppiBPUX3QmM9bwv86lTAtrrI",
           "tool_calls": null,
-          "content": "jTksN5QibLIWodh1LKbjjfVbKv 1ju19bAkLhzt0ScZ5R12qP4MXghX9I3JlkuqY7L6itDIvyErRGaTUsiOeRO",
+          "content": "iJSrJjTZOBh1RRiRgNupVMtR5iv2wKxNRf2cJFHnoC5zkTKzwztP0zW0d4cpUlWkf8HVc",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -351,7 +350,7 @@
         {
           "role": "tool",
           "index": 14,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Expression\",\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\n  \"oneOf\": [\n    {\n      \"description\": \"A JMESPath expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"JMESPath\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"JMESPath\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A Starlark expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Starlark\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"Starlark\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A predefined special expression variant.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"Special\": {\n          \"$ref\": \"functions.expression.Special\"\n        }\n      },\n      \"required\": [\n        \"Special\"\n      ],\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Expression\",\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\n  \"oneOf\": [\n    {\n      \"description\": \"A JMESPath expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$jmespath\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"$jmespath\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A Starlark expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$starlark\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"$starlark\"\n      ],\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A predefined special expression variant.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$special\": {\n          \"$ref\": \"functions.expression.Special\"\n        }\n      },\n      \"required\": [\n        \"$special\"\n      ],\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_12564508208021655825"
         },
         {
@@ -367,7 +366,7 @@
               "id": "call_mock_8661492378054637356",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"video_url\\\", \\\"video_url\\\": {\\\"url\\\": \\\"https://example.com/test.mp4\\\"}}] for item in input['items']]\"}}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}] for item in input['items']]\"}}"
               }
             }
           ],
@@ -554,25 +553,22 @@
       "items": {
         "type": "object",
         "properties": {
-          "url": {
+          "topic": {
             "type": "boolean"
           },
-          "stream": {
-            "type": "video"
+          "key": {
+            "type": "number"
           },
-          "label": {
+          "slug": {
             "type": "string"
           },
-          "values": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "attachment": {
+            "type": "file"
           }
         },
         "required": [
-          "url",
-          "stream"
+          "topic",
+          "attachment"
         ]
       }
     },
@@ -584,7 +580,7 @@
           "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
-          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}] for item in input['items']]"
+          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}] for item in input['items']]"
         }
       }
     ],
@@ -600,25 +596,22 @@
       "items": {
         "type": "object",
         "properties": {
-          "url": {
+          "topic": {
             "type": "boolean"
           },
-          "stream": {
-            "type": "video"
+          "key": {
+            "type": "number"
           },
-          "label": {
+          "slug": {
             "type": "string"
           },
-          "values": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+          "attachment": {
+            "type": "file"
           }
         },
         "required": [
-          "url",
-          "stream"
+          "topic",
+          "attachment"
         ]
       }
     },
@@ -629,7 +622,7 @@
           "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": {
-          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}, {\"type\": \"video_url\", \"video_url\": {\"url\": \"https://example.com/test.mp4\"}}] for item in input['items']]"
+          "$starlark": "[[{\"type\": \"text\", \"text\": str(item)}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}] for item in input['items']]"
         }
       }
     ]

@@ -138,6 +138,64 @@ where
     agg.expect("stream must produce at least one chunk")
 }
 
+/// Like [`consume_stream`], but with an accumulator that is built up on
+/// every chunk and passed to `on_last` for richer assertion messages.
+///
+/// `accumulate` is called on every chunk (including second-to-last and last)
+/// and can push data into `acc`.  `on_last` receives a reference to the
+/// final accumulator alongside the chunk index and chunk.
+pub(crate) async fn consume_stream_acc<C, S, A>(
+    stream: S,
+    mut push: impl FnMut(&mut C, &C),
+    mut accumulate: impl FnMut(&C, &mut A),
+    mut on_chunk: impl FnMut(usize, &C),
+    mut on_second_to_last: impl FnMut(usize, &C),
+    mut on_last: impl FnMut(usize, &C, &A),
+    mut acc: A,
+) -> C
+where
+    C: Clone,
+    S: futures::Stream<Item = C> + Unpin,
+{
+    futures::pin_mut!(stream);
+
+    let mut agg: Option<C> = None;
+    let mut buf: (Option<(usize, C)>, Option<(usize, C)>) = (None, None);
+    let mut idx: usize = 0;
+
+    while let Some(chunk) = stream.next().await {
+        // Accumulate aggregate
+        match &mut agg {
+            Some(a) => push(a, &chunk),
+            None => agg = Some(chunk.clone()),
+        }
+
+        // Accumulate into acc
+        accumulate(&chunk, &mut acc);
+
+        // Shift buffer — flush prev_prev through on_chunk
+        if let (Some((pp_idx, pp)), _) = &buf {
+            on_chunk(*pp_idx, pp);
+        }
+        buf = (buf.1.take(), Some((idx, chunk)));
+        idx += 1;
+    }
+
+    // Flush remaining buffer
+    match buf {
+        (Some((pp_idx, pp)), Some((p_idx, p))) => {
+            on_second_to_last(pp_idx, &pp);
+            on_last(p_idx, &p, &acc);
+        }
+        (None, Some((p_idx, p))) => {
+            on_last(p_idx, &p, &acc);
+        }
+        _ => panic!("stream must produce at least one chunk"),
+    }
+
+    agg.expect("stream must produce at least one chunk")
+}
+
 /// Shared snapshot assertion.
 ///
 /// When `env_var` is set to `"1"`, writes `json` to `path` (update mode).

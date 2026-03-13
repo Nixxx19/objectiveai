@@ -311,7 +311,7 @@
         {
           "role": "tool",
           "index": 13,
-          "content": "{\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"payload\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"score\":{\"type\":\"number\"}},\"required\":[\"caption\"]}]},\"tags\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":10,\"items\":{\"type\":\"string\"}},\"priority\":{\"type\":\"integer\"}},\"required\":[\"payload\",\"tags\",\"priority\"]}",
           "tool_call_id": "call_mock_15284880800023899777"
         },
         {
@@ -627,6 +627,7 @@
     "spec": "Test function spec for mock invention.",
     "essay": "dHg5jj3ReeDCKpP45juVGMQUuDb4YoL9QJk3t92rEW93PUwUnuhtD28ijHf2TtTkxrLMRt yt sERajI8 rvioVN 17MQLap983 sgLu8I5iA5xdIUVIQNKTEwBqPZKG Qayh E4JfzEjaDtEmsYfur6hdMYw2bK5 CEGUVVQaC8XAxeYNXdtvxfXTISnsbO m8i0HXbSZ4nzXXpBEjGURBkAIuKFbdTdz5Z0qYjQME4D2hhN620oUfBPvq2MmLpn7LHey2iuB1pxYNUssITfOAGgDeUMc",
     "input_schema": {
+      "type": "object",
       "properties": {
         "payload": {
           "anyOf": [
@@ -760,6 +761,7 @@
     "type": "alpha.scalar.leaf.function",
     "description": "pAhXo7NUND2xiKgvWr6ZCit1wECDzNpYYMrQBbnZajNvO96MhbaLDnNj4OS2mSeo3mAgzpjSjKvngPJh7gcxTNkkoMHn5gtSPbLJVl3 YYogkvSAiVJ0QmS58omRbMM9KJZAVsOXTcO9J6gP1WKIkH8HZgg35WJZXFXCbRu0aI2vqzTgctovN6gpJWXBuHBYAH RRkEgUXkcfTzH9jW7atUMcpX6xMaOljAjYIWECl9gqU",
     "input_schema": {
+      "type": "object",
       "properties": {
         "payload": {
           "anyOf": [

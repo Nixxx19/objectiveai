@@ -90,14 +90,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "bjWzENIhxOcCLNH20hkJ6Py3TPARN gagUFDGh5gBQuENTxdDQgjODgEBx2od9pFfVrmKnwMcuoeZtbNhEwnmFZv188KwrGZ6tSWWbgZfETC3qRwIqDhQnw7jaIf1Z9NVIcOsSu8Jk0GXwAyHmBDZz WWEQ7XViwiIbqT40KFaX15TjYTNkVObN3h1NgIhlzcW wTy56EYHMinurGWzBy0  6kcUopn3a1rsl0hs9DGEgD1Ug9ETiwQ95p2qz96bAJCWGLwN SWHxapyy6NkTszCfI6j4QBOijuROdG6XaBDxW77pdEaRoOxxxh2V4SWCh9bLnRmM6erwaGtNkqFPmsRQukoIZjygUgLJVrtaXvKvMDdba4peQhJCrXKXch4PLLgciHoPwSZwHiRbzAORclAeKc9kDPWhZ0Cjoc2pMQF8sh FVChtrmr8Mj0uXBDYiDq2B9BJ63dT7HLrf2F0A9wJGVPxgXv4rfGMcNfUe5K9wS8G0w7sD1IV9Dw7Hbu2JgePGTtGdaJXJLS9A58S3Pj29gwTgv3NdfLPUbLYjM9mjrg WMKhcR5H9kgbb6gYpT2YbgjEnkt8SNFEIO7Yv8kutN3ZAeEKaWV68jmlkAbHquuVA8gxFqtgJdoUzb73NJRxiX 8wZQwKi94MMwF3TG7x8DppjQo3XeGye3 o9SYn62rRb2n2X9SnBRUV 0SU3  xMrLIgWeDLbyiP16TaovTdZabNbpa2UbTWO9bZdC1KKR8VRTaYBGjWuIfykpXhUXJ1LUMAv vW29 ",
+          "reasoning": "Jq8MgYsBQLFUTFTAvamLVjCn1CU1ddpW3ZJNftuIViNwUt00oxN7phw8ott7GmvXKGWWtMUGl1UqvvSN8h9TLer61NOo0sijF369EYQoki7Ev2PsCoYC2w4e5ZvdUMWh0Attd412MrILIrbiS4iUAdua3ESOAGifujZgLvPVyLNI OZO4jBumSi3XqrkSIotmW1ZHvqjXr78JGNFyy88cPnh24IAW 9f1srxhJi66G7WfQvGVLoJ8usAyVY2EBDO6yTMz FwEr1r",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_7128034009353663428",
+              "id": "call_mock_14776209749844672726",
               "function": {
-                "name": "WriteInputSchema",
-                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"url\":{\"type\":\"number\"}},\"required\":[\"url\"]}}"
+                "name": "Readfunctions.expression.AudioInputSchemaSchema",
+                "arguments": "{}"
               }
             }
           ],
@@ -118,8 +118,8 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "Ok",
-          "tool_call_id": "call_mock_7128034009353663428"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.AudioInputSchema\",\n  \"description\": \"Schema for an audio input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"$ref\": \"functions.expression.AudioInputSchemaType\"\n    },\n    \"description\": {\n      \"description\": \"Human-readable description of the expected audio.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    }\n  },\n  \"required\": [\n    \"type\"\n  ]\n}\n",
+          "tool_call_id": "call_mock_14776209749844672726"
         },
         {
           "role": "assistant",
@@ -128,8 +128,46 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_17971561090776154936",
+              "function": {
+                "name": "WriteInputSchema",
+                "arguments": "{\"items\":{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\"}},\"required\":[\"text\"]}}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 6,
+          "content": "Ok",
+          "tool_call_id": "call_mock_17971561090776154936"
+        },
+        {
+          "role": "assistant",
+          "index": 7,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "5fstN s58j37tm4mqzEK EdNlkNpdXYSXJYZQD81nbryyqK5QABCrvptIbj55hkADIII8e2kHA5s8XWL97nSN9hMbhy2582j5X4Yl3a",
           "tool_calls": null,
-          "content": "kZi4jBFbjYh8uA6m4 8adWRGYrICwshrwvfPwZdLGBIMeSOgz5s3pNybvIicmHwhot1ixL",
+          "content": "BS5t2OD5R6W6O",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -160,44 +198,6 @@
       "id": "",
       "created": 0,
       "messages": [
-        {
-          "role": "assistant",
-          "index": 6,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "P9QelLSU6vKeWgdRVvKiBOpn538mMln7JvY10StLImxp4BFHEtLl7MRg lJvtS",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_17778694179487413680",
-              "function": {
-                "name": "ReadInputSchema",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 7,
-          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"url\":{\"type\":\"number\"}},\"required\":[\"url\"]}}",
-          "tool_call_id": "call_mock_17778694179487413680"
-        },
         {
           "role": "assistant",
           "index": 8,
@@ -233,7 +233,7 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"url\":{\"type\":\"number\"}},\"required\":[\"url\"]}}",
+          "content": "{\"items\":{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"string\"}},\"required\":[\"text\"]}}",
           "tool_call_id": "call_mock_13601174261003741952"
         },
         {
@@ -591,12 +591,12 @@
       "items": {
         "type": "object",
         "properties": {
-          "url": {
-            "type": "number"
+          "text": {
+            "type": "string"
           }
         },
         "required": [
-          "url"
+          "text"
         ]
       }
     },
@@ -624,12 +624,12 @@
       "items": {
         "type": "object",
         "properties": {
-          "url": {
-            "type": "number"
+          "text": {
+            "type": "string"
           }
         },
         "required": [
-          "url"
+          "text"
         ]
       }
     },

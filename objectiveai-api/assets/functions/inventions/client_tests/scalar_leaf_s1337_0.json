@@ -91,12 +91,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "WxX2dyZmVkmBgHqBpfm83C8KXVpm9fx gKrAPbE7koUEvJPIg26CVtwC0PNaot0yZu1tVQDdUVGLBW0a9gydwpq4KRbi3lrW3OL7T3FwZPx6OkpmOrVPGI7P9TtOXjPKPN iq6KaBTs09SaybN teU9cf7k717g92KvF68iq2PzTRtHjnbW4as7eJszaWTqiE8FaGaTz5dAoArUcwpsmyeDWpXhJ0WTAjV5RfWtG4FITEhimOW8mV1JnUPdCBvd9UWDfNfmYjjkmu9t VIEFjZ8R7gEYDtIVECEVrAY8bGHHWEDUKYnt11b4aGc5qWDRP5DPd8WSmdVVdCMdKYZVD6jwJHs3VFwuqKZKo4c 10IDyPtz3tlAMH034z6Tjm9ALrLvNNzhVn9zBz8OHk45cfysSbKnFGOjM3hKIcYGfeS4F2iZtifnCbLYivEKI8skR9ZNDJtOL JnCPxQIxhHGq5rqYoFEmeGHnFRXN",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_5730715872010968014",
+              "id": "call_mock_12039044577841040642",
               "function": {
-                "name": "Readfunctions.expression.NumberInputSchemaSchema",
+                "name": "Readfunctions.expression.NumberInputSchemaTypeSchema",
                 "arguments": "{}"
               }
             }
@@ -118,8 +119,8 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.NumberInputSchema\",\n  \"description\": \"Schema for a floating-point number input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the number.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"type\": [\n        \"number\",\n        \"null\"\n      ],\n      \"format\": \"double\"\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"type\": [\n        \"number\",\n        \"null\"\n      ],\n      \"format\": \"double\"\n    }\n  }\n}\n",
-          "tool_call_id": "call_mock_5730715872010968014"
+          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.NumberInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"number\"\n  ]\n}\n",
+          "tool_call_id": "call_mock_12039044577841040642"
         },
         {
           "role": "assistant",
@@ -128,13 +129,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "CYncFIMsrgUC spRt7p0i2JUiF6A5cuHcpf867pcOOXJYG955I5qJIdILlF9CtbmAu8gtqq OBujbLrZBEArHoPw7LTNxrkc7l6RZ9Vmw1mWIxNZ8DBr icdNI1VuroUC k7C6gmTzOrIGgac4opXoempS3TSBQ 0 gqUP7OkedbY77718U1Nx3xngta6z9z kODtbOq22HGJyn4lwcFc3FzhZL2t WYUEV2i5bIJkYnxKAzaliVHQBOSXY624mEgCm2Qe67iRBY7JoX9nJIG4oMJuwnlrafhAs6CkhQYgR",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_16144016858346051120",
+              "id": "call_mock_5552658890809417822",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"properties\":{\"query\":{\"type\":\"string\"}},\"required\":[\"query\"]}"
+                "arguments": "{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"integer\"}},\"required\":[\"text\"]}"
               }
             }
           ],
@@ -156,7 +158,7 @@
           "role": "tool",
           "index": 6,
           "content": "Ok",
-          "tool_call_id": "call_mock_16144016858346051120"
+          "tool_call_id": "call_mock_5552658890809417822"
         },
         {
           "role": "assistant",
@@ -165,9 +167,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "3zUU2SHjFDJyP2msd4IcvzFN8ZTFAW9jQU8il5loAsBRXrAkyDPDHaPkJrBqTaRH18sSVcwNG9vysmjlvrDLd3OWJ83jusfDcAhbV5tlq5kVlyi2k7PYnCxyn66D1BN07NKQGwK43JmrwJ36x8eH34YpJ9ZxLd3OtL1vSM57ocT65OgjnwyBQJN3RWnpfQX4HTWLNsyQWEKMitl8KZxTkyGDyNZeEzL  geyc0VF8Y9P4fWOQcd 9ae9ABCc4u5",
+          "reasoning": "YjtGAA92lVgwOFdHVkY5oUEZB8TZGjmeaz0j5jBMcPQ9CkvK GnhTLiQ5iP7jGVuWJUKkT5vqYEqR8kk8l21k6qq58ZZDZqhxXY46eCRmVvFjQH8iJkDKtNOk3RF2gpuwvtJiWxbA6Avks1Jkv1S3TX VevQ6YEdA JtZTIkHGhZ0S9GMO8KnzGGPvVeSaJs6BkSB3LsoenAIXIncRyKbBGBJrQ",
           "tool_calls": null,
-          "content": "7sh9FOBVAo6hkvhoIqJJSkj5Q2P38kIZwA1cXvPRXH8PpGRg",
+          "content": "vLD7K6 TAcqRMbYt UsO8TkGUvf2LyuKBfZcTzcH4c0BYnjUr7nzCFznajC45",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -464,7 +466,7 @@
         {
           "role": "tool",
           "index": 19,
-          "content": "{\"properties\":{\"query\":{\"type\":\"string\"}},\"required\":[\"query\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"text\":{\"type\":\"integer\"}},\"required\":[\"text\"]}",
           "tool_call_id": "call_mock_10225479352428182493"
         },
         {
@@ -590,13 +592,14 @@
     "spec": "Test function spec for mock invention.",
     "essay": "mMcIAW1KtmOMM6axN1TXPqzx3Gxxac158BEjtfIDyF4y8xiG4mJrllh TPgBbu JJ0ooyGm3hNvGIeftnCSOs4m99B9YjS178juuNl1eofAPbRCL4b9pAfyZM8nVgrnMRWwRxcfzgFlWvGrrwQbXLiT0lB rI0VEPSjWoHnCEkqWP9FTL8R8CufPlkZk2brK6Vmk4yJUtFAuka5QQ0xHsgBO nSJNRhsN7jB9gpBUjojx7A28vdVZQwkqUNMExVJBAr 58EBcy2ENdAqAfcPh1fidkyZH4njC5bsue1lNSJF5V8ncGSX7Zq5tjiELAFOHZdz3qODJEQxbBWMCuu",
     "input_schema": {
+      "type": "object",
       "properties": {
-        "query": {
-          "type": "string"
+        "text": {
+          "type": "integer"
         }
       },
       "required": [
-        "query"
+        "text"
       ]
     },
     "essay_tasks": "Db9F37Gdz4ZtT22OczloiyDXx5FGCZiEP05bo CuXCrbj6NGjU4WNZsWucl l6x9YQnAOZsMMzLH8Q mcOD2zt2ig0geU5Nmj2eRYp6JQdhsOg9U5AD7Q6uPE60GwGykoYaExawI0ArE89eOgqwCK9KLKhwS4Qov6JWRYhWv4xaNorKK2xhWDLsm92sD4YgKN9e5fgmetiAhOMKrJ1Rpu63nirJQcLsgXgHW7nb98cfD7YUPbVLVAmoSoYSU8uxDvWOTJ6vj6 tPZce1o87egs2jsdKTsQjs g 7WKUtBlvZBLZwu9csGLeFyVo8orjpNMCmpFhq Y1",
@@ -663,13 +666,14 @@
     "type": "alpha.scalar.leaf.function",
     "description": "3l4CDoUf fGIF7zZi3uy0TFGCEYkF 9zelB9Fewly8hmkBx1uk4qUTYLnA8XrTYDXs1xE",
     "input_schema": {
+      "type": "object",
       "properties": {
-        "query": {
-          "type": "string"
+        "text": {
+          "type": "integer"
         }
       },
       "required": [
-        "query"
+        "text"
       ]
     },
     "tasks": [
