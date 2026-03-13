@@ -1,16 +1,19 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.alpha_vector.expression.VectorFunctionInputValue",
   "type": "object",
   "properties": {
     "context": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "additionalProperties": {
-        "$ref": "functions.expression.InputValue"
-      }
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "functions.expression.InputValue"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "items": {
       "type": "array",
@@ -18,8 +21,5 @@
         "$ref": "functions.expression.InputValue"
       }
     }
-  },
-  "required": [
-    "items"
-  ]
+  }
 }

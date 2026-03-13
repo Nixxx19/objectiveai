@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "vector.completions.request.Profile",
   "description": "Profile weights for a vector completion.\n\nPreviously this was a simple `Vec<Decimal>`. To support per-agent inversion\nwhile remaining backwards compatible, the field is now an untagged enum:\n\n- `Weights(Vec<Decimal>)` - legacy representation (no inversion)\n- `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`",
   "anyOf": [
@@ -8,7 +7,8 @@
       "type": "array",
       "items": {
         "type": "number",
-        "format": "double"
+        "minimum": -3.4028234663852886e+38,
+        "maximum": 3.4028234663852886e+38
       }
     },
     {

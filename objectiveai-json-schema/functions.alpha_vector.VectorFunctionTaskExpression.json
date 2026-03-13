@@ -1,18 +1,20 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.alpha_vector.VectorFunctionTaskExpression",
   "type": "object",
   "properties": {
-    "remote": {
-      "$ref": "functions.Remote"
+    "commit": {
+      "type": "string"
+    },
+    "input": {
+      "$ref": "functions.alpha_vector.expression.VectorFunctionInputValueExpression"
     },
     "owner": {
       "type": "string"
     },
-    "repository": {
-      "type": "string"
+    "remote": {
+      "$ref": "functions.Remote"
     },
-    "commit": {
+    "repository": {
       "type": "string"
     },
     "skip": {
@@ -24,16 +26,6 @@
           "type": "null"
         }
       ]
-    },
-    "input": {
-      "$ref": "functions.alpha_vector.expression.VectorFunctionInputValueExpression"
     }
-  },
-  "required": [
-    "remote",
-    "owner",
-    "repository",
-    "commit",
-    "input"
-  ]
+  }
 }

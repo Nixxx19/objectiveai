@@ -1,32 +1,29 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.alpha_vector.PartialPlaceholderBranchTaskExpression",
-  "oneOf": [
+  "anyOf": [
     {
       "type": "object",
+      "$ref": "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression",
       "properties": {
         "type": {
           "type": "string",
-          "const": "placeholder.alpha.scalar.function"
+          "enum": [
+            "placeholder.alpha.scalar.function"
+          ]
         }
-      },
-      "$ref": "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression",
-      "required": [
-        "type"
-      ]
+      }
     },
     {
       "type": "object",
+      "$ref": "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression",
       "properties": {
         "type": {
           "type": "string",
-          "const": "placeholder.alpha.vector.function"
+          "enum": [
+            "placeholder.alpha.vector.function"
+          ]
         }
-      },
-      "$ref": "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression",
-      "required": [
-        "type"
-      ]
+      }
     }
   ]
 }

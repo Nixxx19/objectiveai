@@ -1,37 +1,48 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.openrouter.ReasoningEffort",
   "description": "The level of effort the model should put into reasoning.\n\nOnly supported by some models.",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "No reasoning.",
       "type": "string",
-      "const": "none"
+      "enum": [
+        "none"
+      ]
     },
     {
       "description": "Minimal reasoning effort.",
       "type": "string",
-      "const": "minimal"
+      "enum": [
+        "minimal"
+      ]
     },
     {
       "description": "Low reasoning effort.",
       "type": "string",
-      "const": "low"
+      "enum": [
+        "low"
+      ]
     },
     {
       "description": "Medium reasoning effort.",
       "type": "string",
-      "const": "medium"
+      "enum": [
+        "medium"
+      ]
     },
     {
       "description": "High reasoning effort.",
       "type": "string",
-      "const": "high"
+      "enum": [
+        "high"
+      ]
     },
     {
       "description": "Maximum reasoning effort.",
       "type": "string",
-      "const": "xhigh"
+      "enum": [
+        "xhigh"
+      ]
     }
   ]
 }

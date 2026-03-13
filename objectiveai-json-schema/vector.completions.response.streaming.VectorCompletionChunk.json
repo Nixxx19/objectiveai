@@ -1,13 +1,8 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "vector.completions.response.streaming.VectorCompletionChunk",
   "description": "A chunk in a streaming vector completion response.\n\nEach chunk contains incremental updates to the completion. Use the\n[`push`](Self::push) method to accumulate chunks into a complete response.",
   "type": "object",
   "properties": {
-    "id": {
-      "description": "Unique identifier for this vector completion.",
-      "type": "string"
-    },
     "completions": {
       "description": "Incremental agent completion chunks from each agent.",
       "type": "array",
@@ -15,42 +10,32 @@
         "$ref": "vector.completions.response.streaming.AgentCompletionChunk"
       }
     },
-    "votes": {
-      "description": "Votes received so far. New votes are appended in subsequent chunks.",
-      "type": "array",
-      "items": {
-        "$ref": "vector.completions.response.Vote"
-      }
+    "created": {
+      "description": "Unix timestamp when the completion was created.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "ensemble": {
+      "description": "ID of the ensemble used for this completion.",
+      "type": "string"
+    },
+    "id": {
+      "description": "Unique identifier for this vector completion.",
+      "type": "string"
+    },
+    "object": {
+      "description": "Object type identifier (`\"vector.completion.chunk\"`).",
+      "$ref": "vector.completions.response.streaming.Object"
     },
     "scores": {
       "description": "Current weighted scores. Updated as new votes arrive.",
       "type": "array",
       "items": {
         "type": "number",
-        "format": "double"
+        "minimum": -3.4028234663852886e+38,
+        "maximum": 3.4028234663852886e+38
       }
-    },
-    "weights": {
-      "description": "Current weight distribution across responses. Updated as new votes arrive.",
-      "type": "array",
-      "items": {
-        "type": "number",
-        "format": "double"
-      }
-    },
-    "created": {
-      "description": "Unix timestamp when the completion was created.",
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "ensemble": {
-      "description": "ID of the ensemble used for this completion.",
-      "type": "string"
-    },
-    "object": {
-      "description": "Object type identifier (`\"vector.completion.chunk\"`).",
-      "$ref": "vector.completions.response.streaming.Object"
     },
     "usage": {
       "description": "Aggregated usage statistics. Typically present only in the final chunk.",
@@ -62,16 +47,22 @@
           "type": "null"
         }
       ]
+    },
+    "votes": {
+      "description": "Votes received so far. New votes are appended in subsequent chunks.",
+      "type": "array",
+      "items": {
+        "$ref": "vector.completions.response.Vote"
+      }
+    },
+    "weights": {
+      "description": "Current weight distribution across responses. Updated as new votes arrive.",
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -3.4028234663852886e+38,
+        "maximum": 3.4028234663852886e+38
+      }
     }
-  },
-  "required": [
-    "id",
-    "completions",
-    "votes",
-    "scores",
-    "weights",
-    "created",
-    "ensemble",
-    "object"
-  ]
+  }
 }

@@ -1,41 +1,71 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.profiles.computations.response.streaming.FunctionExecutionChunk",
   "type": "object",
   "properties": {
-    "index": {
+    "created": {
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
     "dataset": {
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "n": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "retry": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+    "function": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "id": {
       "type": "string"
     },
-    "tasks": {
-      "type": "array",
-      "items": {
-        "$ref": "functions.executions.response.streaming.TaskChunk"
-      }
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "tasks_errors": {
-      "type": [
-        "boolean",
-        "null"
+    "n": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "object": {
+      "$ref": "functions.executions.response.streaming.Object"
+    },
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.TaskOutputOwned"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "reasoning": {
@@ -48,51 +78,36 @@
         }
       ]
     },
-    "output": {
-      "anyOf": [
-        {
-          "$ref": "functions.expression.TaskOutputOwned"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "error": {
-      "anyOf": [
-        {
-          "$ref": "ResponseError"
-        },
-        {
-          "type": "null"
-        }
-      ]
+    "retry": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
     "retry_token": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "created": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.executions.response.streaming.TaskChunk"
+      }
     },
-    "function": {
-      "type": [
-        "string",
-        "null"
+    "tasks_errors": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
       ]
-    },
-    "profile": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "object": {
-      "$ref": "functions.executions.response.streaming.Object"
     },
     "usage": {
       "anyOf": [
@@ -104,15 +119,5 @@
         }
       ]
     }
-  },
-  "required": [
-    "index",
-    "dataset",
-    "n",
-    "retry",
-    "id",
-    "tasks",
-    "created",
-    "object"
-  ]
+  }
 }

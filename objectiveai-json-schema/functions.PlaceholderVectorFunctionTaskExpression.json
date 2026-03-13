@@ -1,35 +1,23 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.PlaceholderVectorFunctionTaskExpression",
   "description": "Expression for a placeholder vector function task (pre-compilation).\n\nLike [`VectorFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces an equalized vector of length `output_length`.",
   "type": "object",
   "properties": {
-    "input_schema": {
-      "description": "JSON Schema defining the expected input structure.",
-      "$ref": "functions.expression.InputSchema"
-    },
-    "output_length": {
-      "description": "Expression computing the expected output vector length.\nReceives: `input`.",
-      "$ref": "functions.expression.Expression"
-    },
-    "input_split": {
-      "description": "Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.",
-      "$ref": "functions.expression.Expression"
+    "input": {
+      "description": "Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).",
+      "$ref": "functions.expression.WithExpression.functions.expression.InputValueExpression"
     },
     "input_merge": {
       "description": "Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).",
       "$ref": "functions.expression.Expression"
     },
-    "skip": {
-      "description": "If this expression evaluates to true, skip the task. Receives: `input`.",
-      "anyOf": [
-        {
-          "$ref": "functions.expression.Expression"
-        },
-        {
-          "type": "null"
-        }
-      ]
+    "input_schema": {
+      "description": "JSON Schema defining the expected input structure.",
+      "$ref": "functions.expression.InputSchema"
+    },
+    "input_split": {
+      "description": "Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.",
+      "$ref": "functions.expression.Expression"
     },
     "map": {
       "description": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
@@ -42,21 +30,24 @@
         }
       ]
     },
-    "input": {
-      "description": "Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).",
-      "$ref": "functions.expression.WithExpression.functions.expression.InputValueExpression"
-    },
     "output": {
       "description": "Expression to transform the equalized vector output.\nReceives: `input`, `output` as `Vector(equalized)`.",
       "$ref": "functions.expression.Expression"
+    },
+    "output_length": {
+      "description": "Expression computing the expected output vector length.\nReceives: `input`.",
+      "$ref": "functions.expression.Expression"
+    },
+    "skip": {
+      "description": "If this expression evaluates to true, skip the task. Receives: `input`.",
+      "anyOf": [
+        {
+          "$ref": "functions.expression.Expression"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
-  },
-  "required": [
-    "input_schema",
-    "output_length",
-    "input_split",
-    "input_merge",
-    "input",
-    "output"
-  ]
+  }
 }

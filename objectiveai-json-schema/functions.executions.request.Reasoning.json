@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.executions.request.Reasoning",
   "description": "Configuration for generating reasoning summaries during execution.\n\nWhen enabled, an LLM summarizes the execution's reasoning process.",
   "type": "object",
@@ -10,16 +9,17 @@
     },
     "agents": {
       "description": "Fallback agents tried in order if the primary is rate-limited or errors.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "$ref": "agent.completions.request.Agent"
-      }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.completions.request.Agent"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
-  },
-  "required": [
-    "agent"
-  ]
+  }
 }

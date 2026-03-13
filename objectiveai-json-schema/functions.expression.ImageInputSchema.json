@@ -1,21 +1,21 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.ImageInputSchema",
   "description": "Schema for an image input (URL or base64-encoded).",
   "type": "object",
   "properties": {
-    "type": {
-      "$ref": "functions.expression.ImageInputSchemaType"
-    },
     "description": {
       "description": "Human-readable description of the expected image.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
+    },
+    "type": {
+      "$ref": "functions.expression.ImageInputSchemaType"
     }
-  },
-  "required": [
-    "type"
-  ]
+  }
 }

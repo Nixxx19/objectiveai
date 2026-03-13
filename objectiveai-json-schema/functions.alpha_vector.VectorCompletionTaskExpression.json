@@ -1,8 +1,13 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.alpha_vector.VectorCompletionTaskExpression",
   "type": "object",
   "properties": {
+    "messages": {
+      "$ref": "functions.expression.Expression"
+    },
+    "responses": {
+      "$ref": "functions.expression.Expression"
+    },
     "skip": {
       "anyOf": [
         {
@@ -12,16 +17,6 @@
           "type": "null"
         }
       ]
-    },
-    "messages": {
-      "$ref": "functions.expression.Expression"
-    },
-    "responses": {
-      "$ref": "functions.expression.Expression"
     }
-  },
-  "required": [
-    "messages",
-    "responses"
-  ]
+  }
 }

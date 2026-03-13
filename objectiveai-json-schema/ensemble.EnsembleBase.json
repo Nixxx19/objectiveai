@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "ensemble.EnsembleBase",
   "description": "The base configuration for an Ensemble (without computed ID).\n\nContains a list of agent configurations that will be validated, deduplicated,\nand sorted when converting to [`Ensemble`].",
   "type": "object",
@@ -11,8 +10,5 @@
         "$ref": "agent.WithFallbacksAndCount.agent.AgentBase"
       }
     }
-  },
-  "required": [
-    "agents"
-  ]
+  }
 }

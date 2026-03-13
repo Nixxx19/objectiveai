@@ -1,20 +1,16 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.McpServer",
   "description": "An MCP server that the agent can connect to.",
   "type": "object",
   "properties": {
-    "url": {
-      "description": "The URL of the MCP server.",
-      "type": "string"
-    },
     "authorization": {
       "description": "Whether this MCP server uses authorization.",
       "type": "boolean",
       "default": false
+    },
+    "url": {
+      "description": "The URL of the MCP server.",
+      "type": "string"
     }
-  },
-  "required": [
-    "url"
-  ]
+  }
 }

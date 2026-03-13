@@ -1,31 +1,22 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.inventions.response.streaming.FunctionInventionChunk",
   "type": "object",
   "properties": {
-    "id": {
-      "type": "string"
-    },
     "completions": {
       "type": "array",
       "items": {
         "$ref": "functions.inventions.response.streaming.AgentCompletionChunk"
       }
     },
-    "state": {
-      "anyOf": [
-        {
-          "$ref": "functions.inventions.state.State"
-        },
-        {
-          "type": "null"
-        }
-      ]
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "path": {
+    "error": {
       "anyOf": [
         {
-          "$ref": "functions.RemoteFunctionPath"
+          "$ref": "ResponseError"
         },
         {
           "type": "null"
@@ -42,13 +33,31 @@
         }
       ]
     },
-    "created": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+    "id": {
+      "type": "string"
     },
     "object": {
       "$ref": "functions.inventions.response.streaming.Object"
+    },
+    "path": {
+      "anyOf": [
+        {
+          "$ref": "functions.RemoteFunctionPath"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "state": {
+      "anyOf": [
+        {
+          "$ref": "functions.inventions.state.State"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "usage": {
       "anyOf": [
@@ -59,22 +68,6 @@
           "type": "null"
         }
       ]
-    },
-    "error": {
-      "anyOf": [
-        {
-          "$ref": "ResponseError"
-        },
-        {
-          "type": "null"
-        }
-      ]
     }
-  },
-  "required": [
-    "id",
-    "completions",
-    "created",
-    "object"
-  ]
+  }
 }

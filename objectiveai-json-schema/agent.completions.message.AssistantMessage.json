@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.message.AssistantMessage",
   "description": "An assistant message (model's previous response).",
   "type": "object",
@@ -17,33 +16,49 @@
     },
     "name": {
       "description": "Optional name for the assistant.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reasoning": {
+      "description": "Reasoning content from models that support chain-of-thought.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "refusal": {
       "description": "Refusal message if the model declined to respond.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "tool_calls": {
       "description": "Tool calls made by the assistant.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "$ref": "agent.completions.message.AssistantToolCall"
-      }
-    },
-    "reasoning": {
-      "description": "Reasoning content from models that support chain-of-thought.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.completions.message.AssistantToolCall"
+          }
+        },
+        {
+          "type": "null"
+        }
       ]
     }
   }

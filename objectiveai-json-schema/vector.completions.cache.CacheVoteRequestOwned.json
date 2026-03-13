@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "vector.completions.cache.CacheVoteRequestOwned",
   "type": "object",
   "properties": {
@@ -7,13 +6,17 @@
       "$ref": "agent.completions.request.Agent"
     },
     "agents": {
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "$ref": "agent.completions.request.Agent"
-      }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.completions.request.Agent"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "messages": {
       "type": "array",
@@ -27,10 +30,5 @@
         "$ref": "agent.completions.message.RichContent"
       }
     }
-  },
-  "required": [
-    "agent",
-    "messages",
-    "responses"
-  ]
+  }
 }

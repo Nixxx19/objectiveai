@@ -1,25 +1,18 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.RemoteFunctionPath",
   "type": "object",
   "properties": {
-    "remote": {
-      "$ref": "functions.Remote"
+    "commit": {
+      "type": "string"
     },
     "owner": {
       "type": "string"
     },
+    "remote": {
+      "$ref": "functions.Remote"
+    },
     "repository": {
       "type": "string"
-    },
-    "commit": {
-      "type": "string"
     }
-  },
-  "required": [
-    "remote",
-    "owner",
-    "repository",
-    "commit"
-  ]
+  }
 }

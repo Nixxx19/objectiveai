@@ -1,9 +1,40 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.request.AgentCompletionCreateParams",
   "description": "Parameters for creating a agent completion.",
   "type": "object",
   "properties": {
+    "agent": {
+      "description": "The agent to use (inline Agent or stored ID).",
+      "$ref": "agent.completions.request.Agent"
+    },
+    "agents": {
+      "description": "Alternative agents to try if the primary agent fails.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.completions.request.Agent"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "messages": {
       "description": "The conversation messages.",
       "type": "array",
@@ -22,20 +53,6 @@
         }
       ]
     },
-    "agent": {
-      "description": "The agent to use (inline Agent or stored ID).",
-      "$ref": "agent.completions.request.Agent"
-    },
-    "agents": {
-      "description": "Alternative agents to try if the primary agent fails.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "$ref": "agent.completions.request.Agent"
-      }
-    },
     "response_format": {
       "description": "Output format constraints (text, JSON, or JSON schema).",
       "anyOf": [
@@ -49,32 +66,27 @@
     },
     "seed": {
       "description": "Random seed for deterministic generation.",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "int64"
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "stream": {
       "description": "Whether to stream the response.",
-      "type": [
-        "boolean",
-        "null"
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
       ]
-    },
-    "mcp_server_authorization": {
-      "description": "Map from MCP server URL to authorization header value.",
-      "type": [
-        "object",
-        "null"
-      ],
-      "additionalProperties": {
-        "type": "string"
-      }
     }
-  },
-  "required": [
-    "messages",
-    "agent"
-  ]
+  }
 }

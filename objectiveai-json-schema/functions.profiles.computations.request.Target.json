@@ -1,61 +1,56 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.profiles.computations.request.Target",
-  "oneOf": [
+  "anyOf": [
     {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "number",
-          "format": "double"
-        },
         "type": {
           "type": "string",
-          "const": "scalar"
+          "enum": [
+            "scalar"
+          ]
+        },
+        "value": {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
         }
-      },
-      "required": [
-        "type",
-        "value"
-      ]
+      }
     },
     {
       "type": "object",
       "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "vector"
+          ]
+        },
         "value": {
           "type": "array",
           "items": {
             "type": "number",
-            "format": "double"
+            "minimum": -3.4028234663852886e+38,
+            "maximum": 3.4028234663852886e+38
           }
-        },
-        "type": {
-          "type": "string",
-          "const": "vector"
         }
-      },
-      "required": [
-        "type",
-        "value"
-      ]
+      }
     },
     {
       "type": "object",
       "properties": {
-        "value": {
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0
-        },
         "type": {
           "type": "string",
-          "const": "vector_winner"
+          "enum": [
+            "vector_winner"
+          ]
+        },
+        "value": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
         }
-      },
-      "required": [
-        "type",
-        "value"
-      ]
+      }
     }
   ]
 }

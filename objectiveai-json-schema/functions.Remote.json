@@ -1,22 +1,27 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.Remote",
   "description": "The remote source where a function or profile is hosted.",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "GitHub repository.",
       "type": "string",
-      "const": "github"
+      "enum": [
+        "github"
+      ]
     },
     {
       "description": "Local filesystem.",
       "type": "string",
-      "const": "filesystem"
+      "enum": [
+        "filesystem"
+      ]
     },
     {
       "description": "Mock (for testing).",
       "type": "string",
-      "const": "mock"
+      "enum": [
+        "mock"
+      ]
     }
   ]
 }

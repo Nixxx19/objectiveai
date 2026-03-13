@@ -1,21 +1,46 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.executions.request.FunctionRemoteProfileRemoteRequestBody",
   "description": "Base request body with common execution parameters.\n\nUsed directly for remote Function + remote Profile, or flattened into\nother request body types.",
   "type": "object",
   "properties": {
-    "retry_token": {
-      "description": "If present, reuses votes from a previous execution with this token.",
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "from_cache": {
       "description": "If true, uses cached votes when available.",
-      "type": [
-        "boolean",
-        "null"
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "input": {
+      "description": "The input data to pass to the Function.",
+      "$ref": "functions.expression.InputValue"
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "provider": {
+      "description": "Provider routing preferences.",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.Provider"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "reasoning": {
@@ -23,6 +48,30 @@
       "anyOf": [
         {
           "$ref": "functions.executions.request.Reasoning"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "description": "If present, reuses votes from a previous execution with this token.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seed": {
+      "description": "Random seed for deterministic results.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
         },
         {
           "type": "null"
@@ -40,48 +89,16 @@
         }
       ]
     },
-    "input": {
-      "description": "The input data to pass to the Function.",
-      "$ref": "functions.expression.InputValue"
-    },
-    "provider": {
-      "description": "Provider routing preferences.",
+    "stream": {
+      "description": "Whether to stream the response.",
       "anyOf": [
         {
-          "$ref": "agent.completions.request.Provider"
+          "type": "boolean"
         },
         {
           "type": "null"
         }
       ]
-    },
-    "seed": {
-      "description": "Random seed for deterministic results.",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "int64"
-    },
-    "stream": {
-      "description": "Whether to stream the response.",
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "mcp_server_authorization": {
-      "description": "Map from MCP server URL to authorization header value.",
-      "type": [
-        "object",
-        "null"
-      ],
-      "additionalProperties": {
-        "type": "string"
-      }
     }
-  },
-  "required": [
-    "input"
-  ]
+  }
 }

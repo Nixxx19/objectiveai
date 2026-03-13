@@ -1,44 +1,59 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.response.CompletionTokensDetails",
   "description": "Detailed breakdown of completion token usage.",
   "type": "object",
   "properties": {
     "accepted_prediction_tokens": {
       "description": "Tokens from accepted predictions (speculative decoding).",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "audio_tokens": {
       "description": "Audio output tokens.",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "reasoning_tokens": {
       "description": "Tokens used for reasoning/thinking.",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "rejected_prediction_tokens": {
       "description": "Tokens from rejected predictions (speculative decoding).",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   }
 }

@@ -1,21 +1,21 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.AudioInputSchema",
   "description": "Schema for an audio input.",
   "type": "object",
   "properties": {
-    "type": {
-      "$ref": "functions.expression.AudioInputSchemaType"
-    },
     "description": {
       "description": "Human-readable description of the expected audio.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
+    },
+    "type": {
+      "$ref": "functions.expression.AudioInputSchemaType"
     }
-  },
-  "required": [
-    "type"
-  ]
+  }
 }

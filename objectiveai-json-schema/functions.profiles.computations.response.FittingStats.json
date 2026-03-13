@@ -1,38 +1,31 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.profiles.computations.response.FittingStats",
   "type": "object",
   "properties": {
-    "loss": {
-      "type": "number",
-      "format": "double"
+    "errors": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4294967295
     },
     "executions": {
       "type": "integer",
-      "format": "uint",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 4294967295
     },
-    "starts": {
-      "type": "integer",
-      "format": "uint",
-      "minimum": 0
+    "loss": {
+      "type": "number",
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     },
     "rounds": {
       "type": "integer",
-      "format": "uint",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 4294967295
     },
-    "errors": {
+    "starts": {
       "type": "integer",
-      "format": "uint",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 4294967295
     }
-  },
-  "required": [
-    "loss",
-    "executions",
-    "starts",
-    "rounds",
-    "errors"
-  ]
+  }
 }

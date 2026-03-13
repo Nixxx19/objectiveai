@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.InputValue",
   "description": "A concrete input value (post-compilation).\n\nRepresents any JSON-like value that can be passed to a Function,\nincluding rich content types (images, audio, video, files).",
   "anyOf": [
@@ -11,14 +10,14 @@
       "description": "An object with string keys.",
       "type": "object",
       "additionalProperties": {
-        "$ref": "#"
+        "$ref": "functions.expression.InputValue"
       }
     },
     {
       "description": "An array of values.",
       "type": "array",
       "items": {
-        "$ref": "#"
+        "$ref": "functions.expression.InputValue"
       }
     },
     {
@@ -28,12 +27,14 @@
     {
       "description": "An integer value.",
       "type": "integer",
-      "format": "int64"
+      "minimum": -9223372036854775808,
+      "maximum": 9223372036854775807
     },
     {
       "description": "A floating-point number.",
       "type": "number",
-      "format": "double"
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     },
     {
       "description": "A boolean value.",

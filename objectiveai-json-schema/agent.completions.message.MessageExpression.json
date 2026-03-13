@@ -1,72 +1,66 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.message.MessageExpression",
   "description": "A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.",
-  "oneOf": [
+  "anyOf": [
     {
       "type": "object",
-      "properties": {
-        "role": {
-          "type": "string",
-          "const": "developer"
-        }
-      },
       "$ref": "agent.completions.message.DeveloperMessageExpression",
-      "required": [
-        "role"
-      ]
-    },
-    {
-      "type": "object",
       "properties": {
         "role": {
           "type": "string",
-          "const": "system"
+          "enum": [
+            "developer"
+          ]
         }
-      },
+      }
+    },
+    {
+      "type": "object",
       "$ref": "agent.completions.message.SystemMessageExpression",
-      "required": [
-        "role"
-      ]
-    },
-    {
-      "type": "object",
       "properties": {
         "role": {
           "type": "string",
-          "const": "user"
+          "enum": [
+            "system"
+          ]
         }
-      },
+      }
+    },
+    {
+      "type": "object",
       "$ref": "agent.completions.message.UserMessageExpression",
-      "required": [
-        "role"
-      ]
-    },
-    {
-      "type": "object",
       "properties": {
         "role": {
           "type": "string",
-          "const": "assistant"
+          "enum": [
+            "user"
+          ]
         }
-      },
+      }
+    },
+    {
+      "type": "object",
       "$ref": "agent.completions.message.AssistantMessageExpression",
-      "required": [
-        "role"
-      ]
-    },
-    {
-      "type": "object",
       "properties": {
         "role": {
           "type": "string",
-          "const": "tool"
+          "enum": [
+            "assistant"
+          ]
         }
-      },
+      }
+    },
+    {
+      "type": "object",
       "$ref": "agent.completions.message.ToolMessageExpression",
-      "required": [
-        "role"
-      ]
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "tool"
+          ]
+        }
+      }
     }
   ]
 }

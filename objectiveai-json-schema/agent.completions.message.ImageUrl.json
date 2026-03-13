@@ -1,13 +1,8 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.message.ImageUrl",
   "description": "An image URL for multimodal input.",
   "type": "object",
   "properties": {
-    "url": {
-      "description": "The URL of the image (can be a data URL or HTTP URL).",
-      "type": "string"
-    },
     "detail": {
       "description": "The detail level for image processing.",
       "anyOf": [
@@ -18,9 +13,10 @@
           "type": "null"
         }
       ]
+    },
+    "url": {
+      "description": "The URL of the image (can be a data URL or HTTP URL).",
+      "type": "string"
     }
-  },
-  "required": [
-    "url"
-  ]
+  }
 }

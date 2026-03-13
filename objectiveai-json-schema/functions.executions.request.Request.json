@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.executions.request.Request",
   "description": "Internal request representation with path and body separated.\n\nUsed internally to route requests to the appropriate API endpoint.",
   "anyOf": [
@@ -9,55 +8,40 @@
         "body": {
           "$ref": "functions.executions.request.FunctionInlineProfileInlineRequestBody"
         }
-      },
-      "required": [
-        "body"
-      ]
+      }
     },
     {
       "type": "object",
       "properties": {
-        "path": {
-          "$ref": "functions.executions.request.FunctionInlineProfileRemoteRequestPath"
-        },
         "body": {
           "$ref": "functions.executions.request.FunctionInlineProfileRemoteRequestBody"
+        },
+        "path": {
+          "$ref": "functions.executions.request.FunctionInlineProfileRemoteRequestPath"
         }
-      },
-      "required": [
-        "path",
-        "body"
-      ]
+      }
     },
     {
       "type": "object",
       "properties": {
-        "path": {
-          "$ref": "functions.executions.request.FunctionRemoteProfileInlineRequestPath"
-        },
         "body": {
           "$ref": "functions.executions.request.FunctionRemoteProfileInlineRequestBody"
+        },
+        "path": {
+          "$ref": "functions.executions.request.FunctionRemoteProfileInlineRequestPath"
         }
-      },
-      "required": [
-        "path",
-        "body"
-      ]
+      }
     },
     {
       "type": "object",
       "properties": {
-        "path": {
-          "$ref": "functions.executions.request.FunctionRemoteProfileRemoteRequestPath"
-        },
         "body": {
           "$ref": "functions.executions.request.FunctionRemoteProfileRemoteRequestBody"
+        },
+        "path": {
+          "$ref": "functions.executions.request.FunctionRemoteProfileRemoteRequestPath"
         }
-      },
-      "required": [
-        "path",
-        "body"
-      ]
+      }
     }
   ]
 }

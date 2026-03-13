@@ -1,7 +1,6 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.alpha_scalar.RemoteFunction",
-  "oneOf": [
+  "anyOf": [
     {
       "type": "object",
       "properties": {
@@ -19,15 +18,11 @@
         },
         "type": {
           "type": "string",
-          "const": "alpha.scalar.branch.function"
+          "enum": [
+            "alpha.scalar.branch.function"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "description",
-        "input_schema",
-        "tasks"
-      ]
+      }
     },
     {
       "type": "object",
@@ -46,15 +41,11 @@
         },
         "type": {
           "type": "string",
-          "const": "alpha.scalar.leaf.function"
+          "enum": [
+            "alpha.scalar.leaf.function"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "description",
-        "input_schema",
-        "tasks"
-      ]
+      }
     }
   ]
 }

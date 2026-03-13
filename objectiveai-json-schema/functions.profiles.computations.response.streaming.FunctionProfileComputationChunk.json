@@ -1,10 +1,11 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk",
   "type": "object",
   "properties": {
-    "id": {
-      "type": "string"
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
     "executions": {
       "type": "array",
@@ -13,15 +14,9 @@
       }
     },
     "executions_errors": {
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "profile": {
       "anyOf": [
         {
-          "$ref": "functions.InlineTasksProfile"
+          "type": "boolean"
         },
         {
           "type": "null"
@@ -38,25 +33,41 @@
         }
       ]
     },
-    "retry_token": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "created": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
     "function": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
+    },
+    "id": {
+      "type": "string"
     },
     "object": {
       "$ref": "functions.profiles.computations.response.streaming.Object"
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "$ref": "functions.InlineTasksProfile"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "usage": {
       "anyOf": [
@@ -68,11 +79,5 @@
         }
       ]
     }
-  },
-  "required": [
-    "id",
-    "executions",
-    "created",
-    "object"
-  ]
+  }
 }

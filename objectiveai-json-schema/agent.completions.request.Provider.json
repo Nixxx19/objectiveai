@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.request.Provider",
   "description": "Provider routing and selection preferences.",
   "type": "object",
@@ -15,18 +14,13 @@
         }
       ]
     },
-    "zdr": {
-      "description": "Whether to use zero data retention providers only.",
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "sort": {
-      "description": "How to sort/prioritize providers.",
+    "max_latency": {
+      "description": "Hard maximum latency requirement (seconds).",
       "anyOf": [
         {
-          "$ref": "agent.completions.request.ProviderSort"
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
         },
         {
           "type": "null"
@@ -44,37 +38,66 @@
         }
       ]
     },
-    "preferred_min_throughput": {
-      "description": "Preferred minimum throughput (tokens/second).",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+    "min_throughput": {
+      "description": "Hard minimum throughput requirement (tokens/second).",
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "preferred_max_latency": {
       "description": "Preferred maximum latency (seconds).",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "min_throughput": {
-      "description": "Hard minimum throughput requirement (tokens/second).",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+    "preferred_min_throughput": {
+      "description": "Preferred minimum throughput (tokens/second).",
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "max_latency": {
-      "description": "Hard maximum latency requirement (seconds).",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+    "sort": {
+      "description": "How to sort/prioritize providers.",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.ProviderSort"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "zdr": {
+      "description": "Whether to use zero data retention providers only.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   }
 }

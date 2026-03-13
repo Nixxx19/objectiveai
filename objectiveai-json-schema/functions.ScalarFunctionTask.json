@@ -1,21 +1,8 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.ScalarFunctionTask",
   "description": "A compiled scalar function task ready for execution.",
   "type": "object",
   "properties": {
-    "remote": {
-      "description": "The remote source where the function is hosted.",
-      "$ref": "functions.Remote"
-    },
-    "owner": {
-      "description": "Repository owner.",
-      "type": "string"
-    },
-    "repository": {
-      "description": "Repository name.",
-      "type": "string"
-    },
     "commit": {
       "description": "Git commit SHA for the function version.",
       "type": "string"
@@ -27,14 +14,18 @@
     "output": {
       "description": "Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`ScalarFunctionTaskExpression::output`] for full documentation.",
       "$ref": "functions.expression.Expression"
+    },
+    "owner": {
+      "description": "Repository owner.",
+      "type": "string"
+    },
+    "remote": {
+      "description": "The remote source where the function is hosted.",
+      "$ref": "functions.Remote"
+    },
+    "repository": {
+      "description": "Repository name.",
+      "type": "string"
     }
-  },
-  "required": [
-    "remote",
-    "owner",
-    "repository",
-    "commit",
-    "input",
-    "output"
-  ]
+  }
 }

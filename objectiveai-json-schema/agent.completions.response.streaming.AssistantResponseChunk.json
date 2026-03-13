@@ -1,45 +1,10 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.response.streaming.AssistantResponseChunk",
   "description": "A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.",
   "type": "object",
   "properties": {
-    "role": {
-      "$ref": "agent.completions.response.AssistantRole"
-    },
-    "index": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "created": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
     "agent": {
       "type": "string"
-    },
-    "model": {
-      "type": "string"
-    },
-    "upstream_id": {
-      "type": "string"
-    },
-    "reasoning": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "tool_calls": {
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "$ref": "agent.completions.message.AssistantToolCallDelta"
-      }
     },
     "content": {
       "anyOf": [
@@ -51,11 +16,10 @@
         }
       ]
     },
-    "refusal": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
     "finish_reason": {
       "anyOf": [
@@ -67,6 +31,11 @@
         }
       ]
     },
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
     "logprobs": {
       "anyOf": [
         {
@@ -77,23 +46,77 @@
         }
       ]
     },
+    "model": {
+      "type": "string"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "refusal": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "role": {
+      "$ref": "agent.completions.response.AssistantRole"
+    },
     "service_tier": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "system_fingerprint": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "provider": {
-      "type": [
-        "string",
-        "null"
+    "tool_calls": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.completions.message.AssistantToolCallDelta"
+          }
+        },
+        {
+          "type": "null"
+        }
       ]
+    },
+    "upstream_id": {
+      "type": "string"
     },
     "usage": {
       "description": "Upstream usage for this assistant response (set by upstream clients).",
@@ -106,13 +129,5 @@
         }
       ]
     }
-  },
-  "required": [
-    "role",
-    "index",
-    "created",
-    "agent",
-    "model",
-    "upstream_id"
-  ]
+  }
 }

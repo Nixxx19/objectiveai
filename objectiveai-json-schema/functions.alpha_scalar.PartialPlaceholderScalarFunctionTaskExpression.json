@@ -1,10 +1,9 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression",
   "type": "object",
   "properties": {
-    "spec": {
-      "type": "string"
+    "input": {
+      "$ref": "functions.expression.Expression"
     },
     "input_schema": {
       "$ref": "functions.expression.ObjectInputSchema"
@@ -19,13 +18,8 @@
         }
       ]
     },
-    "input": {
-      "$ref": "functions.expression.Expression"
+    "spec": {
+      "type": "string"
     }
-  },
-  "required": [
-    "spec",
-    "input_schema",
-    "input"
-  ]
+  }
 }

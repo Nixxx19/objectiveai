@@ -1,22 +1,27 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.OutputMode",
   "description": "The method used to constrain LLM output to valid response keys.\n\nIn vector completions, the model must select from a predefined set of\nresponses. This enum controls *how* that constraint is enforced.\n\n**Note:** This setting is only relevant for vector completions and is\ncompletely ignored for agent completions.",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.",
       "type": "string",
-      "const": "instruction"
+      "enum": [
+        "instruction"
+      ]
     },
     {
       "description": "A JSON schema response format is used with an enum of possible keys.\n\nRequires model support for structured JSON output.",
       "type": "string",
-      "const": "json_schema"
+      "enum": [
+        "json_schema"
+      ]
     },
     {
       "description": "A forced tool call with an argument schema containing possible keys.\n\nRequires model support for tool/function calling.",
       "type": "string",
-      "const": "tool_call"
+      "enum": [
+        "tool_call"
+      ]
     }
   ]
 }

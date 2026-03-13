@@ -1,19 +1,20 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.TaskOutputOwned",
   "description": "Owned task output variants.",
   "anyOf": [
     {
       "description": "A single scalar score.",
       "type": "number",
-      "format": "double"
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     },
     {
       "description": "A vector of scores.",
       "type": "array",
       "items": {
         "type": "number",
-        "format": "double"
+        "minimum": -3.4028234663852886e+38,
+        "maximum": 3.4028234663852886e+38
       }
     },
     {
@@ -23,7 +24,8 @@
         "type": "array",
         "items": {
           "type": "number",
-          "format": "double"
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
         }
       }
     },

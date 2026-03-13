@@ -1,22 +1,27 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.openrouter.ReasoningSummaryVerbosity",
   "description": "Verbosity of the reasoning summary included in responses.\n\nOnly supported by some models.",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "Let the model decide (default, normalized away).",
       "type": "string",
-      "const": "auto"
+      "enum": [
+        "auto"
+      ]
     },
     {
       "description": "Brief summary of reasoning.",
       "type": "string",
-      "const": "concise"
+      "enum": [
+        "concise"
+      ]
     },
     {
       "description": "Thorough summary of reasoning.",
       "type": "string",
-      "const": "detailed"
+      "enum": [
+        "detailed"
+      ]
     }
   ]
 }

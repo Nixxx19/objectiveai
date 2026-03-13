@@ -1,8 +1,7 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.Expression",
   "description": "An expression that can be either JMESPath or Starlark.\n\nSerializes as `{\"$jmespath\": \"...\"}` or `{\"$starlark\": \"...\"}` in JSON.\n\n# Examples\n\nJMESPath:\n```json\n{\"$jmespath\": \"input.items[0].name\"}\n```\n\nStarlark:\n```json\n{\"$starlark\": \"input['items'][0]['name']\"}\n```",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "A JMESPath expression.",
       "type": "object",
@@ -11,9 +10,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "$jmespath"
-      ],
       "additionalProperties": false
     },
     {
@@ -24,9 +20,6 @@
           "type": "string"
         }
       },
-      "required": [
-        "$starlark"
-      ],
       "additionalProperties": false
     },
     {
@@ -37,9 +30,6 @@
           "$ref": "functions.expression.Special"
         }
       },
-      "required": [
-        "$special"
-      ],
       "additionalProperties": false
     }
   ]

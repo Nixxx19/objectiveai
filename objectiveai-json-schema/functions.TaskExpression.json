@@ -1,72 +1,66 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.TaskExpression",
   "description": "A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].",
-  "oneOf": [
+  "anyOf": [
     {
       "type": "object",
-      "properties": {
-        "type": {
-          "type": "string",
-          "const": "scalar.function"
-        }
-      },
       "$ref": "functions.ScalarFunctionTaskExpression",
-      "required": [
-        "type"
-      ]
-    },
-    {
-      "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "const": "vector.function"
+          "enum": [
+            "scalar.function"
+          ]
         }
-      },
+      }
+    },
+    {
+      "type": "object",
       "$ref": "functions.VectorFunctionTaskExpression",
-      "required": [
-        "type"
-      ]
-    },
-    {
-      "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "const": "vector.completion"
+          "enum": [
+            "vector.function"
+          ]
         }
-      },
+      }
+    },
+    {
+      "type": "object",
       "$ref": "functions.VectorCompletionTaskExpression",
-      "required": [
-        "type"
-      ]
-    },
-    {
-      "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "const": "placeholder.scalar.function"
+          "enum": [
+            "vector.completion"
+          ]
         }
-      },
+      }
+    },
+    {
+      "type": "object",
       "$ref": "functions.PlaceholderScalarFunctionTaskExpression",
-      "required": [
-        "type"
-      ]
-    },
-    {
-      "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "const": "placeholder.vector.function"
+          "enum": [
+            "placeholder.scalar.function"
+          ]
         }
-      },
+      }
+    },
+    {
+      "type": "object",
       "$ref": "functions.PlaceholderVectorFunctionTaskExpression",
-      "required": [
-        "type"
-      ]
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.vector.function"
+          ]
+        }
+      }
     }
   ]
 }

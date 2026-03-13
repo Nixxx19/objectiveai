@@ -1,37 +1,47 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.NumberInputSchema",
   "description": "Schema for a floating-point number input.",
   "type": "object",
   "properties": {
-    "type": {
-      "$ref": "functions.expression.NumberInputSchemaType"
-    },
     "description": {
       "description": "Human-readable description of the number.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "maximum": {
+      "description": "Maximum allowed value (inclusive).",
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "minimum": {
       "description": "Minimum allowed value (inclusive).",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "maximum": {
-      "description": "Maximum allowed value (inclusive).",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+    "type": {
+      "$ref": "functions.expression.NumberInputSchemaType"
     }
-  },
-  "required": [
-    "type"
-  ]
+  }
 }

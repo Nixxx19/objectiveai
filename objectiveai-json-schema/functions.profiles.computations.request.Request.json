@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.profiles.computations.request.Request",
   "anyOf": [
     {
@@ -8,25 +7,18 @@
         "body": {
           "$ref": "functions.profiles.computations.request.FunctionInlineRequestBody"
         }
-      },
-      "required": [
-        "body"
-      ]
+      }
     },
     {
       "type": "object",
       "properties": {
-        "path": {
-          "$ref": "functions.profiles.computations.request.FunctionRemoteRequestPath"
-        },
         "body": {
           "$ref": "functions.profiles.computations.request.FunctionRemoteRequestBody"
+        },
+        "path": {
+          "$ref": "functions.profiles.computations.request.FunctionRemoteRequestPath"
         }
-      },
-      "required": [
-        "path",
-        "body"
-      ]
+      }
     }
   ]
 }

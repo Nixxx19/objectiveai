@@ -1,55 +1,61 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.executions.response.streaming.FunctionExecutionTaskChunk",
   "type": "object",
   "properties": {
-    "index": {
+    "created": {
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "task_index": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "task_path": {
-      "type": "array",
-      "items": {
-        "type": "integer",
-        "format": "uint64",
-        "minimum": 0
-      }
-    },
-    "swiss_pool_index": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
-    },
-    "swiss_round": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
+    "function": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "id": {
       "type": "string"
     },
-    "tasks": {
-      "type": "array",
-      "items": {
-        "$ref": "functions.executions.response.streaming.TaskChunk"
-      }
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "tasks_errors": {
-      "type": [
-        "boolean",
-        "null"
+    "object": {
+      "$ref": "functions.executions.response.streaming.Object"
+    },
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.TaskOutputOwned"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "reasoning": {
@@ -62,51 +68,68 @@
         }
       ]
     },
-    "output": {
-      "anyOf": [
-        {
-          "$ref": "functions.expression.TaskOutputOwned"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "error": {
-      "anyOf": [
-        {
-          "$ref": "ResponseError"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
     "retry_token": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "created": {
+    "swiss_pool_index": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "swiss_round": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "task_index": {
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "function": {
-      "type": [
-        "string",
-        "null"
+    "task_path": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 18446744073709551615
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.executions.response.streaming.TaskChunk"
+      }
+    },
+    "tasks_errors": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
       ]
-    },
-    "profile": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "object": {
-      "$ref": "functions.executions.response.streaming.Object"
     },
     "usage": {
       "anyOf": [
@@ -118,14 +141,5 @@
         }
       ]
     }
-  },
-  "required": [
-    "index",
-    "task_index",
-    "task_path",
-    "id",
-    "tasks",
-    "created",
-    "object"
-  ]
+  }
 }

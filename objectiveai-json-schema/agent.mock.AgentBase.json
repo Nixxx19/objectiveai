@@ -1,12 +1,29 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.mock.AgentBase",
   "description": "The base configuration for a Mock Agent (without computed ID).",
   "type": "object",
   "properties": {
-    "upstream": {
-      "description": "The upstream provider marker.",
-      "$ref": "agent.mock.Upstream"
+    "error": {
+      "description": "If true, the mock client will return an error instead of a response.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "invention": {
+      "description": "If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "output_mode": {
       "description": "The output mode for vector completions. Ignored for agent completions.",
@@ -14,30 +31,20 @@
     },
     "top_logprobs": {
       "description": "Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
-    },
-    "error": {
-      "description": "If true, the mock client will return an error instead of a response.",
-      "type": [
-        "boolean",
-        "null"
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "invention": {
-      "description": "If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.",
-      "type": [
-        "boolean",
-        "null"
-      ]
+    "upstream": {
+      "description": "The upstream provider marker.",
+      "$ref": "agent.mock.Upstream"
     }
-  },
-  "required": [
-    "upstream",
-    "output_mode"
-  ]
+  }
 }

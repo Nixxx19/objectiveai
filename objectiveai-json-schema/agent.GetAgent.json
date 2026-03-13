@@ -1,19 +1,7 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.GetAgent",
   "description": "Response containing a single Agent with creation timestamp.",
   "type": "object",
-  "properties": {
-    "created": {
-      "description": "Unix timestamp when this Agent was first used.",
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    }
-  },
-  "required": [
-    "created"
-  ],
   "anyOf": [
     {
       "$ref": "agent.openrouter.Agent"
@@ -24,5 +12,13 @@
     {
       "$ref": "agent.mock.Agent"
     }
-  ]
+  ],
+  "properties": {
+    "created": {
+      "description": "Unix timestamp when this Agent was first used.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    }
+  }
 }

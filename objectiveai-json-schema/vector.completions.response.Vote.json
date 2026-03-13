@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "vector.completions.response.Vote",
   "description": "A single LLM's vote in a vector completion.\n\nEach LLM in the ensemble produces a vote indicating which response(s) it\nselected. Votes are weighted according to the profile and combined to\nproduce the final scores.\n\n# Vote Format\n\nThe `vote` field is a vector of decimals corresponding to the responses\nin the request. Typically one element is 1.0 and the rest are 0.0 (discrete\nselection), but when `top_logprobs` is used, votes may be probability\ndistributions.",
   "type": "object",
@@ -11,14 +10,25 @@
     "ensemble_index": {
       "description": "Index of the agent configuration within the ensemble.",
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
     "flat_ensemble_index": {
       "description": "Flattened index accounting for agent counts in the ensemble.",
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "from_cache": {
+      "description": "If true, this vote was retrieved from cache rather than generated fresh.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "prompt_id": {
       "description": "Content hash of the request messages (for caching/deduplication).",
@@ -31,41 +41,31 @@
         "type": "string"
       }
     },
+    "retry": {
+      "description": "If true, this vote was reused from a previous request via the `retry`\nparameter. All fields reflect the original request's values.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "vote": {
       "description": "The vote distribution. Each index corresponds to a response from the\nrequest. Typically one element is 1.0 (selected) and the rest are 0.0.",
       "type": "array",
       "items": {
         "type": "number",
-        "format": "double"
+        "minimum": -3.4028234663852886e+38,
+        "maximum": 3.4028234663852886e+38
       }
     },
     "weight": {
       "description": "The weight applied to this vote when computing final scores.",
       "type": "number",
-      "format": "double"
-    },
-    "retry": {
-      "description": "If true, this vote was reused from a previous request via the `retry`\nparameter. All fields reflect the original request's values.",
-      "type": [
-        "boolean",
-        "null"
-      ]
-    },
-    "from_cache": {
-      "description": "If true, this vote was retrieved from cache rather than generated fresh.",
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     }
-  },
-  "required": [
-    "agent",
-    "ensemble_index",
-    "flat_ensemble_index",
-    "prompt_id",
-    "responses_ids",
-    "vote",
-    "weight"
-  ]
+  }
 }

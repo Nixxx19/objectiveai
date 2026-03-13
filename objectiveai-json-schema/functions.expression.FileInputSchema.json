@@ -1,21 +1,21 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.FileInputSchema",
   "description": "Schema for a file input.",
   "type": "object",
   "properties": {
-    "type": {
-      "$ref": "functions.expression.FileInputSchemaType"
-    },
     "description": {
       "description": "Human-readable description of the expected file.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
+    },
+    "type": {
+      "$ref": "functions.expression.FileInputSchemaType"
     }
-  },
-  "required": [
-    "type"
-  ]
+  }
 }

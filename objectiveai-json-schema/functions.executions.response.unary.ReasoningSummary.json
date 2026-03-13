@@ -1,16 +1,25 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.executions.response.unary.ReasoningSummary",
   "description": "A complete agent completion response.",
   "type": "object",
   "properties": {
-    "id": {
-      "type": "string"
-    },
     "created": {
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
     },
     "messages": {
       "type": "array",
@@ -22,30 +31,12 @@
       "description": "The object type (always \"agent.completion\").",
       "$ref": "agent.completions.response.unary.Object"
     },
-    "usage": {
-      "$ref": "agent.completions.response.Usage"
-    },
     "upstream": {
       "description": "Upstream provider",
       "$ref": "agent.Upstream"
     },
-    "error": {
-      "anyOf": [
-        {
-          "$ref": "ResponseError"
-        },
-        {
-          "type": "null"
-        }
-      ]
+    "usage": {
+      "$ref": "agent.completions.response.Usage"
     }
-  },
-  "required": [
-    "id",
-    "created",
-    "messages",
-    "object",
-    "usage",
-    "upstream"
-  ]
+  }
 }

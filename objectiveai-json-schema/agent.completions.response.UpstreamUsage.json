@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.response.UpstreamUsage",
   "description": "Token usage and cost information from an upstream provider.\n\nThis is the per-assistant-response usage yielded by upstream clients.\nIt includes upstream-specific fields like `cost_multiplier` and `is_byok`.",
   "type": "object",
@@ -7,20 +6,8 @@
     "completion_tokens": {
       "description": "Number of tokens in the completion.",
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "prompt_tokens": {
-      "description": "Number of tokens in the prompt.",
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "total_tokens": {
-      "description": "Total tokens (prompt + completion).",
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
     "completion_tokens_details": {
       "description": "Detailed breakdown of completion tokens.",
@@ -33,21 +20,11 @@
         }
       ]
     },
-    "prompt_tokens_details": {
-      "description": "Detailed breakdown of prompt tokens.",
-      "anyOf": [
-        {
-          "$ref": "agent.completions.response.PromptTokensDetails"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
     "cost": {
       "description": "The cost charged by ObjectiveAI for this request.",
       "type": "number",
-      "format": "double"
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     },
     "cost_details": {
       "description": "Detailed cost breakdown.",
@@ -60,28 +37,44 @@
         }
       ]
     },
-    "total_cost": {
-      "description": "Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged.",
-      "type": "number",
-      "format": "double"
-    },
     "cost_multiplier": {
       "description": "The multiplier applied to compute ObjectiveAI's charge.",
       "type": "number",
-      "format": "double"
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     },
     "is_byok": {
       "description": "Whether this request used Bring Your Own Key (BYOK).",
       "type": "boolean"
+    },
+    "prompt_tokens": {
+      "description": "Number of tokens in the prompt.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "prompt_tokens_details": {
+      "description": "Detailed breakdown of prompt tokens.",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.PromptTokensDetails"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "total_cost": {
+      "description": "Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged.",
+      "type": "number",
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
+    },
+    "total_tokens": {
+      "description": "Total tokens (prompt + completion).",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     }
-  },
-  "required": [
-    "completion_tokens",
-    "prompt_tokens",
-    "total_tokens",
-    "cost",
-    "total_cost",
-    "cost_multiplier",
-    "is_byok"
-  ]
+  }
 }

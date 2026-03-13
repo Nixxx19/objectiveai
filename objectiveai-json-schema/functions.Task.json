@@ -1,77 +1,71 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.Task",
   "description": "A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "Calls a scalar function (produces a single score).",
       "type": "object",
+      "$ref": "functions.ScalarFunctionTask",
       "properties": {
         "type": {
           "type": "string",
-          "const": "scalar.function"
+          "enum": [
+            "scalar.function"
+          ]
         }
-      },
-      "$ref": "functions.ScalarFunctionTask",
-      "required": [
-        "type"
-      ]
+      }
     },
     {
       "description": "Calls a vector function (produces a vector of scores).",
       "type": "object",
+      "$ref": "functions.VectorFunctionTask",
       "properties": {
         "type": {
           "type": "string",
-          "const": "vector.function"
+          "enum": [
+            "vector.function"
+          ]
         }
-      },
-      "$ref": "functions.VectorFunctionTask",
-      "required": [
-        "type"
-      ]
+      }
     },
     {
       "description": "Runs a vector completion.",
       "type": "object",
+      "$ref": "functions.VectorCompletionTask",
       "properties": {
         "type": {
           "type": "string",
-          "const": "vector.completion"
+          "enum": [
+            "vector.completion"
+          ]
         }
-      },
-      "$ref": "functions.VectorCompletionTask",
-      "required": [
-        "type"
-      ]
+      }
     },
     {
       "description": "Placeholder scalar function (always outputs 0.5).",
       "type": "object",
+      "$ref": "functions.PlaceholderScalarFunctionTask",
       "properties": {
         "type": {
           "type": "string",
-          "const": "placeholder.scalar.function"
+          "enum": [
+            "placeholder.scalar.function"
+          ]
         }
-      },
-      "$ref": "functions.PlaceholderScalarFunctionTask",
-      "required": [
-        "type"
-      ]
+      }
     },
     {
       "description": "Placeholder vector function (always outputs equalized vector).",
       "type": "object",
+      "$ref": "functions.PlaceholderVectorFunctionTask",
       "properties": {
         "type": {
           "type": "string",
-          "const": "placeholder.vector.function"
+          "enum": [
+            "placeholder.vector.function"
+          ]
         }
-      },
-      "$ref": "functions.PlaceholderVectorFunctionTask",
-      "required": [
-        "type"
-      ]
+      }
     }
   ]
 }

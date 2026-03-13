@@ -1,21 +1,28 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.message.AssistantToolCallFunctionDelta",
   "description": "Function call details in a streaming tool call.",
   "type": "object",
   "properties": {
-    "name": {
-      "description": "The function name (only present in the first delta).",
-      "type": [
-        "string",
-        "null"
-      ]
-    },
     "arguments": {
       "description": "The arguments being streamed (accumulated across deltas).",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "description": "The function name (only present in the first delta).",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     }
   }

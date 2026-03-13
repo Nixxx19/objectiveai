@@ -1,30 +1,33 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.response.Logprob",
   "description": "Log probability information for a single token.",
   "type": "object",
   "properties": {
-    "token": {
-      "description": "The token string.",
-      "type": "string"
-    },
     "bytes": {
       "description": "The raw bytes of the token.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "type": "integer",
-        "format": "uint8",
-        "minimum": 0,
-        "maximum": 255
-      }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 255
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "logprob": {
       "description": "The log probability of this token.",
       "type": "number",
-      "format": "double"
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
+    },
+    "token": {
+      "description": "The token string.",
+      "type": "string"
     },
     "top_logprobs": {
       "description": "The top alternative tokens and their log probabilities.",
@@ -33,10 +36,5 @@
         "$ref": "agent.completions.response.TopLogprob"
       }
     }
-  },
-  "required": [
-    "token",
-    "logprob",
-    "top_logprobs"
-  ]
+  }
 }

@@ -1,37 +1,47 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.IntegerInputSchema",
   "description": "Schema for an integer input.",
   "type": "object",
   "properties": {
-    "type": {
-      "$ref": "functions.expression.IntegerInputSchemaType"
-    },
     "description": {
       "description": "Human-readable description of the integer.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "maximum": {
+      "description": "Maximum allowed value (inclusive).",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "minimum": {
       "description": "Minimum allowed value (inclusive).",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "int64"
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "maximum": {
-      "description": "Maximum allowed value (inclusive).",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "int64"
+    "type": {
+      "$ref": "functions.expression.IntegerInputSchemaType"
     }
-  },
-  "required": [
-    "type"
-  ]
+  }
 }

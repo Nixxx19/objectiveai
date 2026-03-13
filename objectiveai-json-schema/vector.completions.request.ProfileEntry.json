@@ -1,23 +1,24 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "vector.completions.request.ProfileEntry",
   "description": "An entry in a profile with an explicit weight and optional invert flag.",
   "type": "object",
   "properties": {
+    "invert": {
+      "description": "If true, invert this agent's vote distribution before combining.\n\nWhen omitted or false, the vote distribution is used as-is.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "weight": {
       "description": "The weight for this agent in the ensemble. Must be in [0, 1].",
       "type": "number",
-      "format": "double"
-    },
-    "invert": {
-      "description": "If true, invert this agent's vote distribution before combining.\n\nWhen omitted or false, the vote distribution is used as-is.",
-      "type": [
-        "boolean",
-        "null"
-      ]
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     }
-  },
-  "required": [
-    "weight"
-  ]
+  }
 }

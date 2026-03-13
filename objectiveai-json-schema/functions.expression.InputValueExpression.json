@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.InputValueExpression",
   "description": "An input value that may contain expressions (pre-compilation).\n\nSimilar to [`InputValue`] but object values and array elements can be\nexpressions (JMESPath or Starlark) that are evaluated during compilation.",
   "anyOf": [
@@ -28,12 +27,14 @@
     {
       "description": "An integer value.",
       "type": "integer",
-      "format": "int64"
+      "minimum": -9223372036854775808,
+      "maximum": 9223372036854775807
     },
     {
       "description": "A floating-point number.",
       "type": "number",
-      "format": "double"
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
     },
     {
       "description": "A boolean value.",

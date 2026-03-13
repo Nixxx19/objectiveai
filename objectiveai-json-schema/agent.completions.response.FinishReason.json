@@ -1,32 +1,41 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.response.FinishReason",
   "description": "The reason the model stopped generating.",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "The model reached a natural stop point or stop sequence.",
       "type": "string",
-      "const": "stop"
+      "enum": [
+        "stop"
+      ]
     },
     {
       "description": "The model reached the maximum token limit.",
       "type": "string",
-      "const": "length"
+      "enum": [
+        "length"
+      ]
     },
     {
       "description": "The model decided to call one or more tools.",
       "type": "string",
-      "const": "tool_calls"
+      "enum": [
+        "tool_calls"
+      ]
     },
     {
       "description": "The response was filtered due to content policy.",
       "type": "string",
-      "const": "content_filter"
+      "enum": [
+        "content_filter"
+      ]
     },
     {
       "description": "An error occurred during generation.",
       "type": "string",
-      "const": "error"
+      "enum": [
+        "error"
+      ]
     }
   ]
 }

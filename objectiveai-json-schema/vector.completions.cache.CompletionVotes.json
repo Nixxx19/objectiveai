@@ -1,16 +1,19 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "vector.completions.cache.CompletionVotes",
   "type": "object",
   "properties": {
     "data": {
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "$ref": "vector.completions.response.Vote"
-      }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "vector.completions.response.Vote"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   }
 }

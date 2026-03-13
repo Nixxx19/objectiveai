@@ -1,12 +1,8 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.response.streaming.Object",
-  "description": "The object type for streaming agent completion chunks.",
-  "oneOf": [
-    {
-      "description": "A agent completion chunk object.",
-      "type": "string",
-      "const": "agent.completion.chunk"
-    }
+  "description": "A agent completion chunk object.",
+  "type": "string",
+  "enum": [
+    "agent.completion.chunk"
   ]
 }

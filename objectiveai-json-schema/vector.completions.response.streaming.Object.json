@@ -1,12 +1,8 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "vector.completions.response.streaming.Object",
-  "description": "Object type for streaming vector completion chunks.\n\nSerializes to `\"vector.completion.chunk\"` in JSON.",
-  "oneOf": [
-    {
-      "description": "A streaming vector completion chunk.",
-      "type": "string",
-      "const": "vector.completion.chunk"
-    }
+  "description": "A streaming vector completion chunk.",
+  "type": "string",
+  "enum": [
+    "vector.completion.chunk"
   ]
 }

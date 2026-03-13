@@ -1,43 +1,40 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.inventions.state.AlphaScalarLeafState",
   "type": "object",
   "properties": {
     "depth": {
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "min_branch_width": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "max_branch_width": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "min_leaf_width": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "max_leaf_width": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "name": {
-      "type": "string"
-    },
-    "spec": {
-      "type": "string"
+    "description": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "essay": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "essay_tasks": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "input_schema": {
@@ -50,49 +47,66 @@
         }
       ]
     },
-    "essay_tasks": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "max_branch_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "tasks": {
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "$ref": "functions.alpha_scalar.LeafTaskExpression"
-      }
+    "max_leaf_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "tasks_length": {
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
+    "min_branch_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
-    "description": {
-      "type": [
-        "string",
-        "null"
-      ]
+    "min_leaf_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "name": {
+      "type": "string"
     },
     "readme": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "spec": {
+      "type": "string"
+    },
+    "tasks": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "functions.alpha_scalar.LeafTaskExpression"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tasks_length": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
       ]
     }
-  },
-  "required": [
-    "depth",
-    "min_branch_width",
-    "max_branch_width",
-    "min_leaf_width",
-    "max_leaf_width",
-    "name",
-    "spec"
-  ]
+  }
 }

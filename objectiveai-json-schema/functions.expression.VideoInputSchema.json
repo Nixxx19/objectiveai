@@ -1,21 +1,21 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.VideoInputSchema",
   "description": "Schema for a video input (URL or base64-encoded).",
   "type": "object",
   "properties": {
-    "type": {
-      "$ref": "functions.expression.VideoInputSchemaType"
-    },
     "description": {
       "description": "Human-readable description of the expected video.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
+    },
+    "type": {
+      "$ref": "functions.expression.VideoInputSchemaType"
     }
-  },
-  "required": [
-    "type"
-  ]
+  }
 }

@@ -1,8 +1,12 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk",
   "type": "object",
   "properties": {
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
     "id": {
       "type": "string"
     },
@@ -13,15 +17,14 @@
       }
     },
     "inventions_errors": {
-      "type": [
-        "boolean",
-        "null"
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
       ]
-    },
-    "created": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
     },
     "object": {
       "$ref": "functions.inventions.recursive.response.streaming.Object"
@@ -36,11 +39,5 @@
         }
       ]
     }
-  },
-  "required": [
-    "id",
-    "inventions",
-    "created",
-    "object"
-  ]
+  }
 }

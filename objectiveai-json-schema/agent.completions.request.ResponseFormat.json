@@ -1,20 +1,18 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.request.ResponseFormat",
   "description": "The format of the model's response.",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "Plain text response (default).",
       "type": "object",
       "properties": {
         "type": {
           "type": "string",
-          "const": "text"
+          "enum": [
+            "text"
+          ]
         }
-      },
-      "required": [
-        "type"
-      ]
+      }
     },
     {
       "description": "Response must be valid JSON.",
@@ -22,12 +20,11 @@
       "properties": {
         "type": {
           "type": "string",
-          "const": "json_object"
+          "enum": [
+            "json_object"
+          ]
         }
-      },
-      "required": [
-        "type"
-      ]
+      }
     },
     {
       "description": "Response must conform to a JSON schema.",
@@ -40,13 +37,11 @@
         },
         "type": {
           "type": "string",
-          "const": "json_schema"
+          "enum": [
+            "json_schema"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "schema"
-      ]
+      }
     },
     {
       "description": "Response must conform to a grammar.",
@@ -57,13 +52,11 @@
         },
         "type": {
           "type": "string",
-          "const": "grammar"
+          "enum": [
+            "grammar"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "grammar"
-      ]
+      }
     },
     {
       "description": "Response must be valid Python code.",
@@ -71,48 +64,47 @@
       "properties": {
         "type": {
           "type": "string",
-          "const": "python"
+          "enum": [
+            "python"
+          ]
         }
-      },
-      "required": [
-        "type"
-      ]
+      }
     },
     {
       "description": "The final assistant message will contain this tool call",
       "type": "object",
       "properties": {
+        "description": {
+          "description": "A description of the tool.",
+          "type": "string"
+        },
         "name": {
           "description": "The name of the tool.",
           "type": "string"
         },
-        "description": {
-          "description": "A description of the tool.",
-          "type": "string"
+        "required": {
+          "description": "Whether the tool MUST be called.",
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "schema": {
           "description": "The JSON Schema definition.",
           "type": "object",
           "additionalProperties": true
         },
-        "required": {
-          "description": "Whether the tool MUST be called.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
         "type": {
           "type": "string",
-          "const": "tool_call"
+          "enum": [
+            "tool_call"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "name",
-        "description",
-        "schema"
-      ]
+      }
     }
   ]
 }

@@ -1,38 +1,11 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.inventions.state.AlphaScalarState",
   "type": "object",
   "properties": {
     "depth": {
       "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "min_branch_width": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "max_branch_width": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "min_leaf_width": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "max_leaf_width": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
-    },
-    "name": {
-      "type": "string"
-    },
-    "spec": {
-      "type": "string"
+      "minimum": 0,
+      "maximum": 18446744073709551615
     },
     "input_schema": {
       "anyOf": [
@@ -43,15 +16,32 @@
           "type": "null"
         }
       ]
+    },
+    "max_branch_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "max_leaf_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "min_branch_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "min_leaf_width": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "name": {
+      "type": "string"
+    },
+    "spec": {
+      "type": "string"
     }
-  },
-  "required": [
-    "depth",
-    "min_branch_width",
-    "max_branch_width",
-    "min_leaf_width",
-    "max_leaf_width",
-    "name",
-    "spec"
-  ]
+  }
 }

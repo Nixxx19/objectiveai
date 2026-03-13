@@ -1,7 +1,6 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.alpha_vector.InlineFunction",
-  "oneOf": [
+  "anyOf": [
     {
       "type": "object",
       "properties": {
@@ -13,13 +12,11 @@
         },
         "type": {
           "type": "string",
-          "const": "alpha.vector.branch.function"
+          "enum": [
+            "alpha.vector.branch.function"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "tasks"
-      ]
+      }
     },
     {
       "type": "object",
@@ -32,13 +29,11 @@
         },
         "type": {
           "type": "string",
-          "const": "alpha.vector.leaf.function"
+          "enum": [
+            "alpha.vector.leaf.function"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "tasks"
-      ]
+      }
     }
   ]
 }

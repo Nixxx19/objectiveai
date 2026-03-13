@@ -1,5 +1,4 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "auth.ListApiKeyItem",
   "description": "An API key with metadata and accumulated cost information.\n\nThis extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with\nthe total cost incurred by requests using this key.",
   "type": "object",
@@ -8,48 +7,55 @@
       "description": "The API key itself.",
       "$ref": "PrefixedUuid"
     },
+    "cost": {
+      "description": "The total cost incurred by this API key.",
+      "type": "number",
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
+    },
     "created": {
       "description": "The timestamp when the API key was created (RFC 3339 format).",
       "type": "string",
       "format": "date-time"
     },
-    "expires": {
-      "description": "The timestamp when the API key expires, or `None` if it does not expire.",
-      "type": [
-        "string",
-        "null"
-      ],
-      "format": "date-time"
+    "description": {
+      "description": "The user-provided description of the API key, or `None` if not provided.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "disabled": {
       "description": "The timestamp when the API key was disabled, or `None` if it is active.",
-      "type": [
-        "string",
-        "null"
-      ],
-      "format": "date-time"
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "expires": {
+      "description": "The timestamp when the API key expires, or `None` if it does not expire.",
+      "anyOf": [
+        {
+          "type": "string",
+          "format": "date-time"
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "name": {
       "description": "The user-provided name of the API key.",
       "type": "string"
-    },
-    "description": {
-      "description": "The user-provided description of the API key, or `None` if not provided.",
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "cost": {
-      "description": "The total cost incurred by this API key.",
-      "type": "number",
-      "format": "double"
     }
-  },
-  "required": [
-    "api_key",
-    "created",
-    "name",
-    "cost"
-  ]
+  }
 }

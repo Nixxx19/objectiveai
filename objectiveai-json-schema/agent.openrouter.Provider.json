@@ -1,62 +1,85 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.openrouter.Provider",
   "description": "Provider routing preferences.\n\nControls which providers are used and in what order when routing\nrequests to upstream model hosts.",
   "type": "object",
   "properties": {
     "allow_fallbacks": {
       "description": "Whether to allow fallback to other providers if preferred ones fail.\nDefaults to `true`.",
-      "type": [
-        "boolean",
-        "null"
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "require_parameters": {
-      "description": "Whether to require that the provider supports all request parameters.\nDefaults to `false`.",
-      "type": [
-        "boolean",
-        "null"
+    "ignore": {
+      "description": "Providers to exclude from routing.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "only": {
+      "description": "Exclusive list of allowed providers. If set, only these providers are used.",
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "order": {
       "description": "Preferred provider order. Earlier providers are tried first.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "type": "string"
-      }
-    },
-    "only": {
-      "description": "Exclusive list of allowed providers. If set, only these providers are used.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "type": "string"
-      }
-    },
-    "ignore": {
-      "description": "Providers to exclude from routing.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "type": "string"
-      }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "quantizations": {
       "description": "Allowed model quantization levels.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "$ref": "agent.openrouter.ProviderQuantization"
-      }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.openrouter.ProviderQuantization"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "require_parameters": {
+      "description": "Whether to require that the provider supports all request parameters.\nDefaults to `false`.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   }
 }

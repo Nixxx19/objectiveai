@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
 #[derive(Debug, Clone, Serialize, JsonSchema)]
+#[serde(untagged)]
 #[schemars(rename = "vector.completions.cache.CacheVoteRequest")]
 pub enum CacheVoteRequest<'a> {
     Ref(CacheVoteRequestRef<'a>),

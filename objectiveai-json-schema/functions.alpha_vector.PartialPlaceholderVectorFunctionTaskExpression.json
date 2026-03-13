@@ -1,10 +1,9 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression",
   "type": "object",
   "properties": {
-    "spec": {
-      "type": "string"
+    "input": {
+      "$ref": "functions.alpha_vector.expression.VectorFunctionInputValueExpression"
     },
     "input_schema": {
       "$ref": "functions.alpha_vector.expression.VectorFunctionInputSchema"
@@ -19,13 +18,8 @@
         }
       ]
     },
-    "input": {
-      "$ref": "functions.alpha_vector.expression.VectorFunctionInputValueExpression"
+    "spec": {
+      "type": "string"
     }
-  },
-  "required": [
-    "spec",
-    "input_schema",
-    "input"
-  ]
+  }
 }

@@ -1,39 +1,42 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.ObjectInputSchema",
   "description": "Schema for an object input with named properties.",
   "type": "object",
   "properties": {
-    "type": {
-      "$ref": "functions.expression.ObjectInputSchemaType"
-    },
     "description": {
       "description": "Human-readable description of the object.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "properties": {
-      "description": "Schema for each property in the object.",
-      "type": "object",
       "additionalProperties": {
         "$ref": "functions.expression.InputSchema"
-      }
+      },
+      "description": "Schema for each property in the object.",
+      "type": "object"
     },
     "required": {
       "description": "List of property names that must be present.",
-      "type": [
-        "array",
-        "null"
-      ],
-      "items": {
-        "type": "string"
-      }
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "type": {
+      "$ref": "functions.expression.ObjectInputSchemaType"
     }
-  },
-  "required": [
-    "type",
-    "properties"
-  ]
+  }
 }

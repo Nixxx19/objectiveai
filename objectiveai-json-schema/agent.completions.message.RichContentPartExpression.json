@@ -1,8 +1,7 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.message.RichContentPartExpression",
   "description": "Expression variant of [`RichContentPart`] for dynamic content.",
-  "oneOf": [
+  "anyOf": [
     {
       "type": "object",
       "properties": {
@@ -11,13 +10,11 @@
         },
         "type": {
           "type": "string",
-          "const": "text"
+          "enum": [
+            "text"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "text"
-      ]
+      }
     },
     {
       "type": "object",
@@ -27,13 +24,11 @@
         },
         "type": {
           "type": "string",
-          "const": "image_url"
+          "enum": [
+            "image_url"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "image_url"
-      ]
+      }
     },
     {
       "type": "object",
@@ -43,45 +38,39 @@
         },
         "type": {
           "type": "string",
-          "const": "input_audio"
+          "enum": [
+            "input_audio"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "input_audio"
-      ]
+      }
     },
     {
       "type": "object",
       "properties": {
-        "video_url": {
-          "$ref": "functions.expression.WithExpression.agent.completions.message.VideoUrl"
-        },
         "type": {
           "type": "string",
-          "const": "input_video"
+          "enum": [
+            "input_video"
+          ]
+        },
+        "video_url": {
+          "$ref": "functions.expression.WithExpression.agent.completions.message.VideoUrl"
         }
-      },
-      "required": [
-        "type",
-        "video_url"
-      ]
+      }
     },
     {
       "type": "object",
       "properties": {
-        "video_url": {
-          "$ref": "functions.expression.WithExpression.agent.completions.message.VideoUrl"
-        },
         "type": {
           "type": "string",
-          "const": "video_url"
+          "enum": [
+            "video_url"
+          ]
+        },
+        "video_url": {
+          "$ref": "functions.expression.WithExpression.agent.completions.message.VideoUrl"
         }
-      },
-      "required": [
-        "type",
-        "video_url"
-      ]
+      }
     },
     {
       "type": "object",
@@ -91,13 +80,11 @@
         },
         "type": {
           "type": "string",
-          "const": "file"
+          "enum": [
+            "file"
+          ]
         }
-      },
-      "required": [
-        "type",
-        "file"
-      ]
+      }
     }
   ]
 }

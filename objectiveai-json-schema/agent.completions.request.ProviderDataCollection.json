@@ -1,17 +1,20 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.request.ProviderDataCollection",
   "description": "Data collection policy for providers.",
-  "oneOf": [
+  "anyOf": [
     {
       "description": "Do not allow data collection.",
       "type": "string",
-      "const": "deny"
+      "enum": [
+        "deny"
+      ]
     },
     {
       "description": "Allow data collection.",
       "type": "string",
-      "const": "allow"
+      "enum": [
+        "allow"
+      ]
     }
   ]
 }

@@ -1,21 +1,56 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.executions.response.streaming.FunctionExecutionChunk",
   "type": "object",
   "properties": {
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "function": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
     "id": {
       "type": "string"
     },
-    "tasks": {
-      "type": "array",
-      "items": {
-        "$ref": "functions.executions.response.streaming.TaskChunk"
-      }
+    "object": {
+      "$ref": "functions.executions.response.streaming.Object"
     },
-    "tasks_errors": {
-      "type": [
-        "boolean",
-        "null"
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.TaskOutputOwned"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
     "reasoning": {
@@ -28,51 +63,31 @@
         }
       ]
     },
-    "output": {
-      "anyOf": [
-        {
-          "$ref": "functions.expression.TaskOutputOwned"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
-    "error": {
-      "anyOf": [
-        {
-          "$ref": "ResponseError"
-        },
-        {
-          "type": "null"
-        }
-      ]
-    },
     "retry_token": {
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
     },
-    "created": {
-      "type": "integer",
-      "format": "uint64",
-      "minimum": 0
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.executions.response.streaming.TaskChunk"
+      }
     },
-    "function": {
-      "type": [
-        "string",
-        "null"
+    "tasks_errors": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
       ]
-    },
-    "profile": {
-      "type": [
-        "string",
-        "null"
-      ]
-    },
-    "object": {
-      "$ref": "functions.executions.response.streaming.Object"
     },
     "usage": {
       "anyOf": [
@@ -84,11 +99,5 @@
         }
       ]
     }
-  },
-  "required": [
-    "id",
-    "tasks",
-    "created",
-    "object"
-  ]
+  }
 }

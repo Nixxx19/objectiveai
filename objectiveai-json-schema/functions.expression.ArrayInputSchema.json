@@ -1,44 +1,51 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "functions.expression.ArrayInputSchema",
   "description": "Schema for an array input.",
   "type": "object",
   "properties": {
-    "type": {
-      "$ref": "functions.expression.ArrayInputSchemaType"
-    },
     "description": {
       "description": "Human-readable description of the array.",
-      "type": [
-        "string",
-        "null"
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
       ]
-    },
-    "minItems": {
-      "description": "Minimum number of items required.",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
-    },
-    "maxItems": {
-      "description": "Maximum number of items allowed.",
-      "type": [
-        "integer",
-        "null"
-      ],
-      "format": "uint64",
-      "minimum": 0
     },
     "items": {
       "description": "Schema for each item in the array.",
       "$ref": "functions.expression.InputSchema"
+    },
+    "maxItems": {
+      "description": "Maximum number of items allowed.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "minItems": {
+      "description": "Minimum number of items required.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "type": {
+      "$ref": "functions.expression.ArrayInputSchemaType"
     }
-  },
-  "required": [
-    "type",
-    "items"
-  ]
+  }
 }

@@ -1,48 +1,72 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "agent.completions.request.ProviderMaxPrice",
   "description": "Maximum price constraints per token type.",
   "type": "object",
   "properties": {
-    "prompt": {
-      "description": "Maximum price per prompt token.",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+    "audio": {
+      "description": "Maximum price per audio second.",
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "completion": {
       "description": "Maximum price per completion token.",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "image": {
       "description": "Maximum price per image.",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
-    "audio": {
-      "description": "Maximum price per audio second.",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+    "prompt": {
+      "description": "Maximum price per prompt token.",
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     },
     "request": {
       "description": "Maximum price per request.",
-      "type": [
-        "number",
-        "null"
-      ],
-      "format": "double"
+      "anyOf": [
+        {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        },
+        {
+          "type": "null"
+        }
+      ]
     }
   }
 }
