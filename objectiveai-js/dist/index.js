@@ -1,4 +1,4 @@
-import z294, { z } from 'zod';
+import z305, { z } from 'zod';
 
 // src/agent/claude_agent_sdk/agent.ts
 var AgentClaudeAgentSdkEffortSchema = z.union([z.literal("low").describe("Minimal output, concise responses."), z.literal("medium").describe("Balanced output (default, normalized away during preparation)."), z.literal("high").describe("Detailed output with thorough explanations."), z.literal("max").describe("Maximum effort, most detailed output possible.")]).describe("The effort level for model output.\n\nThis setting hints to the model how detailed its responses should be.").meta({ title: "agent.claude_agent_sdk.Effort" });
@@ -126,15 +126,15 @@ var AgentCompletionsMessageUserMessageExpressionSchema = z.object({
 }).describe("Expression variant of [`UserMessage`] for dynamic content.").meta({ title: "agent.completions.message.UserMessageExpression" });
 
 // src/agent/completions/message/messageExpression.ts
-var AgentCompletionsMessageMessageExpressionSchema = z.union([AgentCompletionsMessageDeveloperMessageExpressionSchema.and(z.object({
+var AgentCompletionsMessageMessageExpressionSchema = z.union([z.lazy(() => AgentCompletionsMessageDeveloperMessageExpressionSchema).and(z.object({
   role: z.literal("developer")
-})), AgentCompletionsMessageSystemMessageExpressionSchema.and(z.object({
+})), z.lazy(() => AgentCompletionsMessageSystemMessageExpressionSchema).and(z.object({
   role: z.literal("system")
-})), AgentCompletionsMessageUserMessageExpressionSchema.and(z.object({
+})), z.lazy(() => AgentCompletionsMessageUserMessageExpressionSchema).and(z.object({
   role: z.literal("user")
 })), z.lazy(() => AgentCompletionsMessageAssistantMessageExpressionSchema).and(z.object({
   role: z.literal("assistant")
-})), AgentCompletionsMessageToolMessageExpressionSchema.and(z.object({
+})), z.lazy(() => AgentCompletionsMessageToolMessageExpressionSchema).and(z.object({
   role: z.literal("tool")
 }))]).describe("A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.").meta({ title: "agent.completions.message.MessageExpression" });
 var AgentCompletionsMessageRichContentExpressionSchema = z.union([z.string().describe("Plain text content."), z.array(z.lazy(() => FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionSchema)).describe("Multi-part content expressions.")]).describe("Expression variant of [`RichContent`] for dynamic content.").meta({ title: "agent.completions.message.RichContentExpression" });
@@ -166,41 +166,41 @@ var FunctionsExpressionSpecialSchema = z.union([z.literal("input").describe("Ret
 
 // src/functions/expression/expression.ts
 var FunctionsExpressionExpressionSchema = z.union([z.object({
-  JMESPath: z.string()
+  $jmespath: z.string()
 }).strict().describe("A JMESPath expression."), z.object({
-  Starlark: z.string()
+  $starlark: z.string()
 }).strict().describe("A Starlark expression."), z.object({
-  Special: FunctionsExpressionSpecialSchema
+  $special: FunctionsExpressionSpecialSchema
 }).strict().describe("A predefined special expression variant.")]).describe('An expression that can be either JMESPath or Starlark.\n\nSerializes as `{"$jmespath": "..."}` or `{"$starlark": "..."}` in JSON.\n\n# Examples\n\nJMESPath:\n```json\n{"$jmespath": "input.items[0].name"}\n```\n\nStarlark:\n```json\n{"$starlark": "input[\'items\'][0][\'name\']"}\n```').meta({ title: "functions.expression.Expression" });
 var FunctionsExpressionInputValueExpressionSchema = z.union([AgentCompletionsMessageRichContentPartSchema.describe("Rich content (image, audio, video, file)."), z.record(z.string(), z.lazy(() => FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema)).describe("An object with values that may be expressions."), z.array(z.lazy(() => FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema)).describe("An array with elements that may be expressions."), z.string().describe("A string value."), z.number().int().meta({ format: "int64" }).describe("An integer value."), z.number().meta({ format: "double" }).describe("A floating-point number."), z.boolean().describe("A boolean value.")]).describe("An input value that may contain expressions (pre-compilation).\n\nSimilar to [`InputValue`] but object values and array elements can be\nexpressions (JMESPath or Starlark) that are evaluated during compilation.").meta({ title: "functions.expression.InputValueExpression" });
 
 // src/functions/expression/withExpression.ts
-var FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageAssistantToolCallExpressionSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression" });
-var FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression" });
+var FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => AgentCompletionsMessageAssistantToolCallExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression" });
+var FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression" });
 var FunctionsExpressionWithExpressionAgentCompletionsMessageFileSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageFileSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.File" });
 var FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageImageUrlSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.ImageUrl" });
 var FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageInputAudioSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.InputAudio" });
-var FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageMessageExpressionSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.MessageExpression" });
-var FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageRichContentExpressionSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.RichContentExpression" });
-var FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageRichContentPartExpressionSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.RichContentPartExpression" });
-var FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageSimpleContentExpressionSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.SimpleContentExpression" });
-var FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageSimpleContentPartExpressionSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.SimpleContentPartExpression" });
+var FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => AgentCompletionsMessageMessageExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.MessageExpression" });
+var FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => AgentCompletionsMessageRichContentExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.RichContentExpression" });
+var FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => AgentCompletionsMessageRichContentPartExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.RichContentPartExpression" });
+var FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => AgentCompletionsMessageSimpleContentExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.SimpleContentExpression" });
+var FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => AgentCompletionsMessageSimpleContentPartExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.SimpleContentPartExpression" });
 var FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageVideoUrlSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.agent.completions.message.VideoUrl" });
 var FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.array(FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.Array_of_functions.expression.WithExpression.agent.completions.message.MessageExpression" });
 var FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.array(FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.Array_of_functions.expression.WithExpression.agent.completions.message.RichContentExpression" });
-var FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.functions.expression.InputValueExpression" });
-var FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), AgentCompletionsMessageRichContentExpressionSchema.nullable().describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression" });
+var FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => FunctionsExpressionInputValueExpressionSchema).describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.functions.expression.InputValueExpression" });
+var FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.lazy(() => AgentCompletionsMessageRichContentExpressionSchema).nullable().describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression" });
 var FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.array(FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema).nullable().describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression" });
 var FunctionsExpressionWithExpressionNullableStringSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.string().nullable().describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.Nullable_string" });
 var FunctionsExpressionWithExpressionStringSchema = z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), z.string().describe("A literal value.")]).describe('A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```').meta({ title: "functions.expression.WithExpression.string" });
 
 // src/agent/completions/message/assistantMessageExpression.ts
 var AgentCompletionsMessageAssistantMessageExpressionSchema = z.object({
-  content: FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema.nullable().describe("The content expression.").optional(),
-  name: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional(),
-  refusal: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional(),
-  tool_calls: FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema.nullable().optional(),
-  reasoning: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional()
+  content: z.lazy(() => FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema).nullable().describe("The content expression.").optional(),
+  name: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
+  refusal: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
+  tool_calls: z.lazy(() => FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema).nullable().optional(),
+  reasoning: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional()
 }).describe("Expression variant of [`AssistantMessage`] for dynamic content.").meta({ title: "agent.completions.message.AssistantMessageExpression" });
 var AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema = z.object({
   name: z.string().nullable().describe("The function name (only present in the first delta).").optional(),
@@ -301,10 +301,10 @@ function merge(a, b, combine) {
 function mergedString(a, b) {
   return b === "" ? [a, false] : [a + b, true];
 }
-function mergedDecimalArray(a, b) {
+function mergedNumberArray(a, b) {
   if (a.length === b.length) {
     for (let i = 0; i < a.length; i++) {
-      if (String(a[i]) !== String(b[i])) return [b, true];
+      if (a[i] !== b[i]) return [b, true];
     }
     return [a, false];
   }
@@ -359,7 +359,7 @@ function agentCompletionsMessageAssistantToolCallDeltaMerged(a, b) {
     index: a.index,
     ...type != null ? { type } : {},
     ...id != null ? { id } : {},
-    ...fn !== void 0 ? { function: fn } : {}
+    ...fn != null ? { function: fn } : {}
   }, true];
 }
 function agentCompletionsMessageAssistantToolCallDeltaMergedList(a, b) {
@@ -453,11 +453,11 @@ var AgentAgentBaseSchema = z.union([AgentOpenrouterAgentBaseSchema, AgentClaudeA
 var AgentCompletionsRequestAgentSchema = z.union([z.string().describe("The content-addressed ID of an Agent stored in ObjectiveAI's database."), AgentAgentBaseSchema.describe("An inline Agent configuration.")]).describe('The agent to use for agent completion.\n\nCan be either:\n- An inline [`AgentBase`](super::super::super::AgentBase) configuration\n- The ID of a previously used Agent (22-character base62 string)\n\nSince IDs are content-addressed, ObjectiveAI stores Agent definitions\nwhen they are successfully used. "Previously used" means the ID exists in\nObjectiveAI\'s database from any successful use by anyone.').meta({ title: "agent.completions.request.Agent" });
 var AgentCompletionsRequestProviderDataCollectionSchema = z.union([z.literal("deny").describe("Do not allow data collection."), z.literal("allow").describe("Allow data collection.")]).describe("Data collection policy for providers.").meta({ title: "agent.completions.request.ProviderDataCollection" });
 var AgentCompletionsRequestProviderMaxPriceSchema = z.object({
-  prompt: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).nullable().describe("Maximum price per prompt token.").optional(),
-  completion: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).nullable().describe("Maximum price per completion token.").optional(),
-  image: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).nullable().describe("Maximum price per image.").optional(),
-  audio: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).nullable().describe("Maximum price per audio second.").optional(),
-  request: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).nullable().describe("Maximum price per request.").optional()
+  prompt: z.number().meta({ format: "double" }).nullable().describe("Maximum price per prompt token.").optional(),
+  completion: z.number().meta({ format: "double" }).nullable().describe("Maximum price per completion token.").optional(),
+  image: z.number().meta({ format: "double" }).nullable().describe("Maximum price per image.").optional(),
+  audio: z.number().meta({ format: "double" }).nullable().describe("Maximum price per audio second.").optional(),
+  request: z.number().meta({ format: "double" }).nullable().describe("Maximum price per request.").optional()
 }).describe("Maximum price constraints per token type.").meta({ title: "agent.completions.request.ProviderMaxPrice" });
 var AgentCompletionsRequestProviderSortSchema = z.union([z.literal("price").describe("Prioritize by price (cheapest first)."), z.literal("throughput").describe("Prioritize by throughput (fastest first)."), z.literal("latency").describe("Prioritize by latency (lowest first).")]).describe("How to sort/prioritize providers.").meta({ title: "agent.completions.request.ProviderSort" });
 
@@ -472,12 +472,22 @@ var AgentCompletionsRequestProviderSchema = z.object({
   min_throughput: z.number().meta({ format: "double" }).nullable().describe("Hard minimum throughput requirement (tokens/second).").optional(),
   max_latency: z.number().meta({ format: "double" }).nullable().describe("Hard maximum latency requirement (seconds).").optional()
 }).describe("Provider routing and selection preferences.").meta({ title: "agent.completions.request.Provider" });
+var JsonValueSchema = z.union([
+  z.string(),
+  z.number(),
+  z.boolean(),
+  z.null(),
+  z.array(z.lazy(() => JsonValueSchema)),
+  z.record(z.string(), z.lazy(() => JsonValueSchema))
+]);
+
+// src/agent/completions/request/responseFormat.ts
 var AgentCompletionsRequestResponseFormatSchema = z.union([z.object({
   type: z.literal("text")
 }).describe("Plain text response (default)."), z.object({
   type: z.literal("json_object")
 }).describe("Response must be valid JSON."), z.object({
-  schema: z.record(z.string(), z.unknown()).describe("The JSON Schema definition."),
+  schema: z.record(z.string(), JsonValueSchema).describe("The JSON Schema definition."),
   type: z.literal("json_schema")
 }).describe("Response must conform to a JSON schema."), z.object({
   grammar: z.string(),
@@ -487,7 +497,7 @@ var AgentCompletionsRequestResponseFormatSchema = z.union([z.object({
 }).describe("Response must be valid Python code."), z.object({
   name: z.string().describe("The name of the tool."),
   description: z.string().describe("A description of the tool."),
-  schema: z.record(z.string(), z.unknown()).describe("The JSON Schema definition."),
+  schema: z.record(z.string(), JsonValueSchema).describe("The JSON Schema definition."),
   required: z.boolean().nullable().describe("Whether the tool MUST be called.").optional(),
   type: z.literal("tool_call")
 }).describe("The final assistant message will contain this tool call")]).describe("The format of the model's response.").meta({ title: "agent.completions.request.ResponseFormat" });
@@ -511,14 +521,14 @@ var AgentCompletionsResponseFinishReasonSchema = z.union([z.literal("stop").desc
 var AgentCompletionsResponseTopLogprobSchema = z.object({
   token: z.string().describe("The token string."),
   bytes: z.array(z.number().int().min(0).max(255).meta({ format: "uint8" })).nullable().describe("The raw bytes of the token.").optional(),
-  logprob: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).nullable().describe("The log probability of this token.").optional()
+  logprob: z.number().meta({ format: "double" }).nullable().describe("The log probability of this token.").optional()
 }).describe("A top alternative token with its log probability.").meta({ title: "agent.completions.response.TopLogprob" });
 
 // src/agent/completions/response/logprob.ts
 var AgentCompletionsResponseLogprobSchema = z.object({
   token: z.string().describe("The token string."),
   bytes: z.array(z.number().int().min(0).max(255).meta({ format: "uint8" })).nullable().describe("The raw bytes of the token.").optional(),
-  logprob: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The log probability of this token."),
+  logprob: z.number().meta({ format: "double" }).describe("The log probability of this token."),
   top_logprobs: z.array(AgentCompletionsResponseTopLogprobSchema).describe("The top alternative tokens and their log probabilities.")
 }).describe("Log probability information for a single token.").meta({ title: "agent.completions.response.Logprob" });
 
@@ -534,8 +544,8 @@ var AgentCompletionsResponseCompletionTokensDetailsSchema = z.object({
   rejected_prediction_tokens: z.number().int().min(0).meta({ format: "uint64" }).nullable().describe("Tokens from rejected predictions (speculative decoding).").optional()
 }).describe("Detailed breakdown of completion token usage.").meta({ title: "agent.completions.response.CompletionTokensDetails" });
 var AgentCompletionsResponseCostDetailsSchema = z.object({
-  upstream_inference_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Cost charged by the immediate upstream (e.g., OpenRouter)."),
-  upstream_upstream_inference_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Cost charged by the upstream's upstream (e.g., the actual model provider).")
+  upstream_inference_cost: z.number().meta({ format: "double" }).describe("Cost charged by the immediate upstream (e.g., OpenRouter)."),
+  upstream_upstream_inference_cost: z.number().meta({ format: "double" }).describe("Cost charged by the upstream's upstream (e.g., the actual model provider).")
 }).describe("Detailed cost breakdown.").meta({ title: "agent.completions.response.CostDetails" });
 var AgentCompletionsResponsePromptTokensDetailsSchema = z.object({
   audio_tokens: z.number().int().min(0).meta({ format: "uint64" }).nullable().describe("Audio input tokens.").optional(),
@@ -551,10 +561,10 @@ var AgentCompletionsResponseUpstreamUsageSchema = z.object({
   total_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total tokens (prompt + completion)."),
   completion_tokens_details: AgentCompletionsResponseCompletionTokensDetailsSchema.nullable().describe("Detailed breakdown of completion tokens.").optional(),
   prompt_tokens_details: AgentCompletionsResponsePromptTokensDetailsSchema.nullable().describe("Detailed breakdown of prompt tokens.").optional(),
-  cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The cost charged by ObjectiveAI for this request."),
+  cost: z.number().meta({ format: "double" }).describe("The cost charged by ObjectiveAI for this request."),
   cost_details: AgentCompletionsResponseCostDetailsSchema.nullable().describe("Detailed cost breakdown.").optional(),
-  total_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged."),
-  cost_multiplier: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The multiplier applied to compute ObjectiveAI's charge."),
+  total_cost: z.number().meta({ format: "double" }).describe("Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged."),
+  cost_multiplier: z.number().meta({ format: "double" }).describe("The multiplier applied to compute ObjectiveAI's charge."),
   is_byok: z.boolean().describe("Whether this request used Bring Your Own Key (BYOK).")
 }).describe("Token usage and cost information from an upstream provider.\n\nThis is the per-assistant-response usage yielded by upstream clients.\nIt includes upstream-specific fields like `cost_multiplier` and `is_byok`.").meta({ title: "agent.completions.response.UpstreamUsage" });
 
@@ -596,14 +606,14 @@ var AgentCompletionsResponseUsageSchema = z.object({
   total_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Sum of completion and prompt tokens."),
   completion_tokens_details: AgentCompletionsResponseCompletionTokensDetailsSchema.nullable().describe("Breakdown of completion tokens (reasoning, audio, etc.) if available.").optional(),
   prompt_tokens_details: AgentCompletionsResponsePromptTokensDetailsSchema.nullable().describe("Breakdown of prompt tokens (cached, audio, etc.) if available.").optional(),
-  cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Cost charged by ObjectiveAI for this request."),
+  cost: z.number().meta({ format: "double" }).describe("Cost charged by ObjectiveAI for this request."),
   cost_details: AgentCompletionsResponseCostDetailsSchema.nullable().describe("Breakdown of upstream and upstream_upstream costs if available.").optional(),
-  total_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Total cost including upstream provider charges. Only differs from `cost`\nwhen using BYOK (Bring Your Own Key).")
+  total_cost: z.number().meta({ format: "double" }).describe("Total cost including upstream provider charges. Only differs from `cost`\nwhen using BYOK (Bring Your Own Key).")
 }).describe('Aggregated token and cost usage for an agent completion.\n\nThis is the "primary" usage type that aggregates across all upstream\nassistant responses within a single agent completion.').meta({ title: "agent.completions.response.Usage" });
 var AgentUpstreamSchema = z.union([z.literal("unknown").describe("Unknown Upstream."), z.literal("openrouter").describe("OpenRouter Upstream."), z.literal("claude_agent_sdk").describe("Claude Agent SDK Upstream."), z.literal("mock").describe("Mock Upstream.")]).describe("Supported agent upstreams.").meta({ title: "agent.Upstream" });
 var ResponseErrorSchema = z.object({
   code: z.number().int().min(0).max(65535).meta({ format: "uint16" }).describe("The HTTP status code of the error response."),
-  message: z.unknown().describe("The error message or details as a JSON value.")
+  message: JsonValueSchema.describe("The error message or details as a JSON value.")
 }).describe('An error returned by the ObjectiveAI API.\n\nThis struct represents an API error response containing an HTTP status\ncode and a message. The message can be any JSON value, allowing for\nboth simple string errors and structured error objects.\n\n# Examples\n\n```\nuse objectiveai::error::ResponseError;\nuse serde_json::json;\n\nlet error = ResponseError {\n    code: 400,\n    message: json!({"error": "Invalid request"}),\n};\n```').meta({ title: "ResponseError" });
 
 // src/agent/completions/response/streaming/agentCompletionChunk.ts
@@ -642,8 +652,8 @@ function agentCompletionsResponseLogprobsMerged(a, b) {
   }
   if (!changed) return [a, false];
   return [{
-    ...content != null ? { content } : {},
-    ...refusal != null ? { refusal } : {}
+    ...content !== void 0 ? { content } : {},
+    ...refusal !== void 0 ? { refusal } : {}
   }, true];
 }
 
@@ -693,8 +703,8 @@ function agentCompletionsResponsePromptTokensDetailsMerged(a, b) {
 
 // src/agent/completions/response/costDetailsMerged.ts
 function agentCompletionsResponseCostDetailsMerged(a, b) {
-  const upstream_inference_cost = Number(a.upstream_inference_cost) + Number(b.upstream_inference_cost);
-  const upstream_upstream_inference_cost = Number(a.upstream_upstream_inference_cost) + Number(b.upstream_upstream_inference_cost);
+  const upstream_inference_cost = a.upstream_inference_cost + b.upstream_inference_cost;
+  const upstream_upstream_inference_cost = a.upstream_upstream_inference_cost + b.upstream_upstream_inference_cost;
   return [{
     upstream_inference_cost,
     upstream_upstream_inference_cost
@@ -716,21 +726,21 @@ function agentCompletionsResponseUpstreamUsageMerged(a, b) {
     b.prompt_tokens_details ?? void 0,
     agentCompletionsResponsePromptTokensDetailsMerged
   );
-  const cost = Number(a.cost) + Number(b.cost);
+  const cost = a.cost + b.cost;
   const [cost_details, c3] = merge(
     a.cost_details ?? void 0,
     b.cost_details ?? void 0,
     agentCompletionsResponseCostDetailsMerged
   );
-  const total_cost = Number(a.total_cost) + Number(b.total_cost);
+  const total_cost = a.total_cost + b.total_cost;
   return [{
     completion_tokens,
     prompt_tokens,
     total_tokens,
-    ...completion_tokens_details !== void 0 ? { completion_tokens_details } : {},
-    ...prompt_tokens_details !== void 0 ? { prompt_tokens_details } : {},
+    ...completion_tokens_details != null ? { completion_tokens_details } : {},
+    ...prompt_tokens_details != null ? { prompt_tokens_details } : {},
     cost,
-    ...cost_details !== void 0 ? { cost_details } : {},
+    ...cost_details != null ? { cost_details } : {},
     total_cost,
     cost_multiplier: a.cost_multiplier,
     is_byok: a.is_byok
@@ -825,7 +835,8 @@ function agentCompletionsResponseStreamingAssistantResponseChunkMerged(a, b) {
     ...tool_calls != null ? { tool_calls } : {},
     ...content != null ? { content } : {},
     ...refusal != null ? { refusal } : {},
-    ...finish_reason != null ? { finish_reason } : {},
+    // finish_reason: no skip_serializing_if — must be present (null or value)
+    ...finish_reason !== void 0 ? { finish_reason } : {},
     ...logprobs != null ? { logprobs } : {},
     ...service_tier != null ? { service_tier } : {},
     ...system_fingerprint != null ? { system_fingerprint } : {},
@@ -880,21 +891,21 @@ function agentCompletionsResponseUsageMerged(a, b) {
     b.prompt_tokens_details ?? void 0,
     agentCompletionsResponsePromptTokensDetailsMerged
   );
-  const cost = Number(a.cost) + Number(b.cost);
+  const cost = a.cost + b.cost;
   const [cost_details, c3] = merge(
     a.cost_details ?? void 0,
     b.cost_details ?? void 0,
     agentCompletionsResponseCostDetailsMerged
   );
-  const total_cost = Number(a.total_cost) + Number(b.total_cost);
+  const total_cost = a.total_cost + b.total_cost;
   return [{
     completion_tokens,
     prompt_tokens,
     total_tokens,
-    ...completion_tokens_details !== void 0 ? { completion_tokens_details } : {},
-    ...prompt_tokens_details !== void 0 ? { prompt_tokens_details } : {},
+    ...completion_tokens_details != null ? { completion_tokens_details } : {},
+    ...prompt_tokens_details != null ? { prompt_tokens_details } : {},
     cost,
-    ...cost_details !== void 0 ? { cost_details } : {},
+    ...cost_details != null ? { cost_details } : {},
     total_cost
   }, true];
 }
@@ -963,10 +974,10 @@ var AgentCompletionsResponseUnaryAgentCompletionSchema = z.object({
   error: ResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional()
 }).describe("A complete agent completion response.").meta({ title: "agent.completions.response.unary.AgentCompletion" });
 var AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema = AgentCompletionsRequestAgentCompletionCreateParamsSchema.extend({
-  stream: z294.literal(true)
+  stream: z305.literal(true)
 });
 var AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema = AgentCompletionsRequestAgentCompletionCreateParamsSchema.extend({
-  stream: z294.literal(false).optional().nullable()
+  stream: z305.literal(false).optional().nullable()
 });
 function agentCompletionsCreateAgentCompletion(client, body, options) {
   if (body.stream) {
@@ -1034,7 +1045,7 @@ var AgentUsageAgentSchema = z.object({
   requests: z.number().int().min(0).meta({ format: "uint64" }).describe("Total number of requests made with this Agent."),
   completion_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total completion tokens generated."),
   prompt_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total prompt tokens processed."),
-  total_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Total cost incurred.")
+  total_cost: z.number().meta({ format: "double" }).describe("Total cost incurred.")
 }).describe("Usage statistics for an Agent.").meta({ title: "agent.UsageAgent" });
 var AgentWithFallbacksAndCountAgentAgentSchema = z.union([AgentOpenrouterAgentSchema, AgentClaudeAgentSdkAgentSchema, AgentMockAgentSchema]).and(z.object({
   count: z.number().int().min(0).meta({ format: "uint64" }).default(1).describe("Number of instances of this agent in the ensemble. Defaults to 1.").optional(),
@@ -1084,9 +1095,9 @@ var AuthDisableApiKeyRequestSchema = z.object({
   api_key: PrefixedUuidSchema.describe("The API key to disable.")
 }).describe("Request to disable an existing API key.\n\nOnce disabled, the API key can no longer be used for authentication.\nThis action is reversible only by creating a new key.").meta({ title: "auth.DisableApiKeyRequest" });
 var AuthGetCreditsResponseSchema = z.object({
-  credits: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The current available credit balance."),
-  total_credits_purchased: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The total amount of credits ever purchased."),
-  total_credits_used: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The total amount of credits consumed by API usage.")
+  credits: z.number().meta({ format: "double" }).describe("The current available credit balance."),
+  total_credits_purchased: z.number().meta({ format: "double" }).describe("The total amount of credits ever purchased."),
+  total_credits_used: z.number().meta({ format: "double" }).describe("The total amount of credits consumed by API usage.")
 }).describe("Response containing the user's credit balance information.\n\nCredits are the billing unit for ObjectiveAI. This response provides\na complete view of the user's credit status.").meta({ title: "auth.GetCreditsResponse" });
 var AuthGetOpenRouterByokApiKeyResponseSchema = z.object({
   api_key: z.string().nullable().describe("The OpenRouter API key, or `None` if not configured.").optional()
@@ -1098,7 +1109,7 @@ var AuthListApiKeyItemSchema = z.object({
   disabled: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
   name: z.string().describe("The user-provided name of the API key."),
   description: z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
-  cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The total cost incurred by this API key.")
+  cost: z.number().meta({ format: "double" }).describe("The total cost incurred by this API key.")
 }).describe("An API key with metadata and accumulated cost information.\n\nThis extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with\nthe total cost incurred by requests using this key.").meta({ title: "auth.ListApiKeyItem" });
 var AuthListApiKeyResponseSchema = z.object({
   data: z.array(AuthListApiKeyItemSchema).describe("The list of API keys with their metadata and usage costs.")
@@ -1158,7 +1169,7 @@ var EnsembleUsageEnsembleSchema = z.object({
   requests: z.number().int().min(0).meta({ format: "uint64" }).describe("Total number of requests made with this Ensemble."),
   completion_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total completion tokens generated across all agents."),
   prompt_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total prompt tokens processed across all agents."),
-  total_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Total cost incurred.")
+  total_cost: z.number().meta({ format: "double" }).describe("Total cost incurred.")
 }).describe("Usage statistics for an Ensemble.").meta({ title: "ensemble.UsageEnsemble" });
 
 // src/ensemble/http.ts
@@ -1182,71 +1193,87 @@ function ensembleGetEnsembleUsage(client, ensembleId, options) {
 var FunctionsExpressionAnyOfInputSchemaSchema = z.object({
   anyOf: z.array(z.lazy(() => FunctionsExpressionInputSchemaSchema)).describe("The possible schemas that the input can match.")
 }).describe("Schema for a union of possible types - input must match at least one.").meta({ title: "functions.expression.AnyOfInputSchema" });
+var FunctionsExpressionArrayInputSchemaTypeSchema = z.literal("array").meta({ title: "functions.expression.ArrayInputSchemaType" });
+
+// src/functions/expression/arrayInputSchema.ts
 var FunctionsExpressionArrayInputSchemaSchema = z.object({
+  type: FunctionsExpressionArrayInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the array.").optional(),
   minItems: z.number().int().min(0).meta({ format: "uint64" }).nullable().describe("Minimum number of items required.").optional(),
   maxItems: z.number().int().min(0).meta({ format: "uint64" }).nullable().describe("Maximum number of items allowed.").optional(),
   items: z.lazy(() => FunctionsExpressionInputSchemaSchema).describe("Schema for each item in the array.")
 }).describe("Schema for an array input.").meta({ title: "functions.expression.ArrayInputSchema" });
+var FunctionsExpressionAudioInputSchemaTypeSchema = z.literal("audio").meta({ title: "functions.expression.AudioInputSchemaType" });
+
+// src/functions/expression/audioInputSchema.ts
 var FunctionsExpressionAudioInputSchemaSchema = z.object({
+  type: FunctionsExpressionAudioInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the expected audio.").optional()
 }).describe("Schema for an audio input.").meta({ title: "functions.expression.AudioInputSchema" });
+var FunctionsExpressionBooleanInputSchemaTypeSchema = z.literal("boolean").meta({ title: "functions.expression.BooleanInputSchemaType" });
+
+// src/functions/expression/booleanInputSchema.ts
 var FunctionsExpressionBooleanInputSchemaSchema = z.object({
+  type: FunctionsExpressionBooleanInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the boolean.").optional()
 }).describe("Schema for a boolean input.").meta({ title: "functions.expression.BooleanInputSchema" });
+var FunctionsExpressionFileInputSchemaTypeSchema = z.literal("file").meta({ title: "functions.expression.FileInputSchemaType" });
+
+// src/functions/expression/fileInputSchema.ts
 var FunctionsExpressionFileInputSchemaSchema = z.object({
+  type: FunctionsExpressionFileInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the expected file.").optional()
 }).describe("Schema for a file input.").meta({ title: "functions.expression.FileInputSchema" });
+var FunctionsExpressionImageInputSchemaTypeSchema = z.literal("image").meta({ title: "functions.expression.ImageInputSchemaType" });
+
+// src/functions/expression/imageInputSchema.ts
 var FunctionsExpressionImageInputSchemaSchema = z.object({
+  type: FunctionsExpressionImageInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the expected image.").optional()
 }).describe("Schema for an image input (URL or base64-encoded).").meta({ title: "functions.expression.ImageInputSchema" });
+var FunctionsExpressionIntegerInputSchemaTypeSchema = z.literal("integer").meta({ title: "functions.expression.IntegerInputSchemaType" });
+
+// src/functions/expression/integerInputSchema.ts
 var FunctionsExpressionIntegerInputSchemaSchema = z.object({
+  type: FunctionsExpressionIntegerInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the integer.").optional(),
   minimum: z.number().int().meta({ format: "int64" }).nullable().describe("Minimum allowed value (inclusive).").optional(),
   maximum: z.number().int().meta({ format: "int64" }).nullable().describe("Maximum allowed value (inclusive).").optional()
 }).describe("Schema for an integer input.").meta({ title: "functions.expression.IntegerInputSchema" });
+var FunctionsExpressionNumberInputSchemaTypeSchema = z.literal("number").meta({ title: "functions.expression.NumberInputSchemaType" });
+
+// src/functions/expression/numberInputSchema.ts
 var FunctionsExpressionNumberInputSchemaSchema = z.object({
+  type: FunctionsExpressionNumberInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the number.").optional(),
   minimum: z.number().meta({ format: "double" }).nullable().describe("Minimum allowed value (inclusive).").optional(),
   maximum: z.number().meta({ format: "double" }).nullable().describe("Maximum allowed value (inclusive).").optional()
 }).describe("Schema for a floating-point number input.").meta({ title: "functions.expression.NumberInputSchema" });
+var FunctionsExpressionStringInputSchemaTypeSchema = z.literal("string").meta({ title: "functions.expression.StringInputSchemaType" });
+
+// src/functions/expression/stringInputSchema.ts
 var FunctionsExpressionStringInputSchemaSchema = z.object({
+  type: FunctionsExpressionStringInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the string.").optional(),
   enum: z.array(z.string()).nullable().describe("If provided, the string must be one of these values.").optional()
 }).describe("Schema for a string input.").meta({ title: "functions.expression.StringInputSchema" });
+var FunctionsExpressionVideoInputSchemaTypeSchema = z.literal("video").meta({ title: "functions.expression.VideoInputSchemaType" });
+
+// src/functions/expression/videoInputSchema.ts
 var FunctionsExpressionVideoInputSchemaSchema = z.object({
+  type: FunctionsExpressionVideoInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the expected video.").optional()
 }).describe("Schema for a video input (URL or base64-encoded).").meta({ title: "functions.expression.VideoInputSchema" });
 
 // src/functions/expression/inputSchema.ts
-var FunctionsExpressionInputSchemaSchema = z.union([z.object({
-  Object: z.lazy(() => FunctionsExpressionObjectInputSchemaSchema)
-}).strict().describe("An object with named properties."), z.object({
-  Array: FunctionsExpressionArrayInputSchemaSchema
-}).strict().describe("An array of items."), z.object({
-  String: FunctionsExpressionStringInputSchemaSchema
-}).strict().describe("A string value."), z.object({
-  Integer: FunctionsExpressionIntegerInputSchemaSchema
-}).strict().describe("An integer value."), z.object({
-  Number: FunctionsExpressionNumberInputSchemaSchema
-}).strict().describe("A floating-point number."), z.object({
-  Boolean: FunctionsExpressionBooleanInputSchemaSchema
-}).strict().describe("A boolean value."), z.object({
-  Image: FunctionsExpressionImageInputSchemaSchema
-}).strict().describe("An image (URL or base64)."), z.object({
-  Audio: FunctionsExpressionAudioInputSchemaSchema
-}).strict().describe("Audio content."), z.object({
-  Video: FunctionsExpressionVideoInputSchemaSchema
-}).strict().describe("Video content."), z.object({
-  File: FunctionsExpressionFileInputSchemaSchema
-}).strict().describe("A file."), z.object({
-  AnyOf: FunctionsExpressionAnyOfInputSchemaSchema
-}).strict().describe("A union of schemas - input must match at least one.")]).describe("Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.").meta({ title: "functions.expression.InputSchema" });
+var FunctionsExpressionInputSchemaSchema = z.union([z.lazy(() => FunctionsExpressionAnyOfInputSchemaSchema).describe("A union of schemas - input must match at least one."), z.lazy(() => FunctionsExpressionObjectInputSchemaSchema).describe("An object with named properties."), z.lazy(() => FunctionsExpressionArrayInputSchemaSchema).describe("An array of items."), FunctionsExpressionStringInputSchemaSchema.describe("A string value."), FunctionsExpressionIntegerInputSchemaSchema.describe("An integer value."), FunctionsExpressionNumberInputSchemaSchema.describe("A floating-point number."), FunctionsExpressionBooleanInputSchemaSchema.describe("A boolean value."), FunctionsExpressionImageInputSchemaSchema.describe("An image (URL or base64)."), FunctionsExpressionAudioInputSchemaSchema.describe("Audio content."), FunctionsExpressionVideoInputSchemaSchema.describe("Video content."), FunctionsExpressionFileInputSchemaSchema.describe("A file.")]).describe("Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.").meta({ title: "functions.expression.InputSchema" });
+var FunctionsExpressionObjectInputSchemaTypeSchema = z.literal("object").meta({ title: "functions.expression.ObjectInputSchemaType" });
 
 // src/functions/expression/objectInputSchema.ts
 var FunctionsExpressionObjectInputSchemaSchema = z.object({
+  type: FunctionsExpressionObjectInputSchemaTypeSchema,
   description: z.string().nullable().describe("Human-readable description of the object.").optional(),
-  properties: z.record(z.string(), FunctionsExpressionInputSchemaSchema).describe("Schema for each property in the object."),
+  properties: z.record(z.string(), z.lazy(() => FunctionsExpressionInputSchemaSchema)).describe("Schema for each property in the object."),
   required: z.array(z.string()).nullable().describe("List of property names that must be present.").optional()
 }).describe("Schema for an object input with named properties.").meta({ title: "functions.expression.ObjectInputSchema" });
 
@@ -1527,12 +1554,12 @@ var FunctionsInlineFunctionSchema = z.union([z.object({
 }).describe("Produces a vector of scores that sums to 1.")]).describe("An inline function definition without metadata.\n\nUsed when embedding function logic directly in requests rather than\nreferencing a remote function. Lacks description and input\nschema fields.").meta({ title: "functions.InlineFunction" });
 var VectorCompletionsRequestEnsembleSchema = z.union([z.string().describe("Reference an existing Ensemble by its ID."), EnsembleEnsembleBaseSchema.describe("Provide an inline Ensemble definition.")]).describe('Specifies which Ensemble to use for a vector completion.\n\nEnsembles can be referenced by ID or provided inline. The untagged\ndeserialization allows either a string ID or a full [`EnsembleBase`]\ndefinition in JSON.\n\n# Examples\n\nBy ID:\n```json\n"ensemble": "ens_abc123"\n```\n\nInline definition:\n```json\n"ensemble": {\n  "llms": [\n    {"model": "openai/gpt-4o", "output_mode": "json_schema", "count": 2},\n    {"model": "google/gemini-3.0-pro", "output_mode": "tool_call"}\n  ]\n}\n```\n\n[`EnsembleBase`]: crate::ensemble::EnsembleBase').meta({ title: "vector.completions.request.Ensemble" });
 var VectorCompletionsRequestProfileEntrySchema = z.object({
-  weight: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The weight for this agent in the ensemble. Must be in [0, 1]."),
+  weight: z.number().meta({ format: "double" }).describe("The weight for this agent in the ensemble. Must be in [0, 1]."),
   invert: z.boolean().nullable().describe("If true, invert this agent's vote distribution before combining.\n\nWhen omitted or false, the vote distribution is used as-is.").optional()
 }).describe("An entry in a profile with an explicit weight and optional invert flag.").meta({ title: "vector.completions.request.ProfileEntry" });
 
 // src/vector/completions/request/profile.ts
-var VectorCompletionsRequestProfileSchema = z.union([z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Simple vector of decimal weights."), z.array(VectorCompletionsRequestProfileEntrySchema).describe("Vector of entries with optional invert flags.")]).describe("Profile weights for a vector completion.\n\nPreviously this was a simple `Vec<Decimal>`. To support per-agent inversion\nwhile remaining backwards compatible, the field is now an untagged enum:\n\n- `Weights(Vec<Decimal>)` - legacy representation (no inversion)\n- `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`").meta({ title: "vector.completions.request.Profile" });
+var VectorCompletionsRequestProfileSchema = z.union([z.array(z.number().meta({ format: "double" })).describe("Simple vector of decimal weights."), z.array(VectorCompletionsRequestProfileEntrySchema).describe("Vector of entries with optional invert flags.")]).describe("Profile weights for a vector completion.\n\nPreviously this was a simple `Vec<Decimal>`. To support per-agent inversion\nwhile remaining backwards compatible, the field is now an untagged enum:\n\n- `Weights(Vec<Decimal>)` - legacy representation (no inversion)\n- `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`").meta({ title: "vector.completions.request.Profile" });
 
 // src/functions/inlineAutoProfile.ts
 var FunctionsInlineAutoProfileSchema = z.object({
@@ -1544,16 +1571,16 @@ var FunctionsTaskProfileSchema = z.union([z.object({
   owner: z.string().describe("Repository owner."),
   repository: z.string().describe("Repository name."),
   commit: z.string().nullable().describe("Git commit SHA. Highly recommended for remote profiles to\nensure compatibility if the referenced profile's shape changes.").optional()
-}).describe("Profile for a nested function task (references another profile)."), z.lazy(() => FunctionsInlineProfileSchema).describe("Inline profile for a task (tasks-based or auto)."), z.record(z.string(), z.unknown()).describe("Placeholder task \u2014 no configuration needed, output is fixed.")]).describe("Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.").meta({ title: "functions.TaskProfile" });
+}).describe("Profile for a nested function task (references another profile)."), z.lazy(() => FunctionsInlineProfileSchema).describe("Inline profile for a task (tasks-based or auto)."), z.record(z.string(), JsonValueSchema).describe("Placeholder task \u2014 no configuration needed, output is fixed.")]).describe("Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.").meta({ title: "functions.TaskProfile" });
 
 // src/functions/inlineTasksProfile.ts
 var FunctionsInlineTasksProfileSchema = z.object({
-  tasks: z.array(FunctionsTaskProfileSchema).describe("Configuration for each task in the corresponding Function."),
+  tasks: z.array(z.lazy(() => FunctionsTaskProfileSchema)).describe("Configuration for each task in the corresponding Function."),
   profile: VectorCompletionsRequestProfileSchema.describe("Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.")
 }).describe("An inline tasks-based profile definition without metadata.").meta({ title: "functions.InlineTasksProfile" });
 
 // src/functions/inlineProfile.ts
-var FunctionsInlineProfileSchema = z.union([FunctionsInlineTasksProfileSchema.describe("Tasks-based profile with per-task configuration."), FunctionsInlineAutoProfileSchema.describe("Auto profile that applies a single ensemble+weights to all vector completion tasks.")]).describe("An inline profile, either tasks-based or auto.").meta({ title: "functions.InlineProfile" });
+var FunctionsInlineProfileSchema = z.union([z.lazy(() => FunctionsInlineTasksProfileSchema).describe("Tasks-based profile with per-task configuration."), FunctionsInlineAutoProfileSchema.describe("Auto profile that applies a single ensemble+weights to all vector completion tasks.")]).describe("An inline profile, either tasks-based or auto.").meta({ title: "functions.InlineProfile" });
 
 // src/functions/executions/request/functionInlineProfileInlineRequestBody.ts
 var FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema = z.object({
@@ -1651,7 +1678,7 @@ var FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema = z.object({
   upstream: AgentUpstreamSchema.describe("Upstream provider"),
   error: ResponseErrorSchema.nullable().optional()
 }).describe("A chunk of a streaming agent completion response.\n\nMultiple chunks are received via Server-Sent Events and can be\naccumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)\nusing the [`push`](Self::push) method.").meta({ title: "functions.executions.response.streaming.ReasoningSummaryChunk" });
-var FunctionsExpressionTaskOutputOwnedSchema = z.union([z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("A single scalar score."), z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("A vector of scores."), z.array(z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]))).describe("Multiple vectors of scores (from mapped tasks)."), z.unknown().describe("An error occurred during execution.")]).describe("Owned task output variants.").meta({ title: "functions.expression.TaskOutputOwned" });
+var FunctionsExpressionTaskOutputOwnedSchema = z.union([z.number().meta({ format: "double" }).describe("A single scalar score."), z.array(z.number().meta({ format: "double" })).describe("A vector of scores."), z.array(z.array(z.number().meta({ format: "double" }))).describe("Multiple vectors of scores (from mapped tasks)."), JsonValueSchema.describe("An error occurred during execution.")]).describe("Owned task output variants.").meta({ title: "functions.expression.TaskOutputOwned" });
 
 // src/functions/executions/response/streaming/functionExecutionTaskChunk.ts
 var FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema = z.object({
@@ -1690,8 +1717,8 @@ var VectorCompletionsResponseVoteSchema = z.object({
   flat_ensemble_index: z.number().int().min(0).meta({ format: "uint64" }).describe("Flattened index accounting for agent counts in the ensemble."),
   prompt_id: z.string().describe("Content hash of the request messages (for caching/deduplication)."),
   responses_ids: z.array(z.string()).describe("Content hashes of each response option in the request."),
-  vote: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("The vote distribution. Each index corresponds to a response from the\nrequest. Typically one element is 1.0 (selected) and the rest are 0.0."),
-  weight: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The weight applied to this vote when computing final scores."),
+  vote: z.array(z.number().meta({ format: "double" })).describe("The vote distribution. Each index corresponds to a response from the\nrequest. Typically one element is 1.0 (selected) and the rest are 0.0."),
+  weight: z.number().meta({ format: "double" }).describe("The weight applied to this vote when computing final scores."),
   retry: z.boolean().nullable().describe("If true, this vote was reused from a previous request via the `retry`\nparameter. All fields reflect the original request's values.").optional(),
   from_cache: z.boolean().nullable().describe("If true, this vote was retrieved from cache rather than generated fresh.").optional()
 }).describe("A single LLM's vote in a vector completion.\n\nEach LLM in the ensemble produces a vote indicating which response(s) it\nselected. Votes are weighted according to the profile and combined to\nproduce the final scores.\n\n# Vote Format\n\nThe `vote` field is a vector of decimals corresponding to the responses\nin the request. Typically one element is 1.0 and the rest are 0.0 (discrete\nselection), but when `top_logprobs` is used, votes may be probability\ndistributions.").meta({ title: "vector.completions.response.Vote" });
@@ -1704,8 +1731,8 @@ var FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema = z.obje
   id: z.string().describe("Unique identifier for this vector completion."),
   completions: z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
   votes: z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
-  scores: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Current weighted scores. Updated as new votes arrive."),
-  weights: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Current weight distribution across responses. Updated as new votes arrive."),
+  scores: z.array(z.number().meta({ format: "double" })).describe("Current weighted scores. Updated as new votes arrive."),
+  weights: z.array(z.number().meta({ format: "double" })).describe("Current weight distribution across responses. Updated as new votes arrive."),
   created: z.number().int().min(0).meta({ format: "uint64" }).describe("Unix timestamp when the completion was created."),
   ensemble: z.string().describe("ID of the ensemble used for this completion."),
   object: VectorCompletionsResponseStreamingObjectSchema.describe('Object type identifier (`"vector.completion.chunk"`).'),
@@ -1714,7 +1741,7 @@ var FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema = z.obje
 }).describe("A chunk in a streaming vector completion response.\n\nEach chunk contains incremental updates to the completion. Use the\n[`push`](Self::push) method to accumulate chunks into a complete response.").meta({ title: "functions.executions.response.streaming.VectorCompletionTaskChunk" });
 
 // src/functions/executions/response/streaming/taskChunk.ts
-var FunctionsExecutionsResponseStreamingTaskChunkSchema = z.union([FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema]).meta({ title: "functions.executions.response.streaming.TaskChunk" });
+var FunctionsExecutionsResponseStreamingTaskChunkSchema = z.union([z.lazy(() => FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema), FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema]).meta({ title: "functions.executions.response.streaming.TaskChunk" });
 
 // src/functions/executions/response/streaming/functionExecutionChunk.ts
 var FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema = z.object({
@@ -1827,9 +1854,9 @@ function functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged(a, 
   if (c1) changed = true;
   const [votes, c2] = vectorCompletionsResponseVoteMergedList(a.votes, b.votes);
   if (c2) changed = true;
-  const [scores, c3] = mergedDecimalArray(a.scores, b.scores);
+  const [scores, c3] = mergedNumberArray(a.scores, b.scores);
   if (c3) changed = true;
-  const [weights, c4] = mergedDecimalArray(a.weights, b.weights);
+  const [weights, c4] = mergedNumberArray(a.weights, b.weights);
   if (c4) changed = true;
   let usage = a.usage;
   if (a.usage != null && b.usage != null) {
@@ -1863,10 +1890,16 @@ function functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged(a, 
   }, true];
 }
 
-// src/functions/executions/response/streaming/functionExecutionChunkFieldsMerged.ts
-function functionsExecutionsResponseStreamingFunctionExecutionChunkFieldsMerged(a, b, taskChunkMergedList) {
+// src/functions/executions/response/streaming/taskChunkMerged.ts
+function isVectorCompletionTaskChunk(chunk) {
+  return "scores" in chunk;
+}
+function taskChunkIndex(chunk) {
+  return chunk.index;
+}
+function functionsExecutionsResponseStreamingFunctionExecutionTaskChunkMerged(a, b) {
   let changed = false;
-  const [tasks, c1] = taskChunkMergedList(a.tasks, b.tasks);
+  const [tasks, c1] = functionsExecutionsResponseStreamingTaskChunkMergedList(a.tasks, b.tasks);
   if (c1) changed = true;
   let tasks_errors = a.tasks_errors;
   if (b.tasks_errors === true) {
@@ -1906,19 +1939,7 @@ function functionsExecutionsResponseStreamingFunctionExecutionChunkFieldsMerged(
     usage = b.usage;
     changed = true;
   }
-  return { changed, tasks, tasks_errors, reasoning, output, error, retry_token, usage };
-}
-
-// src/functions/executions/response/streaming/taskChunkMerged.ts
-function isVectorCompletionTaskChunk(chunk) {
-  return "scores" in chunk;
-}
-function taskChunkIndex(chunk) {
-  return chunk.index;
-}
-function functionsExecutionsResponseStreamingFunctionExecutionTaskChunkMerged(a, b) {
-  const fields = functionsExecutionsResponseStreamingFunctionExecutionChunkFieldsMerged(a, b, functionsExecutionsResponseStreamingTaskChunkMergedList);
-  if (!fields.changed) return [a, false];
+  if (!changed) return [a, false];
   return [{
     index: a.index,
     task_index: a.task_index,
@@ -1926,17 +1947,17 @@ function functionsExecutionsResponseStreamingFunctionExecutionTaskChunkMerged(a,
     ...a.swiss_pool_index != null ? { swiss_pool_index: a.swiss_pool_index } : {},
     ...a.swiss_round != null ? { swiss_round: a.swiss_round } : {},
     id: a.id,
-    tasks: fields.tasks,
-    ...fields.tasks_errors != null ? { tasks_errors: fields.tasks_errors } : {},
-    ...fields.reasoning != null ? { reasoning: fields.reasoning } : {},
-    ...fields.output != null ? { output: fields.output } : {},
-    ...fields.error != null ? { error: fields.error } : {},
-    ...fields.retry_token != null ? { retry_token: fields.retry_token } : {},
+    tasks,
+    ...tasks_errors != null ? { tasks_errors } : {},
+    ...reasoning != null ? { reasoning } : {},
+    ...output != null ? { output } : {},
+    ...error != null ? { error } : {},
+    ...retry_token != null ? { retry_token } : {},
     created: a.created,
-    ...a.function != null ? { function: a.function } : {},
-    ...a.profile != null ? { profile: a.profile } : {},
+    ...a.function !== void 0 ? { function: a.function } : {},
+    ...a.profile !== void 0 ? { profile: a.profile } : {},
     object: a.object,
-    ...fields.usage != null ? { usage: fields.usage } : {}
+    ...usage != null ? { usage } : {}
   }, true];
 }
 function functionsExecutionsResponseStreamingTaskChunkMerged(a, b) {
@@ -1971,21 +1992,61 @@ function functionsExecutionsResponseStreamingTaskChunkMergedList(a, b) {
 
 // src/functions/executions/response/streaming/functionExecutionChunkMerged.ts
 function functionsExecutionsResponseStreamingFunctionExecutionChunkMerged(a, b) {
-  const fields = functionsExecutionsResponseStreamingFunctionExecutionChunkFieldsMerged(a, b, functionsExecutionsResponseStreamingTaskChunkMergedList);
-  if (!fields.changed) return [a, false];
+  let changed = false;
+  const [tasks, c1] = functionsExecutionsResponseStreamingTaskChunkMergedList(a.tasks, b.tasks);
+  if (c1) changed = true;
+  let tasks_errors = a.tasks_errors;
+  if (b.tasks_errors === true) {
+    if (a.tasks_errors !== true) changed = true;
+    tasks_errors = true;
+  }
+  let reasoning = a.reasoning;
+  if (a.reasoning != null && b.reasoning != null) {
+    const [merged, c] = functionsExecutionsResponseStreamingReasoningSummaryChunkMerged(a.reasoning, b.reasoning);
+    reasoning = merged;
+    if (c) changed = true;
+  } else if (b.reasoning != null) {
+    reasoning = b.reasoning;
+    changed = true;
+  }
+  let output = a.output;
+  if (b.output != null) {
+    output = b.output;
+    changed = true;
+  }
+  let retry_token = a.retry_token;
+  if (b.retry_token != null) {
+    retry_token = b.retry_token;
+    changed = true;
+  }
+  let error = a.error;
+  if (b.error != null) {
+    error = b.error;
+    changed = true;
+  }
+  let usage = a.usage;
+  if (a.usage != null && b.usage != null) {
+    const [merged, c] = agentCompletionsResponseUsageMerged(a.usage, b.usage);
+    usage = merged;
+    if (c) changed = true;
+  } else if (b.usage != null) {
+    usage = b.usage;
+    changed = true;
+  }
+  if (!changed) return [a, false];
   return [{
     id: a.id,
-    tasks: fields.tasks,
-    ...fields.tasks_errors != null ? { tasks_errors: fields.tasks_errors } : {},
-    ...fields.reasoning != null ? { reasoning: fields.reasoning } : {},
-    ...fields.output != null ? { output: fields.output } : {},
-    ...fields.error != null ? { error: fields.error } : {},
-    ...fields.retry_token != null ? { retry_token: fields.retry_token } : {},
+    tasks,
+    ...tasks_errors != null ? { tasks_errors } : {},
+    ...reasoning != null ? { reasoning } : {},
+    ...output != null ? { output } : {},
+    ...error != null ? { error } : {},
+    ...retry_token != null ? { retry_token } : {},
     created: a.created,
-    ...a.function != null ? { function: a.function } : {},
-    ...a.profile != null ? { profile: a.profile } : {},
+    ...a.function !== void 0 ? { function: a.function } : {},
+    ...a.profile !== void 0 ? { profile: a.profile } : {},
     object: a.object,
-    ...fields.usage != null ? { usage: fields.usage } : {}
+    ...usage != null ? { usage } : {}
   }, true];
 }
 var FunctionsExecutionsResponseUnaryObjectSchema = z.enum(["scalar.function.execution", "vector.function.execution"]).meta({ title: "functions.executions.response.unary.Object" });
@@ -2037,8 +2098,8 @@ var FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema = z.object({
   id: z.string().describe("Unique identifier for this vector completion."),
   completions: z.array(VectorCompletionsResponseUnaryAgentCompletionSchema).describe("The underlying agent completions from each agent in the ensemble."),
   votes: z.array(VectorCompletionsResponseVoteSchema).describe("Individual votes from each agent, showing their selections."),
-  scores: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Final weighted scores for each response option. Sums to 1."),
-  weights: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution."),
+  scores: z.array(z.number().meta({ format: "double" })).describe("Final weighted scores for each response option. Sums to 1."),
+  weights: z.array(z.number().meta({ format: "double" })).describe("Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution."),
   created: z.number().int().min(0).meta({ format: "uint64" }).describe("Unix timestamp when the completion was created."),
   ensemble: z.string().describe("ID of the ensemble used for this completion."),
   object: VectorCompletionsResponseUnaryObjectSchema.describe('Object type identifier (`"vector.completion"`).'),
@@ -2047,7 +2108,7 @@ var FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema = z.object({
 }).describe("A complete vector completion response (non-streaming).\n\nContains the final scores, all votes from the ensemble, and the underlying\nagent completions that produced those votes.").meta({ title: "functions.executions.response.unary.VectorCompletionTask" });
 
 // src/functions/executions/response/unary/task.ts
-var FunctionsExecutionsResponseUnaryTaskSchema = z.union([FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema]).meta({ title: "functions.executions.response.unary.Task" });
+var FunctionsExecutionsResponseUnaryTaskSchema = z.union([z.lazy(() => FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema), FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema]).meta({ title: "functions.executions.response.unary.Task" });
 
 // src/functions/executions/response/unary/functionExecution.ts
 var FunctionsExecutionsResponseUnaryFunctionExecutionSchema = z.object({
@@ -2109,7 +2170,7 @@ var FunctionsExpressionParamsOwnedSchema = z.object({
   output: FunctionsExpressionTaskOutputOwnedSchema.nullable().describe("Results from executed tasks. Only populated for task output expressions.").optional(),
   map: z.number().int().min(0).meta({ format: "uint64" }).nullable().describe("Current map index. Only populated for mapped task expressions.").optional()
 }).describe("Owned version of expression parameters.").meta({ title: "functions.expression.ParamsOwned" });
-var FunctionsExpressionTaskOutputRefSchema = z.union([z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("A single scalar score."), z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("A vector of scores."), z.array(z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]))).describe("Multiple vectors of scores (from mapped tasks)."), z.unknown().describe("An error occurred during execution.")]).describe("Borrowed task output variants.").meta({ title: "functions.expression.TaskOutputRef" });
+var FunctionsExpressionTaskOutputRefSchema = z.union([z.number().meta({ format: "double" }).describe("A single scalar score."), z.array(z.number().meta({ format: "double" })).describe("A vector of scores."), z.array(z.array(z.number().meta({ format: "double" }))).describe("Multiple vectors of scores (from mapped tasks)."), JsonValueSchema.describe("An error occurred during execution.")]).describe("Borrowed task output variants.").meta({ title: "functions.expression.TaskOutputRef" });
 
 // src/functions/expression/taskOutput.ts
 var FunctionsExpressionTaskOutputSchema = z.union([FunctionsExpressionTaskOutputOwnedSchema.describe("Owned version."), FunctionsExpressionTaskOutputRefSchema.describe("Borrowed version.")]).describe("Output from an executed task.").meta({ title: "functions.expression.TaskOutput" });
@@ -2491,10 +2552,10 @@ var FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema = 
   usage: AgentCompletionsResponseUsageSchema
 }).meta({ title: "functions.inventions.recursive.response.unary.FunctionInventionRecursive" });
 var FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema = FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema.extend({
-  stream: z294.literal(true)
+  stream: z305.literal(true)
 });
 var FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema = FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema.extend({
-  stream: z294.literal(false).optional().nullable()
+  stream: z305.literal(false).optional().nullable()
 });
 function functionsInventionsRecursiveCreateFunctionInventionRecursive(client, body, options) {
   if (body.stream) {
@@ -2617,10 +2678,10 @@ var FunctionsInventionsTasksLengthObjectSchema = z.object({
   tasks_length: z.number().int().min(0).meta({ format: "uint64" })
 }).meta({ title: "functions.inventions.TasksLengthObject" });
 var FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema = FunctionsInventionsRequestFunctionInventionCreateParamsSchema.extend({
-  stream: z294.literal(true)
+  stream: z305.literal(true)
 });
 var FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema = FunctionsInventionsRequestFunctionInventionCreateParamsSchema.extend({
-  stream: z294.literal(false).optional().nullable()
+  stream: z305.literal(false).optional().nullable()
 });
 function functionsInventionsCreateFunctionInvention(client, body, options) {
   if (body.stream) {
@@ -2637,10 +2698,10 @@ function functionsInventionsCreateFunctionInvention(client, body, options) {
   );
 }
 var FunctionsProfilesComputationsRequestTargetSchema = z.union([z.object({
-  value: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]),
+  value: z.number().meta({ format: "double" }),
   type: z.literal("scalar")
 }), z.object({
-  value: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])),
+  value: z.array(z.number().meta({ format: "double" })),
   type: z.literal("vector")
 }), z.object({
   value: z.number().int().min(0).meta({ format: "uint" }),
@@ -2711,7 +2772,7 @@ var FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema =
   usage: AgentCompletionsResponseUsageSchema.nullable().optional()
 }).meta({ title: "functions.profiles.computations.response.streaming.FunctionExecutionChunk" });
 var FunctionsProfilesComputationsResponseFittingStatsSchema = z.object({
-  loss: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]),
+  loss: z.number().meta({ format: "double" }),
   executions: z.number().int().min(0).meta({ format: "uint" }),
   starts: z.number().int().min(0).meta({ format: "uint" }),
   rounds: z.number().int().min(0).meta({ format: "uint" }),
@@ -2735,25 +2796,65 @@ var FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChun
 
 // src/functions/profiles/computations/response/streaming/functionExecutionChunkMerged.ts
 function functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged(a, b) {
-  const fields = functionsExecutionsResponseStreamingFunctionExecutionChunkFieldsMerged(a, b, functionsExecutionsResponseStreamingTaskChunkMergedList);
-  if (!fields.changed) return [a, false];
+  let changed = false;
+  const [tasks, c1] = functionsExecutionsResponseStreamingTaskChunkMergedList(a.tasks, b.tasks);
+  if (c1) changed = true;
+  let tasks_errors = a.tasks_errors;
+  if (b.tasks_errors === true) {
+    if (a.tasks_errors !== true) changed = true;
+    tasks_errors = true;
+  }
+  let reasoning = a.reasoning;
+  if (a.reasoning != null && b.reasoning != null) {
+    const [merged, c] = functionsExecutionsResponseStreamingReasoningSummaryChunkMerged(a.reasoning, b.reasoning);
+    reasoning = merged;
+    if (c) changed = true;
+  } else if (b.reasoning != null) {
+    reasoning = b.reasoning;
+    changed = true;
+  }
+  let output = a.output;
+  if (b.output != null) {
+    output = b.output;
+    changed = true;
+  }
+  let retry_token = a.retry_token;
+  if (b.retry_token != null) {
+    retry_token = b.retry_token;
+    changed = true;
+  }
+  let error = a.error;
+  if (b.error != null) {
+    error = b.error;
+    changed = true;
+  }
+  let usage = a.usage;
+  if (a.usage != null && b.usage != null) {
+    const [merged, c] = agentCompletionsResponseUsageMerged(a.usage, b.usage);
+    usage = merged;
+    if (c) changed = true;
+  } else if (b.usage != null) {
+    usage = b.usage;
+    changed = true;
+  }
+  if (!changed) return [a, false];
   return [{
     index: a.index,
     dataset: a.dataset,
     n: a.n,
     retry: a.retry,
     id: a.id,
-    tasks: fields.tasks,
-    ...fields.tasks_errors != null ? { tasks_errors: fields.tasks_errors } : {},
-    ...fields.reasoning != null ? { reasoning: fields.reasoning } : {},
-    ...fields.output != null ? { output: fields.output } : {},
-    ...fields.error != null ? { error: fields.error } : {},
-    ...fields.retry_token != null ? { retry_token: fields.retry_token } : {},
+    tasks,
+    ...tasks_errors != null ? { tasks_errors } : {},
+    ...reasoning != null ? { reasoning } : {},
+    ...output != null ? { output } : {},
+    ...error != null ? { error } : {},
+    ...retry_token != null ? { retry_token } : {},
     created: a.created,
-    ...a.function != null ? { function: a.function } : {},
-    ...a.profile != null ? { profile: a.profile } : {},
+    function: a.function,
+    profile: a.profile,
     object: a.object,
-    ...fields.usage != null ? { usage: fields.usage } : {}
+    ...usage != null ? { usage } : {}
   }, true];
 }
 function functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList(a, b) {
@@ -2921,7 +3022,7 @@ var FunctionsProfilesUsageProfileSchema = z.object({
   requests: z.number().int().min(0).meta({ format: "uint64" }).describe("Total number of requests made with this profile."),
   completion_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total completion tokens used."),
   prompt_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total prompt tokens used."),
-  total_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Total cost incurred.")
+  total_cost: z.number().meta({ format: "double" }).describe("Total cost incurred.")
 }).describe("Usage statistics for a profile.").meta({ title: "functions.profiles.UsageProfile" });
 
 // src/functions/profiles/http.ts
@@ -3054,13 +3155,13 @@ var FunctionsUsageFunctionSchema = z.object({
   requests: z.number().int().min(0).meta({ format: "uint64" }).describe("Total number of requests made with this function."),
   completion_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total completion tokens used."),
   prompt_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total prompt tokens used."),
-  total_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Total cost incurred.")
+  total_cost: z.number().meta({ format: "double" }).describe("Total cost incurred.")
 }).describe("Usage statistics for a function.").meta({ title: "functions.UsageFunction" });
 var FunctionsUsageFunctionProfilePairSchema = z.object({
   requests: z.number().int().min(0).meta({ format: "uint64" }).describe("Total number of requests made with this function-profile pair."),
   completion_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total completion tokens used."),
   prompt_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total prompt tokens used."),
-  total_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Total cost incurred.")
+  total_cost: z.number().meta({ format: "double" }).describe("Total cost incurred.")
 }).describe("Usage statistics for a function-profile pair.").meta({ title: "functions.UsageFunctionProfilePair" });
 
 // src/functions/http.ts
@@ -3145,8 +3246,8 @@ var VectorCompletionsResponseStreamingVectorCompletionChunkSchema = z.object({
   id: z.string().describe("Unique identifier for this vector completion."),
   completions: z.array(VectorCompletionsResponseStreamingAgentCompletionChunkSchema).describe("Incremental agent completion chunks from each agent."),
   votes: z.array(VectorCompletionsResponseVoteSchema).describe("Votes received so far. New votes are appended in subsequent chunks."),
-  scores: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Current weighted scores. Updated as new votes arrive."),
-  weights: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Current weight distribution across responses. Updated as new votes arrive."),
+  scores: z.array(z.number().meta({ format: "double" })).describe("Current weighted scores. Updated as new votes arrive."),
+  weights: z.array(z.number().meta({ format: "double" })).describe("Current weight distribution across responses. Updated as new votes arrive."),
   created: z.number().int().min(0).meta({ format: "uint64" }).describe("Unix timestamp when the completion was created."),
   ensemble: z.string().describe("ID of the ensemble used for this completion."),
   object: VectorCompletionsResponseStreamingObjectSchema.describe('Object type identifier (`"vector.completion.chunk"`).'),
@@ -3160,9 +3261,9 @@ function vectorCompletionsResponseStreamingVectorCompletionChunkMerged(a, b) {
   if (c1) changed = true;
   const [votes, c2] = vectorCompletionsResponseVoteMergedList(a.votes, b.votes);
   if (c2) changed = true;
-  const [scores, c3] = mergedDecimalArray(a.scores, b.scores);
+  const [scores, c3] = mergedNumberArray(a.scores, b.scores);
   if (c3) changed = true;
-  const [weights, c4] = mergedDecimalArray(a.weights, b.weights);
+  const [weights, c4] = mergedNumberArray(a.weights, b.weights);
   if (c4) changed = true;
   let usage = a.usage;
   if (a.usage != null && b.usage != null) {
@@ -3190,8 +3291,8 @@ var VectorCompletionsResponseUnaryVectorCompletionSchema = z.object({
   id: z.string().describe("Unique identifier for this vector completion."),
   completions: z.array(VectorCompletionsResponseUnaryAgentCompletionSchema).describe("The underlying agent completions from each agent in the ensemble."),
   votes: z.array(VectorCompletionsResponseVoteSchema).describe("Individual votes from each agent, showing their selections."),
-  scores: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Final weighted scores for each response option. Sums to 1."),
-  weights: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])).describe("Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution."),
+  scores: z.array(z.number().meta({ format: "double" })).describe("Final weighted scores for each response option. Sums to 1."),
+  weights: z.array(z.number().meta({ format: "double" })).describe("Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution."),
   created: z.number().int().min(0).meta({ format: "uint64" }).describe("Unix timestamp when the completion was created."),
   ensemble: z.string().describe("ID of the ensemble used for this completion."),
   object: VectorCompletionsResponseUnaryObjectSchema.describe('Object type identifier (`"vector.completion"`).'),
@@ -3199,10 +3300,10 @@ var VectorCompletionsResponseUnaryVectorCompletionSchema = z.object({
 }).describe("A complete vector completion response (non-streaming).\n\nContains the final scores, all votes from the ensemble, and the underlying\nagent completions that produced those votes.").meta({ title: "vector.completions.response.unary.VectorCompletion" });
 var VectorCompletionsVectorResponsesSchema = z.array(AgentCompletionsMessageRichContentSchema).describe('The list of response options in a vector completion request.\n\nEach element is a [`RichContent`] value that an LLM can vote for.\nResponses can be plain text strings or multi-part content containing\ntext, images, audio, video, or files.\n\n# Minimum Length\n\nA vector completion requires at least 2 responses to vote between.\n\n# Examples\n\nPlain text responses:\n```json\n["Yes", "No", "Maybe"]\n```\n\nMultimodal responses:\n```json\n[\n  [{"type": "text", "text": "Option A"}, {"type": "image_url", "image_url": {"url": "https://example.com/a.png"}}],\n  [{"type": "text", "text": "Option B"}, {"type": "image_url", "image_url": {"url": "https://example.com/b.png"}}]\n]\n```').meta({ title: "vector.completions.VectorResponses" });
 var VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema = VectorCompletionsRequestVectorCompletionCreateParamsSchema.extend({
-  stream: z294.literal(true)
+  stream: z305.literal(true)
 });
 var VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema = VectorCompletionsRequestVectorCompletionCreateParamsSchema.extend({
-  stream: z294.literal(false).optional().nullable()
+  stream: z305.literal(false).optional().nullable()
 });
 function vectorCompletionsCreateVectorCompletion(client, body, options) {
   if (body.stream) {
@@ -3380,25 +3481,25 @@ function readEnv(env) {
   }
   return void 0;
 }
-var ObjectiveAIOptionsSchema = z294.object({
-  apiKey: z294.string().nullish().describe("API key for authentication. Falls back to OBJECTIVEAI_API_KEY env var."),
-  apiBase: z294.string().nullish().describe(
+var ObjectiveAIOptionsSchema = z305.object({
+  apiKey: z305.string().nullish().describe("API key for authentication. Falls back to OBJECTIVEAI_API_KEY env var."),
+  apiBase: z305.string().nullish().describe(
     "Base URL for the API. Falls back to OBJECTIVEAI_API_BASE env var, then https://api.objective-ai.io"
   ),
-  userAgent: z294.string().nullish().describe("User-Agent header. Falls back to USER_AGENT env var."),
-  xTitle: z294.string().nullish().describe("X-Title header. Falls back to X_TITLE env var."),
-  httpReferer: z294.string().nullish().describe("HTTP-Referer header. Falls back to HTTP_REFERER env var."),
-  xGithubAuthorization: z294.string().nullish().describe("X-GITHUB-AUTHORIZATION header for GitHub-hosted function/profile access."),
-  xOpenrouterAuthorization: z294.string().nullish().describe("X-OPENROUTER-AUTHORIZATION header for BYOK (Bring Your Own Key) support."),
-  xMcpAuthorization: z294.record(z294.string(), z294.string()).nullish().describe("X-MCP-AUTHORIZATION header (JSON-encoded map of MCP authorization headers).")
+  userAgent: z305.string().nullish().describe("User-Agent header. Falls back to USER_AGENT env var."),
+  xTitle: z305.string().nullish().describe("X-Title header. Falls back to X_TITLE env var."),
+  httpReferer: z305.string().nullish().describe("HTTP-Referer header. Falls back to HTTP_REFERER env var."),
+  xGithubAuthorization: z305.string().nullish().describe("X-GITHUB-AUTHORIZATION header for GitHub-hosted function/profile access."),
+  xOpenrouterAuthorization: z305.string().nullish().describe("X-OPENROUTER-AUTHORIZATION header for BYOK (Bring Your Own Key) support."),
+  xMcpAuthorization: z305.record(z305.string(), z305.string()).nullish().describe("X-MCP-AUTHORIZATION header (JSON-encoded map of MCP authorization headers).")
 }).describe("Options for the ObjectiveAI client.");
-var RequestOptionsSchema = z294.object({
-  headers: z294.union([
-    z294.instanceof(Headers),
-    z294.record(z294.string(), z294.string()),
-    z294.array(z294.tuple([z294.string(), z294.string()]))
+var RequestOptionsSchema = z305.object({
+  headers: z305.union([
+    z305.instanceof(Headers),
+    z305.record(z305.string(), z305.string()),
+    z305.array(z305.tuple([z305.string(), z305.string()]))
   ]).nullish().describe("Additional headers to include in the request."),
-  signal: z294.instanceof(AbortSignal).nullish().describe("AbortSignal for cancelling the request.")
+  signal: z305.instanceof(AbortSignal).nullish().describe("AbortSignal for cancelling the request.")
 }).describe("Options for individual requests.");
 var ObjectiveAI = class {
   constructor(options) {
@@ -3592,23 +3693,37 @@ function numberIsEmpty(value) {
   return value === null || value === void 0 || value === 0;
 }
 
-// src/mapsToRecords.ts
-function mapsToRecords(value) {
-  if (value instanceof Map) {
-    const result = {};
-    for (const [k, v] of value) {
-      result[String(k)] = mapsToRecords(v);
+// src/zockerParse.ts
+var NUMBER_MIN = 0;
+var NUMBER_MAX = 999;
+function fixForSerde(value) {
+  if (typeof value === "number") {
+    if (!Number.isFinite(value) || value < NUMBER_MIN || value > NUMBER_MAX) {
+      return Math.floor(Math.random() * (NUMBER_MAX - NUMBER_MIN + 1)) + NUMBER_MIN;
     }
-    return result;
+    return value;
   } else if (value !== null && typeof value === "object") {
     const obj = value;
     for (const k in obj) {
-      obj[k] = mapsToRecords(obj[k]);
+      obj[k] = fixForSerde(obj[k]);
     }
     return value;
   } else {
     return value;
   }
 }
+function zockerParse(gen, normalize) {
+  let raw;
+  for (let attempt = 0; ; attempt++) {
+    try {
+      raw = gen.generate();
+      break;
+    } catch (e) {
+      if (attempt >= 99) throw e;
+    }
+  }
+  const fixed = fixForSerde(raw);
+  return JSON.parse(normalize(fixed));
+}
 
-export { AgentAgentBaseSchema, AgentAgentSchema, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, AgentClaudeAgentSdkEffortSchema, AgentClaudeAgentSdkOutputModeSchema, AgentClaudeAgentSdkUpstreamSchema, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, AgentCompletionsMessageAssistantToolCallDeltaSchema, AgentCompletionsMessageAssistantToolCallExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, AgentCompletionsMessageAssistantToolCallTypeSchema, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, AgentCompletionsMessageFileSchema, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, AgentCompletionsMessageInputAudioSchema, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, AgentCompletionsMessageRichContentExpressionSchema, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, AgentCompletionsMessageSimpleContentExpressionSchema, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, AgentCompletionsMessageVideoUrlSchema, AgentCompletionsRequestAgentCompletionCreateParamsSchema, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, AgentCompletionsRequestAgentSchema, AgentCompletionsRequestProviderDataCollectionSchema, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, AgentCompletionsRequestProviderSortSchema, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, AgentCompletionsResponseAssistantRoleSchema, AgentCompletionsResponseCompletionTokensDetailsSchema, AgentCompletionsResponseCostDetailsSchema, AgentCompletionsResponseFinishReasonSchema, AgentCompletionsResponseLogprobSchema, AgentCompletionsResponseLogprobsSchema, AgentCompletionsResponsePromptTokensDetailsSchema, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, AgentCompletionsResponseStreamingMessageChunkSchema, AgentCompletionsResponseStreamingObjectSchema, AgentCompletionsResponseToolResponseSchema, AgentCompletionsResponseToolRoleSchema, AgentCompletionsResponseTopLogprobSchema, AgentCompletionsResponseUnaryAgentCompletionSchema, AgentCompletionsResponseUnaryAssistantResponseSchema, AgentCompletionsResponseUnaryMessageSchema, AgentCompletionsResponseUnaryObjectSchema, AgentCompletionsResponseUpstreamUsageSchema, AgentCompletionsResponseUsageSchema, AgentGetAgentSchema, AgentListAgentItemSchema, AgentListAgentSchema, AgentMcpServerSchema, AgentMockAgentBaseSchema, AgentMockAgentSchema, AgentMockOutputModeSchema, AgentMockUpstreamSchema, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, AgentOpenrouterOutputModeSchema, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, AgentOpenrouterReasoningSummaryVerbositySchema, AgentOpenrouterStopSchema, AgentOpenrouterUpstreamSchema, AgentOpenrouterVerbositySchema, AgentOutputModeSchema, AgentUpstreamSchema, AgentUsageAgentSchema, AgentWithFallbacksAndCountAgentAgentBaseSchema, AgentWithFallbacksAndCountAgentAgentSchema, AuthApiKeyWithMetadataSchema, AuthCreateApiKeyRequestSchema, AuthCreateOpenRouterByokApiKeyRequestSchema, AuthDisableApiKeyRequestSchema, AuthGetCreditsResponseSchema, AuthGetOpenRouterByokApiKeyResponseSchema, AuthListApiKeyItemSchema, AuthListApiKeyResponseSchema, EnsembleEnsembleBaseSchema, EnsembleEnsembleSchema, EnsembleGetEnsembleSchema, EnsembleListEnsembleItemSchema, EnsembleListEnsembleSchema, EnsembleUsageEnsembleSchema, FunctionsAlphaInlineFunctionSchema, FunctionsAlphaRemoteFunctionSchema, FunctionsAlphaScalarBranchTaskExpressionSchema, FunctionsAlphaScalarInlineFunctionSchema, FunctionsAlphaScalarLeafTaskExpressionSchema, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, FunctionsAlphaScalarRemoteFunctionSchema, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, FunctionsAlphaVectorBranchTaskExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, FunctionsAlphaVectorInlineFunctionSchema, FunctionsAlphaVectorLeafTaskExpressionSchema, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, FunctionsAlphaVectorRemoteFunctionSchema, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, FunctionsCheckScalarFieldsValidationSchema, FunctionsCheckVectorFieldsValidationSchema, FunctionsCompiledTaskSchema, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema, FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema, FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema, FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema, FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPathSchema, FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema, FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema, FunctionsExecutionsRequestReasoningSchema, FunctionsExecutionsRequestRequestSchema, FunctionsExecutionsRequestStrategySchema, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, FunctionsExecutionsResponseStreamingObjectSchema, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, FunctionsExecutionsResponseStreamingTaskChunkSchema, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, FunctionsExecutionsResponseUnaryObjectSchema, FunctionsExecutionsResponseUnaryReasoningSummarySchema, FunctionsExecutionsResponseUnaryTaskSchema, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, FunctionsExecutionsRetryTokenSchema, FunctionsExpressionAnyOfInputSchemaSchema, FunctionsExpressionArrayInputSchemaSchema, FunctionsExpressionAudioInputSchemaSchema, FunctionsExpressionBooleanInputSchemaSchema, FunctionsExpressionExpressionSchema, FunctionsExpressionFileInputSchemaSchema, FunctionsExpressionImageInputSchemaSchema, FunctionsExpressionInputSchemaSchema, FunctionsExpressionInputValueExpressionSchema, FunctionsExpressionInputValueSchema, FunctionsExpressionIntegerInputSchemaSchema, FunctionsExpressionNumberInputSchemaSchema, FunctionsExpressionObjectInputSchemaSchema, FunctionsExpressionOneOrManyStringSchema, FunctionsExpressionParamsOwnedSchema, FunctionsExpressionParamsRefSchema, FunctionsExpressionParamsSchema, FunctionsExpressionSpecialSchema, FunctionsExpressionStringInputSchemaSchema, FunctionsExpressionTaskOutputOwnedSchema, FunctionsExpressionTaskOutputRefSchema, FunctionsExpressionTaskOutputSchema, FunctionsExpressionVideoInputSchemaSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageFileSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema, FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema, FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, FunctionsExpressionWithExpressionNullableStringSchema, FunctionsExpressionWithExpressionStringSchema, FunctionsFullInlineFunctionSchema, FunctionsFullRemoteFunctionSchema, FunctionsFunctionSchema, FunctionsFunctionTypeSchema, FunctionsGetFunctionProfilePairSchema, FunctionsGetFunctionSchema, FunctionsInlineAutoProfileSchema, FunctionsInlineFunctionSchema, FunctionsInlineProfileSchema, FunctionsInlineTasksProfileSchema, FunctionsInventionsDescriptionObjectSchema, FunctionsInventionsEssayObjectSchema, FunctionsInventionsEssayTasksObjectSchema, FunctionsInventionsIndexObjectSchema, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, FunctionsInventionsRecursiveResponseStreamingObjectSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, FunctionsInventionsRecursiveResponseUnaryObjectSchema, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, FunctionsInventionsResponseStreamingObjectSchema, FunctionsInventionsResponseUnaryAgentCompletionSchema, FunctionsInventionsResponseUnaryFunctionInventionSchema, FunctionsInventionsResponseUnaryObjectSchema, FunctionsInventionsStateAlphaScalarBranchStateSchema, FunctionsInventionsStateAlphaScalarLeafStateSchema, FunctionsInventionsStateAlphaScalarStateSchema, FunctionsInventionsStateAlphaVectorBranchStateSchema, FunctionsInventionsStateAlphaVectorLeafStateSchema, FunctionsInventionsStateAlphaVectorStateSchema, FunctionsInventionsStateParamsSchema, FunctionsInventionsStateParamsStateSchema, FunctionsInventionsStateStateSchema, FunctionsInventionsTasksLengthObjectSchema, FunctionsListFunctionItemSchema, FunctionsListFunctionProfilePairItemSchema, FunctionsListFunctionProfilePairSchema, FunctionsListFunctionProfilePairsQueryParametersSchema, FunctionsListFunctionProfilePairsSourceSchema, FunctionsListFunctionSchema, FunctionsListFunctionsQueryParametersSchema, FunctionsListFunctionsSourceSchema, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, FunctionsProfileSchema, FunctionsProfilesComputationsRequestDatasetItemSchema, FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema, FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema, FunctionsProfilesComputationsRequestRequestSchema, FunctionsProfilesComputationsRequestTargetSchema, FunctionsProfilesComputationsResponseFittingStatsSchema, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, FunctionsProfilesComputationsResponseStreamingObjectSchema, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, FunctionsProfilesComputationsResponseUnaryObjectSchema, FunctionsProfilesComputationsRetryTokenSchema, FunctionsProfilesGetProfileSchema, FunctionsProfilesListProfileItemSchema, FunctionsProfilesListProfileSchema, FunctionsProfilesListProfilesQueryParametersSchema, FunctionsProfilesListProfilesSourceSchema, FunctionsProfilesUsageProfileSchema, FunctionsRemoteAutoProfileSchema, FunctionsRemoteFunctionPathSchema, FunctionsRemoteFunctionSchema, FunctionsRemoteProfileSchema, FunctionsRemoteSchema, FunctionsRemoteTasksProfileSchema, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, FunctionsTaskExpressionSchema, FunctionsTaskProfileSchema, FunctionsTaskSchema, FunctionsUsageFunctionProfilePairSchema, FunctionsUsageFunctionSchema, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, ObjectiveAI, ObjectiveAIFetchError, ObjectiveAIOptionsSchema, PrefixedUuidSchema, RequestOptionsSchema, ResponseErrorSchema, Stream, VectorCompletionsCacheCacheVoteRequestOwnedSchema, VectorCompletionsCacheCacheVoteRequestRefSchema, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, VectorCompletionsCacheCompletionVotesSchema, VectorCompletionsRequestEnsembleSchema, VectorCompletionsRequestProfileEntrySchema, VectorCompletionsRequestProfileSchema, VectorCompletionsRequestVectorCompletionCreateParamsSchema, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, VectorCompletionsResponseStreamingObjectSchema, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, VectorCompletionsResponseUnaryAgentCompletionSchema, VectorCompletionsResponseUnaryObjectSchema, VectorCompletionsResponseUnaryVectorCompletionSchema, VectorCompletionsResponseVoteSchema, VectorCompletionsVectorResponsesSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, ensembleGetEnsemble, ensembleGetEnsembleUsage, ensembleListEnsembles, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkFieldsMerged, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, mapsToRecords, merge, mergedDecimalArray, mergedString, numberIsEmpty, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList };
+export { AgentAgentBaseSchema, AgentAgentSchema, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, AgentClaudeAgentSdkEffortSchema, AgentClaudeAgentSdkOutputModeSchema, AgentClaudeAgentSdkUpstreamSchema, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, AgentCompletionsMessageAssistantToolCallDeltaSchema, AgentCompletionsMessageAssistantToolCallExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, AgentCompletionsMessageAssistantToolCallTypeSchema, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, AgentCompletionsMessageFileSchema, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, AgentCompletionsMessageInputAudioSchema, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, AgentCompletionsMessageRichContentExpressionSchema, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, AgentCompletionsMessageSimpleContentExpressionSchema, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, AgentCompletionsMessageVideoUrlSchema, AgentCompletionsRequestAgentCompletionCreateParamsSchema, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, AgentCompletionsRequestAgentSchema, AgentCompletionsRequestProviderDataCollectionSchema, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, AgentCompletionsRequestProviderSortSchema, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, AgentCompletionsResponseAssistantRoleSchema, AgentCompletionsResponseCompletionTokensDetailsSchema, AgentCompletionsResponseCostDetailsSchema, AgentCompletionsResponseFinishReasonSchema, AgentCompletionsResponseLogprobSchema, AgentCompletionsResponseLogprobsSchema, AgentCompletionsResponsePromptTokensDetailsSchema, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, AgentCompletionsResponseStreamingMessageChunkSchema, AgentCompletionsResponseStreamingObjectSchema, AgentCompletionsResponseToolResponseSchema, AgentCompletionsResponseToolRoleSchema, AgentCompletionsResponseTopLogprobSchema, AgentCompletionsResponseUnaryAgentCompletionSchema, AgentCompletionsResponseUnaryAssistantResponseSchema, AgentCompletionsResponseUnaryMessageSchema, AgentCompletionsResponseUnaryObjectSchema, AgentCompletionsResponseUpstreamUsageSchema, AgentCompletionsResponseUsageSchema, AgentGetAgentSchema, AgentListAgentItemSchema, AgentListAgentSchema, AgentMcpServerSchema, AgentMockAgentBaseSchema, AgentMockAgentSchema, AgentMockOutputModeSchema, AgentMockUpstreamSchema, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, AgentOpenrouterOutputModeSchema, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, AgentOpenrouterReasoningSummaryVerbositySchema, AgentOpenrouterStopSchema, AgentOpenrouterUpstreamSchema, AgentOpenrouterVerbositySchema, AgentOutputModeSchema, AgentUpstreamSchema, AgentUsageAgentSchema, AgentWithFallbacksAndCountAgentAgentBaseSchema, AgentWithFallbacksAndCountAgentAgentSchema, AuthApiKeyWithMetadataSchema, AuthCreateApiKeyRequestSchema, AuthCreateOpenRouterByokApiKeyRequestSchema, AuthDisableApiKeyRequestSchema, AuthGetCreditsResponseSchema, AuthGetOpenRouterByokApiKeyResponseSchema, AuthListApiKeyItemSchema, AuthListApiKeyResponseSchema, EnsembleEnsembleBaseSchema, EnsembleEnsembleSchema, EnsembleGetEnsembleSchema, EnsembleListEnsembleItemSchema, EnsembleListEnsembleSchema, EnsembleUsageEnsembleSchema, FunctionsAlphaInlineFunctionSchema, FunctionsAlphaRemoteFunctionSchema, FunctionsAlphaScalarBranchTaskExpressionSchema, FunctionsAlphaScalarInlineFunctionSchema, FunctionsAlphaScalarLeafTaskExpressionSchema, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, FunctionsAlphaScalarRemoteFunctionSchema, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, FunctionsAlphaVectorBranchTaskExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, FunctionsAlphaVectorInlineFunctionSchema, FunctionsAlphaVectorLeafTaskExpressionSchema, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, FunctionsAlphaVectorRemoteFunctionSchema, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, FunctionsCheckScalarFieldsValidationSchema, FunctionsCheckVectorFieldsValidationSchema, FunctionsCompiledTaskSchema, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema, FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema, FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema, FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema, FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPathSchema, FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema, FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema, FunctionsExecutionsRequestReasoningSchema, FunctionsExecutionsRequestRequestSchema, FunctionsExecutionsRequestStrategySchema, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, FunctionsExecutionsResponseStreamingObjectSchema, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, FunctionsExecutionsResponseStreamingTaskChunkSchema, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, FunctionsExecutionsResponseUnaryObjectSchema, FunctionsExecutionsResponseUnaryReasoningSummarySchema, FunctionsExecutionsResponseUnaryTaskSchema, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, FunctionsExecutionsRetryTokenSchema, FunctionsExpressionAnyOfInputSchemaSchema, FunctionsExpressionArrayInputSchemaSchema, FunctionsExpressionArrayInputSchemaTypeSchema, FunctionsExpressionAudioInputSchemaSchema, FunctionsExpressionAudioInputSchemaTypeSchema, FunctionsExpressionBooleanInputSchemaSchema, FunctionsExpressionBooleanInputSchemaTypeSchema, FunctionsExpressionExpressionSchema, FunctionsExpressionFileInputSchemaSchema, FunctionsExpressionFileInputSchemaTypeSchema, FunctionsExpressionImageInputSchemaSchema, FunctionsExpressionImageInputSchemaTypeSchema, FunctionsExpressionInputSchemaSchema, FunctionsExpressionInputValueExpressionSchema, FunctionsExpressionInputValueSchema, FunctionsExpressionIntegerInputSchemaSchema, FunctionsExpressionIntegerInputSchemaTypeSchema, FunctionsExpressionNumberInputSchemaSchema, FunctionsExpressionNumberInputSchemaTypeSchema, FunctionsExpressionObjectInputSchemaSchema, FunctionsExpressionObjectInputSchemaTypeSchema, FunctionsExpressionOneOrManyStringSchema, FunctionsExpressionParamsOwnedSchema, FunctionsExpressionParamsRefSchema, FunctionsExpressionParamsSchema, FunctionsExpressionSpecialSchema, FunctionsExpressionStringInputSchemaSchema, FunctionsExpressionStringInputSchemaTypeSchema, FunctionsExpressionTaskOutputOwnedSchema, FunctionsExpressionTaskOutputRefSchema, FunctionsExpressionTaskOutputSchema, FunctionsExpressionVideoInputSchemaSchema, FunctionsExpressionVideoInputSchemaTypeSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageFileSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionSchema, FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema, FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema, FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, FunctionsExpressionWithExpressionNullableStringSchema, FunctionsExpressionWithExpressionStringSchema, FunctionsFullInlineFunctionSchema, FunctionsFullRemoteFunctionSchema, FunctionsFunctionSchema, FunctionsFunctionTypeSchema, FunctionsGetFunctionProfilePairSchema, FunctionsGetFunctionSchema, FunctionsInlineAutoProfileSchema, FunctionsInlineFunctionSchema, FunctionsInlineProfileSchema, FunctionsInlineTasksProfileSchema, FunctionsInventionsDescriptionObjectSchema, FunctionsInventionsEssayObjectSchema, FunctionsInventionsEssayTasksObjectSchema, FunctionsInventionsIndexObjectSchema, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, FunctionsInventionsRecursiveResponseStreamingObjectSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, FunctionsInventionsRecursiveResponseUnaryObjectSchema, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, FunctionsInventionsResponseStreamingObjectSchema, FunctionsInventionsResponseUnaryAgentCompletionSchema, FunctionsInventionsResponseUnaryFunctionInventionSchema, FunctionsInventionsResponseUnaryObjectSchema, FunctionsInventionsStateAlphaScalarBranchStateSchema, FunctionsInventionsStateAlphaScalarLeafStateSchema, FunctionsInventionsStateAlphaScalarStateSchema, FunctionsInventionsStateAlphaVectorBranchStateSchema, FunctionsInventionsStateAlphaVectorLeafStateSchema, FunctionsInventionsStateAlphaVectorStateSchema, FunctionsInventionsStateParamsSchema, FunctionsInventionsStateParamsStateSchema, FunctionsInventionsStateStateSchema, FunctionsInventionsTasksLengthObjectSchema, FunctionsListFunctionItemSchema, FunctionsListFunctionProfilePairItemSchema, FunctionsListFunctionProfilePairSchema, FunctionsListFunctionProfilePairsQueryParametersSchema, FunctionsListFunctionProfilePairsSourceSchema, FunctionsListFunctionSchema, FunctionsListFunctionsQueryParametersSchema, FunctionsListFunctionsSourceSchema, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, FunctionsProfileSchema, FunctionsProfilesComputationsRequestDatasetItemSchema, FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema, FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema, FunctionsProfilesComputationsRequestRequestSchema, FunctionsProfilesComputationsRequestTargetSchema, FunctionsProfilesComputationsResponseFittingStatsSchema, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, FunctionsProfilesComputationsResponseStreamingObjectSchema, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, FunctionsProfilesComputationsResponseUnaryObjectSchema, FunctionsProfilesComputationsRetryTokenSchema, FunctionsProfilesGetProfileSchema, FunctionsProfilesListProfileItemSchema, FunctionsProfilesListProfileSchema, FunctionsProfilesListProfilesQueryParametersSchema, FunctionsProfilesListProfilesSourceSchema, FunctionsProfilesUsageProfileSchema, FunctionsRemoteAutoProfileSchema, FunctionsRemoteFunctionPathSchema, FunctionsRemoteFunctionSchema, FunctionsRemoteProfileSchema, FunctionsRemoteSchema, FunctionsRemoteTasksProfileSchema, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, FunctionsTaskExpressionSchema, FunctionsTaskProfileSchema, FunctionsTaskSchema, FunctionsUsageFunctionProfilePairSchema, FunctionsUsageFunctionSchema, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, ObjectiveAI, ObjectiveAIFetchError, ObjectiveAIOptionsSchema, PrefixedUuidSchema, RequestOptionsSchema, ResponseErrorSchema, Stream, VectorCompletionsCacheCacheVoteRequestOwnedSchema, VectorCompletionsCacheCacheVoteRequestRefSchema, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, VectorCompletionsCacheCompletionVotesSchema, VectorCompletionsRequestEnsembleSchema, VectorCompletionsRequestProfileEntrySchema, VectorCompletionsRequestProfileSchema, VectorCompletionsRequestVectorCompletionCreateParamsSchema, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, VectorCompletionsResponseStreamingObjectSchema, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, VectorCompletionsResponseUnaryAgentCompletionSchema, VectorCompletionsResponseUnaryObjectSchema, VectorCompletionsResponseUnaryVectorCompletionSchema, VectorCompletionsResponseVoteSchema, VectorCompletionsVectorResponsesSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, ensembleGetEnsemble, ensembleGetEnsembleUsage, ensembleListEnsembles, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, merge, mergedNumberArray, mergedString, numberIsEmpty, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, zockerParse };

@@ -23,7 +23,7 @@ export function agentCompletionsResponseUsageMerged(
     agentCompletionsResponsePromptTokensDetailsMerged,
   );
 
-  const cost = Number(a.cost) + Number(b.cost);
+  const cost = a.cost + b.cost;
 
   const [cost_details, c3] = merge(
     a.cost_details ?? undefined,
@@ -31,16 +31,16 @@ export function agentCompletionsResponseUsageMerged(
     agentCompletionsResponseCostDetailsMerged,
   );
 
-  const total_cost = Number(a.total_cost) + Number(b.total_cost);
+  const total_cost = a.total_cost + b.total_cost;
 
   return [{
     completion_tokens,
     prompt_tokens,
     total_tokens,
-    ...(completion_tokens_details !== undefined ? { completion_tokens_details } : {}),
-    ...(prompt_tokens_details !== undefined ? { prompt_tokens_details } : {}),
+    ...(completion_tokens_details != null ? { completion_tokens_details } : {}),
+    ...(prompt_tokens_details != null ? { prompt_tokens_details } : {}),
     cost,
-    ...(cost_details !== undefined ? { cost_details } : {}),
+    ...(cost_details != null ? { cost_details } : {}),
     total_cost,
   }, true];
 }

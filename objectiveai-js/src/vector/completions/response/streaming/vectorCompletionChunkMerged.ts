@@ -1,7 +1,7 @@
 import type { VectorCompletionsResponseStreamingVectorCompletionChunk } from "./vectorCompletionChunk";
 import { vectorCompletionsResponseStreamingAgentCompletionChunkMergedList } from "./agentCompletionChunkMerged";
 import { vectorCompletionsResponseVoteMergedList } from "../voteMerged";
-import { mergedDecimalArray } from "../../../../merge";
+import { mergedNumberArray } from "../../../../merge";
 import { agentCompletionsResponseUsageMerged } from "../../../../agent/completions/response/usageMerged";
 
 export function vectorCompletionsResponseStreamingVectorCompletionChunkMerged(
@@ -16,10 +16,10 @@ export function vectorCompletionsResponseStreamingVectorCompletionChunkMerged(
   const [votes, c2] = vectorCompletionsResponseVoteMergedList(a.votes, b.votes);
   if (c2) changed = true;
 
-  const [scores, c3] = mergedDecimalArray(a.scores, b.scores);
+  const [scores, c3] = mergedNumberArray(a.scores, b.scores);
   if (c3) changed = true;
 
-  const [weights, c4] = mergedDecimalArray(a.weights, b.weights);
+  const [weights, c4] = mergedNumberArray(a.weights, b.weights);
   if (c4) changed = true;
 
   let usage = a.usage;

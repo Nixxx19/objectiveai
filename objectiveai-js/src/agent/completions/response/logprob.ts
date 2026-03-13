@@ -6,7 +6,7 @@ import { AgentCompletionsResponseTopLogprobSchema } from "./topLogprob";
 export const AgentCompletionsResponseLogprobSchema = z.object({
   token: z.string().describe("The token string."),
   bytes: z.array(z.number().int().min(0).max(255).meta({ format: "uint8" })).nullable().describe("The raw bytes of the token.").optional(),
-  logprob: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The log probability of this token."),
+  logprob: z.number().meta({ format: "double" }).describe("The log probability of this token."),
   top_logprobs: z.array(AgentCompletionsResponseTopLogprobSchema).describe("The top alternative tokens and their log probabilities."),
 }).describe("Log probability information for a single token.").meta({ title: "agent.completions.response.Logprob" });
 export type AgentCompletionsResponseLogprob = z.infer<typeof AgentCompletionsResponseLogprobSchema>;

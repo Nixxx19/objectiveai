@@ -11,9 +11,9 @@ export interface AgentCompletionsMessageAssistantMessageExpression {
   reasoning?: (FunctionsExpressionWithExpressionNullableString) | null;
 }
 export const AgentCompletionsMessageAssistantMessageExpressionSchema: z.ZodType<AgentCompletionsMessageAssistantMessageExpression> = z.object({
-  content: FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema.nullable().describe("The content expression.").optional(),
-  name: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional(),
-  refusal: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional(),
-  tool_calls: FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema.nullable().optional(),
-  reasoning: FunctionsExpressionWithExpressionNullableStringSchema.nullable().optional(),
+  content: z.lazy(() => FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema).nullable().describe("The content expression.").optional(),
+  name: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
+  refusal: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
+  tool_calls: z.lazy(() => FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema).nullable().optional(),
+  reasoning: z.lazy(() => FunctionsExpressionWithExpressionNullableStringSchema).nullable().optional(),
 }).describe("Expression variant of [`AssistantMessage`] for dynamic content.").meta({ title: "agent.completions.message.AssistantMessageExpression" });

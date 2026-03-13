@@ -18,14 +18,14 @@ export type AgentCompletionsMessageMessageExpression = AgentCompletionsMessageDe
 } | AgentCompletionsMessageToolMessageExpression & {
   role: "tool";
 };
-export const AgentCompletionsMessageMessageExpressionSchema: z.ZodType<AgentCompletionsMessageMessageExpression> = z.union([AgentCompletionsMessageDeveloperMessageExpressionSchema.and(z.object({
+export const AgentCompletionsMessageMessageExpressionSchema: z.ZodType<AgentCompletionsMessageMessageExpression> = z.union([z.lazy(() => AgentCompletionsMessageDeveloperMessageExpressionSchema).and(z.object({
   role: z.literal("developer"),
-})), AgentCompletionsMessageSystemMessageExpressionSchema.and(z.object({
+})), z.lazy(() => AgentCompletionsMessageSystemMessageExpressionSchema).and(z.object({
   role: z.literal("system"),
-})), AgentCompletionsMessageUserMessageExpressionSchema.and(z.object({
+})), z.lazy(() => AgentCompletionsMessageUserMessageExpressionSchema).and(z.object({
   role: z.literal("user"),
 })), z.lazy(() => AgentCompletionsMessageAssistantMessageExpressionSchema).and(z.object({
   role: z.literal("assistant"),
-})), AgentCompletionsMessageToolMessageExpressionSchema.and(z.object({
+})), z.lazy(() => AgentCompletionsMessageToolMessageExpressionSchema).and(z.object({
   role: z.literal("tool"),
 }))]).describe("A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.").meta({ title: "agent.completions.message.MessageExpression" });

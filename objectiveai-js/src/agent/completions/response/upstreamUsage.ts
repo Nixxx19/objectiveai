@@ -11,10 +11,10 @@ export const AgentCompletionsResponseUpstreamUsageSchema = z.object({
   total_tokens: z.number().int().min(0).meta({ format: "uint64" }).describe("Total tokens (prompt + completion)."),
   completion_tokens_details: AgentCompletionsResponseCompletionTokensDetailsSchema.nullable().describe("Detailed breakdown of completion tokens.").optional(),
   prompt_tokens_details: AgentCompletionsResponsePromptTokensDetailsSchema.nullable().describe("Detailed breakdown of prompt tokens.").optional(),
-  cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The cost charged by ObjectiveAI for this request."),
+  cost: z.number().meta({ format: "double" }).describe("The cost charged by ObjectiveAI for this request."),
   cost_details: AgentCompletionsResponseCostDetailsSchema.nullable().describe("Detailed cost breakdown.").optional(),
-  total_cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged."),
-  cost_multiplier: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The multiplier applied to compute ObjectiveAI's charge."),
+  total_cost: z.number().meta({ format: "double" }).describe("Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged."),
+  cost_multiplier: z.number().meta({ format: "double" }).describe("The multiplier applied to compute ObjectiveAI's charge."),
   is_byok: z.boolean().describe("Whether this request used Bring Your Own Key (BYOK)."),
 }).describe("Token usage and cost information from an upstream provider.\n\nThis is the per-assistant-response usage yielded by upstream clients.\nIt includes upstream-specific fields like `cost_multiplier` and `is_byok`.").meta({ title: "agent.completions.response.UpstreamUsage" });
 export type AgentCompletionsResponseUpstreamUsage = z.infer<typeof AgentCompletionsResponseUpstreamUsageSchema>;

@@ -1,3 +1,4 @@
+import type { JsonValue } from "./json";
 import { ResponseError } from "./responseError";
 
 export { ResponseError };
@@ -34,7 +35,7 @@ export class ObjectiveAIFetchError extends Error {
       body = { code: codeOrBody, message: null };
     } else {
       // Try to parse as JSON
-      let parsed: unknown;
+      let parsed: JsonValue;
       try {
         parsed = JSON.parse(rawBody);
       } catch {

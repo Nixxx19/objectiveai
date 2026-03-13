@@ -5,6 +5,7 @@
  */
 import { describe, it, expect } from "vitest";
 import { z, toJSONSchema } from "zod";
+import { JsonValueSchema } from "./json";
 import * as fs from "fs";
 import * as path from "path";
 import { fileURLToPath } from "url";
@@ -63,12 +64,25 @@ function zodToJsonSchema(
       const js = ctx.jsonSchema;
       if (!js || typeof js !== "object") return;
 
+      // JsonValueSchema (and its inner z.lazy refs, and .describe() wrappers) → {} (any JSON value)
+      if (
+        ctx.zodSchema === JsonValueSchema ||
+        (ctx.zodSchema as any)?._zod?.def?.options === (JsonValueSchema as any)._zod.def.options ||
+        ((ctx.zodSchema as any)?._zod?.def?.type === "lazy" &&
+         (ctx.zodSchema as any)._zod.def.getter() === JsonValueSchema)
+      ) {
+        const desc = js.description;
+        for (const key of Object.keys(js)) delete js[key];
+        if (desc) js.description = desc;
+        return;
+      }
+
       // Strip additionalProperties: false from non-strict objects
       // (Zod adds it to all objects, but only .strict() should produce it)
       if (
         js.additionalProperties === false &&
         js.type === "object" &&
-        ctx.zodSchema?._zod?.def?.catchall?.type !== "never"
+        (ctx.zodSchema?._zod?.def as any)?.catchall?.type !== "never"
       ) {
         delete js.additionalProperties;
       }
@@ -100,16 +114,20 @@ function zodToJsonSchema(
 }
 
 /** Replace internal $ref: "#/$defs/..." with the actual $defs content. */
-function resolveDefs(obj: any, defs: Record<string, any>): any {
+function resolveDefs(obj: any, defs: Record<string, any>, resolving = new Set<string>()): any {
   if (obj === null || typeof obj !== "object") return obj;
-  if (Array.isArray(obj)) return obj.map((v) => resolveDefs(v, defs));
+  if (Array.isArray(obj)) return obj.map((v) => resolveDefs(v, defs, resolving));
 
   // If this is an internal $defs $ref, resolve it
   if (obj.$ref && typeof obj.$ref === "string" && obj.$ref.startsWith("#/$defs/")) {
     const defName = obj.$ref.slice("#/$defs/".length);
+    // Break cycles (e.g., JsonValueSchema's recursive self-refs) → {}
+    if (resolving.has(defName)) return {};
     const def = defs[defName];
     if (def) {
-      const resolved = resolveDefs(def, defs);
+      const inner = new Set(resolving);
+      inner.add(defName);
+      const resolved = resolveDefs(def, defs, inner);
       // Preserve sibling properties (e.g., description) from the $ref node
       const siblings = Object.keys(obj).filter((k) => k !== "$ref");
       if (siblings.length === 0) return resolved;
@@ -119,7 +137,7 @@ function resolveDefs(obj: any, defs: Record<string, any>): any {
 
   const result: any = {};
   for (const [key, value] of Object.entries(obj)) {
-    result[key] = resolveDefs(value, defs);
+    result[key] = resolveDefs(value, defs, resolving);
   }
   return result;
 }

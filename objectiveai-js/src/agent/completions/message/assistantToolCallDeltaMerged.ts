@@ -32,7 +32,7 @@ export function agentCompletionsMessageAssistantToolCallDeltaMerged(
     index: a.index,
     ...(type != null ? { type } : {}),
     ...(id != null ? { id } : {}),
-    ...(fn !== undefined ? { function: fn } : {}),
+    ...(fn != null ? { function: fn } : {}),
   }, true];
 }
 

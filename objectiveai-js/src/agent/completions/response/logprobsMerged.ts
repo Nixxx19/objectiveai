@@ -30,7 +30,7 @@ export function agentCompletionsResponseLogprobsMerged(
 
   if (!changed) return [a, false];
   return [{
-    ...(content != null ? { content } : {}),
-    ...(refusal != null ? { refusal } : {}),
+    ...(content !== undefined ? { content } : {}),
+    ...(refusal !== undefined ? { refusal } : {}),
   }, true];
 }

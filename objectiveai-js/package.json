@@ -10,8 +10,8 @@
   },
   "type": "module",
   "scripts": {
-    "build": "shx rm -rf dist && node ./scripts/install-wasm.cjs && tsup && shx rm -f dist/*.d.mts && shx rm -f dist/*.d.cts",
-    "test": "node test/test-cjs.cjs && node test/test-esm.mjs && vitest run",
+    "build": "shx rm -rf dist && node ./scripts/install-zod.cjs && node ./scripts/install-wasm.cjs && tsup && shx rm -f dist/*.d.mts && shx rm -f dist/*.d.cts",
+    "test": "node test/test-override.cjs && node test/test-cjs.cjs && node test/test-esm.mjs && vitest run",
     "start": "node dist/index.js"
   },
   "author": {
@@ -34,7 +34,8 @@
     "shx": "^0.4.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "zocker": "^3.0.0"
   },
   "keywords": [
     "llm",

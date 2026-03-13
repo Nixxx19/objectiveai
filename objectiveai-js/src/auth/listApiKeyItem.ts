@@ -10,6 +10,6 @@ export const AuthListApiKeyItemSchema = z.object({
   disabled: z.string().meta({ format: "date-time" }).nullable().describe("The timestamp when the API key was disabled, or `None` if it is active.").optional(),
   name: z.string().describe("The user-provided name of the API key."),
   description: z.string().nullable().describe("The user-provided description of the API key, or `None` if not provided.").optional(),
-  cost: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]).describe("The total cost incurred by this API key."),
+  cost: z.number().meta({ format: "double" }).describe("The total cost incurred by this API key."),
 }).describe("An API key with metadata and accumulated cost information.\n\nThis extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with\nthe total cost incurred by requests using this key.").meta({ title: "auth.ListApiKeyItem" });
 export type AuthListApiKeyItem = z.infer<typeof AuthListApiKeyItemSchema>;

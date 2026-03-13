@@ -3,10 +3,10 @@
 import { z } from "zod";
 
 export const FunctionsProfilesComputationsRequestTargetSchema = z.union([z.object({
-  value: z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()]),
+  value: z.number().meta({ format: "double" }),
   type: z.literal("scalar"),
 }), z.object({
-  value: z.array(z.union([z.string().regex(new RegExp("^-?\\d+(\\.\\d+)?([eE]\\d+)?$")), z.number()])),
+  value: z.array(z.number().meta({ format: "double" })),
   type: z.literal("vector"),
 }), z.object({
   value: z.number().int().min(0).meta({ format: "uint" }),

@@ -9,6 +9,6 @@ export interface FunctionsInlineTasksProfile {
   profile: VectorCompletionsRequestProfile;
 }
 export const FunctionsInlineTasksProfileSchema: z.ZodType<FunctionsInlineTasksProfile> = z.object({
-  tasks: z.array(FunctionsTaskProfileSchema).describe("Configuration for each task in the corresponding Function."),
+  tasks: z.array(z.lazy(() => FunctionsTaskProfileSchema)).describe("Configuration for each task in the corresponding Function."),
   profile: VectorCompletionsRequestProfileSchema.describe("Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields."),
 }).describe("An inline tasks-based profile definition without metadata.").meta({ title: "functions.InlineTasksProfile" });

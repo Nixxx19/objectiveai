@@ -6,5 +6,5 @@ export * from "./client";
 export * from "./error";
 export * from "./stream";
 export * from "./isEmpty";
-export * from "./mapsToRecords";
+export * from "./zockerParse";
 export * from "./merge";

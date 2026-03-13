@@ -111,7 +111,8 @@ export function agentCompletionsResponseStreamingAssistantResponseChunkMerged(
     ...(tool_calls != null ? { tool_calls } : {}),
     ...(content != null ? { content } : {}),
     ...(refusal != null ? { refusal } : {}),
-    ...(finish_reason != null ? { finish_reason } : {}),
+    // finish_reason: no skip_serializing_if — must be present (null or value)
+    ...(finish_reason !== undefined ? { finish_reason } : {}),
     ...(logprobs != null ? { logprobs } : {}),
     ...(service_tier != null ? { service_tier } : {}),
     ...(system_fingerprint != null ? { system_fingerprint } : {}),

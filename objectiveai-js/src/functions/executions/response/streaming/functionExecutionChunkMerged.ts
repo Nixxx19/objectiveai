@@ -1,25 +1,74 @@
 import type { FunctionsExecutionsResponseStreamingFunctionExecutionChunk } from "./functionExecutionChunk";
-import { functionsExecutionsResponseStreamingFunctionExecutionChunkFieldsMerged } from "./functionExecutionChunkFieldsMerged";
 import { functionsExecutionsResponseStreamingTaskChunkMergedList } from "./taskChunkMerged";
+import { functionsExecutionsResponseStreamingReasoningSummaryChunkMerged } from "./reasoningSummaryChunkMerged";
+import { agentCompletionsResponseUsageMerged } from "../../../../agent/completions/response/usageMerged";
 
 export function functionsExecutionsResponseStreamingFunctionExecutionChunkMerged(
   a: FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
   b: FunctionsExecutionsResponseStreamingFunctionExecutionChunk,
 ): [FunctionsExecutionsResponseStreamingFunctionExecutionChunk, boolean] {
-  const fields = functionsExecutionsResponseStreamingFunctionExecutionChunkFieldsMerged(a, b, functionsExecutionsResponseStreamingTaskChunkMergedList);
-  if (!fields.changed) return [a, false];
+  let changed = false;
+
+  const [tasks, c1] = functionsExecutionsResponseStreamingTaskChunkMergedList(a.tasks, b.tasks);
+  if (c1) changed = true;
+
+  let tasks_errors = a.tasks_errors;
+  if (b.tasks_errors === true) {
+    if (a.tasks_errors !== true) changed = true;
+    tasks_errors = true;
+  }
+
+  let reasoning = a.reasoning;
+  if (a.reasoning != null && b.reasoning != null) {
+    const [merged, c] = functionsExecutionsResponseStreamingReasoningSummaryChunkMerged(a.reasoning, b.reasoning);
+    reasoning = merged;
+    if (c) changed = true;
+  } else if (b.reasoning != null) {
+    reasoning = b.reasoning;
+    changed = true;
+  }
+
+  let output = a.output;
+  if (b.output != null) {
+    output = b.output;
+    changed = true;
+  }
+
+  let retry_token = a.retry_token;
+  if (b.retry_token != null) {
+    retry_token = b.retry_token;
+    changed = true;
+  }
+
+  let error = a.error;
+  if (b.error != null) {
+    error = b.error;
+    changed = true;
+  }
+
+  let usage = a.usage;
+  if (a.usage != null && b.usage != null) {
+    const [merged, c] = agentCompletionsResponseUsageMerged(a.usage, b.usage);
+    usage = merged;
+    if (c) changed = true;
+  } else if (b.usage != null) {
+    usage = b.usage;
+    changed = true;
+  }
+
+  if (!changed) return [a, false];
   return [{
     id: a.id,
-    tasks: fields.tasks,
-    ...(fields.tasks_errors != null ? { tasks_errors: fields.tasks_errors } : {}),
-    ...(fields.reasoning != null ? { reasoning: fields.reasoning } : {}),
-    ...(fields.output != null ? { output: fields.output } : {}),
-    ...(fields.error != null ? { error: fields.error } : {}),
-    ...(fields.retry_token != null ? { retry_token: fields.retry_token } : {}),
+    tasks,
+    ...(tasks_errors != null ? { tasks_errors } : {}),
+    ...(reasoning != null ? { reasoning } : {}),
+    ...(output != null ? { output } : {}),
+    ...(error != null ? { error } : {}),
+    ...(retry_token != null ? { retry_token } : {}),
     created: a.created,
-    ...(a.function != null ? { function: a.function } : {}),
-    ...(a.profile != null ? { profile: a.profile } : {}),
+    ...(a.function !== undefined ? { function: a.function } : {}),
+    ...(a.profile !== undefined ? { profile: a.profile } : {}),
     object: a.object,
-    ...(fields.usage != null ? { usage: fields.usage } : {}),
+    ...(usage != null ? { usage } : {}),
   }, true];
 }

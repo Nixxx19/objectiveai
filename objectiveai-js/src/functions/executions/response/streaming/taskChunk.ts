@@ -5,4 +5,4 @@ import { FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, t
 import { FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk } from "./vectorCompletionTaskChunk";
 
 export type FunctionsExecutionsResponseStreamingTaskChunk = FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk | FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk;
-export const FunctionsExecutionsResponseStreamingTaskChunkSchema: z.ZodType<FunctionsExecutionsResponseStreamingTaskChunk> = z.union([FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema]).meta({ title: "functions.executions.response.streaming.TaskChunk" });
+export const FunctionsExecutionsResponseStreamingTaskChunkSchema: z.ZodType<FunctionsExecutionsResponseStreamingTaskChunk> = z.union([z.lazy(() => FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema), FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema]).meta({ title: "functions.executions.response.streaming.TaskChunk" });

@@ -13,49 +13,5 @@ import { FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObj
 import { FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchema } from "./stringInputSchema";
 import { FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchema } from "./videoInputSchema";
 
-export type FunctionsExpressionInputSchema = {
-  Object: FunctionsExpressionObjectInputSchema;
-} | {
-  Array: FunctionsExpressionArrayInputSchema;
-} | {
-  String: FunctionsExpressionStringInputSchema;
-} | {
-  Integer: FunctionsExpressionIntegerInputSchema;
-} | {
-  Number: FunctionsExpressionNumberInputSchema;
-} | {
-  Boolean: FunctionsExpressionBooleanInputSchema;
-} | {
-  Image: FunctionsExpressionImageInputSchema;
-} | {
-  Audio: FunctionsExpressionAudioInputSchema;
-} | {
-  Video: FunctionsExpressionVideoInputSchema;
-} | {
-  File: FunctionsExpressionFileInputSchema;
-} | {
-  AnyOf: FunctionsExpressionAnyOfInputSchema;
-};
-export const FunctionsExpressionInputSchemaSchema: z.ZodType<FunctionsExpressionInputSchema> = z.union([z.object({
-  Object: z.lazy(() => FunctionsExpressionObjectInputSchemaSchema),
-}).strict().describe("An object with named properties."), z.object({
-  Array: FunctionsExpressionArrayInputSchemaSchema,
-}).strict().describe("An array of items."), z.object({
-  String: FunctionsExpressionStringInputSchemaSchema,
-}).strict().describe("A string value."), z.object({
-  Integer: FunctionsExpressionIntegerInputSchemaSchema,
-}).strict().describe("An integer value."), z.object({
-  Number: FunctionsExpressionNumberInputSchemaSchema,
-}).strict().describe("A floating-point number."), z.object({
-  Boolean: FunctionsExpressionBooleanInputSchemaSchema,
-}).strict().describe("A boolean value."), z.object({
-  Image: FunctionsExpressionImageInputSchemaSchema,
-}).strict().describe("An image (URL or base64)."), z.object({
-  Audio: FunctionsExpressionAudioInputSchemaSchema,
-}).strict().describe("Audio content."), z.object({
-  Video: FunctionsExpressionVideoInputSchemaSchema,
-}).strict().describe("Video content."), z.object({
-  File: FunctionsExpressionFileInputSchemaSchema,
-}).strict().describe("A file."), z.object({
-  AnyOf: FunctionsExpressionAnyOfInputSchemaSchema,
-}).strict().describe("A union of schemas - input must match at least one.")]).describe("Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.").meta({ title: "functions.expression.InputSchema" });
+export type FunctionsExpressionInputSchema = FunctionsExpressionAnyOfInputSchema | FunctionsExpressionObjectInputSchema | FunctionsExpressionArrayInputSchema | FunctionsExpressionStringInputSchema | FunctionsExpressionIntegerInputSchema | FunctionsExpressionNumberInputSchema | FunctionsExpressionBooleanInputSchema | FunctionsExpressionImageInputSchema | FunctionsExpressionAudioInputSchema | FunctionsExpressionVideoInputSchema | FunctionsExpressionFileInputSchema;
+export const FunctionsExpressionInputSchemaSchema: z.ZodType<FunctionsExpressionInputSchema> = z.union([z.lazy(() => FunctionsExpressionAnyOfInputSchemaSchema).describe("A union of schemas - input must match at least one."), z.lazy(() => FunctionsExpressionObjectInputSchemaSchema).describe("An object with named properties."), z.lazy(() => FunctionsExpressionArrayInputSchemaSchema).describe("An array of items."), FunctionsExpressionStringInputSchemaSchema.describe("A string value."), FunctionsExpressionIntegerInputSchemaSchema.describe("An integer value."), FunctionsExpressionNumberInputSchemaSchema.describe("A floating-point number."), FunctionsExpressionBooleanInputSchemaSchema.describe("A boolean value."), FunctionsExpressionImageInputSchemaSchema.describe("An image (URL or base64)."), FunctionsExpressionAudioInputSchemaSchema.describe("Audio content."), FunctionsExpressionVideoInputSchemaSchema.describe("Video content."), FunctionsExpressionFileInputSchemaSchema.describe("A file.")]).describe("Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.").meta({ title: "functions.expression.InputSchema" });
