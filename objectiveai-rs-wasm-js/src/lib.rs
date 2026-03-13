@@ -330,7 +330,7 @@ pub fn compileFunctionInputMerge(
 pub fn checkVectorFields(fields: JsValue) -> Result<(), JsValue> {
     let fields: objectiveai::functions::check::VectorFieldsValidation =
         serde_wasm_bindgen::from_value(fields)?;
-    objectiveai::functions::check::check_vector_fields(fields)
+    objectiveai::functions::check::check_vector_fields(fields, None)
         .map_err(|e| JsValue::from_str(&e))
 }
 
@@ -339,7 +339,7 @@ pub fn checkVectorFields(fields: JsValue) -> Result<(), JsValue> {
 pub fn checkScalarFields(fields: JsValue) -> Result<(), JsValue> {
     let fields: objectiveai::functions::check::ScalarFieldsValidation =
         serde_wasm_bindgen::from_value(fields)?;
-    objectiveai::functions::check::check_scalar_fields(fields)
+    objectiveai::functions::check::check_scalar_fields(fields, None)
         .map_err(|e| JsValue::from_str(&e))
 }
 
@@ -348,7 +348,7 @@ pub fn checkScalarFields(fields: JsValue) -> Result<(), JsValue> {
 pub fn alphaCheckLeafScalarFunction(function: JsValue) -> Result<(), JsValue> {
     let function: objectiveai::functions::alpha_scalar::RemoteFunction =
         serde_wasm_bindgen::from_value(function)?;
-    objectiveai::functions::alpha_scalar::check::check_alpha_leaf_scalar_function(&function)
+    objectiveai::functions::alpha_scalar::check::check_alpha_leaf_scalar_function(&function, None)
         .map_err(|e| JsValue::from_str(&e))
 }
 
@@ -366,7 +366,7 @@ pub fn alphaCheckBranchScalarFunction(function: JsValue, children: JsValue) -> R
         } else {
             Some(serde_wasm_bindgen::from_value(children)?)
         };
-    objectiveai::functions::alpha_scalar::check::check_alpha_branch_scalar_function(&function, children.as_ref())
+    objectiveai::functions::alpha_scalar::check::check_alpha_branch_scalar_function(&function, children.as_ref(), None)
         .map_err(|e| JsValue::from_str(&e))
 }
 
@@ -375,7 +375,7 @@ pub fn alphaCheckBranchScalarFunction(function: JsValue, children: JsValue) -> R
 pub fn alphaCheckLeafVectorFunction(function: JsValue) -> Result<(), JsValue> {
     let function: objectiveai::functions::alpha_vector::RemoteFunction =
         serde_wasm_bindgen::from_value(function)?;
-    objectiveai::functions::alpha_vector::check::check_alpha_leaf_vector_function(&function)
+    objectiveai::functions::alpha_vector::check::check_alpha_leaf_vector_function(&function, None)
         .map_err(|e| JsValue::from_str(&e))
 }
 
@@ -393,7 +393,7 @@ pub fn alphaCheckBranchVectorFunction(function: JsValue, children: JsValue) -> R
         } else {
             Some(serde_wasm_bindgen::from_value(children)?)
         };
-    objectiveai::functions::alpha_vector::check::check_alpha_branch_vector_function(&function, children.as_ref())
+    objectiveai::functions::alpha_vector::check::check_alpha_branch_vector_function(&function, children.as_ref(), None)
         .map_err(|e| JsValue::from_str(&e))
 }
 
