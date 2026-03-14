@@ -2,17 +2,7 @@
   "title": "agent.GetAgent",
   "description": "Response containing a single Agent with creation timestamp.",
   "type": "object",
-  "anyOf": [
-    {
-      "$ref": "agent.openrouter.Agent"
-    },
-    {
-      "$ref": "agent.claude_agent_sdk.Agent"
-    },
-    {
-      "$ref": "agent.mock.Agent"
-    }
-  ],
+  "$ref": "agent.Agent",
   "properties": {
     "created": {
       "description": "Unix timestamp when this Agent was first used.",

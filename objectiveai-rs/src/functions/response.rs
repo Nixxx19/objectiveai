@@ -34,6 +34,7 @@ pub struct GetFunction {
     pub repository: String,
     pub commit: String,
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<functions::RemoteFunction>")]
     pub inner: functions::RemoteFunction,
 }
 

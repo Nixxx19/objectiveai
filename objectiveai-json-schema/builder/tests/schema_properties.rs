@@ -232,26 +232,46 @@ fn no_one_of_outside_properties() {
     }
 }
 
-fn has_any_of_with_ref(value: &serde_json::Value, inside_properties: bool) -> bool {
+fn has_any_of_with_sibling(value: &serde_json::Value, sibling: &str, inside_properties: bool) -> bool {
     match value {
         serde_json::Value::Object(map) => {
-            if !inside_properties && map.contains_key("anyOf") && map.contains_key("$ref") {
+            if !inside_properties && map.contains_key("anyOf") && map.contains_key(sibling) {
                 return true;
             }
             map.iter()
-                .any(|(k, v)| has_any_of_with_ref(v, k == "properties"))
+                .any(|(k, v)| has_any_of_with_sibling(v, sibling, k == "properties"))
         }
-        serde_json::Value::Array(arr) => arr.iter().any(|v| has_any_of_with_ref(v, false)),
+        serde_json::Value::Array(arr) => arr.iter().any(|v| has_any_of_with_sibling(v, sibling, false)),
         _ => false,
     }
 }
 
 #[test]
-fn no_any_of_with_sibling_ref() {
+fn no_any_of_with_sibling_ref_outside_properties() {
     for (name, schema) in load_schemas() {
         assert!(
-            !has_any_of_with_ref(&schema, false),
+            !has_any_of_with_sibling(&schema, "$ref", false),
             "{name} has anyOf with a sibling $ref"
+        );
+    }
+}
+
+#[test]
+fn no_any_of_with_sibling_type_outside_properties() {
+    for (name, schema) in load_schemas() {
+        assert!(
+            !has_any_of_with_sibling(&schema, "type", false),
+            "{name} has anyOf with a sibling type"
+        );
+    }
+}
+
+#[test]
+fn no_any_of_with_sibling_properties_outside_properties() {
+    for (name, schema) in load_schemas() {
+        assert!(
+            !has_any_of_with_sibling(&schema, "properties", false),
+            "{name} has anyOf with a sibling properties"
         );
     }
 }

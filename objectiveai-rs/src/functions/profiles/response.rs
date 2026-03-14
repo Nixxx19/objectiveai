@@ -34,6 +34,7 @@ pub struct GetProfile {
     pub repository: String,
     pub commit: String,
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<functions::RemoteProfile>")]
     pub inner: functions::RemoteProfile,
 }
 

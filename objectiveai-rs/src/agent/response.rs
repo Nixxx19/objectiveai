@@ -27,6 +27,7 @@ pub struct GetAgent {
     pub created: u64,
     /// The Agent definition.
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<super::Agent>")]
     pub inner: super::Agent,
 }
 

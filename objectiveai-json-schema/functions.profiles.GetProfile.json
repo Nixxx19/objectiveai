@@ -1,17 +1,7 @@
 {
   "title": "functions.profiles.GetProfile",
-  "description": "A remote profile, either tasks-based or auto.",
   "type": "object",
-  "anyOf": [
-    {
-      "description": "Tasks-based profile with per-task configuration.",
-      "$ref": "functions.RemoteTasksProfile"
-    },
-    {
-      "description": "Auto profile that applies a single ensemble+weights to all vector completion tasks.",
-      "$ref": "functions.RemoteAutoProfile"
-    }
-  ],
+  "$ref": "functions.RemoteProfile",
   "properties": {
     "commit": {
       "type": "string"

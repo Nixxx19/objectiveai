@@ -377,3 +377,12 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         // schemars::schema_for!(functions::expression::WithExpression<Vec<functions::expression::WithExpression<agent::completions::message::RichContentExpression>>>),
     ]
 }
+
+/// Schema helper: produces a `$ref` to `T` for use with `#[schemars(schema_with)]`
+/// on `#[serde(flatten)]` fields, preventing schemars from merging the inner type's
+/// schema into the parent.
+pub fn flatten_schema<T: schemars::JsonSchema>(
+    generator: &mut schemars::SchemaGenerator,
+) -> schemars::Schema {
+    generator.subschema_for::<T>()
+}

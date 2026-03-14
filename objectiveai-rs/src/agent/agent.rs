@@ -205,6 +205,7 @@ pub struct WithFallbacksAndCount<T> {
     pub count: u64,
     /// The primary agent configuration.
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<T>")]
     pub inner: T,
     /// Fallback agents to try if the primary fails.
     #[serde(skip_serializing_if = "Option::is_none")]

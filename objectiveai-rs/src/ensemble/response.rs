@@ -27,6 +27,7 @@ pub struct GetEnsemble {
     pub created: u64,
     /// The Ensemble definition.
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<super::Ensemble>")]
     pub inner: super::Ensemble,
 }
 
