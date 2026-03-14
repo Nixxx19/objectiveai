@@ -3143,9 +3143,6 @@ declare function agentCompletionsResponseStreamingMessageChunkMergedList(a: Agen
 
 declare function agentCompletionsResponseStreamingAgentCompletionChunkMerged(a: AgentCompletionsResponseStreamingAgentCompletionChunk, b: AgentCompletionsResponseStreamingAgentCompletionChunk): [AgentCompletionsResponseStreamingAgentCompletionChunk, boolean];
 
-declare function wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged(a: AgentCompletionsResponseStreamingAgentCompletionChunk, b: AgentCompletionsResponseStreamingAgentCompletionChunk): AgentCompletionsResponseStreamingAgentCompletionChunk;
-declare function wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized(a: AgentCompletionsResponseStreamingAgentCompletionChunk): AgentCompletionsResponseStreamingAgentCompletionChunk;
-
 declare const AgentCompletionsResponseUnaryAgentCompletionSchema: z.ZodObject<{
     created: z.ZodNumber;
     error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
@@ -3321,6 +3318,10 @@ declare const AgentCompletionsResponseUnaryAgentCompletionSchema: z.ZodObject<{
     }, z.core.$strip>;
 }, z.core.$strip>;
 type AgentCompletionsResponseUnaryAgentCompletion = z.infer<typeof AgentCompletionsResponseUnaryAgentCompletionSchema>;
+
+declare function wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged(a: AgentCompletionsResponseStreamingAgentCompletionChunk, b: AgentCompletionsResponseStreamingAgentCompletionChunk): AgentCompletionsResponseStreamingAgentCompletionChunk;
+declare function wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized(a: AgentCompletionsResponseStreamingAgentCompletionChunk): AgentCompletionsResponseStreamingAgentCompletionChunk;
+declare function wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary(a: AgentCompletionsResponseStreamingAgentCompletionChunk): AgentCompletionsResponseUnaryAgentCompletion;
 
 declare const AgentCompletionsResponseUnaryAssistantResponseSchema: z.ZodObject<{
     agent: z.ZodString;
@@ -34575,9 +34576,6 @@ declare function functionsExecutionsResponseStreamingTaskChunkMergedList(a: Func
 
 declare function functionsExecutionsResponseStreamingFunctionExecutionChunkMerged(a: FunctionsExecutionsResponseStreamingFunctionExecutionChunk, b: FunctionsExecutionsResponseStreamingFunctionExecutionChunk): [FunctionsExecutionsResponseStreamingFunctionExecutionChunk, boolean];
 
-declare function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged(a: FunctionsExecutionsResponseStreamingFunctionExecutionChunk, b: FunctionsExecutionsResponseStreamingFunctionExecutionChunk): FunctionsExecutionsResponseStreamingFunctionExecutionChunk;
-declare function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized(a: FunctionsExecutionsResponseStreamingFunctionExecutionChunk): FunctionsExecutionsResponseStreamingFunctionExecutionChunk;
-
 declare const FunctionsExecutionsResponseUnaryObjectSchema: z.ZodEnum<{
     "scalar.function.execution": "scalar.function.execution";
     "vector.function.execution": "vector.function.execution";
@@ -35226,6 +35224,10 @@ declare const FunctionsExecutionsResponseUnaryFunctionExecutionSchema: z.ZodObje
     }, z.core.$strip>;
 }, z.core.$strip>;
 type FunctionsExecutionsResponseUnaryFunctionExecution = z.infer<typeof FunctionsExecutionsResponseUnaryFunctionExecutionSchema>;
+
+declare function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged(a: FunctionsExecutionsResponseStreamingFunctionExecutionChunk, b: FunctionsExecutionsResponseStreamingFunctionExecutionChunk): FunctionsExecutionsResponseStreamingFunctionExecutionChunk;
+declare function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized(a: FunctionsExecutionsResponseStreamingFunctionExecutionChunk): FunctionsExecutionsResponseStreamingFunctionExecutionChunk;
+declare function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary(a: FunctionsExecutionsResponseStreamingFunctionExecutionChunk): FunctionsExecutionsResponseUnaryFunctionExecution;
 
 declare const FunctionsExecutionsRetryTokenSchema: z.ZodArray<z.ZodNullable<z.ZodString>>;
 type FunctionsExecutionsRetryToken = z.infer<typeof FunctionsExecutionsRetryTokenSchema>;
@@ -39069,1143 +39071,6 @@ declare function functionsInventionsRecursiveResponseStreamingFunctionInventionC
 
 declare function functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, b: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): [FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, boolean];
 
-declare function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, b: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk;
-declare function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk;
-
-declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: z.ZodObject<{
-    completions: z.ZodArray<z.ZodObject<{
-        created: z.ZodNumber;
-        error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            code: z.ZodNumber;
-            message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-        }, z.core.$strip>>>;
-        id: z.ZodString;
-        index: z.ZodNumber;
-        messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            agent: z.ZodString;
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-                text: z.ZodString;
-                type: z.ZodLiteral<"text">;
-            }, z.core.$strip>, z.ZodObject<{
-                image_url: z.ZodObject<{
-                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                    url: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"image_url">;
-            }, z.core.$strip>, z.ZodObject<{
-                input_audio: z.ZodObject<{
-                    data: z.ZodString;
-                    format: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"input_audio">;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"input_video">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"video_url">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                file: z.ZodObject<{
-                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>>]>>>;
-            created: z.ZodNumber;
-            finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
-            index: z.ZodNumber;
-            logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodNumber;
-                    token: z.ZodString;
-                    top_logprobs: z.ZodArray<z.ZodObject<{
-                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                        token: z.ZodString;
-                    }, z.core.$strip>>;
-                }, z.core.$strip>>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodNumber;
-                    token: z.ZodString;
-                    top_logprobs: z.ZodArray<z.ZodObject<{
-                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                        token: z.ZodString;
-                    }, z.core.$strip>>;
-                }, z.core.$strip>>>>;
-            }, z.core.$strip>>>;
-            model: z.ZodString;
-            provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            role: z.ZodLiteral<"assistant">;
-            service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                function: z.ZodObject<{
-                    arguments: z.ZodString;
-                    name: z.ZodString;
-                }, z.core.$strip>;
-                id: z.ZodString;
-                type: z.ZodLiteral<"function">;
-            }, z.core.$strip>>>>;
-            upstream_id: z.ZodString;
-            usage: z.ZodObject<{
-                completion_tokens: z.ZodNumber;
-                completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                    accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                }, z.core.$strip>>>;
-                cost: z.ZodNumber;
-                cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                    upstream_inference_cost: z.ZodNumber;
-                    upstream_upstream_inference_cost: z.ZodNumber;
-                }, z.core.$strip>>>;
-                cost_multiplier: z.ZodNumber;
-                is_byok: z.ZodBoolean;
-                prompt_tokens: z.ZodNumber;
-                prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                }, z.core.$strip>>>;
-                total_cost: z.ZodNumber;
-                total_tokens: z.ZodNumber;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-                text: z.ZodString;
-                type: z.ZodLiteral<"text">;
-            }, z.core.$strip>, z.ZodObject<{
-                image_url: z.ZodObject<{
-                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                    url: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"image_url">;
-            }, z.core.$strip>, z.ZodObject<{
-                input_audio: z.ZodObject<{
-                    data: z.ZodString;
-                    format: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"input_audio">;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"input_video">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"video_url">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                file: z.ZodObject<{
-                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>>]>;
-            index: z.ZodNumber;
-            role: z.ZodLiteral<"tool">;
-            tool_call_id: z.ZodString;
-        }, z.core.$strip>]>>;
-        object: z.ZodLiteral<"agent.completion">;
-        upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
-        usage: z.ZodObject<{
-            completion_tokens: z.ZodNumber;
-            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            cost: z.ZodNumber;
-            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                upstream_inference_cost: z.ZodNumber;
-                upstream_upstream_inference_cost: z.ZodNumber;
-            }, z.core.$strip>>>;
-            prompt_tokens: z.ZodNumber;
-            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            total_cost: z.ZodNumber;
-            total_tokens: z.ZodNumber;
-        }, z.core.$strip>;
-    }, z.core.$strip>>;
-    created: z.ZodNumber;
-    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        code: z.ZodNumber;
-        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-    }, z.core.$strip>>>;
-    function: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
-        description: z.ZodString;
-        input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
-        tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"alpha.scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            depth: z.ZodNumber;
-            input: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
-            max_branch_width: z.ZodNumber;
-            max_leaf_width: z.ZodNumber;
-            min_branch_width: z.ZodNumber;
-            min_leaf_width: z.ZodNumber;
-            name: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            spec: z.ZodString;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.alpha.scalar.function">;
-        }, z.core.$strip>>]>>;
-        type: z.ZodLiteral<"alpha.scalar.branch.function">;
-    }, z.core.$strip>, z.ZodObject<{
-        description: z.ZodString;
-        input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
-        tasks: z.ZodArray<z.ZodIntersection<z.ZodObject<{
-            messages: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            responses: z.ZodArray<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-                text: z.ZodString;
-                type: z.ZodLiteral<"text">;
-            }, z.core.$strip>, z.ZodObject<{
-                image_url: z.ZodObject<{
-                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                    url: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"image_url">;
-            }, z.core.$strip>, z.ZodObject<{
-                input_audio: z.ZodObject<{
-                    data: z.ZodString;
-                    format: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"input_audio">;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"input_video">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"video_url">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                file: z.ZodObject<{
-                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>>]>>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"vector.completion">;
-        }, z.core.$strip>>>;
-        type: z.ZodLiteral<"alpha.scalar.leaf.function">;
-    }, z.core.$strip>]>, z.ZodUnion<readonly [z.ZodObject<{
-        description: z.ZodString;
-        input_schema: z.ZodObject<{
-            context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
-            items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-        }, z.core.$strip>;
-        tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"alpha.scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodObject<{
-                context: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                    $jmespath: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $starlark: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>>>;
-                items: z.ZodUnion<readonly [z.ZodObject<{
-                    $jmespath: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $starlark: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>;
-            }, z.core.$strip>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"alpha.vector.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            depth: z.ZodNumber;
-            input: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
-            max_branch_width: z.ZodNumber;
-            max_leaf_width: z.ZodNumber;
-            min_branch_width: z.ZodNumber;
-            min_leaf_width: z.ZodNumber;
-            name: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            spec: z.ZodString;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.alpha.scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            depth: z.ZodNumber;
-            input: z.ZodObject<{
-                context: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                    $jmespath: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $starlark: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>>>;
-                items: z.ZodUnion<readonly [z.ZodObject<{
-                    $jmespath: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $starlark: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>;
-            }, z.core.$strip>;
-            input_schema: z.ZodObject<{
-                context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
-                items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-            }, z.core.$strip>;
-            max_branch_width: z.ZodNumber;
-            max_leaf_width: z.ZodNumber;
-            min_branch_width: z.ZodNumber;
-            min_leaf_width: z.ZodNumber;
-            name: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            spec: z.ZodString;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.alpha.vector.function">;
-        }, z.core.$strip>>]>>;
-        type: z.ZodLiteral<"alpha.vector.branch.function">;
-    }, z.core.$strip>, z.ZodObject<{
-        description: z.ZodString;
-        input_schema: z.ZodObject<{
-            context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
-            items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-        }, z.core.$strip>;
-        tasks: z.ZodArray<z.ZodIntersection<z.ZodObject<{
-            messages: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            responses: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"vector.completion">;
-        }, z.core.$strip>>>;
-        type: z.ZodLiteral<"alpha.vector.leaf.function">;
-    }, z.core.$strip>]>]>, z.ZodUnion<readonly [z.ZodObject<{
-        description: z.ZodString;
-        input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-        tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"vector.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            messages: z.ZodType<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, unknown>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            responses: z.ZodType<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, unknown>>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"vector.completion">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
-            input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
-            input_merge: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-            input_split: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            output_length: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.vector.function">;
-        }, z.core.$strip>>]>>;
-        type: z.ZodLiteral<"scalar.function">;
-    }, z.core.$strip>, z.ZodObject<{
-        description: z.ZodString;
-        input_merge: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>;
-        input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-        input_split: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>;
-        output_length: z.ZodUnion<readonly [z.ZodObject<{
-            $jmespath: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $starlark: z.ZodString;
-        }, z.core.$strict>, z.ZodObject<{
-            $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-        }, z.core.$strict>]>;
-        tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"vector.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            messages: z.ZodType<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, unknown>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            responses: z.ZodType<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, unknown>>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"vector.completion">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
-            input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
-            input_merge: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-            input_split: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            output: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            output_length: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.vector.function">;
-        }, z.core.$strip>>]>>;
-        type: z.ZodLiteral<"vector.function">;
-    }, z.core.$strip>]>]>>>;
-    id: z.ZodString;
-    index: z.ZodNumber;
-    object: z.ZodEnum<{
-        "alpha.scalar.function.invention": "alpha.scalar.function.invention";
-        "alpha.vector.function.invention": "alpha.vector.function.invention";
-    }>;
-    path: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        commit: z.ZodString;
-        owner: z.ZodString;
-        remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-        repository: z.ZodString;
-    }, z.core.$strip>>>;
-    state: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
-        depth: z.ZodNumber;
-        description: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        essay: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        essay_tasks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        input_schema: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
-        max_branch_width: z.ZodNumber;
-        max_leaf_width: z.ZodNumber;
-        min_branch_width: z.ZodNumber;
-        min_leaf_width: z.ZodNumber;
-        name: z.ZodString;
-        readme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        spec: z.ZodString;
-        tasks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"alpha.scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            depth: z.ZodNumber;
-            input: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
-            max_branch_width: z.ZodNumber;
-            max_leaf_width: z.ZodNumber;
-            min_branch_width: z.ZodNumber;
-            min_leaf_width: z.ZodNumber;
-            name: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            spec: z.ZodString;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.alpha.scalar.function">;
-        }, z.core.$strip>>]>>>>;
-        tasks_length: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    }, z.core.$strip>, z.ZodObject<{
-        type: z.ZodLiteral<"alpha.scalar.branch.function">;
-    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-        depth: z.ZodNumber;
-        description: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        essay: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        essay_tasks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        input_schema: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
-        max_branch_width: z.ZodNumber;
-        max_leaf_width: z.ZodNumber;
-        min_branch_width: z.ZodNumber;
-        min_leaf_width: z.ZodNumber;
-        name: z.ZodString;
-        readme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        spec: z.ZodString;
-        tasks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodObject<{
-            messages: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            responses: z.ZodArray<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-                text: z.ZodString;
-                type: z.ZodLiteral<"text">;
-            }, z.core.$strip>, z.ZodObject<{
-                image_url: z.ZodObject<{
-                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                    url: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"image_url">;
-            }, z.core.$strip>, z.ZodObject<{
-                input_audio: z.ZodObject<{
-                    data: z.ZodString;
-                    format: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"input_audio">;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"input_video">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"video_url">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                file: z.ZodObject<{
-                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>>]>>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"vector.completion">;
-        }, z.core.$strip>>>>>;
-        tasks_length: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    }, z.core.$strip>, z.ZodObject<{
-        type: z.ZodLiteral<"alpha.scalar.leaf.function">;
-    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-        depth: z.ZodNumber;
-        description: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        essay: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        essay_tasks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        input_schema: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
-            items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-        }, z.core.$strip>>>;
-        max_branch_width: z.ZodNumber;
-        max_leaf_width: z.ZodNumber;
-        min_branch_width: z.ZodNumber;
-        min_leaf_width: z.ZodNumber;
-        name: z.ZodString;
-        readme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        spec: z.ZodString;
-        tasks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"alpha.scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            commit: z.ZodString;
-            input: z.ZodObject<{
-                context: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                    $jmespath: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $starlark: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>>>;
-                items: z.ZodUnion<readonly [z.ZodObject<{
-                    $jmespath: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $starlark: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>;
-            }, z.core.$strip>;
-            owner: z.ZodString;
-            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
-            repository: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"alpha.vector.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            depth: z.ZodNumber;
-            input: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
-            max_branch_width: z.ZodNumber;
-            max_leaf_width: z.ZodNumber;
-            min_branch_width: z.ZodNumber;
-            min_leaf_width: z.ZodNumber;
-            name: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            spec: z.ZodString;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.alpha.scalar.function">;
-        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-            depth: z.ZodNumber;
-            input: z.ZodObject<{
-                context: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                    $jmespath: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $starlark: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>>>;
-                items: z.ZodUnion<readonly [z.ZodObject<{
-                    $jmespath: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $starlark: z.ZodString;
-                }, z.core.$strict>, z.ZodObject<{
-                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-                }, z.core.$strict>]>;
-            }, z.core.$strip>;
-            input_schema: z.ZodObject<{
-                context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
-                items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-            }, z.core.$strip>;
-            max_branch_width: z.ZodNumber;
-            max_leaf_width: z.ZodNumber;
-            min_branch_width: z.ZodNumber;
-            min_leaf_width: z.ZodNumber;
-            name: z.ZodString;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-            spec: z.ZodString;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"placeholder.alpha.vector.function">;
-        }, z.core.$strip>>]>>>>;
-        tasks_length: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    }, z.core.$strip>, z.ZodObject<{
-        type: z.ZodLiteral<"alpha.vector.branch.function">;
-    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
-        depth: z.ZodNumber;
-        description: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        essay: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        essay_tasks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        input_schema: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
-            items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
-        }, z.core.$strip>>>;
-        max_branch_width: z.ZodNumber;
-        max_leaf_width: z.ZodNumber;
-        min_branch_width: z.ZodNumber;
-        min_leaf_width: z.ZodNumber;
-        name: z.ZodString;
-        readme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        spec: z.ZodString;
-        tasks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodObject<{
-            messages: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            responses: z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>;
-            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
-                $jmespath: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $starlark: z.ZodString;
-            }, z.core.$strict>, z.ZodObject<{
-                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
-            }, z.core.$strict>]>>>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"vector.completion">;
-        }, z.core.$strip>>>>>;
-        tasks_length: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-    }, z.core.$strip>, z.ZodObject<{
-        type: z.ZodLiteral<"alpha.vector.leaf.function">;
-    }, z.core.$strip>>]>;
-    usage: z.ZodObject<{
-        completion_tokens: z.ZodNumber;
-        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        cost: z.ZodNumber;
-        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            upstream_inference_cost: z.ZodNumber;
-            upstream_upstream_inference_cost: z.ZodNumber;
-        }, z.core.$strip>>>;
-        prompt_tokens: z.ZodNumber;
-        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        total_cost: z.ZodNumber;
-        total_tokens: z.ZodNumber;
-    }, z.core.$strip>;
-}, z.core.$strip>;
-type FunctionsInventionsRecursiveResponseUnaryFunctionInvention = z.infer<typeof FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema>;
-
 declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema: z.ZodObject<{
     created: z.ZodNumber;
     id: z.ZodString;
@@ -41371,6 +40236,1144 @@ declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiv
     }, z.core.$strip>;
 }, z.core.$strip>;
 type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive = z.infer<typeof FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema>;
+
+declare function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, b: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk;
+declare function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk;
+declare function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive;
+
+declare const FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema: z.ZodObject<{
+    completions: z.ZodArray<z.ZodObject<{
+        created: z.ZodNumber;
+        error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            code: z.ZodNumber;
+            message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+        }, z.core.$strip>>>;
+        id: z.ZodString;
+        index: z.ZodNumber;
+        messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            agent: z.ZodString;
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            created: z.ZodNumber;
+            finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+            index: z.ZodNumber;
+            logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>>>;
+            model: z.ZodString;
+            provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            role: z.ZodLiteral<"assistant">;
+            service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+            upstream_id: z.ZodString;
+            usage: z.ZodObject<{
+                completion_tokens: z.ZodNumber;
+                completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                cost: z.ZodNumber;
+                cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    upstream_inference_cost: z.ZodNumber;
+                    upstream_upstream_inference_cost: z.ZodNumber;
+                }, z.core.$strip>>>;
+                cost_multiplier: z.ZodNumber;
+                is_byok: z.ZodBoolean;
+                prompt_tokens: z.ZodNumber;
+                prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                total_cost: z.ZodNumber;
+                total_tokens: z.ZodNumber;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            index: z.ZodNumber;
+            role: z.ZodLiteral<"tool">;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>]>>;
+        object: z.ZodLiteral<"agent.completion">;
+        upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>>;
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    function: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodUnion<readonly [z.ZodObject<{
+        description: z.ZodString;
+        input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
+        tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"alpha.scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            depth: z.ZodNumber;
+            input: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
+            max_branch_width: z.ZodNumber;
+            max_leaf_width: z.ZodNumber;
+            min_branch_width: z.ZodNumber;
+            min_leaf_width: z.ZodNumber;
+            name: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            spec: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.alpha.scalar.function">;
+        }, z.core.$strip>>]>>;
+        type: z.ZodLiteral<"alpha.scalar.branch.function">;
+    }, z.core.$strip>, z.ZodObject<{
+        description: z.ZodString;
+        input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
+        tasks: z.ZodArray<z.ZodIntersection<z.ZodObject<{
+            messages: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            responses: z.ZodArray<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"vector.completion">;
+        }, z.core.$strip>>>;
+        type: z.ZodLiteral<"alpha.scalar.leaf.function">;
+    }, z.core.$strip>]>, z.ZodUnion<readonly [z.ZodObject<{
+        description: z.ZodString;
+        input_schema: z.ZodObject<{
+            context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
+            items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+        }, z.core.$strip>;
+        tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"alpha.scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodObject<{
+                context: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                    $jmespath: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $starlark: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+                }, z.core.$strict>]>>>;
+                items: z.ZodUnion<readonly [z.ZodObject<{
+                    $jmespath: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $starlark: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+                }, z.core.$strict>]>;
+            }, z.core.$strip>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"alpha.vector.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            depth: z.ZodNumber;
+            input: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
+            max_branch_width: z.ZodNumber;
+            max_leaf_width: z.ZodNumber;
+            min_branch_width: z.ZodNumber;
+            min_leaf_width: z.ZodNumber;
+            name: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            spec: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.alpha.scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            depth: z.ZodNumber;
+            input: z.ZodObject<{
+                context: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                    $jmespath: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $starlark: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+                }, z.core.$strict>]>>>;
+                items: z.ZodUnion<readonly [z.ZodObject<{
+                    $jmespath: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $starlark: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+                }, z.core.$strict>]>;
+            }, z.core.$strip>;
+            input_schema: z.ZodObject<{
+                context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
+                items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+            }, z.core.$strip>;
+            max_branch_width: z.ZodNumber;
+            max_leaf_width: z.ZodNumber;
+            min_branch_width: z.ZodNumber;
+            min_leaf_width: z.ZodNumber;
+            name: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            spec: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.alpha.vector.function">;
+        }, z.core.$strip>>]>>;
+        type: z.ZodLiteral<"alpha.vector.branch.function">;
+    }, z.core.$strip>, z.ZodObject<{
+        description: z.ZodString;
+        input_schema: z.ZodObject<{
+            context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
+            items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+        }, z.core.$strip>;
+        tasks: z.ZodArray<z.ZodIntersection<z.ZodObject<{
+            messages: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            responses: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"vector.completion">;
+        }, z.core.$strip>>>;
+        type: z.ZodLiteral<"alpha.vector.leaf.function">;
+    }, z.core.$strip>]>]>, z.ZodUnion<readonly [z.ZodObject<{
+        description: z.ZodString;
+        input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+        tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"vector.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            messages: z.ZodType<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            responses: z.ZodType<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, unknown>>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"vector.completion">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
+            input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
+            input_merge: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+            input_split: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.vector.function">;
+        }, z.core.$strip>>]>>;
+        type: z.ZodLiteral<"scalar.function">;
+    }, z.core.$strip>, z.ZodObject<{
+        description: z.ZodString;
+        input_merge: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+        }, z.core.$strict>]>;
+        input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+        input_split: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+        }, z.core.$strict>]>;
+        output_length: z.ZodUnion<readonly [z.ZodObject<{
+            $jmespath: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $starlark: z.ZodString;
+        }, z.core.$strict>, z.ZodObject<{
+            $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+        }, z.core.$strict>]>;
+        tasks: z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"vector.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            messages: z.ZodType<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, unknown>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            responses: z.ZodType<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, unknown>>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"vector.completion">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
+            input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            input: z.ZodType<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown, z.core.$ZodTypeInternals<FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, unknown>>;
+            input_merge: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            input_schema: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+            input_split: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            map: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            output: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            output_length: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.vector.function">;
+        }, z.core.$strip>>]>>;
+        type: z.ZodLiteral<"vector.function">;
+    }, z.core.$strip>]>]>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    object: z.ZodEnum<{
+        "alpha.scalar.function.invention": "alpha.scalar.function.invention";
+        "alpha.vector.function.invention": "alpha.vector.function.invention";
+    }>;
+    path: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        commit: z.ZodString;
+        owner: z.ZodString;
+        remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+        repository: z.ZodString;
+    }, z.core.$strip>>>;
+    state: z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+        depth: z.ZodNumber;
+        description: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        essay: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        essay_tasks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        input_schema: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
+        max_branch_width: z.ZodNumber;
+        max_leaf_width: z.ZodNumber;
+        min_branch_width: z.ZodNumber;
+        min_leaf_width: z.ZodNumber;
+        name: z.ZodString;
+        readme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        spec: z.ZodString;
+        tasks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"alpha.scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            depth: z.ZodNumber;
+            input: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
+            max_branch_width: z.ZodNumber;
+            max_leaf_width: z.ZodNumber;
+            min_branch_width: z.ZodNumber;
+            min_leaf_width: z.ZodNumber;
+            name: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            spec: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.alpha.scalar.function">;
+        }, z.core.$strip>>]>>>>;
+        tasks_length: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"alpha.scalar.branch.function">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        depth: z.ZodNumber;
+        description: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        essay: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        essay_tasks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        input_schema: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
+        max_branch_width: z.ZodNumber;
+        max_leaf_width: z.ZodNumber;
+        min_branch_width: z.ZodNumber;
+        min_leaf_width: z.ZodNumber;
+        name: z.ZodString;
+        readme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        spec: z.ZodString;
+        tasks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodObject<{
+            messages: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            responses: z.ZodArray<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"vector.completion">;
+        }, z.core.$strip>>>>>;
+        tasks_length: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"alpha.scalar.leaf.function">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        depth: z.ZodNumber;
+        description: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        essay: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        essay_tasks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        input_schema: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
+            items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+        }, z.core.$strip>>>;
+        max_branch_width: z.ZodNumber;
+        max_leaf_width: z.ZodNumber;
+        min_branch_width: z.ZodNumber;
+        min_leaf_width: z.ZodNumber;
+        name: z.ZodString;
+        readme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        spec: z.ZodString;
+        tasks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodUnion<readonly [z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"alpha.scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            commit: z.ZodString;
+            input: z.ZodObject<{
+                context: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                    $jmespath: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $starlark: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+                }, z.core.$strict>]>>>;
+                items: z.ZodUnion<readonly [z.ZodObject<{
+                    $jmespath: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $starlark: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+                }, z.core.$strict>]>;
+            }, z.core.$strip>;
+            owner: z.ZodString;
+            remote: z.ZodUnion<readonly [z.ZodLiteral<"github">, z.ZodLiteral<"filesystem">, z.ZodLiteral<"mock">]>;
+            repository: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"alpha.vector.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            depth: z.ZodNumber;
+            input: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            input_schema: z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>;
+            max_branch_width: z.ZodNumber;
+            max_leaf_width: z.ZodNumber;
+            min_branch_width: z.ZodNumber;
+            min_leaf_width: z.ZodNumber;
+            name: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            spec: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.alpha.scalar.function">;
+        }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+            depth: z.ZodNumber;
+            input: z.ZodObject<{
+                context: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                    $jmespath: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $starlark: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+                }, z.core.$strict>]>>>;
+                items: z.ZodUnion<readonly [z.ZodObject<{
+                    $jmespath: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $starlark: z.ZodString;
+                }, z.core.$strict>, z.ZodObject<{
+                    $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+                }, z.core.$strict>]>;
+            }, z.core.$strip>;
+            input_schema: z.ZodObject<{
+                context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
+                items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+            }, z.core.$strip>;
+            max_branch_width: z.ZodNumber;
+            max_leaf_width: z.ZodNumber;
+            min_branch_width: z.ZodNumber;
+            min_leaf_width: z.ZodNumber;
+            name: z.ZodString;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+            spec: z.ZodString;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"placeholder.alpha.vector.function">;
+        }, z.core.$strip>>]>>>>;
+        tasks_length: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"alpha.vector.branch.function">;
+    }, z.core.$strip>>, z.ZodIntersection<z.ZodObject<{
+        depth: z.ZodNumber;
+        description: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        essay: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        essay_tasks: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        input_schema: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            context: z.ZodOptional<z.ZodNullable<z.ZodType<FunctionsExpressionObjectInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionObjectInputSchema, unknown>>>>;
+            items: z.ZodType<FunctionsExpressionInputSchema, unknown, z.core.$ZodTypeInternals<FunctionsExpressionInputSchema, unknown>>;
+        }, z.core.$strip>>>;
+        max_branch_width: z.ZodNumber;
+        max_leaf_width: z.ZodNumber;
+        min_branch_width: z.ZodNumber;
+        min_leaf_width: z.ZodNumber;
+        name: z.ZodString;
+        readme: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        spec: z.ZodString;
+        tasks: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodIntersection<z.ZodObject<{
+            messages: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            responses: z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>;
+            skip: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodObject<{
+                $jmespath: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $starlark: z.ZodString;
+            }, z.core.$strict>, z.ZodObject<{
+                $special: z.ZodUnion<readonly [z.ZodLiteral<"input">, z.ZodLiteral<"output">, z.ZodLiteral<"task_output_l1_normalized">, z.ZodLiteral<"task_output_weighted_sum">, z.ZodLiteral<"input_items_output_length">, z.ZodLiteral<"input_items_optional_context_split">, z.ZodLiteral<"input_items_optional_context_merge">]>;
+            }, z.core.$strict>]>>>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"vector.completion">;
+        }, z.core.$strip>>>>>;
+        tasks_length: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+    }, z.core.$strip>, z.ZodObject<{
+        type: z.ZodLiteral<"alpha.vector.leaf.function">;
+    }, z.core.$strip>>]>;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type FunctionsInventionsRecursiveResponseUnaryFunctionInvention = z.infer<typeof FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema>;
 
 declare const FunctionsInventionsRecursiveResponseUnaryObjectSchema: z.ZodEnum<{
     "alpha.scalar.function.invention.recursive": "alpha.scalar.function.invention.recursive";
@@ -47064,186 +47067,6 @@ declare function functionsInventionsResponseStreamingAgentCompletionChunkMergedL
 
 declare function functionsInventionsResponseStreamingFunctionInventionChunkMerged(a: FunctionsInventionsResponseStreamingFunctionInventionChunk, b: FunctionsInventionsResponseStreamingFunctionInventionChunk): [FunctionsInventionsResponseStreamingFunctionInventionChunk, boolean];
 
-declare function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged(a: FunctionsInventionsResponseStreamingFunctionInventionChunk, b: FunctionsInventionsResponseStreamingFunctionInventionChunk): FunctionsInventionsResponseStreamingFunctionInventionChunk;
-declare function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized(a: FunctionsInventionsResponseStreamingFunctionInventionChunk): FunctionsInventionsResponseStreamingFunctionInventionChunk;
-
-declare const FunctionsInventionsResponseUnaryAgentCompletionSchema: z.ZodObject<{
-    created: z.ZodNumber;
-    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        code: z.ZodNumber;
-        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-    }, z.core.$strip>>>;
-    id: z.ZodString;
-    index: z.ZodNumber;
-    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-        agent: z.ZodString;
-        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            text: z.ZodString;
-            type: z.ZodLiteral<"text">;
-        }, z.core.$strip>, z.ZodObject<{
-            image_url: z.ZodObject<{
-                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                url: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"image_url">;
-        }, z.core.$strip>, z.ZodObject<{
-            input_audio: z.ZodObject<{
-                data: z.ZodString;
-                format: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"input_audio">;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"input_video">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"video_url">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            file: z.ZodObject<{
-                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>>]>>>;
-        created: z.ZodNumber;
-        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
-        index: z.ZodNumber;
-        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                logprob: z.ZodNumber;
-                token: z.ZodString;
-                top_logprobs: z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    token: z.ZodString;
-                }, z.core.$strip>>;
-            }, z.core.$strip>>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                logprob: z.ZodNumber;
-                token: z.ZodString;
-                top_logprobs: z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    token: z.ZodString;
-                }, z.core.$strip>>;
-            }, z.core.$strip>>>>;
-        }, z.core.$strip>>>;
-        model: z.ZodString;
-        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        role: z.ZodLiteral<"assistant">;
-        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-            function: z.ZodObject<{
-                arguments: z.ZodString;
-                name: z.ZodString;
-            }, z.core.$strip>;
-            id: z.ZodString;
-            type: z.ZodLiteral<"function">;
-        }, z.core.$strip>>>>;
-        upstream_id: z.ZodString;
-        usage: z.ZodObject<{
-            completion_tokens: z.ZodNumber;
-            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            cost: z.ZodNumber;
-            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                upstream_inference_cost: z.ZodNumber;
-                upstream_upstream_inference_cost: z.ZodNumber;
-            }, z.core.$strip>>>;
-            cost_multiplier: z.ZodNumber;
-            is_byok: z.ZodBoolean;
-            prompt_tokens: z.ZodNumber;
-            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            total_cost: z.ZodNumber;
-            total_tokens: z.ZodNumber;
-        }, z.core.$strip>;
-    }, z.core.$strip>, z.ZodObject<{
-        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            text: z.ZodString;
-            type: z.ZodLiteral<"text">;
-        }, z.core.$strip>, z.ZodObject<{
-            image_url: z.ZodObject<{
-                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                url: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"image_url">;
-        }, z.core.$strip>, z.ZodObject<{
-            input_audio: z.ZodObject<{
-                data: z.ZodString;
-                format: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"input_audio">;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"input_video">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"video_url">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            file: z.ZodObject<{
-                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>>]>;
-        index: z.ZodNumber;
-        role: z.ZodLiteral<"tool">;
-        tool_call_id: z.ZodString;
-    }, z.core.$strip>]>>;
-    object: z.ZodLiteral<"agent.completion">;
-    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
-    usage: z.ZodObject<{
-        completion_tokens: z.ZodNumber;
-        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        cost: z.ZodNumber;
-        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            upstream_inference_cost: z.ZodNumber;
-            upstream_upstream_inference_cost: z.ZodNumber;
-        }, z.core.$strip>>>;
-        prompt_tokens: z.ZodNumber;
-        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        total_cost: z.ZodNumber;
-        total_tokens: z.ZodNumber;
-    }, z.core.$strip>;
-}, z.core.$strip>;
-type FunctionsInventionsResponseUnaryAgentCompletion = z.infer<typeof FunctionsInventionsResponseUnaryAgentCompletionSchema>;
-
 declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObject<{
     completions: z.ZodArray<z.ZodObject<{
         created: z.ZodNumber;
@@ -48376,6 +48199,187 @@ declare const FunctionsInventionsResponseUnaryFunctionInventionSchema: z.ZodObje
     }, z.core.$strip>;
 }, z.core.$strip>;
 type FunctionsInventionsResponseUnaryFunctionInvention = z.infer<typeof FunctionsInventionsResponseUnaryFunctionInventionSchema>;
+
+declare function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged(a: FunctionsInventionsResponseStreamingFunctionInventionChunk, b: FunctionsInventionsResponseStreamingFunctionInventionChunk): FunctionsInventionsResponseStreamingFunctionInventionChunk;
+declare function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized(a: FunctionsInventionsResponseStreamingFunctionInventionChunk): FunctionsInventionsResponseStreamingFunctionInventionChunk;
+declare function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary(a: FunctionsInventionsResponseStreamingFunctionInventionChunk): FunctionsInventionsResponseUnaryFunctionInvention;
+
+declare const FunctionsInventionsResponseUnaryAgentCompletionSchema: z.ZodObject<{
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        agent: z.ZodString;
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        created: z.ZodNumber;
+        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+        index: z.ZodNumber;
+        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>>>;
+        model: z.ZodString;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        role: z.ZodLiteral<"assistant">;
+        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodObject<{
+                arguments: z.ZodString;
+                name: z.ZodString;
+            }, z.core.$strip>;
+            id: z.ZodString;
+            type: z.ZodLiteral<"function">;
+        }, z.core.$strip>>>>;
+        upstream_id: z.ZodString;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            cost_multiplier: z.ZodNumber;
+            is_byok: z.ZodBoolean;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>, z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        index: z.ZodNumber;
+        role: z.ZodLiteral<"tool">;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>]>>;
+    object: z.ZodLiteral<"agent.completion">;
+    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type FunctionsInventionsResponseUnaryAgentCompletion = z.infer<typeof FunctionsInventionsResponseUnaryAgentCompletionSchema>;
 
 declare const FunctionsInventionsResponseUnaryObjectSchema: z.ZodEnum<{
     "alpha.scalar.function.invention": "alpha.scalar.function.invention";
@@ -60677,230 +60681,6 @@ declare function functionsProfilesComputationsResponseStreamingFunctionExecution
 
 declare function functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, b: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): [FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, boolean];
 
-declare function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, b: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk;
-declare function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk;
-
-declare const FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema: z.ZodObject<{
-    created: z.ZodNumber;
-    dataset: z.ZodNumber;
-    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        code: z.ZodNumber;
-        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-    }, z.core.$strip>>>;
-    function: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    id: z.ZodString;
-    index: z.ZodNumber;
-    n: z.ZodNumber;
-    object: z.ZodEnum<{
-        "scalar.function.execution": "scalar.function.execution";
-        "vector.function.execution": "vector.function.execution";
-    }>;
-    output: z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodArray<z.ZodArray<z.ZodNumber>>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>;
-    profile: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    reasoning: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        created: z.ZodNumber;
-        error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            code: z.ZodNumber;
-            message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-        }, z.core.$strip>>>;
-        id: z.ZodString;
-        messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            agent: z.ZodString;
-            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-                text: z.ZodString;
-                type: z.ZodLiteral<"text">;
-            }, z.core.$strip>, z.ZodObject<{
-                image_url: z.ZodObject<{
-                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                    url: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"image_url">;
-            }, z.core.$strip>, z.ZodObject<{
-                input_audio: z.ZodObject<{
-                    data: z.ZodString;
-                    format: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"input_audio">;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"input_video">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"video_url">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                file: z.ZodObject<{
-                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>>]>>>;
-            created: z.ZodNumber;
-            finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
-            index: z.ZodNumber;
-            logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodNumber;
-                    token: z.ZodString;
-                    top_logprobs: z.ZodArray<z.ZodObject<{
-                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                        token: z.ZodString;
-                    }, z.core.$strip>>;
-                }, z.core.$strip>>>>;
-                refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodNumber;
-                    token: z.ZodString;
-                    top_logprobs: z.ZodArray<z.ZodObject<{
-                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                        token: z.ZodString;
-                    }, z.core.$strip>>;
-                }, z.core.$strip>>>>;
-            }, z.core.$strip>>>;
-            model: z.ZodString;
-            provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            role: z.ZodLiteral<"assistant">;
-            service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                function: z.ZodObject<{
-                    arguments: z.ZodString;
-                    name: z.ZodString;
-                }, z.core.$strip>;
-                id: z.ZodString;
-                type: z.ZodLiteral<"function">;
-            }, z.core.$strip>>>>;
-            upstream_id: z.ZodString;
-            usage: z.ZodObject<{
-                completion_tokens: z.ZodNumber;
-                completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                    accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                }, z.core.$strip>>>;
-                cost: z.ZodNumber;
-                cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                    upstream_inference_cost: z.ZodNumber;
-                    upstream_upstream_inference_cost: z.ZodNumber;
-                }, z.core.$strip>>>;
-                cost_multiplier: z.ZodNumber;
-                is_byok: z.ZodBoolean;
-                prompt_tokens: z.ZodNumber;
-                prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                }, z.core.$strip>>>;
-                total_cost: z.ZodNumber;
-                total_tokens: z.ZodNumber;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-                text: z.ZodString;
-                type: z.ZodLiteral<"text">;
-            }, z.core.$strip>, z.ZodObject<{
-                image_url: z.ZodObject<{
-                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                    url: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"image_url">;
-            }, z.core.$strip>, z.ZodObject<{
-                input_audio: z.ZodObject<{
-                    data: z.ZodString;
-                    format: z.ZodString;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"input_audio">;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"input_video">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                type: z.ZodLiteral<"video_url">;
-                video_url: z.ZodObject<{
-                    url: z.ZodString;
-                }, z.core.$strip>;
-            }, z.core.$strip>, z.ZodObject<{
-                file: z.ZodObject<{
-                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                }, z.core.$strip>;
-                type: z.ZodLiteral<"file">;
-            }, z.core.$strip>]>>]>;
-            index: z.ZodNumber;
-            role: z.ZodLiteral<"tool">;
-            tool_call_id: z.ZodString;
-        }, z.core.$strip>]>>;
-        object: z.ZodLiteral<"agent.completion">;
-        upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
-        usage: z.ZodObject<{
-            completion_tokens: z.ZodNumber;
-            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            cost: z.ZodNumber;
-            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                upstream_inference_cost: z.ZodNumber;
-                upstream_upstream_inference_cost: z.ZodNumber;
-            }, z.core.$strip>>>;
-            prompt_tokens: z.ZodNumber;
-            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            total_cost: z.ZodNumber;
-            total_tokens: z.ZodNumber;
-        }, z.core.$strip>;
-    }, z.core.$strip>>>;
-    retry: z.ZodNumber;
-    retry_token: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-    tasks: z.ZodArray<z.ZodType<FunctionsExecutionsResponseUnaryTask, unknown, z.core.$ZodTypeInternals<FunctionsExecutionsResponseUnaryTask, unknown>>>;
-    tasks_errors: z.ZodBoolean;
-    usage: z.ZodObject<{
-        completion_tokens: z.ZodNumber;
-        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        cost: z.ZodNumber;
-        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            upstream_inference_cost: z.ZodNumber;
-            upstream_upstream_inference_cost: z.ZodNumber;
-        }, z.core.$strip>>>;
-        prompt_tokens: z.ZodNumber;
-        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        total_cost: z.ZodNumber;
-        total_tokens: z.ZodNumber;
-    }, z.core.$strip>;
-}, z.core.$strip>;
-type FunctionsProfilesComputationsResponseUnaryFunctionExecution = z.infer<typeof FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema>;
-
 declare const FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema: z.ZodObject<{
     created: z.ZodNumber;
     executions: z.ZodArray<z.ZodObject<{
@@ -61160,6 +60940,231 @@ declare const FunctionsProfilesComputationsResponseUnaryFunctionProfileComputati
     }, z.core.$strip>;
 }, z.core.$strip>;
 type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation = z.infer<typeof FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema>;
+
+declare function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, b: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk;
+declare function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk;
+declare function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation;
+
+declare const FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema: z.ZodObject<{
+    created: z.ZodNumber;
+    dataset: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    function: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    n: z.ZodNumber;
+    object: z.ZodEnum<{
+        "scalar.function.execution": "scalar.function.execution";
+        "vector.function.execution": "vector.function.execution";
+    }>;
+    output: z.ZodUnion<readonly [z.ZodNumber, z.ZodArray<z.ZodNumber>, z.ZodArray<z.ZodArray<z.ZodNumber>>, z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>]>;
+    profile: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    reasoning: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        created: z.ZodNumber;
+        error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            code: z.ZodNumber;
+            message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+        }, z.core.$strip>>>;
+        id: z.ZodString;
+        messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            agent: z.ZodString;
+            content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>>>;
+            created: z.ZodNumber;
+            finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+            index: z.ZodNumber;
+            logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+                refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodNumber;
+                    token: z.ZodString;
+                    top_logprobs: z.ZodArray<z.ZodObject<{
+                        bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                        logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                        token: z.ZodString;
+                    }, z.core.$strip>>;
+                }, z.core.$strip>>>>;
+            }, z.core.$strip>>>;
+            model: z.ZodString;
+            provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            role: z.ZodLiteral<"assistant">;
+            service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                function: z.ZodObject<{
+                    arguments: z.ZodString;
+                    name: z.ZodString;
+                }, z.core.$strip>;
+                id: z.ZodString;
+                type: z.ZodLiteral<"function">;
+            }, z.core.$strip>>>>;
+            upstream_id: z.ZodString;
+            usage: z.ZodObject<{
+                completion_tokens: z.ZodNumber;
+                completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                cost: z.ZodNumber;
+                cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    upstream_inference_cost: z.ZodNumber;
+                    upstream_upstream_inference_cost: z.ZodNumber;
+                }, z.core.$strip>>>;
+                cost_multiplier: z.ZodNumber;
+                is_byok: z.ZodBoolean;
+                prompt_tokens: z.ZodNumber;
+                prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                    audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                }, z.core.$strip>>>;
+                total_cost: z.ZodNumber;
+                total_tokens: z.ZodNumber;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+                text: z.ZodString;
+                type: z.ZodLiteral<"text">;
+            }, z.core.$strip>, z.ZodObject<{
+                image_url: z.ZodObject<{
+                    detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                    url: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"image_url">;
+            }, z.core.$strip>, z.ZodObject<{
+                input_audio: z.ZodObject<{
+                    data: z.ZodString;
+                    format: z.ZodString;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"input_audio">;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"input_video">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                type: z.ZodLiteral<"video_url">;
+                video_url: z.ZodObject<{
+                    url: z.ZodString;
+                }, z.core.$strip>;
+            }, z.core.$strip>, z.ZodObject<{
+                file: z.ZodObject<{
+                    file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                    filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                }, z.core.$strip>;
+                type: z.ZodLiteral<"file">;
+            }, z.core.$strip>]>>]>;
+            index: z.ZodNumber;
+            role: z.ZodLiteral<"tool">;
+            tool_call_id: z.ZodString;
+        }, z.core.$strip>]>>;
+        object: z.ZodLiteral<"agent.completion">;
+        upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>>>;
+    retry: z.ZodNumber;
+    retry_token: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+    tasks: z.ZodArray<z.ZodType<FunctionsExecutionsResponseUnaryTask, unknown, z.core.$ZodTypeInternals<FunctionsExecutionsResponseUnaryTask, unknown>>>;
+    tasks_errors: z.ZodBoolean;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type FunctionsProfilesComputationsResponseUnaryFunctionExecution = z.infer<typeof FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema>;
 
 declare const FunctionsProfilesComputationsResponseUnaryObjectSchema: z.ZodLiteral<"function.profile.computation">;
 type FunctionsProfilesComputationsResponseUnaryObject = z.infer<typeof FunctionsProfilesComputationsResponseUnaryObjectSchema>;
@@ -80027,189 +80032,6 @@ declare function vectorCompletionsResponseStreamingAgentCompletionChunkMergedLis
 
 declare function vectorCompletionsResponseStreamingVectorCompletionChunkMerged(a: VectorCompletionsResponseStreamingVectorCompletionChunk, b: VectorCompletionsResponseStreamingVectorCompletionChunk): [VectorCompletionsResponseStreamingVectorCompletionChunk, boolean];
 
-declare function wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged(a: VectorCompletionsResponseStreamingVectorCompletionChunk, b: VectorCompletionsResponseStreamingVectorCompletionChunk): VectorCompletionsResponseStreamingVectorCompletionChunk;
-declare function wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized(a: VectorCompletionsResponseStreamingVectorCompletionChunk): VectorCompletionsResponseStreamingVectorCompletionChunk;
-
-declare const VectorCompletionsResponseUnaryAgentCompletionSchema: z.ZodObject<{
-    created: z.ZodNumber;
-    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-        code: z.ZodNumber;
-        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
-    }, z.core.$strip>>>;
-    id: z.ZodString;
-    index: z.ZodNumber;
-    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-        agent: z.ZodString;
-        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            text: z.ZodString;
-            type: z.ZodLiteral<"text">;
-        }, z.core.$strip>, z.ZodObject<{
-            image_url: z.ZodObject<{
-                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                url: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"image_url">;
-        }, z.core.$strip>, z.ZodObject<{
-            input_audio: z.ZodObject<{
-                data: z.ZodString;
-                format: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"input_audio">;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"input_video">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"video_url">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            file: z.ZodObject<{
-                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>>]>>>;
-        created: z.ZodNumber;
-        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
-        index: z.ZodNumber;
-        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                logprob: z.ZodNumber;
-                token: z.ZodString;
-                top_logprobs: z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    token: z.ZodString;
-                }, z.core.$strip>>;
-            }, z.core.$strip>>>>;
-            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                logprob: z.ZodNumber;
-                token: z.ZodString;
-                top_logprobs: z.ZodArray<z.ZodObject<{
-                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
-                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                    token: z.ZodString;
-                }, z.core.$strip>>;
-            }, z.core.$strip>>>>;
-        }, z.core.$strip>>>;
-        model: z.ZodString;
-        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        role: z.ZodLiteral<"assistant">;
-        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
-            function: z.ZodObject<{
-                arguments: z.ZodString;
-                name: z.ZodString;
-            }, z.core.$strip>;
-            id: z.ZodString;
-            type: z.ZodLiteral<"function">;
-        }, z.core.$strip>>>>;
-        upstream_id: z.ZodString;
-        usage: z.ZodObject<{
-            completion_tokens: z.ZodNumber;
-            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            cost: z.ZodNumber;
-            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                upstream_inference_cost: z.ZodNumber;
-                upstream_upstream_inference_cost: z.ZodNumber;
-            }, z.core.$strip>>>;
-            cost_multiplier: z.ZodNumber;
-            is_byok: z.ZodBoolean;
-            prompt_tokens: z.ZodNumber;
-            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            }, z.core.$strip>>>;
-            total_cost: z.ZodNumber;
-            total_tokens: z.ZodNumber;
-        }, z.core.$strip>;
-    }, z.core.$strip>, z.ZodObject<{
-        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
-            text: z.ZodString;
-            type: z.ZodLiteral<"text">;
-        }, z.core.$strip>, z.ZodObject<{
-            image_url: z.ZodObject<{
-                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
-                url: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"image_url">;
-        }, z.core.$strip>, z.ZodObject<{
-            input_audio: z.ZodObject<{
-                data: z.ZodString;
-                format: z.ZodString;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"input_audio">;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"input_video">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            type: z.ZodLiteral<"video_url">;
-            video_url: z.ZodObject<{
-                url: z.ZodString;
-            }, z.core.$strip>;
-        }, z.core.$strip>, z.ZodObject<{
-            file: z.ZodObject<{
-                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
-            }, z.core.$strip>;
-            type: z.ZodLiteral<"file">;
-        }, z.core.$strip>]>>]>;
-        index: z.ZodNumber;
-        role: z.ZodLiteral<"tool">;
-        tool_call_id: z.ZodString;
-    }, z.core.$strip>]>>;
-    object: z.ZodLiteral<"agent.completion">;
-    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
-    usage: z.ZodObject<{
-        completion_tokens: z.ZodNumber;
-        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        cost: z.ZodNumber;
-        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            upstream_inference_cost: z.ZodNumber;
-            upstream_upstream_inference_cost: z.ZodNumber;
-        }, z.core.$strip>>>;
-        prompt_tokens: z.ZodNumber;
-        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
-            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
-        }, z.core.$strip>>>;
-        total_cost: z.ZodNumber;
-        total_tokens: z.ZodNumber;
-    }, z.core.$strip>;
-}, z.core.$strip>;
-type VectorCompletionsResponseUnaryAgentCompletion = z.infer<typeof VectorCompletionsResponseUnaryAgentCompletionSchema>;
-
-declare const VectorCompletionsResponseUnaryObjectSchema: z.ZodLiteral<"vector.completion">;
-type VectorCompletionsResponseUnaryObject = z.infer<typeof VectorCompletionsResponseUnaryObjectSchema>;
-
 declare const VectorCompletionsResponseUnaryVectorCompletionSchema: z.ZodObject<{
     completions: z.ZodArray<z.ZodObject<{
         created: z.ZodNumber;
@@ -80428,6 +80250,190 @@ declare const VectorCompletionsResponseUnaryVectorCompletionSchema: z.ZodObject<
     weights: z.ZodArray<z.ZodNumber>;
 }, z.core.$strip>;
 type VectorCompletionsResponseUnaryVectorCompletion = z.infer<typeof VectorCompletionsResponseUnaryVectorCompletionSchema>;
+
+declare function wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged(a: VectorCompletionsResponseStreamingVectorCompletionChunk, b: VectorCompletionsResponseStreamingVectorCompletionChunk): VectorCompletionsResponseStreamingVectorCompletionChunk;
+declare function wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized(a: VectorCompletionsResponseStreamingVectorCompletionChunk): VectorCompletionsResponseStreamingVectorCompletionChunk;
+declare function wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary(a: VectorCompletionsResponseStreamingVectorCompletionChunk): VectorCompletionsResponseUnaryVectorCompletion;
+
+declare const VectorCompletionsResponseUnaryAgentCompletionSchema: z.ZodObject<{
+    created: z.ZodNumber;
+    error: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+        code: z.ZodNumber;
+        message: z.ZodType<JsonValue, unknown, z.core.$ZodTypeInternals<JsonValue, unknown>>;
+    }, z.core.$strip>>>;
+    id: z.ZodString;
+    index: z.ZodNumber;
+    messages: z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+        agent: z.ZodString;
+        content: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>>>;
+        created: z.ZodNumber;
+        finish_reason: z.ZodUnion<readonly [z.ZodLiteral<"stop">, z.ZodLiteral<"length">, z.ZodLiteral<"tool_calls">, z.ZodLiteral<"content_filter">, z.ZodLiteral<"error">]>;
+        index: z.ZodNumber;
+        logprobs: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            content: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+            refusal: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+                bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                logprob: z.ZodNumber;
+                token: z.ZodString;
+                top_logprobs: z.ZodArray<z.ZodObject<{
+                    bytes: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodNumber>>>;
+                    logprob: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                    token: z.ZodString;
+                }, z.core.$strip>>;
+            }, z.core.$strip>>>>;
+        }, z.core.$strip>>>;
+        model: z.ZodString;
+        provider: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        reasoning: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        refusal: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        role: z.ZodLiteral<"assistant">;
+        service_tier: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        system_fingerprint: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+        tool_calls: z.ZodOptional<z.ZodNullable<z.ZodArray<z.ZodObject<{
+            function: z.ZodObject<{
+                arguments: z.ZodString;
+                name: z.ZodString;
+            }, z.core.$strip>;
+            id: z.ZodString;
+            type: z.ZodLiteral<"function">;
+        }, z.core.$strip>>>>;
+        upstream_id: z.ZodString;
+        usage: z.ZodObject<{
+            completion_tokens: z.ZodNumber;
+            completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            cost: z.ZodNumber;
+            cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                upstream_inference_cost: z.ZodNumber;
+                upstream_upstream_inference_cost: z.ZodNumber;
+            }, z.core.$strip>>>;
+            cost_multiplier: z.ZodNumber;
+            is_byok: z.ZodBoolean;
+            prompt_tokens: z.ZodNumber;
+            prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+                audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+                video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            }, z.core.$strip>>>;
+            total_cost: z.ZodNumber;
+            total_tokens: z.ZodNumber;
+        }, z.core.$strip>;
+    }, z.core.$strip>, z.ZodObject<{
+        content: z.ZodUnion<readonly [z.ZodString, z.ZodArray<z.ZodUnion<readonly [z.ZodObject<{
+            text: z.ZodString;
+            type: z.ZodLiteral<"text">;
+        }, z.core.$strip>, z.ZodObject<{
+            image_url: z.ZodObject<{
+                detail: z.ZodOptional<z.ZodNullable<z.ZodUnion<readonly [z.ZodLiteral<"auto">, z.ZodLiteral<"low">, z.ZodLiteral<"high">]>>>;
+                url: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"image_url">;
+        }, z.core.$strip>, z.ZodObject<{
+            input_audio: z.ZodObject<{
+                data: z.ZodString;
+                format: z.ZodString;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"input_audio">;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"input_video">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            type: z.ZodLiteral<"video_url">;
+            video_url: z.ZodObject<{
+                url: z.ZodString;
+            }, z.core.$strip>;
+        }, z.core.$strip>, z.ZodObject<{
+            file: z.ZodObject<{
+                file_data: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_id: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                file_url: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+                filename: z.ZodOptional<z.ZodNullable<z.ZodString>>;
+            }, z.core.$strip>;
+            type: z.ZodLiteral<"file">;
+        }, z.core.$strip>]>>]>;
+        index: z.ZodNumber;
+        role: z.ZodLiteral<"tool">;
+        tool_call_id: z.ZodString;
+    }, z.core.$strip>]>>;
+    object: z.ZodLiteral<"agent.completion">;
+    upstream: z.ZodUnion<readonly [z.ZodLiteral<"unknown">, z.ZodLiteral<"openrouter">, z.ZodLiteral<"claude_agent_sdk">, z.ZodLiteral<"mock">]>;
+    usage: z.ZodObject<{
+        completion_tokens: z.ZodNumber;
+        completion_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            accepted_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            reasoning_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            rejected_prediction_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        cost: z.ZodNumber;
+        cost_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            upstream_inference_cost: z.ZodNumber;
+            upstream_upstream_inference_cost: z.ZodNumber;
+        }, z.core.$strip>>>;
+        prompt_tokens: z.ZodNumber;
+        prompt_tokens_details: z.ZodOptional<z.ZodNullable<z.ZodObject<{
+            audio_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cache_write_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            cached_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+            video_tokens: z.ZodOptional<z.ZodNullable<z.ZodNumber>>;
+        }, z.core.$strip>>>;
+        total_cost: z.ZodNumber;
+        total_tokens: z.ZodNumber;
+    }, z.core.$strip>;
+}, z.core.$strip>;
+type VectorCompletionsResponseUnaryAgentCompletion = z.infer<typeof VectorCompletionsResponseUnaryAgentCompletionSchema>;
+
+declare const VectorCompletionsResponseUnaryObjectSchema: z.ZodLiteral<"vector.completion">;
+type VectorCompletionsResponseUnaryObject = z.infer<typeof VectorCompletionsResponseUnaryObjectSchema>;
 
 declare const VectorCompletionsResponseVoteSchema: z.ZodObject<{
     agent: z.ZodString;
@@ -83139,4 +83145,4 @@ declare function merge<T extends {}>(a: T | null | undefined, b: T | null | unde
 declare function mergedString(a: string, b: string): [string, boolean];
 declare function mergedNumberArray(a: number[], b: number[]): [number[], boolean];
 
-export { type AgentAgent, type AgentAgentBase, AgentAgentBaseSchema, AgentAgentSchema, type AgentClaudeAgentSdkAgent, type AgentClaudeAgentSdkAgentBase, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, type AgentClaudeAgentSdkEffort, AgentClaudeAgentSdkEffortSchema, type AgentClaudeAgentSdkOutputMode, AgentClaudeAgentSdkOutputModeSchema, type AgentClaudeAgentSdkUpstream, AgentClaudeAgentSdkUpstreamSchema, type AgentCompletionsMessageAssistantMessage, type AgentCompletionsMessageAssistantMessageExpression, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, type AgentCompletionsMessageAssistantToolCall, type AgentCompletionsMessageAssistantToolCallDelta, AgentCompletionsMessageAssistantToolCallDeltaSchema, type AgentCompletionsMessageAssistantToolCallExpression, AgentCompletionsMessageAssistantToolCallExpressionSchema, type AgentCompletionsMessageAssistantToolCallFunction, type AgentCompletionsMessageAssistantToolCallFunctionDelta, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, type AgentCompletionsMessageAssistantToolCallFunctionExpression, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, type AgentCompletionsMessageAssistantToolCallType, AgentCompletionsMessageAssistantToolCallTypeSchema, type AgentCompletionsMessageDeveloperMessage, type AgentCompletionsMessageDeveloperMessageExpression, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, type AgentCompletionsMessageFile, AgentCompletionsMessageFileSchema, type AgentCompletionsMessageImageUrl, type AgentCompletionsMessageImageUrlDetail, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, type AgentCompletionsMessageInputAudio, AgentCompletionsMessageInputAudioSchema, type AgentCompletionsMessageMessage, type AgentCompletionsMessageMessageExpression, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, type AgentCompletionsMessageRichContent, type AgentCompletionsMessageRichContentExpression, AgentCompletionsMessageRichContentExpressionSchema, type AgentCompletionsMessageRichContentPart, type AgentCompletionsMessageRichContentPartExpression, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, type AgentCompletionsMessageSimpleContent, type AgentCompletionsMessageSimpleContentExpression, AgentCompletionsMessageSimpleContentExpressionSchema, type AgentCompletionsMessageSimpleContentPart, type AgentCompletionsMessageSimpleContentPartExpression, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, type AgentCompletionsMessageSystemMessage, type AgentCompletionsMessageSystemMessageExpression, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, type AgentCompletionsMessageToolMessage, type AgentCompletionsMessageToolMessageExpression, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, type AgentCompletionsMessageUserMessage, type AgentCompletionsMessageUserMessageExpression, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, type AgentCompletionsMessageVideoUrl, AgentCompletionsMessageVideoUrlSchema, type AgentCompletionsRequestAgent, type AgentCompletionsRequestAgentCompletionCreateParams, AgentCompletionsRequestAgentCompletionCreateParamsSchema, type AgentCompletionsRequestAgentCompletionCreateParamsStreaming, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, type AgentCompletionsRequestAgentCompletionCreateParamsUnary, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, AgentCompletionsRequestAgentSchema, type AgentCompletionsRequestProvider, type AgentCompletionsRequestProviderDataCollection, AgentCompletionsRequestProviderDataCollectionSchema, type AgentCompletionsRequestProviderMaxPrice, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, type AgentCompletionsRequestProviderSort, AgentCompletionsRequestProviderSortSchema, type AgentCompletionsRequestResponseFormat, type AgentCompletionsRequestResponseFormatParam, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, type AgentCompletionsResponseAssistantRole, AgentCompletionsResponseAssistantRoleSchema, type AgentCompletionsResponseCompletionTokensDetails, AgentCompletionsResponseCompletionTokensDetailsSchema, type AgentCompletionsResponseCostDetails, AgentCompletionsResponseCostDetailsSchema, type AgentCompletionsResponseFinishReason, AgentCompletionsResponseFinishReasonSchema, type AgentCompletionsResponseLogprob, AgentCompletionsResponseLogprobSchema, type AgentCompletionsResponseLogprobs, AgentCompletionsResponseLogprobsSchema, type AgentCompletionsResponsePromptTokensDetails, AgentCompletionsResponsePromptTokensDetailsSchema, type AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, type AgentCompletionsResponseStreamingAssistantResponseChunk, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, type AgentCompletionsResponseStreamingMessageChunk, AgentCompletionsResponseStreamingMessageChunkSchema, type AgentCompletionsResponseStreamingObject, AgentCompletionsResponseStreamingObjectSchema, type AgentCompletionsResponseToolResponse, AgentCompletionsResponseToolResponseSchema, type AgentCompletionsResponseToolRole, AgentCompletionsResponseToolRoleSchema, type AgentCompletionsResponseTopLogprob, AgentCompletionsResponseTopLogprobSchema, type AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletionSchema, type AgentCompletionsResponseUnaryAssistantResponse, AgentCompletionsResponseUnaryAssistantResponseSchema, type AgentCompletionsResponseUnaryMessage, AgentCompletionsResponseUnaryMessageSchema, type AgentCompletionsResponseUnaryObject, AgentCompletionsResponseUnaryObjectSchema, type AgentCompletionsResponseUpstreamUsage, AgentCompletionsResponseUpstreamUsageSchema, type AgentCompletionsResponseUsage, AgentCompletionsResponseUsageSchema, type AgentGetAgent, AgentGetAgentSchema, type AgentListAgent, type AgentListAgentItem, AgentListAgentItemSchema, AgentListAgentSchema, type AgentMcpServer, AgentMcpServerSchema, type AgentMockAgent, type AgentMockAgentBase, AgentMockAgentBaseSchema, AgentMockAgentSchema, type AgentMockOutputMode, AgentMockOutputModeSchema, type AgentMockUpstream, AgentMockUpstreamSchema, type AgentOpenrouterAgent, type AgentOpenrouterAgentBase, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, type AgentOpenrouterOutputMode, AgentOpenrouterOutputModeSchema, type AgentOpenrouterProvider, type AgentOpenrouterProviderQuantization, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, type AgentOpenrouterReasoning, type AgentOpenrouterReasoningEffort, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, type AgentOpenrouterReasoningSummaryVerbosity, AgentOpenrouterReasoningSummaryVerbositySchema, type AgentOpenrouterStop, AgentOpenrouterStopSchema, type AgentOpenrouterUpstream, AgentOpenrouterUpstreamSchema, type AgentOpenrouterVerbosity, AgentOpenrouterVerbositySchema, type AgentOutputMode, AgentOutputModeSchema, type AgentUpstream, AgentUpstreamSchema, type AgentUsageAgent, AgentUsageAgentSchema, type AgentWithFallbacksAndCountAgentAgent, type AgentWithFallbacksAndCountAgentAgentBase, AgentWithFallbacksAndCountAgentAgentBaseSchema, AgentWithFallbacksAndCountAgentAgentSchema, type AuthApiKeyWithMetadata, AuthApiKeyWithMetadataSchema, type AuthCreateApiKeyRequest, AuthCreateApiKeyRequestSchema, type AuthCreateOpenRouterByokApiKeyRequest, AuthCreateOpenRouterByokApiKeyRequestSchema, type AuthDisableApiKeyRequest, AuthDisableApiKeyRequestSchema, type AuthGetCreditsResponse, AuthGetCreditsResponseSchema, type AuthGetOpenRouterByokApiKeyResponse, AuthGetOpenRouterByokApiKeyResponseSchema, type AuthListApiKeyItem, AuthListApiKeyItemSchema, type AuthListApiKeyResponse, AuthListApiKeyResponseSchema, type EnsembleEnsemble, type EnsembleEnsembleBase, EnsembleEnsembleBaseSchema, EnsembleEnsembleSchema, type EnsembleGetEnsemble, EnsembleGetEnsembleSchema, type EnsembleListEnsemble, type EnsembleListEnsembleItem, EnsembleListEnsembleItemSchema, EnsembleListEnsembleSchema, type EnsembleUsageEnsemble, EnsembleUsageEnsembleSchema, type FunctionsAlphaInlineFunction, FunctionsAlphaInlineFunctionSchema, type FunctionsAlphaRemoteFunction, FunctionsAlphaRemoteFunctionSchema, type FunctionsAlphaScalarBranchTaskExpression, FunctionsAlphaScalarBranchTaskExpressionSchema, type FunctionsAlphaScalarInlineFunction, FunctionsAlphaScalarInlineFunctionSchema, type FunctionsAlphaScalarLeafTaskExpression, FunctionsAlphaScalarLeafTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarRemoteFunction, FunctionsAlphaScalarRemoteFunctionSchema, type FunctionsAlphaScalarScalarFunctionTaskExpression, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarVectorCompletionTaskExpression, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorBranchTaskExpression, FunctionsAlphaVectorBranchTaskExpressionSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputValue, type FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, type FunctionsAlphaVectorInlineFunction, FunctionsAlphaVectorInlineFunctionSchema, type FunctionsAlphaVectorLeafTaskExpression, FunctionsAlphaVectorLeafTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorRemoteFunction, FunctionsAlphaVectorRemoteFunctionSchema, type FunctionsAlphaVectorScalarFunctionTaskExpression, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorVectorCompletionTaskExpression, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorVectorFunctionTaskExpression, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, type FunctionsCheckScalarFieldsValidation, FunctionsCheckScalarFieldsValidationSchema, type FunctionsCheckVectorFieldsValidation, FunctionsCheckVectorFieldsValidationSchema, type FunctionsCompiledTask, FunctionsCompiledTaskSchema, type FunctionsExecutionsRequestFunctionExecutionCreateParams, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, type FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody, FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema, type FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody, FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema, type FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPath, FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema, type FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody, FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema, type FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPath, FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPathSchema, type FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody, FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema, type FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPath, FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema, type FunctionsExecutionsRequestReasoning, FunctionsExecutionsRequestReasoningSchema, type FunctionsExecutionsRequestRequest, FunctionsExecutionsRequestRequestSchema, type FunctionsExecutionsRequestStrategy, FunctionsExecutionsRequestStrategySchema, type FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, type FunctionsExecutionsResponseStreamingObject, FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk, FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, type FunctionsExecutionsResponseUnaryFunctionExecutionTask, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, type FunctionsExecutionsResponseUnaryObject, FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryReasoningSummary, FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryTask, FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryVectorCompletionTask, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, type FunctionsExecutionsRetryToken, FunctionsExecutionsRetryTokenSchema, type FunctionsExpressionAnyOfInputSchema, FunctionsExpressionAnyOfInputSchemaSchema, type FunctionsExpressionArrayInputSchema, FunctionsExpressionArrayInputSchemaSchema, type FunctionsExpressionArrayInputSchemaType, FunctionsExpressionArrayInputSchemaTypeSchema, type FunctionsExpressionAudioInputSchema, FunctionsExpressionAudioInputSchemaSchema, type FunctionsExpressionAudioInputSchemaType, FunctionsExpressionAudioInputSchemaTypeSchema, type FunctionsExpressionBooleanInputSchema, FunctionsExpressionBooleanInputSchemaSchema, type FunctionsExpressionBooleanInputSchemaType, FunctionsExpressionBooleanInputSchemaTypeSchema, type FunctionsExpressionExpression, FunctionsExpressionExpressionSchema, type FunctionsExpressionFileInputSchema, FunctionsExpressionFileInputSchemaSchema, type FunctionsExpressionFileInputSchemaType, FunctionsExpressionFileInputSchemaTypeSchema, type FunctionsExpressionImageInputSchema, FunctionsExpressionImageInputSchemaSchema, type FunctionsExpressionImageInputSchemaType, FunctionsExpressionImageInputSchemaTypeSchema, type FunctionsExpressionInputSchema, FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputValue, type FunctionsExpressionInputValueExpression, type FunctionsExpressionInputValueExpressionObject, FunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionInputValueObject, FunctionsExpressionInputValueSchema, type FunctionsExpressionIntegerInputSchema, FunctionsExpressionIntegerInputSchemaSchema, type FunctionsExpressionIntegerInputSchemaType, FunctionsExpressionIntegerInputSchemaTypeSchema, type FunctionsExpressionNumberInputSchema, FunctionsExpressionNumberInputSchemaSchema, type FunctionsExpressionNumberInputSchemaType, FunctionsExpressionNumberInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchema, FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObjectInputSchemaType, FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionOneOrManyString, FunctionsExpressionOneOrManyStringSchema, type FunctionsExpressionParams, type FunctionsExpressionParamsOwned, FunctionsExpressionParamsOwnedSchema, type FunctionsExpressionParamsRef, FunctionsExpressionParamsRefSchema, FunctionsExpressionParamsSchema, type FunctionsExpressionSpecial, FunctionsExpressionSpecialSchema, type FunctionsExpressionStringInputSchema, FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchemaType, FunctionsExpressionStringInputSchemaTypeSchema, type FunctionsExpressionTaskOutput, type FunctionsExpressionTaskOutputOwned, FunctionsExpressionTaskOutputOwnedSchema, type FunctionsExpressionTaskOutputRef, FunctionsExpressionTaskOutputRefSchema, FunctionsExpressionTaskOutputSchema, type FunctionsExpressionVideoInputSchema, FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchemaType, FunctionsExpressionVideoInputSchemaTypeSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageFile, FunctionsExpressionWithExpressionAgentCompletionsMessageFileSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrl, FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudio, FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl, FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema, type FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema, type FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, type FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema, type FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression, FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, type FunctionsExpressionWithExpressionNullableString, FunctionsExpressionWithExpressionNullableStringSchema, type FunctionsExpressionWithExpressionString, FunctionsExpressionWithExpressionStringSchema, type FunctionsFullInlineFunction, FunctionsFullInlineFunctionSchema, type FunctionsFullRemoteFunction, FunctionsFullRemoteFunctionSchema, type FunctionsFunction, FunctionsFunctionSchema, type FunctionsFunctionType, FunctionsFunctionTypeSchema, type FunctionsGetFunction, type FunctionsGetFunctionProfilePair, FunctionsGetFunctionProfilePairSchema, FunctionsGetFunctionSchema, type FunctionsInlineAutoProfile, FunctionsInlineAutoProfileSchema, type FunctionsInlineFunction, FunctionsInlineFunctionSchema, type FunctionsInlineProfile, FunctionsInlineProfileSchema, type FunctionsInlineTasksProfile, FunctionsInlineTasksProfileSchema, type FunctionsInventionsDescriptionObject, FunctionsInventionsDescriptionObjectSchema, type FunctionsInventionsEssayObject, FunctionsInventionsEssayObjectSchema, type FunctionsInventionsEssayTasksObject, FunctionsInventionsEssayTasksObjectSchema, type FunctionsInventionsIndexObject, FunctionsInventionsIndexObjectSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreaming, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnary, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, type FunctionsInventionsRecursiveResponseStreamingObject, FunctionsInventionsRecursiveResponseStreamingObjectSchema, type FunctionsInventionsRecursiveResponseUnaryFunctionInvention, type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, type FunctionsInventionsRecursiveResponseUnaryObject, FunctionsInventionsRecursiveResponseUnaryObjectSchema, type FunctionsInventionsRequestFunctionInventionCreateParams, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsStreaming, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsUnary, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, type FunctionsInventionsResponseStreamingAgentCompletionChunk, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, type FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsResponseStreamingObject, FunctionsInventionsResponseStreamingObjectSchema, type FunctionsInventionsResponseUnaryAgentCompletion, FunctionsInventionsResponseUnaryAgentCompletionSchema, type FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInventionSchema, type FunctionsInventionsResponseUnaryObject, FunctionsInventionsResponseUnaryObjectSchema, type FunctionsInventionsStateAlphaScalarBranchState, FunctionsInventionsStateAlphaScalarBranchStateSchema, type FunctionsInventionsStateAlphaScalarLeafState, FunctionsInventionsStateAlphaScalarLeafStateSchema, type FunctionsInventionsStateAlphaScalarState, FunctionsInventionsStateAlphaScalarStateSchema, type FunctionsInventionsStateAlphaVectorBranchState, FunctionsInventionsStateAlphaVectorBranchStateSchema, type FunctionsInventionsStateAlphaVectorLeafState, FunctionsInventionsStateAlphaVectorLeafStateSchema, type FunctionsInventionsStateAlphaVectorState, FunctionsInventionsStateAlphaVectorStateSchema, type FunctionsInventionsStateParams, FunctionsInventionsStateParamsSchema, type FunctionsInventionsStateParamsState, FunctionsInventionsStateParamsStateSchema, type FunctionsInventionsStateState, FunctionsInventionsStateStateSchema, type FunctionsInventionsTasksLengthObject, FunctionsInventionsTasksLengthObjectSchema, type FunctionsListFunction, type FunctionsListFunctionItem, FunctionsListFunctionItemSchema, type FunctionsListFunctionProfilePair, type FunctionsListFunctionProfilePairItem, FunctionsListFunctionProfilePairItemSchema, FunctionsListFunctionProfilePairSchema, type FunctionsListFunctionProfilePairsQueryParameters, FunctionsListFunctionProfilePairsQueryParametersSchema, type FunctionsListFunctionProfilePairsSource, FunctionsListFunctionProfilePairsSourceSchema, FunctionsListFunctionSchema, type FunctionsListFunctionsQueryParameters, FunctionsListFunctionsQueryParametersSchema, type FunctionsListFunctionsSource, FunctionsListFunctionsSourceSchema, type FunctionsPlaceholderScalarFunctionTask, type FunctionsPlaceholderScalarFunctionTaskExpression, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, type FunctionsPlaceholderVectorFunctionTask, type FunctionsPlaceholderVectorFunctionTaskExpression, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, type FunctionsProfile, FunctionsProfileSchema, type FunctionsProfilesComputationsRequestDatasetItem, FunctionsProfilesComputationsRequestDatasetItemSchema, type FunctionsProfilesComputationsRequestFunctionInlineRequestBody, FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema, type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, type FunctionsProfilesComputationsRequestFunctionRemoteRequestBody, FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema, type FunctionsProfilesComputationsRequestFunctionRemoteRequestPath, FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema, type FunctionsProfilesComputationsRequestRequest, FunctionsProfilesComputationsRequestRequestSchema, type FunctionsProfilesComputationsRequestTarget, FunctionsProfilesComputationsRequestTargetSchema, type FunctionsProfilesComputationsResponseFittingStats, FunctionsProfilesComputationsResponseFittingStatsSchema, type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, type FunctionsProfilesComputationsResponseStreamingObject, FunctionsProfilesComputationsResponseStreamingObjectSchema, type FunctionsProfilesComputationsResponseUnaryFunctionExecution, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, type FunctionsProfilesComputationsResponseUnaryObject, FunctionsProfilesComputationsResponseUnaryObjectSchema, type FunctionsProfilesComputationsRetryToken, FunctionsProfilesComputationsRetryTokenSchema, type FunctionsProfilesGetProfile, FunctionsProfilesGetProfileSchema, type FunctionsProfilesListProfile, type FunctionsProfilesListProfileItem, FunctionsProfilesListProfileItemSchema, FunctionsProfilesListProfileSchema, type FunctionsProfilesListProfilesQueryParameters, FunctionsProfilesListProfilesQueryParametersSchema, type FunctionsProfilesListProfilesSource, FunctionsProfilesListProfilesSourceSchema, type FunctionsProfilesUsageProfile, FunctionsProfilesUsageProfileSchema, type FunctionsRemote, type FunctionsRemoteAutoProfile, FunctionsRemoteAutoProfileSchema, type FunctionsRemoteFunction, type FunctionsRemoteFunctionPath, FunctionsRemoteFunctionPathSchema, FunctionsRemoteFunctionSchema, type FunctionsRemoteProfile, FunctionsRemoteProfileSchema, FunctionsRemoteSchema, type FunctionsRemoteTasksProfile, FunctionsRemoteTasksProfileSchema, type FunctionsScalarFunctionTask, type FunctionsScalarFunctionTaskExpression, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, type FunctionsTask, type FunctionsTaskExpression, FunctionsTaskExpressionSchema, type FunctionsTaskProfile, FunctionsTaskProfileSchema, FunctionsTaskSchema, type FunctionsUsageFunction, type FunctionsUsageFunctionProfilePair, FunctionsUsageFunctionProfilePairSchema, FunctionsUsageFunctionSchema, type FunctionsVectorCompletionTask, type FunctionsVectorCompletionTaskExpression, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, type FunctionsVectorFunctionTask, type FunctionsVectorFunctionTaskExpression, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, ObjectiveAI, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsSchema, type PrefixedUuid, PrefixedUuidSchema, type RequestOptions, RequestOptionsSchema, type ResponseError, ResponseErrorSchema, Stream, type VectorCompletionsCacheCacheVote, type VectorCompletionsCacheCacheVoteRequest, type VectorCompletionsCacheCacheVoteRequestOwned, VectorCompletionsCacheCacheVoteRequestOwnedSchema, type VectorCompletionsCacheCacheVoteRequestRef, VectorCompletionsCacheCacheVoteRequestRefSchema, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, type VectorCompletionsCacheCompletionVotes, VectorCompletionsCacheCompletionVotesSchema, type VectorCompletionsRequestEnsemble, VectorCompletionsRequestEnsembleSchema, type VectorCompletionsRequestProfile, type VectorCompletionsRequestProfileEntry, VectorCompletionsRequestProfileEntrySchema, VectorCompletionsRequestProfileSchema, type VectorCompletionsRequestVectorCompletionCreateParams, VectorCompletionsRequestVectorCompletionCreateParamsSchema, type VectorCompletionsRequestVectorCompletionCreateParamsStreaming, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, type VectorCompletionsRequestVectorCompletionCreateParamsUnary, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, type VectorCompletionsResponseStreamingAgentCompletionChunk, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, type VectorCompletionsResponseStreamingObject, VectorCompletionsResponseStreamingObjectSchema, type VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, type VectorCompletionsResponseUnaryAgentCompletion, VectorCompletionsResponseUnaryAgentCompletionSchema, type VectorCompletionsResponseUnaryObject, VectorCompletionsResponseUnaryObjectSchema, type VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletionSchema, type VectorCompletionsResponseVote, VectorCompletionsResponseVoteSchema, type VectorCompletionsVectorResponses, VectorCompletionsVectorResponsesSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, ensembleGetEnsemble, ensembleGetEnsembleUsage, ensembleListEnsembles, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, merge, mergedNumberArray, mergedString, numberIsEmpty, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, wasmAgentCompletionsMessagePromptId, wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged, wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized, wasmAgentValidateAgent, wasmEnsembleValidateEnsemble, wasmFunctionsAlphaCheckBranchScalarFunction, wasmFunctionsAlphaCheckBranchVectorFunction, wasmFunctionsAlphaCheckLeafScalarFunction, wasmFunctionsAlphaCheckLeafVectorFunction, wasmFunctionsCheckCheckScalarFields, wasmFunctionsCheckCheckVectorFields, wasmFunctionsCompileFunctionInputMerge, wasmFunctionsCompileFunctionInputSplit, wasmFunctionsCompileFunctionOutputLength, wasmFunctionsCompileFunctionTasks, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized, wasmFunctionsValidateFunctionInput, wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged, wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized, wasmVectorCompletionsVectorResponseId, zockerParse };
+export { type AgentAgent, type AgentAgentBase, AgentAgentBaseSchema, AgentAgentSchema, type AgentClaudeAgentSdkAgent, type AgentClaudeAgentSdkAgentBase, AgentClaudeAgentSdkAgentBaseSchema, AgentClaudeAgentSdkAgentSchema, type AgentClaudeAgentSdkEffort, AgentClaudeAgentSdkEffortSchema, type AgentClaudeAgentSdkOutputMode, AgentClaudeAgentSdkOutputModeSchema, type AgentClaudeAgentSdkUpstream, AgentClaudeAgentSdkUpstreamSchema, type AgentCompletionsMessageAssistantMessage, type AgentCompletionsMessageAssistantMessageExpression, AgentCompletionsMessageAssistantMessageExpressionSchema, AgentCompletionsMessageAssistantMessageSchema, type AgentCompletionsMessageAssistantToolCall, type AgentCompletionsMessageAssistantToolCallDelta, AgentCompletionsMessageAssistantToolCallDeltaSchema, type AgentCompletionsMessageAssistantToolCallExpression, AgentCompletionsMessageAssistantToolCallExpressionSchema, type AgentCompletionsMessageAssistantToolCallFunction, type AgentCompletionsMessageAssistantToolCallFunctionDelta, AgentCompletionsMessageAssistantToolCallFunctionDeltaSchema, type AgentCompletionsMessageAssistantToolCallFunctionExpression, AgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, AgentCompletionsMessageAssistantToolCallFunctionSchema, AgentCompletionsMessageAssistantToolCallSchema, type AgentCompletionsMessageAssistantToolCallType, AgentCompletionsMessageAssistantToolCallTypeSchema, type AgentCompletionsMessageDeveloperMessage, type AgentCompletionsMessageDeveloperMessageExpression, AgentCompletionsMessageDeveloperMessageExpressionSchema, AgentCompletionsMessageDeveloperMessageSchema, type AgentCompletionsMessageFile, AgentCompletionsMessageFileSchema, type AgentCompletionsMessageImageUrl, type AgentCompletionsMessageImageUrlDetail, AgentCompletionsMessageImageUrlDetailSchema, AgentCompletionsMessageImageUrlSchema, type AgentCompletionsMessageInputAudio, AgentCompletionsMessageInputAudioSchema, type AgentCompletionsMessageMessage, type AgentCompletionsMessageMessageExpression, AgentCompletionsMessageMessageExpressionSchema, AgentCompletionsMessageMessageSchema, type AgentCompletionsMessageRichContent, type AgentCompletionsMessageRichContentExpression, AgentCompletionsMessageRichContentExpressionSchema, type AgentCompletionsMessageRichContentPart, type AgentCompletionsMessageRichContentPartExpression, AgentCompletionsMessageRichContentPartExpressionSchema, AgentCompletionsMessageRichContentPartSchema, AgentCompletionsMessageRichContentSchema, type AgentCompletionsMessageSimpleContent, type AgentCompletionsMessageSimpleContentExpression, AgentCompletionsMessageSimpleContentExpressionSchema, type AgentCompletionsMessageSimpleContentPart, type AgentCompletionsMessageSimpleContentPartExpression, AgentCompletionsMessageSimpleContentPartExpressionSchema, AgentCompletionsMessageSimpleContentPartSchema, AgentCompletionsMessageSimpleContentSchema, type AgentCompletionsMessageSystemMessage, type AgentCompletionsMessageSystemMessageExpression, AgentCompletionsMessageSystemMessageExpressionSchema, AgentCompletionsMessageSystemMessageSchema, type AgentCompletionsMessageToolMessage, type AgentCompletionsMessageToolMessageExpression, AgentCompletionsMessageToolMessageExpressionSchema, AgentCompletionsMessageToolMessageSchema, type AgentCompletionsMessageUserMessage, type AgentCompletionsMessageUserMessageExpression, AgentCompletionsMessageUserMessageExpressionSchema, AgentCompletionsMessageUserMessageSchema, type AgentCompletionsMessageVideoUrl, AgentCompletionsMessageVideoUrlSchema, type AgentCompletionsRequestAgent, type AgentCompletionsRequestAgentCompletionCreateParams, AgentCompletionsRequestAgentCompletionCreateParamsSchema, type AgentCompletionsRequestAgentCompletionCreateParamsStreaming, AgentCompletionsRequestAgentCompletionCreateParamsStreamingSchema, type AgentCompletionsRequestAgentCompletionCreateParamsUnary, AgentCompletionsRequestAgentCompletionCreateParamsUnarySchema, AgentCompletionsRequestAgentSchema, type AgentCompletionsRequestProvider, type AgentCompletionsRequestProviderDataCollection, AgentCompletionsRequestProviderDataCollectionSchema, type AgentCompletionsRequestProviderMaxPrice, AgentCompletionsRequestProviderMaxPriceSchema, AgentCompletionsRequestProviderSchema, type AgentCompletionsRequestProviderSort, AgentCompletionsRequestProviderSortSchema, type AgentCompletionsRequestResponseFormat, type AgentCompletionsRequestResponseFormatParam, AgentCompletionsRequestResponseFormatParamSchema, AgentCompletionsRequestResponseFormatSchema, type AgentCompletionsResponseAssistantRole, AgentCompletionsResponseAssistantRoleSchema, type AgentCompletionsResponseCompletionTokensDetails, AgentCompletionsResponseCompletionTokensDetailsSchema, type AgentCompletionsResponseCostDetails, AgentCompletionsResponseCostDetailsSchema, type AgentCompletionsResponseFinishReason, AgentCompletionsResponseFinishReasonSchema, type AgentCompletionsResponseLogprob, AgentCompletionsResponseLogprobSchema, type AgentCompletionsResponseLogprobs, AgentCompletionsResponseLogprobsSchema, type AgentCompletionsResponsePromptTokensDetails, AgentCompletionsResponsePromptTokensDetailsSchema, type AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunkSchema, type AgentCompletionsResponseStreamingAssistantResponseChunk, AgentCompletionsResponseStreamingAssistantResponseChunkSchema, type AgentCompletionsResponseStreamingMessageChunk, AgentCompletionsResponseStreamingMessageChunkSchema, type AgentCompletionsResponseStreamingObject, AgentCompletionsResponseStreamingObjectSchema, type AgentCompletionsResponseToolResponse, AgentCompletionsResponseToolResponseSchema, type AgentCompletionsResponseToolRole, AgentCompletionsResponseToolRoleSchema, type AgentCompletionsResponseTopLogprob, AgentCompletionsResponseTopLogprobSchema, type AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletionSchema, type AgentCompletionsResponseUnaryAssistantResponse, AgentCompletionsResponseUnaryAssistantResponseSchema, type AgentCompletionsResponseUnaryMessage, AgentCompletionsResponseUnaryMessageSchema, type AgentCompletionsResponseUnaryObject, AgentCompletionsResponseUnaryObjectSchema, type AgentCompletionsResponseUpstreamUsage, AgentCompletionsResponseUpstreamUsageSchema, type AgentCompletionsResponseUsage, AgentCompletionsResponseUsageSchema, type AgentGetAgent, AgentGetAgentSchema, type AgentListAgent, type AgentListAgentItem, AgentListAgentItemSchema, AgentListAgentSchema, type AgentMcpServer, AgentMcpServerSchema, type AgentMockAgent, type AgentMockAgentBase, AgentMockAgentBaseSchema, AgentMockAgentSchema, type AgentMockOutputMode, AgentMockOutputModeSchema, type AgentMockUpstream, AgentMockUpstreamSchema, type AgentOpenrouterAgent, type AgentOpenrouterAgentBase, AgentOpenrouterAgentBaseSchema, AgentOpenrouterAgentSchema, type AgentOpenrouterOutputMode, AgentOpenrouterOutputModeSchema, type AgentOpenrouterProvider, type AgentOpenrouterProviderQuantization, AgentOpenrouterProviderQuantizationSchema, AgentOpenrouterProviderSchema, type AgentOpenrouterReasoning, type AgentOpenrouterReasoningEffort, AgentOpenrouterReasoningEffortSchema, AgentOpenrouterReasoningSchema, type AgentOpenrouterReasoningSummaryVerbosity, AgentOpenrouterReasoningSummaryVerbositySchema, type AgentOpenrouterStop, AgentOpenrouterStopSchema, type AgentOpenrouterUpstream, AgentOpenrouterUpstreamSchema, type AgentOpenrouterVerbosity, AgentOpenrouterVerbositySchema, type AgentOutputMode, AgentOutputModeSchema, type AgentUpstream, AgentUpstreamSchema, type AgentUsageAgent, AgentUsageAgentSchema, type AgentWithFallbacksAndCountAgentAgent, type AgentWithFallbacksAndCountAgentAgentBase, AgentWithFallbacksAndCountAgentAgentBaseSchema, AgentWithFallbacksAndCountAgentAgentSchema, type AuthApiKeyWithMetadata, AuthApiKeyWithMetadataSchema, type AuthCreateApiKeyRequest, AuthCreateApiKeyRequestSchema, type AuthCreateOpenRouterByokApiKeyRequest, AuthCreateOpenRouterByokApiKeyRequestSchema, type AuthDisableApiKeyRequest, AuthDisableApiKeyRequestSchema, type AuthGetCreditsResponse, AuthGetCreditsResponseSchema, type AuthGetOpenRouterByokApiKeyResponse, AuthGetOpenRouterByokApiKeyResponseSchema, type AuthListApiKeyItem, AuthListApiKeyItemSchema, type AuthListApiKeyResponse, AuthListApiKeyResponseSchema, type EnsembleEnsemble, type EnsembleEnsembleBase, EnsembleEnsembleBaseSchema, EnsembleEnsembleSchema, type EnsembleGetEnsemble, EnsembleGetEnsembleSchema, type EnsembleListEnsemble, type EnsembleListEnsembleItem, EnsembleListEnsembleItemSchema, EnsembleListEnsembleSchema, type EnsembleUsageEnsemble, EnsembleUsageEnsembleSchema, type FunctionsAlphaInlineFunction, FunctionsAlphaInlineFunctionSchema, type FunctionsAlphaRemoteFunction, FunctionsAlphaRemoteFunctionSchema, type FunctionsAlphaScalarBranchTaskExpression, FunctionsAlphaScalarBranchTaskExpressionSchema, type FunctionsAlphaScalarInlineFunction, FunctionsAlphaScalarInlineFunctionSchema, type FunctionsAlphaScalarLeafTaskExpression, FunctionsAlphaScalarLeafTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression, FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression, FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarRemoteFunction, FunctionsAlphaScalarRemoteFunctionSchema, type FunctionsAlphaScalarScalarFunctionTaskExpression, FunctionsAlphaScalarScalarFunctionTaskExpressionSchema, type FunctionsAlphaScalarVectorCompletionTaskExpression, FunctionsAlphaScalarVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorBranchTaskExpression, FunctionsAlphaVectorBranchTaskExpressionSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputSchema, FunctionsAlphaVectorExpressionVectorFunctionInputSchemaSchema, type FunctionsAlphaVectorExpressionVectorFunctionInputValue, type FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression, FunctionsAlphaVectorExpressionVectorFunctionInputValueExpressionSchema, FunctionsAlphaVectorExpressionVectorFunctionInputValueSchema, type FunctionsAlphaVectorInlineFunction, FunctionsAlphaVectorInlineFunctionSchema, type FunctionsAlphaVectorLeafTaskExpression, FunctionsAlphaVectorLeafTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression, FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression, FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpressionSchema, type FunctionsAlphaVectorRemoteFunction, FunctionsAlphaVectorRemoteFunctionSchema, type FunctionsAlphaVectorScalarFunctionTaskExpression, FunctionsAlphaVectorScalarFunctionTaskExpressionSchema, type FunctionsAlphaVectorVectorCompletionTaskExpression, FunctionsAlphaVectorVectorCompletionTaskExpressionSchema, type FunctionsAlphaVectorVectorFunctionTaskExpression, FunctionsAlphaVectorVectorFunctionTaskExpressionSchema, type FunctionsCheckScalarFieldsValidation, FunctionsCheckScalarFieldsValidationSchema, type FunctionsCheckVectorFieldsValidation, FunctionsCheckVectorFieldsValidationSchema, type FunctionsCompiledTask, FunctionsCompiledTaskSchema, type FunctionsExecutionsRequestFunctionExecutionCreateParams, FunctionsExecutionsRequestFunctionExecutionCreateParamsSchema, type FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody, FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBodySchema, type FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody, FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBodySchema, type FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPath, FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPathSchema, type FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody, FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBodySchema, type FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPath, FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPathSchema, type FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody, FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBodySchema, type FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPath, FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPathSchema, type FunctionsExecutionsRequestReasoning, FunctionsExecutionsRequestReasoningSchema, type FunctionsExecutionsRequestRequest, FunctionsExecutionsRequestRequestSchema, type FunctionsExecutionsRequestStrategy, FunctionsExecutionsRequestStrategySchema, type FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunkSchema, type FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk, FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunkSchema, type FunctionsExecutionsResponseStreamingObject, FunctionsExecutionsResponseStreamingObjectSchema, type FunctionsExecutionsResponseStreamingReasoningSummaryChunk, FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema, type FunctionsExecutionsResponseStreamingTaskChunk, FunctionsExecutionsResponseStreamingTaskChunkSchema, type FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk, FunctionsExecutionsResponseStreamingVectorCompletionTaskChunkSchema, type FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecutionSchema, type FunctionsExecutionsResponseUnaryFunctionExecutionTask, FunctionsExecutionsResponseUnaryFunctionExecutionTaskSchema, type FunctionsExecutionsResponseUnaryObject, FunctionsExecutionsResponseUnaryObjectSchema, type FunctionsExecutionsResponseUnaryReasoningSummary, FunctionsExecutionsResponseUnaryReasoningSummarySchema, type FunctionsExecutionsResponseUnaryTask, FunctionsExecutionsResponseUnaryTaskSchema, type FunctionsExecutionsResponseUnaryVectorCompletionTask, FunctionsExecutionsResponseUnaryVectorCompletionTaskSchema, type FunctionsExecutionsRetryToken, FunctionsExecutionsRetryTokenSchema, type FunctionsExpressionAnyOfInputSchema, FunctionsExpressionAnyOfInputSchemaSchema, type FunctionsExpressionArrayInputSchema, FunctionsExpressionArrayInputSchemaSchema, type FunctionsExpressionArrayInputSchemaType, FunctionsExpressionArrayInputSchemaTypeSchema, type FunctionsExpressionAudioInputSchema, FunctionsExpressionAudioInputSchemaSchema, type FunctionsExpressionAudioInputSchemaType, FunctionsExpressionAudioInputSchemaTypeSchema, type FunctionsExpressionBooleanInputSchema, FunctionsExpressionBooleanInputSchemaSchema, type FunctionsExpressionBooleanInputSchemaType, FunctionsExpressionBooleanInputSchemaTypeSchema, type FunctionsExpressionExpression, FunctionsExpressionExpressionSchema, type FunctionsExpressionFileInputSchema, FunctionsExpressionFileInputSchemaSchema, type FunctionsExpressionFileInputSchemaType, FunctionsExpressionFileInputSchemaTypeSchema, type FunctionsExpressionImageInputSchema, FunctionsExpressionImageInputSchemaSchema, type FunctionsExpressionImageInputSchemaType, FunctionsExpressionImageInputSchemaTypeSchema, type FunctionsExpressionInputSchema, FunctionsExpressionInputSchemaSchema, type FunctionsExpressionInputValue, type FunctionsExpressionInputValueExpression, type FunctionsExpressionInputValueExpressionObject, FunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionInputValueObject, FunctionsExpressionInputValueSchema, type FunctionsExpressionIntegerInputSchema, FunctionsExpressionIntegerInputSchemaSchema, type FunctionsExpressionIntegerInputSchemaType, FunctionsExpressionIntegerInputSchemaTypeSchema, type FunctionsExpressionNumberInputSchema, FunctionsExpressionNumberInputSchemaSchema, type FunctionsExpressionNumberInputSchemaType, FunctionsExpressionNumberInputSchemaTypeSchema, type FunctionsExpressionObjectInputSchema, FunctionsExpressionObjectInputSchemaSchema, type FunctionsExpressionObjectInputSchemaType, FunctionsExpressionObjectInputSchemaTypeSchema, type FunctionsExpressionOneOrManyString, FunctionsExpressionOneOrManyStringSchema, type FunctionsExpressionParams, type FunctionsExpressionParamsOwned, FunctionsExpressionParamsOwnedSchema, type FunctionsExpressionParamsRef, FunctionsExpressionParamsRefSchema, FunctionsExpressionParamsSchema, type FunctionsExpressionSpecial, FunctionsExpressionSpecialSchema, type FunctionsExpressionStringInputSchema, FunctionsExpressionStringInputSchemaSchema, type FunctionsExpressionStringInputSchemaType, FunctionsExpressionStringInputSchemaTypeSchema, type FunctionsExpressionTaskOutput, type FunctionsExpressionTaskOutputOwned, FunctionsExpressionTaskOutputOwnedSchema, type FunctionsExpressionTaskOutputRef, FunctionsExpressionTaskOutputRefSchema, FunctionsExpressionTaskOutputSchema, type FunctionsExpressionVideoInputSchema, FunctionsExpressionVideoInputSchemaSchema, type FunctionsExpressionVideoInputSchemaType, FunctionsExpressionVideoInputSchemaTypeSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageFile, FunctionsExpressionWithExpressionAgentCompletionsMessageFileSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrl, FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudio, FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpression, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionSchema, type FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl, FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlSchema, type FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema, type FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema, type FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression, FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema, type FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema, type FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression, FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema, type FunctionsExpressionWithExpressionNullableString, FunctionsExpressionWithExpressionNullableStringSchema, type FunctionsExpressionWithExpressionString, FunctionsExpressionWithExpressionStringSchema, type FunctionsFullInlineFunction, FunctionsFullInlineFunctionSchema, type FunctionsFullRemoteFunction, FunctionsFullRemoteFunctionSchema, type FunctionsFunction, FunctionsFunctionSchema, type FunctionsFunctionType, FunctionsFunctionTypeSchema, type FunctionsGetFunction, type FunctionsGetFunctionProfilePair, FunctionsGetFunctionProfilePairSchema, FunctionsGetFunctionSchema, type FunctionsInlineAutoProfile, FunctionsInlineAutoProfileSchema, type FunctionsInlineFunction, FunctionsInlineFunctionSchema, type FunctionsInlineProfile, FunctionsInlineProfileSchema, type FunctionsInlineTasksProfile, FunctionsInlineTasksProfileSchema, type FunctionsInventionsDescriptionObject, FunctionsInventionsDescriptionObjectSchema, type FunctionsInventionsEssayObject, FunctionsInventionsEssayObjectSchema, type FunctionsInventionsEssayTasksObject, FunctionsInventionsEssayTasksObjectSchema, type FunctionsInventionsIndexObject, FunctionsInventionsIndexObjectSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreaming, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsStreamingSchema, type FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnary, FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParamsUnarySchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema, type FunctionsInventionsRecursiveResponseStreamingObject, FunctionsInventionsRecursiveResponseStreamingObjectSchema, type FunctionsInventionsRecursiveResponseUnaryFunctionInvention, type FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursiveSchema, FunctionsInventionsRecursiveResponseUnaryFunctionInventionSchema, type FunctionsInventionsRecursiveResponseUnaryObject, FunctionsInventionsRecursiveResponseUnaryObjectSchema, type FunctionsInventionsRequestFunctionInventionCreateParams, FunctionsInventionsRequestFunctionInventionCreateParamsSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsStreaming, FunctionsInventionsRequestFunctionInventionCreateParamsStreamingSchema, type FunctionsInventionsRequestFunctionInventionCreateParamsUnary, FunctionsInventionsRequestFunctionInventionCreateParamsUnarySchema, type FunctionsInventionsResponseStreamingAgentCompletionChunk, FunctionsInventionsResponseStreamingAgentCompletionChunkSchema, type FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunkSchema, type FunctionsInventionsResponseStreamingObject, FunctionsInventionsResponseStreamingObjectSchema, type FunctionsInventionsResponseUnaryAgentCompletion, FunctionsInventionsResponseUnaryAgentCompletionSchema, type FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInventionSchema, type FunctionsInventionsResponseUnaryObject, FunctionsInventionsResponseUnaryObjectSchema, type FunctionsInventionsStateAlphaScalarBranchState, FunctionsInventionsStateAlphaScalarBranchStateSchema, type FunctionsInventionsStateAlphaScalarLeafState, FunctionsInventionsStateAlphaScalarLeafStateSchema, type FunctionsInventionsStateAlphaScalarState, FunctionsInventionsStateAlphaScalarStateSchema, type FunctionsInventionsStateAlphaVectorBranchState, FunctionsInventionsStateAlphaVectorBranchStateSchema, type FunctionsInventionsStateAlphaVectorLeafState, FunctionsInventionsStateAlphaVectorLeafStateSchema, type FunctionsInventionsStateAlphaVectorState, FunctionsInventionsStateAlphaVectorStateSchema, type FunctionsInventionsStateParams, FunctionsInventionsStateParamsSchema, type FunctionsInventionsStateParamsState, FunctionsInventionsStateParamsStateSchema, type FunctionsInventionsStateState, FunctionsInventionsStateStateSchema, type FunctionsInventionsTasksLengthObject, FunctionsInventionsTasksLengthObjectSchema, type FunctionsListFunction, type FunctionsListFunctionItem, FunctionsListFunctionItemSchema, type FunctionsListFunctionProfilePair, type FunctionsListFunctionProfilePairItem, FunctionsListFunctionProfilePairItemSchema, FunctionsListFunctionProfilePairSchema, type FunctionsListFunctionProfilePairsQueryParameters, FunctionsListFunctionProfilePairsQueryParametersSchema, type FunctionsListFunctionProfilePairsSource, FunctionsListFunctionProfilePairsSourceSchema, FunctionsListFunctionSchema, type FunctionsListFunctionsQueryParameters, FunctionsListFunctionsQueryParametersSchema, type FunctionsListFunctionsSource, FunctionsListFunctionsSourceSchema, type FunctionsPlaceholderScalarFunctionTask, type FunctionsPlaceholderScalarFunctionTaskExpression, FunctionsPlaceholderScalarFunctionTaskExpressionSchema, FunctionsPlaceholderScalarFunctionTaskSchema, type FunctionsPlaceholderVectorFunctionTask, type FunctionsPlaceholderVectorFunctionTaskExpression, FunctionsPlaceholderVectorFunctionTaskExpressionSchema, FunctionsPlaceholderVectorFunctionTaskSchema, type FunctionsProfile, FunctionsProfileSchema, type FunctionsProfilesComputationsRequestDatasetItem, FunctionsProfilesComputationsRequestDatasetItemSchema, type FunctionsProfilesComputationsRequestFunctionInlineRequestBody, FunctionsProfilesComputationsRequestFunctionInlineRequestBodySchema, type FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsSchema, type FunctionsProfilesComputationsRequestFunctionRemoteRequestBody, FunctionsProfilesComputationsRequestFunctionRemoteRequestBodySchema, type FunctionsProfilesComputationsRequestFunctionRemoteRequestPath, FunctionsProfilesComputationsRequestFunctionRemoteRequestPathSchema, type FunctionsProfilesComputationsRequestRequest, FunctionsProfilesComputationsRequestRequestSchema, type FunctionsProfilesComputationsRequestTarget, FunctionsProfilesComputationsRequestTargetSchema, type FunctionsProfilesComputationsResponseFittingStats, FunctionsProfilesComputationsResponseFittingStatsSchema, type FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk, FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunkSchema, type FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkSchema, type FunctionsProfilesComputationsResponseStreamingObject, FunctionsProfilesComputationsResponseStreamingObjectSchema, type FunctionsProfilesComputationsResponseUnaryFunctionExecution, FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema, type FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputationSchema, type FunctionsProfilesComputationsResponseUnaryObject, FunctionsProfilesComputationsResponseUnaryObjectSchema, type FunctionsProfilesComputationsRetryToken, FunctionsProfilesComputationsRetryTokenSchema, type FunctionsProfilesGetProfile, FunctionsProfilesGetProfileSchema, type FunctionsProfilesListProfile, type FunctionsProfilesListProfileItem, FunctionsProfilesListProfileItemSchema, FunctionsProfilesListProfileSchema, type FunctionsProfilesListProfilesQueryParameters, FunctionsProfilesListProfilesQueryParametersSchema, type FunctionsProfilesListProfilesSource, FunctionsProfilesListProfilesSourceSchema, type FunctionsProfilesUsageProfile, FunctionsProfilesUsageProfileSchema, type FunctionsRemote, type FunctionsRemoteAutoProfile, FunctionsRemoteAutoProfileSchema, type FunctionsRemoteFunction, type FunctionsRemoteFunctionPath, FunctionsRemoteFunctionPathSchema, FunctionsRemoteFunctionSchema, type FunctionsRemoteProfile, FunctionsRemoteProfileSchema, FunctionsRemoteSchema, type FunctionsRemoteTasksProfile, FunctionsRemoteTasksProfileSchema, type FunctionsScalarFunctionTask, type FunctionsScalarFunctionTaskExpression, FunctionsScalarFunctionTaskExpressionSchema, FunctionsScalarFunctionTaskSchema, type FunctionsTask, type FunctionsTaskExpression, FunctionsTaskExpressionSchema, type FunctionsTaskProfile, FunctionsTaskProfileSchema, FunctionsTaskSchema, type FunctionsUsageFunction, type FunctionsUsageFunctionProfilePair, FunctionsUsageFunctionProfilePairSchema, FunctionsUsageFunctionSchema, type FunctionsVectorCompletionTask, type FunctionsVectorCompletionTaskExpression, FunctionsVectorCompletionTaskExpressionSchema, FunctionsVectorCompletionTaskSchema, type FunctionsVectorFunctionTask, type FunctionsVectorFunctionTaskExpression, FunctionsVectorFunctionTaskExpressionSchema, FunctionsVectorFunctionTaskSchema, ObjectiveAI, ObjectiveAIFetchError, type ObjectiveAIOptions, ObjectiveAIOptionsSchema, type PrefixedUuid, PrefixedUuidSchema, type RequestOptions, RequestOptionsSchema, type ResponseError, ResponseErrorSchema, Stream, type VectorCompletionsCacheCacheVote, type VectorCompletionsCacheCacheVoteRequest, type VectorCompletionsCacheCacheVoteRequestOwned, VectorCompletionsCacheCacheVoteRequestOwnedSchema, type VectorCompletionsCacheCacheVoteRequestRef, VectorCompletionsCacheCacheVoteRequestRefSchema, VectorCompletionsCacheCacheVoteRequestSchema, VectorCompletionsCacheCacheVoteSchema, type VectorCompletionsCacheCompletionVotes, VectorCompletionsCacheCompletionVotesSchema, type VectorCompletionsRequestEnsemble, VectorCompletionsRequestEnsembleSchema, type VectorCompletionsRequestProfile, type VectorCompletionsRequestProfileEntry, VectorCompletionsRequestProfileEntrySchema, VectorCompletionsRequestProfileSchema, type VectorCompletionsRequestVectorCompletionCreateParams, VectorCompletionsRequestVectorCompletionCreateParamsSchema, type VectorCompletionsRequestVectorCompletionCreateParamsStreaming, VectorCompletionsRequestVectorCompletionCreateParamsStreamingSchema, type VectorCompletionsRequestVectorCompletionCreateParamsUnary, VectorCompletionsRequestVectorCompletionCreateParamsUnarySchema, type VectorCompletionsResponseStreamingAgentCompletionChunk, VectorCompletionsResponseStreamingAgentCompletionChunkSchema, type VectorCompletionsResponseStreamingObject, VectorCompletionsResponseStreamingObjectSchema, type VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunkSchema, type VectorCompletionsResponseUnaryAgentCompletion, VectorCompletionsResponseUnaryAgentCompletionSchema, type VectorCompletionsResponseUnaryObject, VectorCompletionsResponseUnaryObjectSchema, type VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletionSchema, type VectorCompletionsResponseVote, VectorCompletionsResponseVoteSchema, type VectorCompletionsVectorResponses, VectorCompletionsVectorResponsesSchema, agentCompletionsCreateAgentCompletion, agentCompletionsMessageAssistantToolCallDeltaMerged, agentCompletionsMessageAssistantToolCallDeltaMergedList, agentCompletionsMessageAssistantToolCallFunctionDeltaMerged, agentCompletionsMessageRichContentMerged, agentCompletionsResponseCompletionTokensDetailsMerged, agentCompletionsResponseCostDetailsMerged, agentCompletionsResponseLogprobsMerged, agentCompletionsResponsePromptTokensDetailsMerged, agentCompletionsResponseStreamingAgentCompletionChunkMerged, agentCompletionsResponseStreamingAssistantResponseChunkMerged, agentCompletionsResponseStreamingMessageChunkMerged, agentCompletionsResponseStreamingMessageChunkMergedList, agentCompletionsResponseUpstreamUsageMerged, agentCompletionsResponseUsageMerged, agentGetAgent, agentGetAgentUsage, agentListAgents, authCreateApiKey, authCreateOpenrouterByokApiKey, authDeleteOpenrouterByokApiKey, authDisableApiKey, authGetCredits, authGetOpenrouterByokApiKey, authListApiKeys, ensembleGetEnsemble, ensembleGetEnsembleUsage, ensembleListEnsembles, functionsExecutionsCreateFunctionExecution, functionsExecutionsResponseStreamingFunctionExecutionChunkMerged, functionsExecutionsResponseStreamingReasoningSummaryChunkMerged, functionsExecutionsResponseStreamingTaskChunkMerged, functionsExecutionsResponseStreamingTaskChunkMergedList, functionsExecutionsResponseStreamingVectorCompletionTaskChunkMerged, functionsGetFunction, functionsGetFunctionProfilePairUsage, functionsGetFunctionUsage, functionsInventionsCreateFunctionInvention, functionsInventionsRecursiveCreateFunctionInventionRecursive, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMerged, functionsInventionsRecursiveResponseStreamingFunctionInventionChunkMergedList, functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMerged, functionsInventionsResponseStreamingAgentCompletionChunkMergedList, functionsInventionsResponseStreamingFunctionInventionChunkMerged, functionsListFunctionProfilePairs, functionsListFunctions, functionsProfilesComputationsComputeProfile, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMerged, functionsProfilesComputationsResponseStreamingFunctionExecutionChunkMergedList, functionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, functionsProfilesGetProfile, functionsProfilesGetProfileUsage, functionsProfilesListProfiles, isResponseError, merge, mergedNumberArray, mergedString, numberIsEmpty, vectorCompletionsCacheGetCacheVote, vectorCompletionsCacheGetCompletionVotes, vectorCompletionsCreateVectorCompletion, vectorCompletionsResponseStreamingAgentCompletionChunkMerged, vectorCompletionsResponseStreamingAgentCompletionChunkMergedList, vectorCompletionsResponseStreamingVectorCompletionChunkMerged, vectorCompletionsResponseVoteMergedList, wasmAgentCompletionsMessagePromptId, wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged, wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized, wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary, wasmAgentValidateAgent, wasmEnsembleValidateEnsemble, wasmFunctionsAlphaCheckBranchScalarFunction, wasmFunctionsAlphaCheckBranchVectorFunction, wasmFunctionsAlphaCheckLeafScalarFunction, wasmFunctionsAlphaCheckLeafVectorFunction, wasmFunctionsCheckCheckScalarFields, wasmFunctionsCheckCheckVectorFields, wasmFunctionsCompileFunctionInputMerge, wasmFunctionsCompileFunctionInputSplit, wasmFunctionsCompileFunctionOutputLength, wasmFunctionsCompileFunctionTasks, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized, wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized, wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized, wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized, wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary, wasmFunctionsValidateFunctionInput, wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged, wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized, wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary, wasmVectorCompletionsVectorResponseId, zockerParse };

@@ -1320,6 +1320,7 @@ ${val.stack}`;
 })();
 var agentCompletionChunkMerged = _wasm.agentCompletionChunkMerged;
 var agentCompletionChunkNormalized = _wasm.agentCompletionChunkNormalized;
+var agentCompletionChunkToUnary = _wasm.agentCompletionChunkToUnary;
 var alphaCheckBranchScalarFunction = _wasm.alphaCheckBranchScalarFunction;
 var alphaCheckBranchVectorFunction = _wasm.alphaCheckBranchVectorFunction;
 var alphaCheckLeafScalarFunction = _wasm.alphaCheckLeafScalarFunction;
@@ -1332,18 +1333,23 @@ var compileFunctionOutputLength = _wasm.compileFunctionOutputLength;
 var compileFunctionTasks = _wasm.compileFunctionTasks;
 var functionExecutionChunkMerged = _wasm.functionExecutionChunkMerged;
 var functionExecutionChunkNormalized = _wasm.functionExecutionChunkNormalized;
+var functionExecutionChunkToUnary = _wasm.functionExecutionChunkToUnary;
 var functionInventionChunkMerged = _wasm.functionInventionChunkMerged;
 var functionInventionChunkNormalized = _wasm.functionInventionChunkNormalized;
+var functionInventionChunkToUnary = _wasm.functionInventionChunkToUnary;
 var functionInventionRecursiveChunkMerged = _wasm.functionInventionRecursiveChunkMerged;
 var functionInventionRecursiveChunkNormalized = _wasm.functionInventionRecursiveChunkNormalized;
+var functionInventionRecursiveChunkToUnary = _wasm.functionInventionRecursiveChunkToUnary;
 var functionProfileComputationChunkMerged = _wasm.functionProfileComputationChunkMerged;
 var functionProfileComputationChunkNormalized = _wasm.functionProfileComputationChunkNormalized;
+var functionProfileComputationChunkToUnary = _wasm.functionProfileComputationChunkToUnary;
 var promptId = _wasm.promptId;
 var validateAgent = _wasm.validateAgent;
 var validateEnsemble = _wasm.validateEnsemble;
 var validateFunctionInput = _wasm.validateFunctionInput;
 var vectorCompletionChunkMerged = _wasm.vectorCompletionChunkMerged;
 var vectorCompletionChunkNormalized = _wasm.vectorCompletionChunkNormalized;
+var vectorCompletionChunkToUnary = _wasm.vectorCompletionChunkToUnary;
 var vectorResponseId = _wasm.vectorResponseId;
 
 // src/agent/completions/message/wasm.ts
@@ -1916,6 +1922,9 @@ function wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged(a, b) {
 }
 function wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized(a) {
   return JSON.parse(agentCompletionChunkNormalized(a));
+}
+function wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary(a) {
+  return JSON.parse(agentCompletionChunkToUnary(a));
 }
 var AgentCompletionsResponseUnaryAssistantResponseSchema = z305.z.object({
   agent: z305.z.string(),
@@ -3052,6 +3061,9 @@ function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged(a,
 function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized(a) {
   return JSON.parse(functionExecutionChunkNormalized(a));
 }
+function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary(a) {
+  return JSON.parse(functionExecutionChunkToUnary(a));
+}
 var FunctionsExecutionsResponseUnaryObjectSchema = z305.z.enum(["scalar.function.execution", "vector.function.execution"]).meta({ title: "functions.executions.response.unary.Object" });
 var FunctionsExecutionsResponseUnaryReasoningSummarySchema = z305.z.object({
   created: z305.z.number().int().min(0).max(18446744073709552e3),
@@ -3526,6 +3538,9 @@ function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecur
 function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized(a) {
   return JSON.parse(functionInventionRecursiveChunkNormalized(a));
 }
+function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary(a) {
+  return JSON.parse(functionInventionRecursiveChunkToUnary(a));
+}
 var FunctionsInventionsResponseUnaryAgentCompletionSchema = z305.z.object({
   created: z305.z.number().int().min(0).max(18446744073709552e3),
   error: ResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
@@ -3660,6 +3675,9 @@ function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged(a,
 }
 function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized(a) {
   return JSON.parse(functionInventionChunkNormalized(a));
+}
+function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary(a) {
+  return JSON.parse(functionInventionChunkToUnary(a));
 }
 var FunctionsInventionsResponseUnaryFunctionInventionSchema = z305.z.object({
   completions: z305.z.array(FunctionsInventionsResponseUnaryAgentCompletionSchema),
@@ -3948,6 +3966,9 @@ function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComput
 }
 function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized(a) {
   return JSON.parse(functionProfileComputationChunkNormalized(a));
+}
+function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary(a) {
+  return JSON.parse(functionProfileComputationChunkToUnary(a));
 }
 var FunctionsProfilesComputationsResponseUnaryFunctionExecutionSchema = z305.z.object({
   created: z305.z.number().int().min(0).max(18446744073709552e3).describe("Unix timestamp when the execution was created."),
@@ -4354,6 +4375,9 @@ function wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged(a, b)
 }
 function wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized(a) {
   return JSON.parse(vectorCompletionChunkNormalized(a));
+}
+function wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary(a) {
+  return JSON.parse(vectorCompletionChunkToUnary(a));
 }
 var VectorCompletionsResponseUnaryVectorCompletionSchema = z305.z.object({
   completions: z305.z.array(VectorCompletionsResponseUnaryAgentCompletionSchema).describe("The underlying agent completions from each agent in the ensemble."),
@@ -4767,12 +4791,18 @@ function numberIsEmpty(value) {
 }
 
 // src/zockerParse.ts
-var NUMBER_MIN = 0;
-var NUMBER_MAX = 999;
+var NEGATIVE_NUMBER_MIN = -1e3;
+var POSITIVE_NUMBER_MAX = 1e3;
 function fixForSerde(value) {
   if (typeof value === "number") {
-    if (!Number.isFinite(value) || value < NUMBER_MIN || value > NUMBER_MAX) {
-      return Math.floor(Math.random() * (NUMBER_MAX - NUMBER_MIN + 1)) + NUMBER_MIN;
+    if (!Number.isFinite(value)) {
+      return 0;
+    }
+    if (value < NEGATIVE_NUMBER_MIN) {
+      return Math.floor(Math.random() * Math.abs(NEGATIVE_NUMBER_MIN)) * -1;
+    }
+    if (value > POSITIVE_NUMBER_MAX) {
+      return Math.floor(Math.random() * POSITIVE_NUMBER_MAX);
     }
     return value;
   } else if (value !== null && typeof value === "object") {
@@ -5198,6 +5228,7 @@ exports.vectorCompletionsResponseVoteMergedList = vectorCompletionsResponseVoteM
 exports.wasmAgentCompletionsMessagePromptId = wasmAgentCompletionsMessagePromptId;
 exports.wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged = wasmAgentCompletionsResponseStreamingAgentCompletionChunkMerged;
 exports.wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized = wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormalized;
+exports.wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary = wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary;
 exports.wasmAgentValidateAgent = wasmAgentValidateAgent;
 exports.wasmEnsembleValidateEnsemble = wasmEnsembleValidateEnsemble;
 exports.wasmFunctionsAlphaCheckBranchScalarFunction = wasmFunctionsAlphaCheckBranchScalarFunction;
@@ -5212,14 +5243,19 @@ exports.wasmFunctionsCompileFunctionOutputLength = wasmFunctionsCompileFunctionO
 exports.wasmFunctionsCompileFunctionTasks = wasmFunctionsCompileFunctionTasks;
 exports.wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged = wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkMerged;
 exports.wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized = wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkNormalized;
+exports.wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary = wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkToUnary;
 exports.wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged = wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged;
 exports.wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized = wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized;
+exports.wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary = wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary;
 exports.wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged = wasmFunctionsInventionsResponseStreamingFunctionInventionChunkMerged;
 exports.wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized = wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNormalized;
+exports.wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary = wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary;
 exports.wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged = wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged;
 exports.wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized = wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized;
+exports.wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary = wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary;
 exports.wasmFunctionsValidateFunctionInput = wasmFunctionsValidateFunctionInput;
 exports.wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged = wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged;
 exports.wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized = wasmVectorCompletionsResponseStreamingVectorCompletionChunkNormalized;
+exports.wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary = wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary;
 exports.wasmVectorCompletionsVectorResponseId = wasmVectorCompletionsVectorResponseId;
 exports.zockerParse = zockerParse;

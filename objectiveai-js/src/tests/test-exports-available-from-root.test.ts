@@ -24,7 +24,7 @@ const WHITELIST: RegExp[] = [
   /\/generatedIndex\.ts$/,
   /\/tests\//,
   /\/wasm\//,
-  /\/json\.ts$/,
+  /\/jsonValue\.ts$/,
   /\/httpTestUtil\.ts$/,
 ];
 

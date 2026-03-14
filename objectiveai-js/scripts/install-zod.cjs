@@ -758,7 +758,7 @@ function main() {
     const needsJsonValue = refs.has(JSON_VALUE_REF);
     refs.delete(JSON_VALUE_REF);
     if (needsJsonValue) {
-      const relPath = relativeImport(filePath, "json");
+      const relPath = relativeImport(filePath, "jsonValue");
       if (fileInCycle) {
         imports.push(`import { JsonValueSchema, type JsonValue } from "${relPath}";`);
       } else {
