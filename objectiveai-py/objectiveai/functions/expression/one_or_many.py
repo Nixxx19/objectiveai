@@ -5,19 +5,19 @@ from typing import Union
 from pydantic import ConfigDict, RootModel
 
 
-class stringVariant1(RootModel):
+class OneOrMany_stringVariant1(RootModel):
     """A single value."""
     root: str
 
 
-class stringVariant2(RootModel):
+class OneOrMany_stringVariant2(RootModel):
     """Multiple values (from array expressions)."""
     root: list[str]
 
 
-class string(RootModel):
+class OneOrMany_string(RootModel):
     """Result of an expression that may produce one or many values."""
     model_config = ConfigDict(title='functions.expression.OneOrMany.string')
 
-    root: Union[stringVariant1, stringVariant2]
+    root: Union[OneOrMany_stringVariant1, OneOrMany_stringVariant2]
 

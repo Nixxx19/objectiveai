@@ -7,25 +7,25 @@ from objectiveai.agent.agent import Agent as AgentAgent
 from objectiveai.agent.agent_base import AgentBase as AgentAgentBase
 from objectiveai.agent.claude_agent_sdk.agent import Agent as AgentClaudeAgentSdkAgent
 from objectiveai.agent.claude_agent_sdk.agent_base import AgentBase as AgentClaudeAgentSdkAgentBase
-from objectiveai.agent.mock.agent import Agent as AgentMockAgent
+from objectiveai.agent.mock.agent import Agent
 from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
 from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
-from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouterAgentBase
+from objectiveai.agent.openrouter.agent_base import AgentBase
 
 
-class AgentVariant1(RootModel):
+class WithFallbacksAndCount_AgentAgentVariant1(RootModel):
     root: AgentOpenrouterAgent
 
 
-class AgentVariant2(RootModel):
+class WithFallbacksAndCount_AgentAgentVariant2(RootModel):
     root: AgentClaudeAgentSdkAgent
 
 
-class AgentVariant3(RootModel):
-    root: AgentMockAgent
+class WithFallbacksAndCount_AgentAgentVariant3(RootModel):
+    root: Agent
 
 
-class Agent(BaseModel):
+class WithFallbacksAndCount_AgentAgent(BaseModel):
     """Wrapper that adds fallback agents and a count to any agent type.
 
 Used to specify how many instances of an agent to include in an ensemble,
@@ -36,19 +36,19 @@ along with fallback agents to try if the primary fails."""
     fallbacks: Optional[list[AgentAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
 
 
-class AgentBaseVariant1(RootModel):
-    root: AgentOpenrouterAgentBase
+class WithFallbacksAndCount_AgentAgentBaseVariant1(RootModel):
+    root: AgentBase
 
 
-class AgentBaseVariant2(RootModel):
+class WithFallbacksAndCount_AgentAgentBaseVariant2(RootModel):
     root: AgentClaudeAgentSdkAgentBase
 
 
-class AgentBaseVariant3(RootModel):
+class WithFallbacksAndCount_AgentAgentBaseVariant3(RootModel):
     root: AgentMockAgentBase
 
 
-class AgentBase(BaseModel):
+class WithFallbacksAndCount_AgentAgentBase(BaseModel):
     """Wrapper that adds fallback agents and a count to any agent type.
 
 Used to specify how many instances of an agent to include in an ensemble,

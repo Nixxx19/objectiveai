@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.functions.expression.expression import Expression
-from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression
+from objectiveai.functions.expression.with_expression import WithExpression_ArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression, WithExpression_ArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression
 
 
 class VectorCompletionTaskExpression(BaseModel):
@@ -12,8 +12,8 @@ class VectorCompletionTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.VectorCompletionTaskExpression')
 
     map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
-    messages: FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression = Field(..., description='Expression for the conversation messages (the prompt).\nReceives: `input`, `map` (if mapped).')
+    messages: WithExpression_ArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression = Field(..., description='Expression for the conversation messages (the prompt).\nReceives: `input`, `map` (if mapped).')
     output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` as the task's raw result (typically `Vector(scores)`).\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.")
-    responses: FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression = Field(..., description='Expression for the possible responses the LLMs can vote for.\nReceives: `input`, `map` (if mapped).')
+    responses: WithExpression_ArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression = Field(..., description='Expression for the possible responses the LLMs can vote for.\nReceives: `input`, `map` (if mapped).')
     skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
 

@@ -4,5 +4,5 @@ from .function_execution_chunk import FunctionExecutionChunk  # noqa: F401
 from .function_execution_task_chunk import FunctionExecutionTaskChunk  # noqa: F401
 from .object import Object  # noqa: F401
 from .reasoning_summary_chunk import ReasoningSummaryChunk  # noqa: F401
-from .task_chunk import TaskChunk  # noqa: F401
+from .task_chunk import TaskChunk, TaskChunkVariant1, TaskChunkVariant2  # noqa: F401
 from .vector_completion_task_chunk import VectorCompletionTaskChunk  # noqa: F401

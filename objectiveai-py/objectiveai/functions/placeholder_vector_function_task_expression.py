@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.functions.expression.expression import Expression
 from objectiveai.functions.expression.input_schema import InputSchema
-from objectiveai.functions.expression.with_expression import InputValueExpression
+from objectiveai.functions.expression.with_expression import WithExpression_FunctionsExpressionInputValueExpression
 
 
 class PlaceholderVectorFunctionTaskExpression(BaseModel):
@@ -15,7 +15,7 @@ Like [`VectorFunctionTaskExpression`] but without owner/repository/commit.
 Always produces an equalized vector of length `output_length`."""
     model_config = ConfigDict(title='functions.PlaceholderVectorFunctionTaskExpression')
 
-    input: InputValueExpression = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).')
+    input: WithExpression_FunctionsExpressionInputValueExpression = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).')
     input_merge: Expression = Field(..., description='Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).')
     input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
     input_split: Expression = Field(..., description='Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.')

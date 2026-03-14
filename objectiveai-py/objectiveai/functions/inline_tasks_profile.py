@@ -3,10 +3,6 @@
 from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.vector.completions.request.profile import Profile
-from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from objectiveai.functions.task_profile import TaskProfile
 
 
 class InlineTasksProfile(BaseModel):
@@ -16,3 +12,6 @@ class InlineTasksProfile(BaseModel):
     profile: Profile = Field(..., description='Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.')
     tasks: list[TaskProfile] = Field(..., description='Configuration for each task in the corresponding Function.')
 
+
+# Deferred imports to break circular dependencies
+from objectiveai.functions.task_profile import TaskProfile  # noqa: E402

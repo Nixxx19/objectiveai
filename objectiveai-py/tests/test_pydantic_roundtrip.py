@@ -46,6 +46,7 @@ from pydantic import BaseModel, RootModel
 from pydantic.fields import FieldInfo
 from pydantic_core import PydanticUndefined
 
+from objectiveai.json_value import JsonValue
 from test_pydantic_roundtrip_harness import ALL_TITLES, assert_schema_matches
 
 # Import helpers from the generator so the test stays in sync automatically.
@@ -321,8 +322,8 @@ def _convert_type_inner(tp: Any, root_title: str) -> dict:
     if tp is _UUID:
         return {"type": "string", "format": "uuid"}
 
-    # object (bare schema — any JSON value)
-    if tp is object:
+    # object / JsonValue (bare schema — any JSON value)
+    if tp is object or tp is JsonValue:
         return {}
 
     origin = get_origin(tp)
@@ -343,7 +344,7 @@ def _convert_type_inner(tp: Any, root_title: str) -> dict:
     if origin is dict:
         if args and len(args) == 2:
             val_type = args[1]
-            if val_type is object:
+            if val_type is object or val_type is JsonValue:
                 return {"type": "object"}
             val_schema = convert_type(val_type, root_title)
             return {"type": "object", "additionalProperties": val_schema}

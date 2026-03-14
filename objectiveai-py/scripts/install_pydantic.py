@@ -14,6 +14,7 @@ from pathlib import Path
 
 SCHEMA_DIR = Path(__file__).resolve().parent.parent.parent / "objectiveai-json-schema"
 SRC_DIR = Path(__file__).resolve().parent.parent / "objectiveai"
+TESTS_DIR = Path(__file__).resolve().parent.parent / "tests"
 
 GENERATED_HEADER = (
     "# THIS FILE IS AUTO-GENERATED. DO NOT EDIT.\n"
@@ -106,11 +107,28 @@ def _is_snake(name: str) -> bool:
 
 
 def title_to_class_name(title: str) -> str:
-    """Extract just the type name (last PascalCase segment) from a title.
+    """Extract the class name from a title.
 
-    "agent.completions.response.streaming.AgentCompletionChunk" → "AgentCompletionChunk"
-    "ResponseError" → "ResponseError"
+    Non-generic: last PascalCase segment.
+      "agent.completions.response.streaming.AgentCompletionChunk" → "AgentCompletionChunk"
+      "ResponseError" → "ResponseError"
+
+    Generic: GenericBase_PascalCasedTypeParam.
+      "functions.expression.WithExpression.string" → "WithExpression_string"
+      "functions.expression.WithExpression.agent.completions.message.File"
+        → "WithExpression_AgentCompletionsMessageFile"
     """
+    generic_base = get_generic_base(title)
+    if generic_base:
+        base_name = generic_base.split(".")[-1]
+        type_param = title[len(generic_base) + 1:]  # everything after "prefix."
+        # Single lowercase segment (e.g. "string") stays lowercase;
+        # multi-segment paths get PascalCased.
+        if "." not in type_param and type_param[0].islower():
+            param_name = type_param
+        else:
+            param_name = title_to_pascal(type_param)
+        return f"{base_name}_{param_name}"
     return title.split(".")[-1]
 
 
@@ -142,8 +160,16 @@ def compute_global_class_names(all_titles: set[str]) -> dict[str, str]:
             if len(group) == 1:
                 result[group[0]] = short
             else:
+                # Collision: multiple generics map to same short name.
+                # Use GenericBase_PascalTypeParam for disambiguation.
+                prefix = get_generic_base(group[0])
                 for t in group:
-                    result[t] = title_to_pascal(t)
+                    if prefix and t.startswith(prefix + "."):
+                        base_name = prefix.split(".")[-1]
+                        type_param = t[len(prefix) + 1:]
+                        result[t] = f"{base_name}_{title_to_pascal(type_param)}"
+                    else:
+                        result[t] = title_to_pascal(t)
 
     GENERIC_PREFIXES.clear()
     GENERIC_PREFIXES.extend(saved)
@@ -194,7 +220,7 @@ def _convert_type_impl(
     schema: dict, self_title: str, all_titles: set[str], *, annotate: bool
 ) -> str:
     if not schema or not isinstance(schema, dict):
-        return "object"
+        return "JsonValue"
 
     # $ref
     if "$ref" in schema:
@@ -217,7 +243,7 @@ def _convert_type_impl(
         return _convert_single_type(type_, schema, self_title, all_titles, annotate=annotate)
     if "properties" in schema:
         return _convert_single_type("object", schema, self_title, all_titles, annotate=annotate)
-    return "object"
+    return "JsonValue"
 
 
 def _convert_any_of_type(any_of: list[dict], self_title: str, all_titles: set[str]) -> str:
@@ -287,10 +313,10 @@ def _convert_single_type(
             # Items always use inner type (annotate=True) for constraint preservation
             inner = _convert_inner_type(schema["items"], self_title, all_titles)
             return f"list[{inner}]"
-        return "list[object]"
+        return "list[JsonValue]"
     if type_ == "object":
         return _convert_object_type(schema, self_title, all_titles)
-    return "object"
+    return "JsonValue"
 
 
 def _convert_object_type(schema: dict, self_title: str, all_titles: set[str]) -> str:
@@ -304,8 +330,8 @@ def _convert_object_type(schema: dict, self_title: str, all_titles: set[str]) ->
         val_type = _convert_inner_type(val_schema, self_title, all_titles)
         return f"dict[str, {val_type}]"
     if "properties" not in schema:
-        return "dict[str, object]"
-    return "dict[str, object]"
+        return "dict[str, JsonValue]"
+    return "dict[str, JsonValue]"
 
 
 def _union_type(variants: list[str]) -> str:
@@ -881,7 +907,7 @@ def find_files_in_cycles(
 
 
 def clean_generated(directory: Path) -> None:
-    """Recursively delete files containing the auto-generated marker,
+    """Recursively delete auto-generated files and empty __init__.py stubs,
     then prune empty directories bottom-up."""
     if not directory.exists():
         return
@@ -890,9 +916,18 @@ def clean_generated(directory: Path) -> None:
             clean_generated(entry)
         elif entry.is_file() and entry.suffix == ".py":
             try:
-                head = entry.read_text(encoding="utf-8")[:128]
-                if "THIS FILE IS AUTO-GENERATED" in head:
+                content = entry.read_text(encoding="utf-8")
+                # Delete auto-generated files (have the marker)
+                if "THIS FILE IS AUTO-GENERATED" in content[:128]:
                     entry.unlink()
+                elif entry.name == "__init__.py":
+                    # Delete empty __init__.py files
+                    if content.strip() == "":
+                        entry.unlink()
+                    # Migration: delete old-style __init__.py stubs that
+                    # are just "from ._generated import *" without the marker
+                    elif content.strip() == "from ._generated import *  # noqa: F401, F403":
+                        entry.unlink()
             except (OSError, UnicodeDecodeError):
                 pass
     try:
@@ -916,6 +951,7 @@ def _is_generated(path: Path) -> bool:
 
 def main() -> None:
     clean_generated(SRC_DIR)
+    clean_generated(TESTS_DIR)
 
     # Read all schema files
     schema_files = sorted(SCHEMA_DIR.glob("*.json"))
@@ -967,19 +1003,9 @@ def main() -> None:
 
     # --- Compute global title → class name mapping ---
     # This handles within-file collisions: when multiple types in the same
-    # file share the same short class name, they all get long pascal names.
-    global_class_names: dict[str, str] = {}
-    for file_path, entries in file_groups.items():
-        short_to_entries: dict[str, list[str]] = {}
-        for entry in entries:
-            short = title_to_class_name(entry["title"])
-            short_to_entries.setdefault(short, []).append(entry["title"])
-        for short, titles_with_short in short_to_entries.items():
-            if len(titles_with_short) == 1:
-                global_class_names[titles_with_short[0]] = short
-            else:
-                for t in titles_with_short:
-                    global_class_names[t] = title_to_pascal(t)
+    # file share the same short class name, they all get long pascal names
+    # (with the generic prefix stripped to avoid redundancy).
+    global_class_names = compute_global_class_names(all_titles)
 
     # Track all directories and their exports for __init__.py generation
     all_dirs: set[str] = set()
@@ -1066,6 +1092,10 @@ def main() -> None:
         if typing_imports:
             import_lines.append(f"from typing import {', '.join(sorted(typing_imports))}")
 
+        # JsonValue import (for bare {} schemas / serde_json::Value)
+        if "JsonValue" in full_code:
+            import_lines.append("from objectiveai.json_value import JsonValue")
+
         # Determine pydantic imports
         pydantic_imports: list[str] = []
         if "BaseModel" in full_code:
@@ -1091,9 +1121,14 @@ def main() -> None:
                 continue
             refs_by_file.setdefault(ref_path, []).append(ref)
 
-        # Split imports: regular vs TYPE_CHECKING-guarded
+        # Split imports: regular (top of file) vs deferred (bottom of file).
+        # Cyclic imports are placed AFTER class definitions. With
+        # `from __future__ import annotations`, annotations are strings and
+        # don't need the referenced types at class-definition time. By placing
+        # the cyclic imports at the bottom, we avoid circular import deadlocks
+        # while still making the names available for Pydantic model_rebuild.
         regular_imports: list[str] = []
-        type_checking_imports: list[str] = []
+        deferred_imports: list[str] = []
 
         for ref_path in sorted(refs_by_file.keys()):
             ref_titles = refs_by_file[ref_path]
@@ -1117,37 +1152,25 @@ def main() -> None:
 
             items_str = ", ".join(sorted(import_items))
             if is_cyclic:
-                type_checking_imports.append(
-                    f"    from {module_path} import {items_str}"
+                deferred_imports.append(
+                    f"from {module_path} import {items_str}  # noqa: E402"
                 )
             else:
                 regular_imports.append(f"from {module_path} import {items_str}")
 
         import_lines.extend(regular_imports)
 
-        # Add TYPE_CHECKING import if needed
-        if type_checking_imports:
-            typing_imports.append("TYPE_CHECKING")
-            # Rebuild the typing import line
-            found_typing = False
-            for i, line in enumerate(import_lines):
-                if line.startswith("from typing import"):
-                    import_lines[i] = f"from typing import {', '.join(sorted(typing_imports))}"
-                    found_typing = True
-                    break
-            if not found_typing:
-                import_lines.append(f"from typing import TYPE_CHECKING")
-
         # Assemble the file
         content = GENERATED_HEADER
         if import_lines:
             content += "\n".join(import_lines) + "\n"
 
-        if type_checking_imports:
-            content += "\nif TYPE_CHECKING:\n"
-            content += "\n".join(type_checking_imports) + "\n"
-
         content += "\n\n" + "\n\n".join(model_codes) + "\n"
+
+        # Deferred cyclic imports at the bottom (after all class definitions)
+        if deferred_imports:
+            content += "\n# Deferred imports to break circular dependencies\n"
+            content += "\n".join(deferred_imports) + "\n"
 
         # Write the file
         full_path = SRC_DIR / (file_path.replace("/", os.sep) + ".py")
@@ -1159,10 +1182,14 @@ def main() -> None:
         for i in range(1, len(parts)):
             all_dirs.add("/".join(parts[:i]))
 
-        # Record exports for __init__.py re-exports
+        # Record exports for __init__.py re-exports (including variant classes)
         dir_part = "/".join(parts[:-1]) if len(parts) > 1 else ""
         module_name = parts[-1]  # file name without .py
         class_names = [global_class_names.get(e["title"], title_to_class_name(e["title"])) for e in entries]
+        for line in "\n".join(model_codes).split("\n"):
+            if line.startswith("class ") and "Variant" in line:
+                cls_name = line.split("(")[0].replace("class ", "").strip()
+                class_names.append(cls_name)
         dir_exports.setdefault(dir_part, []).append((module_name, class_names))
 
     # Generate _generated.py + stub __init__.py for each package
@@ -1186,19 +1213,57 @@ def main() -> None:
                     f"from .{module_name} import {names_str}"
                     "  # noqa: F401\n"
                 )
+
+
         generated_path.write_text(generated_content, encoding="utf-8")
         generated_count += 1
 
-        # Only create __init__.py if it doesn't exist yet
+        # Only create __init__.py if it doesn't exist yet (user may have
+        # a hand-written one without the auto-generated marker).
         init_path = abs_dir / "__init__.py"
         if not init_path.exists():
-            init_content = "from ._generated import *  # noqa: F401, F403\n"
+            init_content = (
+                GENERATED_HEADER
+                + "from ._generated import *  # noqa: F401, F403\n"
+            )
             init_path.write_text(init_content, encoding="utf-8")
             init_count += 1
 
     print(f"Generated _generated.py for {generated_count} directories")
     if init_count:
         print(f"Created {init_count} new __init__.py stubs")
+
+    # -----------------------------------------------------------------------
+    # Auto-generate test files
+    # -----------------------------------------------------------------------
+    # One test per class, importing from the package (not the submodule).
+    # This validates the __init__.py export chain.
+    test_count = 0
+    for dir_path, modules in sorted(dir_exports.items()):
+        # dir_path e.g. "agent/completions/response/streaming"
+        # module import path e.g. "objectiveai.agent.completions.response.streaming"
+        if dir_path:
+            import_path = "objectiveai." + dir_path.replace("/", ".")
+        else:
+            import_path = "objectiveai"
+
+        for _module_name, class_names in sorted(modules):
+            for class_name in sorted(set(class_names)):
+                test_file_name = "test_" + _to_snake(class_name) + ".py"
+                test_dir = TESTS_DIR / dir_path.replace("/", os.sep) if dir_path else TESTS_DIR
+                test_dir.mkdir(parents=True, exist_ok=True)
+                test_path = test_dir / test_file_name
+
+                test_content = (
+                    GENERATED_HEADER
+                    + f"from {import_path} import {class_name}\n"
+                    + "\n"
+                    + f"schema = {class_name}.model_json_schema()\n"
+                )
+                test_path.write_text(test_content, encoding="utf-8")
+                test_count += 1
+
+    print(f"Generated {test_count} test files")
     print("Done!")
 
 

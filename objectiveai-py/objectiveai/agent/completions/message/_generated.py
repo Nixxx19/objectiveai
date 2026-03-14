@@ -13,16 +13,16 @@ from .developer_message import DeveloperMessage  # noqa: F401
 from .developer_message_expression import DeveloperMessageExpression  # noqa: F401
 from .file import File  # noqa: F401
 from .image_url import ImageUrl  # noqa: F401
-from .image_url_detail import ImageUrlDetail  # noqa: F401
+from .image_url_detail import ImageUrlDetail, ImageUrlDetailVariant1, ImageUrlDetailVariant2, ImageUrlDetailVariant3  # noqa: F401
 from .input_audio import InputAudio  # noqa: F401
-from .message import Message  # noqa: F401
-from .message_expression import MessageExpression  # noqa: F401
-from .rich_content import RichContent  # noqa: F401
-from .rich_content_expression import RichContentExpression  # noqa: F401
-from .rich_content_part import RichContentPart  # noqa: F401
-from .rich_content_part_expression import RichContentPartExpression  # noqa: F401
-from .simple_content import SimpleContent  # noqa: F401
-from .simple_content_expression import SimpleContentExpression  # noqa: F401
+from .message import Message, MessageVariant1, MessageVariant1Variant1, MessageVariant2, MessageVariant2Variant1, MessageVariant3, MessageVariant3Variant1, MessageVariant4, MessageVariant4Variant1, MessageVariant5, MessageVariant5Variant1  # noqa: F401
+from .message_expression import MessageExpression, MessageExpressionVariant1, MessageExpressionVariant1Variant1, MessageExpressionVariant2, MessageExpressionVariant2Variant1, MessageExpressionVariant3, MessageExpressionVariant3Variant1, MessageExpressionVariant4, MessageExpressionVariant4Variant1, MessageExpressionVariant5, MessageExpressionVariant5Variant1  # noqa: F401
+from .rich_content import RichContent, RichContentVariant1, RichContentVariant2  # noqa: F401
+from .rich_content_expression import RichContentExpression, RichContentExpressionVariant1, RichContentExpressionVariant2  # noqa: F401
+from .rich_content_part import RichContentPart, RichContentPartVariant1, RichContentPartVariant2, RichContentPartVariant3, RichContentPartVariant4, RichContentPartVariant5, RichContentPartVariant6  # noqa: F401
+from .rich_content_part_expression import RichContentPartExpression, RichContentPartExpressionVariant1, RichContentPartExpressionVariant2, RichContentPartExpressionVariant3, RichContentPartExpressionVariant4, RichContentPartExpressionVariant5, RichContentPartExpressionVariant6  # noqa: F401
+from .simple_content import SimpleContent, SimpleContentVariant1, SimpleContentVariant2  # noqa: F401
+from .simple_content_expression import SimpleContentExpression, SimpleContentExpressionVariant1, SimpleContentExpressionVariant2  # noqa: F401
 from .simple_content_part import SimpleContentPart  # noqa: F401
 from .simple_content_part_expression import SimpleContentPartExpression  # noqa: F401
 from .system_message import SystemMessage  # noqa: F401

@@ -4,5 +4,5 @@ from .function_execution import FunctionExecution  # noqa: F401
 from .function_execution_task import FunctionExecutionTask  # noqa: F401
 from .object import Object  # noqa: F401
 from .reasoning_summary import ReasoningSummary  # noqa: F401
-from .task import Task  # noqa: F401
+from .task import Task, TaskVariant1, TaskVariant2  # noqa: F401
 from .vector_completion_task import VectorCompletionTask  # noqa: F401
