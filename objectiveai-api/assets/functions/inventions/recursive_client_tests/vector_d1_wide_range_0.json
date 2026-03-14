@@ -323,13 +323,13 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "Uxb5LZahkPYxh3DTv8djt30xagUEpu2FwGYKsRQhycKXC5djuPS",
+              "reasoning": "fEDKmjIR2jMUJGfoBsp0WZ7eRnr6lJ7whKgizzq2Zq0yY5ACNgRr6uP0Dys5u juUvSN5tXdK6MjnsndFC987 0mgYSwueFbmsoolfavAH3tl0fTKThqg1In6LpjJUipBkz GsPh61NP1uS1yUC8h1ingywoT6V1XC1lCQ9KIYb8h7GXvzvL6EGZo3sFP7XJcRZxcoOWn5mljL5GN8wGrpVuattiJfe q8NQPIIf3aRYkmxn31fIyM vf0FcseNjxvULd2BvgXMDsSJKXZnSm oCaDcllRuO1idnaNk3mU9vHJ6bv LZGIOUP0FO1SmZg6T3sPHIBRbwn1z",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_8287114952428869160",
+                  "id": "call_mock_7483862349728348467",
                   "function": {
-                    "name": "Readagent.completions.message.RichContentExpressionSchema",
+                    "name": "Readagent.completions.message.ImageUrlDetailSchema",
                     "arguments": "{}"
                   }
                 }
@@ -351,8 +351,8 @@
             {
               "role": "tool",
               "index": 15,
-              "content": "{\n  \"title\": \"agent.completions.message.RichContentExpression\",\n  \"description\": \"Expression variant of [`RichContent`] for dynamic content.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content expressions.\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentPartExpression\"\n      }\n    }\n  ]\n}\n",
-              "tool_call_id": "call_mock_8287114952428869160"
+              "content": "{\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"auto\"\n      ]\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"low\"\n      ]\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"high\"\n      ]\n    }\n  ]\n}\n",
+              "tool_call_id": "call_mock_7483862349728348467"
             },
             {
               "role": "assistant",
@@ -361,11 +361,11 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "qV1S35SnFoqrLMLhvN0xKxaEBUB1Z6iIKNh4oPG smIS0 u98LEMAoCY9dr4YBOEaEZh0gqSEsXJkDih r89jIUQrKurOoup5XhvD3KT0EYwMGlYnWrG9Rz7Ifmx7y5NbNQRBuZyqFV8M ZehvS2domL1YH77HP7dAn1jrcUsZ9A3m2LT Y4r8ObuKiIXRu4RoYEIJUDrbQ XxsIl0YYtNzvXwpeJw25GT9YVgO5ByOHiMpJ6aJtP4sqmLC8 BwiEW35 zFnDBDDGzSso9FxTXxztdlWAiph57p88SWU9LpN",
+              "reasoning": "D8ZTBs4jMOk0NjyujzcsMTD eIP k8T69SBXWjOJ6J8JfsSTZpwnP51tEC4SSlPZX3f1ox8Jy0bsnPaVyKpb9fG7W9i41PSWSNQLVfZA3C6fyrQ9kzBuTMR4tXoqzAl7jnd6Kt1oB8YGuEpaOLpF3iTGIojIvs9GOTrcC7qU5d0DOwG72oKLHExeHysxrbAHdMyVCth2CIHMYTyHhEzFDyzd5Eqs6tSUMsZ7jjUSld77sa6Nf7ITuSXkFmdVMVqVeZbs9r3h8t7omVEq0Bnrao4BlzumD2Lrw0GYCv67p1WhVDcpeIJedvcadUv7nvSGTGQSpeelNK2m5xyhs7GvRcrw sUgaApH72Udqa5RrvUgvgsh070GAgzbZoEN4aIpq6Pa68vI2zK3ic3TOUYvpcgs",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_12241520280200401814",
+                  "id": "call_mock_7063502720432399607",
                   "function": {
                     "name": "AppendTask",
                     "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}] for item in input['items']]\"}}"
@@ -390,7 +390,7 @@
               "role": "tool",
               "index": 17,
               "content": "1",
-              "tool_call_id": "call_mock_12241520280200401814"
+              "tool_call_id": "call_mock_7063502720432399607"
             },
             {
               "role": "assistant",
@@ -399,9 +399,8 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "0t92ygbnjrk4K9Dx7tpQ8XMY2rqtiHrJ1hYwo9bWmw4vfUmnNoeukofLXp6a2 I0ypJ6wbHyWvqwLFI05rH8zkrD8g4DvFIqkQfvJInrSEOpm768wWS3uce8bzsLXfiPPIfhScOQPS9 mpmJb7QEqW12",
               "tool_calls": null,
-              "content": "qQkYniBCy4 echUoWbnXY8qQvB1F5mdeIWiCA rTWCqYJCRi4my9zJ1Oli5xqX1znA3kw0VWrL9Tuxgxo1d",
+              "content": "gcZ7ZAKzBPI38pZtK4z1dGdC4AdOnFJIWh4UJ8eVFhTWq3r5eul0e1QZQzFTQkfPgqE23x8CCpFlmbe5zO0PopWmgo6",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,

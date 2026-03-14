@@ -206,13 +206,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "964RIdfyEn9b4PgIzmlAtcgkh7rZrp6ihbyV0FtIgIxG3peI8I2YRc0pwkHEyNenuqngXATkZQ9slGfLpHPeAWQHu0YxmWd54 GCVlJHOvhh1CfNSwyMja1wFvQH3W13fzakZOhYDVxLo9hFNJYSo7etBmBhfddqcgrWeX Vu4yEzEUvpko E1M8yCwYHrcocrUZyD8h5ObqVVKDnBS2oRoKin1KvHrVG171Ced0W8Snp4tQ8AAQjl9mycAA9zs",
+          "reasoning": "u1s5Cxy4xXp7EqaTYxmmKGrQfkrREzeCiMOT",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_17192095630078576912",
+              "id": "call_mock_13466604546134539064",
               "function": {
-                "name": "CheckFunction",
+                "name": "EditPredictedTasksLength",
                 "arguments": "{}"
               }
             }
@@ -234,8 +234,8 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "Error: Tasks have not been written",
-          "tool_call_id": "call_mock_17192095630078576912"
+          "content": "Error: Invalid argument: missing field `tasks_length` at line 1 column 2",
+          "tool_call_id": "call_mock_13466604546134539064"
         },
         {
           "role": "assistant",
@@ -244,10 +244,11 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "jX94KlWy5LxRGut2UhYCrE50oVlPL4G279PDgjhSLYDP0Mm68B8rHdkILApS6OlO3QX3F8L3sgI8xkOJgOIyUScFtwkHCxLbp9asro7tXGskiqM0ThFw7cvo8Wvs9gyltrY7wSVGKgMEEQcnqF5CkKRUQv1VU1mP0uf6CVyGuJLkLVttN4cJ1 hdAipPLU3WzQRsifiXdaZQ19jmYFf8CRMHy4NUFXx3xtsvyn9gALGhgoRmJbKrtND3loeWdKWql4Y2mTtgJ1Wc3cXxLjTJ88an4JcltXoTAUU4xOYonlj 10VhlCWH7lTNh1qB GPDJDorDDCTUnSFcJHxnB3l0YpmQPjSQWXivkyPwHmnoH",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_17096019488985216295",
+              "id": "call_mock_7411844805442856776",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}] for item in input['items']]\"}}"
@@ -272,7 +273,7 @@
           "role": "tool",
           "index": 11,
           "content": "1",
-          "tool_call_id": "call_mock_17096019488985216295"
+          "tool_call_id": "call_mock_7411844805442856776"
         },
         {
           "role": "assistant",
@@ -281,9 +282,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "XseXjHqDX7g3qO8KGaAHaGUApYN7LXICUBHe3K1bQ7U3gSYBdZpq5zhsVclZaReDbDK64cjoyjFzs8sRtxdoWfOs1WsDol1AJl3NyS6lE7BXBsJ cOpXUHWVdBvCv1W1IgUI3JmKl7GjhPA73rnIDAxDi6q7gfM60whcWylbFy 6RSXAKcS 6aVJhF3ktOiYdvcvPpIIeePWE jGpQmsYthL9mnT8wrsmLLJxaZyRXBfCgcoUOluUBmwcL9psxEqz MhhTuKugfj1vE8hq99GmHb8exK1IbsuXzXVhF5zHvpHGeInl2fEqxOi1sqvJ 6B4XnGjlUQRQDPM3hCxX9fvBZa7GVkuoLOB879E3At4B0icjppGZasalg3TTuoN29bwQhqwZIR53c THzCIMQXPF4uO02G75LOg6BYaj4Np0KnfEZfiVFRYCTq7",
+          "reasoning": "VPF7VZPXuIECMWKuODtRgtDdqkMZ ifM4F7Ihq8xPlZ47lruklpEfPLTbimMLEfgK0c6uhQGpTHoXwuCCMEN0ICQobiloYtK8OHL3bZAAJ6Ddu5q4foEE1Euz6x5GOclaBA7FsId3xQr5AUP6mMg6qwiUoH2g4lbdZL98oSTsxRmZ2WOiFsbQx0wYOxykNMV cpEzhyehEQHFyr6eb71GQddjd48jr6C7gu7Qv6NgJzpAgV6SgNlAP8s4sJcpu15hIs8W82X646G4UFHVtVnzU9ett4fBuU1qBQ4e7rKaAbbJbSfop3ljPWr94kuVlnxQ9H9wUFhJBmhTU9z2pir8nIKcVuHlnOOcrlMEekTtVHWR7UQ1tQyqLrHBX2KTwP5PFmsPADPgAwQxwkP249bpFapezkK52TAfM1PDGNrfvYpcK 4QB3kzFPFY3Tv31wUCRQ4KJOq",
           "tool_calls": null,
-          "content": "m5IJChMjj1fnmxZg9colEvoR989lTpMA8x1vTjULOItD4TsztbVM0uio1z",
+          "content": "OaU k6rSJivaxZqZudkHeEayNyoAn23LQiIyGC6NGy4 YCGxHqoIhFVoL73UwLTPp2GNnvH3hNNBgYDL",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,

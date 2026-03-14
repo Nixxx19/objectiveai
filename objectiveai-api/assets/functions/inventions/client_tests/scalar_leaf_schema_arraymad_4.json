@@ -205,13 +205,12 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "FtHxhjl3vMGtqJsTmsn0Abe7vxBFMyZZhO2nd1ynnNvDPkd1cIWpoUrnJ2kkKrBzw3lfcPJiE8tw8zWNUcF6Irjkznqx0v1tavmgGDn0eRGfXhiXgT4RC5M iTb1KRiosQUV0ts8a74Hv4kiHOfxrKZ8y2L8qiWRyUj",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_1107066837245847602",
+              "id": "call_mock_7976007871348627602",
               "function": {
-                "name": "Readfunctions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpressionSchema",
+                "name": "ReadPredictedTasksLength",
                 "arguments": "{}"
               }
             }
@@ -233,8 +232,8 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\n  \"title\": \"functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  ]\n}\n",
-          "tool_call_id": "call_mock_1107066837245847602"
+          "content": "1",
+          "tool_call_id": "call_mock_7976007871348627602"
         },
         {
           "role": "assistant",
@@ -243,14 +242,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "YJiU5wcLr9Ws91I6zoMFbyoFaBX2r2iIYbJCmDKVGgUJPKErtXY0VV69c2sl1oqoEPLte BoJrQR05 JQ ondr4HUAdl86VFib6gzllFJLbUnVyHqVqcXRbyaQZI75VugEhnZJYueL4qhNaLvk70NInvAp72cltQUpzjZeC1LIfjRtquKJ0bg8Nr7FqL8tr1gkRStvZes3IwLm1LNwtjYPmxtRiiwQCO1svW2t3OOCW2sGu5uRmH6exUHNQhwRXI8nshjtWasy4IC1oU0WbKp5Iaot3Ry3q xEWNez3XmgmsJgwRFLXF2DXBe9YwylLe3VRESU5PN0lKUx46iQWXQ 9ydgcRLtape9IliPCcZ tqRhFWJDWD1QUuaY3KwtcmsWfniGnbjeCoWZn23ACGmuOfm99yK8I2 bR9NVJGk6hJY7DFjtzTnxoiurTlys0WlX1vlmxb84hnEvcTEwqXxyZTZtiY4EFvAhbK85Cu8NYkvBLyO7pj8lP5oUJKd1b1jm0CzeBrm5Ae71kFnjSJtjLM4lbkQ2 RlH BRuJNjIfHLtTxIKP9aunCwJ58zyj1CPfXnfNl8mPAo",
+          "reasoning": "dqtyXEqK38Hrmd sAzLSggzXn5poekEhCStbND9g38dEwQMolHEBXMGa zIEzYikeWVKbthFmTfn5S5MQiX9CDHSAOMTk85MwGSYfIJ",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_5865183428892554756",
+              "id": "call_mock_3624323038961052083",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"vUgEbgwMm3vPMZKsNlkxj1oG2\"}],[{\"type\":\"text\",\"text\":\"gxv3ur9Y6nNp9V5\"}],[{\"type\":\"text\",\"text\":\"rkPsTD\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"iQjTRQyY4piEIzdXVjfLKj\"}],[{\"type\":\"text\",\"text\":\"5 NvgTLhgJy4Kd1nLnYizXVvL9t6EY\"}]]}"
               }
             }
           ],
@@ -272,7 +271,7 @@
           "role": "tool",
           "index": 11,
           "content": "1",
-          "tool_call_id": "call_mock_5865183428892554756"
+          "tool_call_id": "call_mock_3624323038961052083"
         },
         {
           "role": "assistant",
@@ -281,9 +280,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "8rN7EFWTb6zC4bqjqytTH4hOHDY27LP7ovT3z47balUc C0E4w0ICwwNNpKXG0XgaSZiIQCqFDEwgR e9Z8FQKa9YN143H0crhVMuNM3ylc4rxeVAt Fzz8NE8MkiZlpF1GUZwBjPbYBD5HPSv5SmLKKEoKBqNiCjukqAerpFOlJ Pc",
+          "reasoning": " D3WhnwIsEE5xozlS6Eo1F vI gNWfgN3dqiMaIFrREudZG8RT5pFJ9tDpl4iEQpUAjJ7mtophSVRog1u93qEYX8TJbSf3PiIakev3dLiqDsmIPiMUryO5mtU7pfRsmopSVFGY5nvbcDXemyQJrlnNk20FMbzxy7zKJu7RqO03aaY1HSunSTCbpUgrbF1GR5rBK2j8jl3sROfAkfH2WtYxRwOBkrLN 31IPKfzTiyXOHZgimNrpDyB10RkYCnak7WxlbIPXPUh9nb5zpoXuexlq6DFLLwHHaSyUUj87ekBclMAPRIeRPStw0jYFG2zgK4D2tqwJC52tA8LRSPF3vHHSiZJ1cHHnN9z6XDiBvit EVhmZbZQbF1XE4ccDyvvIT3bcZZ7FaPimorarpBK6WM",
           "tool_calls": null,
-          "content": "huJzQ5qXBGETuOxTPkPb0gGpBwNWm6M00B9A9PcYBsaTmZ7L1Mmk7uovr8rjLW89M4O vaVZIYBY1BRxtpUBkNJYEboz8igG",
+          "content": "GKWsmoXnj9u86suBnBC0k1S0DxfAPADXfCJ3F6Pb7ihll3Nzqvvy",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -543,19 +542,13 @@
           [
             {
               "type": "text",
-              "text": "vUgEbgwMm3vPMZKsNlkxj1oG2"
+              "text": "iQjTRQyY4piEIzdXVjfLKj"
             }
           ],
           [
             {
               "type": "text",
-              "text": "gxv3ur9Y6nNp9V5"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "rkPsTD"
+              "text": "5 NvgTLhgJy4Kd1nLnYizXVvL9t6EY"
             }
           ]
         ]
@@ -637,19 +630,13 @@
           [
             {
               "type": "text",
-              "text": "vUgEbgwMm3vPMZKsNlkxj1oG2"
+              "text": "iQjTRQyY4piEIzdXVjfLKj"
             }
           ],
           [
             {
               "type": "text",
-              "text": "gxv3ur9Y6nNp9V5"
-            }
-          ],
-          [
-            {
-              "type": "text",
-              "text": "rkPsTD"
+              "text": "5 NvgTLhgJy4Kd1nLnYizXVvL9t6EY"
             }
           ]
         ]

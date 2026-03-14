@@ -206,12 +206,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "D6Eam309e0F2agGF69Sh7CdeIowTRFSZArl1d73KofsWum4LebfaR4ubI6lJZf5 7pTTvZHD5b4XqKJbctHPYSut3mIPkwMdij f 5X873l2g197IKxU2lhF0rz4lvNOFWd9K",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_17647979872416986482",
+              "id": "call_mock_14263906878808970441",
               "function": {
-                "name": "Readagent.completions.message.AssistantToolCallFunctionExpressionSchema",
+                "name": "ReadTasksLength",
                 "arguments": "{}"
               }
             }
@@ -233,8 +234,8 @@
         {
           "role": "tool",
           "index": 9,
-          "content": "{\n  \"title\": \"agent.completions.message.AssistantToolCallFunctionExpression\",\n  \"description\": \"Expression variant of [`AssistantToolCallFunction`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"arguments\": {\n      \"description\": \"The arguments expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    },\n    \"name\": {\n      \"description\": \"The function name expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    }\n  }\n}\n",
-          "tool_call_id": "call_mock_17647979872416986482"
+          "content": "0",
+          "tool_call_id": "call_mock_14263906878808970441"
         },
         {
           "role": "assistant",
@@ -243,11 +244,11 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "t hBEcTpz9jx9vXrNblY6fVKL5rEOTo3oEVJ36eTbDxmq6TuXHBhTL99TEWC4 w5KfIhvbecp1NVJZxkUhjpDErSdzIsCFR1cz4YDfdzljZWFhQFSwvDqkq3nvlW1cVu7tB0nkIddmQCCM4g5zXc9wxdct7Cd8cnf9Wip3snosH7iy7QRqSMxY1xCH7SjgFfPCkvpsBcV2vEL9J8MODVGLI7olVZQU3dQbK0pEGTLH2IvNAP",
+          "reasoning": "fCAjl5Ae3R4OnJMQbTLhWEX1CPcoRLNuuTZW0ClqQiYIiisnaSc6i2UZTLv9YjyZqtMDAEIf91TEcsoRvTNCKqTaFdEPbvqR2VKtjMPTCGfjWiIBHl7rNyPVwHlD58h2dqgRWnbNmHtHFTZ6NxKcsNzqE3JZXWjgjKeHW0QP3AixzJgqCWuYKEevBzaX TzehfHyHJ3Gxg0M2z3GH2WfXju2MUdzfwrC8bcWha5XszMZpu8c2zCtuQq5yBoHVt1seSJUE6wJZ1RBXA6N75tO nQM0QqF5r13PAGtzYUzISJe8sEzd89xVrrwyAA7QCiZhKIVVO6WZsXl1rTuL41r1qQb5hJugAH9Dc",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_1359268166673482786",
+              "id": "call_mock_14191075972983285763",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}] for item in input['items']]\"}}"
@@ -272,7 +273,7 @@
           "role": "tool",
           "index": 11,
           "content": "1",
-          "tool_call_id": "call_mock_1359268166673482786"
+          "tool_call_id": "call_mock_14191075972983285763"
         },
         {
           "role": "assistant",
@@ -281,9 +282,8 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "EEI0C0019RFeyHTNyryz2ztr1LYZLP2J69A8oLhZSnV2ZCsHkiUe7iEJ3C7Qe7lVMaVL6oRV0unzj5egrtpfDaKBO mLEgftm6gspqPPCtNh1ZSsDSnNBJ5gg9PZFW N0DgmegNdwCB lAoumUQjUmbyfadNqD8A8iPy9N1jrYju31xwkeUEdJ2xjhCtLotUf08fyxDr7knsK7Tz9xc80z7Yll7C5JGwJyxEo83O7788nebQI2j65LiYsHwKVGpNnELXoY3zdXb84MH9jiv40knyYw4fNPxhh 8D SXTTt5 N 0Bgkj7wpae9ipRA zAZ",
           "tool_calls": null,
-          "content": "sftcJ958PY33f8dQbYlJCwloGH",
+          "content": "TMCfHoeFgN9XLIrV4ZRh7nPv17Sp1g4xjxfYE0Pt7AX0f1haM",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,

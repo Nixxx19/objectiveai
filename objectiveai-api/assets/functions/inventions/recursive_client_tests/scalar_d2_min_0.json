@@ -676,13 +676,12 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "oxlRrQxuKhnXkk4hPbxJcy0ZiKWSq6Z JSgo TLHjonjLsTDemEZSDrp1xBojnwrzqp9pefVGctgGNSA5gAGLUlPmKBZGYn8xdM3TKcJCPZT8O2CZd 0zoE3b00su58i3OV7khfPT1 dwfIPmsbl7 TjjqNyujqouQttnkKC2qcc2BS4wPA8AP4ED4MKWHqJlSoVftZ7ND65QpqlrdnqZlXVg67jfXMU1dSO0a92eFaDOT8csZKliRlYHiuSzpKtjjHG8nKJciwYzw9TnYWIyO4F4I7copg5GdX7khtl20Ae8gh",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_16050113027171892642",
+                  "id": "call_mock_17215968180627080106",
                   "function": {
-                    "name": "Readagent.completions.message.ImageUrlSchema",
+                    "name": "ReadEssay",
                     "arguments": "{}"
                   }
                 }
@@ -704,8 +703,8 @@
             {
               "role": "tool",
               "index": 7,
-              "content": "{\n  \"title\": \"agent.completions.message.ImageUrl\",\n  \"description\": \"An image URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"detail\": {\n      \"description\": \"The detail level for image processing.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.ImageUrlDetail\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"url\": {\n      \"description\": \"The URL of the image (can be a data URL or HTTP URL).\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
-              "tool_call_id": "call_mock_16050113027171892642"
+              "content": "LdMzDflhmfZJzga8FAv0usxCRWSIxGOndoKVn1w2dXXNJhF1YUtqgqqhwzfLaUJ3Gm0hWjbCwU3CLUUO2Biur0W5LRoGNfPNrmnxUkCjWQgkw3yzUSRIOumn7WErwyDE4abnOe1xXppkMGLvLQRsIxHIawBHIhnlPZDb9yUjylJ0ILRdKHv8KoWMo n5pZVgVj0bfC2vxNwm0QSFNEOM9SHHbDOYc7yV96rduWYa hACrEsF1qXdRwbNITxv1ufHyT7eFtCtOLq0Ck 0JGDcNqv1m5wSVvXylr0FpH4EIOAGNXqLs4Lh6UNED8zaKkQwb1KANxn1j69u tYLh7EGBuEkSy8AWnKN76glPVCzWQ58OTSfvYp2dJu32wJKfk5LTqI Lb9cl339NkWTm1EMkQUwKEiBz3GVYmHEc8F3QpQbhsGZLRNK9mPragYeaewUHt6 dYIrP8saIJRopQJ78qr0EuNFJSXg B6n6Sqk27lWAtz7X21",
+              "tool_call_id": "call_mock_17215968180627080106"
             },
             {
               "role": "assistant",
@@ -714,14 +713,14 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "1etvSrwbLabQHPRlMimcw7Jr4rNltsrd1CaifiXhthpQY8xypnxDKAcpjw3fbhHriFr0BOoccMcyAtSZQ0q1cgtGrk4EiqjFoCXyw3nD0E0di3 d4oO AuVDnWShanNuY09zrGi9DkmvlBCtjaarIpbAT89ROrUHmHSfx9ApgcsDqsFbAvF8zBLZZVM6Jyivr7dHEqHr9Jpsp 5xxDr0grmgRKwovpqmnOq36TdflmZ5Nx8FWFUXLNAHubdjLN6fjO1dJRof6qgkNXK2LNae2TXc ",
+              "reasoning": "sCs6qvBlvjdUt466Fiev9jh2V UDUbJ1pwSqj2NwCUTXcX0STUpC48Py2e7cpPzMuAxxAh7bD2C6MCflx9fmQBK2tCOzptbeAYPyX9BS9cTtwc1O30uSvTw a9HGDHM1LZo1lzxVTub0S1qLW75r bACdz6KToWOuJiT8Ht9iOTgYkawIeWsPV0calwpvQKH22JVlXaAfdhjhVxSmyGttcdMuSp8XqbATYwYCVV 7FUnok8jQsVd qSMYJ3VvFTQ1XGAVjS7S9m522tt86JKYB0x3GV6tsd1GTkw1XTpPi4zvGaN xMRBv86lW3TcM5jIULOlZXlT6z36aPzT3Lj0n 349nq3Yv0xErZRBHA0XsPReruOgcP4iH SQk73kSnwo7a1pexZJwHYdzP8Rbl9H88d7yi0fc6j8 JJgMTwFCiQUCUzp4roi2L39q4gObd2sk Qr89fIwqoIpA0n",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_2629240182173282791",
+                  "id": "call_mock_4108777318176053246",
                   "function": {
                     "name": "AppendTask",
-                    "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"7fzikV8 cXEXkr24kKqZ3A4pjx\"}],[{\"type\":\"text\",\"text\":\"Ltf5TMwzqOs\"}]]}"
+                    "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"tti4Mp0rTV1qRHECkgNYIqNnbhOMlMiobvH\"}],[{\"type\":\"text\",\"text\":\"fBj2VTAWHuR\"}],[{\"type\":\"text\",\"text\":\"sc5L7Ot5gUL3befSEB1S4H\"}]]}"
                   }
                 }
               ],
@@ -743,7 +742,7 @@
               "role": "tool",
               "index": 9,
               "content": "1",
-              "tool_call_id": "call_mock_2629240182173282791"
+              "tool_call_id": "call_mock_4108777318176053246"
             },
             {
               "role": "assistant",
@@ -752,9 +751,8 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "XI1pNWbwsoMdsrIGP58vvx2SrK0lIbeivICJEZRvhi2c2cmD1jP4R L0o6 KyWAnAjtyF0EMHmneW6MczcWbSuC4T9d7c3daVLhtgzaACUfj1JiNHTgwQxd8FSaKgy0LxVt0Rsv0eSQ46MukOUD8IswKkNDnA5xNmBhA9erSyNTx1M8f05MYFMkyAFI NAPQ5UCBewWBTnvg3xg32ZStxhkPsrxKTgZtjK5pTXUfbFVgJ5zsO9PK9kJs92PxOnpm0tmzoo4WmVj0MBGoJyh4NhhyE0kpQPAPCTJxB9Bb5FmHNRbQ4Dmt6LB9rCz0SlmGJba3wiWSCHrQyOcU7pFW66xpF2yqz1vMEWKpDErzHOYKzwKgP 1guJmMRMajz25WagRpn7S8MZLmpQEM8r8iZjG9e74RHmRT36iz67PkZQxF2b9c2cg AzkBhkcY42kqBe9wAU",
               "tool_calls": null,
-              "content": "WcyjFk XSwOPYwhNoiXXW6eSJFuDdtMaAamCqAH5devnUdPYB",
+              "content": "4kOuP2cq8d72I8K8guTFtipT568JlnhYr6ick3uHrdmbhFL2ACn05",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -902,13 +900,19 @@
               [
                 {
                   "type": "text",
-                  "text": "7fzikV8 cXEXkr24kKqZ3A4pjx"
+                  "text": "tti4Mp0rTV1qRHECkgNYIqNnbhOMlMiobvH"
                 }
               ],
               [
                 {
                   "type": "text",
-                  "text": "Ltf5TMwzqOs"
+                  "text": "fBj2VTAWHuR"
+                }
+              ],
+              [
+                {
+                  "type": "text",
+                  "text": "sc5L7Ot5gUL3befSEB1S4H"
                 }
               ]
             ]
@@ -955,13 +959,19 @@
               [
                 {
                   "type": "text",
-                  "text": "7fzikV8 cXEXkr24kKqZ3A4pjx"
+                  "text": "tti4Mp0rTV1qRHECkgNYIqNnbhOMlMiobvH"
                 }
               ],
               [
                 {
                   "type": "text",
-                  "text": "Ltf5TMwzqOs"
+                  "text": "fBj2VTAWHuR"
+                }
+              ],
+              [
+                {
+                  "type": "text",
+                  "text": "sc5L7Ot5gUL3befSEB1S4H"
                 }
               ]
             ]

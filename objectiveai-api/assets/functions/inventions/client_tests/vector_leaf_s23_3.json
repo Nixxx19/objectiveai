@@ -247,11 +247,48 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "ae8Mtq7m35JuW9oyoDDMqACyaxcTAkY648elVlhdErkJ7ckMBTDu5pvzR3m84pCNEa11Kpj24wczqUfDVZv sS9gdQmURBIGXyzydr5Va6K7rtlxfc7ubdq9lnfmsntjBhN5OsyK5QWSTwnUta 5Y a3qiq6pN5cAIlxjewELAaw5kzyLp8kpfMkCy5AVw7ZCWCwuCdzBRyHbugyevXJQeJIM ",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_10139540721704213707",
+              "id": "call_mock_15103852890278162583",
+              "function": {
+                "name": "Readagent.completions.message.SystemMessageExpressionSchema",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 10,
+          "content": "{\n  \"title\": \"agent.completions.message.SystemMessageExpression\",\n  \"description\": \"Expression variant of [`SystemMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n      \"anyOf\": [\n        {\n          \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n          \"$ref\": \"functions.expression.Expression\"\n        },\n        {\n          \"description\": \"A literal value.\",\n          \"$ref\": \"agent.completions.message.SimpleContentExpression\"\n        }\n      ]\n    },\n    \"name\": {\n      \"description\": \"Optional name expression.\",\n      \"anyOf\": [\n        {\n          \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n          \"anyOf\": [\n            {\n              \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n              \"$ref\": \"functions.expression.Expression\"\n            },\n            {\n              \"description\": \"A literal value.\",\n              \"anyOf\": [\n                {\n                  \"type\": \"string\"\n                },\n                {\n                  \"type\": \"null\"\n                }\n              ]\n            }\n          ]\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  }\n}\n",
+          "tool_call_id": "call_mock_15103852890278162583"
+        },
+        {
+          "role": "assistant",
+          "index": 11,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "r KgoufHcMyCRIqfwDBWNgwxLR5LybCPZF7KlmjGv3c9hdylP3DfA5QJXXU1gnz24Rrb8Z amHNzfTh84QV1yp9RhfCG6GnFkeBljnlAW",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_9197268344854188225",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}] for item in input['items']]\"}}"
@@ -274,20 +311,20 @@
         },
         {
           "role": "tool",
-          "index": 10,
+          "index": 12,
           "content": "1",
-          "tool_call_id": "call_mock_10139540721704213707"
+          "tool_call_id": "call_mock_9197268344854188225"
         },
         {
           "role": "assistant",
-          "index": 11,
+          "index": 13,
           "created": 0,
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "ox2g1Gu82dfZTM26rWUHl5nMGpDyvQOJ7j67oqNzUFV9m107TFypRD7pBVedaZPgqHrqgqwzt84gVa3faDRiGcrYqbta8zYEyHQM5A TbFwcjuWUvNCtpFvjxbqczmxLRmVqSjFXil lTZF7qlhgvypFnTkKXC0 HOR7SBXH1YV7VCBKqex7WJaJMjks39PAN7HnjczV1fNHO6mhx21bgdtiYg9oatUkUewCfAtNEbOMnHj9faJdoN9W2wsfmINt5MU0",
+          "reasoning": "rvLTkHp36LX9ww7b1spBmt6y2d 8Fqp5nrBTDRQTgcIW5vsgRNuemuydVdZDxcBistqhpBtaRuGQdAbBC6pwCxne4pqy9KU6GggPx39lGtr4E6ZvU8ZLAqRU6VOlV1omBS BQKVk9GHuw69kKMnSWm",
           "tool_calls": null,
-          "content": "WAd04PsuzrViCfdGC2IM",
+          "content": "HriCAmfUAV zGg3qzWTVz3hi4Q5rm2ZKT7iiqKkcz7VP8TFXD1OsPOPpim5XTaqT8e506JgjzQWXrt4SHUxteC7D",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -318,44 +355,6 @@
       "id": "",
       "created": 0,
       "messages": [
-        {
-          "role": "assistant",
-          "index": 12,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "s6LvAlicxqd9gu881GWWiUeoDZq8PXVTACXhROpNBXCSmxczG U2iwmhqe ohsGReDtgEJjzEjBQGdty mPjJyyg ww8JRzNH6iGAe8tEf tw1Rjfzbrzd81IbbevWPMeFlmWvlxPdn",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_2671641327858461956",
-              "function": {
-                "name": "ReadSpec",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 13,
-          "content": "Test function spec for mock invention.",
-          "tool_call_id": "call_mock_2671641327858461956"
-        },
         {
           "role": "assistant",
           "index": 14,

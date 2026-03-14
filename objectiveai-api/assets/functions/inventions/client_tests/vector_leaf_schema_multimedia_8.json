@@ -358,11 +358,49 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "d779VRb5ZCu1e2BcfpwXvWG 4QQMrrOtjrWhmPhwOIms",
+          "reasoning": "Mi1suqDegKgOaELTzdmJZUU8ED5GH0jafXvpD3L9cNUpwibjcZHcXmFq6wWOnQ2h2S7WSGZ9Q 49XAf4VvzXPZ3jbiDsnWV2KCVzaqIav R2uh84YVXg4Jk4rKWnkmmQ uXA29c1Q9grZeGBatDVorsf pcmFVe2ctYss6y8lrbepWULA qf 5De81Dnd3O3JGXUfKVm 0 uiPaBCe7du7PB5Om8s4RajoTR3iy6PLgTruX3Yn H86VYq",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8839435991032937696",
+              "id": "call_mock_2522000765732771137",
+              "function": {
+                "name": "ReadInputSchema",
+                "arguments": "{}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 17,
+          "content": "{\"context\":{\"type\":\"object\",\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
+          "tool_call_id": "call_mock_2522000765732771137"
+        },
+        {
+          "role": "assistant",
+          "index": 18,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "XtgRHeSmj8P u3GTXLv09LEfoUT3fkLCtzqiJPDd96ktEoK5bgTBevQTu2WQ6dG5Y5QWzpZXVPMnShytxY0WgBnYkd1YntRkdzDdOC1TkMDQW5V1Iv4RGmho2welVTqztICgoJswDUajh3s4V5SqJpLJxdKk5bBOV1UxMs2",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_2717307896071639385",
               "function": {
                 "name": "Readagent.completions.message.ImageUrlSchema",
                 "arguments": "{}"
@@ -385,47 +423,9 @@
         },
         {
           "role": "tool",
-          "index": 17,
-          "content": "{\n  \"title\": \"agent.completions.message.ImageUrl\",\n  \"description\": \"An image URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"detail\": {\n      \"description\": \"The detail level for image processing.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.ImageUrlDetail\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"url\": {\n      \"description\": \"The URL of the image (can be a data URL or HTTP URL).\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
-          "tool_call_id": "call_mock_8839435991032937696"
-        },
-        {
-          "role": "assistant",
-          "index": 18,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "reasoning": "07FHfKWqZ4IUl7ENTxBqT53SWDrgNA3djamCO0IOxLLYBNBVVXLe22kuU2cla6R4UxlVYK0Ie7K09rDyluHPwxqILpuFj5AR9IWcL1zNxatlhHRnx8KKEeOtxxvkW1 d5kmBRtOnVdbTUIFoo6BquxZ5cPTzIb70EugsNSzuoFOI OqBKHLqRQn10",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_15007354787820410130",
-              "function": {
-                "name": "ReadSpec",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
           "index": 19,
-          "content": "Test function spec for mock invention.",
-          "tool_call_id": "call_mock_15007354787820410130"
+          "content": "{\n  \"title\": \"agent.completions.message.ImageUrl\",\n  \"description\": \"An image URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"detail\": {\n      \"description\": \"The detail level for image processing.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.ImageUrlDetail\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"url\": {\n      \"description\": \"The URL of the image (can be a data URL or HTTP URL).\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
+          "tool_call_id": "call_mock_2717307896071639385"
         },
         {
           "role": "assistant",
@@ -434,12 +434,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "EgoN8jj2KVxUPr374ROT4fP9xsRGZlyvxo4EonAdrEW3HREyFSaEq 9WgUC7P20qaGRiW cOiJqe1Sxm94xwR0rChkiRU2SfTvuzIT9K4eb9Q1thfzlyBi4xd7v8eBpEHw87vy5B52Au2TubinQuA8uOPXmPIvXhwjUhJG2t 1tndyNt2LC9GM7qtdDvjx3s66HpTOFOExRFfYfRUoZDNIixQMr4zY3Ty4wVzxSV3PXFfCIt7QV8THJc496yu0fx2qTYAopGHV68fztv6qk0pSrHlL1JyrB2ACjH7gfYOcQKTRwa5sQUBZOBI8OPYTcnAb32VH1I Jp9RF882H1Q0J3Cxe1w4IMe0tSeJOiQufrDqe31Z4bR0ZaAYpTRrqzE2eJH7cdJu3Ge7XOMeWIwPHvCuYFpx0arfZZy3pPtgN7wJPdG5gpG1FZ3yOR7gIKwd kNuW RWdvWmANEAnjPMwxxoIgpYrgb89gO1b1wxjCVwvSTmmGAGQR9JZzd",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_16445293069408450796",
+              "id": "call_mock_16498495936225848674",
               "function": {
-                "name": "Readfunctions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpressionSchema",
+                "name": "ReadInputSchema",
                 "arguments": "{}"
               }
             }
@@ -461,8 +462,8 @@
         {
           "role": "tool",
           "index": 21,
-          "content": "{\n  \"title\": \"functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.RichContentExpression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  ]\n}\n",
-          "tool_call_id": "call_mock_16445293069408450796"
+          "content": "{\"context\":{\"type\":\"object\",\"properties\":{\"criteria\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":5,\"items\":{\"type\":\"string\"}},\"reference_image\":{\"type\":\"image\"}},\"required\":[\"criteria\",\"reference_image\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":6,\"items\":{\"anyOf\":[{\"type\":\"image\"},{\"type\":\"object\",\"properties\":{\"visual\":{\"type\":\"image\"},\"caption\":{\"type\":\"string\"},\"metadata\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"confidence\":{\"type\":\"number\"}},\"required\":[\"source\",\"confidence\"]}]}},\"required\":[\"visual\",\"caption\"]}]}}}",
+          "tool_call_id": "call_mock_16498495936225848674"
         },
         {
           "role": "assistant",
@@ -471,13 +472,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "5LdxmamD3kFG 5e8u6cyzxHm17eOkykn5OmejdUCMZN5oz4DwylGCRcJgZyw 9mVEtQQq5mehXQP 0TOOs8nuPpVzEvsGaAJJ1NevGeXn8FdZvSxYmNGxIjgtpqPNNSSKI GbTcX8vAMJF1tOqIP0KVBQtoCeTxgigwrh9L8VgyLFql7qd9qGZCVqnLTAmvjU 2FBgH1AdaqTAz28rxYS8Re5SQT8wjEXmtoDIoDvt9FZGvguElaFykV1LtlOj IDLQer4MRS59mlXziTLYT0nPjJG4f8dCCs2INz3suD1dcHGa416Cl8RtBcSR5QaWZAjms7v65rP8c9eS46pzFmSBbkHIJQBU2pHEiBIfjvXH 3pqGN5Jt0VZb wltCf1gAucimBoLjL7bHyLSxsNbMFw9rcFp8ZYAWUrpM4l91pmhDL6OC6M0W67l F3xUr6xTCMjV9jrYu7g67BJ1lfOjG8CpRL8i",
+          "reasoning": "Jt0ypZJ3jbMuWdk N2Huz8OAUdWkRgYWAXGEkisBVkLcFtPO6t3CkVe3YfQ41U0pQkn4DoXAm4cWVZKxCTqYGuo17b0Gig7iUh6iWu1LdVyKn5LkBLCk1aJsK6ewvqVGjdYvUUsBtQucNHJSXaWQ01iEBn9JL1V ajf4r2ahefKJQFzxiqhNLroXVYiF85Y8oI00h9yM8J9Q4G5WxfmWoouNWo0jp5QPPcr9f5",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8852577129674988145",
+              "id": "call_mock_4130181618646832109",
               "function": {
-                "name": "Readfunctions.expression.WithExpression.agent.completions.message.RichContentExpressionSchema",
+                "name": "Readagent.completions.message.RichContentSchema",
                 "arguments": "{}"
               }
             }
@@ -499,8 +500,8 @@
         {
           "role": "tool",
           "index": 23,
-          "content": "{\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.RichContentExpression\"\n    }\n  ]\n}\n",
-          "tool_call_id": "call_mock_8852577129674988145"
+          "content": "{\n  \"title\": \"agent.completions.message.RichContent\",\n  \"description\": \"Rich content for user/assistant messages (supports multimodal input).\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content (text, images, audio, video, files).\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"agent.completions.message.RichContentPart\"\n      }\n    }\n  ]\n}\n",
+          "tool_call_id": "call_mock_4130181618646832109"
         },
         {
           "role": "assistant",
@@ -509,11 +510,11 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "Xoithx7E2Fr9sT  TQXMLReCQrAQumNge9HcKHoMEhPvsx9NDDv2fVNKtIIbjyWkeB0P4o6ayv1o2Ht3V 8CggAym83k32o9hWJl69xTjw82W0yDvnJyil  QP0DsaiNHbGYaMEl97D6Fnge67LpKpvaVrkY4qQZ IyBTVO9KTLxeObIHOWsCqX8oj8WSaXMwSJQtrFbMEdZFsM8xyU190DrjMjrsG90Gydu4OSm8sSTpF4yNVn4jBIqWzBLCYTx4HwDs71JVpprjeTQ a5MfMpjII3HmiwX3GHC9cWXvaQfVJ8yAa8lkbOwdLVqtXn7JObGOBinS7U9X6t8uSG4Cus3zSJIAxwscoFw QjnLceTcnAjwuW4PQRYDpRyYAKxu 3QijMmVxAUK1xPBWIjsrpRsha j2bR78SbJr6y2XpOqCjdK0j8jubrUIgxXFg8vhu6N82rGUMx496IlU0Ek3nFjhWAieMVX2TyfFu72J22vXTPXM4J0lmreQLTrMbX9vSMCIf2Ritar0YZhkILXi4M7kyey2N6YTdZM90RaTOnKyQgAUEkjpKdGBiT x QLwgPqR8BHQFASkcn6MJjmAEl5YZ7O9z02r0aCPdPJg1HYy29iK3 0lgXJssgdGK5EhXZ14qt55rwgceMs uKNLuLU0zO0ePJPUZ2MvKgqto2dgNMkL7110ZwsAO43GmUGHsbihiIoyoR5sT1blHuowhkKBYTMBWDxjvSJgzwwUpIK5annS2AzJ2HKq0 wgOeYVaXs JIvps1nxy935MyzOYaX3VnrPdYt 2cx66rlc4w1QNtowJ1076LFBfUzfiDNlS5fau8wp4m9C0BxdKjEpoAzqEkQGWBwgX",
+          "reasoning": "CdLPkt69r8xLvbo0BCfCFBCXD9XgI9La SfNztcagQ2PChdi6OCOxmsHqi9NonmkIIiGfzmRT75js7nQgERauzSUZB7FoNhFDHR ThlxZV5uhet0 KHv85lfuTKHYVUaHlUYtMFfauAis631v8dpDYFP7A4kCs28ZItnoNHzf KtrI lvwdkJsreLytj4QaR91kQ32CIuwHLjmGl76w7YFebmX E9",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_6731970947448240698",
+              "id": "call_mock_13012343436555907628",
               "function": {
                 "name": "AppendTask",
                 "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input['context'])}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":{\"$starlark\":\"[[{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(item)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}] for item in input['items']]\"}}"
@@ -538,7 +539,7 @@
           "role": "tool",
           "index": 25,
           "content": "1",
-          "tool_call_id": "call_mock_6731970947448240698"
+          "tool_call_id": "call_mock_13012343436555907628"
         },
         {
           "role": "assistant",
@@ -547,8 +548,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "Ww3ihsJENvXdRgucPrO7OZU3A1ziFVL2zuu2 EZDlNOfI6pz1gf1HH nmUPsQ",
           "tool_calls": null,
-          "content": "hcoaDfnGEtlETJoklzI9kfnWatN",
+          "content": "2tt8EOAM19apGLffAgg41bTIh2FjaZzDy5W2ltxjRQLMjSmHu9DmWy8h8W",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
