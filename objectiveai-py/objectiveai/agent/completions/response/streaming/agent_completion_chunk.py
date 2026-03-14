@@ -26,3 +26,5 @@ using the [`push`](Self::push) method."""
     upstream: AgentUpstream = Field(..., description='Upstream provider')
     usage: Optional[AgentCompletionsResponseUsage] = Field(None, description='Token usage (only present in the final chunk).')
 
+
+import objectiveai.agent.completions.response.streaming.agent_completion_chunk_methods  # noqa: F401, E402

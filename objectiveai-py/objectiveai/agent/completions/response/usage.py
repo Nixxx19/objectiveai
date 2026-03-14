@@ -24,3 +24,5 @@ assistant responses within a single agent completion."""
     total_cost: float = Field(..., description='Total cost including upstream provider charges. Only differs from `cost`\nwhen using BYOK (Bring Your Own Key).', ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)
     total_tokens: int = Field(..., description='Sum of completion and prompt tokens.', ge=0, le=18446744073709551615)
 
+
+import objectiveai.agent.completions.response.usage_methods  # noqa: F401, E402

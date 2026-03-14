@@ -14,3 +14,5 @@ class AgentCompletionsResponsePromptTokensDetails(BaseModel):
     cached_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Tokens served from cache.')
     video_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Video input tokens.')
 
+
+import objectiveai.agent.completions.response.prompt_tokens_details_methods  # noqa: F401, E402

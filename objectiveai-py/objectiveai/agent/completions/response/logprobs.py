@@ -13,3 +13,5 @@ class AgentCompletionsResponseLogprobs(BaseModel):
     content: Optional[list[AgentCompletionsResponseLogprob]] = Field(None, description='Log probabilities for content tokens.')
     refusal: Optional[list[AgentCompletionsResponseLogprob]] = Field(None, description='Log probabilities for refusal tokens.')
 
+
+import objectiveai.agent.completions.response.logprobs_methods  # noqa: F401, E402

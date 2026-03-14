@@ -1020,8 +1020,16 @@ def main() -> None:
 
         content += "\n\n" + "\n\n".join(model_codes) + "\n"
 
-        # Write the file
+        # Check for a companion _methods.py file and import it if present.
+        # This allows hand-written methods (push, etc.) to be monkey-patched
+        # onto the auto-generated classes automatically when the module is imported.
         full_path = SRC_DIR / (file_path.replace("/", os.sep) + ".py")
+        methods_path = SRC_DIR / (file_path.replace("/", os.sep) + "_methods.py")
+        if methods_path.exists():
+            methods_module = "objectiveai." + file_path.replace("/", ".") + "_methods"
+            content += f"\nimport {methods_module}  # noqa: F401, E402\n"
+
+        # Write the file
         full_path.parent.mkdir(parents=True, exist_ok=True)
         full_path.write_text(content, encoding="utf-8")
 

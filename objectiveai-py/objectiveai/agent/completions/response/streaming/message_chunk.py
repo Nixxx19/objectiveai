@@ -20,3 +20,5 @@ class AgentCompletionsResponseStreamingMessageChunk(RootModel):
 
     root: Union[AgentCompletionsResponseStreamingMessageChunkVariant1, AgentCompletionsResponseStreamingMessageChunkVariant2]
 
+
+import objectiveai.agent.completions.response.streaming.message_chunk_methods  # noqa: F401, E402

@@ -16,3 +16,5 @@ class AgentCompletionsMessageAssistantToolCallDelta(BaseModel):
     index: int = Field(..., description='The index of this tool call.', ge=0, le=18446744073709551615)
     type_: Optional[AgentCompletionsMessageAssistantToolCallType] = Field(None, alias='type', description='The type of tool call (always "function").')
 
+
+import objectiveai.agent.completions.message.assistant_tool_call_delta_methods  # noqa: F401, E402

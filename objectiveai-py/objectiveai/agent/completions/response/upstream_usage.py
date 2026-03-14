@@ -26,3 +26,5 @@ It includes upstream-specific fields like `cost_multiplier` and `is_byok`."""
     total_cost: float = Field(..., description="Total cost including ObjectiveAI's charge plus all upstream charges.\nFor BYOK requests, ObjectiveAI only charges the cost_multiplier difference,\nbut total_cost still includes what the upstream provider charged.", ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)
     total_tokens: int = Field(..., description='Total tokens (prompt + completion).', ge=0, le=18446744073709551615)
 
+
+import objectiveai.agent.completions.response.upstream_usage_methods  # noqa: F401, E402

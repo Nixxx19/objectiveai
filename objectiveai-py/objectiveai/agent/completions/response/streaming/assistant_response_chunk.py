@@ -36,3 +36,5 @@ using the [`push`](Self::push) method."""
     upstream_id: str
     usage: Optional[AgentCompletionsResponseUpstreamUsage] = Field(None, description='Upstream usage for this assistant response (set by upstream clients).')
 
+
+import objectiveai.agent.completions.response.streaming.assistant_response_chunk_methods  # noqa: F401, E402
