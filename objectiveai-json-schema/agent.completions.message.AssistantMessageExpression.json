@@ -7,7 +7,24 @@
       "description": "The content expression.",
       "anyOf": [
         {
-          "$ref": "Nullable_agent.completions.message.RichContentExpression.functions.expression.WithExpression"
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "$ref": "agent.completions.message.RichContentExpression"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
         },
         {
           "type": "null"
@@ -17,7 +34,24 @@
     "name": {
       "anyOf": [
         {
-          "$ref": "Nullable_string.functions.expression.WithExpression"
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
         },
         {
           "type": "null"
@@ -27,7 +61,24 @@
     "reasoning": {
       "anyOf": [
         {
-          "$ref": "Nullable_string.functions.expression.WithExpression"
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
         },
         {
           "type": "null"
@@ -37,7 +88,24 @@
     "refusal": {
       "anyOf": [
         {
-          "$ref": "Nullable_string.functions.expression.WithExpression"
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
         },
         {
           "type": "null"
@@ -47,7 +115,37 @@
     "tool_calls": {
       "anyOf": [
         {
-          "$ref": "Nullable_Array_of_agent.completions.message.AssistantToolCallExpression.functions.expression.WithExpression.functions.expression.WithExpression"
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+                    "anyOf": [
+                      {
+                        "description": "An expression (JMESPath or Starlark) to evaluate.",
+                        "$ref": "functions.expression.Expression"
+                      },
+                      {
+                        "description": "A literal value.",
+                        "$ref": "agent.completions.message.AssistantToolCallExpression"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
         },
         {
           "type": "null"

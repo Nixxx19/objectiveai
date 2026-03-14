@@ -1,5 +1,117 @@
+use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
+
+/// Returns true if the name represents a generic type instantiation.
+/// A name is generic if any dot-separated segment that is NOT the last one
+/// starts with an uppercase letter (PascalCase).
+fn is_generic_name(name: &str) -> bool {
+    let segments: Vec<&str> = name.split('.').collect();
+    segments
+        .iter()
+        .take(segments.len().saturating_sub(1))
+        .any(|s| s.starts_with(|c: char| c.is_uppercase()))
+}
+
+/// Replace `$ref: "#/$defs/<generic>"` with the inlined definition throughout `value`.
+/// Returns true if any replacement was made.
+fn inline_generic_refs(
+    value: &mut serde_json::Value,
+    generic_defs: &HashMap<String, serde_json::Value>,
+) -> bool {
+    let mut changed = false;
+    match value {
+        serde_json::Value::Object(map) => {
+            // Check if this object is a bare `$ref` to a generic def
+            let should_inline = map
+                .get("$ref")
+                .and_then(|v| v.as_str())
+                .and_then(|r| r.strip_prefix("#/$defs/"))
+                .and_then(|name| generic_defs.get(name).cloned());
+
+            if let Some(def) = should_inline {
+                *value = def;
+                // The inlined value might itself have refs, recurse
+                inline_generic_refs(value, generic_defs);
+                return true;
+            }
+
+            // Recurse into all values
+            for (_, v) in map.iter_mut() {
+                if inline_generic_refs(v, generic_defs) {
+                    changed = true;
+                }
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            for v in arr.iter_mut() {
+                if inline_generic_refs(v, generic_defs) {
+                    changed = true;
+                }
+            }
+        }
+        _ => {}
+    }
+    changed
+}
+
+/// Inline generic `$defs` into the schema, replacing `$ref` with the actual definition.
+/// Non-generic defs are kept in `$defs` for normalize to handle.
+fn inline_generic_defs(schema: &mut serde_json::Value) {
+    let map = match schema.as_object_mut() {
+        Some(m) => m,
+        None => return,
+    };
+    let defs = match map.remove("$defs") {
+        Some(serde_json::Value::Object(defs)) => defs,
+        other => {
+            if let Some(v) = other {
+                map.insert("$defs".to_string(), v);
+            }
+            return;
+        }
+    };
+
+    // Separate generic and non-generic defs
+    let mut generic_defs: HashMap<String, serde_json::Value> = HashMap::new();
+    let mut non_generic_defs = serde_json::Map::new();
+    for (name, def) in defs {
+        if is_generic_name(&name) {
+            generic_defs.insert(name, def);
+        } else {
+            non_generic_defs.insert(name, def);
+        }
+    }
+
+    // Recursively resolve generic defs that reference other generic defs.
+    // Remove each key while resolving so self-references are skipped,
+    // then iterate until no more changes occur (fixed point).
+    loop {
+        let mut changed = false;
+        let keys: Vec<String> = generic_defs.keys().cloned().collect();
+        for key in keys {
+            let mut def = generic_defs.remove(&key).unwrap();
+            if inline_generic_refs(&mut def, &generic_defs) {
+                changed = true;
+            }
+            generic_defs.insert(key, def);
+        }
+        if !changed {
+            break;
+        }
+    }
+
+    // Inline generic refs throughout the main schema
+    inline_generic_refs(schema, &generic_defs);
+
+    // Put back non-generic defs (normalize will strip $defs and rewrite $ref)
+    if !non_generic_defs.is_empty() {
+        schema
+            .as_object_mut()
+            .unwrap()
+            .insert("$defs".to_string(), serde_json::Value::Object(non_generic_defs));
+    }
+}
 
 fn normalize(value: &mut serde_json::Value, inside_properties: bool, title: &str) {
     match value {
@@ -220,6 +332,7 @@ fn main() {
             .unwrap_or_else(|| panic!("schema missing title: {json}"))
             .to_string();
 
+        inline_generic_defs(&mut json);
         normalize(&mut json, false, &title);
         order_keys(&mut json, false);
 

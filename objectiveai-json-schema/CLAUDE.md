@@ -62,9 +62,8 @@ All guarantees below apply **outside of `properties` objects**. Inside `properti
 | 10 | No `format` on `type: "integer"` or `type: "number"` (bounds are explicit via `minimum`/`maximum`) | `no_numeric_format` |
 | 11 | `minimum` never exceeds `maximum` | `minimum_never_exceeds_maximum` |
 | 12 | Every `$ref` target resolves to an existing schema title | `all_refs_resolve` |
-| 13 | `anyOf` inside `properties` is exactly 2 variants: one non-null type + `{"type": "null"}` (multi-variant unions only at root) | `anyof_in_properties_is_nullable_only` |
-| 14 | `anyOf` with 2+ non-null variants never includes a `{"type": "null"}` variant (multi-variant unions are never nullable) | `multi_variant_anyof_never_nullable` |
-| 15 | `format` is only ever `"uuid"` or `"date-time"` | `format_is_uuid_or_datetime_only` |
+| 13 | `anyOf` with 2+ non-null variants never includes a `{"type": "null"}` variant (multi-variant unions are never nullable) | `multi_variant_anyof_never_nullable` |
+| 14 | `format` is only ever `"uuid"` or `"date-time"` | `format_is_uuid_or_datetime_only` |
 
 ## Implications for SDK Code Generators
 
@@ -76,5 +75,4 @@ Code generators (Python, TypeScript, etc.) that consume these schemas can rely o
 - **Clean `$ref` targets** — Always bare type names (e.g., `"agent.Agent"`), never JSON Pointer paths.
 - **Deterministic key order** — Both keyword order and property field order are stable and predictable.
 - **No ambiguous union+ref** — An object never has both `anyOf` and `$ref`.
-- **No multi-variant unions in properties** — `anyOf` inside `properties` is always nullable (exactly 2 variants, one being `{"type": "null"}`). Multi-variant `anyOf` only appears at the root level.
 - **No nullable multi-variant unions** — `anyOf` with 2+ non-null variants never also contains `{"type": "null"}`. Nullability and union discrimination are mutually exclusive.
