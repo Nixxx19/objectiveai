@@ -14,11 +14,8 @@ pub struct ReasoningSummaryChunk {
 impl ReasoningSummaryChunk {
     pub fn push(&mut self, other: &ReasoningSummaryChunk) {
         self.inner.push(&other.inner);
-        match (&mut self.error, &other.error) {
-            (None, Some(other_error)) => {
-                self.error = Some(other_error.clone());
-            }
-            _ => {}
+        if let Some(error) = &other.error {
+            self.error = Some(error.clone());
         }
     }
 }
