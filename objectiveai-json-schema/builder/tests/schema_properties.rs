@@ -296,6 +296,52 @@ fn no_numeric_format() {
     }
 }
 
+fn check_format_values(
+    value: &serde_json::Value,
+    inside_properties: bool,
+    errors: &mut Vec<String>,
+    path: &str,
+) {
+    match value {
+        serde_json::Value::Object(map) => {
+            if !inside_properties {
+                if let Some(serde_json::Value::String(fmt)) = map.get("format") {
+                    if fmt != "uuid" && fmt != "date-time" {
+                        errors.push(format!("{path}: format is \"{fmt}\" (expected \"uuid\" or \"date-time\")"));
+                    }
+                }
+            }
+            for (k, v) in map {
+                let child_path = if path.is_empty() {
+                    k.clone()
+                } else {
+                    format!("{path}.{k}")
+                };
+                check_format_values(v, k == "properties", errors, &child_path);
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            for (i, v) in arr.iter().enumerate() {
+                check_format_values(v, false, errors, &format!("{path}[{i}]"));
+            }
+        }
+        _ => {}
+    }
+}
+
+#[test]
+fn format_is_uuid_or_datetime_only() {
+    for (name, schema) in load_schemas() {
+        let mut errors = Vec::new();
+        check_format_values(&schema, false, &mut errors, &name);
+        assert!(
+            errors.is_empty(),
+            "format must be \"uuid\" or \"date-time\":\n{}",
+            errors.join("\n")
+        );
+    }
+}
+
 fn collect_refs(value: &serde_json::Value, refs: &mut std::collections::BTreeSet<String>, inside_properties: bool) {
     match value {
         serde_json::Value::Object(map) => {

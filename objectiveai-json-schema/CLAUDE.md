@@ -64,6 +64,7 @@ All guarantees below apply **outside of `properties` objects**. Inside `properti
 | 12 | Every `$ref` target resolves to an existing schema title | `all_refs_resolve` |
 | 13 | `anyOf` inside `properties` is exactly 2 variants: one non-null type + `{"type": "null"}` (multi-variant unions only at root) | `anyof_in_properties_is_nullable_only` |
 | 14 | `anyOf` with 2+ non-null variants never includes a `{"type": "null"}` variant (multi-variant unions are never nullable) | `multi_variant_anyof_never_nullable` |
+| 15 | `format` is only ever `"uuid"` or `"date-time"` | `format_is_uuid_or_datetime_only` |
 
 ## Implications for SDK Code Generators
 
