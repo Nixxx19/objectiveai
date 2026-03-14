@@ -200,18 +200,11 @@ fn order_keys(value: &mut serde_json::Value, inside_properties: bool) {
 fn main() {
     let out_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
 
-    // Clear everything except the builder folder
+    // Clear only .json files (preserve builder/, CLAUDE.md, etc.)
     for entry in fs::read_dir(&out_dir).unwrap() {
         let entry = entry.unwrap();
-        let name = entry.file_name();
-        let name = name.to_str().unwrap();
-        if name == "builder" {
-            continue;
-        }
         let path = entry.path();
-        if path.is_dir() {
-            fs::remove_dir_all(&path).unwrap();
-        } else {
+        if path.extension().and_then(|e| e.to_str()) == Some("json") {
             fs::remove_file(&path).unwrap();
         }
     }
