@@ -844,35 +844,34 @@ def _generate_flattened_ref_model(
 ) -> str:
     """Generate a model for schemas with properties AND a $ref.
 
-    Generates a single variant type for the $ref. The converter discovers
-    it by naming convention and emits $ref directly (not anyOf).
+    The $ref represents inheritance: the generated class extends the $ref
+    target and adds the local properties on top (like Zod's .extend()).
     """
     properties = schema.get("properties", {})
 
-    # Generate a variant type for the $ref
-    ref_schema = {"$ref": ref_target}
-    var_code, _, var_refs = _generate_variant_class(
-        ref_schema, pascal_name, 1, title, all_titles,
-    )
-    refs.update(var_refs)
+    # Track the $ref as a dependency
+    refs.add(ref_target)
+    base_class = resolve_ref_name(ref_target)
 
-    # Generate the BaseModel with properties
-    lines = [f"class {pascal_name}(BaseModel):"]
+    # Generate a class that inherits from the $ref target
+    lines = [f"class {pascal_name}({base_class}):"]
     if safe_desc:
         lines.append(f'    """{safe_desc}"""')
     if schema_title:
         lines.append(f"    model_config = ConfigDict(title={schema_title!r})")
         lines.append("")
 
-    for prop_name, prop_schema in properties.items():
-        collect_refs(prop_schema, refs)
-        prop_type = convert_to_type(prop_schema, title, all_titles)
-        is_required = not _is_nullable(prop_schema)
-        line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
-        lines.append(f"    {line}")
+    if properties:
+        for prop_name, prop_schema in properties.items():
+            collect_refs(prop_schema, refs)
+            prop_type = convert_to_type(prop_schema, title, all_titles)
+            is_required = not _is_nullable(prop_schema)
+            line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
+            lines.append(f"    {line}")
+    else:
+        lines.append("    pass")
 
-    main_code = "\n".join(lines) + "\n"
-    return "\n\n".join([var_code, main_code])
+    return "\n".join(lines) + "\n"
 
 
 # ---------------------------------------------------------------------------
@@ -1060,6 +1059,16 @@ def main() -> None:
             model_codes.append(code)
             all_refs |= refs
 
+        # --- Detect base class refs (inheritance, can't be deferred) ---
+        # Scan generated code for `class Foo(Bar):` where Bar is not
+        # BaseModel/RootModel — those refs must be eagerly imported.
+        base_class_names: set[str] = set()
+        for line in "\n".join(model_codes).split("\n"):
+            if line.startswith("class ") and "(" in line:
+                base = line.split("(")[1].split(")")[0].strip()
+                if base not in ("BaseModel", "RootModel"):
+                    base_class_names.add(base)
+
         # --- Build imports ---
         import_lines: list[str] = []
 
@@ -1144,13 +1153,25 @@ def main() -> None:
                 else:
                     import_items.append(class_name)
 
-            items_str = ", ".join(sorted(import_items))
-            if is_cyclic:
-                deferred_imports.append(
-                    f"from {module_path} import {items_str}  # noqa: E402"
+            # Split items: base class refs must be eager even in cycles
+            eager_items = []
+            deferred_items = []
+            for item in sorted(import_items):
+                # Extract the local name (after "as" if aliased)
+                local = item.split(" as ")[-1].strip()
+                if is_cyclic and local not in base_class_names:
+                    deferred_items.append(item)
+                else:
+                    eager_items.append(item)
+
+            if eager_items:
+                regular_imports.append(
+                    f"from {module_path} import {', '.join(eager_items)}"
                 )
-            else:
-                regular_imports.append(f"from {module_path} import {items_str}")
+            if deferred_items:
+                deferred_imports.append(
+                    f"from {module_path} import {', '.join(deferred_items)}  # noqa: E402"
+                )
 
         import_lines.extend(regular_imports)
 
@@ -1165,6 +1186,8 @@ def main() -> None:
         if deferred_imports:
             content += "\n# Deferred imports to break circular dependencies\n"
             content += "\n".join(deferred_imports) + "\n"
+
+            pass
 
         # Write the file
         full_path = SRC_DIR / (file_path.replace("/", os.sep) + ".py")
@@ -1224,6 +1247,8 @@ def main() -> None:
                 GENERATED_HEADER
                 + "\n"
                 + "def __getattr__(name):\n"
+                + "    from objectiveai._rebuild import ensure_rebuilt\n"
+                + "    ensure_rebuilt()\n"
                 + "    import importlib\n"
                 + "    _generated = importlib.import_module(__name__ + '._generated')\n"
                 + "    return getattr(_generated, name)\n"
@@ -1277,6 +1302,21 @@ def main() -> None:
                         p_init.write_text(GENERATED_HEADER, encoding="utf-8")
 
     print(f"Generated {test_count} test files")
+
+    # -----------------------------------------------------------------------
+    # Generate _module_list.py — list of all generated module paths.
+    # Used by _rebuild.py to load all modules and resolve forward references.
+    # -----------------------------------------------------------------------
+    module_list_lines = [GENERATED_HEADER, "MODULES = ["]
+    for file_path in sorted(file_groups.keys()):
+        module_path = "objectiveai." + file_path.replace("/", ".")
+        module_list_lines.append(f"    {module_path!r},")
+    module_list_lines.append("]")
+
+    module_list_path = SRC_DIR / "_module_list.py"
+    module_list_path.write_text("\n".join(module_list_lines) + "\n", encoding="utf-8")
+    print(f"Generated _module_list.py with {len(file_groups)} modules")
+
     print("Done!")
 
 

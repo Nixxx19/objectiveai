@@ -34,8 +34,8 @@ from .remote_profile import RemoteProfile, RemoteProfileVariant1, RemoteProfileV
 from .remote_tasks_profile import RemoteTasksProfile  # noqa: F401
 from .scalar_function_task import ScalarFunctionTask  # noqa: F401
 from .scalar_function_task_expression import ScalarFunctionTaskExpression  # noqa: F401
-from .task import Task, TaskVariant1, TaskVariant1Variant1, TaskVariant2, TaskVariant2Variant1, TaskVariant3, TaskVariant3Variant1, TaskVariant4, TaskVariant4Variant1, TaskVariant5, TaskVariant5Variant1  # noqa: F401
-from .task_expression import TaskExpression, TaskExpressionVariant1, TaskExpressionVariant1Variant1, TaskExpressionVariant2, TaskExpressionVariant2Variant1, TaskExpressionVariant3, TaskExpressionVariant3Variant1, TaskExpressionVariant4, TaskExpressionVariant4Variant1, TaskExpressionVariant5, TaskExpressionVariant5Variant1  # noqa: F401
+from .task import Task, TaskVariant1, TaskVariant2, TaskVariant3, TaskVariant4, TaskVariant5  # noqa: F401
+from .task_expression import TaskExpression, TaskExpressionVariant1, TaskExpressionVariant2, TaskExpressionVariant3, TaskExpressionVariant4, TaskExpressionVariant5  # noqa: F401
 from .task_profile import TaskProfile, TaskProfileVariant1, TaskProfileVariant2, TaskProfileVariant3  # noqa: F401
 from .usage_function import UsageFunction  # noqa: F401
 from .usage_function_profile_pair import UsageFunctionProfilePair  # noqa: F401

@@ -4,17 +4,17 @@ from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 from objectiveai.agent.agent import Agent as AgentAgent
-from objectiveai.agent.agent_base import AgentBase as AgentAgentBase
+from objectiveai.agent.agent_base import AgentBase
 from objectiveai.agent.claude_agent_sdk.agent import Agent as AgentClaudeAgentSdkAgent
-from objectiveai.agent.claude_agent_sdk.agent_base import AgentBase
-from objectiveai.agent.mock.agent import Agent as AgentMockAgent
+from objectiveai.agent.claude_agent_sdk.agent_base import AgentBase as AgentClaudeAgentSdkAgentBase
+from objectiveai.agent.mock.agent import Agent
 from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
-from objectiveai.agent.openrouter.agent import Agent
+from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
 from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouterAgentBase
 
 
 class WithFallbacksAndCount_AgentAgentVariant1(RootModel):
-    root: Agent
+    root: AgentOpenrouterAgent
 
 
 class WithFallbacksAndCount_AgentAgentVariant2(RootModel):
@@ -22,7 +22,7 @@ class WithFallbacksAndCount_AgentAgentVariant2(RootModel):
 
 
 class WithFallbacksAndCount_AgentAgentVariant3(RootModel):
-    root: AgentMockAgent
+    root: Agent
 
 
 class WithFallbacksAndCount_AgentAgent(BaseModel):
@@ -41,7 +41,7 @@ class WithFallbacksAndCount_AgentAgentBaseVariant1(RootModel):
 
 
 class WithFallbacksAndCount_AgentAgentBaseVariant2(RootModel):
-    root: AgentBase
+    root: AgentClaudeAgentSdkAgentBase
 
 
 class WithFallbacksAndCount_AgentAgentBaseVariant3(RootModel):
@@ -56,5 +56,5 @@ along with fallback agents to try if the primary fails."""
     model_config = ConfigDict(title='agent.WithFallbacksAndCount.agent.AgentBase')
 
     count: int = Field(1, description='Number of instances of this agent in the ensemble. Defaults to 1.', ge=0, le=18446744073709551615)
-    fallbacks: Optional[list[AgentAgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
+    fallbacks: Optional[list[AgentBase]] = Field(None, description='Fallback agents to try if the primary fails.')
 

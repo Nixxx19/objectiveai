@@ -7,5 +7,5 @@ from .alpha_vector_branch_state import AlphaVectorBranchState  # noqa: F401
 from .alpha_vector_leaf_state import AlphaVectorLeafState  # noqa: F401
 from .alpha_vector_state import AlphaVectorState  # noqa: F401
 from .params import Params  # noqa: F401
-from .params_state import ParamsState, ParamsStateVariant1, ParamsStateVariant1Variant1, ParamsStateVariant2, ParamsStateVariant2Variant1, ParamsStateVariant3, ParamsStateVariant3Variant1, ParamsStateVariant4, ParamsStateVariant4Variant1, ParamsStateVariant5, ParamsStateVariant5Variant1, ParamsStateVariant6, ParamsStateVariant6Variant1  # noqa: F401
-from .state import State, StateVariant1, StateVariant1Variant1, StateVariant2, StateVariant2Variant1, StateVariant3, StateVariant3Variant1, StateVariant4, StateVariant4Variant1  # noqa: F401
+from .params_state import ParamsState, ParamsStateVariant1, ParamsStateVariant2, ParamsStateVariant3, ParamsStateVariant4, ParamsStateVariant5, ParamsStateVariant6  # noqa: F401
+from .state import State, StateVariant1, StateVariant2, StateVariant3, StateVariant4  # noqa: F401
