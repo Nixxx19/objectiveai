@@ -17,11 +17,8 @@ pub struct VectorCompletionTaskChunk {
 impl VectorCompletionTaskChunk {
     pub fn push(&mut self, other: &VectorCompletionTaskChunk) {
         self.inner.push(&other.inner);
-        match (&mut self.error, &other.error) {
-            (None, Some(other_error)) => {
-                self.error = Some(other_error.clone());
-            }
-            _ => {}
+        if let Some(error) = &other.error {
+            self.error = Some(error.clone());
         }
     }
 }
