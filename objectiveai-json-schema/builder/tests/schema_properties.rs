@@ -352,6 +352,61 @@ fn minimum_never_exceeds_maximum() {
     }
 }
 
+fn check_multi_variant_anyof_not_nullable(
+    value: &serde_json::Value,
+    inside_properties: bool,
+    errors: &mut Vec<String>,
+    path: &str,
+) {
+    match value {
+        serde_json::Value::Object(map) => {
+            if !inside_properties {
+                if let Some(serde_json::Value::Array(variants)) = map.get("anyOf") {
+                    let non_null_count = variants
+                        .iter()
+                        .filter(|v| v.get("type").and_then(|t| t.as_str()) != Some("null"))
+                        .count();
+                    let has_null = variants.iter().any(|v| {
+                        v.get("type").and_then(|t| t.as_str()) == Some("null")
+                    });
+                    if non_null_count >= 2 && has_null {
+                        errors.push(format!(
+                            "{path}: anyOf has {non_null_count} non-null variants plus a null variant"
+                        ));
+                    }
+                }
+            }
+            for (k, v) in map {
+                let child_path = if path.is_empty() {
+                    k.clone()
+                } else {
+                    format!("{path}.{k}")
+                };
+                check_multi_variant_anyof_not_nullable(v, k == "properties", errors, &child_path);
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            for (i, v) in arr.iter().enumerate() {
+                check_multi_variant_anyof_not_nullable(v, false, errors, &format!("{path}[{i}]"));
+            }
+        }
+        _ => {}
+    }
+}
+
+#[test]
+fn multi_variant_anyof_never_nullable() {
+    for (name, schema) in load_schemas() {
+        let mut errors = Vec::new();
+        check_multi_variant_anyof_not_nullable(&schema, false, &mut errors, &name);
+        assert!(
+            errors.is_empty(),
+            "anyOf with 2+ non-null variants must not include a null variant:\n{}",
+            errors.join("\n")
+        );
+    }
+}
+
 fn check_anyof_in_properties(
     value: &serde_json::Value,
     in_properties: bool,
