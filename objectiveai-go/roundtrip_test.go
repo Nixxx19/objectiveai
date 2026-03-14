@@ -48,648 +48,654 @@ import (
 	vector_completions_response_unary "github.com/objective-ai/objectiveai-go/vector/completions/response/unary"
 )
 
+func describedForTitle(title string) any {
+	switch title {
+	case "PrefixedUuid":
+		return PrefixedUuid{}
+	case "ResponseError":
+		return ResponseError{}
+	case "agent.Agent":
+		return agent.AgentSchema{}
+	case "agent.AgentBase":
+		return agent.AgentBaseSchema{}
+	case "agent.GetAgent":
+		return agent.GetAgent{}
+	case "agent.ListAgent":
+		return agent.ListAgent{}
+	case "agent.ListAgentItem":
+		return agent.ListAgentItem{}
+	case "agent.McpServer":
+		return agent.McpServer{}
+	case "agent.OutputMode":
+		return agent.OutputModeSchema{}
+	case "agent.Upstream":
+		return agent.UpstreamSchema{}
+	case "agent.UsageAgent":
+		return agent.UsageAgent{}
+	case "agent.WithFallbacksAndCount.agent.Agent":
+		return agent.WithFallbacksAndCountAgentAgent{}
+	case "agent.WithFallbacksAndCount.agent.AgentBase":
+		return agent.WithFallbacksAndCountAgentAgentBase{}
+	case "agent.claude_agent_sdk.Agent":
+		return agent_claude_agent_sdk.Agent{}
+	case "agent.claude_agent_sdk.AgentBase":
+		return agent_claude_agent_sdk.AgentBase{}
+	case "agent.claude_agent_sdk.Effort":
+		return agent_claude_agent_sdk.EffortSchema{}
+	case "agent.claude_agent_sdk.OutputMode":
+		return agent_claude_agent_sdk.OutputModeSchema{}
+	case "agent.claude_agent_sdk.Upstream":
+		return agent_claude_agent_sdk.UpstreamSchema{}
+	case "agent.completions.message.AssistantMessage":
+		return agent_completions_message.AssistantMessage{}
+	case "agent.completions.message.AssistantMessageExpression":
+		return agent_completions_message.AssistantMessageExpression{}
+	case "agent.completions.message.AssistantToolCall":
+		return agent_completions_message.AssistantToolCall{}
+	case "agent.completions.message.AssistantToolCallDelta":
+		return agent_completions_message.AssistantToolCallDelta{}
+	case "agent.completions.message.AssistantToolCallExpression":
+		return agent_completions_message.AssistantToolCallExpression{}
+	case "agent.completions.message.AssistantToolCallFunction":
+		return agent_completions_message.AssistantToolCallFunction{}
+	case "agent.completions.message.AssistantToolCallFunctionDelta":
+		return agent_completions_message.AssistantToolCallFunctionDelta{}
+	case "agent.completions.message.AssistantToolCallFunctionExpression":
+		return agent_completions_message.AssistantToolCallFunctionExpression{}
+	case "agent.completions.message.AssistantToolCallType":
+		return agent_completions_message.AssistantToolCallTypeSchema{}
+	case "agent.completions.message.DeveloperMessage":
+		return agent_completions_message.DeveloperMessage{}
+	case "agent.completions.message.DeveloperMessageExpression":
+		return agent_completions_message.DeveloperMessageExpression{}
+	case "agent.completions.message.File":
+		return agent_completions_message.File{}
+	case "agent.completions.message.ImageUrl":
+		return agent_completions_message.ImageUrl{}
+	case "agent.completions.message.ImageUrlDetail":
+		return agent_completions_message.ImageUrlDetailSchema{}
+	case "agent.completions.message.InputAudio":
+		return agent_completions_message.InputAudio{}
+	case "agent.completions.message.Message":
+		return agent_completions_message.MessageSchema{}
+	case "agent.completions.message.MessageExpression":
+		return agent_completions_message.MessageExpressionSchema{}
+	case "agent.completions.message.RichContent":
+		return agent_completions_message.RichContentSchema{}
+	case "agent.completions.message.RichContentExpression":
+		return agent_completions_message.RichContentExpressionSchema{}
+	case "agent.completions.message.RichContentPart":
+		return agent_completions_message.RichContentPartSchema{}
+	case "agent.completions.message.RichContentPartExpression":
+		return agent_completions_message.RichContentPartExpressionSchema{}
+	case "agent.completions.message.SimpleContent":
+		return agent_completions_message.SimpleContentSchema{}
+	case "agent.completions.message.SimpleContentExpression":
+		return agent_completions_message.SimpleContentExpressionSchema{}
+	case "agent.completions.message.SimpleContentPart":
+		return agent_completions_message.SimpleContentPart{}
+	case "agent.completions.message.SimpleContentPartExpression":
+		return agent_completions_message.SimpleContentPartExpression{}
+	case "agent.completions.message.SystemMessage":
+		return agent_completions_message.SystemMessage{}
+	case "agent.completions.message.SystemMessageExpression":
+		return agent_completions_message.SystemMessageExpression{}
+	case "agent.completions.message.ToolMessage":
+		return agent_completions_message.ToolMessage{}
+	case "agent.completions.message.ToolMessageExpression":
+		return agent_completions_message.ToolMessageExpression{}
+	case "agent.completions.message.UserMessage":
+		return agent_completions_message.UserMessage{}
+	case "agent.completions.message.UserMessageExpression":
+		return agent_completions_message.UserMessageExpression{}
+	case "agent.completions.message.VideoUrl":
+		return agent_completions_message.VideoUrl{}
+	case "agent.completions.request.Agent":
+		return agent_completions_request.AgentSchema{}
+	case "agent.completions.request.AgentCompletionCreateParams":
+		return agent_completions_request.AgentCompletionCreateParams{}
+	case "agent.completions.request.Provider":
+		return agent_completions_request.Provider{}
+	case "agent.completions.request.ProviderDataCollection":
+		return agent_completions_request.ProviderDataCollectionSchema{}
+	case "agent.completions.request.ProviderMaxPrice":
+		return agent_completions_request.ProviderMaxPrice{}
+	case "agent.completions.request.ProviderSort":
+		return agent_completions_request.ProviderSortSchema{}
+	case "agent.completions.request.ResponseFormat":
+		return agent_completions_request.ResponseFormatSchema{}
+	case "agent.completions.request.ResponseFormatParam":
+		return agent_completions_request.ResponseFormatParamSchema{}
+	case "agent.completions.response.AssistantRole":
+		return agent_completions_response.AssistantRoleSchema{}
+	case "agent.completions.response.CompletionTokensDetails":
+		return agent_completions_response.CompletionTokensDetails{}
+	case "agent.completions.response.CostDetails":
+		return agent_completions_response.CostDetails{}
+	case "agent.completions.response.FinishReason":
+		return agent_completions_response.FinishReasonSchema{}
+	case "agent.completions.response.Logprob":
+		return agent_completions_response.Logprob{}
+	case "agent.completions.response.Logprobs":
+		return agent_completions_response.Logprobs{}
+	case "agent.completions.response.PromptTokensDetails":
+		return agent_completions_response.PromptTokensDetails{}
+	case "agent.completions.response.ToolResponse":
+		return agent_completions_response.ToolResponse{}
+	case "agent.completions.response.ToolRole":
+		return agent_completions_response.ToolRoleSchema{}
+	case "agent.completions.response.TopLogprob":
+		return agent_completions_response.TopLogprob{}
+	case "agent.completions.response.UpstreamUsage":
+		return agent_completions_response.UpstreamUsage{}
+	case "agent.completions.response.Usage":
+		return agent_completions_response.Usage{}
+	case "agent.completions.response.streaming.AgentCompletionChunk":
+		return agent_completions_response_streaming.AgentCompletionChunk{}
+	case "agent.completions.response.streaming.AssistantResponseChunk":
+		return agent_completions_response_streaming.AssistantResponseChunk{}
+	case "agent.completions.response.streaming.MessageChunk":
+		return agent_completions_response_streaming.MessageChunkSchema{}
+	case "agent.completions.response.streaming.Object":
+		return agent_completions_response_streaming.ObjectSchema{}
+	case "agent.completions.response.unary.AgentCompletion":
+		return agent_completions_response_unary.AgentCompletion{}
+	case "agent.completions.response.unary.AssistantResponse":
+		return agent_completions_response_unary.AssistantResponse{}
+	case "agent.completions.response.unary.Message":
+		return agent_completions_response_unary.MessageSchema{}
+	case "agent.completions.response.unary.Object":
+		return agent_completions_response_unary.ObjectSchema{}
+	case "agent.mock.Agent":
+		return agent_mock.Agent{}
+	case "agent.mock.AgentBase":
+		return agent_mock.AgentBase{}
+	case "agent.mock.OutputMode":
+		return agent_mock.OutputModeSchema{}
+	case "agent.mock.Upstream":
+		return agent_mock.UpstreamSchema{}
+	case "agent.openrouter.Agent":
+		return agent_openrouter.Agent{}
+	case "agent.openrouter.AgentBase":
+		return agent_openrouter.AgentBase{}
+	case "agent.openrouter.OutputMode":
+		return agent_openrouter.OutputModeSchema{}
+	case "agent.openrouter.Provider":
+		return agent_openrouter.Provider{}
+	case "agent.openrouter.ProviderQuantization":
+		return agent_openrouter.ProviderQuantizationSchema{}
+	case "agent.openrouter.Reasoning":
+		return agent_openrouter.Reasoning{}
+	case "agent.openrouter.ReasoningEffort":
+		return agent_openrouter.ReasoningEffortSchema{}
+	case "agent.openrouter.ReasoningSummaryVerbosity":
+		return agent_openrouter.ReasoningSummaryVerbositySchema{}
+	case "agent.openrouter.Stop":
+		return agent_openrouter.StopSchema{}
+	case "agent.openrouter.Upstream":
+		return agent_openrouter.UpstreamSchema{}
+	case "agent.openrouter.Verbosity":
+		return agent_openrouter.VerbositySchema{}
+	case "auth.ApiKeyWithMetadata":
+		return auth.ApiKeyWithMetadata{}
+	case "auth.CreateApiKeyRequest":
+		return auth.CreateApiKeyRequest{}
+	case "auth.CreateOpenRouterByokApiKeyRequest":
+		return auth.CreateOpenRouterByokApiKeyRequest{}
+	case "auth.DisableApiKeyRequest":
+		return auth.DisableApiKeyRequest{}
+	case "auth.GetCreditsResponse":
+		return auth.GetCreditsResponse{}
+	case "auth.GetOpenRouterByokApiKeyResponse":
+		return auth.GetOpenRouterByokApiKeyResponse{}
+	case "auth.ListApiKeyItem":
+		return auth.ListApiKeyItem{}
+	case "auth.ListApiKeyResponse":
+		return auth.ListApiKeyResponse{}
+	case "ensemble.Ensemble":
+		return ensemble.Ensemble{}
+	case "ensemble.EnsembleBase":
+		return ensemble.EnsembleBase{}
+	case "ensemble.GetEnsemble":
+		return ensemble.GetEnsemble{}
+	case "ensemble.ListEnsemble":
+		return ensemble.ListEnsemble{}
+	case "ensemble.ListEnsembleItem":
+		return ensemble.ListEnsembleItem{}
+	case "ensemble.UsageEnsemble":
+		return ensemble.UsageEnsemble{}
+	case "functions.AlphaInlineFunction":
+		return functions.AlphaInlineFunctionSchema{}
+	case "functions.AlphaRemoteFunction":
+		return functions.AlphaRemoteFunctionSchema{}
+	case "functions.CompiledTask":
+		return functions.CompiledTaskSchema{}
+	case "functions.FullInlineFunction":
+		return functions.FullInlineFunctionSchema{}
+	case "functions.FullRemoteFunction":
+		return functions.FullRemoteFunctionSchema{}
+	case "functions.Function":
+		return functions.FunctionSchema{}
+	case "functions.FunctionType":
+		return functions.FunctionTypeSchema{}
+	case "functions.GetFunction":
+		return functions.GetFunction{}
+	case "functions.GetFunctionProfilePair":
+		return functions.GetFunctionProfilePair{}
+	case "functions.InlineAutoProfile":
+		return functions.InlineAutoProfile{}
+	case "functions.InlineFunction":
+		return functions.InlineFunctionSchema{}
+	case "functions.InlineProfile":
+		return functions.InlineProfileSchema{}
+	case "functions.InlineTasksProfile":
+		return functions.InlineTasksProfile{}
+	case "functions.ListFunction":
+		return functions.ListFunction{}
+	case "functions.ListFunctionItem":
+		return functions.ListFunctionItem{}
+	case "functions.ListFunctionProfilePair":
+		return functions.ListFunctionProfilePair{}
+	case "functions.ListFunctionProfilePairItem":
+		return functions.ListFunctionProfilePairItem{}
+	case "functions.ListFunctionProfilePairsQueryParameters":
+		return functions.ListFunctionProfilePairsQueryParameters{}
+	case "functions.ListFunctionProfilePairsSource":
+		return functions.ListFunctionProfilePairsSourceSchema{}
+	case "functions.ListFunctionsQueryParameters":
+		return functions.ListFunctionsQueryParameters{}
+	case "functions.ListFunctionsSource":
+		return functions.ListFunctionsSourceSchema{}
+	case "functions.PlaceholderScalarFunctionTask":
+		return functions.PlaceholderScalarFunctionTask{}
+	case "functions.PlaceholderScalarFunctionTaskExpression":
+		return functions.PlaceholderScalarFunctionTaskExpression{}
+	case "functions.PlaceholderVectorFunctionTask":
+		return functions.PlaceholderVectorFunctionTask{}
+	case "functions.PlaceholderVectorFunctionTaskExpression":
+		return functions.PlaceholderVectorFunctionTaskExpression{}
+	case "functions.Profile":
+		return functions.ProfileSchema{}
+	case "functions.Remote":
+		return functions.RemoteSchema{}
+	case "functions.RemoteAutoProfile":
+		return functions.RemoteAutoProfile{}
+	case "functions.RemoteFunction":
+		return functions.RemoteFunctionSchema{}
+	case "functions.RemoteFunctionPath":
+		return functions.RemoteFunctionPath{}
+	case "functions.RemoteProfile":
+		return functions.RemoteProfileSchema{}
+	case "functions.RemoteTasksProfile":
+		return functions.RemoteTasksProfile{}
+	case "functions.ScalarFunctionTask":
+		return functions.ScalarFunctionTask{}
+	case "functions.ScalarFunctionTaskExpression":
+		return functions.ScalarFunctionTaskExpression{}
+	case "functions.Task":
+		return functions.TaskSchema{}
+	case "functions.TaskExpression":
+		return functions.TaskExpressionSchema{}
+	case "functions.TaskProfile":
+		return functions.TaskProfileSchema{}
+	case "functions.UsageFunction":
+		return functions.UsageFunction{}
+	case "functions.UsageFunctionProfilePair":
+		return functions.UsageFunctionProfilePair{}
+	case "functions.VectorCompletionTask":
+		return functions.VectorCompletionTask{}
+	case "functions.VectorCompletionTaskExpression":
+		return functions.VectorCompletionTaskExpression{}
+	case "functions.VectorFunctionTask":
+		return functions.VectorFunctionTask{}
+	case "functions.VectorFunctionTaskExpression":
+		return functions.VectorFunctionTaskExpression{}
+	case "functions.alpha_scalar.BranchTaskExpression":
+		return functions_alpha_scalar.BranchTaskExpressionSchema{}
+	case "functions.alpha_scalar.InlineFunction":
+		return functions_alpha_scalar.InlineFunctionSchema{}
+	case "functions.alpha_scalar.LeafTaskExpression":
+		return functions_alpha_scalar.LeafTaskExpression{}
+	case "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression":
+		return functions_alpha_scalar.PartialPlaceholderBranchTaskExpression{}
+	case "functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression":
+		return functions_alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression{}
+	case "functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression":
+		return functions_alpha_scalar.PlaceholderScalarFunctionTaskExpression{}
+	case "functions.alpha_scalar.RemoteFunction":
+		return functions_alpha_scalar.RemoteFunctionSchema{}
+	case "functions.alpha_scalar.ScalarFunctionTaskExpression":
+		return functions_alpha_scalar.ScalarFunctionTaskExpression{}
+	case "functions.alpha_scalar.VectorCompletionTaskExpression":
+		return functions_alpha_scalar.VectorCompletionTaskExpression{}
+	case "functions.alpha_vector.BranchTaskExpression":
+		return functions_alpha_vector.BranchTaskExpressionSchema{}
+	case "functions.alpha_vector.InlineFunction":
+		return functions_alpha_vector.InlineFunctionSchema{}
+	case "functions.alpha_vector.LeafTaskExpression":
+		return functions_alpha_vector.LeafTaskExpression{}
+	case "functions.alpha_vector.PartialPlaceholderBranchTaskExpression":
+		return functions_alpha_vector.PartialPlaceholderBranchTaskExpressionSchema{}
+	case "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression":
+		return functions_alpha_vector.PartialPlaceholderScalarFunctionTaskExpression{}
+	case "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression":
+		return functions_alpha_vector.PartialPlaceholderVectorFunctionTaskExpression{}
+	case "functions.alpha_vector.PlaceholderScalarFunctionTaskExpression":
+		return functions_alpha_vector.PlaceholderScalarFunctionTaskExpression{}
+	case "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression":
+		return functions_alpha_vector.PlaceholderVectorFunctionTaskExpression{}
+	case "functions.alpha_vector.RemoteFunction":
+		return functions_alpha_vector.RemoteFunctionSchema{}
+	case "functions.alpha_vector.ScalarFunctionTaskExpression":
+		return functions_alpha_vector.ScalarFunctionTaskExpression{}
+	case "functions.alpha_vector.VectorCompletionTaskExpression":
+		return functions_alpha_vector.VectorCompletionTaskExpression{}
+	case "functions.alpha_vector.VectorFunctionTaskExpression":
+		return functions_alpha_vector.VectorFunctionTaskExpression{}
+	case "functions.alpha_vector.expression.VectorFunctionInputSchema":
+		return functions_alpha_vector_expression.VectorFunctionInputSchema{}
+	case "functions.alpha_vector.expression.VectorFunctionInputValue":
+		return functions_alpha_vector_expression.VectorFunctionInputValue{}
+	case "functions.alpha_vector.expression.VectorFunctionInputValueExpression":
+		return functions_alpha_vector_expression.VectorFunctionInputValueExpression{}
+	case "functions.check.ScalarFieldsValidation":
+		return functions_check.ScalarFieldsValidation{}
+	case "functions.check.VectorFieldsValidation":
+		return functions_check.VectorFieldsValidation{}
+	case "functions.executions.RetryToken":
+		return functions_executions.RetryTokenSchema{}
+	case "functions.executions.request.FunctionExecutionCreateParams":
+		return functions_executions_request.FunctionExecutionCreateParamsSchema{}
+	case "functions.executions.request.FunctionInlineProfileInlineRequestBody":
+		return functions_executions_request.FunctionInlineProfileInlineRequestBody{}
+	case "functions.executions.request.FunctionInlineProfileRemoteRequestBody":
+		return functions_executions_request.FunctionInlineProfileRemoteRequestBody{}
+	case "functions.executions.request.FunctionInlineProfileRemoteRequestPath":
+		return functions_executions_request.FunctionInlineProfileRemoteRequestPath{}
+	case "functions.executions.request.FunctionRemoteProfileInlineRequestBody":
+		return functions_executions_request.FunctionRemoteProfileInlineRequestBody{}
+	case "functions.executions.request.FunctionRemoteProfileInlineRequestPath":
+		return functions_executions_request.FunctionRemoteProfileInlineRequestPath{}
+	case "functions.executions.request.FunctionRemoteProfileRemoteRequestBody":
+		return functions_executions_request.FunctionRemoteProfileRemoteRequestBody{}
+	case "functions.executions.request.FunctionRemoteProfileRemoteRequestPath":
+		return functions_executions_request.FunctionRemoteProfileRemoteRequestPath{}
+	case "functions.executions.request.Reasoning":
+		return functions_executions_request.Reasoning{}
+	case "functions.executions.request.Request":
+		return functions_executions_request.RequestSchema{}
+	case "functions.executions.request.Strategy":
+		return functions_executions_request.StrategySchema{}
+	case "functions.executions.response.streaming.FunctionExecutionChunk":
+		return functions_executions_response_streaming.FunctionExecutionChunk{}
+	case "functions.executions.response.streaming.FunctionExecutionTaskChunk":
+		return functions_executions_response_streaming.FunctionExecutionTaskChunk{}
+	case "functions.executions.response.streaming.Object":
+		return functions_executions_response_streaming.ObjectSchema{}
+	case "functions.executions.response.streaming.ReasoningSummaryChunk":
+		return functions_executions_response_streaming.ReasoningSummaryChunk{}
+	case "functions.executions.response.streaming.TaskChunk":
+		return functions_executions_response_streaming.TaskChunkSchema{}
+	case "functions.executions.response.streaming.VectorCompletionTaskChunk":
+		return functions_executions_response_streaming.VectorCompletionTaskChunk{}
+	case "functions.executions.response.unary.FunctionExecution":
+		return functions_executions_response_unary.FunctionExecution{}
+	case "functions.executions.response.unary.FunctionExecutionTask":
+		return functions_executions_response_unary.FunctionExecutionTask{}
+	case "functions.executions.response.unary.Object":
+		return functions_executions_response_unary.ObjectSchema{}
+	case "functions.executions.response.unary.ReasoningSummary":
+		return functions_executions_response_unary.ReasoningSummary{}
+	case "functions.executions.response.unary.Task":
+		return functions_executions_response_unary.TaskSchema{}
+	case "functions.executions.response.unary.VectorCompletionTask":
+		return functions_executions_response_unary.VectorCompletionTask{}
+	case "functions.expression.AnyOfInputSchema":
+		return functions_expression.AnyOfInputSchema{}
+	case "functions.expression.ArrayInputSchema":
+		return functions_expression.ArrayInputSchema{}
+	case "functions.expression.ArrayInputSchemaType":
+		return functions_expression.ArrayInputSchemaTypeSchema{}
+	case "functions.expression.AudioInputSchema":
+		return functions_expression.AudioInputSchema{}
+	case "functions.expression.AudioInputSchemaType":
+		return functions_expression.AudioInputSchemaTypeSchema{}
+	case "functions.expression.BooleanInputSchema":
+		return functions_expression.BooleanInputSchema{}
+	case "functions.expression.BooleanInputSchemaType":
+		return functions_expression.BooleanInputSchemaTypeSchema{}
+	case "functions.expression.Expression":
+		return functions_expression.ExpressionSchema{}
+	case "functions.expression.FileInputSchema":
+		return functions_expression.FileInputSchema{}
+	case "functions.expression.FileInputSchemaType":
+		return functions_expression.FileInputSchemaTypeSchema{}
+	case "functions.expression.ImageInputSchema":
+		return functions_expression.ImageInputSchema{}
+	case "functions.expression.ImageInputSchemaType":
+		return functions_expression.ImageInputSchemaTypeSchema{}
+	case "functions.expression.InputSchema":
+		return functions_expression.InputSchemaSchema{}
+	case "functions.expression.InputValue":
+		return functions_expression.InputValueSchema{}
+	case "functions.expression.InputValueExpression":
+		return functions_expression.InputValueExpressionSchema{}
+	case "functions.expression.IntegerInputSchema":
+		return functions_expression.IntegerInputSchema{}
+	case "functions.expression.IntegerInputSchemaType":
+		return functions_expression.IntegerInputSchemaTypeSchema{}
+	case "functions.expression.NumberInputSchema":
+		return functions_expression.NumberInputSchema{}
+	case "functions.expression.NumberInputSchemaType":
+		return functions_expression.NumberInputSchemaTypeSchema{}
+	case "functions.expression.ObjectInputSchema":
+		return functions_expression.ObjectInputSchema{}
+	case "functions.expression.ObjectInputSchemaType":
+		return functions_expression.ObjectInputSchemaTypeSchema{}
+	case "functions.expression.OneOrMany.string":
+		return functions_expression.OneOrManyStringSchema{}
+	case "functions.expression.Params":
+		return functions_expression.ParamsSchema{}
+	case "functions.expression.ParamsOwned":
+		return functions_expression.ParamsOwned{}
+	case "functions.expression.ParamsRef":
+		return functions_expression.ParamsRef{}
+	case "functions.expression.Special":
+		return functions_expression.SpecialSchema{}
+	case "functions.expression.StringInputSchema":
+		return functions_expression.StringInputSchema{}
+	case "functions.expression.StringInputSchemaType":
+		return functions_expression.StringInputSchemaTypeSchema{}
+	case "functions.expression.TaskOutput":
+		return functions_expression.TaskOutputSchema{}
+	case "functions.expression.TaskOutputOwned":
+		return functions_expression.TaskOutputOwnedSchema{}
+	case "functions.expression.TaskOutputRef":
+		return functions_expression.TaskOutputRefSchema{}
+	case "functions.expression.VideoInputSchema":
+		return functions_expression.VideoInputSchema{}
+	case "functions.expression.VideoInputSchemaType":
+		return functions_expression.VideoInputSchemaTypeSchema{}
+	case "functions.expression.WithExpression.Array_of_functions.expression.WithExpression.agent.completions.message.MessageExpression":
+		return functions_expression.WithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema{}
+	case "functions.expression.WithExpression.Array_of_functions.expression.WithExpression.agent.completions.message.RichContentExpression":
+		return functions_expression.WithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema{}
+	case "functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression":
+		return functions_expression.WithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema{}
+	case "functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression":
+		return functions_expression.WithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema{}
+	case "functions.expression.WithExpression.Nullable_string":
+		return functions_expression.WithExpressionNullableStringSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression":
+		return functions_expression.WithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression":
+		return functions_expression.WithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.File":
+		return functions_expression.WithExpressionAgentCompletionsMessageFileSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.ImageUrl":
+		return functions_expression.WithExpressionAgentCompletionsMessageImageUrlSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.InputAudio":
+		return functions_expression.WithExpressionAgentCompletionsMessageInputAudioSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.MessageExpression":
+		return functions_expression.WithExpressionAgentCompletionsMessageMessageExpressionSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.RichContentExpression":
+		return functions_expression.WithExpressionAgentCompletionsMessageRichContentExpressionSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.RichContentPartExpression":
+		return functions_expression.WithExpressionAgentCompletionsMessageRichContentPartExpressionSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.SimpleContentExpression":
+		return functions_expression.WithExpressionAgentCompletionsMessageSimpleContentExpressionSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.SimpleContentPartExpression":
+		return functions_expression.WithExpressionAgentCompletionsMessageSimpleContentPartExpressionSchema{}
+	case "functions.expression.WithExpression.agent.completions.message.VideoUrl":
+		return functions_expression.WithExpressionAgentCompletionsMessageVideoUrlSchema{}
+	case "functions.expression.WithExpression.functions.expression.InputValueExpression":
+		return functions_expression.WithExpressionFunctionsExpressionInputValueExpressionSchema{}
+	case "functions.expression.WithExpression.string":
+		return functions_expression.WithExpressionStringSchema{}
+	case "functions.inventions.DescriptionObject":
+		return functions_inventions.DescriptionObject{}
+	case "functions.inventions.EssayObject":
+		return functions_inventions.EssayObject{}
+	case "functions.inventions.EssayTasksObject":
+		return functions_inventions.EssayTasksObject{}
+	case "functions.inventions.IndexObject":
+		return functions_inventions.IndexObject{}
+	case "functions.inventions.TasksLengthObject":
+		return functions_inventions.TasksLengthObject{}
+	case "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams":
+		return functions_inventions_recursive_request.FunctionInventionRecursiveCreateParams{}
+	case "functions.inventions.recursive.response.streaming.FunctionInventionChunk":
+		return functions_inventions_recursive_response_streaming.FunctionInventionChunk{}
+	case "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk":
+		return functions_inventions_recursive_response_streaming.FunctionInventionRecursiveChunk{}
+	case "functions.inventions.recursive.response.streaming.Object":
+		return functions_inventions_recursive_response_streaming.ObjectSchema{}
+	case "functions.inventions.recursive.response.unary.FunctionInvention":
+		return functions_inventions_recursive_response_unary.FunctionInvention{}
+	case "functions.inventions.recursive.response.unary.FunctionInventionRecursive":
+		return functions_inventions_recursive_response_unary.FunctionInventionRecursive{}
+	case "functions.inventions.recursive.response.unary.Object":
+		return functions_inventions_recursive_response_unary.ObjectSchema{}
+	case "functions.inventions.request.FunctionInventionCreateParams":
+		return functions_inventions_request.FunctionInventionCreateParams{}
+	case "functions.inventions.response.streaming.AgentCompletionChunk":
+		return functions_inventions_response_streaming.AgentCompletionChunk{}
+	case "functions.inventions.response.streaming.FunctionInventionChunk":
+		return functions_inventions_response_streaming.FunctionInventionChunk{}
+	case "functions.inventions.response.streaming.Object":
+		return functions_inventions_response_streaming.ObjectSchema{}
+	case "functions.inventions.response.unary.AgentCompletion":
+		return functions_inventions_response_unary.AgentCompletion{}
+	case "functions.inventions.response.unary.FunctionInvention":
+		return functions_inventions_response_unary.FunctionInvention{}
+	case "functions.inventions.response.unary.Object":
+		return functions_inventions_response_unary.ObjectSchema{}
+	case "functions.inventions.state.AlphaScalarBranchState":
+		return functions_inventions_state.AlphaScalarBranchState{}
+	case "functions.inventions.state.AlphaScalarLeafState":
+		return functions_inventions_state.AlphaScalarLeafState{}
+	case "functions.inventions.state.AlphaScalarState":
+		return functions_inventions_state.AlphaScalarState{}
+	case "functions.inventions.state.AlphaVectorBranchState":
+		return functions_inventions_state.AlphaVectorBranchState{}
+	case "functions.inventions.state.AlphaVectorLeafState":
+		return functions_inventions_state.AlphaVectorLeafState{}
+	case "functions.inventions.state.AlphaVectorState":
+		return functions_inventions_state.AlphaVectorState{}
+	case "functions.inventions.state.Params":
+		return functions_inventions_state.Params{}
+	case "functions.inventions.state.ParamsState":
+		return functions_inventions_state.ParamsStateSchema{}
+	case "functions.inventions.state.State":
+		return functions_inventions_state.StateSchema{}
+	case "functions.profiles.GetProfile":
+		return functions_profiles.GetProfile{}
+	case "functions.profiles.ListProfile":
+		return functions_profiles.ListProfile{}
+	case "functions.profiles.ListProfileItem":
+		return functions_profiles.ListProfileItem{}
+	case "functions.profiles.ListProfilesQueryParameters":
+		return functions_profiles.ListProfilesQueryParameters{}
+	case "functions.profiles.ListProfilesSource":
+		return functions_profiles.ListProfilesSourceSchema{}
+	case "functions.profiles.UsageProfile":
+		return functions_profiles.UsageProfile{}
+	case "functions.profiles.computations.RetryToken":
+		return functions_profiles_computations.RetryTokenSchema{}
+	case "functions.profiles.computations.request.DatasetItem":
+		return functions_profiles_computations_request.DatasetItem{}
+	case "functions.profiles.computations.request.FunctionInlineRequestBody":
+		return functions_profiles_computations_request.FunctionInlineRequestBody{}
+	case "functions.profiles.computations.request.FunctionProfileComputationCreateParams":
+		return functions_profiles_computations_request.FunctionProfileComputationCreateParamsSchema{}
+	case "functions.profiles.computations.request.FunctionRemoteRequestBody":
+		return functions_profiles_computations_request.FunctionRemoteRequestBody{}
+	case "functions.profiles.computations.request.FunctionRemoteRequestPath":
+		return functions_profiles_computations_request.FunctionRemoteRequestPath{}
+	case "functions.profiles.computations.request.Request":
+		return functions_profiles_computations_request.RequestSchema{}
+	case "functions.profiles.computations.request.Target":
+		return functions_profiles_computations_request.TargetSchema{}
+	case "functions.profiles.computations.response.FittingStats":
+		return functions_profiles_computations_response.FittingStats{}
+	case "functions.profiles.computations.response.streaming.FunctionExecutionChunk":
+		return functions_profiles_computations_response_streaming.FunctionExecutionChunk{}
+	case "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk":
+		return functions_profiles_computations_response_streaming.FunctionProfileComputationChunk{}
+	case "functions.profiles.computations.response.streaming.Object":
+		return functions_profiles_computations_response_streaming.ObjectSchema{}
+	case "functions.profiles.computations.response.unary.FunctionExecution":
+		return functions_profiles_computations_response_unary.FunctionExecution{}
+	case "functions.profiles.computations.response.unary.FunctionProfileComputation":
+		return functions_profiles_computations_response_unary.FunctionProfileComputation{}
+	case "functions.profiles.computations.response.unary.Object":
+		return functions_profiles_computations_response_unary.ObjectSchema{}
+	case "vector.completions.VectorResponses":
+		return vector_completions.VectorResponsesSchema{}
+	case "vector.completions.cache.CacheVote":
+		return vector_completions_cache.CacheVote{}
+	case "vector.completions.cache.CacheVoteRequest":
+		return vector_completions_cache.CacheVoteRequestSchema{}
+	case "vector.completions.cache.CacheVoteRequestOwned":
+		return vector_completions_cache.CacheVoteRequestOwned{}
+	case "vector.completions.cache.CacheVoteRequestRef":
+		return vector_completions_cache.CacheVoteRequestRef{}
+	case "vector.completions.cache.CompletionVotes":
+		return vector_completions_cache.CompletionVotes{}
+	case "vector.completions.request.Ensemble":
+		return vector_completions_request.EnsembleSchema{}
+	case "vector.completions.request.Profile":
+		return vector_completions_request.ProfileSchema{}
+	case "vector.completions.request.ProfileEntry":
+		return vector_completions_request.ProfileEntry{}
+	case "vector.completions.request.VectorCompletionCreateParams":
+		return vector_completions_request.VectorCompletionCreateParams{}
+	case "vector.completions.response.Vote":
+		return vector_completions_response.Vote{}
+	case "vector.completions.response.streaming.AgentCompletionChunk":
+		return vector_completions_response_streaming.AgentCompletionChunk{}
+	case "vector.completions.response.streaming.Object":
+		return vector_completions_response_streaming.ObjectSchema{}
+	case "vector.completions.response.streaming.VectorCompletionChunk":
+		return vector_completions_response_streaming.VectorCompletionChunk{}
+	case "vector.completions.response.unary.AgentCompletion":
+		return vector_completions_response_unary.AgentCompletion{}
+	case "vector.completions.response.unary.Object":
+		return vector_completions_response_unary.ObjectSchema{}
+	case "vector.completions.response.unary.VectorCompletion":
+		return vector_completions_response_unary.VectorCompletion{}
+	}
+	return nil
+}
+
 func TestRoundtrip(t *testing.T) {
 	for _, title := range allTitlesSorted {
 		t.Run(title, func(t *testing.T) {
-			var schema map[string]any
-			switch title {
-			case "PrefixedUuid":
-				schema = PrefixedUuid{}.JSONSchema()
-			case "ResponseError":
-				schema = ResponseError{}.JSONSchema()
-			case "agent.Agent":
-				schema = agent.AgentSchema{}.JSONSchema()
-			case "agent.AgentBase":
-				schema = agent.AgentBaseSchema{}.JSONSchema()
-			case "agent.GetAgent":
-				schema = agent.GetAgent{}.JSONSchema()
-			case "agent.ListAgent":
-				schema = agent.ListAgent{}.JSONSchema()
-			case "agent.ListAgentItem":
-				schema = agent.ListAgentItem{}.JSONSchema()
-			case "agent.McpServer":
-				schema = agent.McpServer{}.JSONSchema()
-			case "agent.OutputMode":
-				schema = agent.OutputModeSchema{}.JSONSchema()
-			case "agent.Upstream":
-				schema = agent.UpstreamSchema{}.JSONSchema()
-			case "agent.UsageAgent":
-				schema = agent.UsageAgent{}.JSONSchema()
-			case "agent.WithFallbacksAndCount.agent.Agent":
-				schema = agent.WithFallbacksAndCountAgentAgent{}.JSONSchema()
-			case "agent.WithFallbacksAndCount.agent.AgentBase":
-				schema = agent.WithFallbacksAndCountAgentAgentBase{}.JSONSchema()
-			case "agent.claude_agent_sdk.Agent":
-				schema = agent_claude_agent_sdk.Agent{}.JSONSchema()
-			case "agent.claude_agent_sdk.AgentBase":
-				schema = agent_claude_agent_sdk.AgentBase{}.JSONSchema()
-			case "agent.claude_agent_sdk.Effort":
-				schema = agent_claude_agent_sdk.EffortSchema{}.JSONSchema()
-			case "agent.claude_agent_sdk.OutputMode":
-				schema = agent_claude_agent_sdk.OutputModeSchema{}.JSONSchema()
-			case "agent.claude_agent_sdk.Upstream":
-				schema = agent_claude_agent_sdk.UpstreamSchema{}.JSONSchema()
-			case "agent.completions.message.AssistantMessage":
-				schema = agent_completions_message.AssistantMessage{}.JSONSchema()
-			case "agent.completions.message.AssistantMessageExpression":
-				schema = agent_completions_message.AssistantMessageExpression{}.JSONSchema()
-			case "agent.completions.message.AssistantToolCall":
-				schema = agent_completions_message.AssistantToolCall{}.JSONSchema()
-			case "agent.completions.message.AssistantToolCallDelta":
-				schema = agent_completions_message.AssistantToolCallDelta{}.JSONSchema()
-			case "agent.completions.message.AssistantToolCallExpression":
-				schema = agent_completions_message.AssistantToolCallExpression{}.JSONSchema()
-			case "agent.completions.message.AssistantToolCallFunction":
-				schema = agent_completions_message.AssistantToolCallFunction{}.JSONSchema()
-			case "agent.completions.message.AssistantToolCallFunctionDelta":
-				schema = agent_completions_message.AssistantToolCallFunctionDelta{}.JSONSchema()
-			case "agent.completions.message.AssistantToolCallFunctionExpression":
-				schema = agent_completions_message.AssistantToolCallFunctionExpression{}.JSONSchema()
-			case "agent.completions.message.AssistantToolCallType":
-				schema = agent_completions_message.AssistantToolCallTypeSchema{}.JSONSchema()
-			case "agent.completions.message.DeveloperMessage":
-				schema = agent_completions_message.DeveloperMessage{}.JSONSchema()
-			case "agent.completions.message.DeveloperMessageExpression":
-				schema = agent_completions_message.DeveloperMessageExpression{}.JSONSchema()
-			case "agent.completions.message.File":
-				schema = agent_completions_message.File{}.JSONSchema()
-			case "agent.completions.message.ImageUrl":
-				schema = agent_completions_message.ImageUrl{}.JSONSchema()
-			case "agent.completions.message.ImageUrlDetail":
-				schema = agent_completions_message.ImageUrlDetailSchema{}.JSONSchema()
-			case "agent.completions.message.InputAudio":
-				schema = agent_completions_message.InputAudio{}.JSONSchema()
-			case "agent.completions.message.Message":
-				schema = agent_completions_message.MessageSchema{}.JSONSchema()
-			case "agent.completions.message.MessageExpression":
-				schema = agent_completions_message.MessageExpressionSchema{}.JSONSchema()
-			case "agent.completions.message.RichContent":
-				schema = agent_completions_message.RichContentSchema{}.JSONSchema()
-			case "agent.completions.message.RichContentExpression":
-				schema = agent_completions_message.RichContentExpressionSchema{}.JSONSchema()
-			case "agent.completions.message.RichContentPart":
-				schema = agent_completions_message.RichContentPartSchema{}.JSONSchema()
-			case "agent.completions.message.RichContentPartExpression":
-				schema = agent_completions_message.RichContentPartExpressionSchema{}.JSONSchema()
-			case "agent.completions.message.SimpleContent":
-				schema = agent_completions_message.SimpleContentSchema{}.JSONSchema()
-			case "agent.completions.message.SimpleContentExpression":
-				schema = agent_completions_message.SimpleContentExpressionSchema{}.JSONSchema()
-			case "agent.completions.message.SimpleContentPart":
-				schema = agent_completions_message.SimpleContentPart{}.JSONSchema()
-			case "agent.completions.message.SimpleContentPartExpression":
-				schema = agent_completions_message.SimpleContentPartExpression{}.JSONSchema()
-			case "agent.completions.message.SystemMessage":
-				schema = agent_completions_message.SystemMessage{}.JSONSchema()
-			case "agent.completions.message.SystemMessageExpression":
-				schema = agent_completions_message.SystemMessageExpression{}.JSONSchema()
-			case "agent.completions.message.ToolMessage":
-				schema = agent_completions_message.ToolMessage{}.JSONSchema()
-			case "agent.completions.message.ToolMessageExpression":
-				schema = agent_completions_message.ToolMessageExpression{}.JSONSchema()
-			case "agent.completions.message.UserMessage":
-				schema = agent_completions_message.UserMessage{}.JSONSchema()
-			case "agent.completions.message.UserMessageExpression":
-				schema = agent_completions_message.UserMessageExpression{}.JSONSchema()
-			case "agent.completions.message.VideoUrl":
-				schema = agent_completions_message.VideoUrl{}.JSONSchema()
-			case "agent.completions.request.Agent":
-				schema = agent_completions_request.AgentSchema{}.JSONSchema()
-			case "agent.completions.request.AgentCompletionCreateParams":
-				schema = agent_completions_request.AgentCompletionCreateParams{}.JSONSchema()
-			case "agent.completions.request.Provider":
-				schema = agent_completions_request.Provider{}.JSONSchema()
-			case "agent.completions.request.ProviderDataCollection":
-				schema = agent_completions_request.ProviderDataCollectionSchema{}.JSONSchema()
-			case "agent.completions.request.ProviderMaxPrice":
-				schema = agent_completions_request.ProviderMaxPrice{}.JSONSchema()
-			case "agent.completions.request.ProviderSort":
-				schema = agent_completions_request.ProviderSortSchema{}.JSONSchema()
-			case "agent.completions.request.ResponseFormat":
-				schema = agent_completions_request.ResponseFormatSchema{}.JSONSchema()
-			case "agent.completions.request.ResponseFormatParam":
-				schema = agent_completions_request.ResponseFormatParamSchema{}.JSONSchema()
-			case "agent.completions.response.AssistantRole":
-				schema = agent_completions_response.AssistantRoleSchema{}.JSONSchema()
-			case "agent.completions.response.CompletionTokensDetails":
-				schema = agent_completions_response.CompletionTokensDetails{}.JSONSchema()
-			case "agent.completions.response.CostDetails":
-				schema = agent_completions_response.CostDetails{}.JSONSchema()
-			case "agent.completions.response.FinishReason":
-				schema = agent_completions_response.FinishReasonSchema{}.JSONSchema()
-			case "agent.completions.response.Logprob":
-				schema = agent_completions_response.Logprob{}.JSONSchema()
-			case "agent.completions.response.Logprobs":
-				schema = agent_completions_response.Logprobs{}.JSONSchema()
-			case "agent.completions.response.PromptTokensDetails":
-				schema = agent_completions_response.PromptTokensDetails{}.JSONSchema()
-			case "agent.completions.response.ToolResponse":
-				schema = agent_completions_response.ToolResponse{}.JSONSchema()
-			case "agent.completions.response.ToolRole":
-				schema = agent_completions_response.ToolRoleSchema{}.JSONSchema()
-			case "agent.completions.response.TopLogprob":
-				schema = agent_completions_response.TopLogprob{}.JSONSchema()
-			case "agent.completions.response.UpstreamUsage":
-				schema = agent_completions_response.UpstreamUsage{}.JSONSchema()
-			case "agent.completions.response.Usage":
-				schema = agent_completions_response.Usage{}.JSONSchema()
-			case "agent.completions.response.streaming.AgentCompletionChunk":
-				schema = agent_completions_response_streaming.AgentCompletionChunk{}.JSONSchema()
-			case "agent.completions.response.streaming.AssistantResponseChunk":
-				schema = agent_completions_response_streaming.AssistantResponseChunk{}.JSONSchema()
-			case "agent.completions.response.streaming.MessageChunk":
-				schema = agent_completions_response_streaming.MessageChunkSchema{}.JSONSchema()
-			case "agent.completions.response.streaming.Object":
-				schema = agent_completions_response_streaming.ObjectSchema{}.JSONSchema()
-			case "agent.completions.response.unary.AgentCompletion":
-				schema = agent_completions_response_unary.AgentCompletion{}.JSONSchema()
-			case "agent.completions.response.unary.AssistantResponse":
-				schema = agent_completions_response_unary.AssistantResponse{}.JSONSchema()
-			case "agent.completions.response.unary.Message":
-				schema = agent_completions_response_unary.MessageSchema{}.JSONSchema()
-			case "agent.completions.response.unary.Object":
-				schema = agent_completions_response_unary.ObjectSchema{}.JSONSchema()
-			case "agent.mock.Agent":
-				schema = agent_mock.Agent{}.JSONSchema()
-			case "agent.mock.AgentBase":
-				schema = agent_mock.AgentBase{}.JSONSchema()
-			case "agent.mock.OutputMode":
-				schema = agent_mock.OutputModeSchema{}.JSONSchema()
-			case "agent.mock.Upstream":
-				schema = agent_mock.UpstreamSchema{}.JSONSchema()
-			case "agent.openrouter.Agent":
-				schema = agent_openrouter.Agent{}.JSONSchema()
-			case "agent.openrouter.AgentBase":
-				schema = agent_openrouter.AgentBase{}.JSONSchema()
-			case "agent.openrouter.OutputMode":
-				schema = agent_openrouter.OutputModeSchema{}.JSONSchema()
-			case "agent.openrouter.Provider":
-				schema = agent_openrouter.Provider{}.JSONSchema()
-			case "agent.openrouter.ProviderQuantization":
-				schema = agent_openrouter.ProviderQuantizationSchema{}.JSONSchema()
-			case "agent.openrouter.Reasoning":
-				schema = agent_openrouter.Reasoning{}.JSONSchema()
-			case "agent.openrouter.ReasoningEffort":
-				schema = agent_openrouter.ReasoningEffortSchema{}.JSONSchema()
-			case "agent.openrouter.ReasoningSummaryVerbosity":
-				schema = agent_openrouter.ReasoningSummaryVerbositySchema{}.JSONSchema()
-			case "agent.openrouter.Stop":
-				schema = agent_openrouter.StopSchema{}.JSONSchema()
-			case "agent.openrouter.Upstream":
-				schema = agent_openrouter.UpstreamSchema{}.JSONSchema()
-			case "agent.openrouter.Verbosity":
-				schema = agent_openrouter.VerbositySchema{}.JSONSchema()
-			case "auth.ApiKeyWithMetadata":
-				schema = auth.ApiKeyWithMetadata{}.JSONSchema()
-			case "auth.CreateApiKeyRequest":
-				schema = auth.CreateApiKeyRequest{}.JSONSchema()
-			case "auth.CreateOpenRouterByokApiKeyRequest":
-				schema = auth.CreateOpenRouterByokApiKeyRequest{}.JSONSchema()
-			case "auth.DisableApiKeyRequest":
-				schema = auth.DisableApiKeyRequest{}.JSONSchema()
-			case "auth.GetCreditsResponse":
-				schema = auth.GetCreditsResponse{}.JSONSchema()
-			case "auth.GetOpenRouterByokApiKeyResponse":
-				schema = auth.GetOpenRouterByokApiKeyResponse{}.JSONSchema()
-			case "auth.ListApiKeyItem":
-				schema = auth.ListApiKeyItem{}.JSONSchema()
-			case "auth.ListApiKeyResponse":
-				schema = auth.ListApiKeyResponse{}.JSONSchema()
-			case "ensemble.Ensemble":
-				schema = ensemble.Ensemble{}.JSONSchema()
-			case "ensemble.EnsembleBase":
-				schema = ensemble.EnsembleBase{}.JSONSchema()
-			case "ensemble.GetEnsemble":
-				schema = ensemble.GetEnsemble{}.JSONSchema()
-			case "ensemble.ListEnsemble":
-				schema = ensemble.ListEnsemble{}.JSONSchema()
-			case "ensemble.ListEnsembleItem":
-				schema = ensemble.ListEnsembleItem{}.JSONSchema()
-			case "ensemble.UsageEnsemble":
-				schema = ensemble.UsageEnsemble{}.JSONSchema()
-			case "functions.AlphaInlineFunction":
-				schema = functions.AlphaInlineFunctionSchema{}.JSONSchema()
-			case "functions.AlphaRemoteFunction":
-				schema = functions.AlphaRemoteFunctionSchema{}.JSONSchema()
-			case "functions.CompiledTask":
-				schema = functions.CompiledTaskSchema{}.JSONSchema()
-			case "functions.FullInlineFunction":
-				schema = functions.FullInlineFunctionSchema{}.JSONSchema()
-			case "functions.FullRemoteFunction":
-				schema = functions.FullRemoteFunctionSchema{}.JSONSchema()
-			case "functions.Function":
-				schema = functions.FunctionSchema{}.JSONSchema()
-			case "functions.FunctionType":
-				schema = functions.FunctionTypeSchema{}.JSONSchema()
-			case "functions.GetFunction":
-				schema = functions.GetFunction{}.JSONSchema()
-			case "functions.GetFunctionProfilePair":
-				schema = functions.GetFunctionProfilePair{}.JSONSchema()
-			case "functions.InlineAutoProfile":
-				schema = functions.InlineAutoProfile{}.JSONSchema()
-			case "functions.InlineFunction":
-				schema = functions.InlineFunctionSchema{}.JSONSchema()
-			case "functions.InlineProfile":
-				schema = functions.InlineProfileSchema{}.JSONSchema()
-			case "functions.InlineTasksProfile":
-				schema = functions.InlineTasksProfile{}.JSONSchema()
-			case "functions.ListFunction":
-				schema = functions.ListFunction{}.JSONSchema()
-			case "functions.ListFunctionItem":
-				schema = functions.ListFunctionItem{}.JSONSchema()
-			case "functions.ListFunctionProfilePair":
-				schema = functions.ListFunctionProfilePair{}.JSONSchema()
-			case "functions.ListFunctionProfilePairItem":
-				schema = functions.ListFunctionProfilePairItem{}.JSONSchema()
-			case "functions.ListFunctionProfilePairsQueryParameters":
-				schema = functions.ListFunctionProfilePairsQueryParameters{}.JSONSchema()
-			case "functions.ListFunctionProfilePairsSource":
-				schema = functions.ListFunctionProfilePairsSourceSchema{}.JSONSchema()
-			case "functions.ListFunctionsQueryParameters":
-				schema = functions.ListFunctionsQueryParameters{}.JSONSchema()
-			case "functions.ListFunctionsSource":
-				schema = functions.ListFunctionsSourceSchema{}.JSONSchema()
-			case "functions.PlaceholderScalarFunctionTask":
-				schema = functions.PlaceholderScalarFunctionTask{}.JSONSchema()
-			case "functions.PlaceholderScalarFunctionTaskExpression":
-				schema = functions.PlaceholderScalarFunctionTaskExpression{}.JSONSchema()
-			case "functions.PlaceholderVectorFunctionTask":
-				schema = functions.PlaceholderVectorFunctionTask{}.JSONSchema()
-			case "functions.PlaceholderVectorFunctionTaskExpression":
-				schema = functions.PlaceholderVectorFunctionTaskExpression{}.JSONSchema()
-			case "functions.Profile":
-				schema = functions.ProfileSchema{}.JSONSchema()
-			case "functions.Remote":
-				schema = functions.RemoteSchema{}.JSONSchema()
-			case "functions.RemoteAutoProfile":
-				schema = functions.RemoteAutoProfile{}.JSONSchema()
-			case "functions.RemoteFunction":
-				schema = functions.RemoteFunctionSchema{}.JSONSchema()
-			case "functions.RemoteFunctionPath":
-				schema = functions.RemoteFunctionPath{}.JSONSchema()
-			case "functions.RemoteProfile":
-				schema = functions.RemoteProfileSchema{}.JSONSchema()
-			case "functions.RemoteTasksProfile":
-				schema = functions.RemoteTasksProfile{}.JSONSchema()
-			case "functions.ScalarFunctionTask":
-				schema = functions.ScalarFunctionTask{}.JSONSchema()
-			case "functions.ScalarFunctionTaskExpression":
-				schema = functions.ScalarFunctionTaskExpression{}.JSONSchema()
-			case "functions.Task":
-				schema = functions.TaskSchema{}.JSONSchema()
-			case "functions.TaskExpression":
-				schema = functions.TaskExpressionSchema{}.JSONSchema()
-			case "functions.TaskProfile":
-				schema = functions.TaskProfileSchema{}.JSONSchema()
-			case "functions.UsageFunction":
-				schema = functions.UsageFunction{}.JSONSchema()
-			case "functions.UsageFunctionProfilePair":
-				schema = functions.UsageFunctionProfilePair{}.JSONSchema()
-			case "functions.VectorCompletionTask":
-				schema = functions.VectorCompletionTask{}.JSONSchema()
-			case "functions.VectorCompletionTaskExpression":
-				schema = functions.VectorCompletionTaskExpression{}.JSONSchema()
-			case "functions.VectorFunctionTask":
-				schema = functions.VectorFunctionTask{}.JSONSchema()
-			case "functions.VectorFunctionTaskExpression":
-				schema = functions.VectorFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_scalar.BranchTaskExpression":
-				schema = functions_alpha_scalar.BranchTaskExpressionSchema{}.JSONSchema()
-			case "functions.alpha_scalar.InlineFunction":
-				schema = functions_alpha_scalar.InlineFunctionSchema{}.JSONSchema()
-			case "functions.alpha_scalar.LeafTaskExpression":
-				schema = functions_alpha_scalar.LeafTaskExpression{}.JSONSchema()
-			case "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression":
-				schema = functions_alpha_scalar.PartialPlaceholderBranchTaskExpression{}.JSONSchema()
-			case "functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression":
-				schema = functions_alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression":
-				schema = functions_alpha_scalar.PlaceholderScalarFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_scalar.RemoteFunction":
-				schema = functions_alpha_scalar.RemoteFunctionSchema{}.JSONSchema()
-			case "functions.alpha_scalar.ScalarFunctionTaskExpression":
-				schema = functions_alpha_scalar.ScalarFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_scalar.VectorCompletionTaskExpression":
-				schema = functions_alpha_scalar.VectorCompletionTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.BranchTaskExpression":
-				schema = functions_alpha_vector.BranchTaskExpressionSchema{}.JSONSchema()
-			case "functions.alpha_vector.InlineFunction":
-				schema = functions_alpha_vector.InlineFunctionSchema{}.JSONSchema()
-			case "functions.alpha_vector.LeafTaskExpression":
-				schema = functions_alpha_vector.LeafTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.PartialPlaceholderBranchTaskExpression":
-				schema = functions_alpha_vector.PartialPlaceholderBranchTaskExpressionSchema{}.JSONSchema()
-			case "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression":
-				schema = functions_alpha_vector.PartialPlaceholderScalarFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression":
-				schema = functions_alpha_vector.PartialPlaceholderVectorFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.PlaceholderScalarFunctionTaskExpression":
-				schema = functions_alpha_vector.PlaceholderScalarFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression":
-				schema = functions_alpha_vector.PlaceholderVectorFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.RemoteFunction":
-				schema = functions_alpha_vector.RemoteFunctionSchema{}.JSONSchema()
-			case "functions.alpha_vector.ScalarFunctionTaskExpression":
-				schema = functions_alpha_vector.ScalarFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.VectorCompletionTaskExpression":
-				schema = functions_alpha_vector.VectorCompletionTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.VectorFunctionTaskExpression":
-				schema = functions_alpha_vector.VectorFunctionTaskExpression{}.JSONSchema()
-			case "functions.alpha_vector.expression.VectorFunctionInputSchema":
-				schema = functions_alpha_vector_expression.VectorFunctionInputSchema{}.JSONSchema()
-			case "functions.alpha_vector.expression.VectorFunctionInputValue":
-				schema = functions_alpha_vector_expression.VectorFunctionInputValue{}.JSONSchema()
-			case "functions.alpha_vector.expression.VectorFunctionInputValueExpression":
-				schema = functions_alpha_vector_expression.VectorFunctionInputValueExpression{}.JSONSchema()
-			case "functions.check.ScalarFieldsValidation":
-				schema = functions_check.ScalarFieldsValidation{}.JSONSchema()
-			case "functions.check.VectorFieldsValidation":
-				schema = functions_check.VectorFieldsValidation{}.JSONSchema()
-			case "functions.executions.RetryToken":
-				schema = functions_executions.RetryTokenSchema{}.JSONSchema()
-			case "functions.executions.request.FunctionExecutionCreateParams":
-				schema = functions_executions_request.FunctionExecutionCreateParamsSchema{}.JSONSchema()
-			case "functions.executions.request.FunctionInlineProfileInlineRequestBody":
-				schema = functions_executions_request.FunctionInlineProfileInlineRequestBody{}.JSONSchema()
-			case "functions.executions.request.FunctionInlineProfileRemoteRequestBody":
-				schema = functions_executions_request.FunctionInlineProfileRemoteRequestBody{}.JSONSchema()
-			case "functions.executions.request.FunctionInlineProfileRemoteRequestPath":
-				schema = functions_executions_request.FunctionInlineProfileRemoteRequestPath{}.JSONSchema()
-			case "functions.executions.request.FunctionRemoteProfileInlineRequestBody":
-				schema = functions_executions_request.FunctionRemoteProfileInlineRequestBody{}.JSONSchema()
-			case "functions.executions.request.FunctionRemoteProfileInlineRequestPath":
-				schema = functions_executions_request.FunctionRemoteProfileInlineRequestPath{}.JSONSchema()
-			case "functions.executions.request.FunctionRemoteProfileRemoteRequestBody":
-				schema = functions_executions_request.FunctionRemoteProfileRemoteRequestBody{}.JSONSchema()
-			case "functions.executions.request.FunctionRemoteProfileRemoteRequestPath":
-				schema = functions_executions_request.FunctionRemoteProfileRemoteRequestPath{}.JSONSchema()
-			case "functions.executions.request.Reasoning":
-				schema = functions_executions_request.Reasoning{}.JSONSchema()
-			case "functions.executions.request.Request":
-				schema = functions_executions_request.RequestSchema{}.JSONSchema()
-			case "functions.executions.request.Strategy":
-				schema = functions_executions_request.StrategySchema{}.JSONSchema()
-			case "functions.executions.response.streaming.FunctionExecutionChunk":
-				schema = functions_executions_response_streaming.FunctionExecutionChunk{}.JSONSchema()
-			case "functions.executions.response.streaming.FunctionExecutionTaskChunk":
-				schema = functions_executions_response_streaming.FunctionExecutionTaskChunk{}.JSONSchema()
-			case "functions.executions.response.streaming.Object":
-				schema = functions_executions_response_streaming.ObjectSchema{}.JSONSchema()
-			case "functions.executions.response.streaming.ReasoningSummaryChunk":
-				schema = functions_executions_response_streaming.ReasoningSummaryChunk{}.JSONSchema()
-			case "functions.executions.response.streaming.TaskChunk":
-				schema = functions_executions_response_streaming.TaskChunkSchema{}.JSONSchema()
-			case "functions.executions.response.streaming.VectorCompletionTaskChunk":
-				schema = functions_executions_response_streaming.VectorCompletionTaskChunk{}.JSONSchema()
-			case "functions.executions.response.unary.FunctionExecution":
-				schema = functions_executions_response_unary.FunctionExecution{}.JSONSchema()
-			case "functions.executions.response.unary.FunctionExecutionTask":
-				schema = functions_executions_response_unary.FunctionExecutionTask{}.JSONSchema()
-			case "functions.executions.response.unary.Object":
-				schema = functions_executions_response_unary.ObjectSchema{}.JSONSchema()
-			case "functions.executions.response.unary.ReasoningSummary":
-				schema = functions_executions_response_unary.ReasoningSummary{}.JSONSchema()
-			case "functions.executions.response.unary.Task":
-				schema = functions_executions_response_unary.TaskSchema{}.JSONSchema()
-			case "functions.executions.response.unary.VectorCompletionTask":
-				schema = functions_executions_response_unary.VectorCompletionTask{}.JSONSchema()
-			case "functions.expression.AnyOfInputSchema":
-				schema = functions_expression.AnyOfInputSchema{}.JSONSchema()
-			case "functions.expression.ArrayInputSchema":
-				schema = functions_expression.ArrayInputSchema{}.JSONSchema()
-			case "functions.expression.ArrayInputSchemaType":
-				schema = functions_expression.ArrayInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.AudioInputSchema":
-				schema = functions_expression.AudioInputSchema{}.JSONSchema()
-			case "functions.expression.AudioInputSchemaType":
-				schema = functions_expression.AudioInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.BooleanInputSchema":
-				schema = functions_expression.BooleanInputSchema{}.JSONSchema()
-			case "functions.expression.BooleanInputSchemaType":
-				schema = functions_expression.BooleanInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.Expression":
-				schema = functions_expression.ExpressionSchema{}.JSONSchema()
-			case "functions.expression.FileInputSchema":
-				schema = functions_expression.FileInputSchema{}.JSONSchema()
-			case "functions.expression.FileInputSchemaType":
-				schema = functions_expression.FileInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.ImageInputSchema":
-				schema = functions_expression.ImageInputSchema{}.JSONSchema()
-			case "functions.expression.ImageInputSchemaType":
-				schema = functions_expression.ImageInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.InputSchema":
-				schema = functions_expression.InputSchemaSchema{}.JSONSchema()
-			case "functions.expression.InputValue":
-				schema = functions_expression.InputValueSchema{}.JSONSchema()
-			case "functions.expression.InputValueExpression":
-				schema = functions_expression.InputValueExpressionSchema{}.JSONSchema()
-			case "functions.expression.IntegerInputSchema":
-				schema = functions_expression.IntegerInputSchema{}.JSONSchema()
-			case "functions.expression.IntegerInputSchemaType":
-				schema = functions_expression.IntegerInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.NumberInputSchema":
-				schema = functions_expression.NumberInputSchema{}.JSONSchema()
-			case "functions.expression.NumberInputSchemaType":
-				schema = functions_expression.NumberInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.ObjectInputSchema":
-				schema = functions_expression.ObjectInputSchema{}.JSONSchema()
-			case "functions.expression.ObjectInputSchemaType":
-				schema = functions_expression.ObjectInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.OneOrMany.string":
-				schema = functions_expression.OneOrManyStringSchema{}.JSONSchema()
-			case "functions.expression.Params":
-				schema = functions_expression.ParamsSchema{}.JSONSchema()
-			case "functions.expression.ParamsOwned":
-				schema = functions_expression.ParamsOwned{}.JSONSchema()
-			case "functions.expression.ParamsRef":
-				schema = functions_expression.ParamsRef{}.JSONSchema()
-			case "functions.expression.Special":
-				schema = functions_expression.SpecialSchema{}.JSONSchema()
-			case "functions.expression.StringInputSchema":
-				schema = functions_expression.StringInputSchema{}.JSONSchema()
-			case "functions.expression.StringInputSchemaType":
-				schema = functions_expression.StringInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.TaskOutput":
-				schema = functions_expression.TaskOutputSchema{}.JSONSchema()
-			case "functions.expression.TaskOutputOwned":
-				schema = functions_expression.TaskOutputOwnedSchema{}.JSONSchema()
-			case "functions.expression.TaskOutputRef":
-				schema = functions_expression.TaskOutputRefSchema{}.JSONSchema()
-			case "functions.expression.VideoInputSchema":
-				schema = functions_expression.VideoInputSchema{}.JSONSchema()
-			case "functions.expression.VideoInputSchemaType":
-				schema = functions_expression.VideoInputSchemaTypeSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.Array_of_functions.expression.WithExpression.agent.completions.message.MessageExpression":
-				schema = functions_expression.WithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.Array_of_functions.expression.WithExpression.agent.completions.message.RichContentExpression":
-				schema = functions_expression.WithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression":
-				schema = functions_expression.WithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression":
-				schema = functions_expression.WithExpressionNullableAgentCompletionsMessageRichContentExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.Nullable_string":
-				schema = functions_expression.WithExpressionNullableStringSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageAssistantToolCallExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.File":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageFileSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.ImageUrl":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageImageUrlSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.InputAudio":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageInputAudioSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.MessageExpression":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageMessageExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.RichContentExpression":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageRichContentExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.RichContentPartExpression":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageRichContentPartExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.SimpleContentExpression":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageSimpleContentExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.SimpleContentPartExpression":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageSimpleContentPartExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.agent.completions.message.VideoUrl":
-				schema = functions_expression.WithExpressionAgentCompletionsMessageVideoUrlSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.functions.expression.InputValueExpression":
-				schema = functions_expression.WithExpressionFunctionsExpressionInputValueExpressionSchema{}.JSONSchema()
-			case "functions.expression.WithExpression.string":
-				schema = functions_expression.WithExpressionStringSchema{}.JSONSchema()
-			case "functions.inventions.DescriptionObject":
-				schema = functions_inventions.DescriptionObject{}.JSONSchema()
-			case "functions.inventions.EssayObject":
-				schema = functions_inventions.EssayObject{}.JSONSchema()
-			case "functions.inventions.EssayTasksObject":
-				schema = functions_inventions.EssayTasksObject{}.JSONSchema()
-			case "functions.inventions.IndexObject":
-				schema = functions_inventions.IndexObject{}.JSONSchema()
-			case "functions.inventions.TasksLengthObject":
-				schema = functions_inventions.TasksLengthObject{}.JSONSchema()
-			case "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams":
-				schema = functions_inventions_recursive_request.FunctionInventionRecursiveCreateParams{}.JSONSchema()
-			case "functions.inventions.recursive.response.streaming.FunctionInventionChunk":
-				schema = functions_inventions_recursive_response_streaming.FunctionInventionChunk{}.JSONSchema()
-			case "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk":
-				schema = functions_inventions_recursive_response_streaming.FunctionInventionRecursiveChunk{}.JSONSchema()
-			case "functions.inventions.recursive.response.streaming.Object":
-				schema = functions_inventions_recursive_response_streaming.ObjectSchema{}.JSONSchema()
-			case "functions.inventions.recursive.response.unary.FunctionInvention":
-				schema = functions_inventions_recursive_response_unary.FunctionInvention{}.JSONSchema()
-			case "functions.inventions.recursive.response.unary.FunctionInventionRecursive":
-				schema = functions_inventions_recursive_response_unary.FunctionInventionRecursive{}.JSONSchema()
-			case "functions.inventions.recursive.response.unary.Object":
-				schema = functions_inventions_recursive_response_unary.ObjectSchema{}.JSONSchema()
-			case "functions.inventions.request.FunctionInventionCreateParams":
-				schema = functions_inventions_request.FunctionInventionCreateParams{}.JSONSchema()
-			case "functions.inventions.response.streaming.AgentCompletionChunk":
-				schema = functions_inventions_response_streaming.AgentCompletionChunk{}.JSONSchema()
-			case "functions.inventions.response.streaming.FunctionInventionChunk":
-				schema = functions_inventions_response_streaming.FunctionInventionChunk{}.JSONSchema()
-			case "functions.inventions.response.streaming.Object":
-				schema = functions_inventions_response_streaming.ObjectSchema{}.JSONSchema()
-			case "functions.inventions.response.unary.AgentCompletion":
-				schema = functions_inventions_response_unary.AgentCompletion{}.JSONSchema()
-			case "functions.inventions.response.unary.FunctionInvention":
-				schema = functions_inventions_response_unary.FunctionInvention{}.JSONSchema()
-			case "functions.inventions.response.unary.Object":
-				schema = functions_inventions_response_unary.ObjectSchema{}.JSONSchema()
-			case "functions.inventions.state.AlphaScalarBranchState":
-				schema = functions_inventions_state.AlphaScalarBranchState{}.JSONSchema()
-			case "functions.inventions.state.AlphaScalarLeafState":
-				schema = functions_inventions_state.AlphaScalarLeafState{}.JSONSchema()
-			case "functions.inventions.state.AlphaScalarState":
-				schema = functions_inventions_state.AlphaScalarState{}.JSONSchema()
-			case "functions.inventions.state.AlphaVectorBranchState":
-				schema = functions_inventions_state.AlphaVectorBranchState{}.JSONSchema()
-			case "functions.inventions.state.AlphaVectorLeafState":
-				schema = functions_inventions_state.AlphaVectorLeafState{}.JSONSchema()
-			case "functions.inventions.state.AlphaVectorState":
-				schema = functions_inventions_state.AlphaVectorState{}.JSONSchema()
-			case "functions.inventions.state.Params":
-				schema = functions_inventions_state.Params{}.JSONSchema()
-			case "functions.inventions.state.ParamsState":
-				schema = functions_inventions_state.ParamsStateSchema{}.JSONSchema()
-			case "functions.inventions.state.State":
-				schema = functions_inventions_state.StateSchema{}.JSONSchema()
-			case "functions.profiles.GetProfile":
-				schema = functions_profiles.GetProfile{}.JSONSchema()
-			case "functions.profiles.ListProfile":
-				schema = functions_profiles.ListProfile{}.JSONSchema()
-			case "functions.profiles.ListProfileItem":
-				schema = functions_profiles.ListProfileItem{}.JSONSchema()
-			case "functions.profiles.ListProfilesQueryParameters":
-				schema = functions_profiles.ListProfilesQueryParameters{}.JSONSchema()
-			case "functions.profiles.ListProfilesSource":
-				schema = functions_profiles.ListProfilesSourceSchema{}.JSONSchema()
-			case "functions.profiles.UsageProfile":
-				schema = functions_profiles.UsageProfile{}.JSONSchema()
-			case "functions.profiles.computations.RetryToken":
-				schema = functions_profiles_computations.RetryTokenSchema{}.JSONSchema()
-			case "functions.profiles.computations.request.DatasetItem":
-				schema = functions_profiles_computations_request.DatasetItem{}.JSONSchema()
-			case "functions.profiles.computations.request.FunctionInlineRequestBody":
-				schema = functions_profiles_computations_request.FunctionInlineRequestBody{}.JSONSchema()
-			case "functions.profiles.computations.request.FunctionProfileComputationCreateParams":
-				schema = functions_profiles_computations_request.FunctionProfileComputationCreateParamsSchema{}.JSONSchema()
-			case "functions.profiles.computations.request.FunctionRemoteRequestBody":
-				schema = functions_profiles_computations_request.FunctionRemoteRequestBody{}.JSONSchema()
-			case "functions.profiles.computations.request.FunctionRemoteRequestPath":
-				schema = functions_profiles_computations_request.FunctionRemoteRequestPath{}.JSONSchema()
-			case "functions.profiles.computations.request.Request":
-				schema = functions_profiles_computations_request.RequestSchema{}.JSONSchema()
-			case "functions.profiles.computations.request.Target":
-				schema = functions_profiles_computations_request.TargetSchema{}.JSONSchema()
-			case "functions.profiles.computations.response.FittingStats":
-				schema = functions_profiles_computations_response.FittingStats{}.JSONSchema()
-			case "functions.profiles.computations.response.streaming.FunctionExecutionChunk":
-				schema = functions_profiles_computations_response_streaming.FunctionExecutionChunk{}.JSONSchema()
-			case "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk":
-				schema = functions_profiles_computations_response_streaming.FunctionProfileComputationChunk{}.JSONSchema()
-			case "functions.profiles.computations.response.streaming.Object":
-				schema = functions_profiles_computations_response_streaming.ObjectSchema{}.JSONSchema()
-			case "functions.profiles.computations.response.unary.FunctionExecution":
-				schema = functions_profiles_computations_response_unary.FunctionExecution{}.JSONSchema()
-			case "functions.profiles.computations.response.unary.FunctionProfileComputation":
-				schema = functions_profiles_computations_response_unary.FunctionProfileComputation{}.JSONSchema()
-			case "functions.profiles.computations.response.unary.Object":
-				schema = functions_profiles_computations_response_unary.ObjectSchema{}.JSONSchema()
-			case "vector.completions.VectorResponses":
-				schema = vector_completions.VectorResponsesSchema{}.JSONSchema()
-			case "vector.completions.cache.CacheVote":
-				schema = vector_completions_cache.CacheVote{}.JSONSchema()
-			case "vector.completions.cache.CacheVoteRequest":
-				schema = vector_completions_cache.CacheVoteRequestSchema{}.JSONSchema()
-			case "vector.completions.cache.CacheVoteRequestOwned":
-				schema = vector_completions_cache.CacheVoteRequestOwned{}.JSONSchema()
-			case "vector.completions.cache.CacheVoteRequestRef":
-				schema = vector_completions_cache.CacheVoteRequestRef{}.JSONSchema()
-			case "vector.completions.cache.CompletionVotes":
-				schema = vector_completions_cache.CompletionVotes{}.JSONSchema()
-			case "vector.completions.request.Ensemble":
-				schema = vector_completions_request.EnsembleSchema{}.JSONSchema()
-			case "vector.completions.request.Profile":
-				schema = vector_completions_request.ProfileSchema{}.JSONSchema()
-			case "vector.completions.request.ProfileEntry":
-				schema = vector_completions_request.ProfileEntry{}.JSONSchema()
-			case "vector.completions.request.VectorCompletionCreateParams":
-				schema = vector_completions_request.VectorCompletionCreateParams{}.JSONSchema()
-			case "vector.completions.response.Vote":
-				schema = vector_completions_response.Vote{}.JSONSchema()
-			case "vector.completions.response.streaming.AgentCompletionChunk":
-				schema = vector_completions_response_streaming.AgentCompletionChunk{}.JSONSchema()
-			case "vector.completions.response.streaming.Object":
-				schema = vector_completions_response_streaming.ObjectSchema{}.JSONSchema()
-			case "vector.completions.response.streaming.VectorCompletionChunk":
-				schema = vector_completions_response_streaming.VectorCompletionChunk{}.JSONSchema()
-			case "vector.completions.response.unary.AgentCompletion":
-				schema = vector_completions_response_unary.AgentCompletion{}.JSONSchema()
-			case "vector.completions.response.unary.Object":
-				schema = vector_completions_response_unary.ObjectSchema{}.JSONSchema()
-			case "vector.completions.response.unary.VectorCompletion":
-				schema = vector_completions_response_unary.VectorCompletion{}.JSONSchema()
-			default:
-				t.Fatalf("no schema provider for %q", title)
+			v := describedForTitle(title)
+			if v == nil {
+				t.Fatalf("no type for %q", title)
 			}
+			schema := convertToSchema(v)
 			assertSchemaMatches(t, title, schema)
 		})
 	}

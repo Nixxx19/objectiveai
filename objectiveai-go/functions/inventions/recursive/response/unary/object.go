@@ -6,9 +6,10 @@ type Object = string
 
 type ObjectSchema struct{}
 
-func (ObjectSchema) JSONSchema() map[string]any {
+func (ObjectSchema) SchemaTitle() string { return "functions.inventions.recursive.response.unary.Object" }
+func (ObjectSchema) SchemaDescription() string { return "" }
+func (ObjectSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.inventions.recursive.response.unary.Object",
 		"type": "string",
 		"enum": []any{"alpha.scalar.function.invention.recursive", "alpha.vector.function.invention.recursive"},
 	}

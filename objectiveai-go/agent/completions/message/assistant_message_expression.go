@@ -3,35 +3,17 @@
 package message
 
 type AssistantMessageExpression struct {
-	Content any `json:"content,omitempty"`
-	Name any `json:"name,omitempty"`
-	Reasoning any `json:"reasoning,omitempty"`
-	Refusal any `json:"refusal,omitempty"`
-	ToolCalls any `json:"tool_calls,omitempty"`
+	Content any `json:"content,omitempty" nullable:"true" ref:"functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression"`
+	Name any `json:"name,omitempty" nullable:"true" ref:"functions.expression.WithExpression.Nullable_string"`
+	Reasoning any `json:"reasoning,omitempty" nullable:"true" ref:"functions.expression.WithExpression.Nullable_string"`
+	Refusal any `json:"refusal,omitempty" nullable:"true" ref:"functions.expression.WithExpression.Nullable_string"`
+	ToolCalls any `json:"tool_calls,omitempty" nullable:"true" ref:"functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression"`
 }
 
-func (AssistantMessageExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.AssistantMessageExpression",
-		"description": "Expression variant of [`AssistantMessage`] for dynamic content.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The content expression.",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression"}, map[string]any{"type": "null"}},
-		},
-			"name": map[string]any{
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.WithExpression.Nullable_string"}, map[string]any{"type": "null"}},
-		},
-			"reasoning": map[string]any{
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.WithExpression.Nullable_string"}, map[string]any{"type": "null"}},
-		},
-			"refusal": map[string]any{
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.WithExpression.Nullable_string"}, map[string]any{"type": "null"}},
-		},
-			"tool_calls": map[string]any{
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression"}, map[string]any{"type": "null"}},
-		},
-		},
+func (AssistantMessageExpression) SchemaTitle() string { return "agent.completions.message.AssistantMessageExpression" }
+func (AssistantMessageExpression) SchemaDescription() string { return "Expression variant of [`AssistantMessage`] for dynamic content." }
+func (AssistantMessageExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The content expression.",
 	}
 }

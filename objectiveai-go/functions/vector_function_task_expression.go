@@ -4,53 +4,26 @@ package functions
 
 type VectorFunctionTaskExpression struct {
 	Commit string `json:"commit"`
-	Input any `json:"input"`
-	Map any `json:"map,omitempty"`
-	Output any `json:"output"`
+	Input any `json:"input" ref:"functions.expression.WithExpression.functions.expression.InputValueExpression"`
+	Map any `json:"map,omitempty" nullable:"true" ref:"functions.expression.Expression"`
+	Output any `json:"output" ref:"functions.expression.Expression"`
 	Owner string `json:"owner"`
-	Remote any `json:"remote"`
+	Remote any `json:"remote" ref:"functions.Remote"`
 	Repository string `json:"repository"`
-	Skip any `json:"skip,omitempty"`
+	Skip any `json:"skip,omitempty" nullable:"true" ref:"functions.expression.Expression"`
 }
 
-func (VectorFunctionTaskExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.VectorFunctionTaskExpression",
-		"description": "Expression for a task that calls a vector function (pre-compilation).",
-		"type": "object",
-		"properties": map[string]any{
-			"commit": map[string]any{
-			"description": "Git commit SHA for the function version.",
-			"type": "string",
-		},
-			"input": map[string]any{
-			"description": "Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).",
-			"$ref": "functions.expression.WithExpression.functions.expression.InputValueExpression",
-		},
-			"map": map[string]any{
-			"description": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-			"output": map[string]any{
-			"description": "Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.",
-			"$ref": "functions.expression.Expression",
-		},
-			"owner": map[string]any{
-			"description": "Repository owner.",
-			"type": "string",
-		},
-			"remote": map[string]any{
-			"description": "The remote source where the function is hosted.",
-			"$ref": "functions.Remote",
-		},
-			"repository": map[string]any{
-			"description": "Repository name.",
-			"type": "string",
-		},
-			"skip": map[string]any{
-			"description": "If this expression evaluates to true, skip the task. Receives: `input`.",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-		},
+func (VectorFunctionTaskExpression) SchemaTitle() string { return "functions.VectorFunctionTaskExpression" }
+func (VectorFunctionTaskExpression) SchemaDescription() string { return "Expression for a task that calls a vector function (pre-compilation)." }
+func (VectorFunctionTaskExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"commit": "Git commit SHA for the function version.",
+		"input": "Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).",
+		"map": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
+		"output": "Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.",
+		"owner": "Repository owner.",
+		"remote": "The remote source where the function is hosted.",
+		"repository": "Repository name.",
+		"skip": "If this expression evaluates to true, skip the task. Receives: `input`.",
 	}
 }

@@ -3,26 +3,10 @@
 package alpha_scalar
 
 type VectorCompletionTaskExpression struct {
-	Messages any `json:"messages"`
-	Responses []any `json:"responses"`
-	Skip any `json:"skip,omitempty"`
+	Messages any `json:"messages" ref:"functions.expression.Expression"`
+	Responses []any `json:"responses" items_ref:"agent.completions.message.RichContent"`
+	Skip any `json:"skip,omitempty" nullable:"true" ref:"functions.expression.Expression"`
 }
 
-func (VectorCompletionTaskExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.alpha_scalar.VectorCompletionTaskExpression",
-		"type": "object",
-		"properties": map[string]any{
-			"messages": map[string]any{
-			"$ref": "functions.expression.Expression",
-		},
-			"responses": map[string]any{
-			"type": "array",
-			"items": map[string]any{"$ref": "agent.completions.message.RichContent"},
-		},
-			"skip": map[string]any{
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-		},
-	}
-}
+func (VectorCompletionTaskExpression) SchemaTitle() string { return "functions.alpha_scalar.VectorCompletionTaskExpression" }
+func (VectorCompletionTaskExpression) SchemaDescription() string { return "" }

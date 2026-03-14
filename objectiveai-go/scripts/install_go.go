@@ -508,11 +508,146 @@ func generateStruct(typeName string, schema Schema, selfTitle string, allTitles 
 			}
 		}
 
-		buf.WriteString(fmt.Sprintf("\t%s %s `json:%q`\n", fieldName, fieldType, jsonTag))
+		// Build struct tags: json + metadata tags for roundtrip
+		tags := buildStructTags(jsonTag, propSchema)
+		buf.WriteString(fmt.Sprintf("\t%s %s %s\n", fieldName, fieldType, tags))
 	}
 
 	buf.WriteString("}\n")
 	return buf.String()
+}
+
+// buildStructTags builds the full struct tag string for a field, including
+// json tag and metadata tags (desc, ref, min, max, fmt, pat, def, addprops)
+// that the roundtrip test reads via reflection.
+func buildStructTags(jsonTag string, propSchema Schema) string {
+	tags := []string{fmt.Sprintf("json:%q", jsonTag)}
+
+	// Determine the effective schema for metadata extraction.
+	// For nullable fields, metadata is split: description stays on outer,
+	// constraints go on the non-null variant.
+	nullable := isNullable(propSchema)
+	var constraintSchema Schema
+	if nullable {
+		constraintSchema = getNonNullVariant(propSchema)
+	} else {
+		constraintSchema = propSchema
+	}
+
+	// Note: field descriptions go in the FieldDescriptions() method, not tags,
+	// because descriptions can contain backticks which break struct tag syntax.
+
+	// Explicit nullable marker (so converter doesn't have to guess from omitempty)
+	if nullable {
+		tags = append(tags, `nullable:"true"`)
+	}
+
+	// $ref (on the constraint schema for nullable, or the prop itself)
+	if ref, ok := constraintSchema["$ref"].(string); ok {
+		tags = append(tags, fmt.Sprintf("ref:%q", ref))
+	}
+
+	// enum
+	if enumVals, ok := constraintSchema["enum"].([]any); ok {
+		parts := make([]string, len(enumVals))
+		for i, v := range enumVals {
+			parts[i] = fmt.Sprintf("%v", v)
+		}
+		tags = append(tags, fmt.Sprintf("enum:%q", strings.Join(parts, ",")))
+	}
+
+	// minimum/maximum
+	if v, ok := constraintSchema["minimum"]; ok {
+		tags = append(tags, fmt.Sprintf("min:%q", formatTagNumber(v)))
+	}
+	if v, ok := constraintSchema["maximum"]; ok {
+		tags = append(tags, fmt.Sprintf("max:%q", formatTagNumber(v)))
+	}
+
+	// format
+	if f, ok := constraintSchema["format"].(string); ok {
+		tags = append(tags, fmt.Sprintf("fmt:%q", f))
+	}
+
+	// pattern
+	if p, ok := constraintSchema["pattern"].(string); ok {
+		tags = append(tags, fmt.Sprintf("pat:%q", p))
+	}
+
+	// default (on the outer schema)
+	if v, ok := propSchema["default"]; ok {
+		tags = append(tags, fmt.Sprintf("def:%q", formatTagDefault(v)))
+	}
+
+	// additionalProperties (on the constraint schema)
+	if ap, ok := constraintSchema["additionalProperties"]; ok {
+		if apBool, ok := ap.(bool); ok {
+			tags = append(tags, fmt.Sprintf("addprops:%q", fmt.Sprintf("%v", apBool)))
+		}
+	}
+
+	// items metadata (for array fields)
+	if items, ok := constraintSchema["items"].(map[string]any); ok {
+		if iref, ok := items["$ref"].(string); ok {
+			tags = append(tags, fmt.Sprintf("items_ref:%q", iref))
+		}
+		if v, ok := items["minimum"]; ok {
+			tags = append(tags, fmt.Sprintf("items_min:%q", formatTagNumber(v)))
+		}
+		if v, ok := items["maximum"]; ok {
+			tags = append(tags, fmt.Sprintf("items_max:%q", formatTagNumber(v)))
+		}
+		if f, ok := items["format"].(string); ok {
+			tags = append(tags, fmt.Sprintf("items_fmt:%q", f))
+		}
+	}
+
+	// additionalProperties value constraints (for map fields)
+	if ap, ok := constraintSchema["additionalProperties"].(map[string]any); ok {
+		if ref, ok := ap["$ref"].(string); ok {
+			tags = append(tags, fmt.Sprintf("addprops_ref:%q", ref))
+		}
+		if v, ok := ap["minimum"]; ok {
+			tags = append(tags, fmt.Sprintf("addprops_min:%q", formatTagNumber(v)))
+		}
+		if v, ok := ap["maximum"]; ok {
+			tags = append(tags, fmt.Sprintf("addprops_max:%q", formatTagNumber(v)))
+		}
+	}
+
+	return "`" + strings.Join(tags, " ") + "`"
+}
+
+func formatTagNumber(v any) string {
+	switch n := v.(type) {
+	case json.Number:
+		return n.String()
+	case float64:
+		if n == math.Trunc(n) && !math.IsInf(n, 0) && math.Abs(n) < 1e15 {
+			return strconv.FormatInt(int64(n), 10)
+		}
+		return strconv.FormatFloat(n, 'g', -1, 64)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
+
+func formatTagDefault(v any) string {
+	switch val := v.(type) {
+	case string:
+		return val
+	case bool:
+		return fmt.Sprintf("%v", val)
+	case json.Number:
+		return val.String()
+	case float64:
+		return strconv.FormatFloat(val, 'g', -1, 64)
+	case nil:
+		return "null"
+	default:
+		b, _ := json.Marshal(val)
+		return string(b)
+	}
 }
 
 func resolveFieldType(propSchema Schema, selfTitle string, allTitles map[string]bool) string {
@@ -528,42 +663,85 @@ func resolveFieldType(propSchema Schema, selfTitle string, allTitles map[string]
 }
 
 // ---------------------------------------------------------------------------
-// Generate JSONSchema() method
+// Generate Described methods (Title, Description)
 // ---------------------------------------------------------------------------
 
-func generateJSONSchemaMethod(receiverName string, schema Schema, selfTitle string) string {
+func generateDescribedMethods(receiverName string, schema Schema, selfTitle string) string {
 	var buf strings.Builder
 
-	buf.WriteString(fmt.Sprintf("func (%s) JSONSchema() map[string]any {\n", receiverName))
+	buf.WriteString(fmt.Sprintf("func (%s) SchemaTitle() string { return %q }\n", receiverName, selfTitle))
+
+	desc, _ := schema["description"].(string)
+	buf.WriteString(fmt.Sprintf("func (%s) SchemaDescription() string { return %q }\n", receiverName, desc))
+
+	return buf.String()
+}
+
+// generateFieldDescriptionsMethod generates a FieldDescriptions() method
+// that returns per-field descriptions for struct types. Descriptions go here
+// instead of struct tags because they can contain backticks.
+func generateFieldDescriptionsMethod(receiverName string, schema Schema) string {
+	properties, ok := schema["properties"].(map[string]any)
+	if !ok {
+		return ""
+	}
+
+	// Check if any field has a description
+	hasDescs := false
+	for _, v := range properties {
+		ps, ok := v.(map[string]any)
+		if ok {
+			if _, ok := ps["description"].(string); ok {
+				hasDescs = true
+				break
+			}
+		}
+	}
+	if !hasDescs {
+		return ""
+	}
+
+	var buf strings.Builder
+	buf.WriteString(fmt.Sprintf("func (%s) FieldDescriptions() map[string]string {\n", receiverName))
+	buf.WriteString("\treturn map[string]string{\n")
+
+	propNames := make([]string, 0, len(properties))
+	for k := range properties {
+		propNames = append(propNames, k)
+	}
+	sort.Strings(propNames)
+
+	for _, propName := range propNames {
+		ps, ok := properties[propName].(map[string]any)
+		if !ok {
+			continue
+		}
+		if desc, ok := ps["description"].(string); ok {
+			buf.WriteString(fmt.Sprintf("\t\t%q: %q,\n", propName, desc))
+		}
+	}
+
+	buf.WriteString("\t}\n")
+	buf.WriteString("}\n")
+
+	return buf.String()
+}
+
+// ---------------------------------------------------------------------------
+// Generate Body() method for non-struct types
+// ---------------------------------------------------------------------------
+
+func generateBodyMethod(receiverName string, schema Schema) string {
+	var buf strings.Builder
+
+	// Build a body map with everything except title and description
+	buf.WriteString(fmt.Sprintf("func (%s) Body() map[string]any {\n", receiverName))
 	buf.WriteString("\treturn map[string]any{\n")
 
-	buf.WriteString(fmt.Sprintf("\t\t\"title\": %q,\n", selfTitle))
-
-	if desc, ok := schema["description"].(string); ok {
-		buf.WriteString(fmt.Sprintf("\t\t\"description\": %q,\n", desc))
-	}
-
-	hasProps := false
-	if _, ok := schema["properties"]; ok {
-		hasProps = true
-	}
-	var anyOfItems []any
-	hasAnyOf := false
-	if ao, ok := schema["anyOf"].([]any); ok {
-		hasAnyOf = true
-		anyOfItems = ao
-	}
-	var refTarget string
-	hasRef := false
-	if ref, ok := schema["$ref"].(string); ok {
-		hasRef = true
-		refTarget = ref
-	}
-
+	// Canonical keyword order, skipping title and description
 	if t, ok := schema["type"].(string); ok {
 		buf.WriteString(fmt.Sprintf("\t\t\"type\": %q,\n", t))
 	}
-
 	if enumVals, ok := schema["enum"].([]any); ok {
 		parts := make([]string, len(enumVals))
 		for i, v := range enumVals {
@@ -571,11 +749,9 @@ func generateJSONSchemaMethod(receiverName string, schema Schema, selfTitle stri
 		}
 		buf.WriteString(fmt.Sprintf("\t\t\"enum\": []any{%s},\n", strings.Join(parts, ", ")))
 	}
-
-	// anyOf (top-level or adjacently-tagged)
-	if hasAnyOf {
+	if anyOf, ok := schema["anyOf"].([]any); ok {
 		buf.WriteString("\t\t\"anyOf\": []any{\n")
-		for _, v := range anyOfItems {
+		for _, v := range anyOf {
 			m, ok := v.(map[string]any)
 			if !ok {
 				continue
@@ -584,52 +760,61 @@ func generateJSONSchemaMethod(receiverName string, schema Schema, selfTitle stri
 		}
 		buf.WriteString("\t\t},\n")
 	}
-
-	// $ref (top-level or adjacently-tagged)
-	if hasRef {
-		buf.WriteString(fmt.Sprintf("\t\t\"$ref\": %q,\n", refTarget))
+	if ref, ok := schema["$ref"].(string); ok {
+		buf.WriteString(fmt.Sprintf("\t\t\"$ref\": %q,\n", ref))
+	}
+	if items, ok := schema["items"].(map[string]any); ok {
+		buf.WriteString(fmt.Sprintf("\t\t\"items\": %s,\n", formatSchemaMapLiteral(items)))
+	}
+	for _, kw := range []string{"minItems", "maxItems", "minimum", "maximum", "pattern", "format"} {
+		if v, ok := schema[kw]; ok {
+			buf.WriteString(fmt.Sprintf("\t\t%q: %s,\n", kw, formatJSONValue(v)))
+		}
+	}
+	if ap, ok := schema["additionalProperties"]; ok {
+		buf.WriteString(fmt.Sprintf("\t\t\"additionalProperties\": %s,\n", formatJSONValue(ap)))
+	}
+	if v, ok := schema["default"]; ok {
+		buf.WriteString(fmt.Sprintf("\t\t\"default\": %s,\n", formatJSONValue(v)))
 	}
 
-	// properties
-	if hasProps {
-		buf.WriteString("\t\t\"properties\": map[string]any{\n")
-		properties, _ := schema["properties"].(map[string]any)
-		propNames := make([]string, 0, len(properties))
-		for k := range properties {
-			propNames = append(propNames, k)
-		}
-		sort.Strings(propNames)
-		for _, propName := range propNames {
-			propSchema, ok := properties[propName].(map[string]any)
+	buf.WriteString("\t}\n")
+	buf.WriteString("}\n")
+
+	return buf.String()
+}
+
+// generateStructBodyMethod generates a Body() method for struct types that
+// have extra schema content beyond properties (anyOf or $ref for adjacently-tagged).
+func generateStructBodyMethod(receiverName string, schema Schema) string {
+	hasAnyOf := schema["anyOf"] != nil
+	hasRef := schema["$ref"] != nil
+	hasAdditionalProps := schema["additionalProperties"] != nil
+
+	if !hasAnyOf && !hasRef && !hasAdditionalProps {
+		return ""
+	}
+
+	var buf strings.Builder
+	buf.WriteString(fmt.Sprintf("func (%s) Body() map[string]any {\n", receiverName))
+	buf.WriteString("\treturn map[string]any{\n")
+
+	if anyOf, ok := schema["anyOf"].([]any); ok {
+		buf.WriteString("\t\t\"anyOf\": []any{\n")
+		for _, v := range anyOf {
+			m, ok := v.(map[string]any)
 			if !ok {
 				continue
 			}
-			buf.WriteString(fmt.Sprintf("\t\t\t%q: %s,\n", propName, formatSchemaMapLiteral(propSchema)))
+			buf.WriteString(fmt.Sprintf("\t\t\t%s,\n", formatSchemaMapLiteral(m)))
 		}
 		buf.WriteString("\t\t},\n")
-
-		if ap, ok := schema["additionalProperties"]; ok {
-			buf.WriteString(fmt.Sprintf("\t\t\"additionalProperties\": %s,\n", formatJSONValue(ap)))
-		}
 	}
-
-	// Non-object, non-anyOf, non-ref top-level keywords
-	if !hasProps && !hasAnyOf && !hasRef {
-		if items, ok := schema["items"].(map[string]any); ok {
-			buf.WriteString(fmt.Sprintf("\t\t\"items\": %s,\n", formatSchemaMapLiteral(items)))
-		}
-		for _, kw := range []string{"minItems", "maxItems", "minimum", "maximum", "pattern", "format"} {
-			if v, ok := schema[kw]; ok {
-				buf.WriteString(fmt.Sprintf("\t\t%q: %s,\n", kw, formatJSONValue(v)))
-			}
-		}
-		if ap, ok := schema["additionalProperties"]; ok {
-			buf.WriteString(fmt.Sprintf("\t\t\"additionalProperties\": %s,\n", formatJSONValue(ap)))
-		}
+	if ref, ok := schema["$ref"].(string); ok {
+		buf.WriteString(fmt.Sprintf("\t\t\"$ref\": %q,\n", ref))
 	}
-
-	if v, ok := schema["default"]; ok {
-		buf.WriteString(fmt.Sprintf("\t\t\"default\": %s,\n", formatJSONValue(v)))
+	if ap, ok := schema["additionalProperties"]; ok {
+		buf.WriteString(fmt.Sprintf("\t\t\"additionalProperties\": %s,\n", formatJSONValue(ap)))
 	}
 
 	buf.WriteString("\t}\n")
@@ -642,8 +827,21 @@ func generateJSONSchemaMethod(receiverName string, schema Schema, selfTitle stri
 // Generate full type code for a schema
 // ---------------------------------------------------------------------------
 
-func generateTypeCode(title string, schema Schema, allTitles map[string]bool) string {
+// variantImport tracks a required import for a variant's typed Inner field.
+type variantImport struct {
+	alias string
+	path  string
+}
+
+// generateResult holds generated code and any imports it requires.
+type generateResult struct {
+	code    string
+	imports []variantImport
+}
+
+func generateTypeCode(title string, schema Schema, allTitles map[string]bool) generateResult {
 	typeName := titleToTypeName(title)
+	dirPath, _ := titleToPath(title)
 	hasProperties := schema["properties"] != nil
 
 	var buf strings.Builder
@@ -651,44 +849,157 @@ func generateTypeCode(title string, schema Schema, allTitles map[string]bool) st
 	if hasProperties {
 		buf.WriteString(generateStruct(typeName, schema, title, allTitles))
 		buf.WriteString("\n")
-		buf.WriteString(generateJSONSchemaMethod(typeName, schema, title))
-	} else {
-		// Non-struct types: type alias + Schema helper for JSONSchema() method
-		goT := determineGoType(schema, title, allTitles)
-		buf.WriteString(fmt.Sprintf("type %s = %s\n\n", typeName, goT))
+		buf.WriteString(generateDescribedMethods(typeName, schema, title))
+		fdMethod := generateFieldDescriptionsMethod(typeName, schema)
+		if fdMethod != "" {
+			buf.WriteString(fdMethod)
+		}
+		bodyMethod := generateStructBodyMethod(typeName, schema)
+		if bodyMethod != "" {
+			buf.WriteString("\n")
+			buf.WriteString(bodyMethod)
+		}
+		return generateResult{code: buf.String()}
+	}
+
+	// anyOf → sealed interface + variant types
+	if anyOf, ok := schema["anyOf"].([]any); ok {
+		// Simple nullable (2 variants, one null) — no interface needed
+		nonNull, hasNull := splitNullVariants(anyOf)
+		if hasNull && len(nonNull) == 1 {
+			goT := goType(nonNull[0], title, allTitles)
+			if goT != "any" && !strings.HasPrefix(goT, "*") && !strings.HasPrefix(goT, "[]") && !strings.HasPrefix(goT, "map[") {
+				goT = "*" + goT
+			}
+			buf.WriteString(fmt.Sprintf("type %s = %s\n\n", typeName, goT))
+			helperName := typeName + "Schema"
+			buf.WriteString(fmt.Sprintf("type %s struct{}\n\n", helperName))
+			buf.WriteString(generateDescribedMethods(helperName, schema, title))
+			buf.WriteString(generateBodyMethod(helperName, schema))
+			return generateResult{code: buf.String()}
+		}
+
+		// Non-nullable anyOf → sealed interface
+		ifaceCode, imports := generateSealedInterface(typeName, anyOf, title, dirPath, allTitles)
+		buf.WriteString(ifaceCode)
 		helperName := typeName + "Schema"
 		buf.WriteString(fmt.Sprintf("type %s struct{}\n\n", helperName))
-		buf.WriteString(generateJSONSchemaMethod(helperName, schema, title))
+		buf.WriteString(generateDescribedMethods(helperName, schema, title))
+		buf.WriteString(generateBodyMethod(helperName, schema))
+		return generateResult{code: buf.String(), imports: imports}
 	}
 
-	return buf.String()
+	// Non-anyOf, non-struct: enum, $ref, primitive, array, map
+	goT := determinePrimitiveGoType(schema, title, allTitles)
+	buf.WriteString(fmt.Sprintf("type %s = %s\n\n", typeName, goT))
+	helperName := typeName + "Schema"
+	buf.WriteString(fmt.Sprintf("type %s struct{}\n\n", helperName))
+	buf.WriteString(generateDescribedMethods(helperName, schema, title))
+	buf.WriteString(generateBodyMethod(helperName, schema))
+	return generateResult{code: buf.String()}
 }
 
-func determineGoType(schema Schema, title string, allTitles map[string]bool) string {
-	if _, ok := schema["anyOf"]; ok {
-		anyOf, _ := schema["anyOf"].([]any)
-		var nonNull []Schema
-		hasNull := false
-		for _, v := range anyOf {
-			m, ok := v.(map[string]any)
-			if !ok {
-				continue
-			}
-			if isSimpleNull(m) {
-				hasNull = true
-			} else {
-				nonNull = append(nonNull, m)
-			}
+// splitNullVariants separates null and non-null variants from an anyOf.
+func splitNullVariants(anyOf []any) (nonNull []Schema, hasNull bool) {
+	for _, v := range anyOf {
+		m, ok := v.(map[string]any)
+		if !ok {
+			continue
 		}
-		if hasNull && len(nonNull) == 1 {
-			inner := goType(nonNull[0], title, allTitles)
-			if inner == "any" || strings.HasPrefix(inner, "*") || strings.HasPrefix(inner, "[]") || strings.HasPrefix(inner, "map[") {
-				return inner
-			}
-			return "*" + inner
+		if isSimpleNull(m) {
+			hasNull = true
+		} else {
+			nonNull = append(nonNull, m)
 		}
-		return "any"
 	}
+	return
+}
+
+// generateSealedInterface generates a sealed interface type with variant
+// structs for each anyOf variant, plus their marker method implementations.
+// Variant $ref fields are typed with proper imports.
+func generateSealedInterface(typeName string, anyOf []any, selfTitle string, selfDirPath string, allTitles map[string]bool) (string, []variantImport) {
+	var buf strings.Builder
+	var imports []variantImport
+	seenImports := map[string]bool{}
+
+	marker := "is" + typeName
+
+	buf.WriteString(fmt.Sprintf("type %s interface {\n", typeName))
+	buf.WriteString(fmt.Sprintf("\t%s()\n", marker))
+	buf.WriteString("}\n\n")
+
+	for i, v := range anyOf {
+		m, ok := v.(map[string]any)
+		if !ok {
+			continue
+		}
+		variantName := fmt.Sprintf("%sVariant%d", typeName, i+1)
+
+		if isSimpleNull(m) {
+			buf.WriteString(fmt.Sprintf("type %s struct{}\n\n", variantName))
+		} else if props, ok := m["properties"].(map[string]any); ok {
+			// Inline object variant — struct with fields
+			buf.WriteString(fmt.Sprintf("type %s struct {\n", variantName))
+			propNames := make([]string, 0, len(props))
+			for k := range props {
+				propNames = append(propNames, k)
+			}
+			sort.Strings(propNames)
+			for _, propName := range propNames {
+				propSchema, ok := props[propName].(map[string]any)
+				if !ok {
+					continue
+				}
+				fieldName := goFieldName(propName)
+				fieldType := resolveFieldType(propSchema, selfTitle, allTitles)
+				jsonTag := propName
+				if isNullable(propSchema) {
+					jsonTag += ",omitempty"
+				}
+				if _, hasDefault := propSchema["default"]; hasDefault && !strings.Contains(jsonTag, "omitempty") {
+					jsonTag += ",omitempty"
+				}
+				buf.WriteString(fmt.Sprintf("\t%s %s `json:%q`\n", fieldName, fieldType, jsonTag))
+			}
+			buf.WriteString("}\n\n")
+		} else if ref, ok := m["$ref"].(string); ok {
+			// $ref variant — typed Inner field with import
+			refDirPath, _ := titleToPath(ref)
+			refTypeName := titleToTypeName(ref)
+			var innerType string
+			if refDirPath == selfDirPath {
+				innerType = refTypeName
+			} else {
+				alias := strings.ReplaceAll(refDirPath, "/", "_")
+				innerType = alias + "." + refTypeName
+				importPath := goModulePath + "/" + refDirPath
+				if !seenImports[importPath] {
+					seenImports[importPath] = true
+					imports = append(imports, variantImport{alias: alias, path: importPath})
+				}
+			}
+			buf.WriteString(fmt.Sprintf("type %s struct {\n", variantName))
+			buf.WriteString(fmt.Sprintf("\tInner %s\n", innerType))
+			buf.WriteString("}\n\n")
+		} else if _, ok := m["enum"]; ok && m["type"] == "string" {
+			// String enum variant — empty struct (value implicit in type)
+			buf.WriteString(fmt.Sprintf("type %s struct{}\n\n", variantName))
+		} else {
+			// Primitive type variant
+			innerType := goType(m, selfTitle, allTitles)
+			buf.WriteString(fmt.Sprintf("type %s struct {\n", variantName))
+			buf.WriteString(fmt.Sprintf("\tInner %s\n", innerType))
+			buf.WriteString("}\n\n")
+		}
+
+		buf.WriteString(fmt.Sprintf("func (%s) %s() {}\n\n", variantName, marker))
+	}
+
+	return buf.String(), imports
+}
+
+func determinePrimitiveGoType(schema Schema, title string, allTitles map[string]bool) string {
 	if _, ok := schema["enum"]; ok {
 		return "string"
 	}
@@ -815,9 +1126,18 @@ func main() {
 		pkgName := titleToPackageName(dirPath)
 
 		var modelCodes []string
+		var allFileImports []variantImport
+		seenImportPaths := map[string]bool{}
+
 		for _, entry := range fileEntries {
-			code := generateTypeCode(entry.title, entry.schema, allTitlesSet)
-			modelCodes = append(modelCodes, code)
+			result := generateTypeCode(entry.title, entry.schema, allTitlesSet)
+			modelCodes = append(modelCodes, result.code)
+			for _, imp := range result.imports {
+				if !seenImportPaths[imp.path] {
+					seenImportPaths[imp.path] = true
+					allFileImports = append(allFileImports, imp)
+				}
+			}
 
 			isStruct := entry.schema["properties"] != nil
 			testEntries = append(testEntries, testEntry{
@@ -828,15 +1148,30 @@ func main() {
 			})
 		}
 
+		sort.Slice(allFileImports, func(i, j int) bool {
+			return allFileImports[i].path < allFileImports[j].path
+		})
+
 		fullCode := strings.Join(modelCodes, "\n")
 		needsJSON := strings.Contains(fullCode, "json.Number")
+		hasImports := needsJSON || len(allFileImports) > 0
 
 		var fileContent strings.Builder
 		fileContent.WriteString(generatedHeader)
 		fileContent.WriteString(fmt.Sprintf("package %s\n", pkgName))
 
+		if hasImports {
+			fileContent.WriteString("\nimport (\n")
+			if needsJSON {
+				fileContent.WriteString("\t\"encoding/json\"\n")
+			}
+			for _, imp := range allFileImports {
+				fileContent.WriteString(fmt.Sprintf("\t%s %q\n", imp.alias, imp.path))
+			}
+			fileContent.WriteString(")\n")
+		}
+
 		if needsJSON {
-			fileContent.WriteString("\nimport \"encoding/json\"\n")
 			fileContent.WriteString("\nvar _ json.Number // suppress unused import\n")
 		}
 
@@ -895,17 +1230,16 @@ func main() {
 	}
 	testBuf.WriteString(")\n\n")
 
-	testBuf.WriteString("func TestRoundtrip(t *testing.T) {\n")
-	testBuf.WriteString("\tfor _, title := range allTitlesSorted {\n")
-	testBuf.WriteString("\t\tt.Run(title, func(t *testing.T) {\n")
-	testBuf.WriteString("\t\t\tvar schema map[string]any\n")
-	testBuf.WriteString("\t\t\tswitch title {\n")
+	// Generate a function that returns the Described value for each title.
+	// For struct types, returns the struct itself.
+	// For non-struct types, returns the Schema helper (which also implements SchemaBody).
+	testBuf.WriteString("func describedForTitle(title string) any {\n")
+	testBuf.WriteString("\tswitch title {\n")
 
 	for _, te := range testEntries {
-		testBuf.WriteString(fmt.Sprintf("\t\t\tcase %q:\n", te.title))
+		testBuf.WriteString(fmt.Sprintf("\tcase %q:\n", te.title))
 		var qualifiedName string
 		if te.dirPath == "" {
-			// Root package — no alias needed
 			if te.isStruct {
 				qualifiedName = te.typeName
 			} else {
@@ -919,12 +1253,21 @@ func main() {
 				qualifiedName = alias + "." + te.typeName + "Schema"
 			}
 		}
-		testBuf.WriteString(fmt.Sprintf("\t\t\t\tschema = %s{}.JSONSchema()\n", qualifiedName))
+		testBuf.WriteString(fmt.Sprintf("\t\treturn %s{}\n", qualifiedName))
 	}
 
-	testBuf.WriteString("\t\t\tdefault:\n")
-	testBuf.WriteString("\t\t\t\tt.Fatalf(\"no schema provider for %q\", title)\n")
+	testBuf.WriteString("\t}\n")
+	testBuf.WriteString("\treturn nil\n")
+	testBuf.WriteString("}\n\n")
+
+	testBuf.WriteString("func TestRoundtrip(t *testing.T) {\n")
+	testBuf.WriteString("\tfor _, title := range allTitlesSorted {\n")
+	testBuf.WriteString("\t\tt.Run(title, func(t *testing.T) {\n")
+	testBuf.WriteString("\t\t\tv := describedForTitle(title)\n")
+	testBuf.WriteString("\t\t\tif v == nil {\n")
+	testBuf.WriteString("\t\t\t\tt.Fatalf(\"no type for %q\", title)\n")
 	testBuf.WriteString("\t\t\t}\n")
+	testBuf.WriteString("\t\t\tschema := convertToSchema(v)\n")
 	testBuf.WriteString("\t\t\tassertSchemaMatches(t, title, schema)\n")
 	testBuf.WriteString("\t\t})\n")
 	testBuf.WriteString("\t}\n")

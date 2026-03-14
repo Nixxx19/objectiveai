@@ -6,9 +6,10 @@ type RetryToken = []*string
 
 type RetryTokenSchema struct{}
 
-func (RetryTokenSchema) JSONSchema() map[string]any {
+func (RetryTokenSchema) SchemaTitle() string { return "functions.profiles.computations.RetryToken" }
+func (RetryTokenSchema) SchemaDescription() string { return "" }
+func (RetryTokenSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.profiles.computations.RetryToken",
 		"type": "array",
 		"items": map[string]any{
 			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},

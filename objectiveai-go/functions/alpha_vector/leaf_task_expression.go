@@ -3,19 +3,14 @@
 package alpha_vector
 
 type LeafTaskExpression struct {
-	Type string `json:"type"`
+	Type string `json:"type" enum:"vector.completion"`
 }
 
-func (LeafTaskExpression) JSONSchema() map[string]any {
+func (LeafTaskExpression) SchemaTitle() string { return "functions.alpha_vector.LeafTaskExpression" }
+func (LeafTaskExpression) SchemaDescription() string { return "" }
+
+func (LeafTaskExpression) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.alpha_vector.LeafTaskExpression",
-		"type": "object",
 		"$ref": "functions.alpha_vector.VectorCompletionTaskExpression",
-		"properties": map[string]any{
-			"type": map[string]any{
-			"type": "string",
-			"enum": []any{"vector.completion"},
-		},
-		},
 	}
 }

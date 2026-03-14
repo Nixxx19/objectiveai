@@ -6,9 +6,10 @@ type ImageInputSchemaType = string
 
 type ImageInputSchemaTypeSchema struct{}
 
-func (ImageInputSchemaTypeSchema) JSONSchema() map[string]any {
+func (ImageInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.ImageInputSchemaType" }
+func (ImageInputSchemaTypeSchema) SchemaDescription() string { return "" }
+func (ImageInputSchemaTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.expression.ImageInputSchemaType",
 		"type": "string",
 		"enum": []any{"image"},
 	}

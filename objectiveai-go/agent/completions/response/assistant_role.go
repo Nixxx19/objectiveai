@@ -6,10 +6,10 @@ type AssistantRole = string
 
 type AssistantRoleSchema struct{}
 
-func (AssistantRoleSchema) JSONSchema() map[string]any {
+func (AssistantRoleSchema) SchemaTitle() string { return "agent.completions.response.AssistantRole" }
+func (AssistantRoleSchema) SchemaDescription() string { return "The assistant role." }
+func (AssistantRoleSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "agent.completions.response.AssistantRole",
-		"description": "The assistant role.",
 		"type": "string",
 		"enum": []any{"assistant"},
 	}

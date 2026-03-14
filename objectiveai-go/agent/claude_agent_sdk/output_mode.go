@@ -6,10 +6,10 @@ type OutputMode = string
 
 type OutputModeSchema struct{}
 
-func (OutputModeSchema) JSONSchema() map[string]any {
+func (OutputModeSchema) SchemaTitle() string { return "agent.claude_agent_sdk.OutputMode" }
+func (OutputModeSchema) SchemaDescription() string { return "The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode." }
+func (OutputModeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "agent.claude_agent_sdk.OutputMode",
-		"description": "The model is instructed via the prompt to output a specific key.\n\nThis is the default and most widely supported mode.",
 		"type": "string",
 		"enum": []any{"instruction"},
 	}

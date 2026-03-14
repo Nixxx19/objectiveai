@@ -3,29 +3,11 @@
 package request
 
 type FunctionRemoteRequestPath struct {
-	Fcommit *string `json:"fcommit,omitempty"`
+	Fcommit *string `json:"fcommit,omitempty" nullable:"true"`
 	Fowner string `json:"fowner"`
-	Fremote any `json:"fremote"`
+	Fremote any `json:"fremote" ref:"functions.Remote"`
 	Frepository string `json:"frepository"`
 }
 
-func (FunctionRemoteRequestPath) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.profiles.computations.request.FunctionRemoteRequestPath",
-		"type": "object",
-		"properties": map[string]any{
-			"fcommit": map[string]any{
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"fowner": map[string]any{
-			"type": "string",
-		},
-			"fremote": map[string]any{
-			"$ref": "functions.Remote",
-		},
-			"frepository": map[string]any{
-			"type": "string",
-		},
-		},
-	}
-}
+func (FunctionRemoteRequestPath) SchemaTitle() string { return "functions.profiles.computations.request.FunctionRemoteRequestPath" }
+func (FunctionRemoteRequestPath) SchemaDescription() string { return "" }

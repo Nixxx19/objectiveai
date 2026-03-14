@@ -5,32 +5,17 @@ package functions
 type ListFunctionItem struct {
 	Commit string `json:"commit"`
 	Owner string `json:"owner"`
-	Remote any `json:"remote"`
+	Remote any `json:"remote" ref:"functions.Remote"`
 	Repository string `json:"repository"`
 }
 
-func (ListFunctionItem) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.ListFunctionItem",
-		"description": "A function in a list response.",
-		"type": "object",
-		"properties": map[string]any{
-			"commit": map[string]any{
-			"description": "Git commit SHA.",
-			"type": "string",
-		},
-			"owner": map[string]any{
-			"description": "Repository owner.",
-			"type": "string",
-		},
-			"remote": map[string]any{
-			"description": "The remote source where the function is hosted.",
-			"$ref": "functions.Remote",
-		},
-			"repository": map[string]any{
-			"description": "Repository name.",
-			"type": "string",
-		},
-		},
+func (ListFunctionItem) SchemaTitle() string { return "functions.ListFunctionItem" }
+func (ListFunctionItem) SchemaDescription() string { return "A function in a list response." }
+func (ListFunctionItem) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"commit": "Git commit SHA.",
+		"owner": "Repository owner.",
+		"remote": "The remote source where the function is hosted.",
+		"repository": "Repository name.",
 	}
 }

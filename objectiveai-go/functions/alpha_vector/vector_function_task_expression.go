@@ -4,36 +4,12 @@ package alpha_vector
 
 type VectorFunctionTaskExpression struct {
 	Commit string `json:"commit"`
-	Input any `json:"input"`
+	Input any `json:"input" ref:"functions.alpha_vector.expression.VectorFunctionInputValueExpression"`
 	Owner string `json:"owner"`
-	Remote any `json:"remote"`
+	Remote any `json:"remote" ref:"functions.Remote"`
 	Repository string `json:"repository"`
-	Skip any `json:"skip,omitempty"`
+	Skip any `json:"skip,omitempty" nullable:"true" ref:"functions.expression.Expression"`
 }
 
-func (VectorFunctionTaskExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.alpha_vector.VectorFunctionTaskExpression",
-		"type": "object",
-		"properties": map[string]any{
-			"commit": map[string]any{
-			"type": "string",
-		},
-			"input": map[string]any{
-			"$ref": "functions.alpha_vector.expression.VectorFunctionInputValueExpression",
-		},
-			"owner": map[string]any{
-			"type": "string",
-		},
-			"remote": map[string]any{
-			"$ref": "functions.Remote",
-		},
-			"repository": map[string]any{
-			"type": "string",
-		},
-			"skip": map[string]any{
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-		},
-	}
-}
+func (VectorFunctionTaskExpression) SchemaTitle() string { return "functions.alpha_vector.VectorFunctionTaskExpression" }
+func (VectorFunctionTaskExpression) SchemaDescription() string { return "" }

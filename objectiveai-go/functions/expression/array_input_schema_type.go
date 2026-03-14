@@ -6,9 +6,10 @@ type ArrayInputSchemaType = string
 
 type ArrayInputSchemaTypeSchema struct{}
 
-func (ArrayInputSchemaTypeSchema) JSONSchema() map[string]any {
+func (ArrayInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.ArrayInputSchemaType" }
+func (ArrayInputSchemaTypeSchema) SchemaDescription() string { return "" }
+func (ArrayInputSchemaTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.expression.ArrayInputSchemaType",
 		"type": "string",
 		"enum": []any{"array"},
 	}

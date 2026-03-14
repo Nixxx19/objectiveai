@@ -7,20 +7,11 @@ type InputAudio struct {
 	Format string `json:"format"`
 }
 
-func (InputAudio) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.InputAudio",
-		"description": "Audio input for multimodal messages.",
-		"type": "object",
-		"properties": map[string]any{
-			"data": map[string]any{
-			"description": "Base64-encoded audio data.",
-			"type": "string",
-		},
-			"format": map[string]any{
-			"description": "The audio format (e.g., \"wav\", \"mp3\").",
-			"type": "string",
-		},
-		},
+func (InputAudio) SchemaTitle() string { return "agent.completions.message.InputAudio" }
+func (InputAudio) SchemaDescription() string { return "Audio input for multimodal messages." }
+func (InputAudio) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"data": "Base64-encoded audio data.",
+		"format": "The audio format (e.g., \"wav\", \"mp3\").",
 	}
 }

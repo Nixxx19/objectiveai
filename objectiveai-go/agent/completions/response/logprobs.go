@@ -3,24 +3,15 @@
 package response
 
 type Logprobs struct {
-	Content []any `json:"content,omitempty"`
-	Refusal []any `json:"refusal,omitempty"`
+	Content []any `json:"content,omitempty" nullable:"true" items_ref:"agent.completions.response.Logprob"`
+	Refusal []any `json:"refusal,omitempty" nullable:"true" items_ref:"agent.completions.response.Logprob"`
 }
 
-func (Logprobs) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.response.Logprobs",
-		"description": "Log probabilities for generated tokens.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "Log probabilities for content tokens.",
-			"anyOf": []any{map[string]any{"items": map[string]any{"$ref": "agent.completions.response.Logprob"}, "type": "array"}, map[string]any{"type": "null"}},
-		},
-			"refusal": map[string]any{
-			"description": "Log probabilities for refusal tokens.",
-			"anyOf": []any{map[string]any{"items": map[string]any{"$ref": "agent.completions.response.Logprob"}, "type": "array"}, map[string]any{"type": "null"}},
-		},
-		},
+func (Logprobs) SchemaTitle() string { return "agent.completions.response.Logprobs" }
+func (Logprobs) SchemaDescription() string { return "Log probabilities for generated tokens." }
+func (Logprobs) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "Log probabilities for content tokens.",
+		"refusal": "Log probabilities for refusal tokens.",
 	}
 }

@@ -3,30 +3,11 @@
 package check
 
 type VectorFieldsValidation struct {
-	InputMerge any `json:"input_merge"`
-	InputSchema any `json:"input_schema"`
-	InputSplit any `json:"input_split"`
-	OutputLength any `json:"output_length"`
+	InputMerge any `json:"input_merge" ref:"functions.expression.Expression"`
+	InputSchema any `json:"input_schema" ref:"functions.expression.InputSchema"`
+	InputSplit any `json:"input_split" ref:"functions.expression.Expression"`
+	OutputLength any `json:"output_length" ref:"functions.expression.Expression"`
 }
 
-func (VectorFieldsValidation) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.check.VectorFieldsValidation",
-		"description": "The 4 fields needed to validate a vector function's split/merge behavior.",
-		"type": "object",
-		"properties": map[string]any{
-			"input_merge": map[string]any{
-			"$ref": "functions.expression.Expression",
-		},
-			"input_schema": map[string]any{
-			"$ref": "functions.expression.InputSchema",
-		},
-			"input_split": map[string]any{
-			"$ref": "functions.expression.Expression",
-		},
-			"output_length": map[string]any{
-			"$ref": "functions.expression.Expression",
-		},
-		},
-	}
-}
+func (VectorFieldsValidation) SchemaTitle() string { return "functions.check.VectorFieldsValidation" }
+func (VectorFieldsValidation) SchemaDescription() string { return "The 4 fields needed to validate a vector function's split/merge behavior." }

@@ -3,24 +3,15 @@
 package request
 
 type Reasoning struct {
-	Agent any `json:"agent"`
-	Agents []any `json:"agents,omitempty"`
+	Agent any `json:"agent" ref:"agent.completions.request.Agent"`
+	Agents []any `json:"agents,omitempty" nullable:"true" items_ref:"agent.completions.request.Agent"`
 }
 
-func (Reasoning) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.executions.request.Reasoning",
-		"description": "Configuration for generating reasoning summaries during execution.\n\nWhen enabled, an LLM summarizes the execution's reasoning process.",
-		"type": "object",
-		"properties": map[string]any{
-			"agent": map[string]any{
-			"description": "The primary agent to use for generating reasoning summaries.",
-			"$ref": "agent.completions.request.Agent",
-		},
-			"agents": map[string]any{
-			"description": "Fallback agents tried in order if the primary is rate-limited or errors.",
-			"anyOf": []any{map[string]any{"items": map[string]any{"$ref": "agent.completions.request.Agent"}, "type": "array"}, map[string]any{"type": "null"}},
-		},
-		},
+func (Reasoning) SchemaTitle() string { return "functions.executions.request.Reasoning" }
+func (Reasoning) SchemaDescription() string { return "Configuration for generating reasoning summaries during execution.\n\nWhen enabled, an LLM summarizes the execution's reasoning process." }
+func (Reasoning) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"agent": "The primary agent to use for generating reasoning summaries.",
+		"agents": "Fallback agents tried in order if the primary is rate-limited or errors.",
 	}
 }

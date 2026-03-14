@@ -7,20 +7,11 @@ type AssistantToolCallFunction struct {
 	Name string `json:"name"`
 }
 
-func (AssistantToolCallFunction) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.AssistantToolCallFunction",
-		"description": "Details of a function call made by the assistant.",
-		"type": "object",
-		"properties": map[string]any{
-			"arguments": map[string]any{
-			"description": "The arguments to pass to the function, as a JSON string.",
-			"type": "string",
-		},
-			"name": map[string]any{
-			"description": "The name of the function to call.",
-			"type": "string",
-		},
-		},
+func (AssistantToolCallFunction) SchemaTitle() string { return "agent.completions.message.AssistantToolCallFunction" }
+func (AssistantToolCallFunction) SchemaDescription() string { return "Details of a function call made by the assistant." }
+func (AssistantToolCallFunction) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"arguments": "The arguments to pass to the function, as a JSON string.",
+		"name": "The name of the function to call.",
 	}
 }

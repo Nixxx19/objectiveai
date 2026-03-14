@@ -3,19 +3,13 @@
 package auth
 
 type GetOpenRouterByokApiKeyResponse struct {
-	APIKey *string `json:"api_key,omitempty"`
+	APIKey *string `json:"api_key,omitempty" nullable:"true"`
 }
 
-func (GetOpenRouterByokApiKeyResponse) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "auth.GetOpenRouterByokApiKeyResponse",
-		"description": "Response containing the user's OpenRouter BYOK API key.",
-		"type": "object",
-		"properties": map[string]any{
-			"api_key": map[string]any{
-			"description": "The OpenRouter API key, or `None` if not configured.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-		},
+func (GetOpenRouterByokApiKeyResponse) SchemaTitle() string { return "auth.GetOpenRouterByokApiKeyResponse" }
+func (GetOpenRouterByokApiKeyResponse) SchemaDescription() string { return "Response containing the user's OpenRouter BYOK API key." }
+func (GetOpenRouterByokApiKeyResponse) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"api_key": "The OpenRouter API key, or `None` if not configured.",
 	}
 }

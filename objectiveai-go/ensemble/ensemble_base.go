@@ -3,20 +3,13 @@
 package ensemble
 
 type EnsembleBase struct {
-	Agents []any `json:"agents"`
+	Agents []any `json:"agents" items_ref:"agent.WithFallbacksAndCount.agent.AgentBase"`
 }
 
-func (EnsembleBase) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "ensemble.EnsembleBase",
-		"description": "The base configuration for an Ensemble (without computed ID).\n\nContains a list of agent configurations that will be validated, deduplicated,\nand sorted when converting to [`Ensemble`].",
-		"type": "object",
-		"properties": map[string]any{
-			"agents": map[string]any{
-			"description": "The LLMs in this ensemble, with optional counts and fallbacks.",
-			"type": "array",
-			"items": map[string]any{"$ref": "agent.WithFallbacksAndCount.agent.AgentBase"},
-		},
-		},
+func (EnsembleBase) SchemaTitle() string { return "ensemble.EnsembleBase" }
+func (EnsembleBase) SchemaDescription() string { return "The base configuration for an Ensemble (without computed ID).\n\nContains a list of agent configurations that will be validated, deduplicated,\nand sorted when converting to [`Ensemble`]." }
+func (EnsembleBase) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"agents": "The LLMs in this ensemble, with optional counts and fallbacks.",
 	}
 }

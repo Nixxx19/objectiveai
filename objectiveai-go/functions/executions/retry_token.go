@@ -6,10 +6,10 @@ type RetryToken = []*string
 
 type RetryTokenSchema struct{}
 
-func (RetryTokenSchema) JSONSchema() map[string]any {
+func (RetryTokenSchema) SchemaTitle() string { return "functions.executions.RetryToken" }
+func (RetryTokenSchema) SchemaDescription() string { return "Token that enables reusing votes from a previous function execution.\n\nContains identifiers for each task's votes that can be reused in a\nsubsequent execution. Serialized as base64-encoded JSON." }
+func (RetryTokenSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.executions.RetryToken",
-		"description": "Token that enables reusing votes from a previous function execution.\n\nContains identifiers for each task's votes that can be reused in a\nsubsequent execution. Serialized as base64-encoded JSON.",
 		"type": "array",
 		"items": map[string]any{
 			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},

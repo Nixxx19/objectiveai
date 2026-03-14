@@ -5,32 +5,17 @@ package profiles
 type ListProfileItem struct {
 	Commit string `json:"commit"`
 	Owner string `json:"owner"`
-	Remote any `json:"remote"`
+	Remote any `json:"remote" ref:"functions.Remote"`
 	Repository string `json:"repository"`
 }
 
-func (ListProfileItem) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.profiles.ListProfileItem",
-		"description": "A profile in a list response.",
-		"type": "object",
-		"properties": map[string]any{
-			"commit": map[string]any{
-			"description": "Git commit SHA.",
-			"type": "string",
-		},
-			"owner": map[string]any{
-			"description": "Repository owner.",
-			"type": "string",
-		},
-			"remote": map[string]any{
-			"description": "The remote source where the profile is hosted.",
-			"$ref": "functions.Remote",
-		},
-			"repository": map[string]any{
-			"description": "Repository name.",
-			"type": "string",
-		},
-		},
+func (ListProfileItem) SchemaTitle() string { return "functions.profiles.ListProfileItem" }
+func (ListProfileItem) SchemaDescription() string { return "A profile in a list response." }
+func (ListProfileItem) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"commit": "Git commit SHA.",
+		"owner": "Repository owner.",
+		"remote": "The remote source where the profile is hosted.",
+		"repository": "Repository name.",
 	}
 }

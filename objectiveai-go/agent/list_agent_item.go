@@ -6,16 +6,10 @@ type ListAgentItem struct {
 	ID string `json:"id"`
 }
 
-func (ListAgentItem) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.ListAgentItem",
-		"description": "Summary information for a listed Agent.",
-		"type": "object",
-		"properties": map[string]any{
-			"id": map[string]any{
-			"description": "The unique content-addressed ID of the Agent.",
-			"type": "string",
-		},
-		},
+func (ListAgentItem) SchemaTitle() string { return "agent.ListAgentItem" }
+func (ListAgentItem) SchemaDescription() string { return "Summary information for a listed Agent." }
+func (ListAgentItem) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"id": "The unique content-addressed ID of the Agent.",
 	}
 }

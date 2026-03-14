@@ -3,25 +3,15 @@
 package functions
 
 type InlineTasksProfile struct {
-	Profile any `json:"profile"`
-	Tasks []any `json:"tasks"`
+	Profile any `json:"profile" ref:"vector.completions.request.Profile"`
+	Tasks []any `json:"tasks" items_ref:"functions.TaskProfile"`
 }
 
-func (InlineTasksProfile) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.InlineTasksProfile",
-		"description": "An inline tasks-based profile definition without metadata.",
-		"type": "object",
-		"properties": map[string]any{
-			"profile": map[string]any{
-			"description": "Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
-			"$ref": "vector.completions.request.Profile",
-		},
-			"tasks": map[string]any{
-			"description": "Configuration for each task in the corresponding Function.",
-			"type": "array",
-			"items": map[string]any{"$ref": "functions.TaskProfile"},
-		},
-		},
+func (InlineTasksProfile) SchemaTitle() string { return "functions.InlineTasksProfile" }
+func (InlineTasksProfile) SchemaDescription() string { return "An inline tasks-based profile definition without metadata." }
+func (InlineTasksProfile) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"profile": "Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
+		"tasks": "Configuration for each task in the corresponding Function.",
 	}
 }

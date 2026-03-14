@@ -3,19 +3,14 @@
 package alpha_scalar
 
 type PartialPlaceholderBranchTaskExpression struct {
-	Type string `json:"type"`
+	Type string `json:"type" enum:"placeholder.alpha.scalar.function"`
 }
 
-func (PartialPlaceholderBranchTaskExpression) JSONSchema() map[string]any {
+func (PartialPlaceholderBranchTaskExpression) SchemaTitle() string { return "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression" }
+func (PartialPlaceholderBranchTaskExpression) SchemaDescription() string { return "" }
+
+func (PartialPlaceholderBranchTaskExpression) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.alpha_scalar.PartialPlaceholderBranchTaskExpression",
-		"type": "object",
 		"$ref": "functions.alpha_scalar.PartialPlaceholderScalarFunctionTaskExpression",
-		"properties": map[string]any{
-			"type": map[string]any{
-			"type": "string",
-			"enum": []any{"placeholder.alpha.scalar.function"},
-		},
-		},
 	}
 }

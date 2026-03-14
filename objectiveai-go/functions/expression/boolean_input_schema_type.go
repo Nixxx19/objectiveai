@@ -6,9 +6,10 @@ type BooleanInputSchemaType = string
 
 type BooleanInputSchemaTypeSchema struct{}
 
-func (BooleanInputSchemaTypeSchema) JSONSchema() map[string]any {
+func (BooleanInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.BooleanInputSchemaType" }
+func (BooleanInputSchemaTypeSchema) SchemaDescription() string { return "" }
+func (BooleanInputSchemaTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.expression.BooleanInputSchemaType",
 		"type": "string",
 		"enum": []any{"boolean"},
 	}

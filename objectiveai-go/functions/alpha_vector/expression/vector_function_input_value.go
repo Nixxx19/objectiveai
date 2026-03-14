@@ -3,22 +3,9 @@
 package expression
 
 type VectorFunctionInputValue struct {
-	Context map[string]any `json:"context,omitempty"`
-	Items []any `json:"items"`
+	Context map[string]any `json:"context,omitempty" nullable:"true" addprops_ref:"functions.expression.InputValue"`
+	Items []any `json:"items" items_ref:"functions.expression.InputValue"`
 }
 
-func (VectorFunctionInputValue) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.alpha_vector.expression.VectorFunctionInputValue",
-		"type": "object",
-		"properties": map[string]any{
-			"context": map[string]any{
-			"anyOf": []any{map[string]any{"additionalProperties": map[string]any{"$ref": "functions.expression.InputValue"}, "type": "object"}, map[string]any{"type": "null"}},
-		},
-			"items": map[string]any{
-			"type": "array",
-			"items": map[string]any{"$ref": "functions.expression.InputValue"},
-		},
-		},
-	}
-}
+func (VectorFunctionInputValue) SchemaTitle() string { return "functions.alpha_vector.expression.VectorFunctionInputValue" }
+func (VectorFunctionInputValue) SchemaDescription() string { return "" }

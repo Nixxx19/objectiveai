@@ -3,31 +3,11 @@
 package cache
 
 type CacheVoteRequestOwned struct {
-	Agent any `json:"agent"`
-	Agents []any `json:"agents,omitempty"`
-	Messages []any `json:"messages"`
-	Responses []any `json:"responses"`
+	Agent any `json:"agent" ref:"agent.completions.request.Agent"`
+	Agents []any `json:"agents,omitempty" nullable:"true" items_ref:"agent.completions.request.Agent"`
+	Messages []any `json:"messages" items_ref:"agent.completions.message.Message"`
+	Responses []any `json:"responses" items_ref:"agent.completions.message.RichContent"`
 }
 
-func (CacheVoteRequestOwned) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "vector.completions.cache.CacheVoteRequestOwned",
-		"type": "object",
-		"properties": map[string]any{
-			"agent": map[string]any{
-			"$ref": "agent.completions.request.Agent",
-		},
-			"agents": map[string]any{
-			"anyOf": []any{map[string]any{"items": map[string]any{"$ref": "agent.completions.request.Agent"}, "type": "array"}, map[string]any{"type": "null"}},
-		},
-			"messages": map[string]any{
-			"type": "array",
-			"items": map[string]any{"$ref": "agent.completions.message.Message"},
-		},
-			"responses": map[string]any{
-			"type": "array",
-			"items": map[string]any{"$ref": "agent.completions.message.RichContent"},
-		},
-		},
-	}
-}
+func (CacheVoteRequestOwned) SchemaTitle() string { return "vector.completions.cache.CacheVoteRequestOwned" }
+func (CacheVoteRequestOwned) SchemaDescription() string { return "" }

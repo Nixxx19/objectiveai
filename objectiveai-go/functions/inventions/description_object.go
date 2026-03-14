@@ -6,14 +6,5 @@ type DescriptionObject struct {
 	Description string `json:"description"`
 }
 
-func (DescriptionObject) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.inventions.DescriptionObject",
-		"type": "object",
-		"properties": map[string]any{
-			"description": map[string]any{
-			"type": "string",
-		},
-		},
-	}
-}
+func (DescriptionObject) SchemaTitle() string { return "functions.inventions.DescriptionObject" }
+func (DescriptionObject) SchemaDescription() string { return "" }

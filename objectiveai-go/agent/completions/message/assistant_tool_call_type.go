@@ -6,10 +6,10 @@ type AssistantToolCallType = string
 
 type AssistantToolCallTypeSchema struct{}
 
-func (AssistantToolCallTypeSchema) JSONSchema() map[string]any {
+func (AssistantToolCallTypeSchema) SchemaTitle() string { return "agent.completions.message.AssistantToolCallType" }
+func (AssistantToolCallTypeSchema) SchemaDescription() string { return "A function call." }
+func (AssistantToolCallTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "agent.completions.message.AssistantToolCallType",
-		"description": "A function call.",
 		"type": "string",
 		"enum": []any{"function"},
 	}

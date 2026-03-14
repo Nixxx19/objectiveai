@@ -6,10 +6,10 @@ type Upstream = string
 
 type UpstreamSchema struct{}
 
-func (UpstreamSchema) JSONSchema() map[string]any {
+func (UpstreamSchema) SchemaTitle() string { return "agent.mock.Upstream" }
+func (UpstreamSchema) SchemaDescription() string { return "Mock upstream marker." }
+func (UpstreamSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "agent.mock.Upstream",
-		"description": "Mock upstream marker.",
 		"type": "string",
 		"enum": []any{"mock"},
 	}

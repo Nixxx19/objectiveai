@@ -6,10 +6,10 @@ type Object = string
 
 type ObjectSchema struct{}
 
-func (ObjectSchema) JSONSchema() map[string]any {
+func (ObjectSchema) SchemaTitle() string { return "agent.completions.response.streaming.Object" }
+func (ObjectSchema) SchemaDescription() string { return "A agent completion chunk object." }
+func (ObjectSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "agent.completions.response.streaming.Object",
-		"description": "A agent completion chunk object.",
 		"type": "string",
 		"enum": []any{"agent.completion.chunk"},
 	}

@@ -3,39 +3,21 @@
 package functions
 
 type PlaceholderScalarFunctionTaskExpression struct {
-	Input any `json:"input"`
-	InputSchema any `json:"input_schema"`
-	Map any `json:"map,omitempty"`
-	Output any `json:"output"`
-	Skip any `json:"skip,omitempty"`
+	Input any `json:"input" ref:"functions.expression.WithExpression.functions.expression.InputValueExpression"`
+	InputSchema any `json:"input_schema" ref:"functions.expression.InputSchema"`
+	Map any `json:"map,omitempty" nullable:"true" ref:"functions.expression.Expression"`
+	Output any `json:"output" ref:"functions.expression.Expression"`
+	Skip any `json:"skip,omitempty" nullable:"true" ref:"functions.expression.Expression"`
 }
 
-func (PlaceholderScalarFunctionTaskExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.PlaceholderScalarFunctionTaskExpression",
-		"description": "Expression for a placeholder scalar function task (pre-compilation).\n\nLike [`ScalarFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces a fixed output of 0.5.",
-		"type": "object",
-		"properties": map[string]any{
-			"input": map[string]any{
-			"description": "Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).",
-			"$ref": "functions.expression.WithExpression.functions.expression.InputValueExpression",
-		},
-			"input_schema": map[string]any{
-			"description": "JSON Schema defining the expected input structure.",
-			"$ref": "functions.expression.InputSchema",
-		},
-			"map": map[string]any{
-			"description": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-			"output": map[string]any{
-			"description": "Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`.",
-			"$ref": "functions.expression.Expression",
-		},
-			"skip": map[string]any{
-			"description": "If this expression evaluates to true, skip the task. Receives: `input`.",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-		},
+func (PlaceholderScalarFunctionTaskExpression) SchemaTitle() string { return "functions.PlaceholderScalarFunctionTaskExpression" }
+func (PlaceholderScalarFunctionTaskExpression) SchemaDescription() string { return "Expression for a placeholder scalar function task (pre-compilation).\n\nLike [`ScalarFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces a fixed output of 0.5." }
+func (PlaceholderScalarFunctionTaskExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"input": "Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).",
+		"input_schema": "JSON Schema defining the expected input structure.",
+		"map": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
+		"output": "Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`.",
+		"skip": "If this expression evaluates to true, skip the task. Receives: `input`.",
 	}
 }

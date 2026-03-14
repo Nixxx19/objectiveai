@@ -6,16 +6,10 @@ type CreateOpenRouterByokApiKeyRequest struct {
 	APIKey string `json:"api_key"`
 }
 
-func (CreateOpenRouterByokApiKeyRequest) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "auth.CreateOpenRouterByokApiKeyRequest",
-		"description": "Request to create or update an OpenRouter BYOK (Bring Your Own Key) API key.\n\nThis allows users to provide their own OpenRouter API key for routing\nrequests through OpenRouter's model marketplace.",
-		"type": "object",
-		"properties": map[string]any{
-			"api_key": map[string]any{
-			"description": "The OpenRouter API key to associate with the user's account.",
-			"type": "string",
-		},
-		},
+func (CreateOpenRouterByokApiKeyRequest) SchemaTitle() string { return "auth.CreateOpenRouterByokApiKeyRequest" }
+func (CreateOpenRouterByokApiKeyRequest) SchemaDescription() string { return "Request to create or update an OpenRouter BYOK (Bring Your Own Key) API key.\n\nThis allows users to provide their own OpenRouter API key for routing\nrequests through OpenRouter's model marketplace." }
+func (CreateOpenRouterByokApiKeyRequest) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"api_key": "The OpenRouter API key to associate with the user's account.",
 	}
 }

@@ -6,9 +6,10 @@ type ObjectInputSchemaType = string
 
 type ObjectInputSchemaTypeSchema struct{}
 
-func (ObjectInputSchemaTypeSchema) JSONSchema() map[string]any {
+func (ObjectInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.ObjectInputSchemaType" }
+func (ObjectInputSchemaTypeSchema) SchemaDescription() string { return "" }
+func (ObjectInputSchemaTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.expression.ObjectInputSchemaType",
 		"type": "string",
 		"enum": []any{"object"},
 	}

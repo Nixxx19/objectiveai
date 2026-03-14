@@ -3,29 +3,16 @@
 package message
 
 type AssistantToolCallExpression struct {
-	Function any `json:"function"`
-	ID any `json:"id"`
-	Type string `json:"type"`
+	Function any `json:"function" ref:"functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression"`
+	ID any `json:"id" ref:"functions.expression.WithExpression.string"`
+	Type string `json:"type" enum:"function"`
 }
 
-func (AssistantToolCallExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.AssistantToolCallExpression",
-		"description": "A function call expression.",
-		"type": "object",
-		"properties": map[string]any{
-			"function": map[string]any{
-			"description": "The function expression.",
-			"$ref": "functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression",
-		},
-			"id": map[string]any{
-			"description": "The tool call ID expression.",
-			"$ref": "functions.expression.WithExpression.string",
-		},
-			"type": map[string]any{
-			"type": "string",
-			"enum": []any{"function"},
-		},
-		},
+func (AssistantToolCallExpression) SchemaTitle() string { return "agent.completions.message.AssistantToolCallExpression" }
+func (AssistantToolCallExpression) SchemaDescription() string { return "A function call expression." }
+func (AssistantToolCallExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"function": "The function expression.",
+		"id": "The tool call ID expression.",
 	}
 }

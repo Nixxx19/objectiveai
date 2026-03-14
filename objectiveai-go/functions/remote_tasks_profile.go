@@ -4,29 +4,16 @@ package functions
 
 type RemoteTasksProfile struct {
 	Description string `json:"description"`
-	Profile any `json:"profile"`
-	Tasks []any `json:"tasks"`
+	Profile any `json:"profile" ref:"vector.completions.request.Profile"`
+	Tasks []any `json:"tasks" items_ref:"functions.TaskProfile"`
 }
 
-func (RemoteTasksProfile) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.RemoteTasksProfile",
-		"description": "A remote tasks-based profile with full metadata.\n\nStored as `profile.json` in repositories and referenced by\n`remote/owner/repository`.",
-		"type": "object",
-		"properties": map[string]any{
-			"description": map[string]any{
-			"description": "Human-readable description of the profile.",
-			"type": "string",
-		},
-			"profile": map[string]any{
-			"description": "Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
-			"$ref": "vector.completions.request.Profile",
-		},
-			"tasks": map[string]any{
-			"description": "Configuration for each task in the corresponding Function.",
-			"type": "array",
-			"items": map[string]any{"$ref": "functions.TaskProfile"},
-		},
-		},
+func (RemoteTasksProfile) SchemaTitle() string { return "functions.RemoteTasksProfile" }
+func (RemoteTasksProfile) SchemaDescription() string { return "A remote tasks-based profile with full metadata.\n\nStored as `profile.json` in repositories and referenced by\n`remote/owner/repository`." }
+func (RemoteTasksProfile) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"description": "Human-readable description of the profile.",
+		"profile": "Weights for each Task in the corresponding Function.\n\nMust have the same length as `tasks`. Can be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
+		"tasks": "Configuration for each task in the corresponding Function.",
 	}
 }

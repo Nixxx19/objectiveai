@@ -3,23 +3,14 @@
 package expression
 
 type VideoInputSchema struct {
-	Description *string `json:"description,omitempty"`
-	Type any `json:"type"`
+	Description *string `json:"description,omitempty" nullable:"true"`
+	Type any `json:"type" ref:"functions.expression.VideoInputSchemaType"`
 }
 
-func (VideoInputSchema) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.expression.VideoInputSchema",
-		"description": "Schema for a video input (URL or base64-encoded).",
-		"type": "object",
-		"properties": map[string]any{
-			"description": map[string]any{
-			"description": "Human-readable description of the expected video.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"type": map[string]any{
-			"$ref": "functions.expression.VideoInputSchemaType",
-		},
-		},
+func (VideoInputSchema) SchemaTitle() string { return "functions.expression.VideoInputSchema" }
+func (VideoInputSchema) SchemaDescription() string { return "Schema for a video input (URL or base64-encoded)." }
+func (VideoInputSchema) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"description": "Human-readable description of the expected video.",
 	}
 }

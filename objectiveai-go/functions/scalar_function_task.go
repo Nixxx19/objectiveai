@@ -4,43 +4,22 @@ package functions
 
 type ScalarFunctionTask struct {
 	Commit string `json:"commit"`
-	Input any `json:"input"`
-	Output any `json:"output"`
+	Input any `json:"input" ref:"functions.expression.InputValue"`
+	Output any `json:"output" ref:"functions.expression.Expression"`
 	Owner string `json:"owner"`
-	Remote any `json:"remote"`
+	Remote any `json:"remote" ref:"functions.Remote"`
 	Repository string `json:"repository"`
 }
 
-func (ScalarFunctionTask) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.ScalarFunctionTask",
-		"description": "A compiled scalar function task ready for execution.",
-		"type": "object",
-		"properties": map[string]any{
-			"commit": map[string]any{
-			"description": "Git commit SHA for the function version.",
-			"type": "string",
-		},
-			"input": map[string]any{
-			"description": "The resolved input to pass to the function.",
-			"$ref": "functions.expression.InputValue",
-		},
-			"output": map[string]any{
-			"description": "Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`ScalarFunctionTaskExpression::output`] for full documentation.",
-			"$ref": "functions.expression.Expression",
-		},
-			"owner": map[string]any{
-			"description": "Repository owner.",
-			"type": "string",
-		},
-			"remote": map[string]any{
-			"description": "The remote source where the function is hosted.",
-			"$ref": "functions.Remote",
-		},
-			"repository": map[string]any{
-			"description": "Repository name.",
-			"type": "string",
-		},
-		},
+func (ScalarFunctionTask) SchemaTitle() string { return "functions.ScalarFunctionTask" }
+func (ScalarFunctionTask) SchemaDescription() string { return "A compiled scalar function task ready for execution." }
+func (ScalarFunctionTask) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"commit": "Git commit SHA for the function version.",
+		"input": "The resolved input to pass to the function.",
+		"output": "Expression to transform the task result into a valid function output.\n\nReceives `output` as the nested function's result (Scalar or Vector).\nMust return a `TaskOutputOwned` valid for the parent function's type (scalar or vector).\nSee [`ScalarFunctionTaskExpression::output`] for full documentation.",
+		"owner": "Repository owner.",
+		"remote": "The remote source where the function is hosted.",
+		"repository": "Repository name.",
 	}
 }

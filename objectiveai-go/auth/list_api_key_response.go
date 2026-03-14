@@ -3,20 +3,13 @@
 package auth
 
 type ListApiKeyResponse struct {
-	Data []any `json:"data"`
+	Data []any `json:"data" items_ref:"auth.ListApiKeyItem"`
 }
 
-func (ListApiKeyResponse) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "auth.ListApiKeyResponse",
-		"description": "Response containing a list of API keys.",
-		"type": "object",
-		"properties": map[string]any{
-			"data": map[string]any{
-			"description": "The list of API keys with their metadata and usage costs.",
-			"type": "array",
-			"items": map[string]any{"$ref": "auth.ListApiKeyItem"},
-		},
-		},
+func (ListApiKeyResponse) SchemaTitle() string { return "auth.ListApiKeyResponse" }
+func (ListApiKeyResponse) SchemaDescription() string { return "Response containing a list of API keys." }
+func (ListApiKeyResponse) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"data": "The list of API keys with their metadata and usage costs.",
 	}
 }

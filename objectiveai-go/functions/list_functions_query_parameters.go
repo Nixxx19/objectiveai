@@ -3,19 +3,13 @@
 package functions
 
 type ListFunctionsQueryParameters struct {
-	Source any `json:"source,omitempty"`
+	Source any `json:"source,omitempty" nullable:"true" ref:"functions.ListFunctionsSource"`
 }
 
-func (ListFunctionsQueryParameters) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.ListFunctionsQueryParameters",
-		"description": "Query parameters for the list functions endpoint.",
-		"type": "object",
-		"properties": map[string]any{
-			"source": map[string]any{
-			"description": "Optional source filter for listing functions.",
-			"anyOf": []any{map[string]any{"$ref": "functions.ListFunctionsSource"}, map[string]any{"type": "null"}},
-		},
-		},
+func (ListFunctionsQueryParameters) SchemaTitle() string { return "functions.ListFunctionsQueryParameters" }
+func (ListFunctionsQueryParameters) SchemaDescription() string { return "Query parameters for the list functions endpoint." }
+func (ListFunctionsQueryParameters) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"source": "Optional source filter for listing functions.",
 	}
 }

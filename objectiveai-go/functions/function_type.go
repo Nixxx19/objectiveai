@@ -6,9 +6,10 @@ type FunctionType = string
 
 type FunctionTypeSchema struct{}
 
-func (FunctionTypeSchema) JSONSchema() map[string]any {
+func (FunctionTypeSchema) SchemaTitle() string { return "functions.FunctionType" }
+func (FunctionTypeSchema) SchemaDescription() string { return "" }
+func (FunctionTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.FunctionType",
 		"type": "string",
 		"enum": []any{"scalar.function", "vector.function"},
 	}

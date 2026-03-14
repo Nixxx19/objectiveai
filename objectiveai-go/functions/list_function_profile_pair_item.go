@@ -3,24 +3,15 @@
 package functions
 
 type ListFunctionProfilePairItem struct {
-	Function any `json:"function"`
-	Profile any `json:"profile"`
+	Function any `json:"function" ref:"functions.ListFunctionItem"`
+	Profile any `json:"profile" ref:"functions.profiles.ListProfileItem"`
 }
 
-func (ListFunctionProfilePairItem) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.ListFunctionProfilePairItem",
-		"description": "A function-profile pair in a list response.",
-		"type": "object",
-		"properties": map[string]any{
-			"function": map[string]any{
-			"description": "The function.",
-			"$ref": "functions.ListFunctionItem",
-		},
-			"profile": map[string]any{
-			"description": "The profile.",
-			"$ref": "functions.profiles.ListProfileItem",
-		},
-		},
+func (ListFunctionProfilePairItem) SchemaTitle() string { return "functions.ListFunctionProfilePairItem" }
+func (ListFunctionProfilePairItem) SchemaDescription() string { return "A function-profile pair in a list response." }
+func (ListFunctionProfilePairItem) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"function": "The function.",
+		"profile": "The profile.",
 	}
 }

@@ -3,18 +3,8 @@
 package check
 
 type ScalarFieldsValidation struct {
-	InputSchema any `json:"input_schema"`
+	InputSchema any `json:"input_schema" ref:"functions.expression.InputSchema"`
 }
 
-func (ScalarFieldsValidation) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.check.ScalarFieldsValidation",
-		"description": "The fields needed to validate a scalar function's input behavior.",
-		"type": "object",
-		"properties": map[string]any{
-			"input_schema": map[string]any{
-			"$ref": "functions.expression.InputSchema",
-		},
-		},
-	}
-}
+func (ScalarFieldsValidation) SchemaTitle() string { return "functions.check.ScalarFieldsValidation" }
+func (ScalarFieldsValidation) SchemaDescription() string { return "The fields needed to validate a scalar function's input behavior." }

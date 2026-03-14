@@ -3,25 +3,15 @@
 package ensemble
 
 type Ensemble struct {
-	Agents []any `json:"agents"`
+	Agents []any `json:"agents" items_ref:"agent.WithFallbacksAndCount.agent.Agent"`
 	ID string `json:"id"`
 }
 
-func (Ensemble) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "ensemble.Ensemble",
-		"description": "A validated Ensemble with its computed content-addressed ID.\n\nCreated by converting from [`EnsembleBase`] via [`TryFrom`]. The conversion:\n1. Validates and normalizes each agent\n2. Merges duplicate LLMs (by full_id) and sums their counts\n3. Sorts LLMs by full_id for deterministic ordering\n4. Computes the ensemble ID from the sorted (full_id, count) pairs\n\n# Constraints\n\n- Individual LLMs with `count: 0` are skipped\n- Total agent count (sum of all counts) must be between 1 and 128",
-		"type": "object",
-		"properties": map[string]any{
-			"agents": map[string]any{
-			"description": "The validated and deduplicated LLMs, sorted by full_id.",
-			"type": "array",
-			"items": map[string]any{"$ref": "agent.WithFallbacksAndCount.agent.Agent"},
-		},
-			"id": map[string]any{
-			"description": "The deterministic content-addressed ID (22-character base62 string).",
-			"type": "string",
-		},
-		},
+func (Ensemble) SchemaTitle() string { return "ensemble.Ensemble" }
+func (Ensemble) SchemaDescription() string { return "A validated Ensemble with its computed content-addressed ID.\n\nCreated by converting from [`EnsembleBase`] via [`TryFrom`]. The conversion:\n1. Validates and normalizes each agent\n2. Merges duplicate LLMs (by full_id) and sums their counts\n3. Sorts LLMs by full_id for deterministic ordering\n4. Computes the ensemble ID from the sorted (full_id, count) pairs\n\n# Constraints\n\n- Individual LLMs with `count: 0` are skipped\n- Total agent count (sum of all counts) must be between 1 and 128" }
+func (Ensemble) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"agents": "The validated and deduplicated LLMs, sorted by full_id.",
+		"id": "The deterministic content-addressed ID (22-character base62 string).",
 	}
 }

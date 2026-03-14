@@ -3,45 +3,23 @@
 package auth
 
 type ApiKeyWithMetadata struct {
-	APIKey any `json:"api_key"`
-	Created string `json:"created"`
-	Description *string `json:"description,omitempty"`
-	Disabled *string `json:"disabled,omitempty"`
-	Expires *string `json:"expires,omitempty"`
+	APIKey any `json:"api_key" ref:"PrefixedUuid"`
+	Created string `json:"created" fmt:"date-time"`
+	Description *string `json:"description,omitempty" nullable:"true"`
+	Disabled *string `json:"disabled,omitempty" nullable:"true" fmt:"date-time"`
+	Expires *string `json:"expires,omitempty" nullable:"true" fmt:"date-time"`
 	Name string `json:"name"`
 }
 
-func (ApiKeyWithMetadata) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "auth.ApiKeyWithMetadata",
-		"description": "An ObjectiveAI API Key with associated metadata.\n\nThis struct contains the API key itself along with information about\nwhen it was created, when it expires (if ever), whether it has been\ndisabled, and user-provided name and description.",
-		"type": "object",
-		"properties": map[string]any{
-			"api_key": map[string]any{
-			"description": "The API key itself.",
-			"$ref": "PrefixedUuid",
-		},
-			"created": map[string]any{
-			"description": "The timestamp when the API key was created (RFC 3339 format).",
-			"type": "string",
-			"format": "date-time",
-		},
-			"description": map[string]any{
-			"description": "The user-provided description of the API key, or `None` if not provided.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"disabled": map[string]any{
-			"description": "The timestamp when the API key was disabled, or `None` if it is active.",
-			"anyOf": []any{map[string]any{"format": "date-time", "type": "string"}, map[string]any{"type": "null"}},
-		},
-			"expires": map[string]any{
-			"description": "The timestamp when the API key expires, or `None` if it does not expire.",
-			"anyOf": []any{map[string]any{"format": "date-time", "type": "string"}, map[string]any{"type": "null"}},
-		},
-			"name": map[string]any{
-			"description": "The user-provided name of the API key.",
-			"type": "string",
-		},
-		},
+func (ApiKeyWithMetadata) SchemaTitle() string { return "auth.ApiKeyWithMetadata" }
+func (ApiKeyWithMetadata) SchemaDescription() string { return "An ObjectiveAI API Key with associated metadata.\n\nThis struct contains the API key itself along with information about\nwhen it was created, when it expires (if ever), whether it has been\ndisabled, and user-provided name and description." }
+func (ApiKeyWithMetadata) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"api_key": "The API key itself.",
+		"created": "The timestamp when the API key was created (RFC 3339 format).",
+		"description": "The user-provided description of the API key, or `None` if not provided.",
+		"disabled": "The timestamp when the API key was disabled, or `None` if it is active.",
+		"expires": "The timestamp when the API key expires, or `None` if it does not expire.",
+		"name": "The user-provided name of the API key.",
 	}
 }

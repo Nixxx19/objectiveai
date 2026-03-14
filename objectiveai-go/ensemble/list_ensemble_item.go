@@ -6,16 +6,10 @@ type ListEnsembleItem struct {
 	ID string `json:"id"`
 }
 
-func (ListEnsembleItem) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "ensemble.ListEnsembleItem",
-		"description": "Summary information for a listed Ensemble.",
-		"type": "object",
-		"properties": map[string]any{
-			"id": map[string]any{
-			"description": "The unique content-addressed ID of the Ensemble.",
-			"type": "string",
-		},
-		},
+func (ListEnsembleItem) SchemaTitle() string { return "ensemble.ListEnsembleItem" }
+func (ListEnsembleItem) SchemaDescription() string { return "Summary information for a listed Ensemble." }
+func (ListEnsembleItem) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"id": "The unique content-addressed ID of the Ensemble.",
 	}
 }

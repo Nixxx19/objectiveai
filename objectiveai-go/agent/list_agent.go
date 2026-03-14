@@ -3,20 +3,13 @@
 package agent
 
 type ListAgent struct {
-	Data []any `json:"data"`
+	Data []any `json:"data" items_ref:"agent.ListAgentItem"`
 }
 
-func (ListAgent) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.ListAgent",
-		"description": "Response containing a list of Agents.",
-		"type": "object",
-		"properties": map[string]any{
-			"data": map[string]any{
-			"description": "The list of Agent summaries.",
-			"type": "array",
-			"items": map[string]any{"$ref": "agent.ListAgentItem"},
-		},
-		},
+func (ListAgent) SchemaTitle() string { return "agent.ListAgent" }
+func (ListAgent) SchemaDescription() string { return "Response containing a list of Agents." }
+func (ListAgent) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"data": "The list of Agent summaries.",
 	}
 }

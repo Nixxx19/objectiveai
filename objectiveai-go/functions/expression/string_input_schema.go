@@ -3,28 +3,16 @@
 package expression
 
 type StringInputSchema struct {
-	Description *string `json:"description,omitempty"`
-	Enum []string `json:"enum,omitempty"`
-	Type any `json:"type"`
+	Description *string `json:"description,omitempty" nullable:"true"`
+	Enum []string `json:"enum,omitempty" nullable:"true"`
+	Type any `json:"type" ref:"functions.expression.StringInputSchemaType"`
 }
 
-func (StringInputSchema) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.expression.StringInputSchema",
-		"description": "Schema for a string input.",
-		"type": "object",
-		"properties": map[string]any{
-			"description": map[string]any{
-			"description": "Human-readable description of the string.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"enum": map[string]any{
-			"description": "If provided, the string must be one of these values.",
-			"anyOf": []any{map[string]any{"items": map[string]any{"type": "string"}, "type": "array"}, map[string]any{"type": "null"}},
-		},
-			"type": map[string]any{
-			"$ref": "functions.expression.StringInputSchemaType",
-		},
-		},
+func (StringInputSchema) SchemaTitle() string { return "functions.expression.StringInputSchema" }
+func (StringInputSchema) SchemaDescription() string { return "Schema for a string input." }
+func (StringInputSchema) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"description": "Human-readable description of the string.",
+		"enum": "If provided, the string must be one of these values.",
 	}
 }

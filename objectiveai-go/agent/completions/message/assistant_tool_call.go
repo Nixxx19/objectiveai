@@ -3,29 +3,16 @@
 package message
 
 type AssistantToolCall struct {
-	Function any `json:"function"`
+	Function any `json:"function" ref:"agent.completions.message.AssistantToolCallFunction"`
 	ID string `json:"id"`
-	Type string `json:"type"`
+	Type string `json:"type" enum:"function"`
 }
 
-func (AssistantToolCall) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.AssistantToolCall",
-		"description": "A function call with an ID and function details.",
-		"type": "object",
-		"properties": map[string]any{
-			"function": map[string]any{
-			"description": "The function being called.",
-			"$ref": "agent.completions.message.AssistantToolCallFunction",
-		},
-			"id": map[string]any{
-			"description": "The unique ID of this tool call.",
-			"type": "string",
-		},
-			"type": map[string]any{
-			"type": "string",
-			"enum": []any{"function"},
-		},
-		},
+func (AssistantToolCall) SchemaTitle() string { return "agent.completions.message.AssistantToolCall" }
+func (AssistantToolCall) SchemaDescription() string { return "A function call with an ID and function details." }
+func (AssistantToolCall) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"function": "The function being called.",
+		"id": "The unique ID of this tool call.",
 	}
 }

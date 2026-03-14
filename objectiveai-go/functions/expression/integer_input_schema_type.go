@@ -6,9 +6,10 @@ type IntegerInputSchemaType = string
 
 type IntegerInputSchemaTypeSchema struct{}
 
-func (IntegerInputSchemaTypeSchema) JSONSchema() map[string]any {
+func (IntegerInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.IntegerInputSchemaType" }
+func (IntegerInputSchemaTypeSchema) SchemaDescription() string { return "" }
+func (IntegerInputSchemaTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.expression.IntegerInputSchemaType",
 		"type": "string",
 		"enum": []any{"integer"},
 	}

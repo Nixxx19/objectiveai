@@ -3,34 +3,19 @@
 package request
 
 type FunctionInlineProfileRemoteRequestPath struct {
-	Pcommit *string `json:"pcommit,omitempty"`
+	Pcommit *string `json:"pcommit,omitempty" nullable:"true"`
 	Powner string `json:"powner"`
-	Premote any `json:"premote"`
+	Premote any `json:"premote" ref:"functions.Remote"`
 	Prepository string `json:"prepository"`
 }
 
-func (FunctionInlineProfileRemoteRequestPath) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.executions.request.FunctionInlineProfileRemoteRequestPath",
-		"description": "Path parameters for inline Function with remote Profile.",
-		"type": "object",
-		"properties": map[string]any{
-			"pcommit": map[string]any{
-			"description": "Profile Git commit SHA (optional).",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"powner": map[string]any{
-			"description": "Profile repository owner.",
-			"type": "string",
-		},
-			"premote": map[string]any{
-			"description": "Profile remote source.",
-			"$ref": "functions.Remote",
-		},
-			"prepository": map[string]any{
-			"description": "Profile repository name.",
-			"type": "string",
-		},
-		},
+func (FunctionInlineProfileRemoteRequestPath) SchemaTitle() string { return "functions.executions.request.FunctionInlineProfileRemoteRequestPath" }
+func (FunctionInlineProfileRemoteRequestPath) SchemaDescription() string { return "Path parameters for inline Function with remote Profile." }
+func (FunctionInlineProfileRemoteRequestPath) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"pcommit": "Profile Git commit SHA (optional).",
+		"powner": "Profile repository owner.",
+		"premote": "Profile remote source.",
+		"prepository": "Profile repository name.",
 	}
 }

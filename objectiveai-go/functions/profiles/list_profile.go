@@ -3,20 +3,13 @@
 package profiles
 
 type ListProfile struct {
-	Data []any `json:"data"`
+	Data []any `json:"data" items_ref:"functions.profiles.ListProfileItem"`
 }
 
-func (ListProfile) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.profiles.ListProfile",
-		"description": "Response from listing profiles.",
-		"type": "object",
-		"properties": map[string]any{
-			"data": map[string]any{
-			"description": "List of available profiles.",
-			"type": "array",
-			"items": map[string]any{"$ref": "functions.profiles.ListProfileItem"},
-		},
-		},
+func (ListProfile) SchemaTitle() string { return "functions.profiles.ListProfile" }
+func (ListProfile) SchemaDescription() string { return "Response from listing profiles." }
+func (ListProfile) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"data": "List of available profiles.",
 	}
 }

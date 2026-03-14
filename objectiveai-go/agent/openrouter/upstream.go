@@ -6,10 +6,10 @@ type Upstream = string
 
 type UpstreamSchema struct{}
 
-func (UpstreamSchema) JSONSchema() map[string]any {
+func (UpstreamSchema) SchemaTitle() string { return "agent.openrouter.Upstream" }
+func (UpstreamSchema) SchemaDescription() string { return "OpenRouter upstream marker." }
+func (UpstreamSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "agent.openrouter.Upstream",
-		"description": "OpenRouter upstream marker.",
 		"type": "string",
 		"enum": []any{"openrouter"},
 	}

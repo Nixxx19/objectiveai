@@ -6,9 +6,10 @@ type VideoInputSchemaType = string
 
 type VideoInputSchemaTypeSchema struct{}
 
-func (VideoInputSchemaTypeSchema) JSONSchema() map[string]any {
+func (VideoInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.VideoInputSchemaType" }
+func (VideoInputSchemaTypeSchema) SchemaDescription() string { return "" }
+func (VideoInputSchemaTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.expression.VideoInputSchemaType",
 		"type": "string",
 		"enum": []any{"video"},
 	}

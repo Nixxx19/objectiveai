@@ -4,23 +4,13 @@ package message
 
 type SimpleContentPart struct {
 	Text string `json:"text"`
-	Type string `json:"type"`
+	Type string `json:"type" enum:"text"`
 }
 
-func (SimpleContentPart) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.SimpleContentPart",
-		"description": "A text part.",
-		"type": "object",
-		"properties": map[string]any{
-			"text": map[string]any{
-			"description": "The text content.",
-			"type": "string",
-		},
-			"type": map[string]any{
-			"type": "string",
-			"enum": []any{"text"},
-		},
-		},
+func (SimpleContentPart) SchemaTitle() string { return "agent.completions.message.SimpleContentPart" }
+func (SimpleContentPart) SchemaDescription() string { return "A text part." }
+func (SimpleContentPart) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"text": "The text content.",
 	}
 }

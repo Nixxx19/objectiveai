@@ -3,23 +3,14 @@
 package expression
 
 type BooleanInputSchema struct {
-	Description *string `json:"description,omitempty"`
-	Type any `json:"type"`
+	Description *string `json:"description,omitempty" nullable:"true"`
+	Type any `json:"type" ref:"functions.expression.BooleanInputSchemaType"`
 }
 
-func (BooleanInputSchema) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.expression.BooleanInputSchema",
-		"description": "Schema for a boolean input.",
-		"type": "object",
-		"properties": map[string]any{
-			"description": map[string]any{
-			"description": "Human-readable description of the boolean.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"type": map[string]any{
-			"$ref": "functions.expression.BooleanInputSchemaType",
-		},
-		},
+func (BooleanInputSchema) SchemaTitle() string { return "functions.expression.BooleanInputSchema" }
+func (BooleanInputSchema) SchemaDescription() string { return "Schema for a boolean input." }
+func (BooleanInputSchema) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"description": "Human-readable description of the boolean.",
 	}
 }

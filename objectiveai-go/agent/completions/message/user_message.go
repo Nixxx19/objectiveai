@@ -3,24 +3,15 @@
 package message
 
 type UserMessage struct {
-	Content any `json:"content"`
-	Name *string `json:"name,omitempty"`
+	Content any `json:"content" ref:"agent.completions.message.RichContent"`
+	Name *string `json:"name,omitempty" nullable:"true"`
 }
 
-func (UserMessage) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.UserMessage",
-		"description": "A user message from the end user.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The message content (supports text, images, audio, video, files).",
-			"$ref": "agent.completions.message.RichContent",
-		},
-			"name": map[string]any{
-			"description": "Optional name for the user.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-		},
+func (UserMessage) SchemaTitle() string { return "agent.completions.message.UserMessage" }
+func (UserMessage) SchemaDescription() string { return "A user message from the end user." }
+func (UserMessage) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The message content (supports text, images, audio, video, files).",
+		"name": "Optional name for the user.",
 	}
 }

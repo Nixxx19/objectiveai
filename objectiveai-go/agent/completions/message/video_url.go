@@ -6,16 +6,10 @@ type VideoUrl struct {
 	URL string `json:"url"`
 }
 
-func (VideoUrl) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.VideoUrl",
-		"description": "A video URL for multimodal input.",
-		"type": "object",
-		"properties": map[string]any{
-			"url": map[string]any{
-			"description": "The URL of the video.",
-			"type": "string",
-		},
-		},
+func (VideoUrl) SchemaTitle() string { return "agent.completions.message.VideoUrl" }
+func (VideoUrl) SchemaDescription() string { return "A video URL for multimodal input." }
+func (VideoUrl) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"url": "The URL of the video.",
 	}
 }

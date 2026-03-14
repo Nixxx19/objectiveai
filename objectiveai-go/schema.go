@@ -4,13 +4,21 @@
 // by scripts/install_go.go. Do not edit generated files directly.
 package objectiveai
 
-// SchemaProvider is implemented by every generated type.
-// It returns the JSON Schema metadata that cannot be inferred from
-// struct tags alone (title, description, top-level structure).
-type SchemaProvider interface {
-	// JSONSchema returns a map representing the JSON Schema for this type.
-	// The map uses the canonical key set: title, description, type, enum,
-	// anyOf, $ref, properties, additionalProperties, items, minItems,
-	// maxItems, minimum, maximum, pattern, format, default.
-	JSONSchema() map[string]any
+// Described is implemented by every generated type.
+// It provides metadata that cannot be derived from Go's type system.
+// Methods use the Schema prefix to avoid conflicts with struct fields
+// named "title" or "description".
+type Described interface {
+	SchemaTitle() string
+	SchemaDescription() string
+}
+
+// SchemaBody provides the non-title/non-description parts of a schema
+// for types where the structure cannot be inferred from Go reflection
+// (anyOf interfaces, enums, arrays, primitives).
+//
+// Struct types do NOT implement this — their properties are derived
+// from reflection on struct fields + tags by the roundtrip test.
+type SchemaBody interface {
+	Body() map[string]any
 }

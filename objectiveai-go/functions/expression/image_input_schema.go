@@ -3,23 +3,14 @@
 package expression
 
 type ImageInputSchema struct {
-	Description *string `json:"description,omitempty"`
-	Type any `json:"type"`
+	Description *string `json:"description,omitempty" nullable:"true"`
+	Type any `json:"type" ref:"functions.expression.ImageInputSchemaType"`
 }
 
-func (ImageInputSchema) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.expression.ImageInputSchema",
-		"description": "Schema for an image input (URL or base64-encoded).",
-		"type": "object",
-		"properties": map[string]any{
-			"description": map[string]any{
-			"description": "Human-readable description of the expected image.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"type": map[string]any{
-			"$ref": "functions.expression.ImageInputSchemaType",
-		},
-		},
+func (ImageInputSchema) SchemaTitle() string { return "functions.expression.ImageInputSchema" }
+func (ImageInputSchema) SchemaDescription() string { return "Schema for an image input (URL or base64-encoded)." }
+func (ImageInputSchema) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"description": "Human-readable description of the expected image.",
 	}
 }

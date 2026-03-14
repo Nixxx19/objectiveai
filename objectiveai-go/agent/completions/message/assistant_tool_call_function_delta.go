@@ -3,24 +3,15 @@
 package message
 
 type AssistantToolCallFunctionDelta struct {
-	Arguments *string `json:"arguments,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Arguments *string `json:"arguments,omitempty" nullable:"true"`
+	Name *string `json:"name,omitempty" nullable:"true"`
 }
 
-func (AssistantToolCallFunctionDelta) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.AssistantToolCallFunctionDelta",
-		"description": "Function call details in a streaming tool call.",
-		"type": "object",
-		"properties": map[string]any{
-			"arguments": map[string]any{
-			"description": "The arguments being streamed (accumulated across deltas).",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"name": map[string]any{
-			"description": "The function name (only present in the first delta).",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-		},
+func (AssistantToolCallFunctionDelta) SchemaTitle() string { return "agent.completions.message.AssistantToolCallFunctionDelta" }
+func (AssistantToolCallFunctionDelta) SchemaDescription() string { return "Function call details in a streaming tool call." }
+func (AssistantToolCallFunctionDelta) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"arguments": "The arguments being streamed (accumulated across deltas).",
+		"name": "The function name (only present in the first delta).",
 	}
 }

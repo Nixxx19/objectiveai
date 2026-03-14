@@ -3,24 +3,15 @@
 package message
 
 type DeveloperMessage struct {
-	Content any `json:"content"`
-	Name *string `json:"name,omitempty"`
+	Content any `json:"content" ref:"agent.completions.message.SimpleContent"`
+	Name *string `json:"name,omitempty" nullable:"true"`
 }
 
-func (DeveloperMessage) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.DeveloperMessage",
-		"description": "A developer message.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The message content.",
-			"$ref": "agent.completions.message.SimpleContent",
-		},
-			"name": map[string]any{
-			"description": "Optional name for the message author.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-		},
+func (DeveloperMessage) SchemaTitle() string { return "agent.completions.message.DeveloperMessage" }
+func (DeveloperMessage) SchemaDescription() string { return "A developer message." }
+func (DeveloperMessage) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The message content.",
+		"name": "Optional name for the message author.",
 	}
 }

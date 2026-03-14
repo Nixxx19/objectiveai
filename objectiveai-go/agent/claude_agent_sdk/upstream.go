@@ -6,10 +6,10 @@ type Upstream = string
 
 type UpstreamSchema struct{}
 
-func (UpstreamSchema) JSONSchema() map[string]any {
+func (UpstreamSchema) SchemaTitle() string { return "agent.claude_agent_sdk.Upstream" }
+func (UpstreamSchema) SchemaDescription() string { return "Claude Agent SDK upstream marker." }
+func (UpstreamSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "agent.claude_agent_sdk.Upstream",
-		"description": "Claude Agent SDK upstream marker.",
 		"type": "string",
 		"enum": []any{"claude_agent_sdk"},
 	}

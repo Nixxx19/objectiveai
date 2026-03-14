@@ -3,20 +3,13 @@
 package ensemble
 
 type ListEnsemble struct {
-	Data []any `json:"data"`
+	Data []any `json:"data" items_ref:"ensemble.ListEnsembleItem"`
 }
 
-func (ListEnsemble) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "ensemble.ListEnsemble",
-		"description": "Response containing a list of Ensembles.",
-		"type": "object",
-		"properties": map[string]any{
-			"data": map[string]any{
-			"description": "The list of Ensemble summaries.",
-			"type": "array",
-			"items": map[string]any{"$ref": "ensemble.ListEnsembleItem"},
-		},
-		},
+func (ListEnsemble) SchemaTitle() string { return "ensemble.ListEnsemble" }
+func (ListEnsemble) SchemaDescription() string { return "Response containing a list of Ensembles." }
+func (ListEnsemble) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"data": "The list of Ensemble summaries.",
 	}
 }

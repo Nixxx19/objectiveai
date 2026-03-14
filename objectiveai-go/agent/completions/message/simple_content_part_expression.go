@@ -3,24 +3,14 @@
 package message
 
 type SimpleContentPartExpression struct {
-	Text any `json:"text"`
-	Type string `json:"type"`
+	Text any `json:"text" ref:"functions.expression.WithExpression.string"`
+	Type string `json:"type" enum:"text"`
 }
 
-func (SimpleContentPartExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.SimpleContentPartExpression",
-		"description": "A text part expression.",
-		"type": "object",
-		"properties": map[string]any{
-			"text": map[string]any{
-			"description": "The text expression.",
-			"$ref": "functions.expression.WithExpression.string",
-		},
-			"type": map[string]any{
-			"type": "string",
-			"enum": []any{"text"},
-		},
-		},
+func (SimpleContentPartExpression) SchemaTitle() string { return "agent.completions.message.SimpleContentPartExpression" }
+func (SimpleContentPartExpression) SchemaDescription() string { return "A text part expression." }
+func (SimpleContentPartExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"text": "The text expression.",
 	}
 }

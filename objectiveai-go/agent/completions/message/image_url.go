@@ -3,24 +3,15 @@
 package message
 
 type ImageUrl struct {
-	Detail any `json:"detail,omitempty"`
+	Detail any `json:"detail,omitempty" nullable:"true" ref:"agent.completions.message.ImageUrlDetail"`
 	URL string `json:"url"`
 }
 
-func (ImageUrl) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.ImageUrl",
-		"description": "An image URL for multimodal input.",
-		"type": "object",
-		"properties": map[string]any{
-			"detail": map[string]any{
-			"description": "The detail level for image processing.",
-			"anyOf": []any{map[string]any{"$ref": "agent.completions.message.ImageUrlDetail"}, map[string]any{"type": "null"}},
-		},
-			"url": map[string]any{
-			"description": "The URL of the image (can be a data URL or HTTP URL).",
-			"type": "string",
-		},
-		},
+func (ImageUrl) SchemaTitle() string { return "agent.completions.message.ImageUrl" }
+func (ImageUrl) SchemaDescription() string { return "An image URL for multimodal input." }
+func (ImageUrl) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"detail": "The detail level for image processing.",
+		"url": "The URL of the image (can be a data URL or HTTP URL).",
 	}
 }

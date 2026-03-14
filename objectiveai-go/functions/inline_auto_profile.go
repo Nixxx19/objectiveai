@@ -3,24 +3,15 @@
 package functions
 
 type InlineAutoProfile struct {
-	Ensemble any `json:"ensemble"`
-	Profile any `json:"profile"`
+	Ensemble any `json:"ensemble" ref:"vector.completions.request.Ensemble"`
+	Profile any `json:"profile" ref:"vector.completions.request.Profile"`
 }
 
-func (InlineAutoProfile) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.InlineAutoProfile",
-		"description": "An inline auto profile definition without metadata.\n\nApplies a single ensemble and weights to every vector completion task\nin the function, with equal task weights.",
-		"type": "object",
-		"properties": map[string]any{
-			"ensemble": map[string]any{
-			"description": "The ensemble to use for all vector completion tasks.",
-			"$ref": "vector.completions.request.Ensemble",
-		},
-			"profile": map[string]any{
-			"description": "Weights for each agent in the ensemble.",
-			"$ref": "vector.completions.request.Profile",
-		},
-		},
+func (InlineAutoProfile) SchemaTitle() string { return "functions.InlineAutoProfile" }
+func (InlineAutoProfile) SchemaDescription() string { return "An inline auto profile definition without metadata.\n\nApplies a single ensemble and weights to every vector completion task\nin the function, with equal task weights." }
+func (InlineAutoProfile) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"ensemble": "The ensemble to use for all vector completion tasks.",
+		"profile": "Weights for each agent in the ensemble.",
 	}
 }

@@ -3,21 +3,9 @@
 package request
 
 type DatasetItem struct {
-	Input any `json:"input"`
-	Target any `json:"target"`
+	Input any `json:"input" ref:"functions.expression.InputValue"`
+	Target any `json:"target" ref:"functions.profiles.computations.request.Target"`
 }
 
-func (DatasetItem) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.profiles.computations.request.DatasetItem",
-		"type": "object",
-		"properties": map[string]any{
-			"input": map[string]any{
-			"$ref": "functions.expression.InputValue",
-		},
-			"target": map[string]any{
-			"$ref": "functions.profiles.computations.request.Target",
-		},
-		},
-	}
-}
+func (DatasetItem) SchemaTitle() string { return "functions.profiles.computations.request.DatasetItem" }
+func (DatasetItem) SchemaDescription() string { return "" }

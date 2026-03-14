@@ -3,19 +3,13 @@
 package auth
 
 type DisableApiKeyRequest struct {
-	APIKey any `json:"api_key"`
+	APIKey any `json:"api_key" ref:"PrefixedUuid"`
 }
 
-func (DisableApiKeyRequest) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "auth.DisableApiKeyRequest",
-		"description": "Request to disable an existing API key.\n\nOnce disabled, the API key can no longer be used for authentication.\nThis action is reversible only by creating a new key.",
-		"type": "object",
-		"properties": map[string]any{
-			"api_key": map[string]any{
-			"description": "The API key to disable.",
-			"$ref": "PrefixedUuid",
-		},
-		},
+func (DisableApiKeyRequest) SchemaTitle() string { return "auth.DisableApiKeyRequest" }
+func (DisableApiKeyRequest) SchemaDescription() string { return "Request to disable an existing API key.\n\nOnce disabled, the API key can no longer be used for authentication.\nThis action is reversible only by creating a new key." }
+func (DisableApiKeyRequest) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"api_key": "The API key to disable.",
 	}
 }

@@ -3,24 +3,15 @@
 package message
 
 type SystemMessage struct {
-	Content any `json:"content"`
-	Name *string `json:"name,omitempty"`
+	Content any `json:"content" ref:"agent.completions.message.SimpleContent"`
+	Name *string `json:"name,omitempty" nullable:"true"`
 }
 
-func (SystemMessage) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.SystemMessage",
-		"description": "A system message setting context or instructions.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The message content.",
-			"$ref": "agent.completions.message.SimpleContent",
-		},
-			"name": map[string]any{
-			"description": "Optional name for the message author.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-		},
+func (SystemMessage) SchemaTitle() string { return "agent.completions.message.SystemMessage" }
+func (SystemMessage) SchemaDescription() string { return "A system message setting context or instructions." }
+func (SystemMessage) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The message content.",
+		"name": "Optional name for the message author.",
 	}
 }

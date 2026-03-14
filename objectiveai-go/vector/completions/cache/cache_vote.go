@@ -3,17 +3,8 @@
 package cache
 
 type CacheVote struct {
-	Vote any `json:"vote,omitempty"`
+	Vote any `json:"vote,omitempty" nullable:"true" ref:"vector.completions.response.Vote"`
 }
 
-func (CacheVote) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "vector.completions.cache.CacheVote",
-		"type": "object",
-		"properties": map[string]any{
-			"vote": map[string]any{
-			"anyOf": []any{map[string]any{"$ref": "vector.completions.response.Vote"}, map[string]any{"type": "null"}},
-		},
-		},
-	}
-}
+func (CacheVote) SchemaTitle() string { return "vector.completions.cache.CacheVote" }
+func (CacheVote) SchemaDescription() string { return "" }

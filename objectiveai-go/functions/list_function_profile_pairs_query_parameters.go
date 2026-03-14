@@ -3,19 +3,13 @@
 package functions
 
 type ListFunctionProfilePairsQueryParameters struct {
-	Source any `json:"source,omitempty"`
+	Source any `json:"source,omitempty" nullable:"true" ref:"functions.ListFunctionProfilePairsSource"`
 }
 
-func (ListFunctionProfilePairsQueryParameters) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.ListFunctionProfilePairsQueryParameters",
-		"description": "Query parameters for the list function-profile pairs endpoint.",
-		"type": "object",
-		"properties": map[string]any{
-			"source": map[string]any{
-			"description": "Optional source filter for listing function-profile pairs.",
-			"anyOf": []any{map[string]any{"$ref": "functions.ListFunctionProfilePairsSource"}, map[string]any{"type": "null"}},
-		},
-		},
+func (ListFunctionProfilePairsQueryParameters) SchemaTitle() string { return "functions.ListFunctionProfilePairsQueryParameters" }
+func (ListFunctionProfilePairsQueryParameters) SchemaDescription() string { return "Query parameters for the list function-profile pairs endpoint." }
+func (ListFunctionProfilePairsQueryParameters) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"source": "Optional source filter for listing function-profile pairs.",
 	}
 }

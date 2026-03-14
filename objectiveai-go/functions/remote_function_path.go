@@ -5,27 +5,9 @@ package functions
 type RemoteFunctionPath struct {
 	Commit string `json:"commit"`
 	Owner string `json:"owner"`
-	Remote any `json:"remote"`
+	Remote any `json:"remote" ref:"functions.Remote"`
 	Repository string `json:"repository"`
 }
 
-func (RemoteFunctionPath) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.RemoteFunctionPath",
-		"type": "object",
-		"properties": map[string]any{
-			"commit": map[string]any{
-			"type": "string",
-		},
-			"owner": map[string]any{
-			"type": "string",
-		},
-			"remote": map[string]any{
-			"$ref": "functions.Remote",
-		},
-			"repository": map[string]any{
-			"type": "string",
-		},
-		},
-	}
-}
+func (RemoteFunctionPath) SchemaTitle() string { return "functions.RemoteFunctionPath" }
+func (RemoteFunctionPath) SchemaDescription() string { return "" }

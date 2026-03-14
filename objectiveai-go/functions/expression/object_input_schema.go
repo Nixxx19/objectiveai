@@ -3,34 +3,18 @@
 package expression
 
 type ObjectInputSchema struct {
-	Description *string `json:"description,omitempty"`
-	Properties map[string]any `json:"properties"`
-	Required []string `json:"required,omitempty"`
-	Type any `json:"type"`
+	Description *string `json:"description,omitempty" nullable:"true"`
+	Properties map[string]any `json:"properties" addprops_ref:"functions.expression.InputSchema"`
+	Required []string `json:"required,omitempty" nullable:"true"`
+	Type any `json:"type" ref:"functions.expression.ObjectInputSchemaType"`
 }
 
-func (ObjectInputSchema) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.expression.ObjectInputSchema",
-		"description": "Schema for an object input with named properties.",
-		"type": "object",
-		"properties": map[string]any{
-			"description": map[string]any{
-			"description": "Human-readable description of the object.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"properties": map[string]any{
-			"description": "Schema for each property in the object.",
-			"type": "object",
-			"additionalProperties": map[string]any{"$ref": "functions.expression.InputSchema"},
-		},
-			"required": map[string]any{
-			"description": "List of property names that must be present.",
-			"anyOf": []any{map[string]any{"items": map[string]any{"type": "string"}, "type": "array"}, map[string]any{"type": "null"}},
-		},
-			"type": map[string]any{
-			"$ref": "functions.expression.ObjectInputSchemaType",
-		},
-		},
+func (ObjectInputSchema) SchemaTitle() string { return "functions.expression.ObjectInputSchema" }
+func (ObjectInputSchema) SchemaDescription() string { return "Schema for an object input with named properties." }
+func (ObjectInputSchema) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"description": "Human-readable description of the object.",
+		"properties": "Schema for each property in the object.",
+		"required": "List of property names that must be present.",
 	}
 }

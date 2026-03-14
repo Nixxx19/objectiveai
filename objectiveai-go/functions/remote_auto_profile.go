@@ -4,28 +4,16 @@ package functions
 
 type RemoteAutoProfile struct {
 	Description string `json:"description"`
-	Ensemble any `json:"ensemble"`
-	Profile any `json:"profile"`
+	Ensemble any `json:"ensemble" ref:"vector.completions.request.Ensemble"`
+	Profile any `json:"profile" ref:"vector.completions.request.Profile"`
 }
 
-func (RemoteAutoProfile) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.RemoteAutoProfile",
-		"description": "A remote auto profile with full metadata.\n\nApplies a single ensemble and weights to every vector completion task\nin the function, with equal task weights.",
-		"type": "object",
-		"properties": map[string]any{
-			"description": map[string]any{
-			"description": "Human-readable description of the profile.",
-			"type": "string",
-		},
-			"ensemble": map[string]any{
-			"description": "The ensemble to use for all vector completion tasks.",
-			"$ref": "vector.completions.request.Ensemble",
-		},
-			"profile": map[string]any{
-			"description": "Weights for each agent in the ensemble.",
-			"$ref": "vector.completions.request.Profile",
-		},
-		},
+func (RemoteAutoProfile) SchemaTitle() string { return "functions.RemoteAutoProfile" }
+func (RemoteAutoProfile) SchemaDescription() string { return "A remote auto profile with full metadata.\n\nApplies a single ensemble and weights to every vector completion task\nin the function, with equal task weights." }
+func (RemoteAutoProfile) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"description": "Human-readable description of the profile.",
+		"ensemble": "The ensemble to use for all vector completion tasks.",
+		"profile": "Weights for each agent in the ensemble.",
 	}
 }

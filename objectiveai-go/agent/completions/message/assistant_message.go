@@ -3,39 +3,21 @@
 package message
 
 type AssistantMessage struct {
-	Content any `json:"content,omitempty"`
-	Name *string `json:"name,omitempty"`
-	Reasoning *string `json:"reasoning,omitempty"`
-	Refusal *string `json:"refusal,omitempty"`
-	ToolCalls []any `json:"tool_calls,omitempty"`
+	Content any `json:"content,omitempty" nullable:"true" ref:"agent.completions.message.RichContent"`
+	Name *string `json:"name,omitempty" nullable:"true"`
+	Reasoning *string `json:"reasoning,omitempty" nullable:"true"`
+	Refusal *string `json:"refusal,omitempty" nullable:"true"`
+	ToolCalls []any `json:"tool_calls,omitempty" nullable:"true" items_ref:"agent.completions.message.AssistantToolCall"`
 }
 
-func (AssistantMessage) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.AssistantMessage",
-		"description": "An assistant message (model's previous response).",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The message content, if any.",
-			"anyOf": []any{map[string]any{"$ref": "agent.completions.message.RichContent"}, map[string]any{"type": "null"}},
-		},
-			"name": map[string]any{
-			"description": "Optional name for the assistant.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"reasoning": map[string]any{
-			"description": "Reasoning content from models that support chain-of-thought.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"refusal": map[string]any{
-			"description": "Refusal message if the model declined to respond.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"tool_calls": map[string]any{
-			"description": "Tool calls made by the assistant.",
-			"anyOf": []any{map[string]any{"items": map[string]any{"$ref": "agent.completions.message.AssistantToolCall"}, "type": "array"}, map[string]any{"type": "null"}},
-		},
-		},
+func (AssistantMessage) SchemaTitle() string { return "agent.completions.message.AssistantMessage" }
+func (AssistantMessage) SchemaDescription() string { return "An assistant message (model's previous response)." }
+func (AssistantMessage) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The message content, if any.",
+		"name": "Optional name for the assistant.",
+		"reasoning": "Reasoning content from models that support chain-of-thought.",
+		"refusal": "Refusal message if the model declined to respond.",
+		"tool_calls": "Tool calls made by the assistant.",
 	}
 }

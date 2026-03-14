@@ -6,14 +6,5 @@ type EssayTasksObject struct {
 	EssayTasks string `json:"essay_tasks"`
 }
 
-func (EssayTasksObject) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.inventions.EssayTasksObject",
-		"type": "object",
-		"properties": map[string]any{
-			"essay_tasks": map[string]any{
-			"type": "string",
-		},
-		},
-	}
-}
+func (EssayTasksObject) SchemaTitle() string { return "functions.inventions.EssayTasksObject" }
+func (EssayTasksObject) SchemaDescription() string { return "" }

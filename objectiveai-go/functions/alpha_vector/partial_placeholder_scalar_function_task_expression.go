@@ -3,29 +3,11 @@
 package alpha_vector
 
 type PartialPlaceholderScalarFunctionTaskExpression struct {
-	Input any `json:"input"`
-	InputSchema any `json:"input_schema"`
-	Skip any `json:"skip,omitempty"`
+	Input any `json:"input" ref:"functions.expression.Expression"`
+	InputSchema any `json:"input_schema" ref:"functions.expression.ObjectInputSchema"`
+	Skip any `json:"skip,omitempty" nullable:"true" ref:"functions.expression.Expression"`
 	Spec string `json:"spec"`
 }
 
-func (PartialPlaceholderScalarFunctionTaskExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression",
-		"type": "object",
-		"properties": map[string]any{
-			"input": map[string]any{
-			"$ref": "functions.expression.Expression",
-		},
-			"input_schema": map[string]any{
-			"$ref": "functions.expression.ObjectInputSchema",
-		},
-			"skip": map[string]any{
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-			"spec": map[string]any{
-			"type": "string",
-		},
-		},
-	}
-}
+func (PartialPlaceholderScalarFunctionTaskExpression) SchemaTitle() string { return "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression" }
+func (PartialPlaceholderScalarFunctionTaskExpression) SchemaDescription() string { return "" }

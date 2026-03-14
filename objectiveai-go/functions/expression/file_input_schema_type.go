@@ -6,9 +6,10 @@ type FileInputSchemaType = string
 
 type FileInputSchemaTypeSchema struct{}
 
-func (FileInputSchemaTypeSchema) JSONSchema() map[string]any {
+func (FileInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.FileInputSchemaType" }
+func (FileInputSchemaTypeSchema) SchemaDescription() string { return "" }
+func (FileInputSchemaTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.expression.FileInputSchemaType",
 		"type": "string",
 		"enum": []any{"file"},
 	}

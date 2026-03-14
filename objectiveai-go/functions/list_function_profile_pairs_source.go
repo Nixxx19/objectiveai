@@ -6,10 +6,10 @@ type ListFunctionProfilePairsSource = string
 
 type ListFunctionProfilePairsSourceSchema struct{}
 
-func (ListFunctionProfilePairsSourceSchema) JSONSchema() map[string]any {
+func (ListFunctionProfilePairsSourceSchema) SchemaTitle() string { return "functions.ListFunctionProfilePairsSource" }
+func (ListFunctionProfilePairsSourceSchema) SchemaDescription() string { return "Source filter for listing function-profile pairs." }
+func (ListFunctionProfilePairsSourceSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.ListFunctionProfilePairsSource",
-		"description": "Source filter for listing function-profile pairs.",
 		"type": "string",
 		"enum": []any{"objectiveai"},
 	}

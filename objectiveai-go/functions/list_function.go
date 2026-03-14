@@ -3,20 +3,13 @@
 package functions
 
 type ListFunction struct {
-	Data []any `json:"data"`
+	Data []any `json:"data" items_ref:"functions.ListFunctionItem"`
 }
 
-func (ListFunction) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.ListFunction",
-		"description": "Response from listing functions.",
-		"type": "object",
-		"properties": map[string]any{
-			"data": map[string]any{
-			"description": "List of available functions.",
-			"type": "array",
-			"items": map[string]any{"$ref": "functions.ListFunctionItem"},
-		},
-		},
+func (ListFunction) SchemaTitle() string { return "functions.ListFunction" }
+func (ListFunction) SchemaDescription() string { return "Response from listing functions." }
+func (ListFunction) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"data": "List of available functions.",
 	}
 }

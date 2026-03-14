@@ -3,54 +3,27 @@
 package request
 
 type FunctionRemoteProfileRemoteRequestPath struct {
-	Fcommit *string `json:"fcommit,omitempty"`
+	Fcommit *string `json:"fcommit,omitempty" nullable:"true"`
 	Fowner string `json:"fowner"`
-	Fremote any `json:"fremote"`
+	Fremote any `json:"fremote" ref:"functions.Remote"`
 	Frepository string `json:"frepository"`
-	Pcommit *string `json:"pcommit,omitempty"`
+	Pcommit *string `json:"pcommit,omitempty" nullable:"true"`
 	Powner string `json:"powner"`
-	Premote any `json:"premote"`
+	Premote any `json:"premote" ref:"functions.Remote"`
 	Prepository string `json:"prepository"`
 }
 
-func (FunctionRemoteProfileRemoteRequestPath) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.executions.request.FunctionRemoteProfileRemoteRequestPath",
-		"description": "Path parameters for remote Function with remote Profile.",
-		"type": "object",
-		"properties": map[string]any{
-			"fcommit": map[string]any{
-			"description": "Function Git commit SHA (optional).",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"fowner": map[string]any{
-			"description": "Function repository owner.",
-			"type": "string",
-		},
-			"fremote": map[string]any{
-			"description": "Function remote source.",
-			"$ref": "functions.Remote",
-		},
-			"frepository": map[string]any{
-			"description": "Function repository name.",
-			"type": "string",
-		},
-			"pcommit": map[string]any{
-			"description": "Profile Git commit SHA (optional).",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"powner": map[string]any{
-			"description": "Profile repository owner.",
-			"type": "string",
-		},
-			"premote": map[string]any{
-			"description": "Profile remote source.",
-			"$ref": "functions.Remote",
-		},
-			"prepository": map[string]any{
-			"description": "Profile repository name.",
-			"type": "string",
-		},
-		},
+func (FunctionRemoteProfileRemoteRequestPath) SchemaTitle() string { return "functions.executions.request.FunctionRemoteProfileRemoteRequestPath" }
+func (FunctionRemoteProfileRemoteRequestPath) SchemaDescription() string { return "Path parameters for remote Function with remote Profile." }
+func (FunctionRemoteProfileRemoteRequestPath) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"fcommit": "Function Git commit SHA (optional).",
+		"fowner": "Function repository owner.",
+		"fremote": "Function remote source.",
+		"frepository": "Function repository name.",
+		"pcommit": "Profile Git commit SHA (optional).",
+		"powner": "Profile repository owner.",
+		"premote": "Profile remote source.",
+		"prepository": "Profile repository name.",
 	}
 }

@@ -3,29 +3,17 @@
 package functions
 
 type PlaceholderScalarFunctionTask struct {
-	Input any `json:"input"`
-	InputSchema any `json:"input_schema"`
-	Output any `json:"output"`
+	Input any `json:"input" ref:"functions.expression.InputValue"`
+	InputSchema any `json:"input_schema" ref:"functions.expression.InputSchema"`
+	Output any `json:"output" ref:"functions.expression.Expression"`
 }
 
-func (PlaceholderScalarFunctionTask) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.PlaceholderScalarFunctionTask",
-		"description": "A compiled placeholder scalar function task.\n\nAlways produces `Scalar(0.5)` before the output expression\nis applied.",
-		"type": "object",
-		"properties": map[string]any{
-			"input": map[string]any{
-			"description": "The resolved input.",
-			"$ref": "functions.expression.InputValue",
-		},
-			"input_schema": map[string]any{
-			"description": "JSON Schema defining the expected input structure.",
-			"$ref": "functions.expression.InputSchema",
-		},
-			"output": map[string]any{
-			"description": "Expression to transform the fixed 0.5 output.",
-			"$ref": "functions.expression.Expression",
-		},
-		},
+func (PlaceholderScalarFunctionTask) SchemaTitle() string { return "functions.PlaceholderScalarFunctionTask" }
+func (PlaceholderScalarFunctionTask) SchemaDescription() string { return "A compiled placeholder scalar function task.\n\nAlways produces `Scalar(0.5)` before the output expression\nis applied." }
+func (PlaceholderScalarFunctionTask) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"input": "The resolved input.",
+		"input_schema": "JSON Schema defining the expected input structure.",
+		"output": "Expression to transform the fixed 0.5 output.",
 	}
 }

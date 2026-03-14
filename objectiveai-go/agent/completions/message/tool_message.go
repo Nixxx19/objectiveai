@@ -3,24 +3,15 @@
 package message
 
 type ToolMessage struct {
-	Content any `json:"content"`
+	Content any `json:"content" ref:"agent.completions.message.RichContent"`
 	ToolCallID string `json:"tool_call_id"`
 }
 
-func (ToolMessage) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.ToolMessage",
-		"description": "A tool message containing the result of a tool call.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The content of the tool response.",
-			"$ref": "agent.completions.message.RichContent",
-		},
-			"tool_call_id": map[string]any{
-			"description": "The ID of the tool call this message responds to.",
-			"type": "string",
-		},
-		},
+func (ToolMessage) SchemaTitle() string { return "agent.completions.message.ToolMessage" }
+func (ToolMessage) SchemaDescription() string { return "A tool message containing the result of a tool call." }
+func (ToolMessage) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The content of the tool response.",
+		"tool_call_id": "The ID of the tool call this message responds to.",
 	}
 }

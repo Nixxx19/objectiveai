@@ -5,15 +5,15 @@ package profiles
 type GetProfile struct {
 	Commit string `json:"commit"`
 	Owner string `json:"owner"`
-	Remote any `json:"remote"`
+	Remote any `json:"remote" ref:"functions.Remote"`
 	Repository string `json:"repository"`
 }
 
-func (GetProfile) JSONSchema() map[string]any {
+func (GetProfile) SchemaTitle() string { return "functions.profiles.GetProfile" }
+func (GetProfile) SchemaDescription() string { return "A remote profile, either tasks-based or auto." }
+
+func (GetProfile) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.profiles.GetProfile",
-		"description": "A remote profile, either tasks-based or auto.",
-		"type": "object",
 		"anyOf": []any{
 			map[string]any{
 			"description": "Tasks-based profile with per-task configuration.",
@@ -22,20 +22,6 @@ func (GetProfile) JSONSchema() map[string]any {
 			map[string]any{
 			"description": "Auto profile that applies a single ensemble+weights to all vector completion tasks.",
 			"$ref": "functions.RemoteAutoProfile",
-		},
-		},
-		"properties": map[string]any{
-			"commit": map[string]any{
-			"type": "string",
-		},
-			"owner": map[string]any{
-			"type": "string",
-		},
-			"remote": map[string]any{
-			"$ref": "functions.Remote",
-		},
-			"repository": map[string]any{
-			"type": "string",
 		},
 		},
 	}

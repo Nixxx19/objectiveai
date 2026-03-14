@@ -3,25 +3,15 @@
 package agent
 
 type McpServer struct {
-	Authorization bool `json:"authorization,omitempty"`
+	Authorization bool `json:"authorization,omitempty" def:"false"`
 	URL string `json:"url"`
 }
 
-func (McpServer) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.McpServer",
-		"description": "An MCP server that the agent can connect to.",
-		"type": "object",
-		"properties": map[string]any{
-			"authorization": map[string]any{
-			"description": "Whether this MCP server uses authorization.",
-			"type": "boolean",
-			"default": false,
-		},
-			"url": map[string]any{
-			"description": "The URL of the MCP server.",
-			"type": "string",
-		},
-		},
+func (McpServer) SchemaTitle() string { return "agent.McpServer" }
+func (McpServer) SchemaDescription() string { return "An MCP server that the agent can connect to." }
+func (McpServer) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"authorization": "Whether this MCP server uses authorization.",
+		"url": "The URL of the MCP server.",
 	}
 }

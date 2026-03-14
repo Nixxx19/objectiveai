@@ -3,69 +3,33 @@
 package claude_agent_sdk
 
 type Agent struct {
-	Effort any `json:"effort,omitempty"`
+	Effort any `json:"effort,omitempty" nullable:"true" ref:"agent.claude_agent_sdk.Effort"`
 	ID string `json:"id"`
-	MCPServers []any `json:"mcp_servers,omitempty"`
+	MCPServers []any `json:"mcp_servers,omitempty" nullable:"true" items_ref:"agent.McpServer"`
 	Model string `json:"model"`
-	OutputMode any `json:"output_mode"`
-	PrefixContent any `json:"prefix_content,omitempty"`
-	SuffixContent any `json:"suffix_content,omitempty"`
-	SyntheticReasoning *bool `json:"synthetic_reasoning,omitempty"`
-	SystemPrompt *string `json:"system_prompt,omitempty"`
-	Thinking *bool `json:"thinking,omitempty"`
-	Upstream any `json:"upstream"`
+	OutputMode any `json:"output_mode" ref:"agent.claude_agent_sdk.OutputMode"`
+	PrefixContent any `json:"prefix_content,omitempty" nullable:"true" ref:"agent.completions.message.RichContent"`
+	SuffixContent any `json:"suffix_content,omitempty" nullable:"true" ref:"agent.completions.message.RichContent"`
+	SyntheticReasoning *bool `json:"synthetic_reasoning,omitempty" nullable:"true"`
+	SystemPrompt *string `json:"system_prompt,omitempty" nullable:"true"`
+	Thinking *bool `json:"thinking,omitempty" nullable:"true"`
+	Upstream any `json:"upstream" ref:"agent.claude_agent_sdk.Upstream"`
 }
 
-func (Agent) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.claude_agent_sdk.Agent",
-		"description": "A validated Claude Agent SDK Agent with its computed content-addressed ID.",
-		"type": "object",
-		"properties": map[string]any{
-			"effort": map[string]any{
-			"description": "The effort level for model output.",
-			"anyOf": []any{map[string]any{"$ref": "agent.claude_agent_sdk.Effort"}, map[string]any{"type": "null"}},
-		},
-			"id": map[string]any{
-			"description": "The deterministic content-addressed ID (22-character base62 string).",
-			"type": "string",
-		},
-			"mcp_servers": map[string]any{
-			"description": "MCP servers the agent can connect to.",
-			"anyOf": []any{map[string]any{"items": map[string]any{"$ref": "agent.McpServer"}, "type": "array"}, map[string]any{"type": "null"}},
-		},
-			"model": map[string]any{
-			"description": "The upstream language model identifier.",
-			"type": "string",
-		},
-			"output_mode": map[string]any{
-			"description": "The output mode for vector completions. Ignored for agent completions.",
-			"$ref": "agent.claude_agent_sdk.OutputMode",
-		},
-			"prefix_content": map[string]any{
-			"description": "Rich content prepended to the user's prompt.",
-			"anyOf": []any{map[string]any{"$ref": "agent.completions.message.RichContent"}, map[string]any{"type": "null"}},
-		},
-			"suffix_content": map[string]any{
-			"description": "Rich content appended after the user's prompt.",
-			"anyOf": []any{map[string]any{"$ref": "agent.completions.message.RichContent"}, map[string]any{"type": "null"}},
-		},
-			"synthetic_reasoning": map[string]any{
-			"description": "Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.\n\nWhen enabled, forces the LLM to output a `_think` field before voting,\nsimulating chain-of-thought reasoning. Requires `output_mode` to be\n`ToolCall` (not `Instruction`).",
-			"anyOf": []any{map[string]any{"type": "boolean"}, map[string]any{"type": "null"}},
-		},
-			"system_prompt": map[string]any{
-			"description": "System prompt for the agent.",
-			"anyOf": []any{map[string]any{"type": "string"}, map[string]any{"type": "null"}},
-		},
-			"thinking": map[string]any{
-			"description": "Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.",
-			"anyOf": []any{map[string]any{"type": "boolean"}, map[string]any{"type": "null"}},
-		},
-			"upstream": map[string]any{
-			"description": "The upstream provider marker.",
-			"$ref": "agent.claude_agent_sdk.Upstream",
-		},
-		},
+func (Agent) SchemaTitle() string { return "agent.claude_agent_sdk.Agent" }
+func (Agent) SchemaDescription() string { return "A validated Claude Agent SDK Agent with its computed content-addressed ID." }
+func (Agent) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"effort": "The effort level for model output.",
+		"id": "The deterministic content-addressed ID (22-character base62 string).",
+		"mcp_servers": "MCP servers the agent can connect to.",
+		"model": "The upstream language model identifier.",
+		"output_mode": "The output mode for vector completions. Ignored for agent completions.",
+		"prefix_content": "Rich content prepended to the user's prompt.",
+		"suffix_content": "Rich content appended after the user's prompt.",
+		"synthetic_reasoning": "Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.\n\nWhen enabled, forces the LLM to output a `_think` field before voting,\nsimulating chain-of-thought reasoning. Requires `output_mode` to be\n`ToolCall` (not `Instruction`).",
+		"system_prompt": "System prompt for the agent.",
+		"thinking": "Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.",
+		"upstream": "The upstream provider marker.",
 	}
 }

@@ -3,44 +3,23 @@
 package functions
 
 type PlaceholderVectorFunctionTask struct {
-	Input any `json:"input"`
-	InputMerge any `json:"input_merge"`
-	InputSchema any `json:"input_schema"`
-	InputSplit any `json:"input_split"`
-	Output any `json:"output"`
-	OutputLength any `json:"output_length"`
+	Input any `json:"input" ref:"functions.expression.InputValue"`
+	InputMerge any `json:"input_merge" ref:"functions.expression.Expression"`
+	InputSchema any `json:"input_schema" ref:"functions.expression.InputSchema"`
+	InputSplit any `json:"input_split" ref:"functions.expression.Expression"`
+	Output any `json:"output" ref:"functions.expression.Expression"`
+	OutputLength any `json:"output_length" ref:"functions.expression.Expression"`
 }
 
-func (PlaceholderVectorFunctionTask) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.PlaceholderVectorFunctionTask",
-		"description": "A compiled placeholder vector function task.\n\nAlways produces `Vector(vec![1/N; output_length])` before\nthe output expression is applied.",
-		"type": "object",
-		"properties": map[string]any{
-			"input": map[string]any{
-			"description": "The resolved input.",
-			"$ref": "functions.expression.InputValue",
-		},
-			"input_merge": map[string]any{
-			"description": "Expression merging sub-inputs back into one input.",
-			"$ref": "functions.expression.Expression",
-		},
-			"input_schema": map[string]any{
-			"description": "JSON Schema defining the expected input structure.",
-			"$ref": "functions.expression.InputSchema",
-		},
-			"input_split": map[string]any{
-			"description": "Expression transforming input into sub-inputs for swiss system.",
-			"$ref": "functions.expression.Expression",
-		},
-			"output": map[string]any{
-			"description": "Expression to transform the equalized vector output.",
-			"$ref": "functions.expression.Expression",
-		},
-			"output_length": map[string]any{
-			"description": "Expression computing the expected output vector length.",
-			"$ref": "functions.expression.Expression",
-		},
-		},
+func (PlaceholderVectorFunctionTask) SchemaTitle() string { return "functions.PlaceholderVectorFunctionTask" }
+func (PlaceholderVectorFunctionTask) SchemaDescription() string { return "A compiled placeholder vector function task.\n\nAlways produces `Vector(vec![1/N; output_length])` before\nthe output expression is applied." }
+func (PlaceholderVectorFunctionTask) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"input": "The resolved input.",
+		"input_merge": "Expression merging sub-inputs back into one input.",
+		"input_schema": "JSON Schema defining the expected input structure.",
+		"input_split": "Expression transforming input into sub-inputs for swiss system.",
+		"output": "Expression to transform the equalized vector output.",
+		"output_length": "Expression computing the expected output vector length.",
 	}
 }

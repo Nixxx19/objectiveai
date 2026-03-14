@@ -6,9 +6,10 @@ type Object = string
 
 type ObjectSchema struct{}
 
-func (ObjectSchema) JSONSchema() map[string]any {
+func (ObjectSchema) SchemaTitle() string { return "functions.profiles.computations.response.streaming.Object" }
+func (ObjectSchema) SchemaDescription() string { return "" }
+func (ObjectSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.profiles.computations.response.streaming.Object",
 		"type": "string",
 		"enum": []any{"function.profile.computation.chunk"},
 	}

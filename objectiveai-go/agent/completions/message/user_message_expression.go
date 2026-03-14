@@ -3,24 +3,15 @@
 package message
 
 type UserMessageExpression struct {
-	Content any `json:"content"`
-	Name any `json:"name,omitempty"`
+	Content any `json:"content" ref:"functions.expression.WithExpression.agent.completions.message.RichContentExpression"`
+	Name any `json:"name,omitempty" nullable:"true" ref:"functions.expression.WithExpression.Nullable_string"`
 }
 
-func (UserMessageExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.UserMessageExpression",
-		"description": "Expression variant of [`UserMessage`] for dynamic content.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The message content expression.",
-			"$ref": "functions.expression.WithExpression.agent.completions.message.RichContentExpression",
-		},
-			"name": map[string]any{
-			"description": "Optional name expression.",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.WithExpression.Nullable_string"}, map[string]any{"type": "null"}},
-		},
-		},
+func (UserMessageExpression) SchemaTitle() string { return "agent.completions.message.UserMessageExpression" }
+func (UserMessageExpression) SchemaDescription() string { return "Expression variant of [`UserMessage`] for dynamic content." }
+func (UserMessageExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The message content expression.",
+		"name": "Optional name expression.",
 	}
 }

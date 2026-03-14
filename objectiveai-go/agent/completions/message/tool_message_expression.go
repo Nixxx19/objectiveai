@@ -3,24 +3,15 @@
 package message
 
 type ToolMessageExpression struct {
-	Content any `json:"content"`
-	ToolCallID any `json:"tool_call_id"`
+	Content any `json:"content" ref:"functions.expression.WithExpression.agent.completions.message.RichContentExpression"`
+	ToolCallID any `json:"tool_call_id" ref:"functions.expression.WithExpression.string"`
 }
 
-func (ToolMessageExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.ToolMessageExpression",
-		"description": "Expression variant of [`ToolMessage`] for dynamic content.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The content expression.",
-			"$ref": "functions.expression.WithExpression.agent.completions.message.RichContentExpression",
-		},
-			"tool_call_id": map[string]any{
-			"description": "The tool call ID expression.",
-			"$ref": "functions.expression.WithExpression.string",
-		},
-		},
+func (ToolMessageExpression) SchemaTitle() string { return "agent.completions.message.ToolMessageExpression" }
+func (ToolMessageExpression) SchemaDescription() string { return "Expression variant of [`ToolMessage`] for dynamic content." }
+func (ToolMessageExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The content expression.",
+		"tool_call_id": "The tool call ID expression.",
 	}
 }

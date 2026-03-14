@@ -3,24 +3,15 @@
 package message
 
 type AssistantToolCallFunctionExpression struct {
-	Arguments any `json:"arguments"`
-	Name any `json:"name"`
+	Arguments any `json:"arguments" ref:"functions.expression.WithExpression.string"`
+	Name any `json:"name" ref:"functions.expression.WithExpression.string"`
 }
 
-func (AssistantToolCallFunctionExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.AssistantToolCallFunctionExpression",
-		"description": "Expression variant of [`AssistantToolCallFunction`] for dynamic content.",
-		"type": "object",
-		"properties": map[string]any{
-			"arguments": map[string]any{
-			"description": "The arguments expression.",
-			"$ref": "functions.expression.WithExpression.string",
-		},
-			"name": map[string]any{
-			"description": "The function name expression.",
-			"$ref": "functions.expression.WithExpression.string",
-		},
-		},
+func (AssistantToolCallFunctionExpression) SchemaTitle() string { return "agent.completions.message.AssistantToolCallFunctionExpression" }
+func (AssistantToolCallFunctionExpression) SchemaDescription() string { return "Expression variant of [`AssistantToolCallFunction`] for dynamic content." }
+func (AssistantToolCallFunctionExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"arguments": "The arguments expression.",
+		"name": "The function name expression.",
 	}
 }

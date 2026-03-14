@@ -3,54 +3,27 @@
 package functions
 
 type PlaceholderVectorFunctionTaskExpression struct {
-	Input any `json:"input"`
-	InputMerge any `json:"input_merge"`
-	InputSchema any `json:"input_schema"`
-	InputSplit any `json:"input_split"`
-	Map any `json:"map,omitempty"`
-	Output any `json:"output"`
-	OutputLength any `json:"output_length"`
-	Skip any `json:"skip,omitempty"`
+	Input any `json:"input" ref:"functions.expression.WithExpression.functions.expression.InputValueExpression"`
+	InputMerge any `json:"input_merge" ref:"functions.expression.Expression"`
+	InputSchema any `json:"input_schema" ref:"functions.expression.InputSchema"`
+	InputSplit any `json:"input_split" ref:"functions.expression.Expression"`
+	Map any `json:"map,omitempty" nullable:"true" ref:"functions.expression.Expression"`
+	Output any `json:"output" ref:"functions.expression.Expression"`
+	OutputLength any `json:"output_length" ref:"functions.expression.Expression"`
+	Skip any `json:"skip,omitempty" nullable:"true" ref:"functions.expression.Expression"`
 }
 
-func (PlaceholderVectorFunctionTaskExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.PlaceholderVectorFunctionTaskExpression",
-		"description": "Expression for a placeholder vector function task (pre-compilation).\n\nLike [`VectorFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces an equalized vector of length `output_length`.",
-		"type": "object",
-		"properties": map[string]any{
-			"input": map[string]any{
-			"description": "Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).",
-			"$ref": "functions.expression.WithExpression.functions.expression.InputValueExpression",
-		},
-			"input_merge": map[string]any{
-			"description": "Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).",
-			"$ref": "functions.expression.Expression",
-		},
-			"input_schema": map[string]any{
-			"description": "JSON Schema defining the expected input structure.",
-			"$ref": "functions.expression.InputSchema",
-		},
-			"input_split": map[string]any{
-			"description": "Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.",
-			"$ref": "functions.expression.Expression",
-		},
-			"map": map[string]any{
-			"description": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-			"output": map[string]any{
-			"description": "Expression to transform the equalized vector output.\nReceives: `input`, `output` as `Vector(equalized)`.",
-			"$ref": "functions.expression.Expression",
-		},
-			"output_length": map[string]any{
-			"description": "Expression computing the expected output vector length.\nReceives: `input`.",
-			"$ref": "functions.expression.Expression",
-		},
-			"skip": map[string]any{
-			"description": "If this expression evaluates to true, skip the task. Receives: `input`.",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.Expression"}, map[string]any{"type": "null"}},
-		},
-		},
+func (PlaceholderVectorFunctionTaskExpression) SchemaTitle() string { return "functions.PlaceholderVectorFunctionTaskExpression" }
+func (PlaceholderVectorFunctionTaskExpression) SchemaDescription() string { return "Expression for a placeholder vector function task (pre-compilation).\n\nLike [`VectorFunctionTaskExpression`] but without owner/repository/commit.\nAlways produces an equalized vector of length `output_length`." }
+func (PlaceholderVectorFunctionTaskExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"input": "Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).",
+		"input_merge": "Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).",
+		"input_schema": "JSON Schema defining the expected input structure.",
+		"input_split": "Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.",
+		"map": "Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).",
+		"output": "Expression to transform the equalized vector output.\nReceives: `input`, `output` as `Vector(equalized)`.",
+		"output_length": "Expression computing the expected output vector length.\nReceives: `input`.",
+		"skip": "If this expression evaluates to true, skip the task. Receives: `input`.",
 	}
 }

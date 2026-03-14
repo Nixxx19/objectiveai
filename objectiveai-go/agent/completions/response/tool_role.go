@@ -6,9 +6,10 @@ type ToolRole = string
 
 type ToolRoleSchema struct{}
 
-func (ToolRoleSchema) JSONSchema() map[string]any {
+func (ToolRoleSchema) SchemaTitle() string { return "agent.completions.response.ToolRole" }
+func (ToolRoleSchema) SchemaDescription() string { return "" }
+func (ToolRoleSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "agent.completions.response.ToolRole",
 		"type": "string",
 		"enum": []any{"tool"},
 	}

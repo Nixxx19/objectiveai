@@ -3,24 +3,15 @@
 package message
 
 type DeveloperMessageExpression struct {
-	Content any `json:"content"`
-	Name any `json:"name,omitempty"`
+	Content any `json:"content" ref:"functions.expression.WithExpression.agent.completions.message.SimpleContentExpression"`
+	Name any `json:"name,omitempty" nullable:"true" ref:"functions.expression.WithExpression.Nullable_string"`
 }
 
-func (DeveloperMessageExpression) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "agent.completions.message.DeveloperMessageExpression",
-		"description": "Expression variant of [`DeveloperMessage`] for dynamic content.",
-		"type": "object",
-		"properties": map[string]any{
-			"content": map[string]any{
-			"description": "The message content expression.",
-			"$ref": "functions.expression.WithExpression.agent.completions.message.SimpleContentExpression",
-		},
-			"name": map[string]any{
-			"description": "Optional name expression.",
-			"anyOf": []any{map[string]any{"$ref": "functions.expression.WithExpression.Nullable_string"}, map[string]any{"type": "null"}},
-		},
-		},
+func (DeveloperMessageExpression) SchemaTitle() string { return "agent.completions.message.DeveloperMessageExpression" }
+func (DeveloperMessageExpression) SchemaDescription() string { return "Expression variant of [`DeveloperMessage`] for dynamic content." }
+func (DeveloperMessageExpression) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"content": "The message content expression.",
+		"name": "Optional name expression.",
 	}
 }

@@ -6,9 +6,10 @@ type AudioInputSchemaType = string
 
 type AudioInputSchemaTypeSchema struct{}
 
-func (AudioInputSchemaTypeSchema) JSONSchema() map[string]any {
+func (AudioInputSchemaTypeSchema) SchemaTitle() string { return "functions.expression.AudioInputSchemaType" }
+func (AudioInputSchemaTypeSchema) SchemaDescription() string { return "" }
+func (AudioInputSchemaTypeSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.expression.AudioInputSchemaType",
 		"type": "string",
 		"enum": []any{"audio"},
 	}

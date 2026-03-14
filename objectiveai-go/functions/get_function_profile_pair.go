@@ -3,24 +3,15 @@
 package functions
 
 type GetFunctionProfilePair struct {
-	Function any `json:"function"`
-	Profile any `json:"profile"`
+	Function any `json:"function" ref:"functions.GetFunction"`
+	Profile any `json:"profile" ref:"functions.profiles.GetProfile"`
 }
 
-func (GetFunctionProfilePair) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.GetFunctionProfilePair",
-		"description": "Response from getting a function-profile pair.",
-		"type": "object",
-		"properties": map[string]any{
-			"function": map[string]any{
-			"description": "The function.",
-			"$ref": "functions.GetFunction",
-		},
-			"profile": map[string]any{
-			"description": "The profile.",
-			"$ref": "functions.profiles.GetProfile",
-		},
-		},
+func (GetFunctionProfilePair) SchemaTitle() string { return "functions.GetFunctionProfilePair" }
+func (GetFunctionProfilePair) SchemaDescription() string { return "Response from getting a function-profile pair." }
+func (GetFunctionProfilePair) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"function": "The function.",
+		"profile": "The profile.",
 	}
 }

@@ -6,10 +6,10 @@ type ListFunctionsSource = string
 
 type ListFunctionsSourceSchema struct{}
 
-func (ListFunctionsSourceSchema) JSONSchema() map[string]any {
+func (ListFunctionsSourceSchema) SchemaTitle() string { return "functions.ListFunctionsSource" }
+func (ListFunctionsSourceSchema) SchemaDescription() string { return "Source filter for listing functions." }
+func (ListFunctionsSourceSchema) Body() map[string]any {
 	return map[string]any{
-		"title": "functions.ListFunctionsSource",
-		"description": "Source filter for listing functions.",
 		"type": "string",
 		"enum": []any{"all", "mock", "filesystem", "objectiveai"},
 	}

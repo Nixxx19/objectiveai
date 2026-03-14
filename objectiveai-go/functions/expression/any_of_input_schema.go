@@ -3,20 +3,13 @@
 package expression
 
 type AnyOfInputSchema struct {
-	AnyOf []any `json:"anyOf"`
+	AnyOf []any `json:"anyOf" items_ref:"functions.expression.InputSchema"`
 }
 
-func (AnyOfInputSchema) JSONSchema() map[string]any {
-	return map[string]any{
-		"title": "functions.expression.AnyOfInputSchema",
-		"description": "Schema for a union of possible types - input must match at least one.",
-		"type": "object",
-		"properties": map[string]any{
-			"anyOf": map[string]any{
-			"description": "The possible schemas that the input can match.",
-			"type": "array",
-			"items": map[string]any{"$ref": "functions.expression.InputSchema"},
-		},
-		},
+func (AnyOfInputSchema) SchemaTitle() string { return "functions.expression.AnyOfInputSchema" }
+func (AnyOfInputSchema) SchemaDescription() string { return "Schema for a union of possible types - input must match at least one." }
+func (AnyOfInputSchema) FieldDescriptions() map[string]string {
+	return map[string]string{
+		"anyOf": "The possible schemas that the input can match.",
 	}
 }
