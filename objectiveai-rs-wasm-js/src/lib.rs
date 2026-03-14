@@ -566,3 +566,57 @@ pub fn functionProfileComputationChunkNormalized(a: JsValue) -> Result<String, J
         serde_wasm_bindgen::from_value(a)?;
     serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
 }
+
+/// Converts an accumulated `AgentCompletionChunk` to an `AgentCompletion` (unary).
+#[wasm_bindgen]
+pub fn agentCompletionChunkToUnary(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::agent::completions::response::streaming::AgentCompletionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let unary: objectiveai::agent::completions::response::unary::AgentCompletion = a.into();
+    serde_json::to_string(&unary).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Converts an accumulated `VectorCompletionChunk` to a `VectorCompletion` (unary).
+#[wasm_bindgen]
+pub fn vectorCompletionChunkToUnary(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::vector::completions::response::streaming::VectorCompletionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let unary: objectiveai::vector::completions::response::unary::VectorCompletion = a.into();
+    serde_json::to_string(&unary).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Converts an accumulated `FunctionExecutionChunk` to a `FunctionExecution` (unary).
+#[wasm_bindgen]
+pub fn functionExecutionChunkToUnary(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::functions::executions::response::streaming::FunctionExecutionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let unary: objectiveai::functions::executions::response::unary::FunctionExecution = a.into();
+    serde_json::to_string(&unary).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Converts an accumulated `FunctionInventionChunk` to a `FunctionInvention` (unary).
+#[wasm_bindgen]
+pub fn functionInventionChunkToUnary(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::functions::inventions::response::streaming::FunctionInventionChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let unary: objectiveai::functions::inventions::response::unary::FunctionInvention = a.into();
+    serde_json::to_string(&unary).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Converts an accumulated `FunctionInventionRecursiveChunk` to a `FunctionInventionRecursive` (unary).
+#[wasm_bindgen]
+pub fn functionInventionRecursiveChunkToUnary(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let unary: objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive = a.into();
+    serde_json::to_string(&unary).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Converts an accumulated `FunctionProfileComputationChunk` to a `FunctionProfileComputation` (unary).
+#[wasm_bindgen]
+pub fn functionProfileComputationChunkToUnary(a: JsValue) -> Result<String, JsValue> {
+    let a: objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk =
+        serde_wasm_bindgen::from_value(a)?;
+    let unary: objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation = a.into();
+    serde_json::to_string(&unary).map_err(|e| JsValue::from_str(&e.to_string()))
+}
