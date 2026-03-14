@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import Annotated, Union
 from pydantic import ConfigDict, Field, RootModel
 from objectiveai.agent.completions.message.rich_content_part import RichContentPart
+from objectiveai.functions.expression.expression import Expression
 
 
 class InputValueExpressionVariant1(RootModel):
@@ -13,12 +14,12 @@ class InputValueExpressionVariant1(RootModel):
 
 class InputValueExpressionVariant2(RootModel):
     """An object with values that may be expressions."""
-    root: dict[str, WithExpression_FunctionsExpressionInputValueExpression]
+    root: dict[str, Union[Expression, InputValueExpression]]
 
 
 class InputValueExpressionVariant3(RootModel):
     """An array with elements that may be expressions."""
-    root: list[WithExpression_FunctionsExpressionInputValueExpression]
+    root: list[Union[Expression, InputValueExpression]]
 
 
 class InputValueExpressionVariant4(RootModel):
@@ -50,6 +51,3 @@ expressions (JMESPath or Starlark) that are evaluated during compilation."""
 
     root: Union[InputValueExpressionVariant1, InputValueExpressionVariant2, InputValueExpressionVariant3, InputValueExpressionVariant4, InputValueExpressionVariant5, InputValueExpressionVariant6, InputValueExpressionVariant7]
 
-
-# Deferred imports to break circular dependencies
-from objectiveai.functions.expression.with_expression import WithExpression_FunctionsExpressionInputValueExpression  # noqa: E402

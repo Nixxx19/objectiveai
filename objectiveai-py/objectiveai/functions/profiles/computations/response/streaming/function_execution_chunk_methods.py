@@ -1,7 +1,7 @@
 """Methods for profile computations FunctionExecutionChunk (flattened FunctionExecutionChunk + index/dataset/n/retry)."""
 from __future__ import annotations
 
-from objectiveai.push_utils import push_by_index, push_option, push_replace, push_lazy_set, push_lazy_set_true
+from objectiveai.push_utils import push_by_index, push_option, push_replace, push_lazy_set_true
 from objectiveai.functions.profiles.computations.response.streaming.function_execution_chunk import (
     FunctionExecutionChunk,
 )

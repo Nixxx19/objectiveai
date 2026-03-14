@@ -3,35 +3,40 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
+from objectiveai.agent.completions.message.file import File
+from objectiveai.agent.completions.message.image_url import ImageUrl
+from objectiveai.agent.completions.message.input_audio import InputAudio
+from objectiveai.agent.completions.message.video_url import VideoUrl
+from objectiveai.functions.expression.expression import Expression
 
 
 class RichContentPartExpressionVariant1(BaseModel):
-    text: WithExpression_string
+    text: Union[Expression, str] = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     type_: Literal['text'] = Field(..., alias='type')
 
 
 class RichContentPartExpressionVariant2(BaseModel):
-    image_url: WithExpression_AgentCompletionsMessageImageUrl
+    image_url: Union[Expression, ImageUrl] = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     type_: Literal['image_url'] = Field(..., alias='type')
 
 
 class RichContentPartExpressionVariant3(BaseModel):
-    input_audio: WithExpression_AgentCompletionsMessageInputAudio
+    input_audio: Union[Expression, InputAudio] = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     type_: Literal['input_audio'] = Field(..., alias='type')
 
 
 class RichContentPartExpressionVariant4(BaseModel):
     type_: Literal['input_video'] = Field(..., alias='type')
-    video_url: WithExpression_AgentCompletionsMessageVideoUrl
+    video_url: Union[Expression, VideoUrl] = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
 
 
 class RichContentPartExpressionVariant5(BaseModel):
     type_: Literal['video_url'] = Field(..., alias='type')
-    video_url: WithExpression_AgentCompletionsMessageVideoUrl
+    video_url: Union[Expression, VideoUrl] = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
 
 
 class RichContentPartExpressionVariant6(BaseModel):
-    file: WithExpression_AgentCompletionsMessageFile
+    file: Union[Expression, File] = Field(..., description='A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n"hello world"\n```\n\nJMESPath expression:\n```json\n{"$jmespath": "input.greeting"}\n```\n\nStarlark expression:\n```json\n{"$starlark": "input[\'greeting\']"}\n```')
     type_: Literal['file'] = Field(..., alias='type')
 
 
@@ -41,6 +46,3 @@ class RichContentPartExpression(RootModel):
 
     root: Union[RichContentPartExpressionVariant1, RichContentPartExpressionVariant2, RichContentPartExpressionVariant3, RichContentPartExpressionVariant4, RichContentPartExpressionVariant5, RichContentPartExpressionVariant6]
 
-
-# Deferred imports to break circular dependencies
-from objectiveai.functions.expression.with_expression import WithExpression_AgentCompletionsMessageFile, WithExpression_AgentCompletionsMessageImageUrl, WithExpression_AgentCompletionsMessageInputAudio, WithExpression_AgentCompletionsMessageVideoUrl, WithExpression_string  # noqa: E402

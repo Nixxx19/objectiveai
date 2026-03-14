@@ -74,12 +74,6 @@ def push_replace(self_val, other_val):
     return self_val
 
 
-def push_lazy_set(self_val, other_val):
-    """Lazy set: first non-None wins."""
-    if self_val is None:
-        return other_val
-    return self_val
-
 
 def _get_index(item):
     """Extract an integer index from a model (BaseModel or RootModel)."""

@@ -3,6 +3,8 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
+from objectiveai.agent.completions.message.rich_content_part_expression import RichContentPartExpression
+from objectiveai.functions.expression.expression import Expression
 
 
 class RichContentExpressionVariant1(RootModel):
@@ -12,7 +14,7 @@ class RichContentExpressionVariant1(RootModel):
 
 class RichContentExpressionVariant2(RootModel):
     """Multi-part content expressions."""
-    root: list[WithExpression_AgentCompletionsMessageRichContentPartExpression]
+    root: list[Union[Expression, RichContentPartExpression]]
 
 
 class RichContentExpression(RootModel):
@@ -21,6 +23,3 @@ class RichContentExpression(RootModel):
 
     root: Union[RichContentExpressionVariant1, RichContentExpressionVariant2]
 
-
-# Deferred imports to break circular dependencies
-from objectiveai.functions.expression.with_expression import WithExpression_AgentCompletionsMessageRichContentPartExpression  # noqa: E402

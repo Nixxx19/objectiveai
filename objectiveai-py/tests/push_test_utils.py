@@ -55,16 +55,32 @@ def sanitize_for_serde(value: Any) -> Any:
     return value
 
 
-def generate_normalized(factory_cls: type, normalize_fn) -> dict:
+def generate_normalized(factory_cls: type, normalize_fn, *, max_attempts: int = 50) -> dict:
     """Generate a random chunk, sanitize it, and normalize through Rust serde.
 
     Like zockerParse in JS: generate → fixForSerde → wasmNormalized → parse.
+
+    Retries on polyfactory ValidationError (recursive schemas can produce
+    structurally invalid data) and Rust serde ValueError (untagged enums
+    that polyfactory can't produce valid data for).
     """
-    instance = factory_cls.build()
-    raw = instance.model_dump(mode="python", by_alias=True)
-    sanitized = sanitize_for_serde(raw)
-    normalized = normalize_fn(sanitized)
-    return normalized
+    from pydantic_core import ValidationError
+
+    for _ in range(max_attempts):
+        try:
+            instance = factory_cls.build()
+        except ValidationError:
+            continue
+
+        raw = instance.model_dump(mode="python", by_alias=True)
+        sanitized = sanitize_for_serde(raw)
+
+        try:
+            return normalize_fn(sanitized)
+        except ValueError:
+            continue
+
+    raise RuntimeError(f"Failed to generate valid data after {max_attempts} attempts")
 
 
 def pydantic_push(acc: dict, chunk: dict, model_cls: type[BaseModel]) -> dict:

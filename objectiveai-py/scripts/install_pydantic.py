@@ -26,34 +26,8 @@ GENERATED_HEADER = (
 # ---------------------------------------------------------------------------
 
 
-def detect_generic_prefixes(titles: set[str]) -> list[str]:
-    """Auto-detect generic prefixes from schema titles.
-
-    In a normal module path like "agent.completions.message.UserMessage",
-    every non-final segment is lowercase/snake_case — only the final segment
-    is a PascalCase type name.
-
-    Generic types break this rule: "agent.WithFallbacksAndCount.agent.Agent"
-    has "WithFallbacksAndCount" as a non-final PascalCase segment. The prefix
-    up to and including that segment is the generic base, and everything after
-    is the type parameter.
-    """
-    prefixes: set[str] = set()
-    for title in titles:
-        parts = title.split(".")
-        # Check each non-final segment for PascalCase
-        for i, part in enumerate(parts[:-1]):
-            if part and part[0].isupper():
-                # Everything up to and including this segment is the generic prefix
-                prefixes.add(".".join(parts[: i + 1]) + ".")
-                break
-
-    return sorted(prefixes)
 
 
-# Will be populated after loading schemas (see main block).
-# Also used by the test to stay in sync.
-GENERIC_PREFIXES: list[str] = []
 
 
 def title_to_pascal(title: str) -> str:
@@ -67,28 +41,15 @@ def title_to_pascal(title: str) -> str:
     )
 
 
-def get_generic_base(title: str) -> str | None:
-    """Return the generic base if this is a monomorphized generic, else None."""
-    for prefix in GENERIC_PREFIXES:
-        if title.startswith(prefix) and len(title) > len(prefix):
-            return prefix.rstrip(".")
-    return None
-
 
 def title_to_path(title: str) -> tuple[str, str]:
     """Map a schema title to (directory, filename) relative to SRC_DIR.
 
     "agent.Agent" → ("agent", "agent")
     "ResponseError" → ("", "response_error")
-    "functions.expression.WithExpression.string"
-        → ("functions/expression", "with_expression")
+    "agent.completions.message.File" → ("agent/completions/message", "file")
     """
-    generic_base = get_generic_base(title)
-    if generic_base:
-        parts = generic_base.split(".")
-    else:
-        parts = title.split(".")
-
+    parts = title.split(".")
     type_name = parts.pop()
     dir_path = "/".join(parts)
     file_name = _to_snake(type_name)
@@ -107,28 +68,11 @@ def _is_snake(name: str) -> bool:
 
 
 def title_to_class_name(title: str) -> str:
-    """Extract the class name from a title.
+    """Extract the class name from a title (last segment).
 
-    Non-generic: last PascalCase segment.
-      "agent.completions.response.streaming.AgentCompletionChunk" → "AgentCompletionChunk"
-      "ResponseError" → "ResponseError"
-
-    Generic: GenericBase_PascalCasedTypeParam.
-      "functions.expression.WithExpression.string" → "WithExpression_string"
-      "functions.expression.WithExpression.agent.completions.message.File"
-        → "WithExpression_AgentCompletionsMessageFile"
+    "agent.completions.response.streaming.AgentCompletionChunk" → "AgentCompletionChunk"
+    "ResponseError" → "ResponseError"
     """
-    generic_base = get_generic_base(title)
-    if generic_base:
-        base_name = generic_base.split(".")[-1]
-        type_param = title[len(generic_base) + 1:]  # everything after "prefix."
-        # Single lowercase segment (e.g. "string") stays lowercase;
-        # multi-segment paths get PascalCased.
-        if "." not in type_param and type_param[0].islower():
-            param_name = type_param
-        else:
-            param_name = title_to_pascal(type_param)
-        return f"{base_name}_{param_name}"
     return title.split(".")[-1]
 
 
@@ -138,11 +82,6 @@ def compute_global_class_names(all_titles: set[str]) -> dict[str, str]:
     When multiple titles in the same file would produce the same short class
     name, they all get long pascal names to avoid within-file collisions.
     """
-    prefixes = detect_generic_prefixes(all_titles)
-    saved = GENERIC_PREFIXES[:]
-    GENERIC_PREFIXES.clear()
-    GENERIC_PREFIXES.extend(prefixes)
-
     # Group titles by output file
     file_groups: dict[str, list[str]] = {}
     for title in all_titles:
@@ -160,19 +99,10 @@ def compute_global_class_names(all_titles: set[str]) -> dict[str, str]:
             if len(group) == 1:
                 result[group[0]] = short
             else:
-                # Collision: multiple generics map to same short name.
-                # Use GenericBase_PascalTypeParam for disambiguation.
-                prefix = get_generic_base(group[0])
+                # Collision: use full pascal name for disambiguation
                 for t in group:
-                    if prefix and t.startswith(prefix + "."):
-                        base_name = prefix.split(".")[-1]
-                        type_param = t[len(prefix) + 1:]
-                        result[t] = f"{base_name}_{title_to_pascal(type_param)}"
-                    else:
-                        result[t] = title_to_pascal(t)
+                    result[t] = title_to_pascal(t)
 
-    GENERIC_PREFIXES.clear()
-    GENERIC_PREFIXES.extend(saved)
     return result
 
 
@@ -959,8 +889,7 @@ def main() -> None:
     all_titles = set(schemas.keys())
 
     # Auto-detect generic prefixes from schema titles
-    global GENERIC_PREFIXES
-    GENERIC_PREFIXES = detect_generic_prefixes(all_titles)
+
 
     # Group schemas by output file path
     file_groups: dict[str, list[dict]] = {}

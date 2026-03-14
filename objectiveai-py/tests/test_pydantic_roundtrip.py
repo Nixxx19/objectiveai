@@ -52,7 +52,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import install_pydantic  # noqa: E402
 from install_pydantic import (  # noqa: E402
     compute_global_class_names,
-    detect_generic_prefixes,
     title_to_class_name,
 )
 from install_pydantic import title_to_path as _title_to_path  # noqa: E402
@@ -62,8 +61,6 @@ from install_pydantic import title_to_path as _title_to_path  # noqa: E402
 # Setup
 # ---------------------------------------------------------------------------
 
-# Populate GENERIC_PREFIXES so title_to_path works correctly.
-install_pydantic.GENERIC_PREFIXES = detect_generic_prefixes(ALL_TITLES)
 
 # Compute global class names (handles within-file collisions).
 GLOBAL_CLASS_NAMES = compute_global_class_names(ALL_TITLES)

@@ -1,7 +1,7 @@
 """Methods for FunctionExecutionTaskChunk (flattened FunctionExecutionChunk + index fields)."""
 from __future__ import annotations
 
-from objectiveai.push_utils import push_by_index, push_option, push_replace, push_lazy_set, push_lazy_set_true
+from objectiveai.push_utils import push_by_index, push_option, push_replace, push_lazy_set_true
 from objectiveai.functions.executions.response.streaming.function_execution_task_chunk import (
     FunctionExecutionTaskChunk,
 )

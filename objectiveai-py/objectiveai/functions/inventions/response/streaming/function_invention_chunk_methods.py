@@ -1,7 +1,7 @@
 """Methods for FunctionInventionChunk."""
 from __future__ import annotations
 
-from objectiveai.push_utils import push_by_index, push_option, push_replace, push_lazy_set
+from objectiveai.push_utils import push_by_index, push_option, push_replace
 from objectiveai.functions.inventions.response.streaming.function_invention_chunk import (
     FunctionInventionChunk,
 )
@@ -11,14 +11,14 @@ def _push(self, other: FunctionInventionChunk) -> None:
     # completions: merge by index
     push_by_index(self.completions, other.completions)
 
-    # state: lazy set
-    self.state = push_lazy_set(self.state, other.state)
+    # state: replace
+    self.state = push_replace(self.state, other.state)
 
-    # path: lazy set
-    self.path = push_lazy_set(self.path, other.path)
+    # path: replace
+    self.path = push_replace(self.path, other.path)
 
-    # function: lazy set
-    self.function = push_lazy_set(self.function, other.function)
+    # function: replace
+    self.function = push_replace(self.function, other.function)
 
     # error: replace
     self.error = push_replace(self.error, other.error)
