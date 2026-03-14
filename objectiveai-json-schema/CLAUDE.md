@@ -62,6 +62,7 @@ All guarantees below apply **outside of `properties` objects**. Inside `properti
 | 10 | No `format` on `type: "integer"` or `type: "number"` (bounds are explicit via `minimum`/`maximum`) | `no_numeric_format` |
 | 11 | `minimum` never exceeds `maximum` | `minimum_never_exceeds_maximum` |
 | 12 | Every `$ref` target resolves to an existing schema title | `all_refs_resolve` |
+| 13 | `anyOf` inside `properties` is exactly 2 variants: one non-null type + `{"type": "null"}` (multi-variant unions only at root) | `anyof_in_properties_is_nullable_only` |
 
 ## Implications for SDK Code Generators
 
@@ -73,3 +74,4 @@ Code generators (Python, TypeScript, etc.) that consume these schemas can rely o
 - **Clean `$ref` targets** — Always bare type names (e.g., `"agent.Agent"`), never JSON Pointer paths.
 - **Deterministic key order** — Both keyword order and property field order are stable and predictable.
 - **No ambiguous union+ref** — An object never has both `anyOf` and `$ref`.
+- **No multi-variant unions in properties** — `anyOf` inside `properties` is always nullable (exactly 2 variants, one being `{"type": "null"}`). Multi-variant `anyOf` only appears at the root level.

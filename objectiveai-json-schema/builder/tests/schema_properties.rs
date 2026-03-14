@@ -352,6 +352,65 @@ fn minimum_never_exceeds_maximum() {
     }
 }
 
+fn check_anyof_in_properties(
+    value: &serde_json::Value,
+    in_properties: bool,
+    errors: &mut Vec<String>,
+    path: &str,
+) {
+    match value {
+        serde_json::Value::Object(map) => {
+            if in_properties {
+                // We're looking at a property value (sub-schema).
+                if let Some(serde_json::Value::Array(variants)) = map.get("anyOf") {
+                    if variants.len() != 2 {
+                        errors.push(format!(
+                            "{path}: anyOf has {} variants (expected exactly 2)",
+                            variants.len()
+                        ));
+                    } else {
+                        let has_null = variants.iter().any(|v| {
+                            v.get("type").and_then(|t| t.as_str()) == Some("null")
+                        });
+                        if !has_null {
+                            errors.push(format!(
+                                "{path}: anyOf with 2 variants but neither is {{\"type\": \"null\"}}"
+                            ));
+                        }
+                    }
+                }
+            }
+            for (k, v) in map {
+                let child_path = if path.is_empty() {
+                    k.clone()
+                } else {
+                    format!("{path}.{k}")
+                };
+                check_anyof_in_properties(v, k == "properties", errors, &child_path);
+            }
+        }
+        serde_json::Value::Array(arr) => {
+            for (i, v) in arr.iter().enumerate() {
+                check_anyof_in_properties(v, false, errors, &format!("{path}[{i}]"));
+            }
+        }
+        _ => {}
+    }
+}
+
+#[test]
+fn anyof_in_properties_is_nullable_only() {
+    for (name, schema) in load_schemas() {
+        let mut errors = Vec::new();
+        check_anyof_in_properties(&schema, false, &mut errors, &name);
+        assert!(
+            errors.is_empty(),
+            "anyOf inside properties must be exactly [{{non-null}}, {{\"type\": \"null\"}}]:\n{}",
+            errors.join("\n")
+        );
+    }
+}
+
 #[test]
 fn all_refs_resolve() {
     let schemas = load_schemas();
