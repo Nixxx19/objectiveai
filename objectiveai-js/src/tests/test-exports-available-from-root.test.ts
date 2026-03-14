@@ -25,7 +25,6 @@ const WHITELIST: RegExp[] = [
   /\/tests\//,
   /\/wasm\//,
   /\/json\.ts$/,
-  /\/sanitizeZocker\.ts$/,
   /\/httpTestUtil\.ts$/,
 ];
 

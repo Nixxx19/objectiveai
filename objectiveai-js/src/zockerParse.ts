@@ -1,10 +1,16 @@
-const NUMBER_MIN = 0;
-const NUMBER_MAX = 999;
+const NEGATIVE_NUMBER_MIN = -1000;
+const POSITIVE_NUMBER_MAX = 1000;
 
 function fixForSerde<T>(value: T): T {
   if (typeof value === "number") {
-    if (!Number.isFinite(value) || value < NUMBER_MIN || value > NUMBER_MAX) {
-      return (Math.floor(Math.random() * (NUMBER_MAX - NUMBER_MIN + 1)) + NUMBER_MIN) as T;
+    if (!Number.isFinite(value)) {
+      return 0 as T;
+    }
+    if (value < NEGATIVE_NUMBER_MIN) {
+      return (Math.floor(Math.random() * Math.abs(NEGATIVE_NUMBER_MIN)) * -1) as T;
+    }
+    if (value > POSITIVE_NUMBER_MAX) {
+      return Math.floor(Math.random() * POSITIVE_NUMBER_MAX) as T;
     }
     return value;
   } else if (value !== null && typeof value === "object") {
