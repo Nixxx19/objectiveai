@@ -920,14 +920,8 @@ def clean_generated(directory: Path) -> None:
                 # Delete auto-generated files (have the marker)
                 if "THIS FILE IS AUTO-GENERATED" in content[:128]:
                     entry.unlink()
-                elif entry.name == "__init__.py":
-                    # Delete empty __init__.py files
-                    if content.strip() == "":
-                        entry.unlink()
-                    # Migration: delete old-style __init__.py stubs that
-                    # are just "from ._generated import *" without the marker
-                    elif content.strip() == "from ._generated import *  # noqa: F401, F403":
-                        entry.unlink()
+                elif entry.name == "__init__.py" and content.strip() == "":
+                    entry.unlink()
             except (OSError, UnicodeDecodeError):
                 pass
     try:
@@ -1220,11 +1214,19 @@ def main() -> None:
 
         # Only create __init__.py if it doesn't exist yet (user may have
         # a hand-written one without the auto-generated marker).
+        # Uses lazy __getattr__ to avoid circular imports caused by
+        # eager barrel exports.  Individual modules import from sibling
+        # files directly; the package init is only triggered when user
+        # code does `from objectiveai.pkg import SomeClass`.
         init_path = abs_dir / "__init__.py"
         if not init_path.exists():
             init_content = (
                 GENERATED_HEADER
-                + "from ._generated import *  # noqa: F401, F403\n"
+                + "\n"
+                + "def __getattr__(name):\n"
+                + "    import importlib\n"
+                + "    _generated = importlib.import_module(__name__ + '._generated')\n"
+                + "    return getattr(_generated, name)\n"
             )
             init_path.write_text(init_content, encoding="utf-8")
             init_count += 1
@@ -1256,12 +1258,23 @@ def main() -> None:
 
                 test_content = (
                     GENERATED_HEADER
-                    + f"from {import_path} import {class_name}\n"
-                    + "\n"
-                    + f"schema = {class_name}.model_json_schema()\n"
+                    + "\n\n"
+                    + f"def test_{_to_snake(class_name)}():\n"
+                    + f"    from {import_path} import {class_name}\n"
+                    + f"    schema = {class_name}.model_json_schema()\n"
                 )
                 test_path.write_text(test_content, encoding="utf-8")
                 test_count += 1
+
+                # Ensure __init__.py exists in every test directory (and
+                # all parent dirs up to TESTS_DIR) so pytest can
+                # distinguish same-named files across packages.
+                for parent in [test_dir, *test_dir.parents]:
+                    if parent == TESTS_DIR or parent == TESTS_DIR.parent:
+                        break
+                    p_init = parent / "__init__.py"
+                    if not p_init.exists():
+                        p_init.write_text(GENERATED_HEADER, encoding="utf-8")
 
     print(f"Generated {test_count} test files")
     print("Done!")

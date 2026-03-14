@@ -16,7 +16,8 @@ def _push(self, other: TaskChunk) -> None:
     a = self.root
     b = other.root
     if type(a) is type(b):
-        a.push(b)
+        # Unwrap RootModel variants to get the inner type with push()
+        a.root.push(b.root)
 
 
 TaskChunk.push = _push

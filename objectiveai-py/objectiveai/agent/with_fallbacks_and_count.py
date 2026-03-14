@@ -6,15 +6,15 @@ from pydantic import BaseModel, ConfigDict, Field, RootModel
 from objectiveai.agent.agent import Agent as AgentAgent
 from objectiveai.agent.agent_base import AgentBase as AgentAgentBase
 from objectiveai.agent.claude_agent_sdk.agent import Agent as AgentClaudeAgentSdkAgent
-from objectiveai.agent.claude_agent_sdk.agent_base import AgentBase as AgentClaudeAgentSdkAgentBase
-from objectiveai.agent.mock.agent import Agent
+from objectiveai.agent.claude_agent_sdk.agent_base import AgentBase
+from objectiveai.agent.mock.agent import Agent as AgentMockAgent
 from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
-from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
-from objectiveai.agent.openrouter.agent_base import AgentBase
+from objectiveai.agent.openrouter.agent import Agent
+from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouterAgentBase
 
 
 class WithFallbacksAndCount_AgentAgentVariant1(RootModel):
-    root: AgentOpenrouterAgent
+    root: Agent
 
 
 class WithFallbacksAndCount_AgentAgentVariant2(RootModel):
@@ -22,7 +22,7 @@ class WithFallbacksAndCount_AgentAgentVariant2(RootModel):
 
 
 class WithFallbacksAndCount_AgentAgentVariant3(RootModel):
-    root: Agent
+    root: AgentMockAgent
 
 
 class WithFallbacksAndCount_AgentAgent(BaseModel):
@@ -37,11 +37,11 @@ along with fallback agents to try if the primary fails."""
 
 
 class WithFallbacksAndCount_AgentAgentBaseVariant1(RootModel):
-    root: AgentBase
+    root: AgentOpenrouterAgentBase
 
 
 class WithFallbacksAndCount_AgentAgentBaseVariant2(RootModel):
-    root: AgentClaudeAgentSdkAgentBase
+    root: AgentBase
 
 
 class WithFallbacksAndCount_AgentAgentBaseVariant3(RootModel):

@@ -6,9 +6,7 @@ objectiveai_pyo3 = pytest.importorskip("objectiveai_pyo3")
 from polyfactory.factories.pydantic_factory import ModelFactory
 
 from objectiveai.functions.executions.response.streaming import FunctionExecutionChunk
-from tests.push_test_utils import rebuild_all_models, run_push_fuzz_test
-
-rebuild_all_models(FunctionExecutionChunk)
+from tests.push_test_utils import run_push_fuzz_test
 
 
 class FunctionExecutionChunkFactory(ModelFactory):

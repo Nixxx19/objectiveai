@@ -20,11 +20,11 @@ def _push(self, other: FunctionExecutionTaskChunk) -> None:
     # output: replace
     self.output = push_replace(self.output, other.output)
 
-    # retry_token: lazy set
-    self.retry_token = push_lazy_set(self.retry_token, other.retry_token)
+    # retry_token: replace
+    self.retry_token = push_replace(self.retry_token, other.retry_token)
 
-    # error: lazy set
-    self.error = push_lazy_set(self.error, other.error)
+    # error: replace
+    self.error = push_replace(self.error, other.error)
 
     # usage: delegate
     self.usage = push_option(self.usage, other.usage)

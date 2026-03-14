@@ -1,7 +1,7 @@
 """Methods for VectorCompletionTaskChunk (flattened VectorCompletionChunk + index fields)."""
 from __future__ import annotations
 
-from objectiveai.push_utils import push_by_index, push_option, push_lazy_set
+from objectiveai.push_utils import push_by_index, push_option, push_replace
 from objectiveai.functions.executions.response.streaming.vector_completion_task_chunk import (
     VectorCompletionTaskChunk,
 )
@@ -22,8 +22,8 @@ def _push(self, other: VectorCompletionTaskChunk) -> None:
     if other.weights:
         self.weights = list(other.weights)
 
-    # error: lazy set
-    self.error = push_lazy_set(self.error, other.error)
+    # error: replace
+    self.error = push_replace(self.error, other.error)
 
     # usage: delegate
     self.usage = push_option(self.usage, other.usage)

@@ -1,4 +1,8 @@
-from ._generated import *  # noqa: F401, F403
+def __getattr__(name):
+    import importlib
+    _generated = importlib.import_module(__name__ + '._generated')
+    return getattr(_generated, name)
+
 
 import objectiveai.agent.completions.response.completion_tokens_details_methods  # noqa: F401, E402
 import objectiveai.agent.completions.response.cost_details_methods  # noqa: F401, E402
