@@ -12,5 +12,3 @@ class AssistantToolCallFunctionDelta(BaseModel):
     arguments: Optional[str] = Field(None, description='The arguments being streamed (accumulated across deltas).')
     name: Optional[str] = Field(None, description='The function name (only present in the first delta).')
 
-
-import objectiveai.agent.completions.message.assistant_tool_call_function_delta_methods  # noqa: F401, E402

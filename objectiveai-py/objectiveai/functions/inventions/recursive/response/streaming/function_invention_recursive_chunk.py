@@ -18,5 +18,3 @@ class FunctionInventionRecursiveChunk(BaseModel):
     object: Object
     usage: Optional[Usage] = None
 
-
-import objectiveai.functions.inventions.recursive.response.streaming.function_invention_recursive_chunk_methods  # noqa: F401, E402

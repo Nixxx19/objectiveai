@@ -22,5 +22,3 @@ class TaskChunk(RootModel):
 
     root: Union[TaskChunkVariant1, TaskChunkVariant2]
 
-
-import objectiveai.functions.executions.response.streaming.task_chunk_methods  # noqa: F401, E402

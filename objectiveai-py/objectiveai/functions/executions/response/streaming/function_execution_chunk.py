@@ -27,5 +27,3 @@ class FunctionExecutionChunk(BaseModel):
     tasks_errors: Optional[bool] = None
     usage: Optional[Usage] = None
 
-
-import objectiveai.functions.executions.response.streaming.function_execution_chunk_methods  # noqa: F401, E402

@@ -26,5 +26,3 @@ Each chunk contains incremental updates to the completion. Use the
     votes: list[Vote] = Field(..., description='Votes received so far. New votes are appended in subsequent chunks.')
     weights: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Current weight distribution across responses. Updated as new votes arrive.')
 
-
-import objectiveai.vector.completions.response.streaming.vector_completion_chunk_methods  # noqa: F401, E402

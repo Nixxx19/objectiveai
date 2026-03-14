@@ -25,5 +25,3 @@ class FunctionInventionChunk(BaseModel):
     state: Optional[State] = None
     usage: Optional[Usage] = None
 
-
-import objectiveai.functions.inventions.response.streaming.function_invention_chunk_methods  # noqa: F401, E402

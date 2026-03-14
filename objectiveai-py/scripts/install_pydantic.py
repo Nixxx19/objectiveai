@@ -1149,14 +1149,8 @@ def main() -> None:
 
         content += "\n\n" + "\n\n".join(model_codes) + "\n"
 
-        # Check for a companion _methods.py file and import it if present.
-        full_path = SRC_DIR / (file_path.replace("/", os.sep) + ".py")
-        methods_path = SRC_DIR / (file_path.replace("/", os.sep) + "_methods.py")
-        if methods_path.exists():
-            methods_module = "objectiveai." + file_path.replace("/", ".") + "_methods"
-            content += f"\nimport {methods_module}  # noqa: F401, E402\n"
-
         # Write the file
+        full_path = SRC_DIR / (file_path.replace("/", os.sep) + ".py")
         full_path.parent.mkdir(parents=True, exist_ok=True)
         full_path.write_text(content, encoding="utf-8")
 
@@ -1171,31 +1165,40 @@ def main() -> None:
         class_names = [global_class_names.get(e["title"], title_to_class_name(e["title"])) for e in entries]
         dir_exports.setdefault(dir_part, []).append((module_name, class_names))
 
-    # Generate __init__.py files with re-exports
+    # Generate _generated.py + stub __init__.py for each package
     all_dirs.add("")  # root package
+    generated_count = 0
+    init_count = 0
 
     for dir_path in sorted(all_dirs, key=len, reverse=True):
         abs_dir = SRC_DIR / dir_path.replace("/", os.sep) if dir_path else SRC_DIR
         if not abs_dir.exists():
             continue
 
+        # Always write _generated.py (auto-generated barrel exports)
+        generated_path = abs_dir / "_generated.py"
+        generated_content = GENERATED_HEADER
+        exports = dir_exports.get(dir_path, [])
+        if exports:
+            for module_name, class_names in sorted(exports):
+                names_str = ", ".join(sorted(set(class_names)))
+                generated_content += (
+                    f"from .{module_name} import {names_str}"
+                    "  # noqa: F401\n"
+                )
+        generated_path.write_text(generated_content, encoding="utf-8")
+        generated_count += 1
+
+        # Only create __init__.py if it doesn't exist yet
         init_path = abs_dir / "__init__.py"
-        if not init_path.exists() or _is_generated(init_path):
-            init_content = GENERATED_HEADER
-
-            # Add re-exports for this directory
-            exports = dir_exports.get(dir_path, [])
-            if exports:
-                for module_name, class_names in sorted(exports):
-                    names_str = ", ".join(sorted(set(class_names)))
-                    init_content += (
-                        f"from .{module_name} import {names_str}"
-                        "  # noqa: F401\n"
-                    )
-
+        if not init_path.exists():
+            init_content = "from ._generated import *  # noqa: F401, F403\n"
             init_path.write_text(init_content, encoding="utf-8")
+            init_count += 1
 
-    print(f"Generated __init__.py for {len(all_dirs)} directories")
+    print(f"Generated _generated.py for {generated_count} directories")
+    if init_count:
+        print(f"Created {init_count} new __init__.py stubs")
     print("Done!")
 
 

@@ -22,5 +22,3 @@ class RichContent(RootModel):
 
     root: Union[RichContentVariant1, RichContentVariant2]
 
-
-import objectiveai.agent.completions.message.rich_content_methods  # noqa: F401, E402

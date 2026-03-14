@@ -24,5 +24,3 @@ class FunctionProfileComputationChunk(BaseModel):
     retry_token: Optional[str] = None
     usage: Optional[Usage] = None
 
-
-import objectiveai.functions.profiles.computations.response.streaming.function_profile_computation_chunk_methods  # noqa: F401, E402

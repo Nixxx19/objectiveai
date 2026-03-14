@@ -26,5 +26,3 @@ using the [`push`](Self::push) method."""
     upstream: Upstream = Field(..., description='Upstream provider')
     usage: Optional[Usage] = Field(None, description='Token usage (only present in the final chunk).')
 
-
-import objectiveai.functions.executions.response.streaming.reasoning_summary_chunk_methods  # noqa: F401, E402
