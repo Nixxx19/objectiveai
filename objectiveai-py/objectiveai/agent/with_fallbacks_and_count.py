@@ -3,29 +3,29 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.agent.agent import AgentAgent
-from objectiveai.agent.agent_base import AgentAgentBase
-from objectiveai.agent.claude_agent_sdk.agent import AgentClaudeAgentSdkAgent
-from objectiveai.agent.claude_agent_sdk.agent_base import AgentClaudeAgentSdkAgentBase
-from objectiveai.agent.mock.agent import AgentMockAgent
-from objectiveai.agent.mock.agent_base import AgentMockAgentBase
-from objectiveai.agent.openrouter.agent import AgentOpenrouterAgent
-from objectiveai.agent.openrouter.agent_base import AgentOpenrouterAgentBase
+from objectiveai.agent.agent import Agent as AgentAgent
+from objectiveai.agent.agent_base import AgentBase as AgentAgentBase
+from objectiveai.agent.claude_agent_sdk.agent import Agent as AgentClaudeAgentSdkAgent
+from objectiveai.agent.claude_agent_sdk.agent_base import AgentBase as AgentClaudeAgentSdkAgentBase
+from objectiveai.agent.mock.agent import Agent as AgentMockAgent
+from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
+from objectiveai.agent.openrouter.agent import Agent as AgentOpenrouterAgent
+from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouterAgentBase
 
 
-class AgentWithFallbacksAndCountAgentAgentVariant1(RootModel):
+class AgentVariant1(RootModel):
     root: AgentOpenrouterAgent
 
 
-class AgentWithFallbacksAndCountAgentAgentVariant2(RootModel):
+class AgentVariant2(RootModel):
     root: AgentClaudeAgentSdkAgent
 
 
-class AgentWithFallbacksAndCountAgentAgentVariant3(RootModel):
+class AgentVariant3(RootModel):
     root: AgentMockAgent
 
 
-class AgentWithFallbacksAndCountAgentAgent(BaseModel):
+class Agent(BaseModel):
     """Wrapper that adds fallback agents and a count to any agent type.
 
 Used to specify how many instances of an agent to include in an ensemble,
@@ -36,19 +36,19 @@ along with fallback agents to try if the primary fails."""
     fallbacks: Optional[list[AgentAgent]] = Field(None, description='Fallback agents to try if the primary fails.')
 
 
-class AgentWithFallbacksAndCountAgentAgentBaseVariant1(RootModel):
+class AgentBaseVariant1(RootModel):
     root: AgentOpenrouterAgentBase
 
 
-class AgentWithFallbacksAndCountAgentAgentBaseVariant2(RootModel):
+class AgentBaseVariant2(RootModel):
     root: AgentClaudeAgentSdkAgentBase
 
 
-class AgentWithFallbacksAndCountAgentAgentBaseVariant3(RootModel):
+class AgentBaseVariant3(RootModel):
     root: AgentMockAgentBase
 
 
-class AgentWithFallbacksAndCountAgentAgentBase(BaseModel):
+class AgentBase(BaseModel):
     """Wrapper that adds fallback agents and a count to any agent type.
 
 Used to specify how many instances of an agent to include in an ensemble,

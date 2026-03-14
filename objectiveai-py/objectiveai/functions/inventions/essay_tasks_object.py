@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict
 
 
-class FunctionsInventionsEssayTasksObject(BaseModel):
+class EssayTasksObject(BaseModel):
     model_config = ConfigDict(title='functions.inventions.EssayTasksObject')
 
     essay_tasks: str

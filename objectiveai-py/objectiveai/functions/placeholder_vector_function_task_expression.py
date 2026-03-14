@@ -3,24 +3,24 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
-from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
+from objectiveai.functions.expression.expression import Expression
+from objectiveai.functions.expression.input_schema import InputSchema
+from objectiveai.functions.expression.with_expression import InputValueExpression
 
 
-class FunctionsPlaceholderVectorFunctionTaskExpression(BaseModel):
+class PlaceholderVectorFunctionTaskExpression(BaseModel):
     """Expression for a placeholder vector function task (pre-compilation).
 
 Like [`VectorFunctionTaskExpression`] but without owner/repository/commit.
 Always produces an equalized vector of length `output_length`."""
     model_config = ConfigDict(title='functions.PlaceholderVectorFunctionTaskExpression')
 
-    input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).')
-    input_merge: FunctionsExpressionExpression = Field(..., description='Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).')
-    input_schema: FunctionsExpressionInputSchema = Field(..., description='JSON Schema defining the expected input structure.')
-    input_split: FunctionsExpressionExpression = Field(..., description='Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.')
-    map: Optional[FunctionsExpressionExpression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
-    output: FunctionsExpressionExpression = Field(..., description='Expression to transform the equalized vector output.\nReceives: `input`, `output` as `Vector(equalized)`.')
-    output_length: FunctionsExpressionExpression = Field(..., description='Expression computing the expected output vector length.\nReceives: `input`.')
-    skip: Optional[FunctionsExpressionExpression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
+    input: InputValueExpression = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).')
+    input_merge: Expression = Field(..., description='Expression merging sub-inputs back into one input.\nReceives: `input` (as an array).')
+    input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
+    input_split: Expression = Field(..., description='Expression transforming input into sub-inputs for swiss system.\nReceives: `input`.')
+    map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
+    output: Expression = Field(..., description='Expression to transform the equalized vector output.\nReceives: `input`, `output` as `Vector(equalized)`.')
+    output_length: Expression = Field(..., description='Expression computing the expected output vector length.\nReceives: `input`.')
+    skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
 

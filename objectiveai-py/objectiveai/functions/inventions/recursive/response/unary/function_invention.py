@@ -3,26 +3,26 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
-from objectiveai.functions.full_remote_function import FunctionsFullRemoteFunction
-from objectiveai.functions.inventions.response.unary.agent_completion import FunctionsInventionsResponseUnaryAgentCompletion
-from objectiveai.functions.inventions.response.unary.object import FunctionsInventionsResponseUnaryObject
-from objectiveai.functions.inventions.state.state import FunctionsInventionsStateState
-from objectiveai.functions.remote_function_path import FunctionsRemoteFunctionPath
+from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.functions.full_remote_function import FullRemoteFunction
+from objectiveai.functions.inventions.response.unary.agent_completion import AgentCompletion
+from objectiveai.functions.inventions.response.unary.object import Object
+from objectiveai.functions.inventions.state.state import State
+from objectiveai.functions.remote_function_path import RemoteFunctionPath
 from objectiveai.response_error import ResponseError
 
 
-class FunctionsInventionsRecursiveResponseUnaryFunctionInvention(BaseModel):
+class FunctionInvention(BaseModel):
     model_config = ConfigDict(title='functions.inventions.recursive.response.unary.FunctionInvention')
 
-    completions: list[FunctionsInventionsResponseUnaryAgentCompletion]
+    completions: list[AgentCompletion]
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = None
-    function: Optional[FunctionsFullRemoteFunction] = None
+    function: Optional[FullRemoteFunction] = None
     id: str
     index: int = Field(..., ge=0, le=18446744073709551615)
-    object: FunctionsInventionsResponseUnaryObject
-    path: Optional[FunctionsRemoteFunctionPath] = None
-    state: FunctionsInventionsStateState
-    usage: AgentCompletionsResponseUsage
+    object: Object
+    path: Optional[RemoteFunctionPath] = None
+    state: State
+    usage: Usage
 

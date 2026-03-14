@@ -3,15 +3,15 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.integer_input_schema_type import FunctionsExpressionIntegerInputSchemaType
+from objectiveai.functions.expression.integer_input_schema_type import IntegerInputSchemaType
 
 
-class FunctionsExpressionIntegerInputSchema(BaseModel):
+class IntegerInputSchema(BaseModel):
     """Schema for an integer input."""
     model_config = ConfigDict(title='functions.expression.IntegerInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the integer.')
     maximum: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Maximum allowed value (inclusive).')
     minimum: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Minimum allowed value (inclusive).')
-    type_: FunctionsExpressionIntegerInputSchemaType = Field(..., alias='type')
+    type_: IntegerInputSchemaType = Field(..., alias='type')
 

@@ -3,17 +3,17 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.assistant_tool_call import AgentCompletionsMessageAssistantToolCall
-from objectiveai.agent.completions.message.rich_content import AgentCompletionsMessageRichContent
+from objectiveai.agent.completions.message.assistant_tool_call import AssistantToolCall
+from objectiveai.agent.completions.message.rich_content import RichContent
 
 
-class AgentCompletionsMessageAssistantMessage(BaseModel):
+class AssistantMessage(BaseModel):
     """An assistant message (model's previous response)."""
     model_config = ConfigDict(title='agent.completions.message.AssistantMessage')
 
-    content: Optional[AgentCompletionsMessageRichContent] = Field(None, description='The message content, if any.')
+    content: Optional[RichContent] = Field(None, description='The message content, if any.')
     name: Optional[str] = Field(None, description='Optional name for the assistant.')
     reasoning: Optional[str] = Field(None, description='Reasoning content from models that support chain-of-thought.')
     refusal: Optional[str] = Field(None, description='Refusal message if the model declined to respond.')
-    tool_calls: Optional[list[AgentCompletionsMessageAssistantToolCall]] = Field(None, description='Tool calls made by the assistant.')
+    tool_calls: Optional[list[AssistantToolCall]] = Field(None, description='Tool calls made by the assistant.')
 

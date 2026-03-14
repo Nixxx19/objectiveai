@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.prefixed_uuid import PrefixedUuid
 
 
-class AuthApiKeyWithMetadata(BaseModel):
+class ApiKeyWithMetadata(BaseModel):
     """An ObjectiveAI API Key with associated metadata.
 
 This struct contains the API key itself along with information about

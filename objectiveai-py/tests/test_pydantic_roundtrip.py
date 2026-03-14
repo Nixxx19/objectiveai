@@ -33,7 +33,9 @@ RULES FOR THIS FILE
 This is an information-loss and reconstructibility test.
 """
 
+import ast
 import importlib
+import inspect
 import sys
 import typing
 from pathlib import Path
@@ -50,7 +52,9 @@ from test_pydantic_roundtrip_harness import ALL_TITLES, assert_schema_matches
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
 import install_pydantic  # noqa: E402
 from install_pydantic import (  # noqa: E402
+    compute_global_class_names,
     detect_generic_prefixes,
+    title_to_class_name,
     title_to_pascal,
 )
 from install_pydantic import title_to_path as _title_to_path  # noqa: E402
@@ -63,19 +67,54 @@ from install_pydantic import title_to_path as _title_to_path  # noqa: E402
 # Populate GENERIC_PREFIXES so title_to_path works correctly.
 install_pydantic.GENERIC_PREFIXES = detect_generic_prefixes(ALL_TITLES)
 
+# Compute global class names (handles within-file collisions).
+GLOBAL_CLASS_NAMES = compute_global_class_names(ALL_TITLES)
+
 
 def title_to_module_and_name(title: str) -> tuple[str, str]:
     """Map a schema title to (module_path, class_name)."""
     dir_path, file_name = _title_to_path(title)
     module_path = "objectiveai." + (dir_path + "." if dir_path else "") + file_name
     module_path = module_path.replace("/", ".")
-    pascal_name = title_to_pascal(title)
-    return module_path, pascal_name
+    class_name = GLOBAL_CLASS_NAMES.get(title, title_to_class_name(title))
+    return module_path, class_name
 
 
 # ---------------------------------------------------------------------------
 # Load all Pydantic types
 # ---------------------------------------------------------------------------
+
+
+def _extract_type_checking_imports(mod: Any) -> dict[str, type]:
+    """Extract TYPE_CHECKING imports from a module, resolving them at runtime.
+
+    This is needed because TYPE_CHECKING imports aren't available at runtime,
+    but model_rebuild needs the actual types. We parse the source AST to find
+    what each module imports under TYPE_CHECKING and resolve those to real classes.
+    """
+    try:
+        source = inspect.getsource(mod)
+    except (OSError, TypeError):
+        return {}
+
+    tree = ast.parse(source)
+    imports: dict[str, type] = {}
+
+    for node in ast.walk(tree):
+        if isinstance(node, ast.If):
+            if isinstance(node.test, ast.Name) and node.test.id == "TYPE_CHECKING":
+                for stmt in node.body:
+                    if isinstance(stmt, ast.ImportFrom) and stmt.module:
+                        try:
+                            imported_mod = importlib.import_module(stmt.module)
+                            for alias in stmt.names:
+                                local_name = alias.asname or alias.name
+                                attr = getattr(imported_mod, alias.name, None)
+                                if attr is not None:
+                                    imports[local_name] = attr
+                        except ImportError:
+                            pass
+    return imports
 
 
 def load_pydantic_types() -> dict[str, Any]:
@@ -90,18 +129,19 @@ def load_pydantic_types() -> dict[str, Any]:
         except (ImportError, AttributeError) as e:
             types[title] = e
 
-    # Build namespace for resolving forward references
+    # Build global namespace for resolving forward references (fallback)
     namespace = {}
     for title, cls in types.items():
         if not isinstance(cls, Exception):
-            namespace[title_to_pascal(title)] = cls
+            # Use the actual class name (which may be long for within-file collisions)
+            actual_name = GLOBAL_CLASS_NAMES.get(title, title_to_class_name(title))
+            namespace[actual_name] = cls
 
-    # Collect all variant types from loaded modules
+    # Collect all classes (including variant types) from loaded modules
     all_classes: list[type] = []
     for title, cls in types.items():
         if isinstance(cls, type) and issubclass(cls, (BaseModel, RootModel)):
             all_classes.append(cls)
-            # Find variant types in the same module
             mod = sys.modules.get(cls.__module__)
             if mod:
                 for attr_name in dir(mod):
@@ -110,12 +150,31 @@ def load_pydantic_types() -> dict[str, Any]:
                         if isinstance(attr, type) and issubclass(attr, (BaseModel, RootModel)):
                             all_classes.append(attr)
 
-    # Rebuild all models (including variant types) with the full namespace
+    # Build per-module namespaces: global namespace + module's own TYPE_CHECKING
+    # imports (which correctly resolve colliding short names for that module)
+    module_namespaces: dict[str, dict] = {}
     for cls in all_classes:
-        try:
-            cls.model_rebuild(_types_namespace=namespace)
-        except Exception:
-            pass
+        mod = sys.modules.get(cls.__module__)
+        if mod and mod.__name__ not in module_namespaces:
+            module_ns = dict(namespace)
+            # Add module's own defined classes (runtime imports + local defs)
+            for attr_name in dir(mod):
+                attr = getattr(mod, attr_name, None)
+                if isinstance(attr, type):
+                    module_ns[attr_name] = attr
+            # Override with correctly-resolved TYPE_CHECKING imports
+            tc_imports = _extract_type_checking_imports(mod)
+            module_ns.update(tc_imports)
+            module_namespaces[mod.__name__] = module_ns
+
+    # Rebuild all models with per-module namespaces
+    for cls in all_classes:
+        mod = sys.modules.get(cls.__module__)
+        if mod and mod.__name__ in module_namespaces:
+            try:
+                cls.model_rebuild(_types_namespace=module_namespaces[mod.__name__])
+            except Exception:
+                pass
 
     return types
 
@@ -123,9 +182,13 @@ def load_pydantic_types() -> dict[str, Any]:
 pydantic_types = load_pydantic_types()
 
 # Build reverse mapping: PascalCase name → schema title
+# With short class names, multiple titles may share the same class name
+# (e.g., AgentCompletionChunk in agent, vector, functions.inventions).
+# We keep the old long-name mapping as fallback and also use model_config.title.
 _pascal_to_title: dict[str, str] = {}
 for _t in ALL_TITLES:
     _pascal_to_title[title_to_pascal(_t)] = _t
+    _pascal_to_title[GLOBAL_CLASS_NAMES.get(_t, title_to_class_name(_t))] = _t
 
 
 # ---------------------------------------------------------------------------
@@ -144,6 +207,13 @@ def _get_extra_setting(cls: type) -> str | None:
 def _is_known_type(tp: Any) -> str | None:
     """If tp is a known Pydantic type (in ALL_TITLES), return its title."""
     if isinstance(tp, type):
+        # Prefer model_config.title (unambiguous, set by codegen)
+        config = getattr(tp, "model_config", None)
+        if config and isinstance(config, dict):
+            title = config.get("title")
+            if title and title in ALL_TITLES:
+                return title
+        # Fallback to class name lookup
         name = tp.__name__
         return _pascal_to_title.get(name)
     return None

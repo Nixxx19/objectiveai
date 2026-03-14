@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.string_input_schema_type import FunctionsExpressionStringInputSchemaType
+from objectiveai.functions.expression.string_input_schema_type import StringInputSchemaType
 
 
-class FunctionsExpressionStringInputSchema(BaseModel):
+class StringInputSchema(BaseModel):
     """Schema for a string input."""
     model_config = ConfigDict(title='functions.expression.StringInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the string.')
     enum: Optional[list[str]] = Field(None, description='If provided, the string must be one of these values.')
-    type_: FunctionsExpressionStringInputSchemaType = Field(..., alias='type')
+    type_: StringInputSchemaType = Field(..., alias='type')
 

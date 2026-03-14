@@ -5,14 +5,14 @@ from typing import Literal, TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpression, FunctionsExpressionWithExpressionString
+    from objectiveai.functions.expression.with_expression import AssistantToolCallFunctionExpression, string
 
 
-class AgentCompletionsMessageAssistantToolCallExpression(BaseModel):
+class AssistantToolCallExpression(BaseModel):
     """A function call expression."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCallExpression')
 
-    function: FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpression = Field(..., description='The function expression.')
-    id: FunctionsExpressionWithExpressionString = Field(..., description='The tool call ID expression.')
+    function: AssistantToolCallFunctionExpression = Field(..., description='The function expression.')
+    id: string = Field(..., description='The tool call ID expression.')
     type_: Literal['function'] = Field(..., alias='type')
 

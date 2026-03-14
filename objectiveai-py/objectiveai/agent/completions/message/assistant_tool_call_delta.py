@@ -3,18 +3,18 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.assistant_tool_call_function_delta import AgentCompletionsMessageAssistantToolCallFunctionDelta
-from objectiveai.agent.completions.message.assistant_tool_call_type import AgentCompletionsMessageAssistantToolCallType
+from objectiveai.agent.completions.message.assistant_tool_call_function_delta import AssistantToolCallFunctionDelta
+from objectiveai.agent.completions.message.assistant_tool_call_type import AssistantToolCallType
 
 
-class AgentCompletionsMessageAssistantToolCallDelta(BaseModel):
+class AssistantToolCallDelta(BaseModel):
     """A tool call delta in a streaming response."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCallDelta')
 
-    function: Optional[AgentCompletionsMessageAssistantToolCallFunctionDelta] = Field(None, description='The function call details.')
+    function: Optional[AssistantToolCallFunctionDelta] = Field(None, description='The function call details.')
     id: Optional[str] = Field(None, description='The unique ID of this tool call.')
     index: int = Field(..., description='The index of this tool call.', ge=0, le=18446744073709551615)
-    type_: Optional[AgentCompletionsMessageAssistantToolCallType] = Field(None, alias='type', description='The type of tool call (always "function").')
+    type_: Optional[AssistantToolCallType] = Field(None, alias='type', description='The type of tool call (always "function").')
 
 
 import objectiveai.agent.completions.message.assistant_tool_call_delta_methods  # noqa: F401, E402

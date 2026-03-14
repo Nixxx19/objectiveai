@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExecutionsResponseUnaryObject(RootModel):
+class Object(RootModel):
     model_config = ConfigDict(title='functions.executions.response.unary.Object')
 
     root: Literal['scalar.function.execution', 'vector.function.execution']

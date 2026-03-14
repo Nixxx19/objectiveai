@@ -3,21 +3,21 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
-from objectiveai.functions.remote import FunctionsRemote
+from objectiveai.functions.expression.expression import Expression
+from objectiveai.functions.expression.with_expression import InputValueExpression
+from objectiveai.functions.remote import Remote
 
 
-class FunctionsVectorFunctionTaskExpression(BaseModel):
+class VectorFunctionTaskExpression(BaseModel):
     """Expression for a task that calls a vector function (pre-compilation)."""
     model_config = ConfigDict(title='functions.VectorFunctionTaskExpression')
 
     commit: str = Field(..., description='Git commit SHA for the function version.')
-    input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression = Field(..., description='Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).')
-    map: Optional[FunctionsExpressionExpression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
-    output: FunctionsExpressionExpression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.")
+    input: InputValueExpression = Field(..., description='Expression for the input to pass to the function.\nReceives: `input`, `map` (if mapped).')
+    map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
+    output: Expression = Field(..., description="Expression to transform the task result into a valid function output.\n\nReceives `output` which is one of 4 variants:\n- `Scalar(Decimal)` - a single score\n- `Vector(Vec<Decimal>)` - a vector of scores\n- `Vectors(Vec<Vec<Decimal>>)` - multiple vectors (from mapped tasks)\n- `Err(Value)` - an error\n\nThe expression must return a `TaskOutputOwned` that is valid for the parent function's type:\n- For scalar functions: must return `Scalar(value)` where value is in [0, 1]\n- For vector functions: must return `Vector(values)` where values sum to ~1 and match the expected length\n\nThe function's final output is computed as a weighted average of all task outputs using\nprofile weights. If a function has only one task, that task's output becomes the function's\noutput directly.")
     owner: str = Field(..., description='Repository owner.')
-    remote: FunctionsRemote = Field(..., description='The remote source where the function is hosted.')
+    remote: Remote = Field(..., description='The remote source where the function is hosted.')
     repository: str = Field(..., description='Repository name.')
-    skip: Optional[FunctionsExpressionExpression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
+    skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
 

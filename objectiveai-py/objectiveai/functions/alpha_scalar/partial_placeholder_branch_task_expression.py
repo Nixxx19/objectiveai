@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.alpha_scalar.partial_placeholder_scalar_function_task_expression import FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression
+from objectiveai.functions.alpha_scalar.partial_placeholder_scalar_function_task_expression import PartialPlaceholderScalarFunctionTaskExpression
 
 
-class FunctionsAlphaScalarPartialPlaceholderBranchTaskExpressionVariant1(RootModel):
-    root: FunctionsAlphaScalarPartialPlaceholderScalarFunctionTaskExpression
+class PartialPlaceholderBranchTaskExpressionVariant1(RootModel):
+    root: PartialPlaceholderScalarFunctionTaskExpression
 
 
-class FunctionsAlphaScalarPartialPlaceholderBranchTaskExpression(BaseModel):
+class PartialPlaceholderBranchTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_scalar.PartialPlaceholderBranchTaskExpression')
 
     type_: Literal['placeholder.alpha.scalar.function'] = Field(..., alias='type')

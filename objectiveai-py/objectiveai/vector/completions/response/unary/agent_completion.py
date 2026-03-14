@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.unary.message import AgentCompletionsResponseUnaryMessage
-from objectiveai.agent.completions.response.unary.object import AgentCompletionsResponseUnaryObject
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
-from objectiveai.agent.upstream import AgentUpstream
+from objectiveai.agent.completions.response.unary.message import Message
+from objectiveai.agent.completions.response.unary.object import Object
+from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.agent.upstream import Upstream
 from objectiveai.response_error import ResponseError
 
 
-class VectorCompletionsResponseUnaryAgentCompletion(BaseModel):
+class AgentCompletion(BaseModel):
     """A agent completion from a single agent within a vector completion.
 
 Wraps the standard agent completion response with an index to identify
@@ -21,8 +21,8 @@ which agent in the ensemble produced it."""
     error: Optional[ResponseError] = Field(None, description='Error details if this completion failed.')
     id: str
     index: int = Field(..., description='Index of this completion within the vector completion.', ge=0, le=18446744073709551615)
-    messages: list[AgentCompletionsResponseUnaryMessage]
-    object: AgentCompletionsResponseUnaryObject = Field(..., description='The object type (always "agent.completion").')
-    upstream: AgentUpstream = Field(..., description='Upstream provider')
-    usage: AgentCompletionsResponseUsage
+    messages: list[Message]
+    object: Object = Field(..., description='The object type (always "agent.completion").')
+    upstream: Upstream = Field(..., description='Upstream provider')
+    usage: Usage
 

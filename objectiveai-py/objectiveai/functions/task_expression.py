@@ -3,54 +3,54 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.placeholder_scalar_function_task_expression import FunctionsPlaceholderScalarFunctionTaskExpression
-from objectiveai.functions.placeholder_vector_function_task_expression import FunctionsPlaceholderVectorFunctionTaskExpression
-from objectiveai.functions.scalar_function_task_expression import FunctionsScalarFunctionTaskExpression
-from objectiveai.functions.vector_completion_task_expression import FunctionsVectorCompletionTaskExpression
-from objectiveai.functions.vector_function_task_expression import FunctionsVectorFunctionTaskExpression
+from objectiveai.functions.placeholder_scalar_function_task_expression import PlaceholderScalarFunctionTaskExpression
+from objectiveai.functions.placeholder_vector_function_task_expression import PlaceholderVectorFunctionTaskExpression
+from objectiveai.functions.scalar_function_task_expression import ScalarFunctionTaskExpression
+from objectiveai.functions.vector_completion_task_expression import VectorCompletionTaskExpression
+from objectiveai.functions.vector_function_task_expression import VectorFunctionTaskExpression
 
 
-class FunctionsTaskExpressionVariant1Variant1(RootModel):
-    root: FunctionsScalarFunctionTaskExpression
+class TaskExpressionVariant1Variant1(RootModel):
+    root: ScalarFunctionTaskExpression
 
 
-class FunctionsTaskExpressionVariant1(BaseModel):
+class TaskExpressionVariant1(BaseModel):
     type_: Literal['scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsTaskExpressionVariant2Variant1(RootModel):
-    root: FunctionsVectorFunctionTaskExpression
+class TaskExpressionVariant2Variant1(RootModel):
+    root: VectorFunctionTaskExpression
 
 
-class FunctionsTaskExpressionVariant2(BaseModel):
+class TaskExpressionVariant2(BaseModel):
     type_: Literal['vector.function'] = Field(..., alias='type')
 
 
-class FunctionsTaskExpressionVariant3Variant1(RootModel):
-    root: FunctionsVectorCompletionTaskExpression
+class TaskExpressionVariant3Variant1(RootModel):
+    root: VectorCompletionTaskExpression
 
 
-class FunctionsTaskExpressionVariant3(BaseModel):
+class TaskExpressionVariant3(BaseModel):
     type_: Literal['vector.completion'] = Field(..., alias='type')
 
 
-class FunctionsTaskExpressionVariant4Variant1(RootModel):
-    root: FunctionsPlaceholderScalarFunctionTaskExpression
+class TaskExpressionVariant4Variant1(RootModel):
+    root: PlaceholderScalarFunctionTaskExpression
 
 
-class FunctionsTaskExpressionVariant4(BaseModel):
+class TaskExpressionVariant4(BaseModel):
     type_: Literal['placeholder.scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsTaskExpressionVariant5Variant1(RootModel):
-    root: FunctionsPlaceholderVectorFunctionTaskExpression
+class TaskExpressionVariant5Variant1(RootModel):
+    root: PlaceholderVectorFunctionTaskExpression
 
 
-class FunctionsTaskExpressionVariant5(BaseModel):
+class TaskExpressionVariant5(BaseModel):
     type_: Literal['placeholder.vector.function'] = Field(..., alias='type')
 
 
-class FunctionsTaskExpression(RootModel):
+class TaskExpression(RootModel):
     """A task definition with expressions (pre-compilation).
 
 Task expressions contain dynamic fields (JMESPath or Starlark) that are
@@ -58,5 +58,5 @@ resolved against input data during compilation. Use [`compile`](Self::compile)
 to produce a concrete [`Task`]."""
     model_config = ConfigDict(title='functions.TaskExpression')
 
-    root: Union[FunctionsTaskExpressionVariant1, FunctionsTaskExpressionVariant2, FunctionsTaskExpressionVariant3, FunctionsTaskExpressionVariant4, FunctionsTaskExpressionVariant5]
+    root: Union[TaskExpressionVariant1, TaskExpressionVariant2, TaskExpressionVariant3, TaskExpressionVariant4, TaskExpressionVariant5]
 

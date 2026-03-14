@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.file_input_schema_type import FunctionsExpressionFileInputSchemaType
+from objectiveai.functions.expression.file_input_schema_type import FileInputSchemaType
 
 
-class FunctionsExpressionFileInputSchema(BaseModel):
+class FileInputSchema(BaseModel):
     """Schema for a file input."""
     model_config = ConfigDict(title='functions.expression.FileInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the expected file.')
-    type_: FunctionsExpressionFileInputSchemaType = Field(..., alias='type')
+    type_: FileInputSchemaType = Field(..., alias='type')
 

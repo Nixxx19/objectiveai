@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class VectorCompletionsResponseVote(BaseModel):
+class Vote(BaseModel):
     """A single LLM's vote in a vector completion.
 
 Each LLM in the ensemble produces a vote indicating which response(s) it

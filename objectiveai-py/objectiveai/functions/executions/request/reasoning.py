@@ -3,15 +3,15 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.request.agent import AgentCompletionsRequestAgent
+from objectiveai.agent.completions.request.agent import Agent
 
 
-class FunctionsExecutionsRequestReasoning(BaseModel):
+class Reasoning(BaseModel):
     """Configuration for generating reasoning summaries during execution.
 
 When enabled, an LLM summarizes the execution's reasoning process."""
     model_config = ConfigDict(title='functions.executions.request.Reasoning')
 
-    agent: AgentCompletionsRequestAgent = Field(..., description='The primary agent to use for generating reasoning summaries.')
-    agents: Optional[list[AgentCompletionsRequestAgent]] = Field(None, description='Fallback agents tried in order if the primary is rate-limited or errors.')
+    agent: Agent = Field(..., description='The primary agent to use for generating reasoning summaries.')
+    agents: Optional[list[Agent]] = Field(None, description='Fallback agents tried in order if the primary is rate-limited or errors.')
 

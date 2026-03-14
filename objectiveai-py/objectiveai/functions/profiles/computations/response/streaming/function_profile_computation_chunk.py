@@ -3,24 +3,26 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
-from objectiveai.functions.inline_tasks_profile import FunctionsInlineTasksProfile
-from objectiveai.functions.profiles.computations.response.fitting_stats import FunctionsProfilesComputationsResponseFittingStats
-from objectiveai.functions.profiles.computations.response.streaming.function_execution_chunk import FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk
-from objectiveai.functions.profiles.computations.response.streaming.object import FunctionsProfilesComputationsResponseStreamingObject
+from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.functions.inline_tasks_profile import InlineTasksProfile
+from objectiveai.functions.profiles.computations.response.fitting_stats import FittingStats
+from objectiveai.functions.profiles.computations.response.streaming.function_execution_chunk import FunctionExecutionChunk
+from objectiveai.functions.profiles.computations.response.streaming.object import Object
 
 
-class FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk(BaseModel):
+class FunctionProfileComputationChunk(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.response.streaming.FunctionProfileComputationChunk')
 
     created: int = Field(..., ge=0, le=18446744073709551615)
-    executions: list[FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk]
+    executions: list[FunctionExecutionChunk]
     executions_errors: Optional[bool] = None
-    fitting_stats: Optional[FunctionsProfilesComputationsResponseFittingStats] = None
+    fitting_stats: Optional[FittingStats] = None
     function: Optional[str] = None
     id: str
-    object: FunctionsProfilesComputationsResponseStreamingObject
-    profile: Optional[FunctionsInlineTasksProfile] = None
+    object: Object
+    profile: Optional[InlineTasksProfile] = None
     retry_token: Optional[str] = None
-    usage: Optional[AgentCompletionsResponseUsage] = None
+    usage: Optional[Usage] = None
 
+
+import objectiveai.functions.profiles.computations.response.streaming.function_profile_computation_chunk_methods  # noqa: F401, E402

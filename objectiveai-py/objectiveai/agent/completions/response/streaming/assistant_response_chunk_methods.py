@@ -3,11 +3,11 @@ from __future__ import annotations
 
 from objectiveai.push_utils import push_by_index, push_option, push_option_string
 from objectiveai.agent.completions.response.streaming.assistant_response_chunk import (
-    AgentCompletionsResponseStreamingAssistantResponseChunk,
+    AssistantResponseChunk,
 )
 
 
-def _push(self, other: AgentCompletionsResponseStreamingAssistantResponseChunk) -> None:
+def _push(self, other: AssistantResponseChunk) -> None:
     # reasoning: string concat
     self.reasoning = push_option_string(self.reasoning, other.reasoning)
 
@@ -52,4 +52,4 @@ def _push(self, other: AgentCompletionsResponseStreamingAssistantResponseChunk) 
     # role, index, created, agent, model are immutable
 
 
-AgentCompletionsResponseStreamingAssistantResponseChunk.push = _push
+AssistantResponseChunk.push = _push

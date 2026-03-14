@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsMessageFile(BaseModel):
+class File(BaseModel):
     """A file attachment for multimodal input."""
     model_config = ConfigDict(title='agent.completions.message.File')
 

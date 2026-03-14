@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AuthCreateOpenRouterByokApiKeyRequest(BaseModel):
+class CreateOpenRouterByokApiKeyRequest(BaseModel):
     """Request to create or update an OpenRouter BYOK (Bring Your Own Key) API key.
 
 This allows users to provide their own OpenRouter API key for routing

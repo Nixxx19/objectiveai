@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.video_input_schema_type import FunctionsExpressionVideoInputSchemaType
+from objectiveai.functions.expression.video_input_schema_type import VideoInputSchemaType
 
 
-class FunctionsExpressionVideoInputSchema(BaseModel):
+class VideoInputSchema(BaseModel):
     """Schema for a video input (URL or base64-encoded)."""
     model_config = ConfigDict(title='functions.expression.VideoInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the expected video.')
-    type_: FunctionsExpressionVideoInputSchemaType = Field(..., alias='type')
+    type_: VideoInputSchemaType = Field(..., alias='type')
 

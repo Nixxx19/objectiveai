@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class AgentCompletionsResponseAssistantRole(RootModel):
+class AssistantRole(RootModel):
     """The assistant role."""
     model_config = ConfigDict(title='agent.completions.response.AssistantRole')
 

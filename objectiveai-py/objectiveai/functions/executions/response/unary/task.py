@@ -3,22 +3,22 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.executions.response.unary.vector_completion_task import FunctionsExecutionsResponseUnaryVectorCompletionTask
+from objectiveai.functions.executions.response.unary.vector_completion_task import VectorCompletionTask
 
 if TYPE_CHECKING:
-    from objectiveai.functions.executions.response.unary.function_execution_task import FunctionsExecutionsResponseUnaryFunctionExecutionTask
+    from objectiveai.functions.executions.response.unary.function_execution_task import FunctionExecutionTask
 
 
-class FunctionsExecutionsResponseUnaryTaskVariant1(RootModel):
-    root: FunctionsExecutionsResponseUnaryFunctionExecutionTask
+class TaskVariant1(RootModel):
+    root: FunctionExecutionTask
 
 
-class FunctionsExecutionsResponseUnaryTaskVariant2(RootModel):
-    root: FunctionsExecutionsResponseUnaryVectorCompletionTask
+class TaskVariant2(RootModel):
+    root: VectorCompletionTask
 
 
-class FunctionsExecutionsResponseUnaryTask(RootModel):
+class Task(RootModel):
     model_config = ConfigDict(title='functions.executions.response.unary.Task')
 
-    root: Union[FunctionsExecutionsResponseUnaryTaskVariant1, FunctionsExecutionsResponseUnaryTaskVariant2]
+    root: Union[TaskVariant1, TaskVariant2]
 

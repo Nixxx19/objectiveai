@@ -3,25 +3,27 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
-from objectiveai.functions.full_remote_function import FunctionsFullRemoteFunction
-from objectiveai.functions.inventions.response.streaming.agent_completion_chunk import FunctionsInventionsResponseStreamingAgentCompletionChunk
-from objectiveai.functions.inventions.response.streaming.object import FunctionsInventionsResponseStreamingObject
-from objectiveai.functions.inventions.state.state import FunctionsInventionsStateState
-from objectiveai.functions.remote_function_path import FunctionsRemoteFunctionPath
+from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.functions.full_remote_function import FullRemoteFunction
+from objectiveai.functions.inventions.response.streaming.agent_completion_chunk import AgentCompletionChunk
+from objectiveai.functions.inventions.response.streaming.object import Object
+from objectiveai.functions.inventions.state.state import State
+from objectiveai.functions.remote_function_path import RemoteFunctionPath
 from objectiveai.response_error import ResponseError
 
 
-class FunctionsInventionsResponseStreamingFunctionInventionChunk(BaseModel):
+class FunctionInventionChunk(BaseModel):
     model_config = ConfigDict(title='functions.inventions.response.streaming.FunctionInventionChunk')
 
-    completions: list[FunctionsInventionsResponseStreamingAgentCompletionChunk]
+    completions: list[AgentCompletionChunk]
     created: int = Field(..., ge=0, le=18446744073709551615)
     error: Optional[ResponseError] = None
-    function: Optional[FunctionsFullRemoteFunction] = None
+    function: Optional[FullRemoteFunction] = None
     id: str
-    object: FunctionsInventionsResponseStreamingObject
-    path: Optional[FunctionsRemoteFunctionPath] = None
-    state: Optional[FunctionsInventionsStateState] = None
-    usage: Optional[AgentCompletionsResponseUsage] = None
+    object: Object
+    path: Optional[RemoteFunctionPath] = None
+    state: Optional[State] = None
+    usage: Optional[Usage] = None
 
+
+import objectiveai.functions.inventions.response.streaming.function_invention_chunk_methods  # noqa: F401, E402

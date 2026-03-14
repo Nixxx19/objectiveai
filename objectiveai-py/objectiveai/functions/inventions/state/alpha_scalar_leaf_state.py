@@ -3,18 +3,18 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.alpha_scalar.leaf_task_expression import FunctionsAlphaScalarLeafTaskExpression
-from objectiveai.functions.expression.object_input_schema import FunctionsExpressionObjectInputSchema
+from objectiveai.functions.alpha_scalar.leaf_task_expression import LeafTaskExpression
+from objectiveai.functions.expression.object_input_schema import ObjectInputSchema
 
 
-class FunctionsInventionsStateAlphaScalarLeafState(BaseModel):
+class AlphaScalarLeafState(BaseModel):
     model_config = ConfigDict(title='functions.inventions.state.AlphaScalarLeafState')
 
     depth: int = Field(..., ge=0, le=18446744073709551615)
     description: Optional[str] = None
     essay: Optional[str] = None
     essay_tasks: Optional[str] = None
-    input_schema: Optional[FunctionsExpressionObjectInputSchema] = None
+    input_schema: Optional[ObjectInputSchema] = None
     max_branch_width: int = Field(..., ge=0, le=18446744073709551615)
     max_leaf_width: int = Field(..., ge=0, le=18446744073709551615)
     min_branch_width: int = Field(..., ge=0, le=18446744073709551615)
@@ -22,6 +22,6 @@ class FunctionsInventionsStateAlphaScalarLeafState(BaseModel):
     name: str
     readme: Optional[str] = None
     spec: str
-    tasks: Optional[list[FunctionsAlphaScalarLeafTaskExpression]] = None
+    tasks: Optional[list[LeafTaskExpression]] = None
     tasks_length: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
 

@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class VectorCompletionsResponseStreamingObject(RootModel):
+class Object(RootModel):
     """A streaming vector completion chunk."""
     model_config = ConfigDict(title='vector.completions.response.streaming.Object')
 

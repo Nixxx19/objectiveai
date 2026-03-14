@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.streaming.message_chunk import AgentCompletionsResponseStreamingMessageChunk
-from objectiveai.agent.completions.response.streaming.object import AgentCompletionsResponseStreamingObject
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
-from objectiveai.agent.upstream import AgentUpstream
+from objectiveai.agent.completions.response.streaming.message_chunk import MessageChunk
+from objectiveai.agent.completions.response.streaming.object import Object
+from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.agent.upstream import Upstream
 from objectiveai.response_error import ResponseError
 
 
-class VectorCompletionsResponseStreamingAgentCompletionChunk(BaseModel):
+class AgentCompletionChunk(BaseModel):
     """A streaming agent completion chunk from a single agent within a vector completion.
 
 The `index` field is used to correlate chunks belonging to the same
@@ -21,8 +21,10 @@ underlying completion when accumulating via [`push`](Self::push)."""
     error: Optional[ResponseError] = Field(None, description='Error details if this completion failed.')
     id: str
     index: int = Field(..., description='Index used to correlate chunks from the same completion.', ge=0, le=18446744073709551615)
-    messages: list[AgentCompletionsResponseStreamingMessageChunk]
-    object: AgentCompletionsResponseStreamingObject = Field(..., description='The object type (always "agent.completion.chunk").')
-    upstream: AgentUpstream = Field(..., description='Upstream provider')
-    usage: Optional[AgentCompletionsResponseUsage] = Field(None, description='Token usage (only present in the final chunk).')
+    messages: list[MessageChunk]
+    object: Object = Field(..., description='The object type (always "agent.completion.chunk").')
+    upstream: Upstream = Field(..., description='Upstream provider')
+    usage: Optional[Usage] = Field(None, description='Token usage (only present in the final chunk).')
 
+
+import objectiveai.vector.completions.response.streaming.agent_completion_chunk_methods  # noqa: F401, E402

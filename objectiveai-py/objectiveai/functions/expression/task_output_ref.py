@@ -5,29 +5,29 @@ from typing import Annotated, Union
 from pydantic import ConfigDict, Field, RootModel
 
 
-class FunctionsExpressionTaskOutputRefVariant1(RootModel):
+class TaskOutputRefVariant1(RootModel):
     """A single scalar score."""
     root: Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]
 
 
-class FunctionsExpressionTaskOutputRefVariant2(RootModel):
+class TaskOutputRefVariant2(RootModel):
     """A vector of scores."""
     root: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]]
 
 
-class FunctionsExpressionTaskOutputRefVariant3(RootModel):
+class TaskOutputRefVariant3(RootModel):
     """Multiple vectors of scores (from mapped tasks)."""
     root: list[list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]]]
 
 
-class FunctionsExpressionTaskOutputRefVariant4(RootModel):
+class TaskOutputRefVariant4(RootModel):
     """An error occurred during execution."""
     root: object
 
 
-class FunctionsExpressionTaskOutputRef(RootModel):
+class TaskOutputRef(RootModel):
     """Borrowed task output variants."""
     model_config = ConfigDict(title='functions.expression.TaskOutputRef')
 
-    root: Union[FunctionsExpressionTaskOutputRefVariant1, FunctionsExpressionTaskOutputRefVariant2, FunctionsExpressionTaskOutputRefVariant3, FunctionsExpressionTaskOutputRefVariant4]
+    root: Union[TaskOutputRefVariant1, TaskOutputRefVariant2, TaskOutputRefVariant3, TaskOutputRefVariant4]
 

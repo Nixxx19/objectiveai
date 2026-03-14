@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class AgentClaudeAgentSdkOutputMode(RootModel):
+class OutputMode(RootModel):
     """The model is instructed via the prompt to output a specific key.
 
 This is the default and most widely supported mode."""

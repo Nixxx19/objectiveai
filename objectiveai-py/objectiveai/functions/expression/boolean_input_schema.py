@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.boolean_input_schema_type import FunctionsExpressionBooleanInputSchemaType
+from objectiveai.functions.expression.boolean_input_schema_type import BooleanInputSchemaType
 
 
-class FunctionsExpressionBooleanInputSchema(BaseModel):
+class BooleanInputSchema(BaseModel):
     """Schema for a boolean input."""
     model_config = ConfigDict(title='functions.expression.BooleanInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the boolean.')
-    type_: FunctionsExpressionBooleanInputSchemaType = Field(..., alias='type')
+    type_: BooleanInputSchemaType = Field(..., alias='type')
 

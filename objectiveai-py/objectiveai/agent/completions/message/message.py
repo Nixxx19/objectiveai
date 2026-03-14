@@ -3,61 +3,61 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, RootModel
-from objectiveai.agent.completions.message.assistant_message import AgentCompletionsMessageAssistantMessage
-from objectiveai.agent.completions.message.developer_message import AgentCompletionsMessageDeveloperMessage
-from objectiveai.agent.completions.message.system_message import AgentCompletionsMessageSystemMessage
-from objectiveai.agent.completions.message.tool_message import AgentCompletionsMessageToolMessage
-from objectiveai.agent.completions.message.user_message import AgentCompletionsMessageUserMessage
+from objectiveai.agent.completions.message.assistant_message import AssistantMessage
+from objectiveai.agent.completions.message.developer_message import DeveloperMessage
+from objectiveai.agent.completions.message.system_message import SystemMessage
+from objectiveai.agent.completions.message.tool_message import ToolMessage
+from objectiveai.agent.completions.message.user_message import UserMessage
 
 
-class AgentCompletionsMessageMessageVariant1Variant1(RootModel):
-    root: AgentCompletionsMessageDeveloperMessage
+class MessageVariant1Variant1(RootModel):
+    root: DeveloperMessage
 
 
-class AgentCompletionsMessageMessageVariant1(BaseModel):
+class MessageVariant1(BaseModel):
     """A developer message (similar to system, but from the developer)."""
     role: Literal['developer']
 
 
-class AgentCompletionsMessageMessageVariant2Variant1(RootModel):
-    root: AgentCompletionsMessageSystemMessage
+class MessageVariant2Variant1(RootModel):
+    root: SystemMessage
 
 
-class AgentCompletionsMessageMessageVariant2(BaseModel):
+class MessageVariant2(BaseModel):
     """A system message setting context or instructions."""
     role: Literal['system']
 
 
-class AgentCompletionsMessageMessageVariant3Variant1(RootModel):
-    root: AgentCompletionsMessageUserMessage
+class MessageVariant3Variant1(RootModel):
+    root: UserMessage
 
 
-class AgentCompletionsMessageMessageVariant3(BaseModel):
+class MessageVariant3(BaseModel):
     """A user message from the end user."""
     role: Literal['user']
 
 
-class AgentCompletionsMessageMessageVariant4Variant1(RootModel):
-    root: AgentCompletionsMessageAssistantMessage
+class MessageVariant4Variant1(RootModel):
+    root: AssistantMessage
 
 
-class AgentCompletionsMessageMessageVariant4(BaseModel):
+class MessageVariant4(BaseModel):
     """An assistant message (model's previous response)."""
     role: Literal['assistant']
 
 
-class AgentCompletionsMessageMessageVariant5Variant1(RootModel):
-    root: AgentCompletionsMessageToolMessage
+class MessageVariant5Variant1(RootModel):
+    root: ToolMessage
 
 
-class AgentCompletionsMessageMessageVariant5(BaseModel):
+class MessageVariant5(BaseModel):
     """A tool message containing the result of a tool call."""
     role: Literal['tool']
 
 
-class AgentCompletionsMessageMessage(RootModel):
+class Message(RootModel):
     """A message in the conversation."""
     model_config = ConfigDict(title='agent.completions.message.Message')
 
-    root: Union[AgentCompletionsMessageMessageVariant1, AgentCompletionsMessageMessageVariant2, AgentCompletionsMessageMessageVariant3, AgentCompletionsMessageMessageVariant4, AgentCompletionsMessageMessageVariant5]
+    root: Union[MessageVariant1, MessageVariant2, MessageVariant3, MessageVariant4, MessageVariant5]
 

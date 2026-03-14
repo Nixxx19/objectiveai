@@ -5,42 +5,42 @@ from typing import Literal, TYPE_CHECKING, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionAgentCompletionsMessageFile, FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrl, FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudio, FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl, FunctionsExpressionWithExpressionString
+    from objectiveai.functions.expression.with_expression import File, ImageUrl, InputAudio, VideoUrl, string
 
 
-class AgentCompletionsMessageRichContentPartExpressionVariant1(BaseModel):
-    text: FunctionsExpressionWithExpressionString
+class RichContentPartExpressionVariant1(BaseModel):
+    text: string
     type_: Literal['text'] = Field(..., alias='type')
 
 
-class AgentCompletionsMessageRichContentPartExpressionVariant2(BaseModel):
-    image_url: FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrl
+class RichContentPartExpressionVariant2(BaseModel):
+    image_url: ImageUrl
     type_: Literal['image_url'] = Field(..., alias='type')
 
 
-class AgentCompletionsMessageRichContentPartExpressionVariant3(BaseModel):
-    input_audio: FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudio
+class RichContentPartExpressionVariant3(BaseModel):
+    input_audio: InputAudio
     type_: Literal['input_audio'] = Field(..., alias='type')
 
 
-class AgentCompletionsMessageRichContentPartExpressionVariant4(BaseModel):
+class RichContentPartExpressionVariant4(BaseModel):
     type_: Literal['input_video'] = Field(..., alias='type')
-    video_url: FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl
+    video_url: VideoUrl
 
 
-class AgentCompletionsMessageRichContentPartExpressionVariant5(BaseModel):
+class RichContentPartExpressionVariant5(BaseModel):
     type_: Literal['video_url'] = Field(..., alias='type')
-    video_url: FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl
+    video_url: VideoUrl
 
 
-class AgentCompletionsMessageRichContentPartExpressionVariant6(BaseModel):
-    file: FunctionsExpressionWithExpressionAgentCompletionsMessageFile
+class RichContentPartExpressionVariant6(BaseModel):
+    file: File
     type_: Literal['file'] = Field(..., alias='type')
 
 
-class AgentCompletionsMessageRichContentPartExpression(RootModel):
+class RichContentPartExpression(RootModel):
     """Expression variant of [`RichContentPart`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.RichContentPartExpression')
 
-    root: Union[AgentCompletionsMessageRichContentPartExpressionVariant1, AgentCompletionsMessageRichContentPartExpressionVariant2, AgentCompletionsMessageRichContentPartExpressionVariant3, AgentCompletionsMessageRichContentPartExpressionVariant4, AgentCompletionsMessageRichContentPartExpressionVariant5, AgentCompletionsMessageRichContentPartExpressionVariant6]
+    root: Union[RichContentPartExpressionVariant1, RichContentPartExpressionVariant2, RichContentPartExpressionVariant3, RichContentPartExpressionVariant4, RichContentPartExpressionVariant5, RichContentPartExpressionVariant6]
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict
 
 
-class FunctionsInventionsDescriptionObject(BaseModel):
+class DescriptionObject(BaseModel):
     model_config = ConfigDict(title='functions.inventions.DescriptionObject')
 
     description: str

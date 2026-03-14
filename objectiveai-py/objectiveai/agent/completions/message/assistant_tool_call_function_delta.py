@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsMessageAssistantToolCallFunctionDelta(BaseModel):
+class AssistantToolCallFunctionDelta(BaseModel):
     """Function call details in a streaming tool call."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCallFunctionDelta')
 

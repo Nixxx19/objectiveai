@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.functions.remote import FunctionsRemote
+from objectiveai.functions.remote import Remote
 
 
-class FunctionsProfilesComputationsRequestFunctionRemoteRequestPath(BaseModel):
+class FunctionRemoteRequestPath(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.request.FunctionRemoteRequestPath')
 
     fcommit: Optional[str] = None
     fowner: str
-    fremote: FunctionsRemote
+    fremote: Remote
     frepository: str
 

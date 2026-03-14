@@ -3,64 +3,64 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.placeholder_scalar_function_task import FunctionsPlaceholderScalarFunctionTask
-from objectiveai.functions.placeholder_vector_function_task import FunctionsPlaceholderVectorFunctionTask
-from objectiveai.functions.scalar_function_task import FunctionsScalarFunctionTask
-from objectiveai.functions.vector_completion_task import FunctionsVectorCompletionTask
-from objectiveai.functions.vector_function_task import FunctionsVectorFunctionTask
+from objectiveai.functions.placeholder_scalar_function_task import PlaceholderScalarFunctionTask
+from objectiveai.functions.placeholder_vector_function_task import PlaceholderVectorFunctionTask
+from objectiveai.functions.scalar_function_task import ScalarFunctionTask
+from objectiveai.functions.vector_completion_task import VectorCompletionTask
+from objectiveai.functions.vector_function_task import VectorFunctionTask
 
 
-class FunctionsTaskVariant1Variant1(RootModel):
-    root: FunctionsScalarFunctionTask
+class TaskVariant1Variant1(RootModel):
+    root: ScalarFunctionTask
 
 
-class FunctionsTaskVariant1(BaseModel):
+class TaskVariant1(BaseModel):
     """Calls a scalar function (produces a single score)."""
     type_: Literal['scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsTaskVariant2Variant1(RootModel):
-    root: FunctionsVectorFunctionTask
+class TaskVariant2Variant1(RootModel):
+    root: VectorFunctionTask
 
 
-class FunctionsTaskVariant2(BaseModel):
+class TaskVariant2(BaseModel):
     """Calls a vector function (produces a vector of scores)."""
     type_: Literal['vector.function'] = Field(..., alias='type')
 
 
-class FunctionsTaskVariant3Variant1(RootModel):
-    root: FunctionsVectorCompletionTask
+class TaskVariant3Variant1(RootModel):
+    root: VectorCompletionTask
 
 
-class FunctionsTaskVariant3(BaseModel):
+class TaskVariant3(BaseModel):
     """Runs a vector completion."""
     type_: Literal['vector.completion'] = Field(..., alias='type')
 
 
-class FunctionsTaskVariant4Variant1(RootModel):
-    root: FunctionsPlaceholderScalarFunctionTask
+class TaskVariant4Variant1(RootModel):
+    root: PlaceholderScalarFunctionTask
 
 
-class FunctionsTaskVariant4(BaseModel):
+class TaskVariant4(BaseModel):
     """Placeholder scalar function (always outputs 0.5)."""
     type_: Literal['placeholder.scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsTaskVariant5Variant1(RootModel):
-    root: FunctionsPlaceholderVectorFunctionTask
+class TaskVariant5Variant1(RootModel):
+    root: PlaceholderVectorFunctionTask
 
 
-class FunctionsTaskVariant5(BaseModel):
+class TaskVariant5(BaseModel):
     """Placeholder vector function (always outputs equalized vector)."""
     type_: Literal['placeholder.vector.function'] = Field(..., alias='type')
 
 
-class FunctionsTask(RootModel):
+class Task(RootModel):
     """A compiled task ready for execution.
 
 Produced by compiling a [`TaskExpression`] against input data. All
 expressions have been resolved to concrete values."""
     model_config = ConfigDict(title='functions.Task')
 
-    root: Union[FunctionsTaskVariant1, FunctionsTaskVariant2, FunctionsTaskVariant3, FunctionsTaskVariant4, FunctionsTaskVariant5]
+    root: Union[TaskVariant1, TaskVariant2, TaskVariant3, TaskVariant4, TaskVariant5]
 

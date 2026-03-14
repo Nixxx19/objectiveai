@@ -3,64 +3,64 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.inventions.state.alpha_scalar_branch_state import FunctionsInventionsStateAlphaScalarBranchState
-from objectiveai.functions.inventions.state.alpha_scalar_leaf_state import FunctionsInventionsStateAlphaScalarLeafState
-from objectiveai.functions.inventions.state.alpha_scalar_state import FunctionsInventionsStateAlphaScalarState
-from objectiveai.functions.inventions.state.alpha_vector_branch_state import FunctionsInventionsStateAlphaVectorBranchState
-from objectiveai.functions.inventions.state.alpha_vector_leaf_state import FunctionsInventionsStateAlphaVectorLeafState
-from objectiveai.functions.inventions.state.alpha_vector_state import FunctionsInventionsStateAlphaVectorState
+from objectiveai.functions.inventions.state.alpha_scalar_branch_state import AlphaScalarBranchState
+from objectiveai.functions.inventions.state.alpha_scalar_leaf_state import AlphaScalarLeafState
+from objectiveai.functions.inventions.state.alpha_scalar_state import AlphaScalarState
+from objectiveai.functions.inventions.state.alpha_vector_branch_state import AlphaVectorBranchState
+from objectiveai.functions.inventions.state.alpha_vector_leaf_state import AlphaVectorLeafState
+from objectiveai.functions.inventions.state.alpha_vector_state import AlphaVectorState
 
 
-class FunctionsInventionsStateParamsStateVariant1Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaScalarBranchState
+class ParamsStateVariant1Variant1(RootModel):
+    root: AlphaScalarBranchState
 
 
-class FunctionsInventionsStateParamsStateVariant1(BaseModel):
+class ParamsStateVariant1(BaseModel):
     type_: Literal['alpha.scalar.branch.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateParamsStateVariant2Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaScalarLeafState
+class ParamsStateVariant2Variant1(RootModel):
+    root: AlphaScalarLeafState
 
 
-class FunctionsInventionsStateParamsStateVariant2(BaseModel):
+class ParamsStateVariant2(BaseModel):
     type_: Literal['alpha.scalar.leaf.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateParamsStateVariant3Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaVectorBranchState
+class ParamsStateVariant3Variant1(RootModel):
+    root: AlphaVectorBranchState
 
 
-class FunctionsInventionsStateParamsStateVariant3(BaseModel):
+class ParamsStateVariant3(BaseModel):
     type_: Literal['alpha.vector.branch.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateParamsStateVariant4Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaVectorLeafState
+class ParamsStateVariant4Variant1(RootModel):
+    root: AlphaVectorLeafState
 
 
-class FunctionsInventionsStateParamsStateVariant4(BaseModel):
+class ParamsStateVariant4(BaseModel):
     type_: Literal['alpha.vector.leaf.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateParamsStateVariant5Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaScalarState
+class ParamsStateVariant5Variant1(RootModel):
+    root: AlphaScalarState
 
 
-class FunctionsInventionsStateParamsStateVariant5(BaseModel):
+class ParamsStateVariant5(BaseModel):
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateParamsStateVariant6Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaVectorState
+class ParamsStateVariant6Variant1(RootModel):
+    root: AlphaVectorState
 
 
-class FunctionsInventionsStateParamsStateVariant6(BaseModel):
+class ParamsStateVariant6(BaseModel):
     type_: Literal['alpha.vector.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateParamsState(RootModel):
+class ParamsState(RootModel):
     model_config = ConfigDict(title='functions.inventions.state.ParamsState')
 
-    root: Union[FunctionsInventionsStateParamsStateVariant1, FunctionsInventionsStateParamsStateVariant2, FunctionsInventionsStateParamsStateVariant3, FunctionsInventionsStateParamsStateVariant4, FunctionsInventionsStateParamsStateVariant5, FunctionsInventionsStateParamsStateVariant6]
+    root: Union[ParamsStateVariant1, ParamsStateVariant2, ParamsStateVariant3, ParamsStateVariant4, ParamsStateVariant5, ParamsStateVariant6]
 

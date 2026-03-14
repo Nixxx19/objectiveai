@@ -5,12 +5,12 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
+    from objectiveai.functions.expression.input_schema import InputSchema
 
 
-class FunctionsExpressionAnyOfInputSchema(BaseModel):
+class AnyOfInputSchema(BaseModel):
     """Schema for a union of possible types - input must match at least one."""
     model_config = ConfigDict(title='functions.expression.AnyOfInputSchema')
 
-    any_of: list[FunctionsExpressionInputSchema] = Field(..., alias='anyOf', description='The possible schemas that the input can match.')
+    any_of: list[InputSchema] = Field(..., alias='anyOf', description='The possible schemas that the input can match.')
 

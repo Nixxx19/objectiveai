@@ -3,31 +3,31 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.expression.special import FunctionsExpressionSpecial
+from objectiveai.functions.expression.special import Special
 
 
-class FunctionsExpressionExpressionVariant1(BaseModel):
+class ExpressionVariant1(BaseModel):
     """A JMESPath expression."""
     model_config = ConfigDict(extra='forbid')
 
     jmespath: str = Field(..., alias='$jmespath')
 
 
-class FunctionsExpressionExpressionVariant2(BaseModel):
+class ExpressionVariant2(BaseModel):
     """A Starlark expression."""
     model_config = ConfigDict(extra='forbid')
 
     starlark: str = Field(..., alias='$starlark')
 
 
-class FunctionsExpressionExpressionVariant3(BaseModel):
+class ExpressionVariant3(BaseModel):
     """A predefined special expression variant."""
     model_config = ConfigDict(extra='forbid')
 
-    special: FunctionsExpressionSpecial = Field(..., alias='$special')
+    special: Special = Field(..., alias='$special')
 
 
-class FunctionsExpressionExpression(RootModel):
+class Expression(RootModel):
     """An expression that can be either JMESPath or Starlark.
 
 Serializes as `{"$jmespath": "..."}` or `{"$starlark": "..."}` in JSON.
@@ -45,5 +45,5 @@ Starlark:
 ```"""
     model_config = ConfigDict(title='functions.expression.Expression')
 
-    root: Union[FunctionsExpressionExpressionVariant1, FunctionsExpressionExpressionVariant2, FunctionsExpressionExpressionVariant3]
+    root: Union[ExpressionVariant1, ExpressionVariant2, ExpressionVariant3]
 

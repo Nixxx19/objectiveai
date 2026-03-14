@@ -60,6 +60,27 @@ def push_by_index(self_list: list, other_list: list) -> None:
                 index_map[idx] = len(self_list) - 1
 
 
+def push_lazy_set_true(self_val: bool | None, other_val: bool | None) -> bool | None:
+    """Lazy set that only sets to True, never overwrites to False."""
+    if other_val is True:
+        return True
+    return self_val
+
+
+def push_replace(self_val, other_val):
+    """Replace self with other if other is not None (latest wins)."""
+    if other_val is not None:
+        return other_val
+    return self_val
+
+
+def push_lazy_set(self_val, other_val):
+    """Lazy set: first non-None wins."""
+    if self_val is None:
+        return other_val
+    return self_val
+
+
 def _get_index(item):
     """Extract an integer index from a model (BaseModel or RootModel)."""
     from pydantic import RootModel

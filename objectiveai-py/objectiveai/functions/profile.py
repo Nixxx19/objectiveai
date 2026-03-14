@@ -3,26 +3,26 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.inline_profile import FunctionsInlineProfile
-from objectiveai.functions.remote_profile import FunctionsRemoteProfile
+from objectiveai.functions.inline_profile import InlineProfile
+from objectiveai.functions.remote_profile import RemoteProfile
 
 
-class FunctionsProfileVariant1(RootModel):
+class ProfileVariant1(RootModel):
     """A remote profile with metadata."""
-    root: FunctionsRemoteProfile
+    root: RemoteProfile
 
 
-class FunctionsProfileVariant2(RootModel):
+class ProfileVariant2(RootModel):
     """An inline profile definition."""
-    root: FunctionsInlineProfile
+    root: InlineProfile
 
 
-class FunctionsProfile(RootModel):
+class Profile(RootModel):
     """A Profile definition, either remote or inline.
 
 Profiles contain the weights and nested configurations needed to execute
 a Function. They correspond to a Function's task structure."""
     model_config = ConfigDict(title='functions.Profile')
 
-    root: Union[FunctionsProfileVariant1, FunctionsProfileVariant2]
+    root: Union[ProfileVariant1, ProfileVariant2]
 

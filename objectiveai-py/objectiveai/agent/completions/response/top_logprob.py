@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsResponseTopLogprob(BaseModel):
+class TopLogprob(BaseModel):
     """A top alternative token with its log probability."""
     model_config = ConfigDict(title='agent.completions.response.TopLogprob')
 

@@ -3,22 +3,22 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import FunctionsAlphaVectorExpressionVectorFunctionInputSchema
-from objectiveai.functions.alpha_vector.expression.vector_function_input_value_expression import FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
+from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import VectorFunctionInputSchema
+from objectiveai.functions.alpha_vector.expression.vector_function_input_value_expression import VectorFunctionInputValueExpression
+from objectiveai.functions.expression.expression import Expression
 
 
-class FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression(BaseModel):
+class PlaceholderVectorFunctionTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.PlaceholderVectorFunctionTaskExpression')
 
     depth: int = Field(..., ge=0, le=18446744073709551615)
-    input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression
-    input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchema
+    input: VectorFunctionInputValueExpression
+    input_schema: VectorFunctionInputSchema
     max_branch_width: int = Field(..., ge=0, le=18446744073709551615)
     max_leaf_width: int = Field(..., ge=0, le=18446744073709551615)
     min_branch_width: int = Field(..., ge=0, le=18446744073709551615)
     min_leaf_width: int = Field(..., ge=0, le=18446744073709551615)
     name: str
-    skip: Optional[FunctionsExpressionExpression] = None
+    skip: Optional[Expression] = None
     spec: str
 

@@ -3,11 +3,11 @@ from __future__ import annotations
 
 from objectiveai.push_utils import push_option_int
 from objectiveai.agent.completions.response.completion_tokens_details import (
-    AgentCompletionsResponseCompletionTokensDetails,
+    CompletionTokensDetails,
 )
 
 
-def _push(self, other: AgentCompletionsResponseCompletionTokensDetails) -> None:
+def _push(self, other: CompletionTokensDetails) -> None:
     self.accepted_prediction_tokens = push_option_int(
         self.accepted_prediction_tokens, other.accepted_prediction_tokens,
     )
@@ -18,4 +18,4 @@ def _push(self, other: AgentCompletionsResponseCompletionTokensDetails) -> None:
     )
 
 
-AgentCompletionsResponseCompletionTokensDetails.push = _push
+CompletionTokensDetails.push = _push

@@ -3,23 +3,23 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.request.agent import AgentCompletionsRequestAgent
-from objectiveai.agent.completions.request.provider import AgentCompletionsRequestProvider
-from objectiveai.functions.inventions.state.params_state import FunctionsInventionsStateParamsState
-from objectiveai.functions.remote import FunctionsRemote
+from objectiveai.agent.completions.request.agent import Agent
+from objectiveai.agent.completions.request.provider import Provider
+from objectiveai.functions.inventions.state.params_state import ParamsState
+from objectiveai.functions.remote import Remote
 
 
-class FunctionsInventionsRecursiveRequestFunctionInventionRecursiveCreateParams(BaseModel):
+class FunctionInventionRecursiveCreateParams(BaseModel):
     model_config = ConfigDict(title='functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams')
 
-    agent: AgentCompletionsRequestAgent
-    agents: Optional[list[AgentCompletionsRequestAgent]] = None
+    agent: Agent
+    agents: Optional[list[Agent]] = None
     max_step_retries: Optional[Annotated[int, Field(ge=0, le=4294967295)]] = Field(None, description="Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.")
     mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
     name: str
-    provider: Optional[AgentCompletionsRequestProvider] = None
-    remote: FunctionsRemote
+    provider: Optional[Provider] = None
+    remote: Remote
     seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = None
-    state: FunctionsInventionsStateParamsState
+    state: ParamsState
     stream: Optional[bool] = None
 

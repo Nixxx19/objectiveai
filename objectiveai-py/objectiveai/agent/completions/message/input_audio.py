@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsMessageInputAudio(BaseModel):
+class InputAudio(BaseModel):
     """Audio input for multimodal messages."""
     model_config = ConfigDict(title='agent.completions.message.InputAudio')
 

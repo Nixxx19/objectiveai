@@ -3,20 +3,20 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.vector.completions.cache.cache_vote_request_owned import VectorCompletionsCacheCacheVoteRequestOwned
-from objectiveai.vector.completions.cache.cache_vote_request_ref import VectorCompletionsCacheCacheVoteRequestRef
+from objectiveai.vector.completions.cache.cache_vote_request_owned import CacheVoteRequestOwned
+from objectiveai.vector.completions.cache.cache_vote_request_ref import CacheVoteRequestRef
 
 
-class VectorCompletionsCacheCacheVoteRequestVariant1(RootModel):
-    root: VectorCompletionsCacheCacheVoteRequestRef
+class CacheVoteRequestVariant1(RootModel):
+    root: CacheVoteRequestRef
 
 
-class VectorCompletionsCacheCacheVoteRequestVariant2(RootModel):
-    root: VectorCompletionsCacheCacheVoteRequestOwned
+class CacheVoteRequestVariant2(RootModel):
+    root: CacheVoteRequestOwned
 
 
-class VectorCompletionsCacheCacheVoteRequest(RootModel):
+class CacheVoteRequest(RootModel):
     model_config = ConfigDict(title='vector.completions.cache.CacheVoteRequest')
 
-    root: Union[VectorCompletionsCacheCacheVoteRequestVariant1, VectorCompletionsCacheCacheVoteRequestVariant2]
+    root: Union[CacheVoteRequestVariant1, CacheVoteRequestVariant2]
 

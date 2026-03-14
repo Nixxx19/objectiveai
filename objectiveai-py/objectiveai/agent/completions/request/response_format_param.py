@@ -3,22 +3,22 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.completions.request.response_format import AgentCompletionsRequestResponseFormat
+from objectiveai.agent.completions.request.response_format import ResponseFormat
 
 
-class AgentCompletionsRequestResponseFormatParamVariant1(RootModel):
+class ResponseFormatParamVariant1(RootModel):
     """A single response format applied to all agents."""
-    root: AgentCompletionsRequestResponseFormat
+    root: ResponseFormat
 
 
-class AgentCompletionsRequestResponseFormatParamVariant2(RootModel):
+class ResponseFormatParamVariant2(RootModel):
     """Per-agent response formats, keyed by agent ID."""
-    root: dict[str, AgentCompletionsRequestResponseFormat]
+    root: dict[str, ResponseFormat]
 
 
-class AgentCompletionsRequestResponseFormatParam(RootModel):
+class ResponseFormatParam(RootModel):
     """Either a single response format or a per-agent map."""
     model_config = ConfigDict(title='agent.completions.request.ResponseFormatParam')
 
-    root: Union[AgentCompletionsRequestResponseFormatParamVariant1, AgentCompletionsRequestResponseFormatParamVariant2]
+    root: Union[ResponseFormatParamVariant1, ResponseFormatParamVariant2]
 

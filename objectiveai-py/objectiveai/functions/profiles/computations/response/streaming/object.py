@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsProfilesComputationsResponseStreamingObject(RootModel):
+class Object(RootModel):
     model_config = ConfigDict(title='functions.profiles.computations.response.streaming.Object')
 
     root: Literal['function.profile.computation.chunk']

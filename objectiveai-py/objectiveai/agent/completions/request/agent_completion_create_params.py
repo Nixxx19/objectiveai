@@ -3,22 +3,22 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.message import AgentCompletionsMessageMessage
-from objectiveai.agent.completions.request.agent import AgentCompletionsRequestAgent
-from objectiveai.agent.completions.request.provider import AgentCompletionsRequestProvider
-from objectiveai.agent.completions.request.response_format_param import AgentCompletionsRequestResponseFormatParam
+from objectiveai.agent.completions.message.message import Message
+from objectiveai.agent.completions.request.agent import Agent
+from objectiveai.agent.completions.request.provider import Provider
+from objectiveai.agent.completions.request.response_format_param import ResponseFormatParam
 
 
-class AgentCompletionsRequestAgentCompletionCreateParams(BaseModel):
+class AgentCompletionCreateParams(BaseModel):
     """Parameters for creating a agent completion."""
     model_config = ConfigDict(title='agent.completions.request.AgentCompletionCreateParams')
 
-    agent: AgentCompletionsRequestAgent = Field(..., description='The agent to use (inline Agent or stored ID).')
-    agents: Optional[list[AgentCompletionsRequestAgent]] = Field(None, description='Alternative agents to try if the primary agent fails.')
+    agent: Agent = Field(..., description='The agent to use (inline Agent or stored ID).')
+    agents: Optional[list[Agent]] = Field(None, description='Alternative agents to try if the primary agent fails.')
     mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
-    messages: list[AgentCompletionsMessageMessage] = Field(..., description='The conversation messages.')
-    provider: Optional[AgentCompletionsRequestProvider] = Field(None, description='Provider routing preferences.')
-    response_format: Optional[AgentCompletionsRequestResponseFormatParam] = Field(None, description='Output format constraints (text, JSON, or JSON schema).')
+    messages: list[Message] = Field(..., description='The conversation messages.')
+    provider: Optional[Provider] = Field(None, description='Provider routing preferences.')
+    response_format: Optional[ResponseFormatParam] = Field(None, description='Output format constraints (text, JSON, or JSON schema).')
     seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Random seed for deterministic generation.')
     stream: Optional[bool] = Field(None, description='Whether to stream the response.')
 

@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.prefixed_uuid import PrefixedUuid
 
 
-class AuthListApiKeyItem(BaseModel):
+class ListApiKeyItem(BaseModel):
     """An API key with metadata and accumulated cost information.
 
 This extends [`ApiKeyWithMetadata`](super::ApiKeyWithMetadata) with

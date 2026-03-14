@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionAudioInputSchemaType(RootModel):
+class AudioInputSchemaType(RootModel):
     model_config = ConfigDict(title='functions.expression.AudioInputSchemaType')
 
     root: Literal['audio']

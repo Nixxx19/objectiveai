@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
-from objectiveai.functions.expression.object_input_schema import FunctionsExpressionObjectInputSchema
+from objectiveai.functions.expression.input_schema import InputSchema
+from objectiveai.functions.expression.object_input_schema import ObjectInputSchema
 
 
-class FunctionsAlphaVectorExpressionVectorFunctionInputSchema(BaseModel):
+class VectorFunctionInputSchema(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.expression.VectorFunctionInputSchema')
 
-    context: Optional[FunctionsExpressionObjectInputSchema] = None
-    items: FunctionsExpressionInputSchema
+    context: Optional[ObjectInputSchema] = None
+    items: InputSchema
 

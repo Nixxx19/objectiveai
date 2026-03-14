@@ -3,21 +3,21 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.request.provider_data_collection import AgentCompletionsRequestProviderDataCollection
-from objectiveai.agent.completions.request.provider_max_price import AgentCompletionsRequestProviderMaxPrice
-from objectiveai.agent.completions.request.provider_sort import AgentCompletionsRequestProviderSort
+from objectiveai.agent.completions.request.provider_data_collection import ProviderDataCollection
+from objectiveai.agent.completions.request.provider_max_price import ProviderMaxPrice
+from objectiveai.agent.completions.request.provider_sort import ProviderSort
 
 
-class AgentCompletionsRequestProvider(BaseModel):
+class Provider(BaseModel):
     """Provider routing and selection preferences."""
     model_config = ConfigDict(title='agent.completions.request.Provider')
 
-    data_collection: Optional[AgentCompletionsRequestProviderDataCollection] = Field(None, description='Whether to allow providers to collect data.')
+    data_collection: Optional[ProviderDataCollection] = Field(None, description='Whether to allow providers to collect data.')
     max_latency: Optional[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(None, description='Hard maximum latency requirement (seconds).')
-    max_price: Optional[AgentCompletionsRequestProviderMaxPrice] = Field(None, description='Maximum price constraints.')
+    max_price: Optional[ProviderMaxPrice] = Field(None, description='Maximum price constraints.')
     min_throughput: Optional[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(None, description='Hard minimum throughput requirement (tokens/second).')
     preferred_max_latency: Optional[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(None, description='Preferred maximum latency (seconds).')
     preferred_min_throughput: Optional[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(None, description='Preferred minimum throughput (tokens/second).')
-    sort: Optional[AgentCompletionsRequestProviderSort] = Field(None, description='How to sort/prioritize providers.')
+    sort: Optional[ProviderSort] = Field(None, description='How to sort/prioritize providers.')
     zdr: Optional[bool] = Field(None, description='Whether to use zero data retention providers only.')
 

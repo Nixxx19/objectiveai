@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionObjectInputSchemaType(RootModel):
+class ObjectInputSchemaType(RootModel):
     model_config = ConfigDict(title='functions.expression.ObjectInputSchemaType')
 
     root: Literal['object']

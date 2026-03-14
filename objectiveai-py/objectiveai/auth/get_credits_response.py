@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AuthGetCreditsResponse(BaseModel):
+class GetCreditsResponse(BaseModel):
     """Response containing the user's credit balance information.
 
 Credits are the billing unit for ObjectiveAI. This response provides

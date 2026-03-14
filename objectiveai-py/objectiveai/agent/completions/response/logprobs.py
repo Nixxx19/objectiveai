@@ -3,15 +3,15 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.logprob import AgentCompletionsResponseLogprob
+from objectiveai.agent.completions.response.logprob import Logprob
 
 
-class AgentCompletionsResponseLogprobs(BaseModel):
+class Logprobs(BaseModel):
     """Log probabilities for generated tokens."""
     model_config = ConfigDict(title='agent.completions.response.Logprobs')
 
-    content: Optional[list[AgentCompletionsResponseLogprob]] = Field(None, description='Log probabilities for content tokens.')
-    refusal: Optional[list[AgentCompletionsResponseLogprob]] = Field(None, description='Log probabilities for refusal tokens.')
+    content: Optional[list[Logprob]] = Field(None, description='Log probabilities for content tokens.')
+    refusal: Optional[list[Logprob]] = Field(None, description='Log probabilities for refusal tokens.')
 
 
 import objectiveai.agent.completions.response.logprobs_methods  # noqa: F401, E402

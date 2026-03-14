@@ -3,18 +3,18 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.functions.alpha_vector.expression.vector_function_input_value_expression import FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.remote import FunctionsRemote
+from objectiveai.functions.alpha_vector.expression.vector_function_input_value_expression import VectorFunctionInputValueExpression
+from objectiveai.functions.expression.expression import Expression
+from objectiveai.functions.remote import Remote
 
 
-class FunctionsAlphaVectorVectorFunctionTaskExpression(BaseModel):
+class VectorFunctionTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.VectorFunctionTaskExpression')
 
     commit: str
-    input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression
+    input: VectorFunctionInputValueExpression
     owner: str
-    remote: FunctionsRemote
+    remote: Remote
     repository: str
-    skip: Optional[FunctionsExpressionExpression] = None
+    skip: Optional[Expression] = None
 

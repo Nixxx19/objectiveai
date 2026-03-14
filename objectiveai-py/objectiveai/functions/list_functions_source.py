@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsListFunctionsSource(RootModel):
+class ListFunctionsSource(RootModel):
     """Source filter for listing functions."""
     model_config = ConfigDict(title='functions.ListFunctionsSource')
 

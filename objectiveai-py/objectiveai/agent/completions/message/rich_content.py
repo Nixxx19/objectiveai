@@ -3,24 +3,24 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.completions.message.rich_content_part import AgentCompletionsMessageRichContentPart
+from objectiveai.agent.completions.message.rich_content_part import RichContentPart
 
 
-class AgentCompletionsMessageRichContentVariant1(RootModel):
+class RichContentVariant1(RootModel):
     """Plain text content."""
     root: str
 
 
-class AgentCompletionsMessageRichContentVariant2(RootModel):
+class RichContentVariant2(RootModel):
     """Multi-part content (text, images, audio, video, files)."""
-    root: list[AgentCompletionsMessageRichContentPart]
+    root: list[RichContentPart]
 
 
-class AgentCompletionsMessageRichContent(RootModel):
+class RichContent(RootModel):
     """Rich content for user/assistant messages (supports multimodal input)."""
     model_config = ConfigDict(title='agent.completions.message.RichContent')
 
-    root: Union[AgentCompletionsMessageRichContentVariant1, AgentCompletionsMessageRichContentVariant2]
+    root: Union[RichContentVariant1, RichContentVariant2]
 
 
 import objectiveai.agent.completions.message.rich_content_methods  # noqa: F401, E402

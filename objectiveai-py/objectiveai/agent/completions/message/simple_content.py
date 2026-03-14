@@ -3,22 +3,22 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.completions.message.simple_content_part import AgentCompletionsMessageSimpleContentPart
+from objectiveai.agent.completions.message.simple_content_part import SimpleContentPart
 
 
-class AgentCompletionsMessageSimpleContentVariant1(RootModel):
+class SimpleContentVariant1(RootModel):
     """Plain text content."""
     root: str
 
 
-class AgentCompletionsMessageSimpleContentVariant2(RootModel):
+class SimpleContentVariant2(RootModel):
     """Multi-part text content."""
-    root: list[AgentCompletionsMessageSimpleContentPart]
+    root: list[SimpleContentPart]
 
 
-class AgentCompletionsMessageSimpleContent(RootModel):
+class SimpleContent(RootModel):
     """Simple text content for system/developer messages."""
     model_config = ConfigDict(title='agent.completions.message.SimpleContent')
 
-    root: Union[AgentCompletionsMessageSimpleContentVariant1, AgentCompletionsMessageSimpleContentVariant2]
+    root: Union[SimpleContentVariant1, SimpleContentVariant2]
 

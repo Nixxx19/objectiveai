@@ -3,27 +3,27 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.request.provider import AgentCompletionsRequestProvider
-from objectiveai.functions.executions.request.reasoning import FunctionsExecutionsRequestReasoning
-from objectiveai.functions.executions.request.strategy import FunctionsExecutionsRequestStrategy
-from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
-from objectiveai.functions.inline_function import FunctionsInlineFunction
-from objectiveai.functions.inline_profile import FunctionsInlineProfile
+from objectiveai.agent.completions.request.provider import Provider
+from objectiveai.functions.executions.request.reasoning import Reasoning
+from objectiveai.functions.executions.request.strategy import Strategy
+from objectiveai.functions.expression.input_value import InputValue
+from objectiveai.functions.inline_function import InlineFunction
+from objectiveai.functions.inline_profile import InlineProfile
 
 
-class FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody(BaseModel):
+class FunctionInlineProfileInlineRequestBody(BaseModel):
     """Request body for inline Function with inline Profile."""
     model_config = ConfigDict(title='functions.executions.request.FunctionInlineProfileInlineRequestBody')
 
     from_cache: Optional[bool] = Field(None, description='If true, uses cached votes when available.')
-    function: FunctionsInlineFunction = Field(..., description='The inline Function definition.')
-    input: FunctionsExpressionInputValue = Field(..., description='The input data to pass to the Function.')
+    function: InlineFunction = Field(..., description='The inline Function definition.')
+    input: InputValue = Field(..., description='The input data to pass to the Function.')
     mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
-    profile: FunctionsInlineProfile = Field(..., description='The inline Profile definition.')
-    provider: Optional[AgentCompletionsRequestProvider] = Field(None, description='Provider routing preferences.')
-    reasoning: Optional[FunctionsExecutionsRequestReasoning] = Field(None, description='Reasoning summary configuration.')
+    profile: InlineProfile = Field(..., description='The inline Profile definition.')
+    provider: Optional[Provider] = Field(None, description='Provider routing preferences.')
+    reasoning: Optional[Reasoning] = Field(None, description='Reasoning summary configuration.')
     retry_token: Optional[str] = Field(None, description='If present, reuses votes from a previous execution with this token.')
     seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Random seed for deterministic results.')
-    strategy: Optional[FunctionsExecutionsRequestStrategy] = Field(None, description='Execution strategy.\nDefaults to `Default` strategy if not specified.')
+    strategy: Optional[Strategy] = Field(None, description='Execution strategy.\nDefaults to `Default` strategy if not specified.')
     stream: Optional[bool] = Field(None, description='Whether to stream the response.')
 

@@ -3,20 +3,20 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.task import FunctionsTask
+from objectiveai.functions.task import Task
 
 
-class FunctionsCompiledTaskVariant1(RootModel):
+class CompiledTaskVariant1(RootModel):
     """A single task (no mapping)."""
-    root: FunctionsTask
+    root: Task
 
 
-class FunctionsCompiledTaskVariant2(RootModel):
+class CompiledTaskVariant2(RootModel):
     """Multiple task instances from mapped execution."""
-    root: list[FunctionsTask]
+    root: list[Task]
 
 
-class FunctionsCompiledTask(RootModel):
+class CompiledTask(RootModel):
     """The result of compiling a task expression.
 
 Tasks without a `map` field compile to a single task. Tasks with a `map`
@@ -24,5 +24,5 @@ expression are expanded into multiple tasks, one per integer index from
 0 to the evaluated count."""
     model_config = ConfigDict(title='functions.CompiledTask')
 
-    root: Union[FunctionsCompiledTaskVariant1, FunctionsCompiledTaskVariant2]
+    root: Union[CompiledTaskVariant1, CompiledTaskVariant2]
 

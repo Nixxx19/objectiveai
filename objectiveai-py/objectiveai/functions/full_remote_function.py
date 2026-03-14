@@ -3,20 +3,20 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.alpha_remote_function import FunctionsAlphaRemoteFunction
-from objectiveai.functions.remote_function import FunctionsRemoteFunction
+from objectiveai.functions.alpha_remote_function import AlphaRemoteFunction
+from objectiveai.functions.remote_function import RemoteFunction
 
 
-class FunctionsFullRemoteFunctionVariant1(RootModel):
-    root: FunctionsAlphaRemoteFunction
+class FullRemoteFunctionVariant1(RootModel):
+    root: AlphaRemoteFunction
 
 
-class FunctionsFullRemoteFunctionVariant2(RootModel):
-    root: FunctionsRemoteFunction
+class FullRemoteFunctionVariant2(RootModel):
+    root: RemoteFunction
 
 
-class FunctionsFullRemoteFunction(RootModel):
+class FullRemoteFunction(RootModel):
     model_config = ConfigDict(title='functions.FullRemoteFunction')
 
-    root: Union[FunctionsFullRemoteFunctionVariant1, FunctionsFullRemoteFunctionVariant2]
+    root: Union[FullRemoteFunctionVariant1, FullRemoteFunctionVariant2]
 

@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class AgentCompletionsResponseStreamingObject(RootModel):
+class Object(RootModel):
     """A agent completion chunk object."""
     model_config = ConfigDict(title='agent.completions.response.streaming.Object')
 

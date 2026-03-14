@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.message import AgentCompletionsMessageMessage
-from objectiveai.agent.completions.message.rich_content import AgentCompletionsMessageRichContent
-from objectiveai.agent.completions.request.provider import AgentCompletionsRequestProvider
-from objectiveai.vector.completions.request.ensemble import VectorCompletionsRequestEnsemble
-from objectiveai.vector.completions.request.profile import VectorCompletionsRequestProfile
+from objectiveai.agent.completions.message.message import Message
+from objectiveai.agent.completions.message.rich_content import RichContent
+from objectiveai.agent.completions.request.provider import Provider
+from objectiveai.vector.completions.request.ensemble import Ensemble
+from objectiveai.vector.completions.request.profile import Profile
 
 
-class VectorCompletionsRequestVectorCompletionCreateParams(BaseModel):
+class VectorCompletionCreateParams(BaseModel):
     """Parameters for creating a vector completion.
 
 Vector completions run multiple agent completions (one per LLM in the
@@ -18,13 +18,13 @@ ensemble), force each to vote for one of the predefined responses, and
 combine votes using the provided profile weights to produce final scores."""
     model_config = ConfigDict(title='vector.completions.request.VectorCompletionCreateParams')
 
-    ensemble: VectorCompletionsRequestEnsemble = Field(..., description='The Ensemble of agents to use.')
+    ensemble: Ensemble = Field(..., description='The Ensemble of agents to use.')
     from_cache: Optional[bool] = Field(None, description='If true, uses cached votes when available.')
     mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
-    messages: list[AgentCompletionsMessageMessage] = Field(..., description='The conversation messages (the prompt).')
-    profile: VectorCompletionsRequestProfile = Field(..., description='The profile weights for each agent in the ensemble.\n\nMust have the same length as the total agent count in the ensemble.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.')
-    provider: Optional[AgentCompletionsRequestProvider] = Field(None, description='Provider routing preferences.')
-    responses: list[AgentCompletionsMessageRichContent] = Field(..., description='The possible responses the LLMs can vote for.')
+    messages: list[Message] = Field(..., description='The conversation messages (the prompt).')
+    profile: Profile = Field(..., description='The profile weights for each agent in the ensemble.\n\nMust have the same length as the total agent count in the ensemble.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.')
+    provider: Optional[Provider] = Field(None, description='Provider routing preferences.')
+    responses: list[RichContent] = Field(..., description='The possible responses the LLMs can vote for.')
     retry: Optional[str] = Field(None, description='If present, reuses votes from a previous request with this ID.')
     seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = Field(None, description='Random seed for deterministic results.')
     stream: Optional[bool] = Field(None, description='Whether to stream the response.')

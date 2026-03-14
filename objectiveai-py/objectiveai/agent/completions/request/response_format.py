@@ -5,34 +5,34 @@ from typing import Literal, Optional, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
-class AgentCompletionsRequestResponseFormatVariant1(BaseModel):
+class ResponseFormatVariant1(BaseModel):
     """Plain text response (default)."""
     type_: Literal['text'] = Field(..., alias='type')
 
 
-class AgentCompletionsRequestResponseFormatVariant2(BaseModel):
+class ResponseFormatVariant2(BaseModel):
     """Response must be valid JSON."""
     type_: Literal['json_object'] = Field(..., alias='type')
 
 
-class AgentCompletionsRequestResponseFormatVariant3(BaseModel):
+class ResponseFormatVariant3(BaseModel):
     """Response must conform to a JSON schema."""
     schema: dict[str, object] = Field(..., description='The JSON Schema definition.', json_schema_extra={'additionalProperties': True})
     type_: Literal['json_schema'] = Field(..., alias='type')
 
 
-class AgentCompletionsRequestResponseFormatVariant4(BaseModel):
+class ResponseFormatVariant4(BaseModel):
     """Response must conform to a grammar."""
     grammar: str
     type_: Literal['grammar'] = Field(..., alias='type')
 
 
-class AgentCompletionsRequestResponseFormatVariant5(BaseModel):
+class ResponseFormatVariant5(BaseModel):
     """Response must be valid Python code."""
     type_: Literal['python'] = Field(..., alias='type')
 
 
-class AgentCompletionsRequestResponseFormatVariant6(BaseModel):
+class ResponseFormatVariant6(BaseModel):
     """The final assistant message will contain this tool call"""
     description: str = Field(..., description='A description of the tool.')
     name: str = Field(..., description='The name of the tool.')
@@ -41,9 +41,9 @@ class AgentCompletionsRequestResponseFormatVariant6(BaseModel):
     type_: Literal['tool_call'] = Field(..., alias='type')
 
 
-class AgentCompletionsRequestResponseFormat(RootModel):
+class ResponseFormat(RootModel):
     """The format of the model's response."""
     model_config = ConfigDict(title='agent.completions.request.ResponseFormat')
 
-    root: Union[AgentCompletionsRequestResponseFormatVariant1, AgentCompletionsRequestResponseFormatVariant2, AgentCompletionsRequestResponseFormatVariant3, AgentCompletionsRequestResponseFormatVariant4, AgentCompletionsRequestResponseFormatVariant5, AgentCompletionsRequestResponseFormatVariant6]
+    root: Union[ResponseFormatVariant1, ResponseFormatVariant2, ResponseFormatVariant3, ResponseFormatVariant4, ResponseFormatVariant5, ResponseFormatVariant6]
 

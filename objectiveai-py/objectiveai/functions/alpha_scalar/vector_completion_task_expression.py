@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.agent.completions.message.rich_content import AgentCompletionsMessageRichContent
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
+from objectiveai.agent.completions.message.rich_content import RichContent
+from objectiveai.functions.expression.expression import Expression
 
 
-class FunctionsAlphaScalarVectorCompletionTaskExpression(BaseModel):
+class VectorCompletionTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_scalar.VectorCompletionTaskExpression')
 
-    messages: FunctionsExpressionExpression
-    responses: list[AgentCompletionsMessageRichContent]
-    skip: Optional[FunctionsExpressionExpression] = None
+    messages: Expression
+    responses: list[RichContent]
+    skip: Optional[Expression] = None
 

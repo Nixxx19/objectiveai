@@ -3,12 +3,12 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
+from objectiveai.functions.expression.input_value import InputValue
 
 
-class FunctionsAlphaVectorExpressionVectorFunctionInputValue(BaseModel):
+class VectorFunctionInputValue(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.expression.VectorFunctionInputValue')
 
-    context: Optional[dict[str, FunctionsExpressionInputValue]] = None
-    items: list[FunctionsExpressionInputValue]
+    context: Optional[dict[str, InputValue]] = None
+    items: list[InputValue]
 

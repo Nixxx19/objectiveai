@@ -3,22 +3,22 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.completions.response.streaming.assistant_response_chunk import AgentCompletionsResponseStreamingAssistantResponseChunk
-from objectiveai.agent.completions.response.tool_response import AgentCompletionsResponseToolResponse
+from objectiveai.agent.completions.response.streaming.assistant_response_chunk import AssistantResponseChunk
+from objectiveai.agent.completions.response.tool_response import ToolResponse
 
 
-class AgentCompletionsResponseStreamingMessageChunkVariant1(RootModel):
-    root: AgentCompletionsResponseStreamingAssistantResponseChunk
+class MessageChunkVariant1(RootModel):
+    root: AssistantResponseChunk
 
 
-class AgentCompletionsResponseStreamingMessageChunkVariant2(RootModel):
-    root: AgentCompletionsResponseToolResponse
+class MessageChunkVariant2(RootModel):
+    root: ToolResponse
 
 
-class AgentCompletionsResponseStreamingMessageChunk(RootModel):
+class MessageChunk(RootModel):
     model_config = ConfigDict(title='agent.completions.response.streaming.MessageChunk')
 
-    root: Union[AgentCompletionsResponseStreamingMessageChunkVariant1, AgentCompletionsResponseStreamingMessageChunkVariant2]
+    root: Union[MessageChunkVariant1, MessageChunkVariant2]
 
 
 import objectiveai.agent.completions.response.streaming.message_chunk_methods  # noqa: F401, E402

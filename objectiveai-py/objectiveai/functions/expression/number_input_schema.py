@@ -3,15 +3,15 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.number_input_schema_type import FunctionsExpressionNumberInputSchemaType
+from objectiveai.functions.expression.number_input_schema_type import NumberInputSchemaType
 
 
-class FunctionsExpressionNumberInputSchema(BaseModel):
+class NumberInputSchema(BaseModel):
     """Schema for a floating-point number input."""
     model_config = ConfigDict(title='functions.expression.NumberInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the number.')
     maximum: Optional[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(None, description='Maximum allowed value (inclusive).')
     minimum: Optional[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(None, description='Minimum allowed value (inclusive).')
-    type_: FunctionsExpressionNumberInputSchemaType = Field(..., alias='type')
+    type_: NumberInputSchemaType = Field(..., alias='type')
 

@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.simple_content import AgentCompletionsMessageSimpleContent
+from objectiveai.agent.completions.message.simple_content import SimpleContent
 
 
-class AgentCompletionsMessageDeveloperMessage(BaseModel):
+class DeveloperMessage(BaseModel):
     """A developer message."""
     model_config = ConfigDict(title='agent.completions.message.DeveloperMessage')
 
-    content: AgentCompletionsMessageSimpleContent = Field(..., description='The message content.')
+    content: SimpleContent = Field(..., description='The message content.')
     name: Optional[str] = Field(None, description='Optional name for the message author.')
 

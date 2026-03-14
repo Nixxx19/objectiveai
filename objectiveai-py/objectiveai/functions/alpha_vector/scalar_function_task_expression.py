@@ -3,17 +3,17 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.remote import FunctionsRemote
+from objectiveai.functions.expression.expression import Expression
+from objectiveai.functions.remote import Remote
 
 
-class FunctionsAlphaVectorScalarFunctionTaskExpression(BaseModel):
+class ScalarFunctionTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.ScalarFunctionTaskExpression')
 
     commit: str
-    input: FunctionsExpressionExpression
+    input: Expression
     owner: str
-    remote: FunctionsRemote
+    remote: Remote
     repository: str
-    skip: Optional[FunctionsExpressionExpression] = None
+    skip: Optional[Expression] = None
 

@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class AgentCompletionsMessageAssistantToolCallType(RootModel):
+class AssistantToolCallType(RootModel):
     """A function call."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCallType')
 

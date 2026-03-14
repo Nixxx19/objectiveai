@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsMessageAssistantToolCallFunction(BaseModel):
+class AssistantToolCallFunction(BaseModel):
     """Details of a function call made by the assistant."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCallFunction')
 

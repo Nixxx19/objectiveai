@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class VectorCompletionsRequestProfileEntry(BaseModel):
+class ProfileEntry(BaseModel):
     """An entry in a profile with an explicit weight and optional invert flag."""
     model_config = ConfigDict(title='vector.completions.request.ProfileEntry')
 

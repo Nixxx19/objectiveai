@@ -5,19 +5,19 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class AgentCompletionsRequestProviderDataCollectionVariant1(RootModel):
+class ProviderDataCollectionVariant1(RootModel):
     """Do not allow data collection."""
     root: Literal['deny']
 
 
-class AgentCompletionsRequestProviderDataCollectionVariant2(RootModel):
+class ProviderDataCollectionVariant2(RootModel):
     """Allow data collection."""
     root: Literal['allow']
 
 
-class AgentCompletionsRequestProviderDataCollection(RootModel):
+class ProviderDataCollection(RootModel):
     """Data collection policy for providers."""
     model_config = ConfigDict(title='agent.completions.request.ProviderDataCollection')
 
-    root: Union[AgentCompletionsRequestProviderDataCollectionVariant1, AgentCompletionsRequestProviderDataCollectionVariant2]
+    root: Union[ProviderDataCollectionVariant1, ProviderDataCollectionVariant2]
 

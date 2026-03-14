@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class FunctionsInventionsIndexObject(BaseModel):
+class IndexObject(BaseModel):
     model_config = ConfigDict(title='functions.inventions.IndexObject')
 
     index: int = Field(..., ge=0, le=18446744073709551615)

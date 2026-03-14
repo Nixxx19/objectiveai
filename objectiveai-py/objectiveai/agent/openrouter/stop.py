@@ -5,22 +5,22 @@ from typing import Union
 from pydantic import ConfigDict, RootModel
 
 
-class AgentOpenrouterStopVariant1(RootModel):
+class StopVariant1(RootModel):
     """A single stop sequence."""
     root: str
 
 
-class AgentOpenrouterStopVariant2(RootModel):
+class StopVariant2(RootModel):
     """Multiple stop sequences (up to 4 typically supported)."""
     root: list[str]
 
 
-class AgentOpenrouterStop(RootModel):
+class Stop(RootModel):
     """Stop sequences that terminate model generation.
 
 When the model generates any of these sequences, it immediately
 stops producing further tokens."""
     model_config = ConfigDict(title='agent.openrouter.Stop')
 
-    root: Union[AgentOpenrouterStopVariant1, AgentOpenrouterStopVariant2]
+    root: Union[StopVariant1, StopVariant2]
 

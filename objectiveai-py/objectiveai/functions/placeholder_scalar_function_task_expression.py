@@ -3,21 +3,21 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
-from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
+from objectiveai.functions.expression.expression import Expression
+from objectiveai.functions.expression.input_schema import InputSchema
+from objectiveai.functions.expression.with_expression import InputValueExpression
 
 
-class FunctionsPlaceholderScalarFunctionTaskExpression(BaseModel):
+class PlaceholderScalarFunctionTaskExpression(BaseModel):
     """Expression for a placeholder scalar function task (pre-compilation).
 
 Like [`ScalarFunctionTaskExpression`] but without owner/repository/commit.
 Always produces a fixed output of 0.5."""
     model_config = ConfigDict(title='functions.PlaceholderScalarFunctionTaskExpression')
 
-    input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).')
-    input_schema: FunctionsExpressionInputSchema = Field(..., description='JSON Schema defining the expected input structure.')
-    map: Optional[FunctionsExpressionExpression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
-    output: FunctionsExpressionExpression = Field(..., description='Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`.')
-    skip: Optional[FunctionsExpressionExpression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
+    input: InputValueExpression = Field(..., description='Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped).')
+    input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
+    map: Optional[Expression] = Field(None, description='Expression that evaluates to the number of mapped task instances.\nEach instance receives `map` as an integer index (0-based).')
+    output: Expression = Field(..., description='Expression to transform the fixed 0.5 output.\nReceives: `input`, `output` as `Scalar(0.5)`.')
+    skip: Optional[Expression] = Field(None, description='If this expression evaluates to true, skip the task. Receives: `input`.')
 

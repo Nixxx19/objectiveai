@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentUsageAgent(BaseModel):
+class UsageAgent(BaseModel):
     """Usage statistics for an Agent."""
     model_config = ConfigDict(title='agent.UsageAgent')
 

@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class AgentMockUpstream(RootModel):
+class Upstream(RootModel):
     """Mock upstream marker."""
     model_config = ConfigDict(title='agent.mock.Upstream')
 

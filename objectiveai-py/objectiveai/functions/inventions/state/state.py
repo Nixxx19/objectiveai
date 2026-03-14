@@ -3,46 +3,46 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.inventions.state.alpha_scalar_branch_state import FunctionsInventionsStateAlphaScalarBranchState
-from objectiveai.functions.inventions.state.alpha_scalar_leaf_state import FunctionsInventionsStateAlphaScalarLeafState
-from objectiveai.functions.inventions.state.alpha_vector_branch_state import FunctionsInventionsStateAlphaVectorBranchState
-from objectiveai.functions.inventions.state.alpha_vector_leaf_state import FunctionsInventionsStateAlphaVectorLeafState
+from objectiveai.functions.inventions.state.alpha_scalar_branch_state import AlphaScalarBranchState
+from objectiveai.functions.inventions.state.alpha_scalar_leaf_state import AlphaScalarLeafState
+from objectiveai.functions.inventions.state.alpha_vector_branch_state import AlphaVectorBranchState
+from objectiveai.functions.inventions.state.alpha_vector_leaf_state import AlphaVectorLeafState
 
 
-class FunctionsInventionsStateStateVariant1Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaScalarBranchState
+class StateVariant1Variant1(RootModel):
+    root: AlphaScalarBranchState
 
 
-class FunctionsInventionsStateStateVariant1(BaseModel):
+class StateVariant1(BaseModel):
     type_: Literal['alpha.scalar.branch.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateStateVariant2Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaScalarLeafState
+class StateVariant2Variant1(RootModel):
+    root: AlphaScalarLeafState
 
 
-class FunctionsInventionsStateStateVariant2(BaseModel):
+class StateVariant2(BaseModel):
     type_: Literal['alpha.scalar.leaf.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateStateVariant3Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaVectorBranchState
+class StateVariant3Variant1(RootModel):
+    root: AlphaVectorBranchState
 
 
-class FunctionsInventionsStateStateVariant3(BaseModel):
+class StateVariant3(BaseModel):
     type_: Literal['alpha.vector.branch.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateStateVariant4Variant1(RootModel):
-    root: FunctionsInventionsStateAlphaVectorLeafState
+class StateVariant4Variant1(RootModel):
+    root: AlphaVectorLeafState
 
 
-class FunctionsInventionsStateStateVariant4(BaseModel):
+class StateVariant4(BaseModel):
     type_: Literal['alpha.vector.leaf.function'] = Field(..., alias='type')
 
 
-class FunctionsInventionsStateState(RootModel):
+class State(RootModel):
     model_config = ConfigDict(title='functions.inventions.state.State')
 
-    root: Union[FunctionsInventionsStateStateVariant1, FunctionsInventionsStateStateVariant2, FunctionsInventionsStateStateVariant3, FunctionsInventionsStateStateVariant4]
+    root: Union[StateVariant1, StateVariant2, StateVariant3, StateVariant4]
 

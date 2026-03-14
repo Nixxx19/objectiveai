@@ -2,21 +2,21 @@
 from __future__ import annotations
 
 from objectiveai.agent.completions.response.streaming.message_chunk import (
-    AgentCompletionsResponseStreamingMessageChunk,
-    AgentCompletionsResponseStreamingMessageChunkVariant1,
+    MessageChunk,
+    MessageChunkVariant1,
 )
 
 
-def _push(self, other: AgentCompletionsResponseStreamingMessageChunk) -> None:
+def _push(self, other: MessageChunk) -> None:
     self_inner = self.root
     other_inner = other.root
 
     # Only merge if both are assistant variants
     if (
-        isinstance(self_inner, AgentCompletionsResponseStreamingMessageChunkVariant1)
-        and isinstance(other_inner, AgentCompletionsResponseStreamingMessageChunkVariant1)
+        isinstance(self_inner, MessageChunkVariant1)
+        and isinstance(other_inner, MessageChunkVariant1)
     ):
         self_inner.root.push(other_inner.root)
 
 
-AgentCompletionsResponseStreamingMessageChunk.push = _push
+MessageChunk.push = _push

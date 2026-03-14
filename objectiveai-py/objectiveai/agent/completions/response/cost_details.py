@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsResponseCostDetails(BaseModel):
+class CostDetails(BaseModel):
     """Detailed cost breakdown."""
     model_config = ConfigDict(title='agent.completions.response.CostDetails')
 

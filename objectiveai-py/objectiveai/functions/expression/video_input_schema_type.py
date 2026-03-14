@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionVideoInputSchemaType(RootModel):
+class VideoInputSchemaType(RootModel):
     model_config = ConfigDict(title='functions.expression.VideoInputSchemaType')
 
     root: Literal['video']

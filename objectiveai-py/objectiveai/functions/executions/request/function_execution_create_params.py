@@ -3,38 +3,38 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.executions.request.function_inline_profile_inline_request_body import FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody
-from objectiveai.functions.executions.request.function_inline_profile_remote_request_body import FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody
-from objectiveai.functions.executions.request.function_remote_profile_inline_request_body import FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody
-from objectiveai.functions.executions.request.function_remote_profile_remote_request_body import FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody
+from objectiveai.functions.executions.request.function_inline_profile_inline_request_body import FunctionInlineProfileInlineRequestBody
+from objectiveai.functions.executions.request.function_inline_profile_remote_request_body import FunctionInlineProfileRemoteRequestBody
+from objectiveai.functions.executions.request.function_remote_profile_inline_request_body import FunctionRemoteProfileInlineRequestBody
+from objectiveai.functions.executions.request.function_remote_profile_remote_request_body import FunctionRemoteProfileRemoteRequestBody
 
 
-class FunctionsExecutionsRequestFunctionExecutionCreateParamsVariant1(RootModel):
+class FunctionExecutionCreateParamsVariant1(RootModel):
     """Inline Function with inline Profile."""
-    root: FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody
+    root: FunctionInlineProfileInlineRequestBody
 
 
-class FunctionsExecutionsRequestFunctionExecutionCreateParamsVariant2(RootModel):
+class FunctionExecutionCreateParamsVariant2(RootModel):
     """Inline Function with remote Profile."""
-    root: FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody
+    root: FunctionInlineProfileRemoteRequestBody
 
 
-class FunctionsExecutionsRequestFunctionExecutionCreateParamsVariant3(RootModel):
+class FunctionExecutionCreateParamsVariant3(RootModel):
     """Remote Function with inline Profile."""
-    root: FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody
+    root: FunctionRemoteProfileInlineRequestBody
 
 
-class FunctionsExecutionsRequestFunctionExecutionCreateParamsVariant4(RootModel):
+class FunctionExecutionCreateParamsVariant4(RootModel):
     """Remote Function with remote Profile."""
-    root: FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody
+    root: FunctionRemoteProfileRemoteRequestBody
 
 
-class FunctionsExecutionsRequestFunctionExecutionCreateParams(RootModel):
+class FunctionExecutionCreateParams(RootModel):
     """Parameters for creating a function execution.
 
 Supports four combinations based on whether the Function and Profile
 are provided inline or referenced from remote repositories."""
     model_config = ConfigDict(title='functions.executions.request.FunctionExecutionCreateParams')
 
-    root: Union[FunctionsExecutionsRequestFunctionExecutionCreateParamsVariant1, FunctionsExecutionsRequestFunctionExecutionCreateParamsVariant2, FunctionsExecutionsRequestFunctionExecutionCreateParamsVariant3, FunctionsExecutionsRequestFunctionExecutionCreateParamsVariant4]
+    root: Union[FunctionExecutionCreateParamsVariant1, FunctionExecutionCreateParamsVariant2, FunctionExecutionCreateParamsVariant3, FunctionExecutionCreateParamsVariant4]
 

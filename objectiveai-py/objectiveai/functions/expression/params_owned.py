@@ -3,15 +3,15 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.input_value import FunctionsExpressionInputValue
-from objectiveai.functions.expression.task_output_owned import FunctionsExpressionTaskOutputOwned
+from objectiveai.functions.expression.input_value import InputValue
+from objectiveai.functions.expression.task_output_owned import TaskOutputOwned
 
 
-class FunctionsExpressionParamsOwned(BaseModel):
+class ParamsOwned(BaseModel):
     """Owned version of expression parameters."""
     model_config = ConfigDict(title='functions.expression.ParamsOwned')
 
-    input: FunctionsExpressionInputValue = Field(..., description="The function's input data.")
+    input: InputValue = Field(..., description="The function's input data.")
     map: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Current map index. Only populated for mapped task expressions.')
-    output: Optional[FunctionsExpressionTaskOutputOwned] = Field(None, description='Results from executed tasks. Only populated for task output expressions.')
+    output: Optional[TaskOutputOwned] = Field(None, description='Results from executed tasks. Only populated for task output expressions.')
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class FunctionsProfilesComputationsResponseFittingStats(BaseModel):
+class FittingStats(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.response.FittingStats')
 
     errors: int = Field(..., ge=0, le=4294967295)

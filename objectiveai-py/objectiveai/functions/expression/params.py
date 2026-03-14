@@ -3,25 +3,25 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.expression.params_owned import FunctionsExpressionParamsOwned
-from objectiveai.functions.expression.params_ref import FunctionsExpressionParamsRef
+from objectiveai.functions.expression.params_owned import ParamsOwned
+from objectiveai.functions.expression.params_ref import ParamsRef
 
 
-class FunctionsExpressionParamsVariant1(RootModel):
+class ParamsVariant1(RootModel):
     """Owned version (for deserialization)."""
-    root: FunctionsExpressionParamsOwned
+    root: ParamsOwned
 
 
-class FunctionsExpressionParamsVariant2(RootModel):
+class ParamsVariant2(RootModel):
     """Borrowed version (for efficient evaluation)."""
-    root: FunctionsExpressionParamsRef
+    root: ParamsRef
 
 
-class FunctionsExpressionParams(RootModel):
+class Params(RootModel):
     """Context for evaluating expressions (JMESPath or Starlark).
 
 Contains all data accessible within expressions: `input`, `output`, and `map`."""
     model_config = ConfigDict(title='functions.expression.Params')
 
-    root: Union[FunctionsExpressionParamsVariant1, FunctionsExpressionParamsVariant2]
+    root: Union[ParamsVariant1, ParamsVariant2]
 

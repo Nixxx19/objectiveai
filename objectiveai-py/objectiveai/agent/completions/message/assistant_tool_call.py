@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.assistant_tool_call_function import AgentCompletionsMessageAssistantToolCallFunction
+from objectiveai.agent.completions.message.assistant_tool_call_function import AssistantToolCallFunction
 
 
-class AgentCompletionsMessageAssistantToolCall(BaseModel):
+class AssistantToolCall(BaseModel):
     """A function call with an ID and function details."""
     model_config = ConfigDict(title='agent.completions.message.AssistantToolCall')
 
-    function: AgentCompletionsMessageAssistantToolCallFunction = Field(..., description='The function being called.')
+    function: AssistantToolCallFunction = Field(..., description='The function being called.')
     id: str = Field(..., description='The unique ID of this tool call.')
     type_: Literal['function'] = Field(..., alias='type')
 

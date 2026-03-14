@@ -3,19 +3,19 @@
 from __future__ import annotations
 from typing import Annotated, Optional, TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.array_input_schema_type import FunctionsExpressionArrayInputSchemaType
+from objectiveai.functions.expression.array_input_schema_type import ArrayInputSchemaType
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
+    from objectiveai.functions.expression.input_schema import InputSchema
 
 
-class FunctionsExpressionArrayInputSchema(BaseModel):
+class ArrayInputSchema(BaseModel):
     """Schema for an array input."""
     model_config = ConfigDict(title='functions.expression.ArrayInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the array.')
-    items: FunctionsExpressionInputSchema = Field(..., description='Schema for each item in the array.')
+    items: InputSchema = Field(..., description='Schema for each item in the array.')
     max_items: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, alias='maxItems', description='Maximum number of items allowed.')
     min_items: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, alias='minItems', description='Minimum number of items required.')
-    type_: FunctionsExpressionArrayInputSchemaType = Field(..., alias='type')
+    type_: ArrayInputSchemaType = Field(..., alias='type')
 

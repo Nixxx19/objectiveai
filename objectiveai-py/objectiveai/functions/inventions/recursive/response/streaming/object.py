@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsInventionsRecursiveResponseStreamingObject(RootModel):
+class Object(RootModel):
     model_config = ConfigDict(title='functions.inventions.recursive.response.streaming.Object')
 
     root: Literal['alpha.scalar.function.invention.recursive.chunk', 'alpha.vector.function.invention.recursive.chunk']

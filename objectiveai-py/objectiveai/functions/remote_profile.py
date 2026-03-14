@@ -3,23 +3,23 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.remote_auto_profile import FunctionsRemoteAutoProfile
-from objectiveai.functions.remote_tasks_profile import FunctionsRemoteTasksProfile
+from objectiveai.functions.remote_auto_profile import RemoteAutoProfile
+from objectiveai.functions.remote_tasks_profile import RemoteTasksProfile
 
 
-class FunctionsRemoteProfileVariant1(RootModel):
+class RemoteProfileVariant1(RootModel):
     """Tasks-based profile with per-task configuration."""
-    root: FunctionsRemoteTasksProfile
+    root: RemoteTasksProfile
 
 
-class FunctionsRemoteProfileVariant2(RootModel):
+class RemoteProfileVariant2(RootModel):
     """Auto profile that applies a single ensemble+weights to all vector completion tasks."""
-    root: FunctionsRemoteAutoProfile
+    root: RemoteAutoProfile
 
 
-class FunctionsRemoteProfile(RootModel):
+class RemoteProfile(RootModel):
     """A remote profile, either tasks-based or auto."""
     model_config = ConfigDict(title='functions.RemoteProfile')
 
-    root: Union[FunctionsRemoteProfileVariant1, FunctionsRemoteProfileVariant2]
+    root: Union[RemoteProfileVariant1, RemoteProfileVariant2]
 

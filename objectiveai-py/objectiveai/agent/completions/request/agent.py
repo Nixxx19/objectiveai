@@ -3,20 +3,20 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.agent_base import AgentAgentBase
+from objectiveai.agent.agent_base import AgentBase
 
 
-class AgentCompletionsRequestAgentVariant1(RootModel):
+class AgentVariant1(RootModel):
     """The content-addressed ID of an Agent stored in ObjectiveAI's database."""
     root: str
 
 
-class AgentCompletionsRequestAgentVariant2(RootModel):
+class AgentVariant2(RootModel):
     """An inline Agent configuration."""
-    root: AgentAgentBase
+    root: AgentBase
 
 
-class AgentCompletionsRequestAgent(RootModel):
+class Agent(RootModel):
     """The agent to use for agent completion.
 
 Can be either:
@@ -28,5 +28,5 @@ when they are successfully used. "Previously used" means the ID exists in
 ObjectiveAI's database from any successful use by anyone."""
     model_config = ConfigDict(title='agent.completions.request.Agent')
 
-    root: Union[AgentCompletionsRequestAgentVariant1, AgentCompletionsRequestAgentVariant2]
+    root: Union[AgentVariant1, AgentVariant2]
 

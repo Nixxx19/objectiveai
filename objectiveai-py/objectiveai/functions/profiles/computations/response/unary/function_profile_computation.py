@@ -3,24 +3,24 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
-from objectiveai.functions.inline_tasks_profile import FunctionsInlineTasksProfile
-from objectiveai.functions.profiles.computations.response.fitting_stats import FunctionsProfilesComputationsResponseFittingStats
-from objectiveai.functions.profiles.computations.response.unary.function_execution import FunctionsProfilesComputationsResponseUnaryFunctionExecution
-from objectiveai.functions.profiles.computations.response.unary.object import FunctionsProfilesComputationsResponseUnaryObject
+from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.functions.inline_tasks_profile import InlineTasksProfile
+from objectiveai.functions.profiles.computations.response.fitting_stats import FittingStats
+from objectiveai.functions.profiles.computations.response.unary.function_execution import FunctionExecution
+from objectiveai.functions.profiles.computations.response.unary.object import Object
 
 
-class FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation(BaseModel):
+class FunctionProfileComputation(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.response.unary.FunctionProfileComputation')
 
     created: int = Field(..., ge=0, le=18446744073709551615)
-    executions: list[FunctionsProfilesComputationsResponseUnaryFunctionExecution]
+    executions: list[FunctionExecution]
     executions_errors: bool
-    fitting_stats: FunctionsProfilesComputationsResponseFittingStats
+    fitting_stats: FittingStats
     function: Optional[str] = None
     id: str
-    object: FunctionsProfilesComputationsResponseUnaryObject
-    profile: FunctionsInlineTasksProfile
+    object: Object
+    profile: InlineTasksProfile
     retry_token: Optional[str] = None
-    usage: AgentCompletionsResponseUsage
+    usage: Usage
 

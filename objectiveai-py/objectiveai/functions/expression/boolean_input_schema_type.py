@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionBooleanInputSchemaType(RootModel):
+class BooleanInputSchemaType(RootModel):
     model_config = ConfigDict(title='functions.expression.BooleanInputSchemaType')
 
     root: Literal['boolean']

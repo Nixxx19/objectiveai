@@ -3,12 +3,12 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.list_functions_source import FunctionsListFunctionsSource
+from objectiveai.functions.list_functions_source import ListFunctionsSource
 
 
-class FunctionsListFunctionsQueryParameters(BaseModel):
+class ListFunctionsQueryParameters(BaseModel):
     """Query parameters for the list functions endpoint."""
     model_config = ConfigDict(title='functions.ListFunctionsQueryParameters')
 
-    source: Optional[FunctionsListFunctionsSource] = Field(None, description='Optional source filter for listing functions.')
+    source: Optional[ListFunctionsSource] = Field(None, description='Optional source filter for listing functions.')
 

@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionImageInputSchemaType(RootModel):
+class ImageInputSchemaType(RootModel):
     model_config = ConfigDict(title='functions.expression.ImageInputSchemaType')
 
     root: Literal['image']

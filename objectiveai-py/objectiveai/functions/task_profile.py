@@ -3,35 +3,35 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.remote import FunctionsRemote
+from objectiveai.functions.remote import Remote
 
 if TYPE_CHECKING:
-    from objectiveai.functions.inline_profile import FunctionsInlineProfile
+    from objectiveai.functions.inline_profile import InlineProfile
 
 
-class FunctionsTaskProfileVariant1(BaseModel):
+class TaskProfileVariant1(BaseModel):
     """Profile for a nested function task (references another profile)."""
     commit: Optional[str] = Field(None, description="Git commit SHA. Highly recommended for remote profiles to\nensure compatibility if the referenced profile's shape changes.")
     owner: str = Field(..., description='Repository owner.')
-    remote: FunctionsRemote = Field(..., description='The remote source where the profile is hosted.')
+    remote: Remote = Field(..., description='The remote source where the profile is hosted.')
     repository: str = Field(..., description='Repository name.')
 
 
-class FunctionsTaskProfileVariant2(RootModel):
+class TaskProfileVariant2(RootModel):
     """Inline profile for a task (tasks-based or auto)."""
-    root: FunctionsInlineProfile
+    root: InlineProfile
 
 
-class FunctionsTaskProfileVariant3(RootModel):
+class TaskProfileVariant3(RootModel):
     """Placeholder task — no configuration needed, output is fixed."""
     root: dict[str, object]
 
 
-class FunctionsTaskProfile(RootModel):
+class TaskProfile(RootModel):
     """Configuration for a single task within a Profile.
 
 Each variant corresponds to a task type in the Function definition."""
     model_config = ConfigDict(title='functions.TaskProfile')
 
-    root: Union[FunctionsTaskProfileVariant1, FunctionsTaskProfileVariant2, FunctionsTaskProfileVariant3]
+    root: Union[TaskProfileVariant1, TaskProfileVariant2, TaskProfileVariant3]
 

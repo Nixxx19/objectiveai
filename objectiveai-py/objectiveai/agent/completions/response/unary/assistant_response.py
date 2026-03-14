@@ -3,32 +3,32 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.assistant_tool_call import AgentCompletionsMessageAssistantToolCall
-from objectiveai.agent.completions.message.rich_content import AgentCompletionsMessageRichContent
-from objectiveai.agent.completions.response.assistant_role import AgentCompletionsResponseAssistantRole
-from objectiveai.agent.completions.response.finish_reason import AgentCompletionsResponseFinishReason
-from objectiveai.agent.completions.response.logprobs import AgentCompletionsResponseLogprobs
-from objectiveai.agent.completions.response.upstream_usage import AgentCompletionsResponseUpstreamUsage
+from objectiveai.agent.completions.message.assistant_tool_call import AssistantToolCall
+from objectiveai.agent.completions.message.rich_content import RichContent
+from objectiveai.agent.completions.response.assistant_role import AssistantRole
+from objectiveai.agent.completions.response.finish_reason import FinishReason
+from objectiveai.agent.completions.response.logprobs import Logprobs
+from objectiveai.agent.completions.response.upstream_usage import UpstreamUsage
 
 
-class AgentCompletionsResponseUnaryAssistantResponse(BaseModel):
+class AssistantResponse(BaseModel):
     """An assistant response in a unary agent completion."""
     model_config = ConfigDict(title='agent.completions.response.unary.AssistantResponse')
 
     agent: str
-    content: Optional[AgentCompletionsMessageRichContent] = None
+    content: Optional[RichContent] = None
     created: int = Field(..., ge=0, le=18446744073709551615)
-    finish_reason: AgentCompletionsResponseFinishReason
+    finish_reason: FinishReason
     index: int = Field(..., ge=0, le=18446744073709551615)
-    logprobs: Optional[AgentCompletionsResponseLogprobs] = None
+    logprobs: Optional[Logprobs] = None
     model: str
     provider: Optional[str] = None
     reasoning: Optional[str] = None
     refusal: Optional[str] = None
-    role: AgentCompletionsResponseAssistantRole
+    role: AssistantRole
     service_tier: Optional[str] = None
     system_fingerprint: Optional[str] = None
-    tool_calls: Optional[list[AgentCompletionsMessageAssistantToolCall]] = None
+    tool_calls: Optional[list[AssistantToolCall]] = None
     upstream_id: str
-    usage: AgentCompletionsResponseUpstreamUsage = Field(..., description='Upstream usage for this assistant response (set by upstream clients).')
+    usage: UpstreamUsage = Field(..., description='Upstream usage for this assistant response (set by upstream clients).')
 

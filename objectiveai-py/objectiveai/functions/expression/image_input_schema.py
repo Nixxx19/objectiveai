@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.image_input_schema_type import FunctionsExpressionImageInputSchemaType
+from objectiveai.functions.expression.image_input_schema_type import ImageInputSchemaType
 
 
-class FunctionsExpressionImageInputSchema(BaseModel):
+class ImageInputSchema(BaseModel):
     """Schema for an image input (URL or base64-encoded)."""
     model_config = ConfigDict(title='functions.expression.ImageInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the expected image.')
-    type_: FunctionsExpressionImageInputSchemaType = Field(..., alias='type')
+    type_: ImageInputSchemaType = Field(..., alias='type')
 

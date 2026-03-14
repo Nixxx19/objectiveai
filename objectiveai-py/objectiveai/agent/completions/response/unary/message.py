@@ -3,20 +3,20 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.completions.response.tool_response import AgentCompletionsResponseToolResponse
-from objectiveai.agent.completions.response.unary.assistant_response import AgentCompletionsResponseUnaryAssistantResponse
+from objectiveai.agent.completions.response.tool_response import ToolResponse
+from objectiveai.agent.completions.response.unary.assistant_response import AssistantResponse
 
 
-class AgentCompletionsResponseUnaryMessageVariant1(RootModel):
-    root: AgentCompletionsResponseUnaryAssistantResponse
+class MessageVariant1(RootModel):
+    root: AssistantResponse
 
 
-class AgentCompletionsResponseUnaryMessageVariant2(RootModel):
-    root: AgentCompletionsResponseToolResponse
+class MessageVariant2(RootModel):
+    root: ToolResponse
 
 
-class AgentCompletionsResponseUnaryMessage(RootModel):
+class Message(RootModel):
     model_config = ConfigDict(title='agent.completions.response.unary.Message')
 
-    root: Union[AgentCompletionsResponseUnaryMessageVariant1, AgentCompletionsResponseUnaryMessageVariant2]
+    root: Union[MessageVariant1, MessageVariant2]
 

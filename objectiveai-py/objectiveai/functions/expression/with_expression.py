@@ -3,31 +3,31 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING, Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.completions.message.file import AgentCompletionsMessageFile
-from objectiveai.agent.completions.message.image_url import AgentCompletionsMessageImageUrl
-from objectiveai.agent.completions.message.input_audio import AgentCompletionsMessageInputAudio
-from objectiveai.agent.completions.message.video_url import AgentCompletionsMessageVideoUrl
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
+from objectiveai.agent.completions.message.file import File as AgentCompletionsMessageFile
+from objectiveai.agent.completions.message.image_url import ImageUrl as AgentCompletionsMessageImageUrl
+from objectiveai.agent.completions.message.input_audio import InputAudio as AgentCompletionsMessageInputAudio
+from objectiveai.agent.completions.message.video_url import VideoUrl as AgentCompletionsMessageVideoUrl
+from objectiveai.functions.expression.expression import Expression
 
 if TYPE_CHECKING:
-    from objectiveai.agent.completions.message.assistant_tool_call_expression import AgentCompletionsMessageAssistantToolCallExpression
-    from objectiveai.agent.completions.message.assistant_tool_call_function_expression import AgentCompletionsMessageAssistantToolCallFunctionExpression
-    from objectiveai.agent.completions.message.message_expression import AgentCompletionsMessageMessageExpression
-    from objectiveai.agent.completions.message.rich_content_expression import AgentCompletionsMessageRichContentExpression
-    from objectiveai.agent.completions.message.rich_content_part_expression import AgentCompletionsMessageRichContentPartExpression
-    from objectiveai.agent.completions.message.simple_content_expression import AgentCompletionsMessageSimpleContentExpression
-    from objectiveai.agent.completions.message.simple_content_part_expression import AgentCompletionsMessageSimpleContentPartExpression
-    from objectiveai.functions.expression.input_value_expression import FunctionsExpressionInputValueExpression
+    from objectiveai.agent.completions.message.assistant_tool_call_expression import AssistantToolCallExpression
+    from objectiveai.agent.completions.message.assistant_tool_call_function_expression import AssistantToolCallFunctionExpression as AgentCompletionsMessageAssistantToolCallFunctionExpression
+    from objectiveai.agent.completions.message.message_expression import MessageExpression
+    from objectiveai.agent.completions.message.rich_content_expression import RichContentExpression
+    from objectiveai.agent.completions.message.rich_content_part_expression import RichContentPartExpression as AgentCompletionsMessageRichContentPartExpression
+    from objectiveai.agent.completions.message.simple_content_expression import SimpleContentExpression as AgentCompletionsMessageSimpleContentExpression
+    from objectiveai.agent.completions.message.simple_content_part_expression import SimpleContentPartExpression as AgentCompletionsMessageSimpleContentPartExpression
+    from objectiveai.functions.expression.input_value_expression import InputValueExpression as FunctionsExpressionInputValueExpression
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionVariant2(RootModel):
     """A literal value."""
-    root: AgentCompletionsMessageAssistantToolCallExpression
+    root: AssistantToolCallExpression
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression(RootModel):
@@ -58,17 +58,17 @@ Starlark expression:
     root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionVariant2]
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionVariant1(RootModel):
+class AssistantToolCallFunctionExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionVariant2(RootModel):
+class AssistantToolCallFunctionExpressionVariant2(RootModel):
     """A literal value."""
     root: AgentCompletionsMessageAssistantToolCallFunctionExpression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpression(RootModel):
+class AssistantToolCallFunctionExpression(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -93,20 +93,20 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression')
 
-    root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallFunctionExpressionVariant2]
+    root: Union[AssistantToolCallFunctionExpressionVariant1, AssistantToolCallFunctionExpressionVariant2]
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageFileVariant1(RootModel):
+class FileVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageFileVariant2(RootModel):
+class FileVariant2(RootModel):
     """A literal value."""
     root: AgentCompletionsMessageFile
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageFile(RootModel):
+class File(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -131,20 +131,20 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.agent.completions.message.File')
 
-    root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageFileVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageFileVariant2]
+    root: Union[FileVariant1, FileVariant2]
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlVariant1(RootModel):
+class ImageUrlVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlVariant2(RootModel):
+class ImageUrlVariant2(RootModel):
     """A literal value."""
     root: AgentCompletionsMessageImageUrl
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrl(RootModel):
+class ImageUrl(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -169,20 +169,20 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.agent.completions.message.ImageUrl')
 
-    root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageImageUrlVariant2]
+    root: Union[ImageUrlVariant1, ImageUrlVariant2]
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioVariant1(RootModel):
+class InputAudioVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioVariant2(RootModel):
+class InputAudioVariant2(RootModel):
     """A literal value."""
     root: AgentCompletionsMessageInputAudio
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudio(RootModel):
+class InputAudio(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -207,17 +207,17 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.agent.completions.message.InputAudio')
 
-    root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageInputAudioVariant2]
+    root: Union[InputAudioVariant1, InputAudioVariant2]
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionVariant2(RootModel):
     """A literal value."""
-    root: AgentCompletionsMessageMessageExpression
+    root: MessageExpression
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpression(RootModel):
@@ -250,12 +250,12 @@ Starlark expression:
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionVariant2(RootModel):
     """A literal value."""
-    root: AgentCompletionsMessageRichContentExpression
+    root: RichContentExpression
 
 
 class FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression(RootModel):
@@ -286,17 +286,17 @@ Starlark expression:
     root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionVariant2]
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionVariant1(RootModel):
+class RichContentPartExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionVariant2(RootModel):
+class RichContentPartExpressionVariant2(RootModel):
     """A literal value."""
     root: AgentCompletionsMessageRichContentPartExpression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpression(RootModel):
+class RichContentPartExpression(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -321,20 +321,20 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.agent.completions.message.RichContentPartExpression')
 
-    root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpressionVariant2]
+    root: Union[RichContentPartExpressionVariant1, RichContentPartExpressionVariant2]
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionVariant1(RootModel):
+class SimpleContentExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionVariant2(RootModel):
+class SimpleContentExpressionVariant2(RootModel):
     """A literal value."""
     root: AgentCompletionsMessageSimpleContentExpression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpression(RootModel):
+class SimpleContentExpression(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -359,20 +359,20 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.agent.completions.message.SimpleContentExpression')
 
-    root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentExpressionVariant2]
+    root: Union[SimpleContentExpressionVariant1, SimpleContentExpressionVariant2]
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionVariant1(RootModel):
+class SimpleContentPartExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionVariant2(RootModel):
+class SimpleContentPartExpressionVariant2(RootModel):
     """A literal value."""
     root: AgentCompletionsMessageSimpleContentPartExpression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpression(RootModel):
+class SimpleContentPartExpression(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -397,20 +397,20 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.agent.completions.message.SimpleContentPartExpression')
 
-    root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageSimpleContentPartExpressionVariant2]
+    root: Union[SimpleContentPartExpressionVariant1, SimpleContentPartExpressionVariant2]
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlVariant1(RootModel):
+class VideoUrlVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlVariant2(RootModel):
+class VideoUrlVariant2(RootModel):
     """A literal value."""
     root: AgentCompletionsMessageVideoUrl
 
 
-class FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrl(RootModel):
+class VideoUrl(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -435,12 +435,12 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.agent.completions.message.VideoUrl')
 
-    root: Union[FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlVariant1, FunctionsExpressionWithExpressionAgentCompletionsMessageVideoUrlVariant2]
+    root: Union[VideoUrlVariant1, VideoUrlVariant2]
 
 
 class FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
 class FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageMessageExpressionVariant2(RootModel):
@@ -478,7 +478,7 @@ Starlark expression:
 
 class FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
 class FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionVariant2(RootModel):
@@ -514,17 +514,17 @@ Starlark expression:
     root: Union[FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionVariant1, FunctionsExpressionWithExpressionArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpressionVariant2]
 
 
-class FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionVariant1(RootModel):
+class InputValueExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionVariant2(RootModel):
+class InputValueExpressionVariant2(RootModel):
     """A literal value."""
     root: FunctionsExpressionInputValueExpression
 
 
-class FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression(RootModel):
+class InputValueExpression(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -549,17 +549,17 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.functions.expression.InputValueExpression')
 
-    root: Union[FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionVariant1, FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionVariant2]
+    root: Union[InputValueExpressionVariant1, InputValueExpressionVariant2]
 
 
 class FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
 class FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpressionVariant2(RootModel):
     """A literal value."""
-    root: Optional[AgentCompletionsMessageRichContentExpression]
+    root: Optional[RichContentExpression]
 
 
 class FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpression(RootModel):
@@ -592,7 +592,7 @@ Starlark expression:
 
 class FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
 class FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionVariant2(RootModel):
@@ -628,17 +628,17 @@ Starlark expression:
     root: Union[FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionVariant1, FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpressionVariant2]
 
 
-class FunctionsExpressionWithExpressionNullableStringVariant1(RootModel):
+class Nullable_stringVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionNullableStringVariant2(RootModel):
+class Nullable_stringVariant2(RootModel):
     """A literal value."""
     root: Optional[str]
 
 
-class FunctionsExpressionWithExpressionNullableString(RootModel):
+class Nullable_string(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -663,20 +663,20 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.Nullable_string')
 
-    root: Union[FunctionsExpressionWithExpressionNullableStringVariant1, FunctionsExpressionWithExpressionNullableStringVariant2]
+    root: Union[Nullable_stringVariant1, Nullable_stringVariant2]
 
 
-class FunctionsExpressionWithExpressionStringVariant1(RootModel):
+class stringVariant1(RootModel):
     """An expression (JMESPath or Starlark) to evaluate."""
-    root: FunctionsExpressionExpression
+    root: Expression
 
 
-class FunctionsExpressionWithExpressionStringVariant2(RootModel):
+class stringVariant2(RootModel):
     """A literal value."""
     root: str
 
 
-class FunctionsExpressionWithExpressionString(RootModel):
+class string(RootModel):
     """A value that can be either a literal or an expression.
 
 This allows Function definitions to mix static values with dynamic
@@ -701,5 +701,5 @@ Starlark expression:
 ```"""
     model_config = ConfigDict(title='functions.expression.WithExpression.string')
 
-    root: Union[FunctionsExpressionWithExpressionStringVariant1, FunctionsExpressionWithExpressionStringVariant2]
+    root: Union[stringVariant1, stringVariant2]
 

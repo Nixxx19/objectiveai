@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentListAgentItem(BaseModel):
+class ListAgentItem(BaseModel):
     """Summary information for a listed Agent."""
     model_config = ConfigDict(title='agent.ListAgentItem')
 

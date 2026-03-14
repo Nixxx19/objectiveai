@@ -5,13 +5,13 @@ from pydantic import BaseModel, ConfigDict, Field
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionString
+    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, string
 
 
-class AgentCompletionsMessageToolMessageExpression(BaseModel):
+class ToolMessageExpression(BaseModel):
     """Expression variant of [`ToolMessage`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.ToolMessageExpression')
 
     content: FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression = Field(..., description='The content expression.')
-    tool_call_id: FunctionsExpressionWithExpressionString = Field(..., description='The tool call ID expression.')
+    tool_call_id: string = Field(..., description='The tool call ID expression.')
 

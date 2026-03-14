@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.audio_input_schema_type import FunctionsExpressionAudioInputSchemaType
+from objectiveai.functions.expression.audio_input_schema_type import AudioInputSchemaType
 
 
-class FunctionsExpressionAudioInputSchema(BaseModel):
+class AudioInputSchema(BaseModel):
     """Schema for an audio input."""
     model_config = ConfigDict(title='functions.expression.AudioInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the expected audio.')
-    type_: FunctionsExpressionAudioInputSchemaType = Field(..., alias='type')
+    type_: AudioInputSchemaType = Field(..., alias='type')
 

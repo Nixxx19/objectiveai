@@ -3,22 +3,22 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import BaseModel, ConfigDict, RootModel
-from objectiveai.functions.profiles.computations.request.function_inline_request_body import FunctionsProfilesComputationsRequestFunctionInlineRequestBody
-from objectiveai.functions.profiles.computations.request.function_remote_request_body import FunctionsProfilesComputationsRequestFunctionRemoteRequestBody
-from objectiveai.functions.profiles.computations.request.function_remote_request_path import FunctionsProfilesComputationsRequestFunctionRemoteRequestPath
+from objectiveai.functions.profiles.computations.request.function_inline_request_body import FunctionInlineRequestBody
+from objectiveai.functions.profiles.computations.request.function_remote_request_body import FunctionRemoteRequestBody
+from objectiveai.functions.profiles.computations.request.function_remote_request_path import FunctionRemoteRequestPath
 
 
-class FunctionsProfilesComputationsRequestRequestVariant1(BaseModel):
-    body: FunctionsProfilesComputationsRequestFunctionInlineRequestBody
+class RequestVariant1(BaseModel):
+    body: FunctionInlineRequestBody
 
 
-class FunctionsProfilesComputationsRequestRequestVariant2(BaseModel):
-    body: FunctionsProfilesComputationsRequestFunctionRemoteRequestBody
-    path: FunctionsProfilesComputationsRequestFunctionRemoteRequestPath
+class RequestVariant2(BaseModel):
+    body: FunctionRemoteRequestBody
+    path: FunctionRemoteRequestPath
 
 
-class FunctionsProfilesComputationsRequestRequest(RootModel):
+class Request(RootModel):
     model_config = ConfigDict(title='functions.profiles.computations.request.Request')
 
-    root: Union[FunctionsProfilesComputationsRequestRequestVariant1, FunctionsProfilesComputationsRequestRequestVariant2]
+    root: Union[RequestVariant1, RequestVariant2]
 

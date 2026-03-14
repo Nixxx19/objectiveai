@@ -3,11 +3,11 @@ from __future__ import annotations
 
 from objectiveai.push_utils import push_by_index, push_option
 from objectiveai.agent.completions.response.streaming.agent_completion_chunk import (
-    AgentCompletionsResponseStreamingAgentCompletionChunk,
+    AgentCompletionChunk,
 )
 
 
-def _push(self, other: AgentCompletionsResponseStreamingAgentCompletionChunk) -> None:
+def _push(self, other: AgentCompletionChunk) -> None:
     # messages: merge by index
     push_by_index(self.messages, other.messages)
 
@@ -21,4 +21,4 @@ def _push(self, other: AgentCompletionsResponseStreamingAgentCompletionChunk) ->
     # id, created, object, upstream are immutable
 
 
-AgentCompletionsResponseStreamingAgentCompletionChunk.push = _push
+AgentCompletionChunk.push = _push

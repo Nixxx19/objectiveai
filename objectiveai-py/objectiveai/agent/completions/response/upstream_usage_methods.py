@@ -3,11 +3,11 @@ from __future__ import annotations
 
 from objectiveai.push_utils import push_option
 from objectiveai.agent.completions.response.upstream_usage import (
-    AgentCompletionsResponseUpstreamUsage,
+    UpstreamUsage,
 )
 
 
-def _push(self, other: AgentCompletionsResponseUpstreamUsage) -> None:
+def _push(self, other: UpstreamUsage) -> None:
     self.completion_tokens += other.completion_tokens
     self.prompt_tokens += other.prompt_tokens
     self.total_tokens += other.total_tokens
@@ -25,4 +25,4 @@ def _push(self, other: AgentCompletionsResponseUpstreamUsage) -> None:
     # cost_multiplier and is_byok are immutable — kept from self
 
 
-AgentCompletionsResponseUpstreamUsage.push = _push
+UpstreamUsage.push = _push

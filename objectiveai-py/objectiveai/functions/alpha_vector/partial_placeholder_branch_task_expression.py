@@ -3,28 +3,28 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.alpha_vector.partial_placeholder_scalar_function_task_expression import FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression
-from objectiveai.functions.alpha_vector.partial_placeholder_vector_function_task_expression import FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression
+from objectiveai.functions.alpha_vector.partial_placeholder_scalar_function_task_expression import PartialPlaceholderScalarFunctionTaskExpression
+from objectiveai.functions.alpha_vector.partial_placeholder_vector_function_task_expression import PartialPlaceholderVectorFunctionTaskExpression
 
 
-class FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant1Variant1(RootModel):
-    root: FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression
+class PartialPlaceholderBranchTaskExpressionVariant1Variant1(RootModel):
+    root: PartialPlaceholderScalarFunctionTaskExpression
 
 
-class FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant1(BaseModel):
+class PartialPlaceholderBranchTaskExpressionVariant1(BaseModel):
     type_: Literal['placeholder.alpha.scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant2Variant1(RootModel):
-    root: FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression
+class PartialPlaceholderBranchTaskExpressionVariant2Variant1(RootModel):
+    root: PartialPlaceholderVectorFunctionTaskExpression
 
 
-class FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant2(BaseModel):
+class PartialPlaceholderBranchTaskExpressionVariant2(BaseModel):
     type_: Literal['placeholder.alpha.vector.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaVectorPartialPlaceholderBranchTaskExpression(RootModel):
+class PartialPlaceholderBranchTaskExpression(RootModel):
     model_config = ConfigDict(title='functions.alpha_vector.PartialPlaceholderBranchTaskExpression')
 
-    root: Union[FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant1, FunctionsAlphaVectorPartialPlaceholderBranchTaskExpressionVariant2]
+    root: Union[PartialPlaceholderBranchTaskExpressionVariant1, PartialPlaceholderBranchTaskExpressionVariant2]
 

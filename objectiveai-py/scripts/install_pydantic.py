@@ -105,6 +105,63 @@ def _is_snake(name: str) -> bool:
     return name == _to_snake(name)
 
 
+def title_to_class_name(title: str) -> str:
+    """Extract just the type name (last PascalCase segment) from a title.
+
+    "agent.completions.response.streaming.AgentCompletionChunk" → "AgentCompletionChunk"
+    "ResponseError" → "ResponseError"
+    """
+    return title.split(".")[-1]
+
+
+def compute_global_class_names(all_titles: set[str]) -> dict[str, str]:
+    """Compute the definitive class name for each title.
+
+    When multiple titles in the same file would produce the same short class
+    name, they all get long pascal names to avoid within-file collisions.
+    """
+    prefixes = detect_generic_prefixes(all_titles)
+    saved = GENERIC_PREFIXES[:]
+    GENERIC_PREFIXES.clear()
+    GENERIC_PREFIXES.extend(prefixes)
+
+    # Group titles by output file
+    file_groups: dict[str, list[str]] = {}
+    for title in all_titles:
+        dir_path, file_name = title_to_path(title)
+        file_path = f"{dir_path}/{file_name}" if dir_path else file_name
+        file_groups.setdefault(file_path, []).append(title)
+
+    result: dict[str, str] = {}
+    for titles in file_groups.values():
+        short_to_titles: dict[str, list[str]] = {}
+        for t in titles:
+            short = title_to_class_name(t)
+            short_to_titles.setdefault(short, []).append(t)
+        for short, group in short_to_titles.items():
+            if len(group) == 1:
+                result[group[0]] = short
+            else:
+                for t in group:
+                    result[t] = title_to_pascal(t)
+
+    GENERIC_PREFIXES.clear()
+    GENERIC_PREFIXES.extend(saved)
+    return result
+
+
+# Module-level name map for the file currently being generated.
+# Maps title → class name to use in this file's type annotations.
+_current_name_map: dict[str, str] = {}
+
+
+def resolve_ref_name(title: str) -> str:
+    """Resolve a $ref title to the class name used in the current file."""
+    if title in _current_name_map:
+        return _current_name_map[title]
+    return title_to_class_name(title)
+
+
 # ---------------------------------------------------------------------------
 # JSON Schema → Python type annotation conversion
 # ---------------------------------------------------------------------------
@@ -143,7 +200,7 @@ def _convert_type_impl(
     if "$ref" in schema:
         ref = schema["$ref"]
         ref_title = self_title if ref == "#" else ref
-        return title_to_pascal(ref_title)
+        return resolve_ref_name(ref_title)
 
     # enum
     if "enum" in schema:
@@ -338,7 +395,7 @@ def generate_model(
     Returns (code_string, set_of_ref_titles).
     """
     refs: set[str] = set()
-    pascal_name = title_to_pascal(title)
+    pascal_name = resolve_ref_name(title)
 
     has_properties = "properties" in schema
     has_any_of = "anyOf" in schema
@@ -887,12 +944,14 @@ def main() -> None:
 
     print(f"Generating {len(file_groups)} .py files")
 
-    # Build file dependency graph
+    # Build file dependency graph and collect raw refs per file
     file_refs: dict[str, set[str]] = {}
+    file_raw_refs: dict[str, set[str]] = {}
     for file_path, entries in file_groups.items():
         refs: set[str] = set()
         for entry in entries:
             collect_refs(entry["schema"], refs)
+        file_raw_refs[file_path] = refs
         dep_files: set[str] = set()
         for ref in refs:
             ref_dir, ref_file = title_to_path(ref)
@@ -906,14 +965,71 @@ def main() -> None:
     if files_in_cycles:
         print(f"Found {len(files_in_cycles)} file(s) in dependency cycles")
 
-    # Track all directories for __init__.py generation
+    # --- Compute global title → class name mapping ---
+    # This handles within-file collisions: when multiple types in the same
+    # file share the same short class name, they all get long pascal names.
+    global_class_names: dict[str, str] = {}
+    for file_path, entries in file_groups.items():
+        short_to_entries: dict[str, list[str]] = {}
+        for entry in entries:
+            short = title_to_class_name(entry["title"])
+            short_to_entries.setdefault(short, []).append(entry["title"])
+        for short, titles_with_short in short_to_entries.items():
+            if len(titles_with_short) == 1:
+                global_class_names[titles_with_short[0]] = short
+            else:
+                for t in titles_with_short:
+                    global_class_names[t] = title_to_pascal(t)
+
+    # Track all directories and their exports for __init__.py generation
     all_dirs: set[str] = set()
+    # dir_path → list of (module_name, [class_names])
+    dir_exports: dict[str, list[tuple[str, list[str]]]] = {}
 
     # Generate each .py file
     for file_path, entries in file_groups.items():
+        file_in_cycle = file_path in files_in_cycles
+
+        # --- Compute per-file name map ---
+        # Self-defined class names use the global mapping
+        self_titles = {entry["title"] for entry in entries}
+        self_class_names: dict[str, str] = {
+            t: global_class_names[t] for t in self_titles
+        }
+
+        # External refs — detect collisions with self-defined names and each other
+        external_refs = file_raw_refs.get(file_path, set()) - self_titles
+        # Group external refs by their desired local name
+        # Use global_class_names to get each ref's ACTUAL class name in its source file
+        short_to_refs: dict[str, list[str]] = {}
+        for ref in external_refs:
+            # The name we'd ideally use for this ref in this file
+            short = global_class_names.get(ref, title_to_class_name(ref))
+            short_to_refs.setdefault(short, []).append(ref)
+
+        name_map: dict[str, str] = dict(self_class_names)
+        self_name_set = set(self_class_names.values())
+
+        for short, ref_titles in short_to_refs.items():
+            if short in self_name_set:
+                # Collision with self-defined type — all external refs need alias
+                for t in ref_titles:
+                    name_map[t] = title_to_pascal(t)
+            elif len(ref_titles) == 1:
+                name_map[ref_titles[0]] = short
+            else:
+                # Multiple external refs share short name — alias all but first
+                name_map[ref_titles[0]] = short
+                for t in ref_titles[1:]:
+                    name_map[t] = title_to_pascal(t)
+
+        # Set module-level name map for convert_to_type
+        global _current_name_map
+        _current_name_map = name_map
+
+        # --- Generate model code ---
         all_refs: set[str] = set()
         model_codes: list[str] = []
-        file_in_cycle = file_path in files_in_cycles
 
         for entry in entries:
             code, refs = generate_model(
@@ -924,7 +1040,7 @@ def main() -> None:
             model_codes.append(code)
             all_refs |= refs
 
-        # Build imports
+        # --- Build imports ---
         import_lines: list[str] = []
 
         full_code = "\n".join(model_codes)
@@ -976,23 +1092,36 @@ def main() -> None:
             refs_by_file.setdefault(ref_path, []).append(ref)
 
         # Split imports: regular vs TYPE_CHECKING-guarded
-        # All files now use classes (BaseModel or RootModel), so
-        # TYPE_CHECKING guards work for all inter-cycle imports.
         regular_imports: list[str] = []
         type_checking_imports: list[str] = []
 
         for ref_path in sorted(refs_by_file.keys()):
             ref_titles = refs_by_file[ref_path]
-            names = sorted(set(title_to_pascal(t) for t in ref_titles))
             module_path = "objectiveai." + ref_path.replace("/", ".")
-            names_str = ", ".join(names)
             is_cyclic = file_in_cycle and ref_path in files_in_cycles
+
+            # Build import items: "ClassName" or "ClassName as AliasName"
+            import_items: list[str] = []
+            seen_names: set[str] = set()
+            for t in sorted(ref_titles):
+                # class_name = actual name in the source file
+                class_name = global_class_names.get(t, title_to_class_name(t))
+                local_name = name_map.get(t, class_name)
+                if class_name in seen_names:
+                    continue
+                seen_names.add(class_name)
+                if local_name != class_name:
+                    import_items.append(f"{class_name} as {local_name}")
+                else:
+                    import_items.append(class_name)
+
+            items_str = ", ".join(sorted(import_items))
             if is_cyclic:
                 type_checking_imports.append(
-                    f"    from {module_path} import {names_str}"
+                    f"    from {module_path} import {items_str}"
                 )
             else:
-                regular_imports.append(f"from {module_path} import {names_str}")
+                regular_imports.append(f"from {module_path} import {items_str}")
 
         import_lines.extend(regular_imports)
 
@@ -1021,8 +1150,6 @@ def main() -> None:
         content += "\n\n" + "\n\n".join(model_codes) + "\n"
 
         # Check for a companion _methods.py file and import it if present.
-        # This allows hand-written methods (push, etc.) to be monkey-patched
-        # onto the auto-generated classes automatically when the module is imported.
         full_path = SRC_DIR / (file_path.replace("/", os.sep) + ".py")
         methods_path = SRC_DIR / (file_path.replace("/", os.sep) + "_methods.py")
         if methods_path.exists():
@@ -1033,14 +1160,18 @@ def main() -> None:
         full_path.parent.mkdir(parents=True, exist_ok=True)
         full_path.write_text(content, encoding="utf-8")
 
-        # Track directories
+        # Track directories and exports
         parts = file_path.split("/")
         for i in range(1, len(parts)):
             all_dirs.add("/".join(parts[:i]))
 
-    # Generate empty __init__.py files to make directories importable as packages.
-    # We do NOT re-export via `from .module import *` because that triggers eager
-    # loading of all sibling modules, which creates circular import chains.
+        # Record exports for __init__.py re-exports
+        dir_part = "/".join(parts[:-1]) if len(parts) > 1 else ""
+        module_name = parts[-1]  # file name without .py
+        class_names = [global_class_names.get(e["title"], title_to_class_name(e["title"])) for e in entries]
+        dir_exports.setdefault(dir_part, []).append((module_name, class_names))
+
+    # Generate __init__.py files with re-exports
     all_dirs.add("")  # root package
 
     for dir_path in sorted(all_dirs, key=len, reverse=True):
@@ -1050,7 +1181,19 @@ def main() -> None:
 
         init_path = abs_dir / "__init__.py"
         if not init_path.exists() or _is_generated(init_path):
-            init_path.write_text(GENERATED_HEADER, encoding="utf-8")
+            init_content = GENERATED_HEADER
+
+            # Add re-exports for this directory
+            exports = dir_exports.get(dir_path, [])
+            if exports:
+                for module_name, class_names in sorted(exports):
+                    names_str = ", ".join(sorted(set(class_names)))
+                    init_content += (
+                        f"from .{module_name} import {names_str}"
+                        "  # noqa: F401\n"
+                    )
+
+            init_path.write_text(init_content, encoding="utf-8")
 
     print(f"Generated __init__.py for {len(all_dirs)} directories")
     print("Done!")

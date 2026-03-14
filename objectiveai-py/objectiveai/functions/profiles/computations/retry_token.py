@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsProfilesComputationsRetryToken(RootModel):
+class RetryToken(RootModel):
     model_config = ConfigDict(title='functions.profiles.computations.RetryToken')
 
     root: list[Optional[str]]

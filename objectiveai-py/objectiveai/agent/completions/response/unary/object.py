@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class AgentCompletionsResponseUnaryObject(RootModel):
+class Object(RootModel):
     """A agent completion object."""
     model_config = ConfigDict(title='agent.completions.response.unary.Object')
 

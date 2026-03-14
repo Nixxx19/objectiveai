@@ -5,24 +5,24 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsRemoteVariant1(RootModel):
+class RemoteVariant1(RootModel):
     """GitHub repository."""
     root: Literal['github']
 
 
-class FunctionsRemoteVariant2(RootModel):
+class RemoteVariant2(RootModel):
     """Local filesystem."""
     root: Literal['filesystem']
 
 
-class FunctionsRemoteVariant3(RootModel):
+class RemoteVariant3(RootModel):
     """Mock (for testing)."""
     root: Literal['mock']
 
 
-class FunctionsRemote(RootModel):
+class Remote(RootModel):
     """The remote source where a function or profile is hosted."""
     model_config = ConfigDict(title='functions.Remote')
 
-    root: Union[FunctionsRemoteVariant1, FunctionsRemoteVariant2, FunctionsRemoteVariant3]
+    root: Union[RemoteVariant1, RemoteVariant2, RemoteVariant3]
 

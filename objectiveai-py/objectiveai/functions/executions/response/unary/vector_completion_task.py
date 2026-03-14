@@ -3,31 +3,31 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
+from objectiveai.agent.completions.response.usage import Usage
 from objectiveai.response_error import ResponseError
-from objectiveai.vector.completions.response.unary.agent_completion import VectorCompletionsResponseUnaryAgentCompletion
-from objectiveai.vector.completions.response.unary.object import VectorCompletionsResponseUnaryObject
-from objectiveai.vector.completions.response.vote import VectorCompletionsResponseVote
+from objectiveai.vector.completions.response.unary.agent_completion import AgentCompletion
+from objectiveai.vector.completions.response.unary.object import Object
+from objectiveai.vector.completions.response.vote import Vote
 
 
-class FunctionsExecutionsResponseUnaryVectorCompletionTask(BaseModel):
+class VectorCompletionTask(BaseModel):
     """A complete vector completion response (non-streaming).
 
 Contains the final scores, all votes from the ensemble, and the underlying
 agent completions that produced those votes."""
     model_config = ConfigDict(title='functions.executions.response.unary.VectorCompletionTask')
 
-    completions: list[VectorCompletionsResponseUnaryAgentCompletion] = Field(..., description='The underlying agent completions from each agent in the ensemble.')
+    completions: list[AgentCompletion] = Field(..., description='The underlying agent completions from each agent in the ensemble.')
     created: int = Field(..., description='Unix timestamp when the completion was created.', ge=0, le=18446744073709551615)
     ensemble: str = Field(..., description='ID of the ensemble used for this completion.')
     error: Optional[ResponseError] = None
     id: str = Field(..., description='Unique identifier for this vector completion.')
     index: int = Field(..., ge=0, le=18446744073709551615)
-    object: VectorCompletionsResponseUnaryObject = Field(..., description='Object type identifier (`"vector.completion"`).')
+    object: Object = Field(..., description='Object type identifier (`"vector.completion"`).')
     scores: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Final weighted scores for each response option. Sums to 1.')
     task_index: int = Field(..., ge=0, le=18446744073709551615)
     task_path: list[Annotated[int, Field(ge=0, le=18446744073709551615)]]
-    usage: AgentCompletionsResponseUsage = Field(..., description='Aggregated token and cost usage across all completions.')
-    votes: list[VectorCompletionsResponseVote] = Field(..., description='Individual votes from each agent, showing their selections.')
+    usage: Usage = Field(..., description='Aggregated token and cost usage across all completions.')
+    votes: list[Vote] = Field(..., description='Individual votes from each agent, showing their selections.')
     weights: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description="Total weight allocated to each response option. Same length as `scores`.\nFor discrete votes, an LLM's full weight goes to its selected response.\nFor probabilistic votes, the weight is divided according to the distribution.")
 

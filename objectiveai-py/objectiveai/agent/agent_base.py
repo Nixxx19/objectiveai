@@ -3,29 +3,29 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.agent.claude_agent_sdk.agent_base import AgentClaudeAgentSdkAgentBase
-from objectiveai.agent.mock.agent_base import AgentMockAgentBase
-from objectiveai.agent.openrouter.agent_base import AgentOpenrouterAgentBase
+from objectiveai.agent.claude_agent_sdk.agent_base import AgentBase as AgentClaudeAgentSdkAgentBase
+from objectiveai.agent.mock.agent_base import AgentBase as AgentMockAgentBase
+from objectiveai.agent.openrouter.agent_base import AgentBase as AgentOpenrouterAgentBase
 
 
-class AgentAgentBaseVariant1(RootModel):
+class AgentBaseVariant1(RootModel):
     root: AgentOpenrouterAgentBase
 
 
-class AgentAgentBaseVariant2(RootModel):
+class AgentBaseVariant2(RootModel):
     root: AgentClaudeAgentSdkAgentBase
 
 
-class AgentAgentBaseVariant3(RootModel):
+class AgentBaseVariant3(RootModel):
     root: AgentMockAgentBase
 
 
-class AgentAgentBase(RootModel):
+class AgentBase(RootModel):
     """The base configuration for an Agent (without computed ID).
 
 This is an untagged enum that dispatches to the per-upstream AgentBase.
 Deserialization tries each variant in order until one matches."""
     model_config = ConfigDict(title='agent.AgentBase')
 
-    root: Union[AgentAgentBaseVariant1, AgentAgentBaseVariant2, AgentAgentBaseVariant3]
+    root: Union[AgentBaseVariant1, AgentBaseVariant2, AgentBaseVariant3]
 

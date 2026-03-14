@@ -3,20 +3,20 @@
 from __future__ import annotations
 from typing import Annotated, Union
 from pydantic import ConfigDict, Field, RootModel
-from objectiveai.vector.completions.request.profile_entry import VectorCompletionsRequestProfileEntry
+from objectiveai.vector.completions.request.profile_entry import ProfileEntry
 
 
-class VectorCompletionsRequestProfileVariant1(RootModel):
+class ProfileVariant1(RootModel):
     """Simple vector of decimal weights."""
     root: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]]
 
 
-class VectorCompletionsRequestProfileVariant2(RootModel):
+class ProfileVariant2(RootModel):
     """Vector of entries with optional invert flags."""
-    root: list[VectorCompletionsRequestProfileEntry]
+    root: list[ProfileEntry]
 
 
-class VectorCompletionsRequestProfile(RootModel):
+class Profile(RootModel):
     """Profile weights for a vector completion.
 
 Previously this was a simple `Vec<Decimal>`. To support per-agent inversion
@@ -26,5 +26,5 @@ while remaining backwards compatible, the field is now an untagged enum:
 - `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`"""
     model_config = ConfigDict(title='vector.completions.request.Profile')
 
-    root: Union[VectorCompletionsRequestProfileVariant1, VectorCompletionsRequestProfileVariant2]
+    root: Union[ProfileVariant1, ProfileVariant2]
 

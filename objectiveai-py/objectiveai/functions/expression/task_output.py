@@ -3,23 +3,23 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.expression.task_output_owned import FunctionsExpressionTaskOutputOwned
-from objectiveai.functions.expression.task_output_ref import FunctionsExpressionTaskOutputRef
+from objectiveai.functions.expression.task_output_owned import TaskOutputOwned
+from objectiveai.functions.expression.task_output_ref import TaskOutputRef
 
 
-class FunctionsExpressionTaskOutputVariant1(RootModel):
+class TaskOutputVariant1(RootModel):
     """Owned version."""
-    root: FunctionsExpressionTaskOutputOwned
+    root: TaskOutputOwned
 
 
-class FunctionsExpressionTaskOutputVariant2(RootModel):
+class TaskOutputVariant2(RootModel):
     """Borrowed version."""
-    root: FunctionsExpressionTaskOutputRef
+    root: TaskOutputRef
 
 
-class FunctionsExpressionTaskOutput(RootModel):
+class TaskOutput(RootModel):
     """Output from an executed task."""
     model_config = ConfigDict(title='functions.expression.TaskOutput')
 
-    root: Union[FunctionsExpressionTaskOutputVariant1, FunctionsExpressionTaskOutputVariant2]
+    root: Union[TaskOutputVariant1, TaskOutputVariant2]
 

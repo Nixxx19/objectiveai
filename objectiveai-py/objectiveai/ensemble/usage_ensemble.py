@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class EnsembleUsageEnsemble(BaseModel):
+class UsageEnsemble(BaseModel):
     """Usage statistics for an Ensemble."""
     model_config = ConfigDict(title='ensemble.UsageEnsemble')
 

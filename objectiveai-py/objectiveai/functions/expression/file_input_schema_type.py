@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionFileInputSchemaType(RootModel):
+class FileInputSchemaType(RootModel):
     model_config = ConfigDict(title='functions.expression.FileInputSchemaType')
 
     root: Literal['file']

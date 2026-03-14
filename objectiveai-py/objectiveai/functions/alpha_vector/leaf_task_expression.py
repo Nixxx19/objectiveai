@@ -3,14 +3,14 @@
 from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.alpha_vector.vector_completion_task_expression import FunctionsAlphaVectorVectorCompletionTaskExpression
+from objectiveai.functions.alpha_vector.vector_completion_task_expression import VectorCompletionTaskExpression
 
 
-class FunctionsAlphaVectorLeafTaskExpressionVariant1(RootModel):
-    root: FunctionsAlphaVectorVectorCompletionTaskExpression
+class LeafTaskExpressionVariant1(RootModel):
+    root: VectorCompletionTaskExpression
 
 
-class FunctionsAlphaVectorLeafTaskExpression(BaseModel):
+class LeafTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.LeafTaskExpression')
 
     type_: Literal['vector.completion'] = Field(..., alias='type')

@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsFunctionType(RootModel):
+class FunctionType(RootModel):
     model_config = ConfigDict(title='functions.FunctionType')
 
     root: Literal['scalar.function', 'vector.function']

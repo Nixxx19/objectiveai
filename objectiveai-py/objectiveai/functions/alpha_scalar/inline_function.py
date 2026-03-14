@@ -3,22 +3,22 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.alpha_scalar.branch_task_expression import FunctionsAlphaScalarBranchTaskExpression
-from objectiveai.functions.alpha_scalar.leaf_task_expression import FunctionsAlphaScalarLeafTaskExpression
+from objectiveai.functions.alpha_scalar.branch_task_expression import BranchTaskExpression
+from objectiveai.functions.alpha_scalar.leaf_task_expression import LeafTaskExpression
 
 
-class FunctionsAlphaScalarInlineFunctionVariant1(BaseModel):
-    tasks: list[FunctionsAlphaScalarBranchTaskExpression]
+class InlineFunctionVariant1(BaseModel):
+    tasks: list[BranchTaskExpression]
     type_: Literal['alpha.scalar.branch.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaScalarInlineFunctionVariant2(BaseModel):
-    tasks: list[FunctionsAlphaScalarLeafTaskExpression]
+class InlineFunctionVariant2(BaseModel):
+    tasks: list[LeafTaskExpression]
     type_: Literal['alpha.scalar.leaf.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaScalarInlineFunction(RootModel):
+class InlineFunction(RootModel):
     model_config = ConfigDict(title='functions.alpha_scalar.InlineFunction')
 
-    root: Union[FunctionsAlphaScalarInlineFunctionVariant1, FunctionsAlphaScalarInlineFunctionVariant2]
+    root: Union[InlineFunctionVariant1, InlineFunctionVariant2]
 

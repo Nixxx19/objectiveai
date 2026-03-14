@@ -5,23 +5,23 @@ from typing import Annotated, Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
 
 
-class FunctionsProfilesComputationsRequestTargetVariant1(BaseModel):
+class TargetVariant1(BaseModel):
     type_: Literal['scalar'] = Field(..., alias='type')
     value: float = Field(..., ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)
 
 
-class FunctionsProfilesComputationsRequestTargetVariant2(BaseModel):
+class TargetVariant2(BaseModel):
     type_: Literal['vector'] = Field(..., alias='type')
     value: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]]
 
 
-class FunctionsProfilesComputationsRequestTargetVariant3(BaseModel):
+class TargetVariant3(BaseModel):
     type_: Literal['vector_winner'] = Field(..., alias='type')
     value: int = Field(..., ge=0, le=4294967295)
 
 
-class FunctionsProfilesComputationsRequestTarget(RootModel):
+class Target(RootModel):
     model_config = ConfigDict(title='functions.profiles.computations.request.Target')
 
-    root: Union[FunctionsProfilesComputationsRequestTargetVariant1, FunctionsProfilesComputationsRequestTargetVariant2, FunctionsProfilesComputationsRequestTargetVariant3]
+    root: Union[TargetVariant1, TargetVariant2, TargetVariant3]
 

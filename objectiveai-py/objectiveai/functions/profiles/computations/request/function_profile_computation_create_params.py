@@ -3,20 +3,20 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.profiles.computations.request.function_inline_request_body import FunctionsProfilesComputationsRequestFunctionInlineRequestBody
-from objectiveai.functions.profiles.computations.request.function_remote_request_body import FunctionsProfilesComputationsRequestFunctionRemoteRequestBody
+from objectiveai.functions.profiles.computations.request.function_inline_request_body import FunctionInlineRequestBody
+from objectiveai.functions.profiles.computations.request.function_remote_request_body import FunctionRemoteRequestBody
 
 
-class FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsVariant1(RootModel):
-    root: FunctionsProfilesComputationsRequestFunctionInlineRequestBody
+class FunctionProfileComputationCreateParamsVariant1(RootModel):
+    root: FunctionInlineRequestBody
 
 
-class FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsVariant2(RootModel):
-    root: FunctionsProfilesComputationsRequestFunctionRemoteRequestBody
+class FunctionProfileComputationCreateParamsVariant2(RootModel):
+    root: FunctionRemoteRequestBody
 
 
-class FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParams(RootModel):
+class FunctionProfileComputationCreateParams(RootModel):
     model_config = ConfigDict(title='functions.profiles.computations.request.FunctionProfileComputationCreateParams')
 
-    root: Union[FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsVariant1, FunctionsProfilesComputationsRequestFunctionProfileComputationCreateParamsVariant2]
+    root: Union[FunctionProfileComputationCreateParamsVariant1, FunctionProfileComputationCreateParamsVariant2]
 

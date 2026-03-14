@@ -5,28 +5,28 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class AgentOpenrouterOutputModeVariant1(RootModel):
+class OutputModeVariant1(RootModel):
     """The model is instructed via the prompt to output a specific key.
 
 This is the default and most widely supported mode."""
     root: Literal['instruction']
 
 
-class AgentOpenrouterOutputModeVariant2(RootModel):
+class OutputModeVariant2(RootModel):
     """A JSON schema response format is used with an enum of possible keys.
 
 Requires model support for structured JSON output."""
     root: Literal['json_schema']
 
 
-class AgentOpenrouterOutputModeVariant3(RootModel):
+class OutputModeVariant3(RootModel):
     """A forced tool call with an argument schema containing possible keys.
 
 Requires model support for tool/function calling."""
     root: Literal['tool_call']
 
 
-class AgentOpenrouterOutputMode(RootModel):
+class OutputMode(RootModel):
     """The method used to constrain LLM output to valid response keys.
 
 In vector completions, the model must select from a predefined set of
@@ -36,5 +36,5 @@ responses. This enum controls *how* that constraint is enforced.
 completely ignored for agent completions."""
     model_config = ConfigDict(title='agent.openrouter.OutputMode')
 
-    root: Union[AgentOpenrouterOutputModeVariant1, AgentOpenrouterOutputModeVariant2, AgentOpenrouterOutputModeVariant3]
+    root: Union[OutputModeVariant1, OutputModeVariant2, OutputModeVariant3]
 

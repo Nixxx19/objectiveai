@@ -5,34 +5,34 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class AgentCompletionsResponseFinishReasonVariant1(RootModel):
+class FinishReasonVariant1(RootModel):
     """The model reached a natural stop point or stop sequence."""
     root: Literal['stop']
 
 
-class AgentCompletionsResponseFinishReasonVariant2(RootModel):
+class FinishReasonVariant2(RootModel):
     """The model reached the maximum token limit."""
     root: Literal['length']
 
 
-class AgentCompletionsResponseFinishReasonVariant3(RootModel):
+class FinishReasonVariant3(RootModel):
     """The model decided to call one or more tools."""
     root: Literal['tool_calls']
 
 
-class AgentCompletionsResponseFinishReasonVariant4(RootModel):
+class FinishReasonVariant4(RootModel):
     """The response was filtered due to content policy."""
     root: Literal['content_filter']
 
 
-class AgentCompletionsResponseFinishReasonVariant5(RootModel):
+class FinishReasonVariant5(RootModel):
     """An error occurred during generation."""
     root: Literal['error']
 
 
-class AgentCompletionsResponseFinishReason(RootModel):
+class FinishReason(RootModel):
     """The reason the model stopped generating."""
     model_config = ConfigDict(title='agent.completions.response.FinishReason')
 
-    root: Union[AgentCompletionsResponseFinishReasonVariant1, AgentCompletionsResponseFinishReasonVariant2, AgentCompletionsResponseFinishReasonVariant3, AgentCompletionsResponseFinishReasonVariant4, AgentCompletionsResponseFinishReasonVariant5]
+    root: Union[FinishReasonVariant1, FinishReasonVariant2, FinishReasonVariant3, FinishReasonVariant4, FinishReasonVariant5]
 

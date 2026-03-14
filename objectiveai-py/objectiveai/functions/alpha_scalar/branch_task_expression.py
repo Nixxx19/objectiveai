@@ -3,28 +3,28 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.alpha_scalar.placeholder_scalar_function_task_expression import FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression
-from objectiveai.functions.alpha_scalar.scalar_function_task_expression import FunctionsAlphaScalarScalarFunctionTaskExpression
+from objectiveai.functions.alpha_scalar.placeholder_scalar_function_task_expression import PlaceholderScalarFunctionTaskExpression
+from objectiveai.functions.alpha_scalar.scalar_function_task_expression import ScalarFunctionTaskExpression
 
 
-class FunctionsAlphaScalarBranchTaskExpressionVariant1Variant1(RootModel):
-    root: FunctionsAlphaScalarScalarFunctionTaskExpression
+class BranchTaskExpressionVariant1Variant1(RootModel):
+    root: ScalarFunctionTaskExpression
 
 
-class FunctionsAlphaScalarBranchTaskExpressionVariant1(BaseModel):
+class BranchTaskExpressionVariant1(BaseModel):
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaScalarBranchTaskExpressionVariant2Variant1(RootModel):
-    root: FunctionsAlphaScalarPlaceholderScalarFunctionTaskExpression
+class BranchTaskExpressionVariant2Variant1(RootModel):
+    root: PlaceholderScalarFunctionTaskExpression
 
 
-class FunctionsAlphaScalarBranchTaskExpressionVariant2(BaseModel):
+class BranchTaskExpressionVariant2(BaseModel):
     type_: Literal['placeholder.alpha.scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaScalarBranchTaskExpression(RootModel):
+class BranchTaskExpression(RootModel):
     model_config = ConfigDict(title='functions.alpha_scalar.BranchTaskExpression')
 
-    root: Union[FunctionsAlphaScalarBranchTaskExpressionVariant1, FunctionsAlphaScalarBranchTaskExpressionVariant2]
+    root: Union[BranchTaskExpressionVariant1, BranchTaskExpressionVariant2]
 

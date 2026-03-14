@@ -3,15 +3,15 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.remote import FunctionsRemote
+from objectiveai.functions.remote import Remote
 
 
-class FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPath(BaseModel):
+class FunctionInlineProfileRemoteRequestPath(BaseModel):
     """Path parameters for inline Function with remote Profile."""
     model_config = ConfigDict(title='functions.executions.request.FunctionInlineProfileRemoteRequestPath')
 
     pcommit: Optional[str] = Field(None, description='Profile Git commit SHA (optional).')
     powner: str = Field(..., description='Profile repository owner.')
-    premote: FunctionsRemote = Field(..., description='Profile remote source.')
+    premote: Remote = Field(..., description='Profile remote source.')
     prepository: str = Field(..., description='Profile repository name.')
 

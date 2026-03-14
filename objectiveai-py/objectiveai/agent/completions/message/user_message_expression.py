@@ -5,13 +5,13 @@ from typing import Optional, TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionNullableString
+    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression, Nullable_string
 
 
-class AgentCompletionsMessageUserMessageExpression(BaseModel):
+class UserMessageExpression(BaseModel):
     """Expression variant of [`UserMessage`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.UserMessageExpression')
 
     content: FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentExpression = Field(..., description='The message content expression.')
-    name: Optional[FunctionsExpressionWithExpressionNullableString] = Field(None, description='Optional name expression.')
+    name: Optional[Nullable_string] = Field(None, description='Optional name expression.')
 

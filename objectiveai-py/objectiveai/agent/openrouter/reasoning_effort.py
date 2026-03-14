@@ -5,41 +5,41 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class AgentOpenrouterReasoningEffortVariant1(RootModel):
+class ReasoningEffortVariant1(RootModel):
     """No reasoning."""
     root: Literal['none']
 
 
-class AgentOpenrouterReasoningEffortVariant2(RootModel):
+class ReasoningEffortVariant2(RootModel):
     """Minimal reasoning effort."""
     root: Literal['minimal']
 
 
-class AgentOpenrouterReasoningEffortVariant3(RootModel):
+class ReasoningEffortVariant3(RootModel):
     """Low reasoning effort."""
     root: Literal['low']
 
 
-class AgentOpenrouterReasoningEffortVariant4(RootModel):
+class ReasoningEffortVariant4(RootModel):
     """Medium reasoning effort."""
     root: Literal['medium']
 
 
-class AgentOpenrouterReasoningEffortVariant5(RootModel):
+class ReasoningEffortVariant5(RootModel):
     """High reasoning effort."""
     root: Literal['high']
 
 
-class AgentOpenrouterReasoningEffortVariant6(RootModel):
+class ReasoningEffortVariant6(RootModel):
     """Maximum reasoning effort."""
     root: Literal['xhigh']
 
 
-class AgentOpenrouterReasoningEffort(RootModel):
+class ReasoningEffort(RootModel):
     """The level of effort the model should put into reasoning.
 
 Only supported by some models."""
     model_config = ConfigDict(title='agent.openrouter.ReasoningEffort')
 
-    root: Union[AgentOpenrouterReasoningEffortVariant1, AgentOpenrouterReasoningEffortVariant2, AgentOpenrouterReasoningEffortVariant3, AgentOpenrouterReasoningEffortVariant4, AgentOpenrouterReasoningEffortVariant5, AgentOpenrouterReasoningEffortVariant6]
+    root: Union[ReasoningEffortVariant1, ReasoningEffortVariant2, ReasoningEffortVariant3, ReasoningEffortVariant4, ReasoningEffortVariant5, ReasoningEffortVariant6]
 

@@ -3,22 +3,24 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.executions.response.streaming.vector_completion_task_chunk import FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk
+from objectiveai.functions.executions.response.streaming.vector_completion_task_chunk import VectorCompletionTaskChunk
 
 if TYPE_CHECKING:
-    from objectiveai.functions.executions.response.streaming.function_execution_task_chunk import FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk
+    from objectiveai.functions.executions.response.streaming.function_execution_task_chunk import FunctionExecutionTaskChunk
 
 
-class FunctionsExecutionsResponseStreamingTaskChunkVariant1(RootModel):
-    root: FunctionsExecutionsResponseStreamingFunctionExecutionTaskChunk
+class TaskChunkVariant1(RootModel):
+    root: FunctionExecutionTaskChunk
 
 
-class FunctionsExecutionsResponseStreamingTaskChunkVariant2(RootModel):
-    root: FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk
+class TaskChunkVariant2(RootModel):
+    root: VectorCompletionTaskChunk
 
 
-class FunctionsExecutionsResponseStreamingTaskChunk(RootModel):
+class TaskChunk(RootModel):
     model_config = ConfigDict(title='functions.executions.response.streaming.TaskChunk')
 
-    root: Union[FunctionsExecutionsResponseStreamingTaskChunkVariant1, FunctionsExecutionsResponseStreamingTaskChunkVariant2]
+    root: Union[TaskChunkVariant1, TaskChunkVariant2]
 
+
+import objectiveai.functions.executions.response.streaming.task_chunk_methods  # noqa: F401, E402

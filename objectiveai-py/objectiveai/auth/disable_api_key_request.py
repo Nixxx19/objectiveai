@@ -5,7 +5,7 @@ from pydantic import BaseModel, ConfigDict, Field
 from objectiveai.prefixed_uuid import PrefixedUuid
 
 
-class AuthDisableApiKeyRequest(BaseModel):
+class DisableApiKeyRequest(BaseModel):
     """Request to disable an existing API key.
 
 Once disabled, the API key can no longer be used for authentication.

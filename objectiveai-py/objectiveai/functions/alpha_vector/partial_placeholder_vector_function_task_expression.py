@@ -3,16 +3,16 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import FunctionsAlphaVectorExpressionVectorFunctionInputSchema
-from objectiveai.functions.alpha_vector.expression.vector_function_input_value_expression import FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
+from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import VectorFunctionInputSchema
+from objectiveai.functions.alpha_vector.expression.vector_function_input_value_expression import VectorFunctionInputValueExpression
+from objectiveai.functions.expression.expression import Expression
 
 
-class FunctionsAlphaVectorPartialPlaceholderVectorFunctionTaskExpression(BaseModel):
+class PartialPlaceholderVectorFunctionTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression')
 
-    input: FunctionsAlphaVectorExpressionVectorFunctionInputValueExpression
-    input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchema
-    skip: Optional[FunctionsExpressionExpression] = None
+    input: VectorFunctionInputValueExpression
+    input_schema: VectorFunctionInputSchema
+    skip: Optional[Expression] = None
     spec: str
 

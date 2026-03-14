@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class FunctionsUsageFunctionProfilePair(BaseModel):
+class UsageFunctionProfilePair(BaseModel):
     """Usage statistics for a function-profile pair."""
     model_config = ConfigDict(title='functions.UsageFunctionProfilePair')
 

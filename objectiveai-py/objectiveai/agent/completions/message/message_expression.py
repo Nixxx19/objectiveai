@@ -5,54 +5,54 @@ from typing import Literal, TYPE_CHECKING, Union
 from pydantic import BaseModel, ConfigDict, RootModel
 
 if TYPE_CHECKING:
-    from objectiveai.agent.completions.message.assistant_message_expression import AgentCompletionsMessageAssistantMessageExpression
-    from objectiveai.agent.completions.message.developer_message_expression import AgentCompletionsMessageDeveloperMessageExpression
-    from objectiveai.agent.completions.message.system_message_expression import AgentCompletionsMessageSystemMessageExpression
-    from objectiveai.agent.completions.message.tool_message_expression import AgentCompletionsMessageToolMessageExpression
-    from objectiveai.agent.completions.message.user_message_expression import AgentCompletionsMessageUserMessageExpression
+    from objectiveai.agent.completions.message.assistant_message_expression import AssistantMessageExpression
+    from objectiveai.agent.completions.message.developer_message_expression import DeveloperMessageExpression
+    from objectiveai.agent.completions.message.system_message_expression import SystemMessageExpression
+    from objectiveai.agent.completions.message.tool_message_expression import ToolMessageExpression
+    from objectiveai.agent.completions.message.user_message_expression import UserMessageExpression
 
 
-class AgentCompletionsMessageMessageExpressionVariant1Variant1(RootModel):
-    root: AgentCompletionsMessageDeveloperMessageExpression
+class MessageExpressionVariant1Variant1(RootModel):
+    root: DeveloperMessageExpression
 
 
-class AgentCompletionsMessageMessageExpressionVariant1(BaseModel):
+class MessageExpressionVariant1(BaseModel):
     role: Literal['developer']
 
 
-class AgentCompletionsMessageMessageExpressionVariant2Variant1(RootModel):
-    root: AgentCompletionsMessageSystemMessageExpression
+class MessageExpressionVariant2Variant1(RootModel):
+    root: SystemMessageExpression
 
 
-class AgentCompletionsMessageMessageExpressionVariant2(BaseModel):
+class MessageExpressionVariant2(BaseModel):
     role: Literal['system']
 
 
-class AgentCompletionsMessageMessageExpressionVariant3Variant1(RootModel):
-    root: AgentCompletionsMessageUserMessageExpression
+class MessageExpressionVariant3Variant1(RootModel):
+    root: UserMessageExpression
 
 
-class AgentCompletionsMessageMessageExpressionVariant3(BaseModel):
+class MessageExpressionVariant3(BaseModel):
     role: Literal['user']
 
 
-class AgentCompletionsMessageMessageExpressionVariant4Variant1(RootModel):
-    root: AgentCompletionsMessageAssistantMessageExpression
+class MessageExpressionVariant4Variant1(RootModel):
+    root: AssistantMessageExpression
 
 
-class AgentCompletionsMessageMessageExpressionVariant4(BaseModel):
+class MessageExpressionVariant4(BaseModel):
     role: Literal['assistant']
 
 
-class AgentCompletionsMessageMessageExpressionVariant5Variant1(RootModel):
-    root: AgentCompletionsMessageToolMessageExpression
+class MessageExpressionVariant5Variant1(RootModel):
+    root: ToolMessageExpression
 
 
-class AgentCompletionsMessageMessageExpressionVariant5(BaseModel):
+class MessageExpressionVariant5(BaseModel):
     role: Literal['tool']
 
 
-class AgentCompletionsMessageMessageExpression(RootModel):
+class MessageExpression(RootModel):
     """A message with expressions for dynamic content.
 
 This is the expression variant of [`Message`] used in function definitions
@@ -60,5 +60,5 @@ where message content can be computed from the function input at runtime.
 Supports both JMESPath and Starlark expressions."""
     model_config = ConfigDict(title='agent.completions.message.MessageExpression')
 
-    root: Union[AgentCompletionsMessageMessageExpressionVariant1, AgentCompletionsMessageMessageExpressionVariant2, AgentCompletionsMessageMessageExpressionVariant3, AgentCompletionsMessageMessageExpressionVariant4, AgentCompletionsMessageMessageExpressionVariant5]
+    root: Union[MessageExpressionVariant1, MessageExpressionVariant2, MessageExpressionVariant3, MessageExpressionVariant4, MessageExpressionVariant5]
 

@@ -5,13 +5,13 @@ from typing import Literal, TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionString
+    from objectiveai.functions.expression.with_expression import string
 
 
-class AgentCompletionsMessageSimpleContentPartExpression(BaseModel):
+class SimpleContentPartExpression(BaseModel):
     """A text part expression."""
     model_config = ConfigDict(title='agent.completions.message.SimpleContentPartExpression')
 
-    text: FunctionsExpressionWithExpressionString = Field(..., description='The text expression.')
+    text: string = Field(..., description='The text expression.')
     type_: Literal['text'] = Field(..., alias='type')
 

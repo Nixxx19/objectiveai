@@ -6,7 +6,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AuthCreateApiKeyRequest(BaseModel):
+class CreateApiKeyRequest(BaseModel):
     """Request to create a new API key.
 
 # Fields

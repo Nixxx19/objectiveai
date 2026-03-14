@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsResponsePromptTokensDetails(BaseModel):
+class PromptTokensDetails(BaseModel):
     """Detailed breakdown of prompt token usage."""
     model_config = ConfigDict(title='agent.completions.response.PromptTokensDetails')
 

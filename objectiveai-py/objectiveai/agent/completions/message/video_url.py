@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsMessageVideoUrl(BaseModel):
+class VideoUrl(BaseModel):
     """A video URL for multimodal input."""
     model_config = ConfigDict(title='agent.completions.message.VideoUrl')
 

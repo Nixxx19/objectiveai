@@ -3,18 +3,18 @@
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.object_input_schema_type import FunctionsExpressionObjectInputSchemaType
+from objectiveai.functions.expression.object_input_schema_type import ObjectInputSchemaType
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
+    from objectiveai.functions.expression.input_schema import InputSchema
 
 
-class FunctionsExpressionObjectInputSchema(BaseModel):
+class ObjectInputSchema(BaseModel):
     """Schema for an object input with named properties."""
     model_config = ConfigDict(title='functions.expression.ObjectInputSchema')
 
     description: Optional[str] = Field(None, description='Human-readable description of the object.')
-    properties: dict[str, FunctionsExpressionInputSchema] = Field(..., description='Schema for each property in the object.')
+    properties: dict[str, InputSchema] = Field(..., description='Schema for each property in the object.')
     required: Optional[list[str]] = Field(None, description='List of property names that must be present.')
-    type_: FunctionsExpressionObjectInputSchemaType = Field(..., alias='type')
+    type_: ObjectInputSchemaType = Field(..., alias='type')
 

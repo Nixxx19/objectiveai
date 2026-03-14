@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class FunctionsInventionsStateParams(BaseModel):
+class Params(BaseModel):
     model_config = ConfigDict(title='functions.inventions.state.Params')
 
     depth: int = Field(..., ge=0, le=18446744073709551615)

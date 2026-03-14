@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class EnsembleListEnsembleItem(BaseModel):
+class ListEnsembleItem(BaseModel):
     """Summary information for a listed Ensemble."""
     model_config = ConfigDict(title='ensemble.ListEnsembleItem')
 

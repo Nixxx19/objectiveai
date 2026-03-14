@@ -3,17 +3,17 @@
 from __future__ import annotations
 from typing import Annotated, Optional, TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
-from objectiveai.functions.executions.response.unary.object import FunctionsExecutionsResponseUnaryObject
-from objectiveai.functions.executions.response.unary.reasoning_summary import FunctionsExecutionsResponseUnaryReasoningSummary
-from objectiveai.functions.expression.task_output_owned import FunctionsExpressionTaskOutputOwned
+from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.functions.executions.response.unary.object import Object
+from objectiveai.functions.executions.response.unary.reasoning_summary import ReasoningSummary
+from objectiveai.functions.expression.task_output_owned import TaskOutputOwned
 from objectiveai.response_error import ResponseError
 
 if TYPE_CHECKING:
-    from objectiveai.functions.executions.response.unary.task import FunctionsExecutionsResponseUnaryTask
+    from objectiveai.functions.executions.response.unary.task import Task
 
 
-class FunctionsExecutionsResponseUnaryFunctionExecutionTask(BaseModel):
+class FunctionExecutionTask(BaseModel):
     """A complete function execution response (non-streaming)."""
     model_config = ConfigDict(title='functions.executions.response.unary.FunctionExecutionTask')
 
@@ -22,16 +22,16 @@ class FunctionsExecutionsResponseUnaryFunctionExecutionTask(BaseModel):
     function: Optional[str] = Field(None, description='ID of the function used (if remote).')
     id: str = Field(..., description='Unique identifier for this execution.')
     index: int = Field(..., ge=0, le=18446744073709551615)
-    object: FunctionsExecutionsResponseUnaryObject = Field(..., description='Object type identifier.')
-    output: FunctionsExpressionTaskOutputOwned = Field(..., description='The final output (scalar or vector score).')
+    object: Object = Field(..., description='Object type identifier.')
+    output: TaskOutputOwned = Field(..., description='The final output (scalar or vector score).')
     profile: Optional[str] = Field(None, description='ID of the profile used (if remote).')
-    reasoning: Optional[FunctionsExecutionsResponseUnaryReasoningSummary] = Field(None, description='Reasoning summary if reasoning was enabled.')
+    reasoning: Optional[ReasoningSummary] = Field(None, description='Reasoning summary if reasoning was enabled.')
     retry_token: Optional[str] = Field(None, description='Token for retrying this execution with cached votes.')
     swiss_pool_index: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
     swiss_round: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
     task_index: int = Field(..., ge=0, le=18446744073709551615)
     task_path: list[Annotated[int, Field(ge=0, le=18446744073709551615)]]
-    tasks: list[FunctionsExecutionsResponseUnaryTask] = Field(..., description='Results from each task in the function.')
+    tasks: list[Task] = Field(..., description='Results from each task in the function.')
     tasks_errors: bool = Field(..., description='Whether any tasks encountered errors.')
-    usage: AgentCompletionsResponseUsage = Field(..., description='Aggregated token and cost usage.')
+    usage: Usage = Field(..., description='Aggregated token and cost usage.')
 

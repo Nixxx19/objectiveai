@@ -5,32 +5,32 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class AgentOpenrouterVerbosityVariant1(RootModel):
+class VerbosityVariant1(RootModel):
     """Minimal output, concise responses."""
     root: Literal['low']
 
 
-class AgentOpenrouterVerbosityVariant2(RootModel):
+class VerbosityVariant2(RootModel):
     """Balanced output (default, normalized away during preparation)."""
     root: Literal['medium']
 
 
-class AgentOpenrouterVerbosityVariant3(RootModel):
+class VerbosityVariant3(RootModel):
     """Detailed output with thorough explanations."""
     root: Literal['high']
 
 
-class AgentOpenrouterVerbosityVariant4(RootModel):
+class VerbosityVariant4(RootModel):
     """Maximum verbosity, most detailed output possible."""
     root: Literal['max']
 
 
-class AgentOpenrouterVerbosity(RootModel):
+class Verbosity(RootModel):
     """The verbosity level for model output.
 
 This setting hints to the model how detailed its responses should be.
 Not all models support this parameter."""
     model_config = ConfigDict(title='agent.openrouter.Verbosity')
 
-    root: Union[AgentOpenrouterVerbosityVariant1, AgentOpenrouterVerbosityVariant2, AgentOpenrouterVerbosityVariant3, AgentOpenrouterVerbosityVariant4]
+    root: Union[VerbosityVariant1, VerbosityVariant2, VerbosityVariant3, VerbosityVariant4]
 

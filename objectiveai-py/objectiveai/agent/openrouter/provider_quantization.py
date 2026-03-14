@@ -5,57 +5,57 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class AgentOpenrouterProviderQuantizationVariant1(RootModel):
+class ProviderQuantizationVariant1(RootModel):
     """4-bit integer quantization."""
     root: Literal['int4']
 
 
-class AgentOpenrouterProviderQuantizationVariant2(RootModel):
+class ProviderQuantizationVariant2(RootModel):
     """8-bit integer quantization."""
     root: Literal['int8']
 
 
-class AgentOpenrouterProviderQuantizationVariant3(RootModel):
+class ProviderQuantizationVariant3(RootModel):
     """4-bit floating point quantization."""
     root: Literal['fp4']
 
 
-class AgentOpenrouterProviderQuantizationVariant4(RootModel):
+class ProviderQuantizationVariant4(RootModel):
     """6-bit floating point quantization."""
     root: Literal['fp6']
 
 
-class AgentOpenrouterProviderQuantizationVariant5(RootModel):
+class ProviderQuantizationVariant5(RootModel):
     """8-bit floating point quantization."""
     root: Literal['fp8']
 
 
-class AgentOpenrouterProviderQuantizationVariant6(RootModel):
+class ProviderQuantizationVariant6(RootModel):
     """16-bit floating point (half precision)."""
     root: Literal['fp16']
 
 
-class AgentOpenrouterProviderQuantizationVariant7(RootModel):
+class ProviderQuantizationVariant7(RootModel):
     """16-bit brain floating point."""
     root: Literal['bf16']
 
 
-class AgentOpenrouterProviderQuantizationVariant8(RootModel):
+class ProviderQuantizationVariant8(RootModel):
     """32-bit floating point (full precision)."""
     root: Literal['fp32']
 
 
-class AgentOpenrouterProviderQuantizationVariant9(RootModel):
+class ProviderQuantizationVariant9(RootModel):
     """Unknown quantization level."""
     root: Literal['unknown']
 
 
-class AgentOpenrouterProviderQuantization(RootModel):
+class ProviderQuantization(RootModel):
     """Model quantization levels for provider filtering.
 
 Quantization reduces model precision to decrease memory usage and
 increase inference speed, potentially at the cost of output quality."""
     model_config = ConfigDict(title='agent.openrouter.ProviderQuantization')
 
-    root: Union[AgentOpenrouterProviderQuantizationVariant1, AgentOpenrouterProviderQuantizationVariant2, AgentOpenrouterProviderQuantizationVariant3, AgentOpenrouterProviderQuantizationVariant4, AgentOpenrouterProviderQuantizationVariant5, AgentOpenrouterProviderQuantizationVariant6, AgentOpenrouterProviderQuantizationVariant7, AgentOpenrouterProviderQuantizationVariant8, AgentOpenrouterProviderQuantizationVariant9]
+    root: Union[ProviderQuantizationVariant1, ProviderQuantizationVariant2, ProviderQuantizationVariant3, ProviderQuantizationVariant4, ProviderQuantizationVariant5, ProviderQuantizationVariant6, ProviderQuantizationVariant7, ProviderQuantizationVariant8, ProviderQuantizationVariant9]
 

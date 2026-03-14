@@ -3,82 +3,82 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.expression.audio_input_schema import FunctionsExpressionAudioInputSchema
-from objectiveai.functions.expression.boolean_input_schema import FunctionsExpressionBooleanInputSchema
-from objectiveai.functions.expression.file_input_schema import FunctionsExpressionFileInputSchema
-from objectiveai.functions.expression.image_input_schema import FunctionsExpressionImageInputSchema
-from objectiveai.functions.expression.integer_input_schema import FunctionsExpressionIntegerInputSchema
-from objectiveai.functions.expression.number_input_schema import FunctionsExpressionNumberInputSchema
-from objectiveai.functions.expression.string_input_schema import FunctionsExpressionStringInputSchema
-from objectiveai.functions.expression.video_input_schema import FunctionsExpressionVideoInputSchema
+from objectiveai.functions.expression.audio_input_schema import AudioInputSchema
+from objectiveai.functions.expression.boolean_input_schema import BooleanInputSchema
+from objectiveai.functions.expression.file_input_schema import FileInputSchema
+from objectiveai.functions.expression.image_input_schema import ImageInputSchema
+from objectiveai.functions.expression.integer_input_schema import IntegerInputSchema
+from objectiveai.functions.expression.number_input_schema import NumberInputSchema
+from objectiveai.functions.expression.string_input_schema import StringInputSchema
+from objectiveai.functions.expression.video_input_schema import VideoInputSchema
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.any_of_input_schema import FunctionsExpressionAnyOfInputSchema
-    from objectiveai.functions.expression.array_input_schema import FunctionsExpressionArrayInputSchema
-    from objectiveai.functions.expression.object_input_schema import FunctionsExpressionObjectInputSchema
+    from objectiveai.functions.expression.any_of_input_schema import AnyOfInputSchema
+    from objectiveai.functions.expression.array_input_schema import ArrayInputSchema
+    from objectiveai.functions.expression.object_input_schema import ObjectInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant1(RootModel):
+class InputSchemaVariant1(RootModel):
     """A union of schemas - input must match at least one."""
-    root: FunctionsExpressionAnyOfInputSchema
+    root: AnyOfInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant2(RootModel):
+class InputSchemaVariant2(RootModel):
     """An object with named properties."""
-    root: FunctionsExpressionObjectInputSchema
+    root: ObjectInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant3(RootModel):
+class InputSchemaVariant3(RootModel):
     """An array of items."""
-    root: FunctionsExpressionArrayInputSchema
+    root: ArrayInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant4(RootModel):
+class InputSchemaVariant4(RootModel):
     """A string value."""
-    root: FunctionsExpressionStringInputSchema
+    root: StringInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant5(RootModel):
+class InputSchemaVariant5(RootModel):
     """An integer value."""
-    root: FunctionsExpressionIntegerInputSchema
+    root: IntegerInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant6(RootModel):
+class InputSchemaVariant6(RootModel):
     """A floating-point number."""
-    root: FunctionsExpressionNumberInputSchema
+    root: NumberInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant7(RootModel):
+class InputSchemaVariant7(RootModel):
     """A boolean value."""
-    root: FunctionsExpressionBooleanInputSchema
+    root: BooleanInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant8(RootModel):
+class InputSchemaVariant8(RootModel):
     """An image (URL or base64)."""
-    root: FunctionsExpressionImageInputSchema
+    root: ImageInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant9(RootModel):
+class InputSchemaVariant9(RootModel):
     """Audio content."""
-    root: FunctionsExpressionAudioInputSchema
+    root: AudioInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant10(RootModel):
+class InputSchemaVariant10(RootModel):
     """Video content."""
-    root: FunctionsExpressionVideoInputSchema
+    root: VideoInputSchema
 
 
-class FunctionsExpressionInputSchemaVariant11(RootModel):
+class InputSchemaVariant11(RootModel):
     """A file."""
-    root: FunctionsExpressionFileInputSchema
+    root: FileInputSchema
 
 
-class FunctionsExpressionInputSchema(RootModel):
+class InputSchema(RootModel):
     """Schema for validating Function input.
 
 Defines the expected structure and constraints for input data.
 Used by remote Functions to document and validate their inputs."""
     model_config = ConfigDict(title='functions.expression.InputSchema')
 
-    root: Union[FunctionsExpressionInputSchemaVariant1, FunctionsExpressionInputSchemaVariant2, FunctionsExpressionInputSchemaVariant3, FunctionsExpressionInputSchemaVariant4, FunctionsExpressionInputSchemaVariant5, FunctionsExpressionInputSchemaVariant6, FunctionsExpressionInputSchemaVariant7, FunctionsExpressionInputSchemaVariant8, FunctionsExpressionInputSchemaVariant9, FunctionsExpressionInputSchemaVariant10, FunctionsExpressionInputSchemaVariant11]
+    root: Union[InputSchemaVariant1, InputSchemaVariant2, InputSchemaVariant3, InputSchemaVariant4, InputSchemaVariant5, InputSchemaVariant6, InputSchemaVariant7, InputSchemaVariant8, InputSchemaVariant9, InputSchemaVariant10, InputSchemaVariant11]
 

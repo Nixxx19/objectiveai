@@ -5,45 +5,45 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionSpecialVariant1(RootModel):
+class SpecialVariant1(RootModel):
     """Returns the params input as-is."""
     root: Literal['input']
 
 
-class FunctionsExpressionSpecialVariant2(RootModel):
+class SpecialVariant2(RootModel):
     """Returns the params output as-is."""
     root: Literal['output']
 
 
-class FunctionsExpressionSpecialVariant3(RootModel):
+class SpecialVariant3(RootModel):
     """L1-normalizes the output. Scalar/Err pass through.
 Vector: L1 normalize. Vectors: L1 normalize each."""
     root: Literal['task_output_l1_normalized']
 
 
-class FunctionsExpressionSpecialVariant4(RootModel):
+class SpecialVariant4(RootModel):
     """Weighted sum of the output. Vector → Scalar. Vectors → Vector."""
     root: Literal['task_output_weighted_sum']
 
 
-class FunctionsExpressionSpecialVariant5(RootModel):
+class SpecialVariant5(RootModel):
     """Returns the length of input['items'] as u64"""
     root: Literal['input_items_output_length']
 
 
-class FunctionsExpressionSpecialVariant6(RootModel):
+class SpecialVariant6(RootModel):
     """Splits an input containing items and optionally context into multiple inputs"""
     root: Literal['input_items_optional_context_split']
 
 
-class FunctionsExpressionSpecialVariant7(RootModel):
+class SpecialVariant7(RootModel):
     """Merges multiple inputs containing items and optionally context into a single input"""
     root: Literal['input_items_optional_context_merge']
 
 
-class FunctionsExpressionSpecial(RootModel):
+class Special(RootModel):
     """Predefined expression behaviors that require no user-authored code."""
     model_config = ConfigDict(title='functions.expression.Special')
 
-    root: Union[FunctionsExpressionSpecialVariant1, FunctionsExpressionSpecialVariant2, FunctionsExpressionSpecialVariant3, FunctionsExpressionSpecialVariant4, FunctionsExpressionSpecialVariant5, FunctionsExpressionSpecialVariant6, FunctionsExpressionSpecialVariant7]
+    root: Union[SpecialVariant1, SpecialVariant2, SpecialVariant3, SpecialVariant4, SpecialVariant5, SpecialVariant6, SpecialVariant7]
 

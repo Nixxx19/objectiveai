@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
+from objectiveai.functions.expression.expression import Expression
 
 
-class FunctionsAlphaVectorVectorCompletionTaskExpression(BaseModel):
+class VectorCompletionTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.VectorCompletionTaskExpression')
 
-    messages: FunctionsExpressionExpression
-    responses: FunctionsExpressionExpression
-    skip: Optional[FunctionsExpressionExpression] = None
+    messages: Expression
+    responses: Expression
+    skip: Optional[Expression] = None
 

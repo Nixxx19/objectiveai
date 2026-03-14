@@ -3,39 +3,39 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import BaseModel, ConfigDict, RootModel
-from objectiveai.functions.executions.request.function_inline_profile_inline_request_body import FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody
-from objectiveai.functions.executions.request.function_inline_profile_remote_request_body import FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody
-from objectiveai.functions.executions.request.function_inline_profile_remote_request_path import FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPath
-from objectiveai.functions.executions.request.function_remote_profile_inline_request_body import FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody
-from objectiveai.functions.executions.request.function_remote_profile_inline_request_path import FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPath
-from objectiveai.functions.executions.request.function_remote_profile_remote_request_body import FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody
-from objectiveai.functions.executions.request.function_remote_profile_remote_request_path import FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPath
+from objectiveai.functions.executions.request.function_inline_profile_inline_request_body import FunctionInlineProfileInlineRequestBody
+from objectiveai.functions.executions.request.function_inline_profile_remote_request_body import FunctionInlineProfileRemoteRequestBody
+from objectiveai.functions.executions.request.function_inline_profile_remote_request_path import FunctionInlineProfileRemoteRequestPath
+from objectiveai.functions.executions.request.function_remote_profile_inline_request_body import FunctionRemoteProfileInlineRequestBody
+from objectiveai.functions.executions.request.function_remote_profile_inline_request_path import FunctionRemoteProfileInlineRequestPath
+from objectiveai.functions.executions.request.function_remote_profile_remote_request_body import FunctionRemoteProfileRemoteRequestBody
+from objectiveai.functions.executions.request.function_remote_profile_remote_request_path import FunctionRemoteProfileRemoteRequestPath
 
 
-class FunctionsExecutionsRequestRequestVariant1(BaseModel):
-    body: FunctionsExecutionsRequestFunctionInlineProfileInlineRequestBody
+class RequestVariant1(BaseModel):
+    body: FunctionInlineProfileInlineRequestBody
 
 
-class FunctionsExecutionsRequestRequestVariant2(BaseModel):
-    body: FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestBody
-    path: FunctionsExecutionsRequestFunctionInlineProfileRemoteRequestPath
+class RequestVariant2(BaseModel):
+    body: FunctionInlineProfileRemoteRequestBody
+    path: FunctionInlineProfileRemoteRequestPath
 
 
-class FunctionsExecutionsRequestRequestVariant3(BaseModel):
-    body: FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestBody
-    path: FunctionsExecutionsRequestFunctionRemoteProfileInlineRequestPath
+class RequestVariant3(BaseModel):
+    body: FunctionRemoteProfileInlineRequestBody
+    path: FunctionRemoteProfileInlineRequestPath
 
 
-class FunctionsExecutionsRequestRequestVariant4(BaseModel):
-    body: FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestBody
-    path: FunctionsExecutionsRequestFunctionRemoteProfileRemoteRequestPath
+class RequestVariant4(BaseModel):
+    body: FunctionRemoteProfileRemoteRequestBody
+    path: FunctionRemoteProfileRemoteRequestPath
 
 
-class FunctionsExecutionsRequestRequest(RootModel):
+class Request(RootModel):
     """Internal request representation with path and body separated.
 
 Used internally to route requests to the appropriate API endpoint."""
     model_config = ConfigDict(title='functions.executions.request.Request')
 
-    root: Union[FunctionsExecutionsRequestRequestVariant1, FunctionsExecutionsRequestRequestVariant2, FunctionsExecutionsRequestRequestVariant3, FunctionsExecutionsRequestRequestVariant4]
+    root: Union[RequestVariant1, RequestVariant2, RequestVariant3, RequestVariant4]
 

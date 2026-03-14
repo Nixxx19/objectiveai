@@ -3,31 +3,33 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
+from objectiveai.agent.completions.response.usage import Usage
 from objectiveai.response_error import ResponseError
-from objectiveai.vector.completions.response.streaming.agent_completion_chunk import VectorCompletionsResponseStreamingAgentCompletionChunk
-from objectiveai.vector.completions.response.streaming.object import VectorCompletionsResponseStreamingObject
-from objectiveai.vector.completions.response.vote import VectorCompletionsResponseVote
+from objectiveai.vector.completions.response.streaming.agent_completion_chunk import AgentCompletionChunk
+from objectiveai.vector.completions.response.streaming.object import Object
+from objectiveai.vector.completions.response.vote import Vote
 
 
-class FunctionsExecutionsResponseStreamingVectorCompletionTaskChunk(BaseModel):
+class VectorCompletionTaskChunk(BaseModel):
     """A chunk in a streaming vector completion response.
 
 Each chunk contains incremental updates to the completion. Use the
 [`push`](Self::push) method to accumulate chunks into a complete response."""
     model_config = ConfigDict(title='functions.executions.response.streaming.VectorCompletionTaskChunk')
 
-    completions: list[VectorCompletionsResponseStreamingAgentCompletionChunk] = Field(..., description='Incremental agent completion chunks from each agent.')
+    completions: list[AgentCompletionChunk] = Field(..., description='Incremental agent completion chunks from each agent.')
     created: int = Field(..., description='Unix timestamp when the completion was created.', ge=0, le=18446744073709551615)
     ensemble: str = Field(..., description='ID of the ensemble used for this completion.')
     error: Optional[ResponseError] = None
     id: str = Field(..., description='Unique identifier for this vector completion.')
     index: int = Field(..., ge=0, le=18446744073709551615)
-    object: VectorCompletionsResponseStreamingObject = Field(..., description='Object type identifier (`"vector.completion.chunk"`).')
+    object: Object = Field(..., description='Object type identifier (`"vector.completion.chunk"`).')
     scores: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Current weighted scores. Updated as new votes arrive.')
     task_index: int = Field(..., ge=0, le=18446744073709551615)
     task_path: list[Annotated[int, Field(ge=0, le=18446744073709551615)]]
-    usage: Optional[AgentCompletionsResponseUsage] = Field(None, description='Aggregated usage statistics. Typically present only in the final chunk.')
-    votes: list[VectorCompletionsResponseVote] = Field(..., description='Votes received so far. New votes are appended in subsequent chunks.')
+    usage: Optional[Usage] = Field(None, description='Aggregated usage statistics. Typically present only in the final chunk.')
+    votes: list[Vote] = Field(..., description='Votes received so far. New votes are appended in subsequent chunks.')
     weights: list[Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]] = Field(..., description='Current weight distribution across responses. Updated as new votes arrive.')
 
+
+import objectiveai.functions.executions.response.streaming.vector_completion_task_chunk_methods  # noqa: F401, E402

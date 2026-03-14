@@ -3,46 +3,46 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.alpha_vector.placeholder_scalar_function_task_expression import FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression
-from objectiveai.functions.alpha_vector.placeholder_vector_function_task_expression import FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression
-from objectiveai.functions.alpha_vector.scalar_function_task_expression import FunctionsAlphaVectorScalarFunctionTaskExpression
-from objectiveai.functions.alpha_vector.vector_function_task_expression import FunctionsAlphaVectorVectorFunctionTaskExpression
+from objectiveai.functions.alpha_vector.placeholder_scalar_function_task_expression import PlaceholderScalarFunctionTaskExpression
+from objectiveai.functions.alpha_vector.placeholder_vector_function_task_expression import PlaceholderVectorFunctionTaskExpression
+from objectiveai.functions.alpha_vector.scalar_function_task_expression import ScalarFunctionTaskExpression
+from objectiveai.functions.alpha_vector.vector_function_task_expression import VectorFunctionTaskExpression
 
 
-class FunctionsAlphaVectorBranchTaskExpressionVariant1Variant1(RootModel):
-    root: FunctionsAlphaVectorScalarFunctionTaskExpression
+class BranchTaskExpressionVariant1Variant1(RootModel):
+    root: ScalarFunctionTaskExpression
 
 
-class FunctionsAlphaVectorBranchTaskExpressionVariant1(BaseModel):
+class BranchTaskExpressionVariant1(BaseModel):
     type_: Literal['alpha.scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaVectorBranchTaskExpressionVariant2Variant1(RootModel):
-    root: FunctionsAlphaVectorVectorFunctionTaskExpression
+class BranchTaskExpressionVariant2Variant1(RootModel):
+    root: VectorFunctionTaskExpression
 
 
-class FunctionsAlphaVectorBranchTaskExpressionVariant2(BaseModel):
+class BranchTaskExpressionVariant2(BaseModel):
     type_: Literal['alpha.vector.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaVectorBranchTaskExpressionVariant3Variant1(RootModel):
-    root: FunctionsAlphaVectorPlaceholderScalarFunctionTaskExpression
+class BranchTaskExpressionVariant3Variant1(RootModel):
+    root: PlaceholderScalarFunctionTaskExpression
 
 
-class FunctionsAlphaVectorBranchTaskExpressionVariant3(BaseModel):
+class BranchTaskExpressionVariant3(BaseModel):
     type_: Literal['placeholder.alpha.scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaVectorBranchTaskExpressionVariant4Variant1(RootModel):
-    root: FunctionsAlphaVectorPlaceholderVectorFunctionTaskExpression
+class BranchTaskExpressionVariant4Variant1(RootModel):
+    root: PlaceholderVectorFunctionTaskExpression
 
 
-class FunctionsAlphaVectorBranchTaskExpressionVariant4(BaseModel):
+class BranchTaskExpressionVariant4(BaseModel):
     type_: Literal['placeholder.alpha.vector.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaVectorBranchTaskExpression(RootModel):
+class BranchTaskExpression(RootModel):
     model_config = ConfigDict(title='functions.alpha_vector.BranchTaskExpression')
 
-    root: Union[FunctionsAlphaVectorBranchTaskExpressionVariant1, FunctionsAlphaVectorBranchTaskExpressionVariant2, FunctionsAlphaVectorBranchTaskExpressionVariant3, FunctionsAlphaVectorBranchTaskExpressionVariant4]
+    root: Union[BranchTaskExpressionVariant1, BranchTaskExpressionVariant2, BranchTaskExpressionVariant3, BranchTaskExpressionVariant4]
 

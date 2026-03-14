@@ -3,20 +3,20 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.ensemble.ensemble_base import EnsembleEnsembleBase
+from objectiveai.ensemble.ensemble_base import EnsembleBase
 
 
-class VectorCompletionsRequestEnsembleVariant1(RootModel):
+class EnsembleVariant1(RootModel):
     """Reference an existing Ensemble by its ID."""
     root: str
 
 
-class VectorCompletionsRequestEnsembleVariant2(RootModel):
+class EnsembleVariant2(RootModel):
     """Provide an inline Ensemble definition."""
-    root: EnsembleEnsembleBase
+    root: EnsembleBase
 
 
-class VectorCompletionsRequestEnsemble(RootModel):
+class Ensemble(RootModel):
     """Specifies which Ensemble to use for a vector completion.
 
 Ensembles can be referenced by ID or provided inline. The untagged
@@ -43,5 +43,5 @@ Inline definition:
 [`EnsembleBase`]: crate::ensemble::EnsembleBase"""
     model_config = ConfigDict(title='vector.completions.request.Ensemble')
 
-    root: Union[VectorCompletionsRequestEnsembleVariant1, VectorCompletionsRequestEnsembleVariant2]
+    root: Union[EnsembleVariant1, EnsembleVariant2]
 

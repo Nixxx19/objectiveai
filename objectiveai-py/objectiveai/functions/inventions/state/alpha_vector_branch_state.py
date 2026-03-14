@@ -3,18 +3,18 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.alpha_vector.branch_task_expression import FunctionsAlphaVectorBranchTaskExpression
-from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import FunctionsAlphaVectorExpressionVectorFunctionInputSchema
+from objectiveai.functions.alpha_vector.branch_task_expression import BranchTaskExpression
+from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import VectorFunctionInputSchema
 
 
-class FunctionsInventionsStateAlphaVectorBranchState(BaseModel):
+class AlphaVectorBranchState(BaseModel):
     model_config = ConfigDict(title='functions.inventions.state.AlphaVectorBranchState')
 
     depth: int = Field(..., ge=0, le=18446744073709551615)
     description: Optional[str] = None
     essay: Optional[str] = None
     essay_tasks: Optional[str] = None
-    input_schema: Optional[FunctionsAlphaVectorExpressionVectorFunctionInputSchema] = None
+    input_schema: Optional[VectorFunctionInputSchema] = None
     max_branch_width: int = Field(..., ge=0, le=18446744073709551615)
     max_leaf_width: int = Field(..., ge=0, le=18446744073709551615)
     min_branch_width: int = Field(..., ge=0, le=18446744073709551615)
@@ -22,6 +22,6 @@ class FunctionsInventionsStateAlphaVectorBranchState(BaseModel):
     name: str
     readme: Optional[str] = None
     spec: str
-    tasks: Optional[list[FunctionsAlphaVectorBranchTaskExpression]] = None
+    tasks: Optional[list[BranchTaskExpression]] = None
     tasks_length: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
 

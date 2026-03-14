@@ -3,21 +3,21 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.request.provider import AgentCompletionsRequestProvider
-from objectiveai.functions.profiles.computations.request.dataset_item import FunctionsProfilesComputationsRequestDatasetItem
-from objectiveai.vector.completions.request.ensemble import VectorCompletionsRequestEnsemble
+from objectiveai.agent.completions.request.provider import Provider
+from objectiveai.functions.profiles.computations.request.dataset_item import DatasetItem
+from objectiveai.vector.completions.request.ensemble import Ensemble
 
 
-class FunctionsProfilesComputationsRequestFunctionRemoteRequestBody(BaseModel):
+class FunctionRemoteRequestBody(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.request.FunctionRemoteRequestBody')
 
-    dataset: list[FunctionsProfilesComputationsRequestDatasetItem]
-    ensemble: VectorCompletionsRequestEnsemble
+    dataset: list[DatasetItem]
+    ensemble: Ensemble
     from_cache: Optional[bool] = None
     max_retries: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = None
     mcp_server_authorization: Optional[dict[str, str]] = Field(None, description='Map from MCP server URL to authorization header value.')
     n: int = Field(..., ge=0, le=18446744073709551615)
-    provider: Optional[AgentCompletionsRequestProvider] = None
+    provider: Optional[Provider] = None
     retry_token: Optional[str] = None
     seed: Optional[Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]] = None
     stream: Optional[bool] = None

@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AuthGetOpenRouterByokApiKeyResponse(BaseModel):
+class GetOpenRouterByokApiKeyResponse(BaseModel):
     """Response containing the user's OpenRouter BYOK API key."""
     model_config = ConfigDict(title='auth.GetOpenRouterByokApiKeyResponse')
 

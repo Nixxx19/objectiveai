@@ -3,10 +3,10 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.openrouter.provider_quantization import AgentOpenrouterProviderQuantization
+from objectiveai.agent.openrouter.provider_quantization import ProviderQuantization
 
 
-class AgentOpenrouterProvider(BaseModel):
+class Provider(BaseModel):
     """Provider routing preferences.
 
 Controls which providers are used and in what order when routing
@@ -17,6 +17,6 @@ requests to upstream model hosts."""
     ignore: Optional[list[str]] = Field(None, description='Providers to exclude from routing.')
     only: Optional[list[str]] = Field(None, description='Exclusive list of allowed providers. If set, only these providers are used.')
     order: Optional[list[str]] = Field(None, description='Preferred provider order. Earlier providers are tried first.')
-    quantizations: Optional[list[AgentOpenrouterProviderQuantization]] = Field(None, description='Allowed model quantization levels.')
+    quantizations: Optional[list[ProviderQuantization]] = Field(None, description='Allowed model quantization levels.')
     require_parameters: Optional[bool] = Field(None, description='Whether to require that the provider supports all request parameters.\nDefaults to `false`.')
 

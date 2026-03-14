@@ -5,16 +5,16 @@ from typing import Optional, TYPE_CHECKING
 from pydantic import BaseModel, ConfigDict, Field
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression, FunctionsExpressionWithExpressionNullableString
+    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpression, FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression, Nullable_string
 
 
-class AgentCompletionsMessageAssistantMessageExpression(BaseModel):
+class AssistantMessageExpression(BaseModel):
     """Expression variant of [`AssistantMessage`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.AssistantMessageExpression')
 
     content: Optional[FunctionsExpressionWithExpressionNullableAgentCompletionsMessageRichContentExpression] = Field(None, description='The content expression.')
-    name: Optional[FunctionsExpressionWithExpressionNullableString] = None
-    reasoning: Optional[FunctionsExpressionWithExpressionNullableString] = None
-    refusal: Optional[FunctionsExpressionWithExpressionNullableString] = None
+    name: Optional[Nullable_string] = None
+    reasoning: Optional[Nullable_string] = None
+    refusal: Optional[Nullable_string] = None
     tool_calls: Optional[FunctionsExpressionWithExpressionNullableArrayOfFunctionsExpressionWithExpressionAgentCompletionsMessageAssistantToolCallExpression] = None
 

@@ -3,16 +3,16 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.agent.completions.message.message import AgentCompletionsMessageMessage
-from objectiveai.agent.completions.message.rich_content import AgentCompletionsMessageRichContent
-from objectiveai.agent.completions.request.agent import AgentCompletionsRequestAgent
+from objectiveai.agent.completions.message.message import Message
+from objectiveai.agent.completions.message.rich_content import RichContent
+from objectiveai.agent.completions.request.agent import Agent
 
 
-class VectorCompletionsCacheCacheVoteRequestOwned(BaseModel):
+class CacheVoteRequestOwned(BaseModel):
     model_config = ConfigDict(title='vector.completions.cache.CacheVoteRequestOwned')
 
-    agent: AgentCompletionsRequestAgent
-    agents: Optional[list[AgentCompletionsRequestAgent]] = None
-    messages: list[AgentCompletionsMessageMessage]
-    responses: list[AgentCompletionsMessageRichContent]
+    agent: Agent
+    agents: Optional[list[Agent]] = None
+    messages: list[Message]
+    responses: list[RichContent]
 

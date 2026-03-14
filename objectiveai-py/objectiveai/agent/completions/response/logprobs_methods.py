@@ -2,11 +2,11 @@
 from __future__ import annotations
 
 from objectiveai.agent.completions.response.logprobs import (
-    AgentCompletionsResponseLogprobs,
+    Logprobs,
 )
 
 
-def _push(self, other: AgentCompletionsResponseLogprobs) -> None:
+def _push(self, other: Logprobs) -> None:
     if self.content is not None and other.content is not None:
         self.content.extend(other.content)
     elif other.content is not None:
@@ -18,4 +18,4 @@ def _push(self, other: AgentCompletionsResponseLogprobs) -> None:
         self.refusal = list(other.refusal)
 
 
-AgentCompletionsResponseLogprobs.push = _push
+Logprobs.push = _push

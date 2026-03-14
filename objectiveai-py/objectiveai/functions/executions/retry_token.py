@@ -5,7 +5,7 @@ from typing import Optional
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExecutionsRetryToken(RootModel):
+class RetryToken(RootModel):
     """Token that enables reusing votes from a previous function execution.
 
 Contains identifiers for each task's votes that can be reused in a

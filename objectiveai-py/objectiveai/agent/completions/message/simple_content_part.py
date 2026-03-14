@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsMessageSimpleContentPart(BaseModel):
+class SimpleContentPart(BaseModel):
     """A text part."""
     model_config = ConfigDict(title='agent.completions.message.SimpleContentPart')
 

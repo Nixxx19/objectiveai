@@ -3,11 +3,11 @@
 from __future__ import annotations
 from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.openrouter.reasoning_effort import AgentOpenrouterReasoningEffort
-from objectiveai.agent.openrouter.reasoning_summary_verbosity import AgentOpenrouterReasoningSummaryVerbosity
+from objectiveai.agent.openrouter.reasoning_effort import ReasoningEffort
+from objectiveai.agent.openrouter.reasoning_summary_verbosity import ReasoningSummaryVerbosity
 
 
-class AgentOpenrouterReasoning(BaseModel):
+class Reasoning(BaseModel):
     """Configuration for model reasoning/thinking capabilities.
 
 Some models (like o1, o3, Claude with extended thinking) support
@@ -18,8 +18,8 @@ This struct configures those capabilities.
 only supported by some models. Unsupported fields are silently ignored."""
     model_config = ConfigDict(title='agent.openrouter.Reasoning')
 
-    effort: Optional[AgentOpenrouterReasoningEffort] = Field(None, description='The reasoning effort level.\n\nOnly supported by some models.')
+    effort: Optional[ReasoningEffort] = Field(None, description='The reasoning effort level.\n\nOnly supported by some models.')
     enabled: Optional[bool] = Field(None, description='Whether reasoning is enabled. Defaults to `true` if other fields are set.')
     max_tokens: Optional[Annotated[int, Field(ge=0, le=18446744073709551615)]] = Field(None, description='Maximum tokens for the reasoning/thinking output.\n\nOnly supported by some models.')
-    summary_verbosity: Optional[AgentOpenrouterReasoningSummaryVerbosity] = Field(None, description='Verbosity of reasoning summaries in the response.\n\nOnly supported by some models.')
+    summary_verbosity: Optional[ReasoningSummaryVerbosity] = Field(None, description='Verbosity of reasoning summaries in the response.\n\nOnly supported by some models.')
 

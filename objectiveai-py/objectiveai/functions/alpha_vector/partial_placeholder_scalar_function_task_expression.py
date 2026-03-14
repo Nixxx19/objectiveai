@@ -3,15 +3,15 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.object_input_schema import FunctionsExpressionObjectInputSchema
+from objectiveai.functions.expression.expression import Expression
+from objectiveai.functions.expression.object_input_schema import ObjectInputSchema
 
 
-class FunctionsAlphaVectorPartialPlaceholderScalarFunctionTaskExpression(BaseModel):
+class PartialPlaceholderScalarFunctionTaskExpression(BaseModel):
     model_config = ConfigDict(title='functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression')
 
-    input: FunctionsExpressionExpression
-    input_schema: FunctionsExpressionObjectInputSchema
-    skip: Optional[FunctionsExpressionExpression] = None
+    input: Expression
+    input_schema: ObjectInputSchema
+    skip: Optional[Expression] = None
     spec: str
 

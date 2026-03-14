@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.image_url_detail import AgentCompletionsMessageImageUrlDetail
+from objectiveai.agent.completions.message.image_url_detail import ImageUrlDetail
 
 
-class AgentCompletionsMessageImageUrl(BaseModel):
+class ImageUrl(BaseModel):
     """An image URL for multimodal input."""
     model_config = ConfigDict(title='agent.completions.message.ImageUrl')
 
-    detail: Optional[AgentCompletionsMessageImageUrlDetail] = Field(None, description='The detail level for image processing.')
+    detail: Optional[ImageUrlDetail] = Field(None, description='The detail level for image processing.')
     url: str = Field(..., description='The URL of the image (can be a data URL or HTTP URL).')
 

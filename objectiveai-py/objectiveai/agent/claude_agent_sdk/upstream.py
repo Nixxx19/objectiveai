@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class AgentClaudeAgentSdkUpstream(RootModel):
+class Upstream(RootModel):
     """Claude Agent SDK upstream marker."""
     model_config = ConfigDict(title='agent.claude_agent_sdk.Upstream')
 

@@ -3,27 +3,27 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.functions.alpha_vector.branch_task_expression import FunctionsAlphaVectorBranchTaskExpression
-from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import FunctionsAlphaVectorExpressionVectorFunctionInputSchema
-from objectiveai.functions.alpha_vector.leaf_task_expression import FunctionsAlphaVectorLeafTaskExpression
+from objectiveai.functions.alpha_vector.branch_task_expression import BranchTaskExpression
+from objectiveai.functions.alpha_vector.expression.vector_function_input_schema import VectorFunctionInputSchema
+from objectiveai.functions.alpha_vector.leaf_task_expression import LeafTaskExpression
 
 
-class FunctionsAlphaVectorRemoteFunctionVariant1(BaseModel):
+class RemoteFunctionVariant1(BaseModel):
     description: str
-    input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchema
-    tasks: list[FunctionsAlphaVectorBranchTaskExpression]
+    input_schema: VectorFunctionInputSchema
+    tasks: list[BranchTaskExpression]
     type_: Literal['alpha.vector.branch.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaVectorRemoteFunctionVariant2(BaseModel):
+class RemoteFunctionVariant2(BaseModel):
     description: str
-    input_schema: FunctionsAlphaVectorExpressionVectorFunctionInputSchema
-    tasks: list[FunctionsAlphaVectorLeafTaskExpression]
+    input_schema: VectorFunctionInputSchema
+    tasks: list[LeafTaskExpression]
     type_: Literal['alpha.vector.leaf.function'] = Field(..., alias='type')
 
 
-class FunctionsAlphaVectorRemoteFunction(RootModel):
+class RemoteFunction(RootModel):
     model_config = ConfigDict(title='functions.alpha_vector.RemoteFunction')
 
-    root: Union[FunctionsAlphaVectorRemoteFunctionVariant1, FunctionsAlphaVectorRemoteFunctionVariant2]
+    root: Union[RemoteFunctionVariant1, RemoteFunctionVariant2]
 

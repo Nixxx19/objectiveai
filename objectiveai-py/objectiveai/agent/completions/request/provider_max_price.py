@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsRequestProviderMaxPrice(BaseModel):
+class ProviderMaxPrice(BaseModel):
     """Maximum price constraints per token type."""
     model_config = ConfigDict(title='agent.completions.request.ProviderMaxPrice')
 

@@ -3,51 +3,51 @@
 from __future__ import annotations
 from typing import Literal, Union
 from pydantic import BaseModel, ConfigDict, Field, RootModel
-from objectiveai.agent.completions.message.file import AgentCompletionsMessageFile
-from objectiveai.agent.completions.message.image_url import AgentCompletionsMessageImageUrl
-from objectiveai.agent.completions.message.input_audio import AgentCompletionsMessageInputAudio
-from objectiveai.agent.completions.message.video_url import AgentCompletionsMessageVideoUrl
+from objectiveai.agent.completions.message.file import File
+from objectiveai.agent.completions.message.image_url import ImageUrl
+from objectiveai.agent.completions.message.input_audio import InputAudio
+from objectiveai.agent.completions.message.video_url import VideoUrl
 
 
-class AgentCompletionsMessageRichContentPartVariant1(BaseModel):
+class RichContentPartVariant1(BaseModel):
     """Text content."""
     text: str
     type_: Literal['text'] = Field(..., alias='type')
 
 
-class AgentCompletionsMessageRichContentPartVariant2(BaseModel):
+class RichContentPartVariant2(BaseModel):
     """An image URL."""
-    image_url: AgentCompletionsMessageImageUrl
+    image_url: ImageUrl
     type_: Literal['image_url'] = Field(..., alias='type')
 
 
-class AgentCompletionsMessageRichContentPartVariant3(BaseModel):
+class RichContentPartVariant3(BaseModel):
     """Audio input."""
-    input_audio: AgentCompletionsMessageInputAudio
+    input_audio: InputAudio
     type_: Literal['input_audio'] = Field(..., alias='type')
 
 
-class AgentCompletionsMessageRichContentPartVariant4(BaseModel):
+class RichContentPartVariant4(BaseModel):
     """Video input."""
     type_: Literal['input_video'] = Field(..., alias='type')
-    video_url: AgentCompletionsMessageVideoUrl
+    video_url: VideoUrl
 
 
-class AgentCompletionsMessageRichContentPartVariant5(BaseModel):
+class RichContentPartVariant5(BaseModel):
     """A video URL."""
     type_: Literal['video_url'] = Field(..., alias='type')
-    video_url: AgentCompletionsMessageVideoUrl
+    video_url: VideoUrl
 
 
-class AgentCompletionsMessageRichContentPartVariant6(BaseModel):
+class RichContentPartVariant6(BaseModel):
     """A file."""
-    file: AgentCompletionsMessageFile
+    file: File
     type_: Literal['file'] = Field(..., alias='type')
 
 
-class AgentCompletionsMessageRichContentPart(RootModel):
+class RichContentPart(RootModel):
     """A part of rich content."""
     model_config = ConfigDict(title='agent.completions.message.RichContentPart')
 
-    root: Union[AgentCompletionsMessageRichContentPartVariant1, AgentCompletionsMessageRichContentPartVariant2, AgentCompletionsMessageRichContentPartVariant3, AgentCompletionsMessageRichContentPartVariant4, AgentCompletionsMessageRichContentPartVariant5, AgentCompletionsMessageRichContentPartVariant6]
+    root: Union[RichContentPartVariant1, RichContentPartVariant2, RichContentPartVariant3, RichContentPartVariant4, RichContentPartVariant5, RichContentPartVariant6]
 

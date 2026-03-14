@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionArrayInputSchemaType(RootModel):
+class ArrayInputSchemaType(RootModel):
     model_config = ConfigDict(title='functions.expression.ArrayInputSchemaType')
 
     root: Literal['array']

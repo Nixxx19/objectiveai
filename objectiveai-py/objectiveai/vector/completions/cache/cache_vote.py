@@ -3,11 +3,11 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict
-from objectiveai.vector.completions.response.vote import VectorCompletionsResponseVote
+from objectiveai.vector.completions.response.vote import Vote
 
 
-class VectorCompletionsCacheCacheVote(BaseModel):
+class CacheVote(BaseModel):
     model_config = ConfigDict(title='vector.completions.cache.CacheVote')
 
-    vote: Optional[VectorCompletionsResponseVote] = None
+    vote: Optional[Vote] = None
 

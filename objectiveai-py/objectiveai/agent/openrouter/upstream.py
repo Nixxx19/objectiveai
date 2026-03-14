@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class AgentOpenrouterUpstream(RootModel):
+class Upstream(RootModel):
     """OpenRouter upstream marker."""
     model_config = ConfigDict(title='agent.openrouter.Upstream')
 

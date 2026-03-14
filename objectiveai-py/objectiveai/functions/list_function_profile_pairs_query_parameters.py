@@ -3,12 +3,12 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.list_function_profile_pairs_source import FunctionsListFunctionProfilePairsSource
+from objectiveai.functions.list_function_profile_pairs_source import ListFunctionProfilePairsSource
 
 
-class FunctionsListFunctionProfilePairsQueryParameters(BaseModel):
+class ListFunctionProfilePairsQueryParameters(BaseModel):
     """Query parameters for the list function-profile pairs endpoint."""
     model_config = ConfigDict(title='functions.ListFunctionProfilePairsQueryParameters')
 
-    source: Optional[FunctionsListFunctionProfilePairsSource] = Field(None, description='Optional source filter for listing function-profile pairs.')
+    source: Optional[ListFunctionProfilePairsSource] = Field(None, description='Optional source filter for listing function-profile pairs.')
 

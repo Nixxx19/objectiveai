@@ -3,25 +3,25 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.claude_agent_sdk.effort import AgentClaudeAgentSdkEffort
-from objectiveai.agent.claude_agent_sdk.output_mode import AgentClaudeAgentSdkOutputMode
-from objectiveai.agent.claude_agent_sdk.upstream import AgentClaudeAgentSdkUpstream
-from objectiveai.agent.completions.message.rich_content import AgentCompletionsMessageRichContent
-from objectiveai.agent.mcp_server import AgentMcpServer
+from objectiveai.agent.claude_agent_sdk.effort import Effort
+from objectiveai.agent.claude_agent_sdk.output_mode import OutputMode
+from objectiveai.agent.claude_agent_sdk.upstream import Upstream
+from objectiveai.agent.completions.message.rich_content import RichContent
+from objectiveai.agent.mcp_server import McpServer
 
 
-class AgentClaudeAgentSdkAgentBase(BaseModel):
+class AgentBase(BaseModel):
     """The base configuration for a Claude Agent SDK Agent (without computed ID)."""
     model_config = ConfigDict(title='agent.claude_agent_sdk.AgentBase')
 
-    effort: Optional[AgentClaudeAgentSdkEffort] = Field(None, description='The effort level for model output.')
-    mcp_servers: Optional[list[AgentMcpServer]] = Field(None, description='MCP servers the agent can connect to.')
+    effort: Optional[Effort] = Field(None, description='The effort level for model output.')
+    mcp_servers: Optional[list[McpServer]] = Field(None, description='MCP servers the agent can connect to.')
     model: str = Field(..., description='The upstream language model identifier.')
-    output_mode: AgentClaudeAgentSdkOutputMode = Field(..., description='The output mode for vector completions. Ignored for agent completions.')
-    prefix_content: Optional[AgentCompletionsMessageRichContent] = Field(None, description="Rich content prepended to the user's prompt.")
-    suffix_content: Optional[AgentCompletionsMessageRichContent] = Field(None, description="Rich content appended after the user's prompt.")
+    output_mode: OutputMode = Field(..., description='The output mode for vector completions. Ignored for agent completions.')
+    prefix_content: Optional[RichContent] = Field(None, description="Rich content prepended to the user's prompt.")
+    suffix_content: Optional[RichContent] = Field(None, description="Rich content appended after the user's prompt.")
     synthetic_reasoning: Optional[bool] = Field(None, description='Enable synthetic reasoning for non-reasoning LLMs.\n\n**Vector completions only.** Ignored for agent completions.\n\nWhen enabled, forces the LLM to output a `_think` field before voting,\nsimulating chain-of-thought reasoning. Requires `output_mode` to be\n`ToolCall` (not `Instruction`).')
     system_prompt: Optional[str] = Field(None, description='System prompt for the agent.')
     thinking: Optional[bool] = Field(None, description='Whether thinking/extended thinking is enabled.\n\nDefaults to `true`. Set to `false` to disable.')
-    upstream: AgentClaudeAgentSdkUpstream = Field(..., description='The upstream provider marker.')
+    upstream: Upstream = Field(..., description='The upstream provider marker.')
 

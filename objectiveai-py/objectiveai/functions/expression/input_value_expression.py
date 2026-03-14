@@ -3,53 +3,53 @@
 from __future__ import annotations
 from typing import Annotated, TYPE_CHECKING, Union
 from pydantic import ConfigDict, Field, RootModel
-from objectiveai.agent.completions.message.rich_content_part import AgentCompletionsMessageRichContentPart
+from objectiveai.agent.completions.message.rich_content_part import RichContentPart
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
+    from objectiveai.functions.expression.with_expression import InputValueExpression as FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression
 
 
-class FunctionsExpressionInputValueExpressionVariant1(RootModel):
+class InputValueExpressionVariant1(RootModel):
     """Rich content (image, audio, video, file)."""
-    root: AgentCompletionsMessageRichContentPart
+    root: RichContentPart
 
 
-class FunctionsExpressionInputValueExpressionVariant2(RootModel):
+class InputValueExpressionVariant2(RootModel):
     """An object with values that may be expressions."""
     root: dict[str, FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression]
 
 
-class FunctionsExpressionInputValueExpressionVariant3(RootModel):
+class InputValueExpressionVariant3(RootModel):
     """An array with elements that may be expressions."""
     root: list[FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpression]
 
 
-class FunctionsExpressionInputValueExpressionVariant4(RootModel):
+class InputValueExpressionVariant4(RootModel):
     """A string value."""
     root: str
 
 
-class FunctionsExpressionInputValueExpressionVariant5(RootModel):
+class InputValueExpressionVariant5(RootModel):
     """An integer value."""
     root: Annotated[int, Field(ge=-9223372036854775808, le=9223372036854775807)]
 
 
-class FunctionsExpressionInputValueExpressionVariant6(RootModel):
+class InputValueExpressionVariant6(RootModel):
     """A floating-point number."""
     root: Annotated[float, Field(ge=-3.4028234663852886e+38, le=3.4028234663852886e+38)]
 
 
-class FunctionsExpressionInputValueExpressionVariant7(RootModel):
+class InputValueExpressionVariant7(RootModel):
     """A boolean value."""
     root: bool
 
 
-class FunctionsExpressionInputValueExpression(RootModel):
+class InputValueExpression(RootModel):
     """An input value that may contain expressions (pre-compilation).
 
 Similar to [`InputValue`] but object values and array elements can be
 expressions (JMESPath or Starlark) that are evaluated during compilation."""
     model_config = ConfigDict(title='functions.expression.InputValueExpression')
 
-    root: Union[FunctionsExpressionInputValueExpressionVariant1, FunctionsExpressionInputValueExpressionVariant2, FunctionsExpressionInputValueExpressionVariant3, FunctionsExpressionInputValueExpressionVariant4, FunctionsExpressionInputValueExpressionVariant5, FunctionsExpressionInputValueExpressionVariant6, FunctionsExpressionInputValueExpressionVariant7]
+    root: Union[InputValueExpressionVariant1, InputValueExpressionVariant2, InputValueExpressionVariant3, InputValueExpressionVariant4, InputValueExpressionVariant5, InputValueExpressionVariant6, InputValueExpressionVariant7]
 

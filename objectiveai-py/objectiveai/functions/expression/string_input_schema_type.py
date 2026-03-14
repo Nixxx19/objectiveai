@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class FunctionsExpressionStringInputSchemaType(RootModel):
+class StringInputSchemaType(RootModel):
     model_config = ConfigDict(title='functions.expression.StringInputSchemaType')
 
     root: Literal['string']

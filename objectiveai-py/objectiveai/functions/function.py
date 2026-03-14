@@ -3,21 +3,21 @@
 from __future__ import annotations
 from typing import Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.inline_function import FunctionsInlineFunction
-from objectiveai.functions.remote_function import FunctionsRemoteFunction
+from objectiveai.functions.inline_function import InlineFunction
+from objectiveai.functions.remote_function import RemoteFunction
 
 
-class FunctionsFunctionVariant1(RootModel):
+class FunctionVariant1(RootModel):
     """A remote function with metadata (description, schema, etc.)."""
-    root: FunctionsRemoteFunction
+    root: RemoteFunction
 
 
-class FunctionsFunctionVariant2(RootModel):
+class FunctionVariant2(RootModel):
     """An inline function definition without metadata."""
-    root: FunctionsInlineFunction
+    root: InlineFunction
 
 
-class FunctionsFunction(RootModel):
+class Function(RootModel):
     """A Function definition, either remote or inline.
 
 Functions are composable scoring pipelines that transform structured input
@@ -29,5 +29,5 @@ Use [`compile_tasks`](Self::compile_tasks) to preview how task expressions resol
 for given inputs."""
     model_config = ConfigDict(title='functions.Function')
 
-    root: Union[FunctionsFunctionVariant1, FunctionsFunctionVariant2]
+    root: Union[FunctionVariant1, FunctionVariant2]
 

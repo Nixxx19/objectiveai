@@ -4,7 +4,7 @@ from __future__ import annotations
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentMcpServer(BaseModel):
+class McpServer(BaseModel):
     """An MCP server that the agent can connect to."""
     model_config = ConfigDict(title='agent.McpServer')
 

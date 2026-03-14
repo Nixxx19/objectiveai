@@ -5,26 +5,26 @@ from typing import Literal, Union
 from pydantic import ConfigDict, RootModel
 
 
-class AgentOpenrouterReasoningSummaryVerbosityVariant1(RootModel):
+class ReasoningSummaryVerbosityVariant1(RootModel):
     """Let the model decide (default, normalized away)."""
     root: Literal['auto']
 
 
-class AgentOpenrouterReasoningSummaryVerbosityVariant2(RootModel):
+class ReasoningSummaryVerbosityVariant2(RootModel):
     """Brief summary of reasoning."""
     root: Literal['concise']
 
 
-class AgentOpenrouterReasoningSummaryVerbosityVariant3(RootModel):
+class ReasoningSummaryVerbosityVariant3(RootModel):
     """Thorough summary of reasoning."""
     root: Literal['detailed']
 
 
-class AgentOpenrouterReasoningSummaryVerbosity(RootModel):
+class ReasoningSummaryVerbosity(RootModel):
     """Verbosity of the reasoning summary included in responses.
 
 Only supported by some models."""
     model_config = ConfigDict(title='agent.openrouter.ReasoningSummaryVerbosity')
 
-    root: Union[AgentOpenrouterReasoningSummaryVerbosityVariant1, AgentOpenrouterReasoningSummaryVerbosityVariant2, AgentOpenrouterReasoningSummaryVerbosityVariant3]
+    root: Union[ReasoningSummaryVerbosityVariant1, ReasoningSummaryVerbosityVariant2, ReasoningSummaryVerbosityVariant3]
 

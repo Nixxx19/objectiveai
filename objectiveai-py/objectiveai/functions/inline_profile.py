@@ -3,25 +3,25 @@
 from __future__ import annotations
 from typing import TYPE_CHECKING, Union
 from pydantic import ConfigDict, RootModel
-from objectiveai.functions.inline_auto_profile import FunctionsInlineAutoProfile
+from objectiveai.functions.inline_auto_profile import InlineAutoProfile
 
 if TYPE_CHECKING:
-    from objectiveai.functions.inline_tasks_profile import FunctionsInlineTasksProfile
+    from objectiveai.functions.inline_tasks_profile import InlineTasksProfile
 
 
-class FunctionsInlineProfileVariant1(RootModel):
+class InlineProfileVariant1(RootModel):
     """Tasks-based profile with per-task configuration."""
-    root: FunctionsInlineTasksProfile
+    root: InlineTasksProfile
 
 
-class FunctionsInlineProfileVariant2(RootModel):
+class InlineProfileVariant2(RootModel):
     """Auto profile that applies a single ensemble+weights to all vector completion tasks."""
-    root: FunctionsInlineAutoProfile
+    root: InlineAutoProfile
 
 
-class FunctionsInlineProfile(RootModel):
+class InlineProfile(RootModel):
     """An inline profile, either tasks-based or auto."""
     model_config = ConfigDict(title='functions.InlineProfile')
 
-    root: Union[FunctionsInlineProfileVariant1, FunctionsInlineProfileVariant2]
+    root: Union[InlineProfileVariant1, InlineProfileVariant2]
 

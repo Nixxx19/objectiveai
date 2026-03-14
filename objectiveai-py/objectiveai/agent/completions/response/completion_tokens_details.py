@@ -5,7 +5,7 @@ from typing import Annotated, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 
-class AgentCompletionsResponseCompletionTokensDetails(BaseModel):
+class CompletionTokensDetails(BaseModel):
     """Detailed breakdown of completion token usage."""
     model_config = ConfigDict(title='agent.completions.response.CompletionTokensDetails')
 

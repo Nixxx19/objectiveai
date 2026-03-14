@@ -3,32 +3,32 @@
 from __future__ import annotations
 from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.functions.expression.expression import FunctionsExpressionExpression
-from objectiveai.functions.expression.input_schema import FunctionsExpressionInputSchema
-from objectiveai.functions.remote import FunctionsRemote
-from objectiveai.functions.task_expression import FunctionsTaskExpression
+from objectiveai.functions.expression.expression import Expression
+from objectiveai.functions.expression.input_schema import InputSchema
+from objectiveai.functions.remote import Remote
+from objectiveai.functions.task_expression import TaskExpression
 
 
-class FunctionsGetFunctionVariant1(BaseModel):
+class GetFunctionVariant1(BaseModel):
     """Produces a single score in [0, 1]."""
     description: str = Field(..., description='Human-readable description of what the function does.')
-    input_schema: FunctionsExpressionInputSchema = Field(..., description='JSON Schema defining the expected input structure.')
-    tasks: list[FunctionsTaskExpression] = Field(..., description='The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).')
+    input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
+    tasks: list[TaskExpression] = Field(..., description='The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).')
     type_: Literal['scalar.function'] = Field(..., alias='type')
 
 
-class FunctionsGetFunctionVariant2(BaseModel):
+class GetFunctionVariant2(BaseModel):
     """Produces a vector of scores that sums to 1."""
     description: str = Field(..., description='Human-readable description of what the function does.')
-    input_merge: FunctionsExpressionExpression = Field(..., description='Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array).')
-    input_schema: FunctionsExpressionInputSchema = Field(..., description='JSON Schema defining the expected input structure.')
-    input_split: FunctionsExpressionExpression = Field(..., description='Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`.')
-    output_length: FunctionsExpressionExpression = Field(..., description='Expression computing the expected output vector length for task outputs.\nReceives: `input`.')
-    tasks: list[FunctionsTaskExpression] = Field(..., description='The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).')
+    input_merge: Expression = Field(..., description='Expression transforming an array of inputs computed by `input_split`\ninto a single Input object for the Function.\nReceives: `input` (as an array).')
+    input_schema: InputSchema = Field(..., description='JSON Schema defining the expected input structure.')
+    input_split: Expression = Field(..., description='Expression transforming input into an input array of the output_length\nWhen the Function is executed with any input from the array,\nThe output_length should be 1.\nReceives: `input`.')
+    output_length: Expression = Field(..., description='Expression computing the expected output vector length for task outputs.\nReceives: `input`.')
+    tasks: list[TaskExpression] = Field(..., description='The list of tasks to execute. Tasks with a `map` expression are\nexpanded into multiple instances. Each instance is compiled with\n`map` set to the current integer index.\nReceives: `input`, `map` (if mapped).')
     type_: Literal['vector.function'] = Field(..., alias='type')
 
 
-class FunctionsGetFunction(BaseModel):
+class GetFunction(BaseModel):
     """A remote function with full metadata.
 
 Remote functions are stored as `function.json` in repositories and
@@ -38,6 +38,6 @@ that inline functions lack."""
 
     commit: str
     owner: str
-    remote: FunctionsRemote
+    remote: Remote
     repository: str
 

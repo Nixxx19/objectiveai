@@ -3,13 +3,13 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.message.rich_content import AgentCompletionsMessageRichContent
+from objectiveai.agent.completions.message.rich_content import RichContent
 
 
-class AgentCompletionsMessageUserMessage(BaseModel):
+class UserMessage(BaseModel):
     """A user message from the end user."""
     model_config = ConfigDict(title='agent.completions.message.UserMessage')
 
-    content: AgentCompletionsMessageRichContent = Field(..., description='The message content (supports text, images, audio, video, files).')
+    content: RichContent = Field(..., description='The message content (supports text, images, audio, video, files).')
     name: Optional[str] = Field(None, description='Optional name for the user.')
 

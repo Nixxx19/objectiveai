@@ -5,7 +5,7 @@ from typing import Literal
 from pydantic import ConfigDict, RootModel
 
 
-class VectorCompletionsResponseUnaryObject(RootModel):
+class Object(RootModel):
     """A complete vector completion response."""
     model_config = ConfigDict(title='vector.completions.response.unary.Object')
 

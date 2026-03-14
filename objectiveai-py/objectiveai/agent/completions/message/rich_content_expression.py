@@ -5,22 +5,22 @@ from typing import TYPE_CHECKING, Union
 from pydantic import ConfigDict, RootModel
 
 if TYPE_CHECKING:
-    from objectiveai.functions.expression.with_expression import FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpression
+    from objectiveai.functions.expression.with_expression import RichContentPartExpression
 
 
-class AgentCompletionsMessageRichContentExpressionVariant1(RootModel):
+class RichContentExpressionVariant1(RootModel):
     """Plain text content."""
     root: str
 
 
-class AgentCompletionsMessageRichContentExpressionVariant2(RootModel):
+class RichContentExpressionVariant2(RootModel):
     """Multi-part content expressions."""
-    root: list[FunctionsExpressionWithExpressionAgentCompletionsMessageRichContentPartExpression]
+    root: list[RichContentPartExpression]
 
 
-class AgentCompletionsMessageRichContentExpression(RootModel):
+class RichContentExpression(RootModel):
     """Expression variant of [`RichContent`] for dynamic content."""
     model_config = ConfigDict(title='agent.completions.message.RichContentExpression')
 
-    root: Union[AgentCompletionsMessageRichContentExpressionVariant1, AgentCompletionsMessageRichContentExpressionVariant2]
+    root: Union[RichContentExpressionVariant1, RichContentExpressionVariant2]
 

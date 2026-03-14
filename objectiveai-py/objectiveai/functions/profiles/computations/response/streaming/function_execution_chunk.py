@@ -3,15 +3,15 @@
 from __future__ import annotations
 from typing import Optional
 from pydantic import BaseModel, ConfigDict, Field
-from objectiveai.agent.completions.response.usage import AgentCompletionsResponseUsage
-from objectiveai.functions.executions.response.streaming.object import FunctionsExecutionsResponseStreamingObject
-from objectiveai.functions.executions.response.streaming.reasoning_summary_chunk import FunctionsExecutionsResponseStreamingReasoningSummaryChunk
-from objectiveai.functions.executions.response.streaming.task_chunk import FunctionsExecutionsResponseStreamingTaskChunk
-from objectiveai.functions.expression.task_output_owned import FunctionsExpressionTaskOutputOwned
+from objectiveai.agent.completions.response.usage import Usage
+from objectiveai.functions.executions.response.streaming.object import Object
+from objectiveai.functions.executions.response.streaming.reasoning_summary_chunk import ReasoningSummaryChunk
+from objectiveai.functions.executions.response.streaming.task_chunk import TaskChunk
+from objectiveai.functions.expression.task_output_owned import TaskOutputOwned
 from objectiveai.response_error import ResponseError
 
 
-class FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk(BaseModel):
+class FunctionExecutionChunk(BaseModel):
     model_config = ConfigDict(title='functions.profiles.computations.response.streaming.FunctionExecutionChunk')
 
     created: int = Field(..., ge=0, le=18446744073709551615)
@@ -21,13 +21,15 @@ class FunctionsProfilesComputationsResponseStreamingFunctionExecutionChunk(BaseM
     id: str
     index: int = Field(..., ge=0, le=18446744073709551615)
     n: int = Field(..., ge=0, le=18446744073709551615)
-    object: FunctionsExecutionsResponseStreamingObject
-    output: Optional[FunctionsExpressionTaskOutputOwned] = None
+    object: Object
+    output: Optional[TaskOutputOwned] = None
     profile: Optional[str] = None
-    reasoning: Optional[FunctionsExecutionsResponseStreamingReasoningSummaryChunk] = None
+    reasoning: Optional[ReasoningSummaryChunk] = None
     retry: int = Field(..., ge=0, le=18446744073709551615)
     retry_token: Optional[str] = None
-    tasks: list[FunctionsExecutionsResponseStreamingTaskChunk]
+    tasks: list[TaskChunk]
     tasks_errors: Optional[bool] = None
-    usage: Optional[AgentCompletionsResponseUsage] = None
+    usage: Optional[Usage] = None
 
+
+import objectiveai.functions.profiles.computations.response.streaming.function_execution_chunk_methods  # noqa: F401, E402
