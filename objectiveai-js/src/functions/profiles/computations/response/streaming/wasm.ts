@@ -1,5 +1,6 @@
-import { functionProfileComputationChunkMerged, functionProfileComputationChunkNormalized } from "../../../../../wasm/loader.js";
+import { functionProfileComputationChunkMerged, functionProfileComputationChunkNormalized, functionProfileComputationChunkToUnary } from "../../../../../wasm/loader.js";
 import type { FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk } from "./functionProfileComputationChunk";
+import type { FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation } from "../unary/functionProfileComputation";
 
 export function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkMerged(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, b: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk {
   return JSON.parse(functionProfileComputationChunkMerged(a, b));
@@ -7,4 +8,8 @@ export function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfil
 
 export function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkNormalized(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk {
   return JSON.parse(functionProfileComputationChunkNormalized(a));
+}
+
+export function wasmFunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunkToUnary(a: FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk): FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation {
+  return JSON.parse(functionProfileComputationChunkToUnary(a));
 }

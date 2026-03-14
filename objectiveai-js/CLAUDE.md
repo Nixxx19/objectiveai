@@ -2,6 +2,10 @@
 
 TypeScript SDK for ObjectiveAI. Published as `objectiveai` on npm.
 
+## Building
+
+`npm run build --workspace=objectiveai` (from the repo root) rebuilds everything, including `objectiveai-rs-wasm-js` (WASM). Do NOT run `wasm-pack` directly — the build script handles it.
+
 ## Merge System
 
 The merge system is how streaming chunks are aggregated into a single accumulating object. It is the TypeScript equivalent of `push()` methods in `objectiveai-rs`.
