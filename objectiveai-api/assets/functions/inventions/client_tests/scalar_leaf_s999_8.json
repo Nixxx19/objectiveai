@@ -129,14 +129,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "TkAfnwfDvj391auRkCBCuuVWg1ylABApKlaKkuu2 nBtPBfvMHVuCNLtv8nwEmD37dYoosoSWXY02NLLsG2Y4Wxgls8I sbZs6GgRbnr0tLzHgp1KyYqZhfNl0fokhJz4E93XTaLsDRtxNas mU",
+          "reasoning": "ivXnmkEYqRdpD1SWQhC87S1z9tFKrxiG8vLwLqg4fsAXNmEYADwPVX3XfNZjNfPvoxj8w02CwtTpZzVKte3cBRqaE9lp14B9eP25LB8hDeOzsNdgTgu5M9YiCMDjCgpQIgD1lgrYRCxZZe6lPHc317ybJF72PSus2J0VvEqHlDIdMW11Zbds6nredVLtWpOHR0vqoNGKMEUycnCUWroAZFFQxRgHtJMN2 Y9aMGQ1xEoG8X58nYPlh68Is2fh9lO",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_4922425466746180329",
+              "id": "call_mock_9477332630293189228",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"type\":\"object\",\"properties\":{\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"id\":{\"type\":\"boolean\"},\"format\":{\"type\":\"string\"},\"description\":{\"type\":\"string\"}},\"required\":[\"values\",\"id\"]}"
+                "arguments": "{\"type\":\"object\",\"properties\":{\"version\":{\"type\":\"boolean\"},\"source\":{\"type\":\"string\",\"description\":\"The source\"},\"description\":{\"type\":\"string\"},\"enabled\":{\"type\":\"boolean\"},\"topic\":{\"type\":\"string\"}},\"required\":[\"version\",\"source\",\"description\",\"enabled\",\"topic\"]}"
               }
             }
           ],
@@ -158,7 +158,7 @@
           "role": "tool",
           "index": 6,
           "content": "Ok",
-          "tool_call_id": "call_mock_4922425466746180329"
+          "tool_call_id": "call_mock_9477332630293189228"
         },
         {
           "role": "assistant",
@@ -167,9 +167,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "TNsi81FSRv7bURrxnoBHkTOYlmZn5WzIEN6E88iQqRk0f9k04VYO1QaFvpXoL1KesjKS4jXTlXs3Rg0FX2vQVvENJsLoIRkpmjqZFQdAeaXDoln1 IMVms3w Q9dG97GoKkL69JlruC3ykoDkbgHv yfLWZTW95BxroR6YT R5EglJC8bp9PNbCC3iaLJJJkMa7YaGFE7hpTT0zK8bMLePXyxqBlyhkBY VNegKjfG6wwAPjmuJP DkkkKpVlJsayGg OfHV8YWe29xOl7IXLSPu9cGhzSQRgKxzwb5NyiMSIkD3UfL wm0xaRlaRa5QcDvoMsg",
+          "reasoning": "uZMiJm1hnYXrP65qFRMFYC2VXQPqFLnAyhncidTBjAuCrz4Wqfsxj8b RZs3dTib3oNM 5SWgukg1wfhUvjgv4iCoWV9sbIpbccuyhr ToT9Zg85HSuvE4NQh04sbeQpCvgZ6st7 LZXoJmMZjftLjKCxZXvu4lNMftfUUMgN3tJDEKMHVuq55BsiRITvs0MV4LzOPrRng1Gxz4R33KWP7L2NhEGiK47xBSNX72hkZ1oEWtF4xv2FHkf0p0qXSDAGFQSSMGUFI 4R7EACFp12UAUj7Ibskmbr3biEQno1rVF3jBAqIxCGnOJzs0docWOvqa9jDlI2y2xlvB4qV 0h0WIkfYdLTfv3nbV42VQ0UZ18b6QXAfA1D303Yb8Xu1Vail6NMWkuqfPeMEZ5YDoe4I4IyovBXa2uoZo4FBauhnM9W27KTn1rGMbEU7iltGOpQOwWiT4nQ7nIvfOBtGd4vPB hlwrSo",
           "tool_calls": null,
-          "content": "Bj78nXpr45KGQoN2hCZLLbbi2HXFfbhspa5gXRRWkkantmXlX yj0cnAp7noiXLfkCE",
+          "content": "04Sb1tMbQ9NYuMF5lEAMdvrUFeh7lhz40lh1ysSREU6Yg 3 mPamoFyf4GGB2Md Ll8RSAJJZHqQMd",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -313,7 +313,7 @@
         {
           "role": "tool",
           "index": 12,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.RichContentExpression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.WithExpression.Nullable_agent.completions.message.RichContentExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.RichContentExpression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_2779226910069186332"
         },
         {
@@ -465,7 +465,7 @@
         {
           "role": "tool",
           "index": 20,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.AssistantToolCallFunctionExpression\"\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.AssistantToolCallFunctionExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.AssistantToolCallFunctionExpression\"\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_13537052694971677822"
         },
         {
@@ -503,7 +503,7 @@
         {
           "role": "tool",
           "index": 22,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.SimpleContentPartExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.SimpleContentPartExpression\"\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.SimpleContentPartExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.SimpleContentPartExpression\"\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_7522585428628056319"
         },
         {
@@ -541,7 +541,7 @@
         {
           "role": "tool",
           "index": 24,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"oneOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"const\": \"input\"\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"const\": \"output\"\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_l1_normalized\"\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_weighted_sum\"\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"const\": \"input_items_output_length\"\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_split\"\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_merge\"\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input\"\n      ]\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"output\"\n      ]\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_l1_normalized\"\n      ]\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_weighted_sum\"\n      ]\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_output_length\"\n      ]\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_split\"\n      ]\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_merge\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_8471835323279326256"
         },
         {
@@ -693,7 +693,7 @@
         {
           "role": "tool",
           "index": 32,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.SimpleContentExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.SimpleContentExpression\"\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.SimpleContentExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.SimpleContentExpression\"\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_8815812225107495943"
         },
         {
@@ -921,7 +921,7 @@
         {
           "role": "tool",
           "index": 44,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.UserMessageExpression\",\n  \"description\": \"Expression variant of [`UserMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"The message content expression.\",\n      \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\"\n    },\n    \"name\": {\n      \"description\": \"Optional name expression.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.WithExpression.Nullable_string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  },\n  \"required\": [\n    \"content\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.UserMessageExpression\",\n  \"description\": \"Expression variant of [`UserMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"The message content expression.\",\n      \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\"\n    },\n    \"name\": {\n      \"description\": \"Optional name expression.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.WithExpression.Nullable_string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_8967106860679945276"
         },
         {
@@ -959,7 +959,7 @@
         {
           "role": "tool",
           "index": 46,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.ImageUrl\",\n  \"description\": \"An image URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"url\": {\n      \"description\": \"The URL of the image (can be a data URL or HTTP URL).\",\n      \"type\": \"string\"\n    },\n    \"detail\": {\n      \"description\": \"The detail level for image processing.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.ImageUrlDetail\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  },\n  \"required\": [\n    \"url\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.ImageUrl\",\n  \"description\": \"An image URL for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"detail\": {\n      \"description\": \"The detail level for image processing.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"agent.completions.message.ImageUrlDetail\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"url\": {\n      \"description\": \"The URL of the image (can be a data URL or HTTP URL).\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_6724565663522166760"
         },
         {
@@ -1127,25 +1127,29 @@
     "input_schema": {
       "type": "object",
       "properties": {
-        "values": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "id": {
+        "version": {
           "type": "boolean"
         },
-        "format": {
-          "type": "string"
+        "source": {
+          "type": "string",
+          "description": "The source"
         },
         "description": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "topic": {
           "type": "string"
         }
       },
       "required": [
-        "values",
-        "id"
+        "version",
+        "source",
+        "description",
+        "enabled",
+        "topic"
       ]
     },
     "essay_tasks": "IIRG4zCNqux 1W2IZPfLLMdPPdOQMejVQZrICbG44LBrUJ6BN2Hpn3vRHXqq5hCS1zQyfTgZR mRXdE3ra MXKslsCrpmTze6K2ioquUYURDHwt1SC3YYY3LDmKjGEiady8FYR9eGsPCpFXdIajMcWtbCzhdQl9o pfLTzMHF3Dby8uFcz81QRY4a6VpRsy3Ccb8681okQrck6FXrDHV67hhuf8j7dutwYXshaetIoq yopmdNTj2FDXGQkjqCOkJarbSRlA8JaLi79X69KaA8DiwSYdbkIaAJRJD59z8m2eUSJkfnxYSzLWFkoWtWRmfHJeos9qZ4 C YmszrYyywkr0QVhDJXMBTQHxEE3OjF IXI8uWBzJ58sDIL4XSWDXXBMVg5SLrv9LHbA44Vz2ouVspP3ZHxkDqWUIWqXY60xsDEUWKmpUTkE8uP0axPBO",
@@ -1446,25 +1450,29 @@
     "input_schema": {
       "type": "object",
       "properties": {
-        "values": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "id": {
+        "version": {
           "type": "boolean"
         },
-        "format": {
-          "type": "string"
+        "source": {
+          "type": "string",
+          "description": "The source"
         },
         "description": {
+          "type": "string"
+        },
+        "enabled": {
+          "type": "boolean"
+        },
+        "topic": {
           "type": "string"
         }
       },
       "required": [
-        "values",
-        "id"
+        "version",
+        "source",
+        "description",
+        "enabled",
+        "topic"
       ]
     },
     "tasks": [

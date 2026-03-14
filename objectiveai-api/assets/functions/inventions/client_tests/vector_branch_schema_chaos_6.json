@@ -168,14 +168,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "LHIVJzFAz FAlm82flHzkVEpG8x7UD67jjc4rvivB18nd4kxVmOSXsSBZy0Xgt7hxCbc6fwjE5J2xIIjObG2hS2V19S0GPiMVTwbahGMb3u8m31X6vow5J9zjUhzgQtIdhKIAIUtw4y9sky40krma5s4axgTWF5BgBSDp",
+          "reasoning": "8rzQyGv6 lIxvDqymDZAIXuDI8voV0DKLBdwipqxwZ4Dfo3qyPCk94s311YxUW7JrnT5PknyueUoWT xqAgTe OQvqed3CXGBU3WRQ65jXc8JA6xOKTYOZyIC lmbLTxEnfXXtPQ3Z5bbBUxlT5TVaIjM3sIQ0R5xYKDunn4bEv00gl1 IA01aWUzhHAbTURsLC6m2qbUSYDzGGihG5qJfq2UqOKTlIXMnWeLNQpJQVZ VBjjtphnTbvuNrqzCNKe9aKl2FvsZoKtWQCQCMVuiyujQiGmYR7IWZ3zULrGNSMrrKF Cj9hCbICfuf49QcjSS2F2uzkyS9ntCWlnPYy2ZOlWow1WcrpozTZC8u9QfO6OZZHDi4Wfbf6WGjyA6iqL4GJeD4qcQm44sVC0aywBXvfLRasHo90B2K ZvmFDDMzqUoKBiDSMuHObgyWzx0o20x ZqRRXMOU2IPEhvs9RAssryWkAy3fE1Tcj6HIWmyEjQnrtN1lnFPl9aAL8q7fmz7ifvmC4KlMHSrn4q u",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_14452655218134025630",
+              "id": "call_mock_10425911773673953345",
               "function": {
-                "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"QdXDVRuZrWi8vyGPP9igxxYJTdXzlwMm3MvYkT8BfVe2iaVrobA1ahfTQ4JfrFAHFtiHIsIeSEQGlSIaBHUBYovksGfuxQbvnWKQ7C49HYuQQw12uqRclihQc Ir0rYCl52BOJwZgiQyBubi mqeN8iITyNq45e3sOYqc3opIqVAHAWf4S7kxML9\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"object\",\"properties\":{\"content\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"parts\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"audio\"}]}},\"format\":{\"type\":\"string\"}},\"required\":[\"parts\",\"format\"]}]},\"scores\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"number\"}}},\"required\":[\"content\",\"scores\"]}},\"context\":{\"type\":\"object\",\"properties\":{\"prompt\":{\"type\":\"string\"},\"settings\":{\"type\":\"object\",\"properties\":{\"temperature\":{\"type\":\"number\"},\"mode\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}},\"required\":[\"temperature\"]}},\"required\":[\"prompt\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "name": "EditPredictedTasksLength",
+                "arguments": "{}"
               }
             }
           ],
@@ -196,8 +196,8 @@
         {
           "role": "tool",
           "index": 7,
-          "content": "1",
-          "tool_call_id": "call_mock_14452655218134025630"
+          "content": "Error: Invalid argument: missing field `tasks_length` at line 1 column 2",
+          "tool_call_id": "call_mock_10425911773673953345"
         },
         {
           "role": "assistant",
@@ -206,9 +206,47 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "ikNx8bQRgPQJypYxJOls8oyTB24G4987nOFiOsorSWNTANbrUyVR9pkUs4R3BC4ICeojA8s1yliPSnXfRWwejPrC2QBrVyOerJ7GMMWP95wBR6YoMiqNA1VKvyp5Nwz70b0a4Zh1UcJIczDzKSjxGlSdkAG3xirtR0haota6zDFVu6ua36q981Gfw2XXsZG xaIBomyIVij57vHCwaX3yymFK4PDupD2XHdzMQBnw2Oyyk7BFBJ 3OkrSEYbCkzGGF8LthQDbiUE802H3t2xtc4bZgUXJNOJwFeWQTjs7xTnBpYISLzf2L3Japoiw7royqbO11wLQ6TB2GyfKM2NIs2sBq64pvy4cTV3Gjh 8I9vd6Ht3PqheTH3ssC7MdjgnD2OwaFo",
+          "reasoning": "8zs0KOxu8iotuILHJvLZVmqkP3Wo5Vj9KkckIp6xSQLUS9Vdl44RRHdUjXaEGwuzEmir0 9OuQ1gsOusre6qIcp6xVV7cvs4iACR A W8eJPlQN6k8St n",
+          "tool_calls": [
+            {
+              "type": "function",
+              "id": "call_mock_8137470509450480721",
+              "function": {
+                "name": "AppendTask",
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"AZ2uEMvyDY1O9kuvKKeE545nNGq06rYeOcTW423ZyHHmM1NcOojZRsN Fv uP5HJoydlJ7azCsVSX6lLnjm9RydbstzF0BO2o6A433kEJBx26rGbz9kThW5WzSN6UjTZ4SG2j7trfZ93XDMgNmlT8o5UIEkTi18YKuHKNOFYFUcpVyqAVyaxrWC8VbPfp\",\"input_schema\":{\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"object\",\"properties\":{\"content\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"parts\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"audio\"}]}},\"format\":{\"type\":\"string\"}},\"required\":[\"parts\",\"format\"]}]},\"scores\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"number\"}}},\"required\":[\"content\",\"scores\"]}},\"context\":{\"type\":\"object\",\"properties\":{\"prompt\":{\"type\":\"string\"},\"settings\":{\"type\":\"object\",\"properties\":{\"temperature\":{\"type\":\"number\"},\"mode\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}},\"required\":[\"temperature\"]}},\"required\":[\"prompt\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+              }
+            }
+          ],
+          "content": null,
+          "refusal": null,
+          "finish_reason": "tool_calls",
+          "logprobs": null,
+          "usage": {
+            "completion_tokens": 0,
+            "prompt_tokens": 0,
+            "total_tokens": 0,
+            "cost": 0.0,
+            "total_cost": 0.0,
+            "cost_multiplier": 0.0,
+            "is_byok": false
+          }
+        },
+        {
+          "role": "tool",
+          "index": 9,
+          "content": "1",
+          "tool_call_id": "call_mock_8137470509450480721"
+        },
+        {
+          "role": "assistant",
+          "index": 10,
+          "created": 0,
+          "agent": "70edSCzVEtHRLSaFexKISH",
+          "model": "mock",
+          "upstream_id": "",
+          "reasoning": "of7siieoRnZrPtOp3gULcaisuC1zq5kjaTgG7Ykj1b8952jg8msDFLirnJoMJRKWVqzKeW9hQVh8Dz71n12E6Poo9nWu841j5d8 mYxqg86Rjp5M03tSXfcKF0eMyV3XEn9IBDKJEoL7D0EBuP4lgtr9 YdJEOWJR8EfDK j70BPAR1I4zK3O5zRRLuYmDpO1DNv PSGkQkOYMrDfBChY0LNZkRsUxw1gzA9QJnK3kiHpuIsjjfH35wEmyhNiyXdXc WLUY37U9iKp6aX9wy2h5h2p4c2ys0efZvgCASrGsT27qYo40N0AqG47jmD1ETrxE8mv064NKgo7uxp8TiBKrjqU02eCg8GsjBGQhZpzHlqKVmjw7Ewvh7RLsomHgO7NLGG2KvfzSWTkHPRiIuPn6RzIK9zpkAEezloMP5jvfvQPyGZkVXR2JYulK45Ba WDntahieLYsLHkdx vkQJj0O5aKg4E1HF937JC",
           "tool_calls": null,
-          "content": "HvIjT29AlGYDDFbE3er3533qOpnyxWTjrADXhUSz2yV4FK7i6KmV8k9fhEbZvq VdMr",
+          "content": "UT5yNlJl14rY64m01",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -239,43 +277,6 @@
       "id": "",
       "created": 0,
       "messages": [
-        {
-          "role": "assistant",
-          "index": 9,
-          "created": 0,
-          "agent": "70edSCzVEtHRLSaFexKISH",
-          "model": "mock",
-          "upstream_id": "",
-          "tool_calls": [
-            {
-              "type": "function",
-              "id": "call_mock_708024535668655134",
-              "function": {
-                "name": "ReadInputSchema",
-                "arguments": "{}"
-              }
-            }
-          ],
-          "content": null,
-          "refusal": null,
-          "finish_reason": "tool_calls",
-          "logprobs": null,
-          "usage": {
-            "completion_tokens": 0,
-            "prompt_tokens": 0,
-            "total_tokens": 0,
-            "cost": 0.0,
-            "total_cost": 0.0,
-            "cost_multiplier": 0.0,
-            "is_byok": false
-          }
-        },
-        {
-          "role": "tool",
-          "index": 10,
-          "content": "{\"context\":{\"type\":\"object\",\"properties\":{\"prompt\":{\"type\":\"string\"},\"settings\":{\"type\":\"object\",\"properties\":{\"temperature\":{\"type\":\"number\"},\"mode\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"integer\"}]}},\"required\":[\"temperature\"]}},\"required\":[\"prompt\"]},\"items\":{\"type\":\"array\",\"minItems\":2,\"maxItems\":4,\"items\":{\"type\":\"object\",\"properties\":{\"content\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"object\",\"properties\":{\"parts\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"anyOf\":[{\"type\":\"string\"},{\"type\":\"image\"},{\"type\":\"audio\"}]}},\"format\":{\"type\":\"string\"}},\"required\":[\"parts\",\"format\"]}]},\"scores\":{\"type\":\"array\",\"minItems\":1,\"maxItems\":2,\"items\":{\"type\":\"number\"}}},\"required\":[\"content\",\"scores\"]}}}",
-          "tool_call_id": "call_mock_708024535668655134"
-        },
         {
           "role": "assistant",
           "index": 11,
@@ -574,7 +575,7 @@
         "min_leaf_width": 1,
         "max_leaf_width": 2,
         "name": "vb-2ZBIRE7",
-        "spec": "QdXDVRuZrWi8vyGPP9igxxYJTdXzlwMm3MvYkT8BfVe2iaVrobA1ahfTQ4JfrFAHFtiHIsIeSEQGlSIaBHUBYovksGfuxQbvnWKQ7C49HYuQQw12uqRclihQc Ir0rYCl52BOJwZgiQyBubi mqeN8iITyNq45e3sOYqc3opIqVAHAWf4S7kxML9",
+        "spec": "AZ2uEMvyDY1O9kuvKKeE545nNGq06rYeOcTW423ZyHHmM1NcOojZRsN Fv uP5HJoydlJ7azCsVSX6lLnjm9RydbstzF0BO2o6A433kEJBx26rGbz9kThW5WzSN6UjTZ4SG2j7trfZ93XDMgNmlT8o5UIEkTi18YKuHKNOFYFUcpVyqAVyaxrWC8VbPfp",
         "input_schema": {
           "context": {
             "type": "object",
@@ -788,7 +789,7 @@
         "min_leaf_width": 1,
         "max_leaf_width": 2,
         "name": "vb-2ZBIRE7",
-        "spec": "QdXDVRuZrWi8vyGPP9igxxYJTdXzlwMm3MvYkT8BfVe2iaVrobA1ahfTQ4JfrFAHFtiHIsIeSEQGlSIaBHUBYovksGfuxQbvnWKQ7C49HYuQQw12uqRclihQc Ir0rYCl52BOJwZgiQyBubi mqeN8iITyNq45e3sOYqc3opIqVAHAWf4S7kxML9",
+        "spec": "AZ2uEMvyDY1O9kuvKKeE545nNGq06rYeOcTW423ZyHHmM1NcOojZRsN Fv uP5HJoydlJ7azCsVSX6lLnjm9RydbstzF0BO2o6A433kEJBx26rGbz9kThW5WzSN6UjTZ4SG2j7trfZ93XDMgNmlT8o5UIEkTi18YKuHKNOFYFUcpVyqAVyaxrWC8VbPfp",
         "input_schema": {
           "context": {
             "type": "object",

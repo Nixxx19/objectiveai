@@ -119,7 +119,7 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.NumberInputSchema\",\n  \"description\": \"Schema for a floating-point number input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"$ref\": \"functions.expression.NumberInputSchemaType\"\n    },\n    \"description\": {\n      \"description\": \"Human-readable description of the number.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"type\": [\n        \"number\",\n        \"null\"\n      ],\n      \"format\": \"double\"\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"type\": [\n        \"number\",\n        \"null\"\n      ],\n      \"format\": \"double\"\n    }\n  },\n  \"required\": [\n    \"type\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.NumberInputSchema\",\n  \"description\": \"Schema for a floating-point number input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the number.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"number\",\n          \"minimum\": -3.4028234663852886e+38,\n          \"maximum\": 3.4028234663852886e+38\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"number\",\n          \"minimum\": -3.4028234663852886e+38,\n          \"maximum\": 3.4028234663852886e+38\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.NumberInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_1369920157843984526"
         },
         {
@@ -156,7 +156,7 @@
         {
           "role": "tool",
           "index": 6,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    },\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    }\n  },\n  \"required\": [\n    \"type\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_7515411826153675605"
         },
         {
@@ -360,14 +360,13 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "EFqHxsMWsjy0MXmjQPJFB8ogK9AFJFIPFZYbOoXT9u3v1IxsDNHwJbggEhLg6TVWbYE3z1 4XvCHKNDaDXevcNSMiN5dtU 0liyT18nXVZ07VZS6B0b9rDMaIfg 1Tn2d3XKlS Y4pMh gBRtFqBj5FXEGKlwF6bHJP5TgfOAGeYz94BhwjVjTxZynKvz44OpazMWV9C9Z236T6Gl53C4Ks80D1tIAXzZQ8GmHPHgFjvBVdQv5tNpwijOMtyxfOpjDnheP7dvJfzTWs7HHGHD5GPwJwGRyl1lrkw1sFb3Nzr8z43Sfrt1OamdFYElFWSYEFw7qUYRD23wD 2cfYJY9pl0vKXXqtf1LUfaQZhhTOTUoRven",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_8875684043842303585",
+              "id": "call_mock_774029476919558712",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"6xqD81jj8ZT9w0LpugSMHu5CExioDvEh539uB0 ZLMqgsI3j 3LnI2CC\",\"input_schema\":{\"items\":{\"type\":\"image\",\"description\":\"A submission to score\"}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"Jj4Lv9xKsBOtim8SuV2M5eaqDEJ0C4lNRwzg LwnOWlNWiit505Mlk0SOQk43e Xrd6J9vNccDsEr8Nx\",\"input_schema\":{\"items\":{\"type\":\"image\",\"description\":\"A submission to score\"}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"}}}"
               }
             }
           ],
@@ -389,7 +388,7 @@
           "role": "tool",
           "index": 16,
           "content": "1",
-          "tool_call_id": "call_mock_8875684043842303585"
+          "tool_call_id": "call_mock_774029476919558712"
         },
         {
           "role": "assistant",
@@ -398,9 +397,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "4O6uiEgdBdGy6IpqM6sO0QVq175oTJo0btmOLT1MHpobNQixkuXWhrsF7VKfrk30Wievr1s4o7SRBhvhRtreFLWsVbaoPt1mTDIbP9hrNG17U3JpXauGpTO qmkI7L",
+          "reasoning": "6rO oMtwVkvtmzvdjW3LBQ43Plk4D5SabZKuLn6Vq5aQvdB3y8JnaaAFgFbPhXulQvRu7g58oyt2d6fGVEO7MUcNfQ2bUJKhjaS6Lwm4Xk1yAHILpJuJW2tDKZxCSv4cCm9Ai1NkN B7m1AXe",
           "tool_calls": null,
-          "content": "bAK 5IP2ROdyoP2LbTXT0eFZbMafq7fFKnsJryWbCmoK c3EtK3VzG0L1sez6555G1BFCEpEvuJc xyFBtWF20S0F",
+          "content": "4G fbw06ryVaF1WEEv2ikda3x1x",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -645,7 +644,7 @@
         "min_leaf_width": 1,
         "max_leaf_width": 1,
         "name": "vb-min-48",
-        "spec": "6xqD81jj8ZT9w0LpugSMHu5CExioDvEh539uB0 ZLMqgsI3j 3LnI2CC",
+        "spec": "Jj4Lv9xKsBOtim8SuV2M5eaqDEJ0C4lNRwzg LwnOWlNWiit505Mlk0SOQk43e Xrd6J9vNccDsEr8Nx",
         "input_schema": {
           "items": {
             "type": "image",
@@ -682,7 +681,7 @@
         "min_leaf_width": 1,
         "max_leaf_width": 1,
         "name": "vb-min-48",
-        "spec": "6xqD81jj8ZT9w0LpugSMHu5CExioDvEh539uB0 ZLMqgsI3j 3LnI2CC",
+        "spec": "Jj4Lv9xKsBOtim8SuV2M5eaqDEJ0C4lNRwzg LwnOWlNWiit505Mlk0SOQk43e Xrd6J9vNccDsEr8Nx",
         "input_schema": {
           "items": {
             "type": "image",

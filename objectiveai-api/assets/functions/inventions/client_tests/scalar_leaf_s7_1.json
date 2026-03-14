@@ -90,14 +90,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "f9 XaZT04KZAPkfJCs1YQ6gTI0jGvHXFvOl0lkQJdPAqbMqx3WJ9Aum XzYg9onepgty8HOKkAtrmKePu353LOfrr3BHnVcWPClw3AeiqOlgayVAI bfxnxQ32AMT4XPJp5LbGxxTRdCd3o3fQNJPje16mXczQMsTq8ax7pgsTZOYbcYvx1YBgfRUqM8zbq6NKXITJOwBEZSyS1my46 wrY84qOq2LwjLWX8J 2ixYaDWMBFc cUPx5DkVBdZforOKtmwmovGYnlLv8oYHZXGBEaeY8PwbQY0OhXF8EsbhOrJDitH5TcvD hMRrH6AXdNg2OhVju4CGEvJZFQOapWlNFZUo2DLkL IhEHDd7iEtkZ KSpWGErmKUl0W9oJLBJExPnA8w52H17ngRUX43mx6VupVaQSjgN4wjSw6gww6b4z6VsP9OCzodFkX8 Q8oxsgE 4LDGa6UV76PgrBpPq3tMTgCsDjPJ64enl dpRKhmTpb qGynrsqiVjBJcYtyGY78 BtQcfLQ9CICjSe Iojl8FU8UpEGFGSeWXxGxC9mMNyeoN96d4FIF5vc69IJ8Y7A2LJvGmqOXQJ6JR1DPvyX R2AO wx8cTdgVzdufixuuBMakqNyf",
+          "reasoning": "IR9coPHIObC4y27QOszCkaWtzZ60ewRgOr0Y8hQ RstBZNzxP3QMGDPCZX0qJEtzHzlfT oZLVFqU3a5IqNpgSOzualRhVLjiTp5MSbEZi7b5HKFKo5qdD0IY0p0YO CXfr22jjHZYYXPrPICxhbaVKd6RaBi1aiTAAAYLX3zDMbbZ6zN8EvMBUCyZssaX2KUxPmAQ64YDDGMRVJnRj7MTHfIKE6MpfFRpqM",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_2346086707126467434",
+              "id": "call_mock_12597316308122225047",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"photo\":{\"type\":\"image\"},\"query\":{\"type\":\"integer\",\"description\":\"The query\"},\"categories\":{\"type\":\"array\",\"items\":{\"type\":\"string\"},\"description\":\"The categories\"}},\"required\":[\"caption\",\"photo\"]}"
+                "arguments": "{\"type\":\"object\",\"properties\":{\"video\":{\"type\":\"string\"}},\"required\":[\"video\"]}"
               }
             }
           ],
@@ -119,7 +119,7 @@
           "role": "tool",
           "index": 4,
           "content": "Ok",
-          "tool_call_id": "call_mock_2346086707126467434"
+          "tool_call_id": "call_mock_12597316308122225047"
         },
         {
           "role": "assistant",
@@ -128,8 +128,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "i1TJKeKD3N49BUzYh3dh0AwSsmaS8LZEWtjmiAnKMp6o1SjibszCEch2fdSp61ImdRHzJL6gcxnTluDOiKDINuqj7pXWY832FrhzoGf SBa7hSrMTJw Os6OjDbi3q622WJab7izLPAnyBSRDhxbcL3qxXH5LM5sXjVWbjZ8l1UiwGfCrrTuQTReqAXHU2mk",
           "tool_calls": null,
-          "content": "y5YbFUFb8X1n5sN76uBxNBUxQ5PzZvhLvxxDfx4nbmnI2sXa25Rri2wi7w5m",
+          "content": "WDNcKw zpOfPjlS5jNmXUUB0Qlwg0l2wtavA39Ym 9iyXbaGyHgHwjilq81mj0w2Hx5SZL505VkcZ",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -273,7 +274,7 @@
         {
           "role": "tool",
           "index": 10,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.RichContent\",\n  \"description\": \"Rich content for user/assistant messages (supports multimodal input).\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content (text, images, audio, video, files).\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"agent.completions.message.RichContentPart\"\n      }\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.RichContent\",\n  \"description\": \"Rich content for user/assistant messages (supports multimodal input).\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content (text, images, audio, video, files).\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"agent.completions.message.RichContentPart\"\n      }\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_3410348000044267040"
         },
         {
@@ -311,7 +312,7 @@
         {
           "role": "tool",
           "index": 12,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.SimpleContentPartExpression\",\n  \"description\": \"Expression variant of [`SimpleContentPart`] for dynamic content.\",\n  \"oneOf\": [\n    {\n      \"description\": \"A text part expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"text\": {\n          \"description\": \"The text expression.\",\n          \"$ref\": \"functions.expression.WithExpression.string\"\n        },\n        \"type\": {\n          \"type\": \"string\",\n          \"const\": \"text\"\n        }\n      },\n      \"required\": [\n        \"type\",\n        \"text\"\n      ]\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.SimpleContentPartExpression\",\n  \"description\": \"A text part expression.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"text\": {\n      \"description\": \"The text expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    },\n    \"type\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"text\"\n      ]\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_11439381487119861328"
         },
         {
@@ -328,7 +329,7 @@
               "id": "call_mock_5440593415229993012",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"kZqtR6XEe D7\"}],[{\"type\":\"text\",\"text\":\"wTNnqDCS8sMe5xkhrYxZprnxaV0yGn\"}],[{\"type\":\"text\",\"text\":\"HtolSGtKyvdjWZ5bJH9quX5d1bZQz\"}],[{\"type\":\"text\",\"text\":\"AxUqpBgCwCcCax2iVnEO\"}],[{\"type\":\"text\",\"text\":\"Igg7rtS1Lt GDWJG7uOzdVYQo\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"kZqtR6XEe D7\"}],[{\"type\":\"text\",\"text\":\"wTNnqDCS8sMe5xkhrYxZprnxaV0yGn\"}],[{\"type\":\"text\",\"text\":\"HtolSGtKyvdjWZ5bJH9quX5d1bZQz\"}],[{\"type\":\"text\",\"text\":\"AxUqpBgCwCcCax2iVnEO\"}],[{\"type\":\"text\",\"text\":\"Igg7rtS1Lt GDWJG7uOzdVYQo\"}]]}"
               }
             }
           ],
@@ -465,7 +466,7 @@
         {
           "role": "tool",
           "index": 19,
-          "content": "{\"type\":\"object\",\"properties\":{\"caption\":{\"type\":\"string\"},\"source\":{\"type\":\"string\"},\"photo\":{\"type\":\"image\"},\"query\":{\"type\":\"integer\",\"description\":\"The query\"},\"categories\":{\"type\":\"array\",\"description\":\"The categories\",\"items\":{\"type\":\"string\"}}},\"required\":[\"caption\",\"photo\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"video\":{\"type\":\"string\"}},\"required\":[\"video\"]}",
           "tool_call_id": "call_mock_16039781276789661912"
         },
         {
@@ -554,30 +555,12 @@
     "input_schema": {
       "type": "object",
       "properties": {
-        "caption": {
+        "video": {
           "type": "string"
-        },
-        "source": {
-          "type": "string"
-        },
-        "photo": {
-          "type": "image"
-        },
-        "query": {
-          "type": "integer",
-          "description": "The query"
-        },
-        "categories": {
-          "type": "array",
-          "description": "The categories",
-          "items": {
-            "type": "string"
-          }
         }
       },
       "required": [
-        "caption",
-        "photo"
+        "video"
       ]
     },
     "essay_tasks": "dLtQn63JAT31VbzYe22H8kId0G68xvqic4sGKxsGuP5Si7zphkbqWSj1zFGdOdek09Sv05FneekkaTqf5SahZ46uMyfp9Jn AOIf22vdpZ578LWGx2Kk2oZnblwTkCSczJWmbQhJ5ieaEnhyDMsMsMWKdAOoyCOLD4Th86VKrxVXKqWuFLHMnJbY9gBTGbgA3tuJBA8IxJgc4vDdKn854Qds3Zzq7851Pheg1UZ7khFnEwnFsfse1V76uyPsAD2MMeYLrI XaT4YOU8MOUdZ8SvqNfHYNBnUpqayOe9PJQuLtSmN3T2Fy8i5wpFps042ImgJgJIY1nu3Ge17vNCNhA  79nyby9gL2awDankIfFORNkn",
@@ -585,7 +568,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": [
           [
@@ -632,37 +615,19 @@
     "input_schema": {
       "type": "object",
       "properties": {
-        "caption": {
+        "video": {
           "type": "string"
-        },
-        "source": {
-          "type": "string"
-        },
-        "photo": {
-          "type": "image"
-        },
-        "query": {
-          "type": "integer",
-          "description": "The query"
-        },
-        "categories": {
-          "type": "array",
-          "description": "The categories",
-          "items": {
-            "type": "string"
-          }
         }
       },
       "required": [
-        "caption",
-        "photo"
+        "video"
       ]
     },
     "tasks": [
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
         },
         "responses": [
           [

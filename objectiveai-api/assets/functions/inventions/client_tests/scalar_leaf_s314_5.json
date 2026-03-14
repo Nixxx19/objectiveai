@@ -89,14 +89,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "mOEYFYcQGmk0k2xd0crFqj7 LvQ4hzOPTXWRxGcmDX3HBYDVWbjiLuLggnKLrZx6Xxc5gRFLIR3AlkBDMD1leCtV3hiLAB6RGM92697xC0EYie7d9U5VBEeT3zf8jOv4uNy3rzfRvdrkKLBhQOz3MQByRTsDuOdC8HY1BCTTpHjaO20kmEUHkouCO1yvxblVx9J2gm417kvDvv4mKhmoMXFpGDx8RrAaC03hJ1uE2D2Zft28TCtYRlek46LjFbP0dmGdwTB6phoojN0vvitsjqOcSACCXbun7dUlSPdvFzRNK6xIR8Z8RorSoI2pGT5Hr",
+          "reasoning": "CeAWGSaiDysyJ8sd4sMWpjwMPCqnvp4TATasSwSSZW534XuHmpCMQSTxWvRAGVFMulDlI6nmysTh24gQrUDgKft56uapyT2b7BxbwTJ aUJpULQGxZDsyFCJgO0k61kbC rwnJ7 cCYDnlQKl9Gur0hr1njQwKywMIJ4MIBz7mXQgGIDnBhG6PvnWt7",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_1944896772424062866",
+              "id": "call_mock_15474301918610236197",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"type\":\"object\",\"properties\":{\"format\":{\"type\":\"number\"},\"prompt\":{\"type\":\"string\",\"description\":\"The prompt\"},\"count\":{\"type\":\"integer\"}},\"required\":[\"format\",\"prompt\"]}"
+                "arguments": "{\"type\":\"object\",\"properties\":{\"is_draft\":{\"type\":\"boolean\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"is_draft\",\"values\"]}"
               }
             }
           ],
@@ -118,7 +118,7 @@
           "role": "tool",
           "index": 4,
           "content": "Ok",
-          "tool_call_id": "call_mock_1944896772424062866"
+          "tool_call_id": "call_mock_15474301918610236197"
         },
         {
           "role": "assistant",
@@ -127,9 +127,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "gJ1h4oFTnx530kO7kuEBZYwoV428uMJIZoWiq9uVPG41MWT87EE8yQUAvy4lfEqa7PAC0MX3I2z1vTG7HOj6Ky1o63uE0g HpPW4oEofo5p1ouACnyEpeEFNf2hRvJs5ZdxNze32XH7U75sYnAe1qaMNHSM238RNZK4uu7QsvykCkwcqHPhPUs33OTIN3i ykZHvzktBE1JIZArWgUJ4CTgkpURpjySFZ8AehZXfvZNJ7tGFvW9WsM0 GomvNKKwss9K0NECPdE7GBdqcx7m2ZH6iA9ES6QtRAigSjXeEsdno5HB7oAZGjFCnwg5ckZHFe5pY0VQT9jYZ5YmOJ3nllJX",
+          "reasoning": " w olNCGqtWb6tH45oz2mX1SCaWBQ95DgFS8T8by5IQJd4Bgo6m5JDy29iQTsmRsYqCRDKyT9W4DIc6 x7mVDLtlybe8l ThBI6OgO3AOtvuav yTzGZJJaxggayHraQ0zOtulHP1yKyhoIxVzT63CRPJnOOeR7cLoWn QpFDywS3bG 29vXYtI9PJ8y16nuNDkNlpyFEuS jfihfXe2nC7BPNfbyxQEqv2i 667nny2hTGIKDtTDsUdWoyfx3dLYXRp6SYJAR9qiuBHpp5mhGZeu0TfHGTPIrNH1lxb9YOZdSOc54CfRZToEdO3guWmZ6oTjLUlGtD90ztCj27OS95NgLwYAU36tGrLElfqyAo484f35rk WS60hX3cKYAKvmN6i6cQQHrSFtUmTOHx6eAiKlxSqCiUw3hnwdWd 9aHxwLQPzhq3VTipvDrOy95C4CcLkNZirutO9OBpJZ9COjZKPh6UX9KnK PtrnO3BhEp0jM3cIon3QGl40TW4rmE2hSXD3OW323v7 wNNTqEuzsT0vFAi2EI5cKv3p0vbSCCpgxXsMBa6 NZuWLD5jtKI71MbXWnNLT9XDAavQditJPyH8zRLWk0zCuJ7ZP",
           "tool_calls": null,
-          "content": "5gq hPWnmTJPxhdJEgFNxc7aAtUmDHfLrneK30bkvFFAn0GKvFMo Q9ZkPfmHpQtFQ8hG0u0ZHuZpQO4HeQM5L7TfZh",
+          "content": "HuL98lAeJ5yVMWWjfXipSdBoqZnMFjtSuUYpKDwTwSm6G6y2SqkKXjfEw7HyQHswLVft mxKyzNmB9GgBNAeuSYPxtazjj5l",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -348,7 +348,7 @@
         {
           "role": "tool",
           "index": 14,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.UserMessageExpression\",\n  \"description\": \"Expression variant of [`UserMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"The message content expression.\",\n      \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\"\n    },\n    \"name\": {\n      \"description\": \"Optional name expression.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.WithExpression.Nullable_string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  },\n  \"required\": [\n    \"content\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.UserMessageExpression\",\n  \"description\": \"Expression variant of [`UserMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"The message content expression.\",\n      \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\"\n    },\n    \"name\": {\n      \"description\": \"Optional name expression.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.WithExpression.Nullable_string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_3608613694585667635"
         },
         {
@@ -386,7 +386,7 @@
         {
           "role": "tool",
           "index": 16,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.ToolMessageExpression\",\n  \"description\": \"Expression variant of [`ToolMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"The content expression.\",\n      \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\"\n    },\n    \"tool_call_id\": {\n      \"description\": \"The tool call ID expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    }\n  },\n  \"required\": [\n    \"content\",\n    \"tool_call_id\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.ToolMessageExpression\",\n  \"description\": \"Expression variant of [`ToolMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"The content expression.\",\n      \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\"\n    },\n    \"tool_call_id\": {\n      \"description\": \"The tool call ID expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_15983968350703606020"
         },
         {
@@ -499,7 +499,7 @@
         {
           "role": "tool",
           "index": 22,
-          "content": "{\"type\":\"object\",\"properties\":{\"format\":{\"type\":\"number\"},\"prompt\":{\"type\":\"string\",\"description\":\"The prompt\"},\"count\":{\"type\":\"integer\"}},\"required\":[\"format\",\"prompt\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"is_draft\":{\"type\":\"boolean\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"is_draft\",\"values\"]}",
           "tool_call_id": "call_mock_4311448778119918839"
         },
         {
@@ -536,7 +536,7 @@
         {
           "role": "tool",
           "index": 24,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.AssistantToolCallFunctionExpression\",\n  \"description\": \"Expression variant of [`AssistantToolCallFunction`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"name\": {\n      \"description\": \"The function name expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    },\n    \"arguments\": {\n      \"description\": \"The arguments expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    }\n  },\n  \"required\": [\n    \"name\",\n    \"arguments\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.AssistantToolCallFunctionExpression\",\n  \"description\": \"Expression variant of [`AssistantToolCallFunction`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"arguments\": {\n      \"description\": \"The arguments expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    },\n    \"name\": {\n      \"description\": \"The function name expression.\",\n      \"$ref\": \"functions.expression.WithExpression.string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_18232991660839616771"
         },
         {
@@ -611,7 +611,7 @@
         {
           "role": "tool",
           "index": 28,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"oneOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"const\": \"input\"\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"const\": \"output\"\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_l1_normalized\"\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_weighted_sum\"\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"const\": \"input_items_output_length\"\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_split\"\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_merge\"\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input\"\n      ]\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"output\"\n      ]\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_l1_normalized\"\n      ]\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_weighted_sum\"\n      ]\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_output_length\"\n      ]\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_split\"\n      ]\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_merge\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_1784331011638655463"
         },
         {
@@ -723,7 +723,7 @@
         {
           "role": "tool",
           "index": 34,
-          "content": "{\"type\":\"object\",\"properties\":{\"format\":{\"type\":\"number\"},\"prompt\":{\"type\":\"string\",\"description\":\"The prompt\"},\"count\":{\"type\":\"integer\"}},\"required\":[\"format\",\"prompt\"]}",
+          "content": "{\"type\":\"object\",\"properties\":{\"is_draft\":{\"type\":\"boolean\"},\"values\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"is_draft\",\"values\"]}",
           "tool_call_id": "call_mock_7000635251505432461"
         },
         {
@@ -760,7 +760,7 @@
         {
           "role": "tool",
           "index": 36,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"oneOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"const\": \"input\"\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"const\": \"output\"\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_l1_normalized\"\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_weighted_sum\"\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"const\": \"input_items_output_length\"\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_split\"\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_merge\"\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input\"\n      ]\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"output\"\n      ]\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_l1_normalized\"\n      ]\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_weighted_sum\"\n      ]\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_output_length\"\n      ]\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_split\"\n      ]\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_merge\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_3722810741262156233"
         },
         {
@@ -836,7 +836,7 @@
         {
           "role": "tool",
           "index": 40,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.alpha_scalar.VectorCompletionTaskExpression\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"skip\": {\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.Expression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"messages\": {\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    \"responses\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"agent.completions.message.RichContent\"\n      }\n    }\n  },\n  \"required\": [\n    \"messages\",\n    \"responses\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.alpha_scalar.VectorCompletionTaskExpression\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"messages\": {\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    \"responses\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"agent.completions.message.RichContent\"\n      }\n    },\n    \"skip\": {\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.Expression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_14148498858981022461"
         },
         {
@@ -874,7 +874,7 @@
         {
           "role": "tool",
           "index": 42,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.RichContentExpression\",\n  \"description\": \"Expression variant of [`RichContent`] for dynamic content.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content expressions.\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentPartExpression\"\n      }\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.RichContentExpression\",\n  \"description\": \"Expression variant of [`RichContent`] for dynamic content.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content expressions.\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentPartExpression\"\n      }\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_5223405753820527976"
         },
         {
@@ -950,7 +950,7 @@
         {
           "role": "tool",
           "index": 46,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.RichContent\",\n  \"description\": \"Rich content for user/assistant messages (supports multimodal input).\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content (text, images, audio, video, files).\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"agent.completions.message.RichContentPart\"\n      }\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.RichContent\",\n  \"description\": \"Rich content for user/assistant messages (supports multimodal input).\",\n  \"anyOf\": [\n    {\n      \"description\": \"Plain text content.\",\n      \"type\": \"string\"\n    },\n    {\n      \"description\": \"Multi-part content (text, images, audio, video, files).\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"agent.completions.message.RichContentPart\"\n      }\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_1299796112894895934"
         },
         {
@@ -1026,7 +1026,7 @@
         {
           "role": "tool",
           "index": 50,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.InputAudio\",\n  \"description\": \"Audio input for multimodal messages.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"description\": \"Base64-encoded audio data.\",\n      \"type\": \"string\"\n    },\n    \"format\": {\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\n      \"type\": \"string\"\n    }\n  },\n  \"required\": [\n    \"data\",\n    \"format\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"agent.completions.message.InputAudio\",\n  \"description\": \"Audio input for multimodal messages.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"description\": \"Base64-encoded audio data.\",\n      \"type\": \"string\"\n    },\n    \"format\": {\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_8133803741666938356"
         },
         {
@@ -1381,20 +1381,19 @@
     "input_schema": {
       "type": "object",
       "properties": {
-        "format": {
-          "type": "number"
+        "is_draft": {
+          "type": "boolean"
         },
-        "prompt": {
-          "type": "string",
-          "description": "The prompt"
-        },
-        "count": {
-          "type": "integer"
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
-        "format",
-        "prompt"
+        "is_draft",
+        "values"
       ]
     },
     "essay_tasks": "jtEl5m5SVbdG8q2hfo9BLnjYYZITfmfqjvGaCP4heb1VHtyL5Qv8UCQyki1pzbUzqLh7b75sJa9gpfMu95d5gRKc7u29TJQ23MuJ3jXyGywh",
@@ -1623,20 +1622,19 @@
     "input_schema": {
       "type": "object",
       "properties": {
-        "format": {
-          "type": "number"
+        "is_draft": {
+          "type": "boolean"
         },
-        "prompt": {
-          "type": "string",
-          "description": "The prompt"
-        },
-        "count": {
-          "type": "integer"
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [
-        "format",
-        "prompt"
+        "is_draft",
+        "values"
       ]
     },
     "tasks": [

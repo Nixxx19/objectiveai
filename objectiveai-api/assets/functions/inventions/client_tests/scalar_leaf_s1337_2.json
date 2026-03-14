@@ -91,13 +91,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "Cke19awRECyYR1LaTcRqmTtQpLNAOpQMQwrrymM6woG6Of6bE2fzI3gchbz90FZdjzlyVz2g8ngqC72lVJ71KidmGR1LGgK7R5wpccYBsrF2 xOivtgyZEZ2YVtPCE6hcAbNpoPP6Xuqz81FnAdy3XhqCdG1clQvHWXBBDy3ZX9mqFsspzwsdgpliwlIbDCPgjdhThbpdY2R0kNQJUvFbr8IOzn4ILX9yD7pZqtyeNfl5UpqFXcfN2qGIejLjbaE16hOLTI5D4MeVSJ0sZI2aVPeRGP 5Ft9TGHu2NMGKL0AJZM6yr2vEloXdYQBYuLO j3w25859tFZQvmEs1qWqgNF5Ygeccnn1scW66k8KU1Oiw6xSRoC9NSS",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_6260864397729124470",
+              "id": "call_mock_18349668080478097809",
               "function": {
                 "name": "WriteInputSchema",
-                "arguments": "{\"type\":\"object\",\"properties\":{\"count\":{\"type\":\"number\"},\"avatar\":{\"type\":\"image\"},\"category\":{\"type\":\"string\"}},\"required\":[\"count\",\"avatar\",\"category\"]}"
+                "arguments": "{\"type\":\"object\",\"properties\":{\"category\":{\"type\":\"boolean\",\"description\":\"The category\"},\"recording\":{\"type\":\"audio\"},\"entries\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"score\":{\"type\":\"number\",\"description\":\"The score\"}},\"required\":[\"category\",\"recording\",\"entries\",\"score\"]}"
               }
             }
           ],
@@ -119,7 +120,7 @@
           "role": "tool",
           "index": 4,
           "content": "Ok",
-          "tool_call_id": "call_mock_6260864397729124470"
+          "tool_call_id": "call_mock_18349668080478097809"
         },
         {
           "role": "assistant",
@@ -128,9 +129,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "uxRuXmTJeLutuE3vi32YRBL1k6jnj70UO8zPpY2xtFWI7jaXYB6zhpiR",
+          "reasoning": "vkSepjBEprIqA8jehomuyQQ k5NZuLXnvUzXlbEBqcLfbF1FYje5H2C4k7cMClwN19H6P1E0ek2S1gcTFZLU 69FooVNsQ06QAaND6QhKLHwPhGvQONDoX0CPagzl3TgPUhWF2dC4ai4eC7lrtRsiyDAADbPJeaM1NzfzUJpGTywdz7MoUoJ1UnZT517P3Y3",
           "tool_calls": null,
-          "content": "C85HZvu7zJbQ28gPFSqJDi9ZpUjEw7f6",
+          "content": "Za1EdZxswJuGWAfZ 1T41884k5LeHjYnWn",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -274,7 +275,7 @@
         {
           "role": "tool",
           "index": 10,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"type\": [\n        \"array\",\n        \"null\"\n      ],\n      \"items\": {\n        \"$ref\": \"functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression\"\n      }\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.WithExpression.Nullable_Array_of_functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"$ref\": \"functions.expression.WithExpression.agent.completions.message.AssistantToolCallExpression\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_5944640438115777190"
         },
         {
@@ -329,7 +330,7 @@
               "id": "call_mock_11477457976034079861",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"pHHlq0MwxLtzc5SyJ0SOjkwIgKFSUdihqfd7Bq\"}],[{\"type\":\"text\",\"text\":\"RrcxcX8FP66SWI\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"pHHlq0MwxLtzc5SyJ0SOjkwIgKFSUdihqfd7Bq\"}],[{\"type\":\"text\",\"text\":\"RrcxcX8FP66SWI\"}]]}"
               }
             }
           ],
@@ -388,7 +389,7 @@
         {
           "role": "tool",
           "index": 16,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"oneOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"const\": \"input\"\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"const\": \"output\"\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_l1_normalized\"\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_weighted_sum\"\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"const\": \"input_items_output_length\"\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_split\"\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_merge\"\n    }\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input\"\n      ]\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"output\"\n      ]\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_l1_normalized\"\n      ]\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_weighted_sum\"\n      ]\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_output_length\"\n      ]\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_split\"\n      ]\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_merge\"\n      ]\n    }\n  ]\n}\n",
           "tool_call_id": "call_mock_15399373485256690923"
         },
         {
@@ -405,7 +406,7 @@
               "id": "call_mock_14849570974877508271",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"image_url\\\", \\\"image_url\\\": {\\\"url\\\": \\\"https://example.com/test.png\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"8ZwDzo 6hFQ4FYeFBYPQ9\"}],[{\"type\":\"text\",\"text\":\"lElS dpAau2nS8YxD0wTo1AKkFRnydpA U\"}],[{\"type\":\"text\",\"text\":\"0EF53y\"}]]}"
+                "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"input_audio\\\", \\\"input_audio\\\": {\\\"data\\\": \\\"dGVzdA==\\\", \\\"format\\\": \\\"wav\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"8ZwDzo 6hFQ4FYeFBYPQ9\"}],[{\"type\":\"text\",\"text\":\"lElS dpAau2nS8YxD0wTo1AKkFRnydpA U\"}],[{\"type\":\"text\",\"text\":\"0EF53y\"}]]}"
               }
             }
           ],
@@ -556,20 +557,29 @@
     "input_schema": {
       "type": "object",
       "properties": {
-        "count": {
-          "type": "number"
-        },
-        "avatar": {
-          "type": "image"
-        },
         "category": {
-          "type": "string"
+          "type": "boolean",
+          "description": "The category"
+        },
+        "recording": {
+          "type": "audio"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "score": {
+          "type": "number",
+          "description": "The score"
         }
       },
       "required": [
-        "count",
-        "avatar",
-        "category"
+        "category",
+        "recording",
+        "entries",
+        "score"
       ]
     },
     "essay_tasks": "TjwprKGUG nSSBZAzgGAMIlbBkrbwZaMjdZAVcxbuTlr7F5nMMwun8Ml0oNkW2cLk i78T69Xlk3zX6Hn3pyrh9kC7ckZPTZtU555rdkJpFlbNMTgSxvrNlN9ErBd05x1r1ci5xUvYE5LbXe7FDxi5FJXEmEtKry5GI7vuzcsGHtx 4Qww8sJndHan9C99html4zpdCuOjWBSrS7ZORfcDlviyq2OPv6P2uYmSwsh1p3vXNASCDQPZfxJ68YMc36tzGmBBN GZc7gg5xl0kcOdCR6U1 jL3K2h2V6JxwlSn3kjhEv2oswZJwpeZXhfvQzKFmBkQxECb2iScyA5XfW6z3ibo0aHTc4e1ECirO10B3Pn6tbxdaRiq1EcMSm7RRWgbFeV0qTYhvnJgHP JTLZmtssOnGh v9eUQX9QVsBkeF4g4Kry lH",
@@ -577,7 +587,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
         },
         "responses": [
           [
@@ -597,7 +607,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
         },
         "responses": [
           [
@@ -632,27 +642,36 @@
     "input_schema": {
       "type": "object",
       "properties": {
-        "count": {
-          "type": "number"
-        },
-        "avatar": {
-          "type": "image"
-        },
         "category": {
-          "type": "string"
+          "type": "boolean",
+          "description": "The category"
+        },
+        "recording": {
+          "type": "audio"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "score": {
+          "type": "number",
+          "description": "The score"
         }
       },
       "required": [
-        "count",
-        "avatar",
-        "category"
+        "category",
+        "recording",
+        "entries",
+        "score"
       ]
     },
     "tasks": [
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
         },
         "responses": [
           [
@@ -672,7 +691,7 @@
       {
         "type": "vector.completion",
         "messages": {
-          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"image_url\", \"image_url\": {\"url\": \"https://example.com/test.png\"}}]}]"
+          "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"input_audio\", \"input_audio\": {\"data\": \"dGVzdA==\", \"format\": \"wav\"}}]}]"
         },
         "responses": [
           [

@@ -118,7 +118,7 @@
         {
           "role": "tool",
           "index": 4,
-          "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.NumberInputSchema\",\n  \"description\": \"Schema for a floating-point number input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"$ref\": \"functions.expression.NumberInputSchemaType\"\n    },\n    \"description\": {\n      \"description\": \"Human-readable description of the number.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"type\": [\n        \"number\",\n        \"null\"\n      ],\n      \"format\": \"double\"\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"type\": [\n        \"number\",\n        \"null\"\n      ],\n      \"format\": \"double\"\n    }\n  },\n  \"required\": [\n    \"type\"\n  ]\n}\n",
+          "content": "{\n  \"title\": \"functions.expression.NumberInputSchema\",\n  \"description\": \"Schema for a floating-point number input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the number.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"number\",\n          \"minimum\": -3.4028234663852886e+38,\n          \"maximum\": 3.4028234663852886e+38\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"number\",\n          \"minimum\": -3.4028234663852886e+38,\n          \"maximum\": 3.4028234663852886e+38\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.NumberInputSchemaType\"\n    }\n  }\n}\n",
           "tool_call_id": "call_mock_3585933873139125258"
         },
         {
@@ -284,14 +284,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "WHnRTK854aeiaNWVpvzrXvWaP7Qi0Yu Qf6THPU2wj2EAUPzDYqs9fVs7EJfAclIkks0kHh8wyCL91Ua8z4JggqJT3wRiz7ZO Cy98WFSTBdrCLiekJFdhZ8plslp81kfGndmiTGwqZWCs3tiMoEZRP25FdzVqz GB2lTXNRvqewFCU54RRC1oln30QFCnNRHxWUFHnYnwAoFBv337NZXEZRdBoBkpCSUoVrc gBSnknI",
+          "reasoning": "De0UgLMqd03rmVrVQfB2nFsnO6vRyHKiZKNgSCXCjUjCpQUBsty3HsUS9giGOrh psuLfDJk8ajl3lzIXMrRKhaKNT1wNgt6S8sGYcK4Qwbzc7NFHzI5bNvUPhTgVN9n08RB5wTjCDpsY4EgRljYjx NurcpcV0GMciDSVNh",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_2004932031312490660",
+              "id": "call_mock_2545368654302540980",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"ty19oOR7YaPjMRI m7Atd4mzTdH0jeItJoFyTUcu dLOMmdusZ2  XfYIAQprHi2mefF1AatxVfYEFK5 rPdTVLvgh9Z6mT51wIBRnhgTGAA\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\"},\"limit\":{\"type\":\"number\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"code\",\"limit\",\"tags\"]},\"context\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"}},\"required\":[\"document\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"ACadtgsgYvJygWqt pakeLT8TaSuywLgoqFkNm buApFYbnsvYYnCJZiydrXYE5NOZLOnskicTL6PatQjn6pCxuoeYUftxWJf56g H6lTPP6ycBSwFo3SxshssIiyfA Se141IWu8nw0OFy Dz1va3CT0kgyu8bz3ADTRpN96bsWfuabw5btOnpdakwW5AE3wI yVUID\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\"},\"limit\":{\"type\":\"number\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"code\",\"limit\",\"tags\"]},\"context\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"}},\"required\":[\"document\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -313,7 +313,7 @@
           "role": "tool",
           "index": 12,
           "content": "1",
-          "tool_call_id": "call_mock_2004932031312490660"
+          "tool_call_id": "call_mock_2545368654302540980"
         },
         {
           "role": "assistant",
@@ -322,13 +322,14 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
+          "reasoning": "B6pKvEupeqlD9ns6guKaAr9sSu6ZEbPLZkJVQ4HY4ZdljmkqFWXbnjoBK84zjJdGjtW4U7VLKEeqENkZ8u136MKSwS8cKbGvl8tOHccCOmmhmPF2q194pYxcQ35CmbPyFdUD9by4riUlkH7HZw5fv R2WHvNFdivsSUzf6j31EgZLq5 TkUcbap6fP1Z16YXusx6N iZshCVNGxND62USokWUATrHzvqf4EY3LDkXesxr1ZEPXyzW9JKOoX94dXIa5KIkBr2NLhFNY6vAeyXCr11VTv0EMVhEtUfq3rjHEnIburgSyObSrAnKRNMkM5SjFxLVAaSi3iNWloQj2HPTPYi83XBecgs3gKynC6xHqhsgyuS28nBascgbv0hOHjW4lPq5vAAEFMJN0TXZzUpu1ZlcOWXRoSZiZYpvY1RdzMbQfW1oMbssWBx2RKQRPGLGDGdlfBfG5w 8UQlJk0Xq3P7tvYKnpguvg",
           "tool_calls": [
             {
               "type": "function",
-              "id": "call_mock_5937874556132254859",
+              "id": "call_mock_18442481685468476851",
               "function": {
                 "name": "AppendTask",
-                "arguments": "{\"type\":\"placeholder.alpha.scalar.function\",\"spec\":\"zGg3z6smjGcsIG1uDvMUcmww0UNjmxPaRWFrWjD00vUFvEyjHsd9ahuqRpS3L2zMzJJuQww6VQGnuRpJrvxt7dVzo2Q4cyKTslCNaaabtejSkqF3ebz1Pyr7Dp PW8swSxB2yZweJP\",\"input_schema\":{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\"},\"limit\":{\"type\":\"number\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"code\",\"limit\",\"tags\"]},\"input\":{\"$starlark\":\"input['items'][map]\"}}"
+                "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"d0R7XPrb2mml7sGASn2jJnhjFogT0jpesCzXkQ4kwm GRn0BzXb4Y1u3pDyjv1Oj8Unkel2Op s17e3c5OyHdvMI20kVsXVe2ACgwu0qox7qHEfOYKWxt4Fp8thJuGb7VVhNxi t8ugT9YBQHSXaxqdZ6l\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"code\":{\"type\":\"string\"},\"limit\":{\"type\":\"number\"},\"tags\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}}},\"required\":[\"code\",\"limit\",\"tags\"]},\"context\":{\"type\":\"object\",\"properties\":{\"document\":{\"type\":\"file\"}},\"required\":[\"document\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
               }
             }
           ],
@@ -350,7 +351,7 @@
           "role": "tool",
           "index": 14,
           "content": "2",
-          "tool_call_id": "call_mock_5937874556132254859"
+          "tool_call_id": "call_mock_18442481685468476851"
         },
         {
           "role": "assistant",
@@ -359,9 +360,9 @@
           "agent": "70edSCzVEtHRLSaFexKISH",
           "model": "mock",
           "upstream_id": "",
-          "reasoning": "KHkN5 pobLkFHgWD3QVOtHqr3 HPdbR4GHP26qGNPawVfWYq8oD9CSMr3Sr3AlYOm9R58hDxpMrPx6NSXoi6gFbSwvvgk97OFLrNZdY68p7sM ezO2DBNG4CrcRK88l09lnNRWegdXwzw6sLc6vlk606yDZV7flGWNSYeL",
+          "reasoning": "8xWinIcpcTesALu2isfX41n1i54Zz5yGWgDM4WD5TW5rUd0ormQEWzv8iKvi3mKq 3o9ThJK79aEOMytfo4jXG1zJz7aI 7SLvIsnY19MGKliwfYwiupRtIjnU6vWWOU6W4ePZe7FjGgt05cYmF0oCo6i2rx9i7nUYzVqbi1sSHrlH3UpUloIhFH",
           "tool_calls": null,
-          "content": "9zONB8VgiNcWE16sX6cdyHo1wnUQIDGOsCqcX YICUVl64Vr5FYxUpHQ4Il7wXHc ibM1tPBIL8zkwHJe",
+          "content": "GyOtz2 y6FJL9Ns8S",
           "refusal": null,
           "finish_reason": "stop",
           "logprobs": null,
@@ -521,7 +522,7 @@
         "min_leaf_width": 2,
         "max_leaf_width": 4,
         "name": "vb-2d6Dtm",
-        "spec": "ty19oOR7YaPjMRI m7Atd4mzTdH0jeItJoFyTUcu dLOMmdusZ2  XfYIAQprHi2mefF1AatxVfYEFK5 rPdTVLvgh9Z6mT51wIBRnhgTGAA",
+        "spec": "ACadtgsgYvJygWqt pakeLT8TaSuywLgoqFkNm buApFYbnsvYYnCJZiydrXYE5NOZLOnskicTL6PatQjn6pCxuoeYUftxWJf56g H6lTPP6ycBSwFo3SxshssIiyfA Se141IWu8nw0OFy Dz1va3CT0kgyu8bz3ADTRpN96bsWfuabw5btOnpdakwW5AE3wI yVUID",
         "input_schema": {
           "context": {
             "type": "object",
@@ -567,38 +568,56 @@
         }
       },
       {
-        "type": "placeholder.alpha.scalar.function",
+        "type": "placeholder.alpha.vector.function",
         "depth": 2,
         "min_branch_width": 2,
         "max_branch_width": 4,
         "min_leaf_width": 2,
         "max_leaf_width": 4,
         "name": "vb-2d6Dtn",
-        "spec": "zGg3z6smjGcsIG1uDvMUcmww0UNjmxPaRWFrWjD00vUFvEyjHsd9ahuqRpS3L2zMzJJuQww6VQGnuRpJrvxt7dVzo2Q4cyKTslCNaaabtejSkqF3ebz1Pyr7Dp PW8swSxB2yZweJP",
+        "spec": "d0R7XPrb2mml7sGASn2jJnhjFogT0jpesCzXkQ4kwm GRn0BzXb4Y1u3pDyjv1Oj8Unkel2Op s17e3c5OyHdvMI20kVsXVe2ACgwu0qox7qHEfOYKWxt4Fp8thJuGb7VVhNxi t8ugT9YBQHSXaxqdZ6l",
         "input_schema": {
-          "type": "object",
-          "properties": {
-            "code": {
-              "type": "string"
-            },
-            "limit": {
-              "type": "number"
-            },
-            "tags": {
-              "type": "array",
-              "items": {
-                "type": "string"
+          "context": {
+            "type": "object",
+            "properties": {
+              "document": {
+                "type": "file"
               }
-            }
+            },
+            "required": [
+              "document"
+            ]
           },
-          "required": [
-            "code",
-            "limit",
-            "tags"
-          ]
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "limit": {
+                "type": "number"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "code",
+              "limit",
+              "tags"
+            ]
+          }
         },
         "input": {
-          "$starlark": "input['items'][map]"
+          "context": {
+            "$starlark": "input['context']"
+          },
+          "items": {
+            "$starlark": "input['items']"
+          }
         }
       }
     ],
@@ -654,7 +673,7 @@
         "min_leaf_width": 2,
         "max_leaf_width": 4,
         "name": "vb-2d6Dtm",
-        "spec": "ty19oOR7YaPjMRI m7Atd4mzTdH0jeItJoFyTUcu dLOMmdusZ2  XfYIAQprHi2mefF1AatxVfYEFK5 rPdTVLvgh9Z6mT51wIBRnhgTGAA",
+        "spec": "ACadtgsgYvJygWqt pakeLT8TaSuywLgoqFkNm buApFYbnsvYYnCJZiydrXYE5NOZLOnskicTL6PatQjn6pCxuoeYUftxWJf56g H6lTPP6ycBSwFo3SxshssIiyfA Se141IWu8nw0OFy Dz1va3CT0kgyu8bz3ADTRpN96bsWfuabw5btOnpdakwW5AE3wI yVUID",
         "input_schema": {
           "context": {
             "type": "object",
@@ -700,38 +719,56 @@
         }
       },
       {
-        "type": "placeholder.alpha.scalar.function",
+        "type": "placeholder.alpha.vector.function",
         "depth": 2,
         "min_branch_width": 2,
         "max_branch_width": 4,
         "min_leaf_width": 2,
         "max_leaf_width": 4,
         "name": "vb-2d6Dtn",
-        "spec": "zGg3z6smjGcsIG1uDvMUcmww0UNjmxPaRWFrWjD00vUFvEyjHsd9ahuqRpS3L2zMzJJuQww6VQGnuRpJrvxt7dVzo2Q4cyKTslCNaaabtejSkqF3ebz1Pyr7Dp PW8swSxB2yZweJP",
+        "spec": "d0R7XPrb2mml7sGASn2jJnhjFogT0jpesCzXkQ4kwm GRn0BzXb4Y1u3pDyjv1Oj8Unkel2Op s17e3c5OyHdvMI20kVsXVe2ACgwu0qox7qHEfOYKWxt4Fp8thJuGb7VVhNxi t8ugT9YBQHSXaxqdZ6l",
         "input_schema": {
-          "type": "object",
-          "properties": {
-            "code": {
-              "type": "string"
-            },
-            "limit": {
-              "type": "number"
-            },
-            "tags": {
-              "type": "array",
-              "items": {
-                "type": "string"
+          "context": {
+            "type": "object",
+            "properties": {
+              "document": {
+                "type": "file"
               }
-            }
+            },
+            "required": [
+              "document"
+            ]
           },
-          "required": [
-            "code",
-            "limit",
-            "tags"
-          ]
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string"
+              },
+              "limit": {
+                "type": "number"
+              },
+              "tags": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "code",
+              "limit",
+              "tags"
+            ]
+          }
         },
         "input": {
-          "$starlark": "input['items'][map]"
+          "context": {
+            "$starlark": "input['context']"
+          },
+          "items": {
+            "$starlark": "input['items']"
+          }
         }
       }
     ]

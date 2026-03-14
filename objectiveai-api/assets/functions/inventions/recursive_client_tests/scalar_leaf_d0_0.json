@@ -95,14 +95,14 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "lyod9H1Df7OB7XcjMlc2GbjFxqSkThKLNvULA8s2g94pTtj4MLCLKUAXkg5Vct3wlOuj3FbFaHnX69dULYebbtYfBFOodKESNJCIKHJcue2rSzc9hbxyqm0giwCg5nPLZGpbUWXGenF idZN0Wt5d8qX ODlh24tRA68HXw4eCiin6PgpwF5gRtgtjfgH7b44yCV9J7wct8dx8oSGYCXbt2kpCLjiLCkmgqZCkfFWfKnXcY3znLRjsPqlnOQVeRzYPOEuJlkVSlsDZhUXR2TVsqnScwYHtVJjSdoMJK",
+              "reasoning": "MWToVjZ9lzeGhfdAu9tWhfBnFa98cN0PsAZ7Nsze9sllxE7jkzfvh5JHJBPMWWqLEpNrj5QdFknT8KAr67w3GBth5boTZdYxfInDub3DhikHTnGfUy9A9KwgUMKa3gR CtX23aEbVNmEo2ws6kRr8qPvjzLuFndIJJSyPoQgOx6wrzGzKGkh VIEGOsRmJnhfzxH1 1lqPXlfn3A39DJlwY XkWnKGblCoNPItyzpgncznyondzWDKFaEMgKHXrz38mfd4RKlTLMs2kSpos8Kbooq9PBjNtLRekv2F0zvyAc7crjrcuplroYly3n6iI l1BFwgHrP9j6qa9cvzmSQKzXWNmPG1ObVWicfUuWhjtYUqbk1gQwge25 OJ0YrNQTvHm t1bAklx5IOhtb0ZJyn4KEZlPIj4LFT1YieRZnONWRFTffP4WyrNKaOwgb4 qJArWe 6CgnaQCOlR4qnWA2sFL",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_1084260808347477656",
+                  "id": "call_mock_12489947238343011381",
                   "function": {
                     "name": "WriteInputSchema",
-                    "arguments": "{\"type\":\"object\",\"properties\":{\"is_active\":{\"type\":\"boolean\"}},\"required\":[\"is_active\"]}"
+                    "arguments": "{\"type\":\"object\",\"properties\":{\"upload\":{\"type\":\"file\",\"description\":\"The upload\"},\"threshold\":{\"type\":\"number\"}},\"required\":[\"upload\",\"threshold\"]}"
                   }
                 }
               ],
@@ -124,7 +124,7 @@
               "role": "tool",
               "index": 4,
               "content": "Ok",
-              "tool_call_id": "call_mock_1084260808347477656"
+              "tool_call_id": "call_mock_12489947238343011381"
             },
             {
               "role": "assistant",
@@ -133,8 +133,9 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
+              "reasoning": "gnU7fOVJUawePMskSsCwWcKy0N0LTgVk1qwJMvJu6p9KMiWOnYs0eD19aNSLf7TSZI5fTjROkFFhJ2ISQjK6yGQQP0iBVHPK1YABg1khOivTyaynp0goiTcC3qNLsz35yFbfcWDcxH6BMpmRGJiCFyQloJPMhJ870afsJGlylr678M2HJd8NZBECUlxv XrPJ1EpTw5qIXBvkDsuNb7upgT7HJUEfzC3RUmK 2 CkqfHEy8AEDogeVW64bbVnCx0xOIk fEULx2rIXYj2zulvLNEBp5GwfoA81b8 Rjo4Vx6JYg4dJw0UD5DuIftcJ4X9rHVwIyq4OOLY6qzfa0w2Ic86ZG5j9kmo5MoVniUTKplytbGLlUtijNSsjZDGd98N6lznwA1 GroD9lLvFEt6AHR5nneCytEGOFNZvT17bCa",
               "tool_calls": null,
-              "content": "jt5IMlUYR7Ynot6RaDCetcDsoEMqvJWeQpH1Hxwps2nf827LJih",
+              "content": "2Xc5EfKSpPLKNf8LGPiLs7Sl13l72jQtBIKr3HcWkSKFcaTk5U70Y upS",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -331,7 +332,7 @@
                   "id": "call_mock_12664131822664777814",
                   "function": {
                     "name": "AppendTask",
-                    "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"KEszdmPjLSWEhNK 1X1L0tPKvBHxheAD0\"}],[{\"type\":\"text\",\"text\":\"QuEEOGCI5K6x8P8McqW04SYteUbeMv7XOt2W\"}]]}"
+                    "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"KEszdmPjLSWEhNK 1X1L0tPKvBHxheAD0\"}],[{\"type\":\"text\",\"text\":\"QuEEOGCI5K6x8P8McqW04SYteUbeMv7XOt2W\"}]]}"
                   }
                 }
               ],
@@ -369,7 +370,7 @@
                   "id": "call_mock_12305931850330703984",
                   "function": {
                     "name": "AppendTask",
-                    "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"9q1YDWpNJ3sA6\"}],[{\"type\":\"text\",\"text\":\"fuCItfnoHX4qHNboQkreDEC9AK\"}],[{\"type\":\"text\",\"text\":\"Ha14yp5v0MJsvNnqs 1m c\"}],[{\"type\":\"text\",\"text\":\"ZtEORh8g1JrNUauB8TfyYX1PjfcYi9HCK\"}],[{\"type\":\"text\",\"text\":\"Puurp3HVP8Y\"}]]}"
+                    "arguments": "{\"type\":\"vector.completion\",\"messages\":{\"$starlark\":\"[{\\\"role\\\": \\\"user\\\", \\\"content\\\": [{\\\"type\\\": \\\"text\\\", \\\"text\\\": str(input)}, {\\\"type\\\": \\\"file\\\", \\\"file\\\": {\\\"file_data\\\": \\\"dGVzdA==\\\"}}]}]\"},\"responses\":[[{\"type\":\"text\",\"text\":\"9q1YDWpNJ3sA6\"}],[{\"type\":\"text\",\"text\":\"fuCItfnoHX4qHNboQkreDEC9AK\"}],[{\"type\":\"text\",\"text\":\"Ha14yp5v0MJsvNnqs 1m c\"}],[{\"type\":\"text\",\"text\":\"ZtEORh8g1JrNUauB8TfyYX1PjfcYi9HCK\"}],[{\"type\":\"text\",\"text\":\"Puurp3HVP8Y\"}]]}"
                   }
                 }
               ],
@@ -520,12 +521,17 @@
         "input_schema": {
           "type": "object",
           "properties": {
-            "is_active": {
-              "type": "boolean"
+            "upload": {
+              "type": "file",
+              "description": "The upload"
+            },
+            "threshold": {
+              "type": "number"
             }
           },
           "required": [
-            "is_active"
+            "upload",
+            "threshold"
           ]
         },
         "essay_tasks": "UVrEi9LW6N2VnYu2eQjfbeQRjfdanq71XYYjtaroXjAaVxo8RfTxKPNHqHzpXNktCnR6pBZS0W4MQ fbaIybQsCMphAkIiUe8q6VGJzcksQ fPrnAP3hXg9POzknmoTI7gPXqJJ6ejN5WaQoLt1YZP3BmcE2YZbw1FG4alq42f4yEYKApyAclgfFFYG1Ti60MvaaLR0vgIDXNSIoNHS8G6MQTLCetem4U3FKtTDSLbOrjbEcFVChSFHIEUCUhfxtJHRAstT1eizZyeqvxU2gHkO3 com0VEIFCoBz hO0WOo 61OVDvfw5JzdnFXCgt6k6fZ4FXaS1omE6o0MgLlm9oxHs88e1eh9QOQ2l",
@@ -533,7 +539,7 @@
           {
             "type": "vector.completion",
             "messages": {
-              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
+              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
             },
             "responses": [
               [
@@ -553,7 +559,7 @@
           {
             "type": "vector.completion",
             "messages": {
-              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
+              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
             },
             "responses": [
               [
@@ -600,19 +606,24 @@
         "input_schema": {
           "type": "object",
           "properties": {
-            "is_active": {
-              "type": "boolean"
+            "upload": {
+              "type": "file",
+              "description": "The upload"
+            },
+            "threshold": {
+              "type": "number"
             }
           },
           "required": [
-            "is_active"
+            "upload",
+            "threshold"
           ]
         },
         "tasks": [
           {
             "type": "vector.completion",
             "messages": {
-              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
+              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
             },
             "responses": [
               [
@@ -632,7 +643,7 @@
           {
             "type": "vector.completion",
             "messages": {
-              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}]}]"
+              "$starlark": "[{\"role\": \"user\", \"content\": [{\"type\": \"text\", \"text\": str(input)}, {\"type\": \"file\", \"file\": {\"file_data\": \"dGVzdA==\"}}]}]"
             },
             "responses": [
               [

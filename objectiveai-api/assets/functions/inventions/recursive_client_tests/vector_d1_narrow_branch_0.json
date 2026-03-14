@@ -238,7 +238,7 @@
             {
               "role": "tool",
               "index": 9,
-              "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.UserMessageExpression\",\n  \"description\": \"Expression variant of [`UserMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"The message content expression.\",\n      \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\"\n    },\n    \"name\": {\n      \"description\": \"Optional name expression.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.WithExpression.Nullable_string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  },\n  \"required\": [\n    \"content\"\n  ]\n}\n",
+              "content": "{\n  \"title\": \"agent.completions.message.UserMessageExpression\",\n  \"description\": \"Expression variant of [`UserMessage`] for dynamic content.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"content\": {\n      \"description\": \"The message content expression.\",\n      \"$ref\": \"functions.expression.WithExpression.agent.completions.message.RichContentExpression\"\n    },\n    \"name\": {\n      \"description\": \"Optional name expression.\",\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.WithExpression.Nullable_string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  }\n}\n",
               "tool_call_id": "call_mock_14858603553543698610"
             },
             {
@@ -314,7 +314,7 @@
             {
               "role": "tool",
               "index": 13,
-              "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"oneOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"const\": \"input\"\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"const\": \"output\"\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_l1_normalized\"\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"const\": \"task_output_weighted_sum\"\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"const\": \"input_items_output_length\"\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_split\"\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"const\": \"input_items_optional_context_merge\"\n    }\n  ]\n}\n",
+              "content": "{\n  \"title\": \"functions.expression.Special\",\n  \"description\": \"Predefined expression behaviors that require no user-authored code.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Returns the params input as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input\"\n      ]\n    },\n    {\n      \"description\": \"Returns the params output as-is.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"output\"\n      ]\n    },\n    {\n      \"description\": \"L1-normalizes the output. Scalar/Err pass through.\\nVector: L1 normalize. Vectors: L1 normalize each.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_l1_normalized\"\n      ]\n    },\n    {\n      \"description\": \"Weighted sum of the output. Vector → Scalar. Vectors → Vector.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"task_output_weighted_sum\"\n      ]\n    },\n    {\n      \"description\": \"Returns the length of input['items'] as u64\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_output_length\"\n      ]\n    },\n    {\n      \"description\": \"Splits an input containing items and optionally context into multiple inputs\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_split\"\n      ]\n    },\n    {\n      \"description\": \"Merges multiple inputs containing items and optionally context into a single input\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"input_items_optional_context_merge\"\n      ]\n    }\n  ]\n}\n",
               "tool_call_id": "call_mock_16499100652992602535"
             },
             {
@@ -352,7 +352,7 @@
             {
               "role": "tool",
               "index": 15,
-              "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"oneOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"const\": \"auto\"\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"const\": \"low\"\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"const\": \"high\"\n    }\n  ]\n}\n",
+              "content": "{\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"auto\"\n      ]\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"low\"\n      ]\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"high\"\n      ]\n    }\n  ]\n}\n",
               "tool_call_id": "call_mock_3265638640840928539"
             },
             {
@@ -466,7 +466,7 @@
             {
               "role": "tool",
               "index": 21,
-              "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.ImageUrl\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.ImageUrl\"\n    }\n  ]\n}\n",
+              "content": "{\n  \"title\": \"functions.expression.WithExpression.agent.completions.message.ImageUrl\",\n  \"description\": \"A value that can be either a literal or an expression.\\n\\nThis allows Function definitions to mix static values with dynamic\\nexpressions. During compilation, expressions are evaluated while\\nliteral values pass through unchanged.\\n\\n# Example\\n\\nLiteral value:\\n```json\\n\\\"hello world\\\"\\n```\\n\\nJMESPath expression:\\n```json\\n{\\\"$jmespath\\\": \\\"input.greeting\\\"}\\n```\\n\\nStarlark expression:\\n```json\\n{\\\"$starlark\\\": \\\"input['greeting']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"An expression (JMESPath or Starlark) to evaluate.\",\n      \"$ref\": \"functions.expression.Expression\"\n    },\n    {\n      \"description\": \"A literal value.\",\n      \"$ref\": \"agent.completions.message.ImageUrl\"\n    }\n  ]\n}\n",
               "tool_call_id": "call_mock_15421555741208627013"
             },
             {
@@ -628,7 +628,7 @@
         "min_leaf_width": 5,
         "max_leaf_width": 8,
         "name": "rvb-d1-3HzC",
-        "spec": "TQZy8sAlyT8r4hp2R9wQbcj1dZevSDbq3bELRi1 UmKv2tTSHoDdWrcu8D9DO9rZXf7QM3w9dvJkeftFPjtGL6kvr8NBjAIKgLJiOvGSfhkkUarR74G6wwj3Xot2Q6ywReUlX0RxrMfqn UQsGHzx0YSCEwFITzFriY04aw3wDwFXm56081yrQF7Dt9HcFaY6JiqHE",
+        "spec": "7VWEPYIduuYuUznPDvld8GUG8 q ZB5F fVNdKprDQppPp9uf8wTD2x0FQ9IrQJj5hX75qgXOlQwHL7WOFHO78rXMAw3dzE5W1JIrZTRmkDszOR2rfei89Nx1 dC4x6uPp9tdrFCpnVk oGP0xum5xOMuFrQm88YAJFo25QhoQkd3W",
         "essay": "tZeCx3RK0I6lWAfzqA ekK yRtTY229PsPBvtyOAlwQdhNJreOyCX6mSgyZ8brchiNSZYi28GqCfsnu8dNKGVp0CU1stBLiiM7cwpaeG20wvVdyspAvgejooPh87bc7zMt94OaCbffABDRV2Oub0caSLVWxGIwAvWWY1DSDOzV3X8 dTYASp8bUtLwDu7EyE5mZ2GxqSB2PHHaV37VP4nLTRsMZ GnLVBU2GtLXvn2VqjwCBokhmGyogdZtZRUP77jVLdyvM0p1HUp8pQ vBAq200UkmVanVBpj9aLIcYOLLgLDEFWGw64M1UkJMf9",
         "input_schema": {
           "context": {
@@ -956,7 +956,7 @@
             {
               "role": "tool",
               "index": 4,
-              "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.IntegerInputSchema\",\n  \"description\": \"Schema for an integer input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"$ref\": \"functions.expression.IntegerInputSchemaType\"\n    },\n    \"description\": {\n      \"description\": \"Human-readable description of the integer.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"type\": [\n        \"integer\",\n        \"null\"\n      ],\n      \"format\": \"int64\"\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"type\": [\n        \"integer\",\n        \"null\"\n      ],\n      \"format\": \"int64\"\n    }\n  },\n  \"required\": [\n    \"type\"\n  ]\n}\n",
+              "content": "{\n  \"title\": \"functions.expression.IntegerInputSchema\",\n  \"description\": \"Schema for an integer input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the integer.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": -9223372036854775808,\n          \"maximum\": 9223372036854775807\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": -9223372036854775808,\n          \"maximum\": 9223372036854775807\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.IntegerInputSchemaType\"\n    }\n  }\n}\n",
               "tool_call_id": "call_mock_11309397609257110101"
             },
             {
@@ -994,7 +994,7 @@
             {
               "role": "tool",
               "index": 6,
-              "content": "{\n  \"$schema\": \"https://json-schema.org/draft/2020-12/schema\",\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    },\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"type\": [\n        \"string\",\n        \"null\"\n      ]\n    }\n  },\n  \"required\": [\n    \"type\"\n  ]\n}\n",
+              "content": "{\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    }\n  }\n}\n",
               "tool_call_id": "call_mock_9539145686768999901"
             },
             {
@@ -1159,14 +1159,14 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "UWldq92yysCRJPjgh4gti1 oe 0E4M2rWcErCAhxswwmRiIxqakR96xdAXc6qYOAM2E5GaBzQF1BMvHBC45Aq2bQ1MbicYOa UciGWbC9t1d2hNuAILEylHSVaaAi4XsoqKZ18I8Vs7xhRbThTEoUYlRaOkznPdUjJvt IMx9Fmm4cZjLT7A4m8GKMRH4QkR16EArZy cZZFb4Qsf4w9hLfXRdrMoQxy57faGVIvcI6QPkmRCR0SRTi1Zhfo1bbju7lAM5LacRKEFixxTY6McKzheIJTfKaX0YaoJI5dueehwV2ztx69UBNHDTwEAFfT5eU0WVIXG87JIxw8NNBNF0z0CZAJWFoEoU4bL31A69OB9BhKRnuBK22NrlUK0ZxOTjMGDzPRSQQKifnWdmnztNRln2ldrnakSsl6I6EMu1PNeo7scmzdN4h57urFpRVfOYVXS0xEDYZhZOR1irAtrcNqXOfee7Y917kvJDEROQhgvc5c5xWPbXMzn9IqpZ9ad2mbrgnGsJ4sJhpdlyDIcEJTSUl62cfUpGdjHoIM8VusFwAdbV9072H3Cv5OkSnx6EKrKK79PYipfHAlpSRqViUdGO4jVJdGEDczgo72bnZi1u25dPA5MhDvp",
+              "reasoning": "A6zUaoKc5tEF9VD5oGBFfsGrvGTfbGbH24c92rvx2X2bBa4pW9KHmHE0RHCNWf6qmpV5EPH3ulE1EUzs5FWIx4VnkfSzrCFsKQGhDaqR REWTzDDud6dMDm1Gl3RuXuSAIPM0c1K5ag7PjfdXydgqpepcQimG0TibDfHkxYB 11xt2hwjVP98kETL3lRz54A1TkQG f3",
               "tool_calls": [
                 {
                   "type": "function",
-                  "id": "call_mock_11609731644178496043",
+                  "id": "call_mock_17594527935155708371",
                   "function": {
                     "name": "AppendTask",
-                    "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"TQZy8sAlyT8r4hp2R9wQbcj1dZevSDbq3bELRi1 UmKv2tTSHoDdWrcu8D9DO9rZXf7QM3w9dvJkeftFPjtGL6kvr8NBjAIKgLJiOvGSfhkkUarR74G6wwj3Xot2Q6ywReUlX0RxrMfqn UQsGHzx0YSCEwFITzFriY04aw3wDwFXm56081yrQF7Dt9HcFaY6JiqHE\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"id\":{\"type\":\"boolean\"},\"thumbnail\":{\"type\":\"image\"}},\"required\":[\"source\",\"thumbnail\"]},\"context\":{\"type\":\"object\",\"properties\":{\"instruction\":{\"type\":\"string\"},\"clip\":{\"type\":\"audio\"},\"attachment\":{\"type\":\"file\"}},\"required\":[\"instruction\",\"clip\",\"attachment\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
+                    "arguments": "{\"type\":\"placeholder.alpha.vector.function\",\"spec\":\"7VWEPYIduuYuUznPDvld8GUG8 q ZB5F fVNdKprDQppPp9uf8wTD2x0FQ9IrQJj5hX75qgXOlQwHL7WOFHO78rXMAw3dzE5W1JIrZTRmkDszOR2rfei89Nx1 dC4x6uPp9tdrFCpnVk oGP0xum5xOMuFrQm88YAJFo25QhoQkd3W\",\"input_schema\":{\"items\":{\"type\":\"object\",\"properties\":{\"source\":{\"type\":\"string\"},\"labels\":{\"type\":\"array\",\"items\":{\"type\":\"string\"}},\"id\":{\"type\":\"boolean\"},\"thumbnail\":{\"type\":\"image\"}},\"required\":[\"source\",\"thumbnail\"]},\"context\":{\"type\":\"object\",\"properties\":{\"instruction\":{\"type\":\"string\"},\"clip\":{\"type\":\"audio\"},\"attachment\":{\"type\":\"file\"}},\"required\":[\"instruction\",\"clip\",\"attachment\"]}},\"input\":{\"items\":{\"$starlark\":\"input['items']\"},\"context\":{\"$starlark\":\"input['context']\"}}}"
                   }
                 }
               ],
@@ -1188,7 +1188,7 @@
               "role": "tool",
               "index": 14,
               "content": "1",
-              "tool_call_id": "call_mock_11609731644178496043"
+              "tool_call_id": "call_mock_17594527935155708371"
             },
             {
               "role": "assistant",
@@ -1197,9 +1197,9 @@
               "agent": "70edSCzVEtHRLSaFexKISH",
               "model": "mock",
               "upstream_id": "",
-              "reasoning": "nuTbSSjowEPBiV0ty1lA5H ogRNPb65IDUwy8hHXrYN0UZgySK7PSVe",
+              "reasoning": "NVZZy2cW9pCFTtOZrIpzBkrLYx1B868zKhmEehlivn4hQVhBy2qdxiPJvRA6OkJOeRqgkzIn4 wekwiE k0hQi14VJCa lASbHIVPMyRHpEgn1",
               "tool_calls": null,
-              "content": "kcMerpTb ZbBhzVn9spb3qfbwHiDhawuk0",
+              "content": "8Vc tlgRHNHSs8A5G5l1RPORslHnqHMkl9lrBzE",
               "refusal": null,
               "finish_reason": "stop",
               "logprobs": null,
@@ -1368,7 +1368,7 @@
             "min_leaf_width": 5,
             "max_leaf_width": 8,
             "name": "rvb-d1-3HzC",
-            "spec": "TQZy8sAlyT8r4hp2R9wQbcj1dZevSDbq3bELRi1 UmKv2tTSHoDdWrcu8D9DO9rZXf7QM3w9dvJkeftFPjtGL6kvr8NBjAIKgLJiOvGSfhkkUarR74G6wwj3Xot2Q6ywReUlX0RxrMfqn UQsGHzx0YSCEwFITzFriY04aw3wDwFXm56081yrQF7Dt9HcFaY6JiqHE",
+            "spec": "7VWEPYIduuYuUznPDvld8GUG8 q ZB5F fVNdKprDQppPp9uf8wTD2x0FQ9IrQJj5hX75qgXOlQwHL7WOFHO78rXMAw3dzE5W1JIrZTRmkDszOR2rfei89Nx1 dC4x6uPp9tdrFCpnVk oGP0xum5xOMuFrQm88YAJFo25QhoQkd3W",
             "input_schema": {
               "context": {
                 "type": "object",
@@ -1486,7 +1486,7 @@
             "min_leaf_width": 5,
             "max_leaf_width": 8,
             "name": "rvb-d1-3HzC",
-            "spec": "TQZy8sAlyT8r4hp2R9wQbcj1dZevSDbq3bELRi1 UmKv2tTSHoDdWrcu8D9DO9rZXf7QM3w9dvJkeftFPjtGL6kvr8NBjAIKgLJiOvGSfhkkUarR74G6wwj3Xot2Q6ywReUlX0RxrMfqn UQsGHzx0YSCEwFITzFriY04aw3wDwFXm56081yrQF7Dt9HcFaY6JiqHE",
+            "spec": "7VWEPYIduuYuUznPDvld8GUG8 q ZB5F fVNdKprDQppPp9uf8wTD2x0FQ9IrQJj5hX75qgXOlQwHL7WOFHO78rXMAw3dzE5W1JIrZTRmkDszOR2rfei89Nx1 dC4x6uPp9tdrFCpnVk oGP0xum5xOMuFrQm88YAJFo25QhoQkd3W",
             "input_schema": {
               "context": {
                 "type": "object",
