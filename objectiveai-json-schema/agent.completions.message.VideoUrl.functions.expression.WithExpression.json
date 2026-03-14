@@ -1,5 +1,5 @@
 {
-  "title": "functions.expression.WithExpression.agent.completions.message.SimpleContentPartExpression",
+  "title": "agent.completions.message.VideoUrl.functions.expression.WithExpression",
   "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
   "anyOf": [
     {
@@ -8,7 +8,7 @@
     },
     {
       "description": "A literal value.",
-      "$ref": "agent.completions.message.SimpleContentPartExpression"
+      "$ref": "agent.completions.message.VideoUrl"
     }
   ]
 }

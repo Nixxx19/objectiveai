@@ -198,7 +198,7 @@ impl TryFrom<AgentBase> for Agent {
 /// Used to specify how many instances of an agent to include in an ensemble,
 /// along with fallback agents to try if the primary fails.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
-#[schemars(rename = "agent.WithFallbacksAndCount.{T}")]
+#[schemars(rename = "{T}.agent.WithFallbacksAndCount")]
 pub struct WithFallbacksAndCount<T> {
     /// Number of instances of this agent in the ensemble. Defaults to 1.
     #[serde(default = "WithFallbacksAndCount::<T>::default_count")]

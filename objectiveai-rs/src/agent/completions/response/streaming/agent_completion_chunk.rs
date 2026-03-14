@@ -47,10 +47,8 @@ impl AgentCompletionChunk {
             }
             _ => {}
         }
-        if self.error.is_none() {
-            if let Some(other_error) = error {
-                self.error = Some(other_error.clone());
-            }
+        if let Some(error) = error {
+            self.error = Some(error.clone());
         }
     }
 

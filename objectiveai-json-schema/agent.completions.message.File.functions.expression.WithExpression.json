@@ -1,5 +1,5 @@
 {
-  "title": "functions.expression.WithExpression.Array_of_functions.expression.WithExpression.agent.completions.message.MessageExpression",
+  "title": "agent.completions.message.File.functions.expression.WithExpression",
   "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
   "anyOf": [
     {
@@ -8,10 +8,7 @@
     },
     {
       "description": "A literal value.",
-      "type": "array",
-      "items": {
-        "$ref": "functions.expression.WithExpression.agent.completions.message.MessageExpression"
-      }
+      "$ref": "agent.completions.message.File"
     }
   ]
 }
