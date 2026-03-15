@@ -1,4 +1,4 @@
-import { functionInventionChunkMerged, functionInventionChunkNormalized, functionInventionChunkToUnary } from "../../../../wasm/loader.js";
+import { functionInventionChunkMerged, functionInventionChunkNormalized, functionInventionChunkToUnary, generateFunctionInventionChunk } from "../../../../wasm/loader.js";
 import type { FunctionsInventionsResponseStreamingFunctionInventionChunk } from "./functionInventionChunk";
 import type { FunctionsInventionsResponseUnaryFunctionInvention } from "../unary/functionInvention";
 
@@ -12,4 +12,8 @@ export function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkNo
 
 export function wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary(a: FunctionsInventionsResponseStreamingFunctionInventionChunk): FunctionsInventionsResponseUnaryFunctionInvention {
   return JSON.parse(functionInventionChunkToUnary(a));
+}
+
+export function wasmFunctionsInventionsResponseStreamingGenerateFunctionInventionChunk(seed: number): FunctionsInventionsResponseStreamingFunctionInventionChunk {
+  return JSON.parse(generateFunctionInventionChunk(seed));
 }

@@ -1,4 +1,4 @@
-import { agentCompletionChunkMerged, agentCompletionChunkNormalized, agentCompletionChunkToUnary } from "../../../../wasm/loader.js";
+import { agentCompletionChunkMerged, agentCompletionChunkNormalized, agentCompletionChunkToUnary, generateAgentCompletionChunk } from "../../../../wasm/loader.js";
 import type { AgentCompletionsResponseStreamingAgentCompletionChunk } from "./agentCompletionChunk";
 import type { AgentCompletionsResponseUnaryAgentCompletion } from "../unary/agentCompletion";
 
@@ -12,4 +12,8 @@ export function wasmAgentCompletionsResponseStreamingAgentCompletionChunkNormali
 
 export function wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary(a: AgentCompletionsResponseStreamingAgentCompletionChunk): AgentCompletionsResponseUnaryAgentCompletion {
   return JSON.parse(agentCompletionChunkToUnary(a));
+}
+
+export function wasmAgentCompletionsResponseStreamingGenerateAgentCompletionChunk(seed: number): AgentCompletionsResponseStreamingAgentCompletionChunk {
+  return JSON.parse(generateAgentCompletionChunk(seed));
 }
