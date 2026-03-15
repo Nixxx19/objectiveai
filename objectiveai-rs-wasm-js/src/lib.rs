@@ -642,6 +642,60 @@ pub fn functionProfileComputationChunkToUnary(a: JsValue) -> Result<String, JsVa
     serde_json::to_string(&unary).map_err(|e| JsValue::from_str(&e.to_string()))
 }
 
+/// Normalizes an `AgentCompletion` for test snapshot stability.
+#[wasm_bindgen]
+pub fn normalizeAgentCompletionForTests(a: JsValue) -> Result<String, JsValue> {
+    let mut a: objectiveai::agent::completions::response::unary::AgentCompletion =
+        serde_wasm_bindgen::from_value(a)?;
+    a.normalize_for_tests();
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `VectorCompletion` for test snapshot stability.
+#[wasm_bindgen]
+pub fn normalizeVectorCompletionForTests(a: JsValue) -> Result<String, JsValue> {
+    let mut a: objectiveai::vector::completions::response::unary::VectorCompletion =
+        serde_wasm_bindgen::from_value(a)?;
+    a.normalize_for_tests();
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `FunctionExecution` for test snapshot stability.
+#[wasm_bindgen]
+pub fn normalizeFunctionExecutionForTests(a: JsValue) -> Result<String, JsValue> {
+    let mut a: objectiveai::functions::executions::response::unary::FunctionExecution =
+        serde_wasm_bindgen::from_value(a)?;
+    a.normalize_for_tests();
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `FunctionInvention` for test snapshot stability.
+#[wasm_bindgen]
+pub fn normalizeFunctionInventionForTests(a: JsValue) -> Result<String, JsValue> {
+    let mut a: objectiveai::functions::inventions::response::unary::FunctionInvention =
+        serde_wasm_bindgen::from_value(a)?;
+    a.normalize_for_tests();
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `FunctionInventionRecursive` for test snapshot stability.
+#[wasm_bindgen]
+pub fn normalizeFunctionInventionRecursiveForTests(a: JsValue) -> Result<String, JsValue> {
+    let mut a: objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive =
+        serde_wasm_bindgen::from_value(a)?;
+    a.normalize_for_tests();
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Normalizes a `FunctionProfileComputation` for test snapshot stability.
+#[wasm_bindgen]
+pub fn normalizeFunctionProfileComputationForTests(a: JsValue) -> Result<String, JsValue> {
+    let mut a: objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation =
+        serde_wasm_bindgen::from_value(a)?;
+    a.normalize_for_tests();
+    serde_json::to_string(&a).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
 /// Generates a random `AgentCompletionChunk`. Optional seed for reproducibility.
 #[wasm_bindgen]
 pub fn generateAgentCompletionChunk(seed: JsValue) -> Result<String, JsValue> {

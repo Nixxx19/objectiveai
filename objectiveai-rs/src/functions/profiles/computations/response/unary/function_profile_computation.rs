@@ -24,6 +24,8 @@ impl FunctionProfileComputation {
     pub fn any_usage(&self) -> bool {
         self.usage.any_usage()
     }
+
+    pub fn normalize_for_tests(&mut self) {}
 }
 
 impl From<response::streaming::FunctionProfileComputationChunk>

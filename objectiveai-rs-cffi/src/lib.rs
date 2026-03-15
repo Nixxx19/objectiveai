@@ -856,6 +856,118 @@ pub unsafe extern "C" fn objectiveai_function_profile_computation_chunk_to_unary
 }
 
 // ---------------------------------------------------------------------------
+// Normalize for tests
+// ---------------------------------------------------------------------------
+
+/// Normalizes an AgentCompletion for test snapshot stability.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_normalize_agent_completion_for_tests(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let mut a: objectiveai::agent::completions::response::unary::AgentCompletion =
+                from_json(json_in, json_in_len)?;
+            a.normalize_for_tests();
+            to_json(&a)
+        })
+    }
+}
+
+/// Normalizes a VectorCompletion for test snapshot stability.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_normalize_vector_completion_for_tests(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let mut a: objectiveai::vector::completions::response::unary::VectorCompletion =
+                from_json(json_in, json_in_len)?;
+            a.normalize_for_tests();
+            to_json(&a)
+        })
+    }
+}
+
+/// Normalizes a FunctionExecution for test snapshot stability.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_normalize_function_execution_for_tests(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let mut a: objectiveai::functions::executions::response::unary::FunctionExecution =
+                from_json(json_in, json_in_len)?;
+            a.normalize_for_tests();
+            to_json(&a)
+        })
+    }
+}
+
+/// Normalizes a FunctionInvention for test snapshot stability.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_normalize_function_invention_for_tests(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let mut a: objectiveai::functions::inventions::response::unary::FunctionInvention =
+                from_json(json_in, json_in_len)?;
+            a.normalize_for_tests();
+            to_json(&a)
+        })
+    }
+}
+
+/// Normalizes a FunctionInventionRecursive for test snapshot stability.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_normalize_function_invention_recursive_for_tests(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let mut a: objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive =
+                from_json(json_in, json_in_len)?;
+            a.normalize_for_tests();
+            to_json(&a)
+        })
+    }
+}
+
+/// Normalizes a FunctionProfileComputation for test snapshot stability.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_normalize_function_profile_computation_for_tests(
+    json_in: *const u8,
+    json_in_len: usize,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let mut a: objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation =
+                from_json(json_in, json_in_len)?;
+            a.normalize_for_tests();
+            to_json(&a)
+        })
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Seed → bytes helper
 // ---------------------------------------------------------------------------
 
