@@ -1,4 +1,4 @@
-import { functionExecutionChunkMerged, functionExecutionChunkNormalized, functionExecutionChunkToUnary, generateFunctionExecutionChunk } from "../../../../wasm/loader.js";
+import { functionExecutionChunkMerged, functionExecutionChunkNormalized, functionExecutionChunkToUnary, generateFunctionExecutionChunk, normalizeFunctionExecutionForTests } from "../../../../wasm/loader.js";
 import type { FunctionsExecutionsResponseStreamingFunctionExecutionChunk } from "./functionExecutionChunk";
 import type { FunctionsExecutionsResponseUnaryFunctionExecution } from "../unary/functionExecution";
 
@@ -16,4 +16,8 @@ export function wasmFunctionsExecutionsResponseStreamingFunctionExecutionChunkTo
 
 export function wasmFunctionsExecutionsResponseStreamingGenerateFunctionExecutionChunk(seed: number): FunctionsExecutionsResponseStreamingFunctionExecutionChunk {
   return JSON.parse(generateFunctionExecutionChunk(seed));
+}
+
+export function wasmFunctionsExecutionsResponseStreamingNormalizeFunctionExecutionForTests(a: FunctionsExecutionsResponseUnaryFunctionExecution): FunctionsExecutionsResponseUnaryFunctionExecution {
+  return JSON.parse(normalizeFunctionExecutionForTests(a));
 }

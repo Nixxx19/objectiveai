@@ -1,4 +1,4 @@
-import { vectorCompletionChunkMerged, vectorCompletionChunkNormalized, vectorCompletionChunkToUnary, generateVectorCompletionChunk } from "../../../../wasm/loader.js";
+import { vectorCompletionChunkMerged, vectorCompletionChunkNormalized, vectorCompletionChunkToUnary, generateVectorCompletionChunk, normalizeVectorCompletionForTests } from "../../../../wasm/loader.js";
 import type { VectorCompletionsResponseStreamingVectorCompletionChunk } from "./vectorCompletionChunk";
 import type { VectorCompletionsResponseUnaryVectorCompletion } from "../unary/vectorCompletion";
 
@@ -16,4 +16,8 @@ export function wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUna
 
 export function wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk(seed: number): VectorCompletionsResponseStreamingVectorCompletionChunk {
   return JSON.parse(generateVectorCompletionChunk(seed));
+}
+
+export function wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests(a: VectorCompletionsResponseUnaryVectorCompletion): VectorCompletionsResponseUnaryVectorCompletion {
+  return JSON.parse(normalizeVectorCompletionForTests(a));
 }
