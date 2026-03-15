@@ -47,7 +47,7 @@ func init() {
 		rootDir = wd
 	}
 	schemaDir = filepath.Join(rootDir, "objectiveai-json-schema")
-	srcDir = filepath.Join(rootDir, "objectiveai-go")
+	srcDir = filepath.Join(rootDir, "objectiveai-go", "objectiveai")
 }
 
 // ---------------------------------------------------------------------------
@@ -1105,7 +1105,10 @@ func main() {
 	}
 	genericPrefixes = detectGenericPrefixes(allTitles)
 
+	// Clean auto-generated files from both the target directory and the parent
+	// (in case files were previously generated at the root).
 	cleanGenerated(srcDir)
+	cleanGenerated(filepath.Dir(srcDir))
 
 	// Group by file path
 	type fileEntry struct {

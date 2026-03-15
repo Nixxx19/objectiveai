@@ -17,8 +17,9 @@ import (
 // in cffi.go as PascalCase Go functions like ValidateEnsemble.
 func TestCFFICoverage(t *testing.T) {
 	// Locate repo root relative to this test file.
+	// Test is in objectiveai-go/objectiveai/, repo root is two levels up.
 	_, thisFile, _, _ := runtime.Caller(0)
-	repoRoot := filepath.Dir(filepath.Dir(thisFile))
+	repoRoot := filepath.Dir(filepath.Dir(filepath.Dir(thisFile)))
 
 	// Read Rust lib.rs
 	rustPath := filepath.Join(repoRoot, "objectiveai-rs-cffi", "src", "lib.rs")
@@ -40,7 +41,7 @@ func TestCFFICoverage(t *testing.T) {
 	}
 
 	// Read Go cffi.go
-	goPath := filepath.Join(repoRoot, "objectiveai-go", "cffi.go")
+	goPath := filepath.Join(repoRoot, "objectiveai-go", "objectiveai", "cffi.go")
 	goBytes, err := os.ReadFile(goPath)
 	if err != nil {
 		t.Fatalf("Failed to read %s: %v", goPath, err)
