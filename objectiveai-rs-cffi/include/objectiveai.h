@@ -176,6 +176,31 @@ int32_t objectiveai_function_profile_computation_chunk_to_unary(
     const uint8_t *json_in, size_t json_in_len,
     uint8_t **json_out, size_t *json_out_len);
 
+/* Generate arbitrary chunks (for testing) */
+int32_t objectiveai_generate_agent_completion_chunk(
+    int32_t has_seed, int64_t seed,
+    uint8_t **json_out, size_t *json_out_len);
+
+int32_t objectiveai_generate_vector_completion_chunk(
+    int32_t has_seed, int64_t seed,
+    uint8_t **json_out, size_t *json_out_len);
+
+int32_t objectiveai_generate_function_execution_chunk(
+    int32_t has_seed, int64_t seed,
+    uint8_t **json_out, size_t *json_out_len);
+
+int32_t objectiveai_generate_function_invention_chunk(
+    int32_t has_seed, int64_t seed,
+    uint8_t **json_out, size_t *json_out_len);
+
+int32_t objectiveai_generate_function_invention_recursive_chunk(
+    int32_t has_seed, int64_t seed,
+    uint8_t **json_out, size_t *json_out_len);
+
+int32_t objectiveai_generate_function_profile_computation_chunk(
+    int32_t has_seed, int64_t seed,
+    uint8_t **json_out, size_t *json_out_len);
+
 #ifdef __cplusplus
 }
 #endif
