@@ -18,7 +18,7 @@ use schemars::JsonSchema;
 /// in the request. Typically one element is 1.0 and the rest are 0.0 (discrete
 /// selection), but when `top_logprobs` is used, votes may be probability
 /// distributions.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "vector.completions.response.Vote")]
 pub struct Vote {
     // --- Identifiers ---

@@ -2,7 +2,7 @@ use crate::agent;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.inventions.recursive.response.streaming.FunctionInventionRecursiveChunk")]
 pub struct FunctionInventionRecursiveChunk {
     pub id: String,

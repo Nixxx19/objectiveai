@@ -11,7 +11,7 @@ use starlark::values::{UnpackValue, Value as StarlarkValue};
 use schemars::JsonSchema;
 
 /// An assistant message (model's previous response).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.AssistantMessage")]
 pub struct AssistantMessage {
     /// The message content, if any.
@@ -113,7 +113,7 @@ impl FromStarlarkValue for AssistantMessage {
 }
 
 /// Expression variant of [`AssistantMessage`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.AssistantMessageExpression")]
 pub struct AssistantMessageExpression {
     /// The content expression.
@@ -290,7 +290,7 @@ impl FromStarlarkValue for AssistantMessageExpression {
 }
 
 /// A tool call made by the assistant.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.AssistantToolCall")]
 pub enum AssistantToolCall {
@@ -369,7 +369,7 @@ impl FromStarlarkValue for AssistantToolCall {
 }
 
 /// Expression variant of [`AssistantToolCall`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.AssistantToolCallExpression")]
 pub enum AssistantToolCallExpression {
@@ -424,7 +424,7 @@ impl FromStarlarkValue for AssistantToolCallExpression {
 }
 
 /// Details of a function call made by the assistant.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.AssistantToolCallFunction")]
 pub struct AssistantToolCallFunction {
     /// The name of the function to call.
@@ -497,7 +497,7 @@ impl FromStarlarkValue for AssistantToolCallFunction {
 }
 
 /// A tool call delta in a streaming response.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.AssistantToolCallDelta")]
 pub struct AssistantToolCallDelta {
     /// The index of this tool call.
@@ -535,7 +535,7 @@ impl AssistantToolCallDelta {
 }
 
 /// The type of tool call.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.AssistantToolCallType")]
 pub enum AssistantToolCallType {
     /// A function call.
@@ -545,7 +545,7 @@ pub enum AssistantToolCallType {
 }
 
 /// Function call details in a streaming tool call.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.AssistantToolCallFunctionDelta")]
 pub struct AssistantToolCallFunctionDelta {
     /// The function name (only present in the first delta).
@@ -575,7 +575,7 @@ impl AssistantToolCallFunctionDelta {
 }
 
 /// Expression variant of [`AssistantToolCallFunction`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.AssistantToolCallFunctionExpression")]
 pub struct AssistantToolCallFunctionExpression {
     /// The function name expression.

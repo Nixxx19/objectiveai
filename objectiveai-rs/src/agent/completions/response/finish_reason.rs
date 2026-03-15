@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 
 /// The reason the model stopped generating.
 #[derive(
-    Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq, JsonSchema,
+    Debug, Clone, Copy, Serialize, Deserialize, Default, PartialEq, Eq, JsonSchema, arbitrary::Arbitrary,
 )]
 #[schemars(rename = "agent.completions.response.FinishReason")]
 pub enum FinishReason {

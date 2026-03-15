@@ -13,7 +13,7 @@ use super::InputValue;
 ///
 /// Defines the expected structure and constraints for input data.
 /// Used by remote Functions to document and validate their inputs.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
 #[schemars(rename = "functions.expression.InputSchema")]
 pub enum InputSchema {
@@ -98,7 +98,7 @@ impl Modalities {
 }
 
 /// Schema for a union of possible types - input must match at least one.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.AnyOfInputSchema")]
 pub struct AnyOfInputSchema {
@@ -120,7 +120,7 @@ impl AnyOfInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.ObjectInputSchemaType")]
 pub enum ObjectInputSchemaType {
@@ -142,6 +142,22 @@ pub struct ObjectInputSchema {
     /// List of property names that must be present.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub required: Option<Vec<String>>,
+}
+
+impl<'a> arbitrary::Arbitrary<'a> for ObjectInputSchema {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+        let len = u.int_in_range(0..=4)?;
+        let mut properties = IndexMap::with_capacity(len);
+        for _ in 0..len {
+            properties.insert(u.arbitrary::<String>()?, u.arbitrary()?);
+        }
+        Ok(ObjectInputSchema {
+            r#type: u.arbitrary()?,
+            description: u.arbitrary()?,
+            properties,
+            required: u.arbitrary()?,
+        })
+    }
 }
 
 impl ObjectInputSchema {
@@ -167,7 +183,7 @@ impl ObjectInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.ArrayInputSchemaType")]
 pub enum ArrayInputSchemaType {
@@ -176,7 +192,7 @@ pub enum ArrayInputSchemaType {
 }
 
 /// Schema for an array input.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.ArrayInputSchema")]
 pub struct ArrayInputSchema {
@@ -221,7 +237,7 @@ impl ArrayInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.StringInputSchemaType")]
 pub enum StringInputSchemaType {
@@ -230,7 +246,7 @@ pub enum StringInputSchemaType {
 }
 
 /// Schema for a string input.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.StringInputSchema")]
 pub struct StringInputSchema {
@@ -259,7 +275,7 @@ impl StringInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.IntegerInputSchemaType")]
 pub enum IntegerInputSchemaType {
@@ -268,7 +284,7 @@ pub enum IntegerInputSchemaType {
 }
 
 /// Schema for an integer input.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.IntegerInputSchema")]
 pub struct IntegerInputSchema {
@@ -322,7 +338,7 @@ impl IntegerInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.NumberInputSchemaType")]
 pub enum NumberInputSchemaType {
@@ -331,7 +347,7 @@ pub enum NumberInputSchemaType {
 }
 
 /// Schema for a floating-point number input.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.NumberInputSchema")]
 pub struct NumberInputSchema {
@@ -383,7 +399,7 @@ impl NumberInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.BooleanInputSchemaType")]
 pub enum BooleanInputSchemaType {
@@ -392,7 +408,7 @@ pub enum BooleanInputSchemaType {
 }
 
 /// Schema for a boolean input.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.BooleanInputSchema")]
 pub struct BooleanInputSchema {
@@ -412,7 +428,7 @@ impl BooleanInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.ImageInputSchemaType")]
 pub enum ImageInputSchemaType {
@@ -421,7 +437,7 @@ pub enum ImageInputSchemaType {
 }
 
 /// Schema for an image input (URL or base64-encoded).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.ImageInputSchema")]
 pub struct ImageInputSchema {
@@ -445,7 +461,7 @@ impl ImageInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.AudioInputSchemaType")]
 pub enum AudioInputSchemaType {
@@ -454,7 +470,7 @@ pub enum AudioInputSchemaType {
 }
 
 /// Schema for an audio input.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.AudioInputSchema")]
 pub struct AudioInputSchema {
@@ -478,7 +494,7 @@ impl AudioInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.VideoInputSchemaType")]
 pub enum VideoInputSchemaType {
@@ -487,7 +503,7 @@ pub enum VideoInputSchemaType {
 }
 
 /// Schema for a video input (URL or base64-encoded).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.VideoInputSchema")]
 pub struct VideoInputSchema {
@@ -516,7 +532,7 @@ impl VideoInputSchema {
     }
 }
 
-#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "lowercase")]
 #[schemars(rename = "functions.expression.FileInputSchemaType")]
 pub enum FileInputSchemaType {
@@ -525,7 +541,7 @@ pub enum FileInputSchemaType {
 }
 
 /// Schema for a file input.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.FileInputSchema")]
 pub struct FileInputSchema {

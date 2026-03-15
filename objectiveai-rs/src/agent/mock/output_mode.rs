@@ -14,7 +14,7 @@ use schemars::JsonSchema;
 ///
 /// **Note:** This setting is only relevant for vector completions and is
 /// completely ignored for agent completions.
-#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Hash, JsonSchema)]
+#[derive(Clone, Copy, Debug, Default, Serialize, Deserialize, PartialEq, Hash, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "snake_case")]
 #[schemars(rename = "agent.mock.OutputMode")]
 pub enum OutputMode {

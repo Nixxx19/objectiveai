@@ -444,7 +444,7 @@ impl Function {
 /// Remote functions are stored as `function.json` in repositories and
 /// referenced by `remote/owner/repository`. They include documentation fields
 /// that inline functions lack.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.RemoteFunction")]
 pub enum RemoteFunction {
@@ -543,7 +543,7 @@ impl RemoteFunction {
 /// Used when embedding function logic directly in requests rather than
 /// referencing a remote function. Lacks description and input
 /// schema fields.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.InlineFunction")]
 pub enum InlineFunction {

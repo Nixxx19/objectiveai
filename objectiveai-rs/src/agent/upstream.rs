@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 /// Supported agent upstreams.
 #[derive(
-    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default, JsonSchema,
+    Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary,
 )]
 #[serde(rename_all = "snake_case")]
 #[schemars(rename = "agent.Upstream")]

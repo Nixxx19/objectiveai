@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 ///
 /// The `index` field is used to correlate chunks belonging to the same
 /// underlying completion when accumulating via [`push`](Self::push).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "vector.completions.response.streaming.AgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     /// Index used to correlate chunks from the same completion.

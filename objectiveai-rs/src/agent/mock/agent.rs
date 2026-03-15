@@ -5,7 +5,7 @@ use twox_hash::XxHash3_128;
 use schemars::JsonSchema;
 
 /// The base configuration for a Mock Agent (without computed ID).
-#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.mock.AgentBase")]
 pub struct AgentBase {
     /// The upstream provider marker.

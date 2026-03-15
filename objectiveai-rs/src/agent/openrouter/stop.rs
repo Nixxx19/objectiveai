@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 ///
 /// When the model generates any of these sequences, it immediately
 /// stops producing further tokens.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
 #[schemars(rename = "agent.openrouter.Stop")]
 pub enum Stop {

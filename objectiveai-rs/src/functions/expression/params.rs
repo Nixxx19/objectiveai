@@ -91,7 +91,7 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 }
 
 /// Owned task output variants.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
 #[schemars(rename = "functions.expression.TaskOutputOwned")]
 pub enum TaskOutputOwned {
@@ -102,7 +102,7 @@ pub enum TaskOutputOwned {
     /// Multiple vectors of scores (from mapped tasks).
     Vectors(#[schemars(with = "Vec<Vec<f64>>")] Vec<Vec<rust_decimal::Decimal>>),
     /// An error occurred during execution.
-    Err(serde_json::Value),
+    Err(#[arbitrary(with = crate::arbitrary_util::arbitrary_json_value)] serde_json::Value),
 }
 
 impl ToStarlarkValue for TaskOutputOwned {

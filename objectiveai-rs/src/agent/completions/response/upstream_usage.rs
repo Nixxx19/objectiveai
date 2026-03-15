@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 ///
 /// This is the per-assistant-response usage yielded by upstream clients.
 /// It includes upstream-specific fields like `cost_multiplier` and `is_byok`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.response.UpstreamUsage")]
 pub struct UpstreamUsage {
     /// Number of tokens in the completion.

@@ -5,7 +5,7 @@ use twox_hash::XxHash3_128;
 use schemars::JsonSchema;
 
 /// The base configuration for a Claude Agent SDK Agent (without computed ID).
-#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.claude_agent_sdk.AgentBase")]
 pub struct AgentBase {
     /// The upstream provider marker.

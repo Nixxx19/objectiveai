@@ -9,7 +9,7 @@ use schemars::JsonSchema;
 /// Multiple chunks are received via Server-Sent Events and can be
 /// accumulated into a complete [`AgentCompletion`](response::unary::AgentCompletion)
 /// using the [`push`](Self::push) method.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.response.streaming.AgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     pub id: String,

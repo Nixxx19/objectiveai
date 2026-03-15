@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 use twox_hash::XxHash3_128;
 
 /// The base configuration for an OpenRouter Agent (without computed ID).
-#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.openrouter.AgentBase")]
 pub struct AgentBase {
     /// The upstream provider marker.
@@ -53,6 +53,7 @@ pub struct AgentBase {
     pub frequency_penalty: Option<f64>,
     /// Token ID to bias mapping (-100 to 100). Positive values increase likelihood.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_indexmap)]
     pub logit_bias: Option<IndexMap<String, i64>>,
     /// Maximum tokens in the completion.
     #[serde(skip_serializing_if = "Option::is_none")]

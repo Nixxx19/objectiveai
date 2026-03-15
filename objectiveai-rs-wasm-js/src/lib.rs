@@ -23,7 +23,28 @@
 //! - [`vectorResponseId`] - Compute content-addressed ID for a response option
 
 #![allow(non_snake_case)]
+use arbitrary::Arbitrary;
 use wasm_bindgen::prelude::*;
+
+fn seed_to_bytes(seed: JsValue) -> Vec<u8> {
+    use rand::prelude::*;
+    use std::hash::{Hash, Hasher};
+
+    let seed_val: u64 = if seed.is_undefined() || seed.is_null() {
+        rand::random()
+    } else {
+        // Hash any JsValue into a u64 seed via its debug representation
+        let repr = format!("{:?}", seed);
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        repr.hash(&mut hasher);
+        hasher.finish()
+    };
+
+    let mut rng = rand::rngs::StdRng::seed_from_u64(seed_val);
+    let mut bytes = vec![0u8; 4096];
+    rng.fill_bytes(&mut bytes);
+    bytes
+}
 
 /// Validates an Agent configuration and computes its content-addressed ID.
 ///
@@ -619,4 +640,64 @@ pub fn functionProfileComputationChunkToUnary(a: JsValue) -> Result<String, JsVa
         serde_wasm_bindgen::from_value(a)?;
     let unary: objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation = a.into();
     serde_json::to_string(&unary).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Generates a random `AgentCompletionChunk`. Optional seed for reproducibility.
+#[wasm_bindgen]
+pub fn generateAgentCompletionChunk(seed: JsValue) -> Result<String, JsValue> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::agent::completions::response::streaming::AgentCompletionChunk::arbitrary(&mut u)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    serde_json::to_string(&chunk).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Generates a random `VectorCompletionChunk`. Optional seed for reproducibility.
+#[wasm_bindgen]
+pub fn generateVectorCompletionChunk(seed: JsValue) -> Result<String, JsValue> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::vector::completions::response::streaming::VectorCompletionChunk::arbitrary(&mut u)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    serde_json::to_string(&chunk).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Generates a random `FunctionExecutionChunk`. Optional seed for reproducibility.
+#[wasm_bindgen]
+pub fn generateFunctionExecutionChunk(seed: JsValue) -> Result<String, JsValue> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk::arbitrary(&mut u)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    serde_json::to_string(&chunk).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Generates a random `FunctionInventionChunk`. Optional seed for reproducibility.
+#[wasm_bindgen]
+pub fn generateFunctionInventionChunk(seed: JsValue) -> Result<String, JsValue> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::functions::inventions::response::streaming::FunctionInventionChunk::arbitrary(&mut u)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    serde_json::to_string(&chunk).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Generates a random `FunctionInventionRecursiveChunk`. Optional seed for reproducibility.
+#[wasm_bindgen]
+pub fn generateFunctionInventionRecursiveChunk(seed: JsValue) -> Result<String, JsValue> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk::arbitrary(&mut u)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    serde_json::to_string(&chunk).map_err(|e| JsValue::from_str(&e.to_string()))
+}
+
+/// Generates a random `FunctionProfileComputationChunk`. Optional seed for reproducibility.
+#[wasm_bindgen]
+pub fn generateFunctionProfileComputationChunk(seed: JsValue) -> Result<String, JsValue> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk::arbitrary(&mut u)
+        .map_err(|e| JsValue::from_str(&e.to_string()))?;
+    serde_json::to_string(&chunk).map_err(|e| JsValue::from_str(&e.to_string()))
 }

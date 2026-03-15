@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.profiles.computations.response.FittingStats")]
 pub struct FittingStats {
     #[schemars(with = "f64")]

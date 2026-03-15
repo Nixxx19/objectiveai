@@ -5,7 +5,7 @@ use std::fmt;
 use schemars::JsonSchema;
 
 /// The remote source where a function or profile is hosted.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "snake_case")]
 #[schemars(rename = "functions.Remote")]
 pub enum Remote {

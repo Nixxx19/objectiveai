@@ -11,7 +11,7 @@ use starlark::values::{UnpackValue, Value as StarlarkValue};
 use schemars::JsonSchema;
 
 /// A tool message containing the result of a tool call.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.ToolMessage")]
 pub struct ToolMessage {
     /// The content of the tool response.
@@ -77,7 +77,7 @@ impl FromStarlarkValue for ToolMessage {
 }
 
 /// Expression variant of [`ToolMessage`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.ToolMessageExpression")]
 pub struct ToolMessageExpression {
     /// The content expression.

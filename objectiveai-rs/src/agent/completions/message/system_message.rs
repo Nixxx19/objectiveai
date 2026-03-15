@@ -11,7 +11,7 @@ use starlark::values::{UnpackValue, Value as StarlarkValue};
 use schemars::JsonSchema;
 
 /// A system message setting context or instructions.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.SystemMessage")]
 pub struct SystemMessage {
     /// The message content.
@@ -83,7 +83,7 @@ impl FromStarlarkValue for SystemMessage {
 }
 
 /// Expression variant of [`SystemMessage`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.SystemMessageExpression")]
 pub struct SystemMessageExpression {
     /// The message content expression.

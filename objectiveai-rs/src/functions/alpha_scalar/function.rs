@@ -2,7 +2,7 @@ use crate::functions;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_scalar.RemoteFunction")]
 pub enum RemoteFunction {
@@ -57,7 +57,7 @@ impl RemoteFunction {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.alpha_scalar.InlineFunction")]
 pub enum InlineFunction {

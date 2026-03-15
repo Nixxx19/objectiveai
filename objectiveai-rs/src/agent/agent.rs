@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 ///
 /// This is an untagged enum that dispatches to the per-upstream AgentBase.
 /// Deserialization tries each variant in order until one matches.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
 #[schemars(rename = "agent.AgentBase")]
 pub enum AgentBase {
@@ -197,7 +197,7 @@ impl TryFrom<AgentBase> for Agent {
 ///
 /// Used to specify how many instances of an agent to include in an ensemble,
 /// along with fallback agents to try if the primary fails.
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.WithFallbacksAndCount.{T}")]
 pub struct WithFallbacksAndCount<T> {
     /// Number of instances of this agent in the ensemble. Defaults to 1.

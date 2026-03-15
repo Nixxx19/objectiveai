@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 ///
 /// Contains a list of agent configurations that will be validated, deduplicated,
 /// and sorted when converting to [`Ensemble`].
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "ensemble.EnsembleBase")]
 pub struct EnsembleBase {
     /// The LLMs in this ensemble, with optional counts and fallbacks.

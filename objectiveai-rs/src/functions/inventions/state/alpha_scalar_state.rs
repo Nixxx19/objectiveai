@@ -2,7 +2,7 @@ use crate::functions;
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.inventions.state.AlphaScalarState")]
 pub struct AlphaScalarState {
     #[serde(flatten)]

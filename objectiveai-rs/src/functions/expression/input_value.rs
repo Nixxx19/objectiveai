@@ -487,6 +487,48 @@ impl super::FromStarlarkValue for InputValueExpression {
     }
 }
 
+impl<'a> arbitrary::Arbitrary<'a> for InputValue {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+        match u.int_in_range(0..=6)? {
+            0 => Ok(InputValue::RichContentPart(u.arbitrary()?)),
+            1 => {
+                let len = u.int_in_range(0..=4)?;
+                let mut map = IndexMap::with_capacity(len);
+                for _ in 0..len {
+                    map.insert(u.arbitrary::<String>()?, u.arbitrary()?);
+                }
+                Ok(InputValue::Object(map))
+            }
+            2 => Ok(InputValue::Array(u.arbitrary()?)),
+            3 => Ok(InputValue::String(u.arbitrary()?)),
+            4 => Ok(InputValue::Integer(u.arbitrary()?)),
+            5 => Ok(InputValue::Number(u.arbitrary()?)),
+            _ => Ok(InputValue::Boolean(u.arbitrary()?)),
+        }
+    }
+}
+
+impl<'a> arbitrary::Arbitrary<'a> for InputValueExpression {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+        match u.int_in_range(0..=6)? {
+            0 => Ok(InputValueExpression::RichContentPart(u.arbitrary()?)),
+            1 => {
+                let len = u.int_in_range(0..=4)?;
+                let mut map = IndexMap::with_capacity(len);
+                for _ in 0..len {
+                    map.insert(u.arbitrary::<String>()?, u.arbitrary()?);
+                }
+                Ok(InputValueExpression::Object(map))
+            }
+            2 => Ok(InputValueExpression::Array(u.arbitrary()?)),
+            3 => Ok(InputValueExpression::String(u.arbitrary()?)),
+            4 => Ok(InputValueExpression::Integer(u.arbitrary()?)),
+            5 => Ok(InputValueExpression::Number(u.arbitrary()?)),
+            _ => Ok(InputValueExpression::Boolean(u.arbitrary()?)),
+        }
+    }
+}
+
 impl super::FromSpecial for InputValue {
     fn from_special(
         special: &super::Special,

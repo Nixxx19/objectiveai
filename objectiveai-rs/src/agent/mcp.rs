@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 
 /// An MCP server that the agent can connect to.
 #[derive(
-    Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, JsonSchema,
+    Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord, JsonSchema, arbitrary::Arbitrary,
 )]
 #[schemars(rename = "agent.McpServer")]
 pub struct McpServer {

@@ -90,7 +90,7 @@ pub trait InventionState: Clone + Send + 'static {
     );
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.inventions.state.State")]
 pub enum State {
@@ -241,7 +241,7 @@ impl State {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.inventions.state.ParamsState")]
 pub enum ParamsState {

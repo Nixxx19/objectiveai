@@ -1202,6 +1202,18 @@ async fn main() {
                 }
             }),
         )
+        // Error - create
+        .route(
+            "/error",
+            axum::routing::post({
+                let error_client = Arc::new(objectiveai_api::error::Client::new());
+                move |Json(body): Json<
+                    objectiveai::error::request::ErrorCreateParams,
+                >| {
+                    create_error(error_client, body)
+                }
+            }),
+        )
         // CORS
         .layer(
             tower_http::cors::CorsLayer::new()
@@ -2312,6 +2324,42 @@ async fn create_function_invention_recursive(
         {
             Ok(r) => Json(r).into_response(),
             Err(e) => ResponseError::from(&e).into_response(),
+        }
+    }
+}
+
+// Error
+
+async fn create_error(
+    client: Arc<objectiveai_api::error::Client>,
+    body: objectiveai::error::request::ErrorCreateParams,
+) -> axum::response::Response {
+    if body.stream.unwrap_or(false) {
+        match client.create_streaming(&body) {
+            Ok(stream) => Sse::new(
+                stream
+                    .map(|result| {
+                        Ok::<Event, Infallible>(
+                            Event::default().data(
+                                match result {
+                                    Ok(chunk) => serde_json::to_string(&chunk),
+                                    Err(e) => serde_json::to_string(&e),
+                                }
+                                .unwrap(),
+                            ),
+                        )
+                    })
+                    .chain(StreamOnce::new(
+                        Ok(Event::default().data("[DONE]")),
+                    )),
+            )
+            .into_response(),
+            Err(e) => e.into_response(),
+        }
+    } else {
+        match client.create_unary(&body) {
+            Ok(r) => Json(r).into_response(),
+            Err(e) => e.into_response(),
         }
     }
 }

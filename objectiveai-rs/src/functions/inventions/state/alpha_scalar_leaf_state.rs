@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.inventions.state.AlphaScalarLeafState")]
 pub struct AlphaScalarLeafState {
     #[serde(flatten)]

@@ -14,7 +14,7 @@ use starlark::values::{
 };
 
 /// Rich content for user/assistant messages (supports multimodal input).
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.RichContent")]
 pub enum RichContent {
@@ -136,7 +136,7 @@ impl FromStarlarkValue for RichContent {
 }
 
 /// Expression variant of [`RichContent`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
 #[schemars(rename = "agent.completions.message.RichContentExpression")]
 pub enum RichContentExpression {
@@ -204,7 +204,7 @@ impl FromStarlarkValue for RichContentExpression {
 }
 
 /// A part of rich content.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.RichContentPart")]
 pub enum RichContentPart {
@@ -384,7 +384,7 @@ impl FromStarlarkValue for RichContentPart {
 }
 
 /// Expression variant of [`RichContentPart`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(tag = "type", rename_all = "snake_case")]
 #[schemars(rename = "agent.completions.message.RichContentPartExpression")]
 pub enum RichContentPartExpression {
@@ -517,7 +517,7 @@ impl FromStarlarkValue for RichContentPartExpression {
 }
 
 /// An image URL for multimodal input.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.ImageUrl")]
 pub struct ImageUrl {
     /// The URL of the image (can be a data URL or HTTP URL).
@@ -597,7 +597,7 @@ impl FromStarlarkValue for ImageUrl {
 }
 
 /// Detail level for image processing.
-#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.ImageUrlDetail")]
 pub enum ImageUrlDetail {
     /// Let the model decide the detail level.
@@ -650,7 +650,7 @@ impl FromStarlarkValue for ImageUrlDetail {
 }
 
 /// Audio input for multimodal messages.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.InputAudio")]
 pub struct InputAudio {
     /// Base64-encoded audio data.
@@ -716,7 +716,7 @@ impl FromStarlarkValue for InputAudio {
 }
 
 /// A video URL for multimodal input.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.VideoUrl")]
 pub struct VideoUrl {
     /// The URL of the video.
@@ -777,7 +777,7 @@ impl FromStarlarkValue for VideoUrl {
 }
 
 /// A file attachment for multimodal input.
-#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Hash, PartialEq, Eq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.File")]
 pub struct File {
     /// Base64-encoded file data.

@@ -16,7 +16,7 @@ pub mod scalar_function_input_value_expression {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.alpha_vector.expression.VectorFunctionInputValueExpression")]
 pub struct VectorFunctionInputValueExpression {
     #[serde(skip_serializing_if = "Option::is_none")]

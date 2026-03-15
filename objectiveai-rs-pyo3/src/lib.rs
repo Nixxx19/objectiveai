@@ -4,6 +4,7 @@
 //! Python instead of JavaScript. It uses `pythonize` for zero-copy conversion
 //! between Python dicts and Rust serde types.
 
+use arbitrary::Arbitrary;
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 use pythonize::{depythonize, pythonize};
@@ -487,6 +488,94 @@ fn function_profile_computation_chunk_to_unary(
 }
 
 // ---------------------------------------------------------------------------
+// Seed → bytes helper
+// ---------------------------------------------------------------------------
+
+fn seed_to_bytes(seed: Option<i64>) -> Vec<u8> {
+    use rand::prelude::*;
+
+    let seed_val: u64 = match seed {
+        Some(s) => s as u64,
+        None => rand::random(),
+    };
+
+    let mut rng = rand::rngs::StdRng::seed_from_u64(seed_val);
+    let mut bytes = vec![0u8; 4096];
+    rng.fill_bytes(&mut bytes);
+    bytes
+}
+
+// ---------------------------------------------------------------------------
+// Generate arbitrary chunks
+// ---------------------------------------------------------------------------
+
+/// Generates a random AgentCompletionChunk. Optional seed for reproducibility.
+#[pyfunction]
+#[pyo3(signature = (seed=None))]
+fn generate_agent_completion_chunk(py: Python<'_>, seed: Option<i64>) -> PyResult<Py<PyAny>> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::agent::completions::response::streaming::AgentCompletionChunk::arbitrary(&mut u)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    to_py(py, &chunk)
+}
+
+/// Generates a random VectorCompletionChunk. Optional seed for reproducibility.
+#[pyfunction]
+#[pyo3(signature = (seed=None))]
+fn generate_vector_completion_chunk(py: Python<'_>, seed: Option<i64>) -> PyResult<Py<PyAny>> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::vector::completions::response::streaming::VectorCompletionChunk::arbitrary(&mut u)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    to_py(py, &chunk)
+}
+
+/// Generates a random FunctionExecutionChunk. Optional seed for reproducibility.
+#[pyfunction]
+#[pyo3(signature = (seed=None))]
+fn generate_function_execution_chunk(py: Python<'_>, seed: Option<i64>) -> PyResult<Py<PyAny>> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk::arbitrary(&mut u)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    to_py(py, &chunk)
+}
+
+/// Generates a random FunctionInventionChunk. Optional seed for reproducibility.
+#[pyfunction]
+#[pyo3(signature = (seed=None))]
+fn generate_function_invention_chunk(py: Python<'_>, seed: Option<i64>) -> PyResult<Py<PyAny>> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::functions::inventions::response::streaming::FunctionInventionChunk::arbitrary(&mut u)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    to_py(py, &chunk)
+}
+
+/// Generates a random FunctionInventionRecursiveChunk. Optional seed for reproducibility.
+#[pyfunction]
+#[pyo3(signature = (seed=None))]
+fn generate_function_invention_recursive_chunk(py: Python<'_>, seed: Option<i64>) -> PyResult<Py<PyAny>> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk::arbitrary(&mut u)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    to_py(py, &chunk)
+}
+
+/// Generates a random FunctionProfileComputationChunk. Optional seed for reproducibility.
+#[pyfunction]
+#[pyo3(signature = (seed=None))]
+fn generate_function_profile_computation_chunk(py: Python<'_>, seed: Option<i64>) -> PyResult<Py<PyAny>> {
+    let bytes = seed_to_bytes(seed);
+    let mut u = arbitrary::Unstructured::new(&bytes);
+    let chunk = objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk::arbitrary(&mut u)
+        .map_err(|e| PyValueError::new_err(e.to_string()))?;
+    to_py(py, &chunk)
+}
+
+// ---------------------------------------------------------------------------
 // Module
 // ---------------------------------------------------------------------------
 
@@ -540,6 +629,14 @@ fn objectiveai_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(function_invention_chunk_to_unary, m)?)?;
     m.add_function(wrap_pyfunction!(function_invention_recursive_chunk_to_unary, m)?)?;
     m.add_function(wrap_pyfunction!(function_profile_computation_chunk_to_unary, m)?)?;
+
+    // Generate arbitrary chunks
+    m.add_function(wrap_pyfunction!(generate_agent_completion_chunk, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_vector_completion_chunk, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_function_execution_chunk, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_function_invention_chunk, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_function_invention_recursive_chunk, m)?)?;
+    m.add_function(wrap_pyfunction!(generate_function_profile_computation_chunk, m)?)?;
 
     Ok(())
 }

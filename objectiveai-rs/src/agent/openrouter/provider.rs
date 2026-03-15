@@ -11,7 +11,7 @@ use schemars::JsonSchema;
 ///
 /// Controls which providers are used and in what order when routing
 /// requests to upstream model hosts.
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Hash, JsonSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Hash, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.openrouter.Provider")]
 pub struct Provider {
     /// Whether to allow fallback to other providers if preferred ones fail.
@@ -110,7 +110,7 @@ impl Provider {
 ///
 /// Quantization reduces model precision to decrease memory usage and
 /// increase inference speed, potentially at the cost of output quality.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "snake_case")]
 #[schemars(rename = "agent.openrouter.ProviderQuantization")]
 pub enum ProviderQuantization {

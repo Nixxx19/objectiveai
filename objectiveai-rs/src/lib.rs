@@ -31,6 +31,7 @@
 //! - [`HttpError`] - HTTP error types
 
 pub mod agent;
+pub mod arbitrary_util;
 pub mod auth;
 pub mod ensemble;
 pub mod error;
@@ -162,6 +163,8 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(ensemble::response::GetEnsemble),
         schemars::schema_for!(ensemble::response::UsageEnsemble),
         schemars::schema_for!(error::ResponseError),
+        schemars::schema_for!(error::request::ErrorCreateParams),
+        schemars::schema_for!(error::response::ErrorResponse),
         schemars::schema_for!(functions::alpha_scalar::RemoteFunction),
         schemars::schema_for!(functions::alpha_scalar::InlineFunction),
         schemars::schema_for!(functions::alpha_scalar::BranchTaskExpression),

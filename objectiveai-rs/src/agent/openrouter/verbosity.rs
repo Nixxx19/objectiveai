@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 ///
 /// This setting hints to the model how detailed its responses should be.
 /// Not all models support this parameter.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.openrouter.Verbosity")]
 pub enum Verbosity {
     /// Minimal output, concise responses.

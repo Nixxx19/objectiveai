@@ -11,7 +11,7 @@ use schemars::JsonSchema;
 ///
 /// **Note:** The `max_tokens`, `effort`, and `summary_verbosity` fields are
 /// only supported by some models. Unsupported fields are silently ignored.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.openrouter.Reasoning")]
 pub struct Reasoning {
     /// Whether reasoning is enabled. Defaults to `true` if other fields are set.
@@ -96,7 +96,7 @@ impl Reasoning {
 /// The level of effort the model should put into reasoning.
 ///
 /// Only supported by some models.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "snake_case")]
 #[schemars(rename = "agent.openrouter.ReasoningEffort")]
 pub enum ReasoningEffort {
@@ -117,7 +117,7 @@ pub enum ReasoningEffort {
 /// Verbosity of the reasoning summary included in responses.
 ///
 /// Only supported by some models.
-#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, Copy, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "snake_case")]
 #[schemars(rename = "agent.openrouter.ReasoningSummaryVerbosity")]
 pub enum ReasoningSummaryVerbosity {

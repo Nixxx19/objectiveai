@@ -2,7 +2,7 @@ use crate::{agent, error};
 use serde::{Deserialize, Serialize};
 use schemars::JsonSchema;
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.executions.response.streaming.ReasoningSummaryChunk")]
 pub struct ReasoningSummaryChunk {
     #[serde(flatten)]

@@ -8,7 +8,7 @@ use schemars::JsonSchema;
 ///
 /// This is the "primary" usage type that aggregates across all upstream
 /// assistant responses within a single agent completion.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.response.Usage")]
 pub struct Usage {
     /// Total tokens generated across all assistant responses.

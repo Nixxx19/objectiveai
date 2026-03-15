@@ -16,6 +16,7 @@
 //! Functions that return `Option` (e.g., `validate_function_input`) use a separate
 //! convention documented on each function.
 
+use arbitrary::Arbitrary;
 use std::slice;
 
 // ---------------------------------------------------------------------------
@@ -850,6 +851,143 @@ pub unsafe extern "C" fn objectiveai_function_profile_computation_chunk_to_unary
             let unary: objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation =
                 a.into();
             to_json(&unary)
+        })
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Seed → bytes helper
+// ---------------------------------------------------------------------------
+
+fn seed_to_bytes(has_seed: i32, seed: i64) -> Vec<u8> {
+    use rand::prelude::*;
+
+    let seed_val: u64 = if has_seed != 0 {
+        seed as u64
+    } else {
+        rand::random()
+    };
+
+    let mut rng = rand::rngs::StdRng::seed_from_u64(seed_val);
+    let mut bytes = vec![0u8; 4096];
+    rng.fill_bytes(&mut bytes);
+    bytes
+}
+
+// ---------------------------------------------------------------------------
+// Generate arbitrary chunks
+// ---------------------------------------------------------------------------
+
+/// Generates a random AgentCompletionChunk from a seed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_generate_agent_completion_chunk(
+    has_seed: i32,
+    seed: i64,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let bytes = seed_to_bytes(has_seed, seed);
+            let mut u = arbitrary::Unstructured::new(&bytes);
+            let chunk = objectiveai::agent::completions::response::streaming::AgentCompletionChunk::arbitrary(&mut u)
+                .map_err(|e| e.to_string())?;
+            to_json(&chunk)
+        })
+    }
+}
+
+/// Generates a random VectorCompletionChunk from a seed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_generate_vector_completion_chunk(
+    has_seed: i32,
+    seed: i64,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let bytes = seed_to_bytes(has_seed, seed);
+            let mut u = arbitrary::Unstructured::new(&bytes);
+            let chunk = objectiveai::vector::completions::response::streaming::VectorCompletionChunk::arbitrary(&mut u)
+                .map_err(|e| e.to_string())?;
+            to_json(&chunk)
+        })
+    }
+}
+
+/// Generates a random FunctionExecutionChunk from a seed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_generate_function_execution_chunk(
+    has_seed: i32,
+    seed: i64,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let bytes = seed_to_bytes(has_seed, seed);
+            let mut u = arbitrary::Unstructured::new(&bytes);
+            let chunk = objectiveai::functions::executions::response::streaming::FunctionExecutionChunk::arbitrary(&mut u)
+                .map_err(|e| e.to_string())?;
+            to_json(&chunk)
+        })
+    }
+}
+
+/// Generates a random FunctionInventionChunk from a seed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_generate_function_invention_chunk(
+    has_seed: i32,
+    seed: i64,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let bytes = seed_to_bytes(has_seed, seed);
+            let mut u = arbitrary::Unstructured::new(&bytes);
+            let chunk = objectiveai::functions::inventions::response::streaming::FunctionInventionChunk::arbitrary(&mut u)
+                .map_err(|e| e.to_string())?;
+            to_json(&chunk)
+        })
+    }
+}
+
+/// Generates a random FunctionInventionRecursiveChunk from a seed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_generate_function_invention_recursive_chunk(
+    has_seed: i32,
+    seed: i64,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let bytes = seed_to_bytes(has_seed, seed);
+            let mut u = arbitrary::Unstructured::new(&bytes);
+            let chunk = objectiveai::functions::inventions::recursive::response::streaming::FunctionInventionRecursiveChunk::arbitrary(&mut u)
+                .map_err(|e| e.to_string())?;
+            to_json(&chunk)
+        })
+    }
+}
+
+/// Generates a random FunctionProfileComputationChunk from a seed.
+#[unsafe(no_mangle)]
+pub unsafe extern "C" fn objectiveai_generate_function_profile_computation_chunk(
+    has_seed: i32,
+    seed: i64,
+    json_out: *mut *mut u8,
+    json_out_len: *mut usize,
+) -> i32 {
+    unsafe {
+        run(json_out, json_out_len, || {
+            let bytes = seed_to_bytes(has_seed, seed);
+            let mut u = arbitrary::Unstructured::new(&bytes);
+            let chunk = objectiveai::functions::profiles::computations::response::streaming::FunctionProfileComputationChunk::arbitrary(&mut u)
+                .map_err(|e| e.to_string())?;
+            to_json(&chunk)
         })
     }
 }

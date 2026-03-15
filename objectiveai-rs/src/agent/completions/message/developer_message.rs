@@ -11,7 +11,7 @@ use starlark::values::{UnpackValue, Value as StarlarkValue};
 use schemars::JsonSchema;
 
 /// A developer message.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.DeveloperMessage")]
 pub struct DeveloperMessage {
     /// The message content.
@@ -83,7 +83,7 @@ impl FromStarlarkValue for DeveloperMessage {
 }
 
 /// Expression variant of [`DeveloperMessage`] for dynamic content.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "agent.completions.message.DeveloperMessageExpression")]
 pub struct DeveloperMessageExpression {
     /// The message content expression.
