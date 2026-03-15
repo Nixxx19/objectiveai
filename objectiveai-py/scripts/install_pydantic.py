@@ -287,15 +287,6 @@ def _annotate_primitive(base: str, schema: dict) -> str:
     if "maximum" in schema:
         field_args.append(f"le={schema['maximum']!r}")
 
-    extra: dict = {}
-    fmt = schema.get("format")
-    if fmt and fmt not in ("date-time", "uuid"):
-        extra["format"] = fmt
-    if "pattern" in schema:
-        extra["pattern"] = schema["pattern"]
-    if extra:
-        field_args.append(f"json_schema_extra={extra!r}")
-
     if field_args:
         return f"Annotated[{base}, Field({', '.join(field_args)})]"
     return base
@@ -311,8 +302,6 @@ def _convert_single_type(
             return "datetime"
         if fmt == "uuid":
             return "UUID"
-        if annotate and ("format" in schema or "pattern" in schema):
-            return _annotate_primitive("str", schema)
         return "str"
     if type_ == "integer":
         if annotate and ("minimum" in schema or "maximum" in schema):
@@ -684,18 +673,9 @@ def _extract_field_metadata(prop_schema: dict) -> dict:
     if "maximum" in prop_schema:
         kwargs["le"] = prop_schema["maximum"]
 
-    # Pattern
-    type_ = prop_schema.get("type")
-    if "pattern" in prop_schema:
-        if type_ == "string":
-            kwargs["pattern"] = prop_schema["pattern"]
-        else:
-            kwargs.setdefault("json_schema_extra", {})["pattern"] = prop_schema["pattern"]
-
-    # Format — skip formats handled by native Python types
-    fmt = prop_schema.get("format")
-    if fmt and fmt not in ("date-time", "uuid"):
-        kwargs.setdefault("json_schema_extra", {})["format"] = fmt
+    # Pattern (string properties only)
+    if "pattern" in prop_schema and prop_schema.get("type") == "string":
+        kwargs["pattern"] = prop_schema["pattern"]
 
     # additionalProperties: true (explicit, distinct from absent)
     if prop_schema.get("additionalProperties") is True:
