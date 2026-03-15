@@ -1078,7 +1078,7 @@ where
                             FtpStreamChunk::FunctionExecutionChunk(chunk) => {
                                 // check for output
                                 if let Some(ref output) = chunk.inner.output {
-                                    if let objectiveai::functions::expression::TaskOutputOwned::Vector(scores) = output {
+                                    if let objectiveai::functions::expression::TaskOutputOwned::Vector(scores) = &output.output {
                                         pool_outputs.insert(pool_idx, scores.clone());
                                     }
                                 }
@@ -1447,7 +1447,7 @@ where
                         None
                     },
                     reasoning: None,
-                    output: Some(objectiveai::functions::expression::TaskOutputOwned::Vector(final_output)),
+                    output: Some(objectiveai::functions::executions::response::Output { output: objectiveai::functions::expression::TaskOutputOwned::Vector(final_output) }),
                     error: subsequent_round_error,
                     retry_token: Some(first_round_retry_token.to_string()),
                     created,
@@ -1623,7 +1623,7 @@ where
                         agent.clone(),
                         agents.clone(),
                         description,
-                        final_chunk.output.clone().expect("missing output"),
+                        final_chunk.output.clone().expect("missing output").output,
                         confidence_responses,
                     ).await;
 
@@ -2405,7 +2405,7 @@ where
                             None
                         },
                         reasoning: None,
-                        output: Some(output.clone()),
+                        output: Some(objectiveai::functions::executions::response::Output { output: output.clone() }),
                         error: output_error,
                         retry_token: Some(retry_token.to_string()),
                         created,

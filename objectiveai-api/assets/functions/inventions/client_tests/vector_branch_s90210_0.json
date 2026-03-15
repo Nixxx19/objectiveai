@@ -313,7 +313,7 @@
         {
           "role": "tool",
           "index": 12,
-          "content": "{\n  \"title\": \"functions.expression.ObjectInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"object\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.ObjectInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"object\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_7067066980968149662"
         },
         {
@@ -426,7 +426,7 @@
         {
           "role": "tool",
           "index": 18,
-          "content": "{\n  \"title\": \"agent.completions.message.InputAudio\",\n  \"description\": \"Audio input for multimodal messages.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"data\": {\n      \"description\": \"Base64-encoded audio data.\",\n      \"type\": \"string\"\n    },\n    \"format\": {\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\n      \"type\": \"string\"\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"agent.completions.message.InputAudio\",\r\n  \"description\": \"Audio input for multimodal messages.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"data\": {\r\n      \"description\": \"Base64-encoded audio data.\",\r\n      \"type\": \"string\"\r\n    },\r\n    \"format\": {\r\n      \"description\": \"The audio format (e.g., \\\"wav\\\", \\\"mp3\\\").\",\r\n      \"type\": \"string\"\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_12388011844120720122"
         },
         {
@@ -614,7 +614,7 @@
         {
           "role": "tool",
           "index": 28,
-          "content": "{\n  \"title\": \"functions.alpha_vector.expression.VectorFunctionInputValueExpression\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"context\": {\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.Expression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"items\": {\n      \"$ref\": \"functions.expression.Expression\"\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.alpha_vector.expression.VectorFunctionInputValueExpression\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"context\": {\r\n      \"anyOf\": [\r\n        {\r\n          \"$ref\": \"functions.expression.Expression\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"items\": {\r\n      \"$ref\": \"functions.expression.Expression\"\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_13280526854600151621"
         },
         {
@@ -689,7 +689,7 @@
         {
           "role": "tool",
           "index": 32,
-          "content": "{\n  \"title\": \"functions.expression.AnyOfInputSchema\",\n  \"description\": \"Schema for a union of possible types - input must match at least one.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"anyOf\": {\n      \"description\": \"The possible schemas that the input can match.\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"functions.expression.InputSchema\"\n      }\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.AnyOfInputSchema\",\r\n  \"description\": \"Schema for a union of possible types - input must match at least one.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"anyOf\": {\r\n      \"description\": \"The possible schemas that the input can match.\",\r\n      \"type\": \"array\",\r\n      \"items\": {\r\n        \"$ref\": \"functions.expression.InputSchema\"\r\n      }\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_13316849045236940122"
         },
         {
@@ -726,7 +726,7 @@
         {
           "role": "tool",
           "index": 34,
-          "content": "{\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"array\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"array\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_6632811148858564684"
         },
         {
@@ -840,7 +840,7 @@
         {
           "role": "tool",
           "index": 40,
-          "content": "{\n  \"title\": \"functions.expression.StringInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"string\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"string\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_3536687710645556311"
         },
         {
@@ -877,7 +877,7 @@
         {
           "role": "tool",
           "index": 42,
-          "content": "{\n  \"title\": \"agent.completions.message.File\",\n  \"description\": \"A file attachment for multimodal input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"file_data\": {\n      \"description\": \"Base64-encoded file data.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"file_id\": {\n      \"description\": \"The ID of a previously uploaded file.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"file_url\": {\n      \"description\": \"A URL to fetch the file from.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"filename\": {\n      \"description\": \"The filename for display purposes.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"agent.completions.message.File\",\r\n  \"description\": \"A file attachment for multimodal input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"file_data\": {\r\n      \"description\": \"Base64-encoded file data.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"file_id\": {\r\n      \"description\": \"The ID of a previously uploaded file.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"file_url\": {\r\n      \"description\": \"A URL to fetch the file from.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"filename\": {\r\n      \"description\": \"The filename for display purposes.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_44919182003333330"
         },
         {
@@ -991,7 +991,7 @@
         {
           "role": "tool",
           "index": 48,
-          "content": "{\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"array\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"array\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_2006297260674543214"
         },
         {
@@ -1029,7 +1029,7 @@
         {
           "role": "tool",
           "index": 50,
-          "content": "{\n  \"title\": \"functions.expression.StringInputSchema\",\n  \"description\": \"Schema for a string input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the string.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"enum\": {\n      \"description\": \"If provided, the string must be one of these values.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchema\",\r\n  \"description\": \"Schema for a string input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the string.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"enum\": {\r\n      \"description\": \"If provided, the string must be one of these values.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"array\",\r\n          \"items\": {\r\n            \"type\": \"string\"\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_7335318502335224520"
         },
         {
@@ -1066,7 +1066,7 @@
         {
           "role": "tool",
           "index": 52,
-          "content": "{\n  \"title\": \"functions.expression.ImageInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"image\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"image\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_1116043794478689189"
         },
         {
@@ -1142,7 +1142,7 @@
         {
           "role": "tool",
           "index": 56,
-          "content": "{\n  \"title\": \"functions.expression.NumberInputSchema\",\n  \"description\": \"Schema for a floating-point number input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the number.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"maximum\": {\n      \"description\": \"Maximum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"number\",\n          \"minimum\": -3.4028234663852886e+38,\n          \"maximum\": 3.4028234663852886e+38\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minimum\": {\n      \"description\": \"Minimum allowed value (inclusive).\",\n      \"anyOf\": [\n        {\n          \"type\": \"number\",\n          \"minimum\": -3.4028234663852886e+38,\n          \"maximum\": 3.4028234663852886e+38\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.NumberInputSchemaType\"\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.NumberInputSchema\",\r\n  \"description\": \"Schema for a floating-point number input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the number.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"maximum\": {\r\n      \"description\": \"Maximum allowed value (inclusive).\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"number\",\r\n          \"minimum\": -3.4028234663852886e+38,\r\n          \"maximum\": 3.4028234663852886e+38\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"minimum\": {\r\n      \"description\": \"Minimum allowed value (inclusive).\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"number\",\r\n          \"minimum\": -3.4028234663852886e+38,\r\n          \"maximum\": 3.4028234663852886e+38\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.NumberInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_6616792751906773788"
         },
         {

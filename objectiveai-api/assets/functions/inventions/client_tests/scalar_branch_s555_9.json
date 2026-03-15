@@ -351,7 +351,7 @@
         {
           "role": "tool",
           "index": 14,
-          "content": "{\n  \"title\": \"functions.expression.StringInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"string\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.StringInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"string\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_14770131115488796039"
         },
         {
@@ -389,7 +389,7 @@
         {
           "role": "tool",
           "index": 16,
-          "content": "{\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"auto\"\n      ]\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"low\"\n      ]\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"high\"\n      ]\n    }\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\r\n  \"description\": \"Detail level for image processing.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Let the model decide the detail level.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"auto\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Low detail mode (faster, less tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"low\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"High detail mode (more accurate, more tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"high\"\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_17893930366363887341"
         },
         {
@@ -541,7 +541,7 @@
         {
           "role": "tool",
           "index": 24,
-          "content": "{\n  \"title\": \"functions.expression.AnyOfInputSchema\",\n  \"description\": \"Schema for a union of possible types - input must match at least one.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"anyOf\": {\n      \"description\": \"The possible schemas that the input can match.\",\n      \"type\": \"array\",\n      \"items\": {\n        \"$ref\": \"functions.expression.InputSchema\"\n      }\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.AnyOfInputSchema\",\r\n  \"description\": \"Schema for a union of possible types - input must match at least one.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"anyOf\": {\r\n      \"description\": \"The possible schemas that the input can match.\",\r\n      \"type\": \"array\",\r\n      \"items\": {\r\n        \"$ref\": \"functions.expression.InputSchema\"\r\n      }\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_17649178493608111882"
         },
         {
@@ -616,7 +616,7 @@
         {
           "role": "tool",
           "index": 28,
-          "content": "{\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"array\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"array\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_7247886240206892768"
         },
         {
@@ -729,7 +729,7 @@
         {
           "role": "tool",
           "index": 34,
-          "content": "{\n  \"title\": \"functions.expression.InputSchema\",\n  \"description\": \"Schema for validating Function input.\\n\\nDefines the expected structure and constraints for input data.\\nUsed by remote Functions to document and validate their inputs.\",\n  \"anyOf\": [\n    {\n      \"description\": \"A union of schemas - input must match at least one.\",\n      \"$ref\": \"functions.expression.AnyOfInputSchema\"\n    },\n    {\n      \"description\": \"An object with named properties.\",\n      \"$ref\": \"functions.expression.ObjectInputSchema\"\n    },\n    {\n      \"description\": \"An array of items.\",\n      \"$ref\": \"functions.expression.ArrayInputSchema\"\n    },\n    {\n      \"description\": \"A string value.\",\n      \"$ref\": \"functions.expression.StringInputSchema\"\n    },\n    {\n      \"description\": \"An integer value.\",\n      \"$ref\": \"functions.expression.IntegerInputSchema\"\n    },\n    {\n      \"description\": \"A floating-point number.\",\n      \"$ref\": \"functions.expression.NumberInputSchema\"\n    },\n    {\n      \"description\": \"A boolean value.\",\n      \"$ref\": \"functions.expression.BooleanInputSchema\"\n    },\n    {\n      \"description\": \"An image (URL or base64).\",\n      \"$ref\": \"functions.expression.ImageInputSchema\"\n    },\n    {\n      \"description\": \"Audio content.\",\n      \"$ref\": \"functions.expression.AudioInputSchema\"\n    },\n    {\n      \"description\": \"Video content.\",\n      \"$ref\": \"functions.expression.VideoInputSchema\"\n    },\n    {\n      \"description\": \"A file.\",\n      \"$ref\": \"functions.expression.FileInputSchema\"\n    }\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.InputSchema\",\r\n  \"description\": \"Schema for validating Function input.\\n\\nDefines the expected structure and constraints for input data.\\nUsed by remote Functions to document and validate their inputs.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"A union of schemas - input must match at least one.\",\r\n      \"$ref\": \"functions.expression.AnyOfInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"An object with named properties.\",\r\n      \"$ref\": \"functions.expression.ObjectInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"An array of items.\",\r\n      \"$ref\": \"functions.expression.ArrayInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"A string value.\",\r\n      \"$ref\": \"functions.expression.StringInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"An integer value.\",\r\n      \"$ref\": \"functions.expression.IntegerInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"A floating-point number.\",\r\n      \"$ref\": \"functions.expression.NumberInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"A boolean value.\",\r\n      \"$ref\": \"functions.expression.BooleanInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"An image (URL or base64).\",\r\n      \"$ref\": \"functions.expression.ImageInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"Audio content.\",\r\n      \"$ref\": \"functions.expression.AudioInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"Video content.\",\r\n      \"$ref\": \"functions.expression.VideoInputSchema\"\r\n    },\r\n    {\r\n      \"description\": \"A file.\",\r\n      \"$ref\": \"functions.expression.FileInputSchema\"\r\n    }\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_8011979557507381070"
         },
         {
@@ -843,7 +843,7 @@
         {
           "role": "tool",
           "index": 40,
-          "content": "{\n  \"title\": \"functions.expression.BooleanInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"boolean\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.BooleanInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"boolean\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_17539804272090916798"
         },
         {

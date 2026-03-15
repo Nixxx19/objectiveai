@@ -351,7 +351,7 @@
             {
               "role": "tool",
               "index": 15,
-              "content": "{\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\n  \"description\": \"Detail level for image processing.\",\n  \"anyOf\": [\n    {\n      \"description\": \"Let the model decide the detail level.\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"auto\"\n      ]\n    },\n    {\n      \"description\": \"Low detail mode (faster, less tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"low\"\n      ]\n    },\n    {\n      \"description\": \"High detail mode (more accurate, more tokens).\",\n      \"type\": \"string\",\n      \"enum\": [\n        \"high\"\n      ]\n    }\n  ]\n}\n",
+              "content": "{\r\n  \"title\": \"agent.completions.message.ImageUrlDetail\",\r\n  \"description\": \"Detail level for image processing.\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"Let the model decide the detail level.\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"auto\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"Low detail mode (faster, less tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"low\"\r\n      ]\r\n    },\r\n    {\r\n      \"description\": \"High detail mode (more accurate, more tokens).\",\r\n      \"type\": \"string\",\r\n      \"enum\": [\r\n        \"high\"\r\n      ]\r\n    }\r\n  ]\r\n}\r\n",
               "tool_call_id": "call_mock_7483862349728348467"
             },
             {
@@ -729,7 +729,7 @@
             {
               "role": "tool",
               "index": 6,
-              "content": "{\n  \"title\": \"functions.expression.StringInputSchema\",\n  \"description\": \"Schema for a string input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the string.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"enum\": {\n      \"description\": \"If provided, the string must be one of these values.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\n    }\n  }\n}\n",
+              "content": "{\r\n  \"title\": \"functions.expression.StringInputSchema\",\r\n  \"description\": \"Schema for a string input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the string.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"enum\": {\r\n      \"description\": \"If provided, the string must be one of these values.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"array\",\r\n          \"items\": {\r\n            \"type\": \"string\"\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.StringInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
               "tool_call_id": "call_mock_677254075180088283"
             },
             {
@@ -767,7 +767,7 @@
             {
               "role": "tool",
               "index": 8,
-              "content": "{\n  \"title\": \"functions.expression.StringInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"string\"\n  ]\n}\n",
+              "content": "{\r\n  \"title\": \"functions.expression.StringInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"string\"\r\n  ]\r\n}\r\n",
               "tool_call_id": "call_mock_7244532369397948723"
             },
             {
@@ -805,7 +805,7 @@
             {
               "role": "tool",
               "index": 10,
-              "content": "{\n  \"title\": \"functions.expression.ImageInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"image\"\n  ]\n}\n",
+              "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"image\"\r\n  ]\r\n}\r\n",
               "tool_call_id": "call_mock_11578563462072082402"
             },
             {
@@ -842,7 +842,7 @@
             {
               "role": "tool",
               "index": 12,
-              "content": "{\n  \"title\": \"functions.expression.ArrayInputSchema\",\n  \"description\": \"Schema for an array input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the array.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"items\": {\n      \"description\": \"Schema for each item in the array.\",\n      \"$ref\": \"functions.expression.InputSchema\"\n    },\n    \"maxItems\": {\n      \"description\": \"Maximum number of items allowed.\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": 0,\n          \"maximum\": 18446744073709551615\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minItems\": {\n      \"description\": \"Minimum number of items required.\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": 0,\n          \"maximum\": 18446744073709551615\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ArrayInputSchemaType\"\n    }\n  }\n}\n",
+              "content": "{\r\n  \"title\": \"functions.expression.ArrayInputSchema\",\r\n  \"description\": \"Schema for an array input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the array.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"items\": {\r\n      \"description\": \"Schema for each item in the array.\",\r\n      \"$ref\": \"functions.expression.InputSchema\"\r\n    },\r\n    \"maxItems\": {\r\n      \"description\": \"Maximum number of items allowed.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": 0,\r\n          \"maximum\": 18446744073709551615\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"minItems\": {\r\n      \"description\": \"Minimum number of items required.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": 0,\r\n          \"maximum\": 18446744073709551615\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.ArrayInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
               "tool_call_id": "call_mock_4058875507665189769"
             },
             {
@@ -880,7 +880,7 @@
             {
               "role": "tool",
               "index": 14,
-              "content": "{\n  \"title\": \"functions.expression.AudioInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"audio\"\n  ]\n}\n",
+              "content": "{\r\n  \"title\": \"functions.expression.AudioInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"audio\"\r\n  ]\r\n}\r\n",
               "tool_call_id": "call_mock_3763418749842681368"
             },
             {

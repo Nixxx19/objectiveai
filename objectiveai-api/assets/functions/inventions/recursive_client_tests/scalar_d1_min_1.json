@@ -315,7 +315,7 @@
             {
               "role": "tool",
               "index": 13,
-              "content": "{\n  \"title\": \"functions.expression.Expression\",\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"A JMESPath expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$jmespath\": {\n          \"type\": \"string\"\n        }\n      },\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A Starlark expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$starlark\": {\n          \"type\": \"string\"\n        }\n      },\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A predefined special expression variant.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$special\": {\n          \"$ref\": \"functions.expression.Special\"\n        }\n      },\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
+              "content": "{\r\n  \"title\": \"functions.expression.Expression\",\r\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"A JMESPath expression.\",\r\n      \"type\": \"object\",\r\n      \"properties\": {\r\n        \"$jmespath\": {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"additionalProperties\": false\r\n    },\r\n    {\r\n      \"description\": \"A Starlark expression.\",\r\n      \"type\": \"object\",\r\n      \"properties\": {\r\n        \"$starlark\": {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"additionalProperties\": false\r\n    },\r\n    {\r\n      \"description\": \"A predefined special expression variant.\",\r\n      \"type\": \"object\",\r\n      \"properties\": {\r\n        \"$special\": {\r\n          \"$ref\": \"functions.expression.Special\"\r\n        }\r\n      },\r\n      \"additionalProperties\": false\r\n    }\r\n  ]\r\n}\r\n",
               "tool_call_id": "call_mock_4273598306308979919"
             },
             {
@@ -866,7 +866,7 @@
             {
               "role": "tool",
               "index": 4,
-              "content": "{\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"array\"\n  ]\n}\n",
+              "content": "{\r\n  \"title\": \"functions.expression.ArrayInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"array\"\r\n  ]\r\n}\r\n",
               "tool_call_id": "call_mock_16505802511877577209"
             },
             {
@@ -941,7 +941,7 @@
             {
               "role": "tool",
               "index": 8,
-              "content": "{\n  \"title\": \"functions.expression.ImageInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"image\"\n  ]\n}\n",
+              "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"image\"\r\n  ]\r\n}\r\n",
               "tool_call_id": "call_mock_8960411631347325511"
             },
             {

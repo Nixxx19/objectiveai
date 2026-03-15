@@ -350,7 +350,7 @@
         {
           "role": "tool",
           "index": 14,
-          "content": "{\n  \"title\": \"functions.expression.ObjectInputSchema\",\n  \"description\": \"Schema for an object input with named properties.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the object.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"properties\": {\n      \"additionalProperties\": {\n        \"$ref\": \"functions.expression.InputSchema\"\n      },\n      \"description\": \"Schema for each property in the object.\",\n      \"type\": \"object\"\n    },\n    \"required\": {\n      \"description\": \"List of property names that must be present.\",\n      \"anyOf\": [\n        {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ObjectInputSchemaType\"\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.ObjectInputSchema\",\r\n  \"description\": \"Schema for an object input with named properties.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the object.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"properties\": {\r\n      \"additionalProperties\": {\r\n        \"$ref\": \"functions.expression.InputSchema\"\r\n      },\r\n      \"description\": \"Schema for each property in the object.\",\r\n      \"type\": \"object\"\r\n    },\r\n    \"required\": {\r\n      \"description\": \"List of property names that must be present.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"array\",\r\n          \"items\": {\r\n            \"type\": \"string\"\r\n          }\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.ObjectInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_16352372937274247968"
         },
         {
@@ -388,7 +388,7 @@
         {
           "role": "tool",
           "index": 16,
-          "content": "{\n  \"title\": \"functions.alpha_vector.expression.VectorFunctionInputValueExpression\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"context\": {\n      \"anyOf\": [\n        {\n          \"$ref\": \"functions.expression.Expression\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"items\": {\n      \"$ref\": \"functions.expression.Expression\"\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.alpha_vector.expression.VectorFunctionInputValueExpression\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"context\": {\r\n      \"anyOf\": [\r\n        {\r\n          \"$ref\": \"functions.expression.Expression\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"items\": {\r\n      \"$ref\": \"functions.expression.Expression\"\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_17172247362861079688"
         },
         {
@@ -502,7 +502,7 @@
         {
           "role": "tool",
           "index": 22,
-          "content": "{\n  \"title\": \"functions.expression.ArrayInputSchema\",\n  \"description\": \"Schema for an array input.\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the array.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"items\": {\n      \"description\": \"Schema for each item in the array.\",\n      \"$ref\": \"functions.expression.InputSchema\"\n    },\n    \"maxItems\": {\n      \"description\": \"Maximum number of items allowed.\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": 0,\n          \"maximum\": 18446744073709551615\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"minItems\": {\n      \"description\": \"Minimum number of items required.\",\n      \"anyOf\": [\n        {\n          \"type\": \"integer\",\n          \"minimum\": 0,\n          \"maximum\": 18446744073709551615\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ArrayInputSchemaType\"\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.ArrayInputSchema\",\r\n  \"description\": \"Schema for an array input.\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the array.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"items\": {\r\n      \"description\": \"Schema for each item in the array.\",\r\n      \"$ref\": \"functions.expression.InputSchema\"\r\n    },\r\n    \"maxItems\": {\r\n      \"description\": \"Maximum number of items allowed.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": 0,\r\n          \"maximum\": 18446744073709551615\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"minItems\": {\r\n      \"description\": \"Minimum number of items required.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"integer\",\r\n          \"minimum\": 0,\r\n          \"maximum\": 18446744073709551615\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.ArrayInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_14739388385547484113"
         },
         {
@@ -540,7 +540,7 @@
         {
           "role": "tool",
           "index": 24,
-          "content": "{\n  \"title\": \"functions.expression.ImageInputSchema\",\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\n  \"type\": \"object\",\n  \"properties\": {\n    \"description\": {\n      \"description\": \"Human-readable description of the expected image.\",\n      \"anyOf\": [\n        {\n          \"type\": \"string\"\n        },\n        {\n          \"type\": \"null\"\n        }\n      ]\n    },\n    \"type\": {\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\n    }\n  }\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.ImageInputSchema\",\r\n  \"description\": \"Schema for an image input (URL or base64-encoded).\",\r\n  \"type\": \"object\",\r\n  \"properties\": {\r\n    \"description\": {\r\n      \"description\": \"Human-readable description of the expected image.\",\r\n      \"anyOf\": [\r\n        {\r\n          \"type\": \"string\"\r\n        },\r\n        {\r\n          \"type\": \"null\"\r\n        }\r\n      ]\r\n    },\r\n    \"type\": {\r\n      \"$ref\": \"functions.expression.ImageInputSchemaType\"\r\n    }\r\n  }\r\n}\r\n",
           "tool_call_id": "call_mock_7230643903018777308"
         },
         {
@@ -578,7 +578,7 @@
         {
           "role": "tool",
           "index": 26,
-          "content": "{\n  \"title\": \"functions.expression.Expression\",\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\n  \"anyOf\": [\n    {\n      \"description\": \"A JMESPath expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$jmespath\": {\n          \"type\": \"string\"\n        }\n      },\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A Starlark expression.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$starlark\": {\n          \"type\": \"string\"\n        }\n      },\n      \"additionalProperties\": false\n    },\n    {\n      \"description\": \"A predefined special expression variant.\",\n      \"type\": \"object\",\n      \"properties\": {\n        \"$special\": {\n          \"$ref\": \"functions.expression.Special\"\n        }\n      },\n      \"additionalProperties\": false\n    }\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.Expression\",\r\n  \"description\": \"An expression that can be either JMESPath or Starlark.\\n\\nSerializes as `{\\\"$jmespath\\\": \\\"...\\\"}` or `{\\\"$starlark\\\": \\\"...\\\"}` in JSON.\\n\\n# Examples\\n\\nJMESPath:\\n```json\\n{\\\"$jmespath\\\": \\\"input.items[0].name\\\"}\\n```\\n\\nStarlark:\\n```json\\n{\\\"$starlark\\\": \\\"input['items'][0]['name']\\\"}\\n```\",\r\n  \"anyOf\": [\r\n    {\r\n      \"description\": \"A JMESPath expression.\",\r\n      \"type\": \"object\",\r\n      \"properties\": {\r\n        \"$jmespath\": {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"additionalProperties\": false\r\n    },\r\n    {\r\n      \"description\": \"A Starlark expression.\",\r\n      \"type\": \"object\",\r\n      \"properties\": {\r\n        \"$starlark\": {\r\n          \"type\": \"string\"\r\n        }\r\n      },\r\n      \"additionalProperties\": false\r\n    },\r\n    {\r\n      \"description\": \"A predefined special expression variant.\",\r\n      \"type\": \"object\",\r\n      \"properties\": {\r\n        \"$special\": {\r\n          \"$ref\": \"functions.expression.Special\"\r\n        }\r\n      },\r\n      \"additionalProperties\": false\r\n    }\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_2066053672115337881"
         },
         {
@@ -692,7 +692,7 @@
         {
           "role": "tool",
           "index": 32,
-          "content": "{\n  \"title\": \"functions.expression.NumberInputSchemaType\",\n  \"type\": \"string\",\n  \"enum\": [\n    \"number\"\n  ]\n}\n",
+          "content": "{\r\n  \"title\": \"functions.expression.NumberInputSchemaType\",\r\n  \"type\": \"string\",\r\n  \"enum\": [\r\n    \"number\"\r\n  ]\r\n}\r\n",
           "tool_call_id": "call_mock_7632425395620490347"
         },
         {
