@@ -26,6 +26,7 @@ const WHITELIST: RegExp[] = [
   /\/wasm\//,
   /\/jsonValue\.ts$/,
   /\/httpTestUtil\.ts$/,
+  /\/mergeTestUtil\.ts$/,
 ];
 
 function createProgram() {

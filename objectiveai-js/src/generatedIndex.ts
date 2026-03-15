@@ -7,4 +7,3 @@ export * from "./error/index";
 export * from "./functions/index";
 export * from "./vector/index";
 export * from "./prefixedUuid";
-export * from "./responseError";

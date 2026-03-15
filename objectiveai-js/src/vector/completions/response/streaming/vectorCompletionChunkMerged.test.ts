@@ -1,23 +1,22 @@
 import { describe, it, expect } from "vitest";
-import { zocker } from "zocker";
-import { VectorCompletionsResponseStreamingVectorCompletionChunkSchema } from "./vectorCompletionChunk";
 import { vectorCompletionsResponseStreamingVectorCompletionChunkMerged } from "./vectorCompletionChunkMerged";
-import { vectorCompletionChunkMerged as wasmMerged, vectorCompletionChunkNormalized as wasmNormalized } from "../../../../wasm/loader.js";
-import { zockerParse } from "../../../../zockerParse";
-
-const gen = zocker(VectorCompletionsResponseStreamingVectorCompletionChunkSchema).array({ max: 3 });
-const parse = () => zockerParse(gen, wasmNormalized);
+import {
+  wasmVectorCompletionsResponseStreamingVectorCompletionChunkMerged as wasmMerged,
+  wasmVectorCompletionsResponseStreamingGenerateVectorCompletionChunk as generate,
+} from "./wasm";
+import { rounded } from "../../../../mergeTestUtil";
 
 describe("vectorCompletionChunkMerged fuzz", () => {
   for (let i = 0; i < 20; i++) {
     it(`stream ${i}`, () => {
-      let tsAcc = parse();
+      let seed = i * 1000;
+      let tsAcc = generate(seed++);
       let wasmAcc = structuredClone(tsAcc);
       for (let j = 0; j < 20; j++) {
-        const chunk = parse();
-        [tsAcc] = vectorCompletionsResponseStreamingVectorCompletionChunkMerged(tsAcc as any, chunk as any);
-        wasmAcc = JSON.parse(wasmMerged(wasmAcc, chunk));
-        expect(tsAcc, `chunk ${j}`).toEqual(wasmAcc);
+        const chunk = generate(seed++);
+        [tsAcc] = vectorCompletionsResponseStreamingVectorCompletionChunkMerged(tsAcc, chunk);
+        wasmAcc = wasmMerged(wasmAcc, chunk);
+        expect(rounded(tsAcc), `chunk ${j}`).toEqual(rounded(wasmAcc));
       }
     });
   }
