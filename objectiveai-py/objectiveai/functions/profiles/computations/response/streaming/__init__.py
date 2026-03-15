@@ -8,3 +8,4 @@ def __getattr__(name):
 
 import objectiveai.functions.profiles.computations.response.streaming.function_execution_chunk_methods  # noqa: F401, E402
 import objectiveai.functions.profiles.computations.response.streaming.function_profile_computation_chunk_methods  # noqa: F401, E402
+from objectiveai.functions.profiles.computations.response.streaming.pyo3 import *  # noqa: F401, F403, E402

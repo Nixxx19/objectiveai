@@ -136,15 +136,16 @@ class TestPyo3Coverage:
         assert unmapped == [], f"Unmapped pyo3 functions: {unmapped}"
 
     def test_every_pyo3_function_has_python_wrapper(self):
-        """Every pyo3 function must have a corresponding Python function in pyo3.py."""
+        """Every pyo3 function must have a pyo3_-prefixed Python function in pyo3.py."""
         pyo3_py_files = find_pyo3_py_files()
         errors: list[str] = []
 
         for fn_name, mod_path in FUNCTION_TO_MODULE.items():
             py_fns = pyo3_py_files.get(mod_path, [])
-            if fn_name not in py_fns:
+            expected = f"pyo3_{fn_name}"
+            if expected not in py_fns:
                 errors.append(
-                    f"{mod_path}: missing function \"{fn_name}\" in pyo3.py"
+                    f"{mod_path}: missing function \"{expected}\" in pyo3.py"
                 )
 
         assert errors == [], (
@@ -161,7 +162,9 @@ class TestPyo3Coverage:
             for fn_name in py_fns:
                 if fn_name.startswith("_"):
                     continue
-                if fn_name not in pyo3_fns:
+                # Strip pyo3_ prefix to find the Rust counterpart
+                rust_name = fn_name.removeprefix("pyo3_")
+                if rust_name not in pyo3_fns:
                     errors.append(
                         f"{mod_path}: unexpected function \"{fn_name}\" "
                         f"has no pyo3 counterpart"
@@ -170,6 +173,24 @@ class TestPyo3Coverage:
         assert errors == [], (
             "Extra Python functions without pyo3 counterpart:\n  "
             + "\n  ".join(errors)
+        )
+
+    def test_python_functions_have_pyo3_prefix(self):
+        """Every public function in pyo3.py must be prefixed with pyo3_."""
+        pyo3_py_files = find_pyo3_py_files()
+        errors: list[str] = []
+
+        for mod_path, py_fns in pyo3_py_files.items():
+            for fn_name in py_fns:
+                if fn_name.startswith("_"):
+                    continue
+                if not fn_name.startswith("pyo3_"):
+                    errors.append(
+                        f"{mod_path}: function \"{fn_name}\" missing pyo3_ prefix"
+                    )
+
+        assert errors == [], (
+            "Functions missing pyo3_ prefix:\n  " + "\n  ".join(errors)
         )
 
     def test_functions_importable_from_package_init(self):

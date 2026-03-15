@@ -7,3 +7,4 @@ def __getattr__(name):
 
 
 from objectiveai.ensemble.http import *  # noqa: F401, F403, E402
+from objectiveai.ensemble.pyo3 import *  # noqa: F401, F403, E402
