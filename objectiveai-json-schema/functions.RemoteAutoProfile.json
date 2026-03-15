@@ -1,0 +1,19 @@
+{
+  "title": "functions.RemoteAutoProfile",
+  "description": "A remote auto profile with full metadata.\n\nApplies a single ensemble and weights to every vector completion task\nin the function, with equal task weights.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "Human-readable description of the profile.",
+      "type": "string"
+    },
+    "ensemble": {
+      "description": "The ensemble to use for all vector completion tasks.",
+      "$ref": "vector.completions.request.Ensemble"
+    },
+    "profile": {
+      "description": "Weights for each agent in the ensemble.",
+      "$ref": "vector.completions.request.Profile"
+    }
+  }
+}

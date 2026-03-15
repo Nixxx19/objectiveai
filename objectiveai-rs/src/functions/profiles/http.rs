@@ -1,5 +1,6 @@
 //! HTTP functions for profile management.
 
+use super::request::ListProfilesSource;
 use crate::functions::Remote;
 use crate::{HttpClient, HttpError};
 
@@ -8,15 +9,21 @@ use crate::{HttpClient, HttpError};
 /// # Arguments
 ///
 /// * `client` - The HTTP client to use
+/// * `source` - Optional source filter
 ///
 /// # Returns
 ///
 /// A list of profiles with their repository information.
 pub async fn list_profiles(
     client: &HttpClient,
+    source: Option<ListProfilesSource>,
 ) -> Result<super::response::ListProfile, HttpError> {
+    let path = match &source {
+        Some(s) => format!("functions/profiles?source={}", s.as_str()),
+        None => "functions/profiles".to_string(),
+    };
     client
-        .send_unary(reqwest::Method::GET, "functions/profiles", None::<String>)
+        .send_unary(reqwest::Method::GET, &path, None::<String>)
         .await
 }
 

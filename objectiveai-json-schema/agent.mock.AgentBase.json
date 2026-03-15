@@ -1,0 +1,50 @@
+{
+  "title": "agent.mock.AgentBase",
+  "description": "The base configuration for a Mock Agent (without computed ID).",
+  "type": "object",
+  "properties": {
+    "error": {
+      "description": "If true, the mock client will return an error instead of a response.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "invention": {
+      "description": "If true, this mock agent supports invention tool calling.\nIncompatible with output modes other than `instruction`.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "output_mode": {
+      "description": "The output mode for vector completions. Ignored for agent completions.",
+      "$ref": "agent.mock.OutputMode"
+    },
+    "top_logprobs": {
+      "description": "Number of top log probabilities to return (2-20).\n\n**Vector completions only.** Ignored for agent completions.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "upstream": {
+      "description": "The upstream provider marker.",
+      "$ref": "agent.mock.Upstream"
+    }
+  }
+}

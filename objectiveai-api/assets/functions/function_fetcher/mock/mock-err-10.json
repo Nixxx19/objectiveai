@@ -1,0 +1,21 @@
+{
+  "type": "alpha.scalar.branch.function",
+  "description": "Error test: bad input for sub-function.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": { "type": "string" }
+    },
+    "required": ["text"]
+  },
+  "tasks": [
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-1",
+      "commit": "mock",
+      "input": { "$starlark": "{'wrong_field': input['text']}" }
+    }
+  ]
+}

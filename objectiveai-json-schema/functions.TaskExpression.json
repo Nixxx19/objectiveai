@@ -1,0 +1,66 @@
+{
+  "title": "functions.TaskExpression",
+  "description": "A task definition with expressions (pre-compilation).\n\nTask expressions contain dynamic fields (JMESPath or Starlark) that are\nresolved against input data during compilation. Use [`compile`](Self::compile)\nto produce a concrete [`Task`].",
+  "anyOf": [
+    {
+      "type": "object",
+      "$ref": "functions.ScalarFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "scalar.function"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.VectorFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "vector.function"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.VectorCompletionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "vector.completion"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.PlaceholderScalarFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.scalar.function"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.PlaceholderVectorFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.vector.function"
+          ]
+        }
+      }
+    }
+  ]
+}

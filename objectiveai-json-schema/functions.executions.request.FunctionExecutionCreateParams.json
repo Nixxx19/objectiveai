@@ -1,0 +1,22 @@
+{
+  "title": "functions.executions.request.FunctionExecutionCreateParams",
+  "description": "Parameters for creating a function execution.\n\nSupports four combinations based on whether the Function and Profile\nare provided inline or referenced from remote repositories.",
+  "anyOf": [
+    {
+      "description": "Inline Function with inline Profile.",
+      "$ref": "functions.executions.request.FunctionInlineProfileInlineRequestBody"
+    },
+    {
+      "description": "Inline Function with remote Profile.",
+      "$ref": "functions.executions.request.FunctionInlineProfileRemoteRequestBody"
+    },
+    {
+      "description": "Remote Function with inline Profile.",
+      "$ref": "functions.executions.request.FunctionRemoteProfileInlineRequestBody"
+    },
+    {
+      "description": "Remote Function with remote Profile.",
+      "$ref": "functions.executions.request.FunctionRemoteProfileRemoteRequestBody"
+    }
+  ]
+}

@@ -1,0 +1,71 @@
+{
+  "title": "functions.Task",
+  "description": "A compiled task ready for execution.\n\nProduced by compiling a [`TaskExpression`] against input data. All\nexpressions have been resolved to concrete values.",
+  "anyOf": [
+    {
+      "description": "Calls a scalar function (produces a single score).",
+      "type": "object",
+      "$ref": "functions.ScalarFunctionTask",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "scalar.function"
+          ]
+        }
+      }
+    },
+    {
+      "description": "Calls a vector function (produces a vector of scores).",
+      "type": "object",
+      "$ref": "functions.VectorFunctionTask",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "vector.function"
+          ]
+        }
+      }
+    },
+    {
+      "description": "Runs a vector completion.",
+      "type": "object",
+      "$ref": "functions.VectorCompletionTask",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "vector.completion"
+          ]
+        }
+      }
+    },
+    {
+      "description": "Placeholder scalar function (always outputs 0.5).",
+      "type": "object",
+      "$ref": "functions.PlaceholderScalarFunctionTask",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.scalar.function"
+          ]
+        }
+      }
+    },
+    {
+      "description": "Placeholder vector function (always outputs equalized vector).",
+      "type": "object",
+      "$ref": "functions.PlaceholderVectorFunctionTask",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.vector.function"
+          ]
+        }
+      }
+    }
+  ]
+}

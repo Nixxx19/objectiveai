@@ -1,9 +1,9 @@
 //! Profile weights for vector completion requests.
 //!
-//! A profile specifies how much influence each LLM in the Ensemble has when
+//! A profile specifies how much influence each agent in the Ensemble has when
 //! combining votes into final scores. Profiles can either be a simple vector
 //! of decimal weights or a vector of objects that also include an optional
-//! `invert` flag, which inverts that LLM's vote distribution before it is
+//! `invert` flag, which inverts that agent.s vote distribution before it is
 //! combined.
 //!
 //! The `invert` flag is part of the **profile**, not the Ensemble definition,
@@ -12,13 +12,16 @@
 
 use rust_decimal::Decimal;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// An entry in a profile with an explicit weight and optional invert flag.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "vector.completions.request.ProfileEntry")]
 pub struct ProfileEntry {
-    /// The weight for this LLM in the ensemble. Must be in [0, 1].
+    /// The weight for this agent in the ensemble. Must be in [0, 1].
+    #[schemars(with = "f64")]
     pub weight: Decimal,
-    /// If true, invert this LLM's vote distribution before combining.
+    /// If true, invert this agent's vote distribution before combining.
     ///
     /// When omitted or false, the vote distribution is used as-is.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -27,16 +30,17 @@ pub struct ProfileEntry {
 
 /// Profile weights for a vector completion.
 ///
-/// Previously this was a simple `Vec<Decimal>`. To support per-LLM inversion
+/// Previously this was a simple `Vec<Decimal>`. To support per-agent inversion
 /// while remaining backwards compatible, the field is now an untagged enum:
 ///
 /// - `Weights(Vec<Decimal>)` - legacy representation (no inversion)
-/// - `Entries(Vec<ProfileEntry>)` - weights with optional per-LLM `invert`
-#[derive(Debug, Clone, Serialize, Deserialize)]
+/// - `Entries(Vec<ProfileEntry>)` - weights with optional per-agent `invert`
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
+#[schemars(rename = "vector.completions.request.Profile")]
 pub enum Profile {
     /// Simple vector of decimal weights.
-    Weights(Vec<Decimal>),
+    Weights(#[schemars(with = "Vec<f64>")] Vec<Decimal>),
     /// Vector of entries with optional invert flags.
     Entries(Vec<ProfileEntry>),
 }
@@ -70,4 +74,3 @@ impl Profile {
         }
     }
 }
-

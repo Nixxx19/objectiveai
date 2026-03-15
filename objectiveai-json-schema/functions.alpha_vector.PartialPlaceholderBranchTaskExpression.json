@@ -1,0 +1,29 @@
+{
+  "title": "functions.alpha_vector.PartialPlaceholderBranchTaskExpression",
+  "anyOf": [
+    {
+      "type": "object",
+      "$ref": "functions.alpha_vector.PartialPlaceholderScalarFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.alpha.scalar.function"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.alpha_vector.PartialPlaceholderVectorFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.alpha.vector.function"
+          ]
+        }
+      }
+    }
+  ]
+}

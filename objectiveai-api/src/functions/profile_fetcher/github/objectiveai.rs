@@ -8,12 +8,12 @@ use std::sync::Arc;
 /// Fetches Profiles from GitHub via the ObjectiveAI API.
 pub struct ObjectiveAiFetcher {
     /// The HTTP client for API requests.
-    pub client: Arc<objectiveai::HttpClient>,
+    pub client: Arc<crate::objectiveai_http::Client>,
 }
 
 impl ObjectiveAiFetcher {
     /// Creates a new ObjectiveAI GitHub Profile fetcher.
-    pub fn new(client: Arc<objectiveai::HttpClient>) -> Self {
+    pub fn new(client: Arc<crate::objectiveai_http::Client>) -> Self {
         Self { client }
     }
 }
@@ -21,7 +21,7 @@ impl ObjectiveAiFetcher {
 #[async_trait::async_trait]
 impl<CTXEXT> super::super::Fetcher<CTXEXT> for ObjectiveAiFetcher
 where
-    CTXEXT: Send + Sync + 'static,
+    CTXEXT: Send + Sync + 'static + ctx::ContextExt,
 {
     async fn fetch(
         &self,
@@ -33,6 +33,7 @@ where
         Option<objectiveai::functions::profiles::response::GetProfile>,
         objectiveai::error::ResponseError,
     > {
+        let http_client = self.client.with_authorization(&ctx).await;
         // Resolve commit (use latest_commit_cache if commit is None)
         let commit = if let Some(c) = commit {
             c.to_owned()
@@ -47,7 +48,7 @@ where
                 ))
                 .or_insert_with(|| {
                     let (tx, rx) = tokio::sync::oneshot::channel();
-                    let client = self.client.clone();
+                    let client = http_client.clone();
                     let owner = owner.to_owned();
                     let repository = repository.to_owned();
                     tokio::spawn(async move {
@@ -107,7 +108,7 @@ where
             ))
             .or_insert_with(|| {
                 let (tx, rx) = tokio::sync::oneshot::channel();
-                let client = self.client.clone();
+                let client = http_client.clone();
                 let owner = owner.to_owned();
                 let repository = repository.to_owned();
                 let commit = commit.clone();

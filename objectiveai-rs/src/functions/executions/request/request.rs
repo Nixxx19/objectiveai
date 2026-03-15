@@ -2,12 +2,14 @@
 
 use crate::functions;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Internal request representation with path and body separated.
 ///
 /// Used internally to route requests to the appropriate API endpoint.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "functions.executions.request.Request")]
 pub enum Request {
     FunctionInlineProfileInline {
         body: super::FunctionInlineProfileInlineRequestBody,
@@ -108,8 +110,9 @@ impl Request {
 ///
 /// Supports four combinations based on whether the Function and Profile
 /// are provided inline or referenced from remote repositories.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "functions.executions.request.FunctionExecutionCreateParams")]
 pub enum FunctionExecutionCreateParams {
     /// Inline Function with inline Profile.
     FunctionInlineProfileInline(super::FunctionInlineProfileInlineRequestBody),

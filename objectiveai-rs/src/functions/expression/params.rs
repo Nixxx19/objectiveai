@@ -4,23 +4,26 @@
 //! compilation, including the function input, task outputs, and current map element.
 
 use super::{ExpressionError, FromStarlarkValue, ToStarlarkValue};
-use crate::vector;
+use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use starlark::values::{Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue};
+use starlark::values::{
+    Heap as StarlarkHeap, UnpackValue, Value as StarlarkValue,
+};
 
 /// Context for evaluating expressions (JMESPath or Starlark).
 ///
-/// Contains all data accessible within expressions: `input`, `tasks`, and `map`.
-#[derive(Debug, Clone, Serialize)]
+/// Contains all data accessible within expressions: `input`, `output`, and `map`.
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 #[serde(untagged)]
-pub enum Params<'i, 'to, 'm> {
+#[schemars(rename = "functions.expression.Params")]
+pub enum Params<'i, 'to> {
     /// Owned version (for deserialization).
     Owned(ParamsOwned),
     /// Borrowed version (for efficient evaluation).
-    Ref(ParamsRef<'i, 'to, 'm>),
+    Ref(ParamsRef<'i, 'to>),
 }
 
-impl<'de> serde::Deserialize<'de> for Params<'static, 'static, 'static> {
+impl<'de> serde::Deserialize<'de> for Params<'static, 'static> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
     where
         D: serde::Deserializer<'de>,
@@ -31,30 +34,33 @@ impl<'de> serde::Deserialize<'de> for Params<'static, 'static, 'static> {
 }
 
 /// Owned version of expression parameters.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.expression.ParamsOwned")]
 pub struct ParamsOwned {
     /// The function's input data.
-    pub input: super::Input,
+    pub input: super::InputValue,
     /// Results from executed tasks. Only populated for task output expressions.
     pub output: Option<TaskOutputOwned>,
-    /// Current map element. Only populated for mapped task expressions.
-    pub map: Option<super::Input>,
+    /// Current map index. Only populated for mapped task expressions.
+    pub map: Option<u64>,
 }
 
 /// Borrowed version of expression parameters.
-#[derive(Debug, Clone, Serialize)]
-pub struct ParamsRef<'i, 'to, 'm> {
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
+#[schemars(rename = "functions.expression.ParamsRef")]
+pub struct ParamsRef<'i, 'to> {
     /// The function's input data.
-    pub input: &'i super::Input,
+    pub input: &'i super::InputValue,
     /// Results from executed tasks. Only populated for task output expressions.
     pub output: Option<TaskOutput<'to>>,
-    /// Current map element. Only populated for mapped task expressions.
-    pub map: Option<&'m super::Input>,
+    /// Current map index. Only populated for mapped task expressions.
+    pub map: Option<u64>,
 }
 
 /// Output from an executed task.
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "functions.expression.TaskOutput")]
 pub enum TaskOutput<'a> {
     /// Owned version.
     Owned(TaskOutputOwned),
@@ -63,8 +69,10 @@ pub enum TaskOutput<'a> {
 }
 
 impl<'a> super::ToStarlarkValue for TaskOutput<'a> {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
-
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
         match self {
             TaskOutput::Owned(o) => o.to_starlark_value(heap),
             TaskOutput::Ref(r) => r.to_starlark_value(heap),
@@ -83,201 +91,182 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 }
 
 /// Owned task output variants.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
+#[schemars(rename = "functions.expression.TaskOutputOwned")]
 pub enum TaskOutputOwned {
-    /// Output from a single function task.
-    Function(FunctionOutput),
-    /// Outputs from a mapped function task.
-    MapFunction(Vec<FunctionOutput>),
-    /// Output from a single vector completion task.
-    VectorCompletion(VectorCompletionOutput),
-    /// Outputs from a mapped vector completion task.
-    MapVectorCompletion(Vec<VectorCompletionOutput>),
+    /// A single scalar score.
+    Scalar(#[schemars(with = "f64")] rust_decimal::Decimal),
+    /// A vector of scores.
+    Vector(#[schemars(with = "Vec<f64>")] Vec<rust_decimal::Decimal>),
+    /// Multiple vectors of scores (from mapped tasks).
+    Vectors(#[schemars(with = "Vec<Vec<f64>>")] Vec<Vec<rust_decimal::Decimal>>),
+    /// An error occurred during execution.
+    Err(#[arbitrary(with = crate::arbitrary_util::arbitrary_json_value)] serde_json::Value),
 }
 
 impl ToStarlarkValue for TaskOutputOwned {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
         match self {
-            TaskOutputOwned::Function(f) => f.to_starlark_value(heap),
-            TaskOutputOwned::MapFunction(fs) => fs.to_starlark_value(heap),
-            TaskOutputOwned::VectorCompletion(vc) => vc.to_starlark_value(heap),
-            TaskOutputOwned::MapVectorCompletion(vcs) => vcs.to_starlark_value(heap),
+            TaskOutputOwned::Scalar(d) => d.to_starlark_value(heap),
+            TaskOutputOwned::Vector(ds) => ds.to_starlark_value(heap),
+            TaskOutputOwned::Vectors(vecs) => vecs.to_starlark_value(heap),
+            TaskOutputOwned::Err(json) => json.to_starlark_value(heap),
         }
     }
 }
 
-/// Borrowed task output variants.
-#[derive(Debug, Clone, Serialize)]
-#[serde(untagged)]
-pub enum TaskOutputRef<'a> {
-    /// Output from a single function task.
-    Function(&'a FunctionOutput),
-    /// Outputs from a mapped function task.
-    MapFunction(&'a [FunctionOutput]),
-    /// Output from a single vector completion task.
-    VectorCompletion(&'a VectorCompletionOutput),
-    /// Outputs from a mapped vector completion task.
-    MapVectorCompletion(&'a [VectorCompletionOutput]),
-}
-
-impl<'a> ToStarlarkValue for TaskOutputRef<'a> {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
-        match self {
-            TaskOutputRef::Function(f) => f.to_starlark_value(heap),
-            TaskOutputRef::MapFunction(fs) => fs.to_starlark_value(heap),
-            TaskOutputRef::VectorCompletion(vc) => vc.to_starlark_value(heap),
-            TaskOutputRef::MapVectorCompletion(vcs) => vcs.to_starlark_value(heap),
-        }
-    }
-}
-
-/// Output from a vector completion task.
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct VectorCompletionOutput {
-    /// Individual votes from each LLM.
-    pub votes: Vec<vector::completions::response::Vote>,
-    /// Final weighted scores for each response option.
-    pub scores: Vec<rust_decimal::Decimal>,
-    /// Total weight allocated to each response option.
-    pub weights: Vec<rust_decimal::Decimal>,
-}
-
-impl VectorCompletionOutput {
-    /// Creates a default output with uniform scores when no votes are cast.
-    pub fn default_from_request_responses_len(
-        request_responses_len: usize,
-    ) -> Self {
-        let weights = vec![rust_decimal::Decimal::ZERO; request_responses_len];
-        let scores =
-            vec![
-                rust_decimal::Decimal::ONE
-                    / rust_decimal::Decimal::from(request_responses_len);
-                request_responses_len
-            ];
-        Self {
-            votes: Vec::new(),
-            scores,
-            weights,
-        }
-    }
-}
-
-impl From<vector::completions::response::streaming::VectorCompletionChunk>
-    for VectorCompletionOutput
-{
-    fn from(
-        vector::completions::response::streaming::VectorCompletionChunk {
-            votes,
-            scores,
-            weights,
-            ..
-        }: vector::completions::response::streaming::VectorCompletionChunk,
-    ) -> Self {
-        VectorCompletionOutput {
-            votes,
-            scores,
-            weights,
-        }
-    }
-}
-
-impl From<vector::completions::response::unary::VectorCompletion>
-    for VectorCompletionOutput
-{
-    fn from(
-        vector::completions::response::unary::VectorCompletion {
-            votes,
-            scores,
-            weights,
-            ..
-        }: vector::completions::response::unary::VectorCompletion,
-    ) -> Self {
-        VectorCompletionOutput {
-            votes,
-            scores,
-            weights,
-        }
-    }
-}
-
-impl ToStarlarkValue for VectorCompletionOutput {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
-
-        use starlark::values::dict::AllocDict;
-        heap.alloc(AllocDict([
-            ("votes", self.votes.to_starlark_value(heap)),
-            ("scores", self.scores.to_starlark_value(heap)),
-            ("weights", self.weights.to_starlark_value(heap)),
-        ]))
-    }
-}
-
-/// Output from a function (scalar or vector).
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(untagged)]
-pub enum FunctionOutput {
-    /// A single score in [0, 1].
-    Scalar(rust_decimal::Decimal),
-    /// A vector of scores that sums to 1.
-    Vector(Vec<rust_decimal::Decimal>),
-    /// An error occurred during execution.
-    Err(serde_json::Value),
-}
-
-impl FunctionOutput {
-}
-
-impl ToStarlarkValue for FunctionOutput {
-    fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
-        match self {
-            FunctionOutput::Scalar(d) => d.to_starlark_value(heap),
-            FunctionOutput::Vector(ds) => ds.to_starlark_value(heap),
-            FunctionOutput::Err(json) => json.to_starlark_value(heap),
-        }
-    }
-}
-
-impl FromStarlarkValue for FunctionOutput {
-    fn from_starlark_value(value: &StarlarkValue) -> Result<Self, ExpressionError> {
+impl FromStarlarkValue for TaskOutputOwned {
+    fn from_starlark_value(
+        value: &StarlarkValue,
+    ) -> Result<Self, ExpressionError> {
         use starlark::values::float::UnpackFloat;
+use schemars::JsonSchema;
         if value.is_none() {
-            return Ok(FunctionOutput::Err(serde_json::Value::Null));
+            return Ok(TaskOutputOwned::Err(serde_json::Value::Null));
         }
-        if let Some(list) = starlark::values::list::ListRef::from_value(*value) {
-            let mut decimals = Vec::with_capacity(list.len());
+        if let Some(list) = starlark::values::list::ListRef::from_value(*value)
+        {
+            // Check if it's a list of lists (Vectors) or list of numbers (Vector)
             let mut all_numeric = true;
+            let mut all_lists = true;
+            let mut decimals = Vec::with_capacity(list.len());
+            let mut vecs = Vec::with_capacity(list.len());
+
             for v in list.iter() {
-                if let Ok(Some(i)) = i64::unpack_value(v) {
+                if let Some(inner_list) =
+                    starlark::values::list::ListRef::from_value(v)
+                {
+                    // Try to parse inner list as numbers
+                    let mut inner_decimals =
+                        Vec::with_capacity(inner_list.len());
+                    let mut inner_all_numeric = true;
+                    for iv in inner_list.iter() {
+                        if let Ok(Some(i)) = i64::unpack_value(iv) {
+                            inner_decimals
+                                .push(rust_decimal::Decimal::from(i));
+                        } else if let Ok(Some(UnpackFloat(f))) =
+                            UnpackFloat::unpack_value(iv)
+                        {
+                            match rust_decimal::Decimal::try_from(f) {
+                                Ok(d) => inner_decimals.push(d),
+                                Err(_) => {
+                                    inner_all_numeric = false;
+                                    break;
+                                }
+                            }
+                        } else {
+                            inner_all_numeric = false;
+                            break;
+                        }
+                    }
+                    if inner_all_numeric {
+                        vecs.push(inner_decimals);
+                    } else {
+                        all_lists = false;
+                    }
+                    all_numeric = false;
+                } else if let Ok(Some(i)) = i64::unpack_value(v) {
                     decimals.push(rust_decimal::Decimal::from(i));
-                } else if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(v) {
+                    all_lists = false;
+                } else if let Ok(Some(UnpackFloat(f))) =
+                    UnpackFloat::unpack_value(v)
+                {
                     match rust_decimal::Decimal::try_from(f) {
-                        Ok(d) => decimals.push(d),
-                        Err(_) => { all_numeric = false; break; }
+                        Ok(d) => {
+                            decimals.push(d);
+                            all_lists = false;
+                        }
+                        Err(_) => {
+                            all_numeric = false;
+                            all_lists = false;
+                            break;
+                        }
                     }
                 } else {
                     all_numeric = false;
+                    all_lists = false;
                     break;
                 }
             }
-            if all_numeric {
-                return Ok(FunctionOutput::Vector(decimals));
+            if all_numeric && !decimals.is_empty() {
+                return Ok(TaskOutputOwned::Vector(decimals));
+            }
+            if all_numeric && decimals.is_empty() && list.len() == 0 {
+                return Ok(TaskOutputOwned::Vector(Vec::new()));
+            }
+            if all_lists && !vecs.is_empty() {
+                return Ok(TaskOutputOwned::Vectors(vecs));
+            }
+            if all_lists && vecs.is_empty() && list.len() == 0 {
+                return Ok(TaskOutputOwned::Vectors(Vec::new()));
             }
         }
         if let Ok(Some(i)) = i64::unpack_value(*value) {
-            return Ok(FunctionOutput::Scalar(rust_decimal::Decimal::from(i)));
+            return Ok(TaskOutputOwned::Scalar(
+                rust_decimal::Decimal::from(i),
+            ));
         }
         if let Ok(Some(UnpackFloat(f))) = UnpackFloat::unpack_value(*value) {
             if let Ok(d) = rust_decimal::Decimal::try_from(f) {
-                return Ok(FunctionOutput::Scalar(d));
+                return Ok(TaskOutputOwned::Scalar(d));
             }
         }
         let v = serde_json::Value::from_starlark_value(value)?;
-        Ok(FunctionOutput::Err(v))
+        Ok(TaskOutputOwned::Err(v))
     }
 }
 
-impl FunctionOutput {
+impl super::FromSpecial for TaskOutputOwned {
+    fn from_special(
+        special: &super::Special,
+        params: &super::Params,
+    ) -> Result<Self, super::ExpressionError> {
+        match special {
+            super::Special::Output => {
+                let output = params_output(params)?;
+                Ok(output.clone())
+            }
+            super::Special::TaskOutputL1Normalized => {
+                let output = params_output(params)?;
+                match output {
+                    TaskOutputOwned::Scalar(_) => Ok(output.clone()),
+                    TaskOutputOwned::Vector(v) => {
+                        Ok(TaskOutputOwned::Vector(l1_normalize(v)))
+                    }
+                    TaskOutputOwned::Vectors(vecs) => {
+                        Ok(TaskOutputOwned::Vectors(
+                            vecs.iter().map(|v| l1_normalize(v)).collect(),
+                        ))
+                    }
+                    TaskOutputOwned::Err(_) => Ok(output.clone()),
+                }
+            }
+            super::Special::TaskOutputWeightedSum => {
+                let output = params_output(params)?;
+                match output {
+                    TaskOutputOwned::Vector(scores) => {
+                        Ok(TaskOutputOwned::Scalar(weighted_sum(scores)))
+                    }
+                    TaskOutputOwned::Vectors(vecs) => {
+                        Ok(TaskOutputOwned::Vector(
+                            vecs.iter()
+                                .map(|scores| weighted_sum(scores))
+                                .collect(),
+                        ))
+                    }
+                    _ => Err(super::ExpressionError::UnsupportedSpecial),
+                }
+            }
+            _ => Err(super::ExpressionError::UnsupportedSpecial),
+        }
+    }
+}
+
+impl TaskOutputOwned {
     /// Converts the output into an error variant (wrapping the value as JSON).
     pub fn into_err(self) -> Self {
         match self {
@@ -287,20 +276,90 @@ impl FunctionOutput {
             Self::Vector(vector) => {
                 Self::Err(serde_json::to_value(vector).unwrap())
             }
+            Self::Vectors(vectors) => {
+                Self::Err(serde_json::to_value(vectors).unwrap())
+            }
             Self::Err(err) => Self::Err(err),
         }
     }
 }
 
-// /// Result of compiling a function's output expression.
-// #[derive(Debug, Clone, Serialize, Deserialize)]
-// pub struct CompiledFunctionOutput {
-//     /// The computed output value.
-//     pub output: FunctionOutput,
-//     /// Whether the output is valid. Checks that:
-//     /// - The output type matches the function type (scalar vs vector)
-//     /// - Scalar outputs are in [0, 1]
-//     /// - Vector outputs sum to approximately 1
-//     /// - Vector outputs match `output_length` if specified
-//     pub valid: bool,
-// }
+/// Borrowed task output variants.
+#[derive(Debug, Clone, PartialEq, Serialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "functions.expression.TaskOutputRef")]
+pub enum TaskOutputRef<'a> {
+    /// A single scalar score.
+    Scalar(#[schemars(with = "f64")] &'a rust_decimal::Decimal),
+    /// A vector of scores.
+    Vector(#[schemars(with = "Vec<f64>")] &'a [rust_decimal::Decimal]),
+    /// Multiple vectors of scores (from mapped tasks).
+    Vectors(#[schemars(with = "Vec<Vec<f64>>")] &'a [Vec<rust_decimal::Decimal>]),
+    /// An error occurred during execution.
+    Err(&'a serde_json::Value),
+}
+
+impl<'a> ToStarlarkValue for TaskOutputRef<'a> {
+    fn to_starlark_value<'v>(
+        &self,
+        heap: &'v StarlarkHeap,
+    ) -> StarlarkValue<'v> {
+        match self {
+            TaskOutputRef::Scalar(d) => d.to_starlark_value(heap),
+            TaskOutputRef::Vector(ds) => ds.to_starlark_value(heap),
+            TaskOutputRef::Vectors(vecs) => vecs.to_starlark_value(heap),
+            TaskOutputRef::Err(json) => json.to_starlark_value(heap),
+        }
+    }
+}
+
+fn params_output<'a>(
+    params: &'a super::Params,
+) -> Result<&'a TaskOutputOwned, super::ExpressionError> {
+    match params {
+        super::Params::Owned(o) => o
+            .output
+            .as_ref()
+            .ok_or(super::ExpressionError::UnsupportedSpecial),
+        super::Params::Ref(r) => match &r.output {
+            Some(TaskOutput::Owned(o)) => Ok(o),
+            Some(TaskOutput::Ref(_)) => {
+                // We can't return a reference to TaskOutputRef as TaskOutputOwned,
+                // but in practice this path uses Owned. If we hit Ref, it's unsupported.
+                Err(super::ExpressionError::UnsupportedSpecial)
+            }
+            None => Err(super::ExpressionError::UnsupportedSpecial),
+        },
+    }
+}
+
+fn l1_normalize(v: &[rust_decimal::Decimal]) -> Vec<rust_decimal::Decimal> {
+    if v.is_empty() {
+        return Vec::new();
+    }
+    let sum: rust_decimal::Decimal = v.iter().map(|d| d.abs()).sum();
+    if sum.is_zero() {
+        let uniform =
+            rust_decimal::Decimal::ONE / rust_decimal::Decimal::from(v.len());
+        vec![uniform; v.len()]
+    } else {
+        v.iter().map(|d| d / sum).collect()
+    }
+}
+
+/// Computes a weighted sum of scores where the first element has weight 0,
+/// the last element has weight 1, and intermediate elements are evenly spaced.
+fn weighted_sum(scores: &[rust_decimal::Decimal]) -> rust_decimal::Decimal {
+    let len = scores.len();
+    if len <= 1 {
+        return scores.iter().sum();
+    }
+    let mut ws = rust_decimal::Decimal::ZERO;
+    let last = len - 1;
+    for (i, score) in scores.iter().enumerate() {
+        let weight = rust_decimal::Decimal::from(i)
+            / rust_decimal::Decimal::from(last);
+        ws += score * weight;
+    }
+    ws
+}

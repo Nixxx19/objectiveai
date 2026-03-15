@@ -1,0 +1,19 @@
+import { functionInventionRecursiveChunkMerged, functionInventionRecursiveChunkNormalized, functionInventionRecursiveChunkToUnary, generateFunctionInventionRecursiveChunk } from "../../../../../wasm/loader.js";
+import type { FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk } from "./functionInventionRecursiveChunk";
+import type { FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive } from "../unary/functionInventionRecursive";
+
+export function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, b: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk {
+  return JSON.parse(functionInventionRecursiveChunkMerged(a, b));
+}
+
+export function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkNormalized(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk {
+  return JSON.parse(functionInventionRecursiveChunkNormalized(a));
+}
+
+export function wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary(a: FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk): FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive {
+  return JSON.parse(functionInventionRecursiveChunkToUnary(a));
+}
+
+export function wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInventionRecursiveChunk(seed: number): FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk {
+  return JSON.parse(generateFunctionInventionRecursiveChunk(seed));
+}

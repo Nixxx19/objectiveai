@@ -1,0 +1,27 @@
+{
+  "title": "agent.completions.request.ProviderSort",
+  "description": "How to sort/prioritize providers.",
+  "anyOf": [
+    {
+      "description": "Prioritize by price (cheapest first).",
+      "type": "string",
+      "enum": [
+        "price"
+      ]
+    },
+    {
+      "description": "Prioritize by throughput (fastest first).",
+      "type": "string",
+      "enum": [
+        "throughput"
+      ]
+    },
+    {
+      "description": "Prioritize by latency (lowest first).",
+      "type": "string",
+      "enum": [
+        "latency"
+      ]
+    }
+  ]
+}

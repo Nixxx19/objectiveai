@@ -1,0 +1,34 @@
+{
+  "title": "vector.completions.cache.CacheVoteRequestOwned",
+  "type": "object",
+  "properties": {
+    "agent": {
+      "$ref": "agent.completions.request.Agent"
+    },
+    "agents": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.completions.request.Agent"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.Message"
+      }
+    },
+    "responses": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.RichContent"
+      }
+    }
+  }
+}

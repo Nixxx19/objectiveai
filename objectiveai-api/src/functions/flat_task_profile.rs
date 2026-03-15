@@ -147,7 +147,7 @@ impl FlatTaskProfile {
 
 /// Multiple function tasks from a mapped expression.
 ///
-/// Created when a task has a `map` index pointing to an input_maps sub-array.
+/// Created when a task has a `map` expression that expands into multiple instances.
 /// Each element in that array produces one function instance.
 #[derive(Debug, Clone)]
 pub struct MapFunctionFlatTaskProfile {
@@ -194,7 +194,7 @@ pub struct FunctionFlatTaskProfile {
     /// Description from the Function definition.
     pub description: Option<String>,
     /// The compiled input for this Function.
-    pub input: objectiveai::functions::expression::Input,
+    pub input: objectiveai::functions::expression::InputValue,
     /// The flattened child tasks (None if task was skipped).
     pub tasks: Vec<Option<FlatTaskProfile>>,
     /// The weights for each task from the Profile (for weighted averaging).
@@ -256,17 +256,9 @@ pub enum FunctionType {
         /// Expected output length, if known from output_length expression.
         output_length: Option<u64>,
         /// input_split expression if defined
-        input_split: Option<
-            objectiveai::functions::expression::WithExpression<
-                Vec<objectiveai::functions::expression::Input>,
-            >,
-        >,
+        input_split: Option<objectiveai::functions::expression::Expression>,
         /// input_merge expression if defined
-        input_merge: Option<
-            objectiveai::functions::expression::WithExpression<
-                objectiveai::functions::expression::Input,
-            >,
-        >,
+        input_merge: Option<objectiveai::functions::expression::Expression>,
     },
 }
 
@@ -311,13 +303,10 @@ pub struct VectorCompletionFlatTaskProfile {
     /// The profile for the vector completion (weights and optional per-LLM invert flags).
     pub profile: objectiveai::vector::completions::request::Profile,
     /// The compiled messages for the vector completion.
-    pub messages: Vec<objectiveai::chat::completions::request::Message>,
-    /// Optional tools for the vector completion (read-only context).
-    pub tools: Option<Vec<objectiveai::chat::completions::request::Tool>>,
-    /// The compiled response options the LLMs will vote on.
-    pub responses: Vec<objectiveai::chat::completions::request::RichContent>,
-    /// Expression to transform the raw VectorCompletionOutput into a FunctionOutput.
-    /// Receives: `output` (the raw VectorCompletionOutput).
+    pub messages: Vec<objectiveai::agent::completions::message::Message>,
+    /// The compiled response options the agents will vote on.
+    pub responses: Vec<objectiveai::agent::completions::message::RichContent>,
+    /// Expression to transform the raw task output into a TaskOutputOwned.
     pub output: objectiveai::functions::expression::Expression,
     /// Whether to invert the compiled output after applying `output`.
     pub invert_output: bool,
@@ -339,7 +328,7 @@ impl VectorCompletionFlatTaskProfile {
 #[derive(Debug, Clone)]
 pub struct PlaceholderScalarFunctionFlatTaskProfile {
     pub path: Vec<u64>,
-    pub input: objectiveai::functions::expression::Input,
+    pub input: objectiveai::functions::expression::InputValue,
     pub output: objectiveai::functions::expression::Expression,
     pub invert_output: bool,
 }
@@ -377,14 +366,10 @@ impl MapPlaceholderScalarFunctionFlatTaskProfile {
 #[derive(Debug, Clone)]
 pub struct PlaceholderVectorFunctionFlatTaskProfile {
     pub path: Vec<u64>,
-    pub input: objectiveai::functions::expression::Input,
+    pub input: objectiveai::functions::expression::InputValue,
     pub output_length: u64,
-    pub input_split: objectiveai::functions::expression::WithExpression<
-        Vec<objectiveai::functions::expression::Input>,
-    >,
-    pub input_merge: objectiveai::functions::expression::WithExpression<
-        objectiveai::functions::expression::Input,
-    >,
+    pub input_split: objectiveai::functions::expression::Expression,
+    pub input_merge: objectiveai::functions::expression::Expression,
     pub output: objectiveai::functions::expression::Expression,
     pub invert_output: bool,
 }
@@ -460,17 +445,19 @@ pub async fn get_flat_task_profile<CTXEXT>(
     mut path: Vec<u64>,
     function: FunctionParam,
     profile: ProfileParam,
-    input: objectiveai::functions::expression::Input,
+    input: objectiveai::functions::expression::InputValue,
     task_output: Option<objectiveai::functions::expression::Expression>,
     invert_output: bool,
     function_fetcher: Arc<
         super::function_fetcher::FetcherRouter<
             impl super::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
             impl super::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+            impl super::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
         >,
     >,
     profile_fetcher: Arc<
         super::profile_fetcher::FetcherRouter<
+            impl super::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
             impl super::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
             impl super::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
         >,
@@ -1305,26 +1292,14 @@ where
     Ok(super::VectorCompletionFlatTaskProfile {
         path,
         ensemble: objectiveai::ensemble::EnsembleBase {
-            llms: ensemble
-                .llms
+            agents: ensemble
+                .agents
                 .into_iter()
-                .map(|llm| {
-                    objectiveai::ensemble_llm::EnsembleLlmBaseWithFallbacksAndCount {
-                        count: llm.count,
-                        inner: llm.inner.base,
-                        fallbacks: llm.fallbacks.map(|fallbacks| {
-                            fallbacks
-                                .into_iter()
-                                .map(|fallback| fallback.base)
-                                .collect()
-                        }),
-                    }
-                })
+                .map(|agent| agent.into_base())
                 .collect(),
         },
         profile,
         messages: task.messages,
-        tools: task.tools,
         responses: task.responses,
         output: task.output,
         invert_output,

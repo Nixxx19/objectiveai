@@ -1,0 +1,73 @@
+{
+  "title": "functions.inventions.response.streaming.FunctionInventionChunk",
+  "type": "object",
+  "properties": {
+    "completions": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.inventions.response.streaming.AgentCompletionChunk"
+      }
+    },
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "function": {
+      "anyOf": [
+        {
+          "$ref": "functions.FullRemoteFunction"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "object": {
+      "$ref": "functions.inventions.response.streaming.Object"
+    },
+    "path": {
+      "anyOf": [
+        {
+          "$ref": "functions.RemoteFunctionPath"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "state": {
+      "anyOf": [
+        {
+          "$ref": "functions.inventions.state.State"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

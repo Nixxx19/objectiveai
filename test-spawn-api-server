@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# Spawns the objectiveai-api server on a random free port for testing.
+# MOCK_DELAY_MS=0 so tests run fast.
+#
+# Prints the port to stdout once the server is ready, then keeps running.
+# Kill with Ctrl-C or SIGTERM.
+#
+# Usage:
+#   ./test-spawn-api-server
+#   PORT=$(./test-spawn-api-server) # capture port (server runs in background)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+API_DIR="$SCRIPT_DIR/objectiveai-api"
+
+# Find a free port
+get_free_port() {
+  python3 -c "import socket; s=socket.socket(); s.bind(('127.0.0.1',0)); print(s.getsockname()[1]); s.close()"
+}
+
+PORT=$(get_free_port)
+
+# Start the server in the background
+ADDRESS=127.0.0.1 PORT="$PORT" MOCK_DELAY_MS=0 \
+  cargo run --package objectiveai-api 2>/dev/null &
+SERVER_PID=$!
+
+# Clean up on exit
+trap "kill $SERVER_PID 2>/dev/null" EXIT
+
+# Wait for the server to accept connections (up to 120s)
+TIMEOUT=120
+ELAPSED=0
+while ! (echo > /dev/tcp/127.0.0.1/"$PORT") 2>/dev/null; do
+  if ! kill -0 "$SERVER_PID" 2>/dev/null; then
+    echo "Server process died" >&2
+    exit 1
+  fi
+  if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
+    echo "Server did not become ready within ${TIMEOUT}s" >&2
+    exit 1
+  fi
+  sleep 0.1
+  ELAPSED=$((ELAPSED + 1))
+done
+
+echo "$PORT"
+
+# Keep running until killed
+wait "$SERVER_PID"

@@ -1,7 +1,9 @@
 use crate::{error, vector};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.executions.response.streaming.VectorCompletionTaskChunk")]
 pub struct VectorCompletionTaskChunk {
     pub index: u64,
     pub task_index: u64,
@@ -15,11 +17,8 @@ pub struct VectorCompletionTaskChunk {
 impl VectorCompletionTaskChunk {
     pub fn push(&mut self, other: &VectorCompletionTaskChunk) {
         self.inner.push(&other.inner);
-        match (&mut self.error, &other.error) {
-            (None, Some(other_error)) => {
-                self.error = Some(other_error.clone());
-            }
-            _ => {}
+        if let Some(error) = &other.error {
+            self.error = Some(error.clone());
         }
     }
 }

@@ -1,0 +1,29 @@
+{
+  "title": "functions.alpha_scalar.BranchTaskExpression",
+  "anyOf": [
+    {
+      "type": "object",
+      "$ref": "functions.alpha_scalar.ScalarFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "alpha.scalar.function"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.alpha_scalar.PlaceholderScalarFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.alpha.scalar.function"
+          ]
+        }
+      }
+    }
+  ]
+}

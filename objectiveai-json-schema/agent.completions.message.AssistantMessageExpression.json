@@ -1,0 +1,156 @@
+{
+  "title": "agent.completions.message.AssistantMessageExpression",
+  "description": "Expression variant of [`AssistantMessage`] for dynamic content.",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "The content expression.",
+      "anyOf": [
+        {
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "$ref": "agent.completions.message.RichContentExpression"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "anyOf": [
+        {
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "refusal": {
+      "anyOf": [
+        {
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tool_calls": {
+      "anyOf": [
+        {
+          "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+          "anyOf": [
+            {
+              "description": "An expression (JMESPath or Starlark) to evaluate.",
+              "$ref": "functions.expression.Expression"
+            },
+            {
+              "description": "A literal value.",
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "description": "A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```",
+                    "anyOf": [
+                      {
+                        "description": "An expression (JMESPath or Starlark) to evaluate.",
+                        "$ref": "functions.expression.Expression"
+                      },
+                      {
+                        "description": "A literal value.",
+                        "$ref": "agent.completions.message.AssistantToolCallExpression"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

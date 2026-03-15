@@ -1,0 +1,27 @@
+{
+  "title": "agent.completions.message.ImageUrlDetail",
+  "description": "Detail level for image processing.",
+  "anyOf": [
+    {
+      "description": "Let the model decide the detail level.",
+      "type": "string",
+      "enum": [
+        "auto"
+      ]
+    },
+    {
+      "description": "Low detail mode (faster, less tokens).",
+      "type": "string",
+      "enum": [
+        "low"
+      ]
+    },
+    {
+      "description": "High detail mode (more accurate, more tokens).",
+      "type": "string",
+      "enum": [
+        "high"
+      ]
+    }
+  ]
+}

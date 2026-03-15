@@ -1,0 +1,69 @@
+{
+  "title": "agent.openrouter.ProviderQuantization",
+  "description": "Model quantization levels for provider filtering.\n\nQuantization reduces model precision to decrease memory usage and\nincrease inference speed, potentially at the cost of output quality.",
+  "anyOf": [
+    {
+      "description": "4-bit integer quantization.",
+      "type": "string",
+      "enum": [
+        "int4"
+      ]
+    },
+    {
+      "description": "8-bit integer quantization.",
+      "type": "string",
+      "enum": [
+        "int8"
+      ]
+    },
+    {
+      "description": "4-bit floating point quantization.",
+      "type": "string",
+      "enum": [
+        "fp4"
+      ]
+    },
+    {
+      "description": "6-bit floating point quantization.",
+      "type": "string",
+      "enum": [
+        "fp6"
+      ]
+    },
+    {
+      "description": "8-bit floating point quantization.",
+      "type": "string",
+      "enum": [
+        "fp8"
+      ]
+    },
+    {
+      "description": "16-bit floating point (half precision).",
+      "type": "string",
+      "enum": [
+        "fp16"
+      ]
+    },
+    {
+      "description": "16-bit brain floating point.",
+      "type": "string",
+      "enum": [
+        "bf16"
+      ]
+    },
+    {
+      "description": "32-bit floating point (full precision).",
+      "type": "string",
+      "enum": [
+        "fp32"
+      ]
+    },
+    {
+      "description": "Unknown quantization level.",
+      "type": "string",
+      "enum": [
+        "unknown"
+      ]
+    }
+  ]
+}

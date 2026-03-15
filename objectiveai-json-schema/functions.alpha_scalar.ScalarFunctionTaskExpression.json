@@ -1,0 +1,31 @@
+{
+  "title": "functions.alpha_scalar.ScalarFunctionTaskExpression",
+  "type": "object",
+  "properties": {
+    "commit": {
+      "type": "string"
+    },
+    "input": {
+      "$ref": "functions.expression.Expression"
+    },
+    "owner": {
+      "type": "string"
+    },
+    "remote": {
+      "$ref": "functions.Remote"
+    },
+    "repository": {
+      "type": "string"
+    },
+    "skip": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.Expression"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

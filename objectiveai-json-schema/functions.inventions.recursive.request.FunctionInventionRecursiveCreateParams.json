@@ -1,0 +1,90 @@
+{
+  "title": "functions.inventions.recursive.request.FunctionInventionRecursiveCreateParams",
+  "type": "object",
+  "properties": {
+    "agent": {
+      "$ref": "agent.completions.request.Agent"
+    },
+    "agents": {
+      "anyOf": [
+        {
+          "type": "array",
+          "items": {
+            "$ref": "agent.completions.request.Agent"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "max_step_retries": {
+      "description": "Maximum number of retries per invention step.\nEach step is one agent completion (which itself may loop internally\nvia tool calls). If the step's validation still fails after the\nagent loop ends, the step is retried up to this many times.\nDefaults to 3 if not specified.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 4294967295
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "name": {
+      "type": "string"
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.Provider"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "remote": {
+      "$ref": "functions.Remote"
+    },
+    "seed": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "state": {
+      "$ref": "functions.inventions.state.ParamsState"
+    },
+    "stream": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

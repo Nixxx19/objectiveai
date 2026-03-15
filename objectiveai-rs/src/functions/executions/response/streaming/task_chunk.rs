@@ -1,7 +1,9 @@
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
+#[schemars(rename = "functions.executions.response.streaming.TaskChunk")]
 pub enum TaskChunk {
     FunctionExecution(super::FunctionExecutionTaskChunk),
     VectorCompletion(super::VectorCompletionTaskChunk),

@@ -1,11 +1,11 @@
 //! Function execution client.
 
 use crate::{
-    chat, ctx, functions,
+    ctx, functions,
     util::{ChoiceIndexer, StreamOnce},
     vector,
 };
-use futures::{Stream, StreamExt, TryStreamExt};
+use futures::{Stream, StreamExt};
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, hash::Hasher, sync::Arc, time};
 
@@ -23,7 +23,7 @@ pub fn vector_response_id(created: u64) -> String {
 
 /// Computes the final function output as a weighted average of task outputs.
 ///
-/// All task outputs are already validated `FunctionOutput` (scalar or vector)
+/// All task outputs are already validated `TaskOutputOwned` (scalar or vector)
 /// by their respective output expressions. This function is deterministically
 /// infallible - all inputs are assumed valid.
 ///
@@ -32,14 +32,14 @@ fn compute_weighted_function_output(
     function_type: &functions::FunctionType,
     profile_weights: &[rust_decimal::Decimal],
     task_outputs: &[Option<
-        objectiveai::functions::expression::FunctionOutput,
+        objectiveai::functions::expression::TaskOutputOwned,
     >],
-) -> objectiveai::functions::expression::FunctionOutput {
-    use objectiveai::functions::expression::FunctionOutput;
+) -> objectiveai::functions::expression::TaskOutputOwned {
+    use objectiveai::functions::expression::TaskOutputOwned;
     use rust_decimal::Decimal;
 
-    // Collect (weight, FunctionOutput) pairs from present task outputs
-    let mut weighted_outputs: Vec<(Decimal, &FunctionOutput)> = Vec::new();
+    // Collect (weight, TaskOutputOwned) pairs from present task outputs
+    let mut weighted_outputs: Vec<(Decimal, &TaskOutputOwned)> = Vec::new();
     let mut total_weight = Decimal::ZERO;
 
     for (i, task_output) in task_outputs.iter().enumerate() {
@@ -54,7 +54,7 @@ fn compute_weighted_function_output(
         };
 
         // Skip error outputs (these shouldn't be here, but just in case)
-        if matches!(fn_output, FunctionOutput::Err(_)) {
+        if matches!(fn_output, TaskOutputOwned::Err(_)) {
             continue;
         }
 
@@ -64,7 +64,7 @@ fn compute_weighted_function_output(
 
     // If no valid outputs, return error (shouldn't happen if caller filters properly)
     if weighted_outputs.is_empty() || total_weight == Decimal::ZERO {
-        return FunctionOutput::Err(serde_json::Value::Null);
+        return TaskOutputOwned::Err(serde_json::Value::Null);
     }
 
     // Compute weighted average with L1-normalized weights
@@ -73,7 +73,7 @@ fn compute_weighted_function_output(
             let mut weighted_sum = Decimal::ZERO;
             for (weight, fn_output) in &weighted_outputs {
                 match fn_output {
-                    FunctionOutput::Scalar(s) => {
+                    TaskOutputOwned::Scalar(s) => {
                         // L1-normalize: weight / total_weight
                         weighted_sum += (*weight / total_weight) * s;
                     }
@@ -85,14 +85,14 @@ fn compute_weighted_function_output(
                     }
                 }
             }
-            FunctionOutput::Scalar(weighted_sum)
+            TaskOutputOwned::Scalar(weighted_sum)
         }
         functions::FunctionType::Vector { .. } => {
             // Get vector length from first output
             let vec_len = weighted_outputs
                 .iter()
                 .find_map(|(_, o)| match o {
-                    FunctionOutput::Vector(v) => Some(v.len()),
+                    TaskOutputOwned::Vector(v) => Some(v.len()),
                     _ => None,
                 })
                 .expect("expected at least one vector output");
@@ -101,7 +101,7 @@ fn compute_weighted_function_output(
             let mut result = vec![Decimal::ZERO; vec_len];
             for (weight, fn_output) in &weighted_outputs {
                 match fn_output {
-                    FunctionOutput::Vector(v) => {
+                    TaskOutputOwned::Vector(v) => {
                         if v.len() != vec_len {
                             panic!(
                                 "vector length mismatch: expected {}, got {}",
@@ -122,45 +122,45 @@ fn compute_weighted_function_output(
                     }
                 }
             }
-            FunctionOutput::Vector(result)
+            TaskOutputOwned::Vector(result)
         }
     }
 }
-/// Applies a task's output expression to transform a raw task output into a FunctionOutput.
+/// Applies a task's output expression to transform a raw task output into a TaskOutputOwned.
 ///
 /// The expression receives `output` which is one of 4 variants:
-/// - `Function(FunctionOutput)` - single function task result
-/// - `MapFunction(Vec<FunctionOutput>)` - mapped function task results
+/// - `Function(TaskOutputOwned)` - single function task result
+/// - `MapFunction(Vec<TaskOutputOwned>)` - mapped function task results
 /// - `VectorCompletion(VectorCompletionOutput)` - single vector completion result
 /// - `MapVectorCompletion(Vec<VectorCompletionOutput>)` - mapped vector completion results
 ///
-/// The expression transforms this into a `FunctionOutput`. The output is validated against
+/// The expression transforms this into a `TaskOutputOwned`. The output is validated against
 /// the function type (scalar vs vector) and optional output length.
 ///
-/// Returns the output (possibly as `FunctionOutput::Err` if invalid) and an optional error.
+/// Returns the output (possibly as `TaskOutputOwned::Err` if invalid) and an optional error.
 fn apply_task_output_expression(
-    input: &objectiveai::functions::expression::Input,
+    input: &objectiveai::functions::expression::InputValue,
     task_output: objectiveai::functions::expression::TaskOutputOwned,
     output_expression: &objectiveai::functions::expression::Expression,
     invert_output: bool,
     function_type: &functions::FunctionType,
 ) -> (
-    objectiveai::functions::expression::FunctionOutput,
+    objectiveai::functions::expression::TaskOutputOwned,
     Option<objectiveai::error::ResponseError>,
 ) {
     use objectiveai::functions::expression::{
-        FunctionOutput, Params, ParamsRef, TaskOutput,
+        TaskOutputOwned, Params, ParamsRef, TaskOutput,
     };
     use rust_decimal::Decimal;
 
-    fn invert_function_output(output: FunctionOutput) -> FunctionOutput {
+    fn invert_function_output(output: TaskOutputOwned) -> TaskOutputOwned {
         match output {
-            FunctionOutput::Scalar(s) => {
-                FunctionOutput::Scalar(Decimal::ONE - s)
+            TaskOutputOwned::Scalar(s) => {
+                TaskOutputOwned::Scalar(Decimal::ONE - s)
             }
-            FunctionOutput::Vector(mut v) => {
+            TaskOutputOwned::Vector(mut v) => {
                 if v.is_empty() {
-                    return FunctionOutput::Vector(v);
+                    return TaskOutputOwned::Vector(v);
                 }
                 for x in &mut v {
                     *x = Decimal::ONE - *x;
@@ -176,9 +176,19 @@ fn apply_task_output_expression(
                         *x /= sum;
                     }
                 }
-                FunctionOutput::Vector(v)
+                TaskOutputOwned::Vector(v)
             }
-            FunctionOutput::Err(e) => FunctionOutput::Err(e),
+            TaskOutputOwned::Vectors(vecs) => {
+                TaskOutputOwned::Vectors(
+                    vecs.into_iter()
+                        .map(|v| match invert_function_output(TaskOutputOwned::Vector(v)) {
+                            TaskOutputOwned::Vector(v) => v,
+                            _ => unreachable!(),
+                        })
+                        .collect(),
+                )
+            }
+            TaskOutputOwned::Err(e) => TaskOutputOwned::Err(e),
         }
     }
 
@@ -189,13 +199,13 @@ fn apply_task_output_expression(
         map: None,
     });
 
-    // Evaluate the expression - it transforms the raw output into FunctionOutput
-    let result = match output_expression.compile_one::<FunctionOutput>(&params)
+    // Evaluate the expression - it transforms the raw output into TaskOutputOwned
+    let result = match output_expression.compile_one::<TaskOutputOwned>(&params)
     {
         Ok(result) => result,
         Err(e) => {
             return (
-                FunctionOutput::Err(serde_json::Value::Null),
+                TaskOutputOwned::Err(serde_json::Value::Null),
                 Some(objectiveai::error::ResponseError::from(
                     &super::Error::InvalidAppExpression(e),
                 )),
@@ -206,12 +216,12 @@ fn apply_task_output_expression(
     // Validate the output against the function type
     let (validated, err) = match (function_type, result) {
         // Scalar function must return scalar output (allow -0.01 to 1.01 for floating point tolerance)
-        (functions::FunctionType::Scalar, FunctionOutput::Scalar(s)) => {
+        (functions::FunctionType::Scalar, TaskOutputOwned::Scalar(s)) => {
             if s >= rust_decimal::dec!(-0.01) && s <= rust_decimal::dec!(1.01) {
-                (FunctionOutput::Scalar(s), None)
+                (TaskOutputOwned::Scalar(s), None)
             } else {
                 (
-                    FunctionOutput::Scalar(s).into_err(),
+                    TaskOutputOwned::Scalar(s).into_err(),
                     Some(objectiveai::error::ResponseError::from(
                         &super::Error::InvalidScalarOutput,
                     )),
@@ -221,7 +231,7 @@ fn apply_task_output_expression(
         // Scalar function got vector output - error
         (
             functions::FunctionType::Scalar,
-            result @ FunctionOutput::Vector(_),
+            result @ TaskOutputOwned::Vector(_),
         ) => (
             result.into_err(),
             Some(objectiveai::error::ResponseError::from(
@@ -231,18 +241,18 @@ fn apply_task_output_expression(
         // Vector function must return vector output
         (
             functions::FunctionType::Vector { output_length, .. },
-            FunctionOutput::Vector(v),
+            TaskOutputOwned::Vector(v),
         ) => {
             let sum: Decimal = v.iter().cloned().sum();
             let len_ok = output_length.is_none_or(|len| len == v.len() as u64);
             let sum_ok = sum >= rust_decimal::dec!(0.99)
                 && sum <= rust_decimal::dec!(1.01);
             if len_ok && sum_ok {
-                (FunctionOutput::Vector(v), None)
+                (TaskOutputOwned::Vector(v), None)
             } else {
                 let err_len = output_length.unwrap_or(v.len() as u64) as usize;
                 (
-                    FunctionOutput::Vector(v).into_err(),
+                    TaskOutputOwned::Vector(v).into_err(),
                     Some(objectiveai::error::ResponseError::from(
                         &super::Error::InvalidVectorOutput(err_len),
                     )),
@@ -252,7 +262,7 @@ fn apply_task_output_expression(
         // Vector function got scalar output - error
         (
             functions::FunctionType::Vector { output_length, .. },
-            result @ FunctionOutput::Scalar(_),
+            result @ TaskOutputOwned::Scalar(_),
         ) => (
             result.into_err(),
             Some(objectiveai::error::ResponseError::from(
@@ -261,9 +271,16 @@ fn apply_task_output_expression(
                 ),
             )),
         ),
+        // Vectors output is not expected from task output expressions
+        (_, result @ TaskOutputOwned::Vectors(_)) => (
+            result.into_err(),
+            Some(objectiveai::error::ResponseError::from(
+                &super::Error::InvalidScalarOutput,
+            )),
+        ),
         // Error output passes through - this means the expression itself produced an error value
-        (_, FunctionOutput::Err(err_val)) => (
-            FunctionOutput::Err(err_val.clone()),
+        (_, TaskOutputOwned::Err(err_val)) => (
+            TaskOutputOwned::Err(err_val.clone()),
             Some(objectiveai::error::ResponseError {
                 code: 400,
                 message: serde_json::json!({
@@ -288,20 +305,25 @@ fn apply_task_output_expression(
 /// Functions) with streaming output support.
 pub struct Client<
     CTXEXT,
-    FENSLLM,
-    CUSG,
+    OPENROUTER,
+    CLAUDEAGENTSDK,
+    MOCK,
+    FAGENT,
+    ACUSG,
     FENS,
     FVVOTE,
     FCVOTE,
     VUSG,
     FFNG,
     FFNF,
+    FFNM,
     FPFLG,
     FPFLF,
+    FPFLM,
     FUSG,
 > {
-    /// Chat completions client for reasoning summaries.
-    pub chat_client: Arc<chat::completions::Client<CTXEXT, FENSLLM, CUSG>>,
+    /// Agent completions client for reasoning summaries.
+    pub agent_client: Arc<crate::agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
     /// Fetcher for Ensemble definitions.
     pub ensemble_fetcher:
         Arc<crate::ensemble::fetcher::CachingFetcher<CTXEXT, FENS>>,
@@ -309,8 +331,11 @@ pub struct Client<
     pub vector_client: Arc<
         vector::completions::Client<
             CTXEXT,
-            FENSLLM,
-            CUSG,
+            OPENROUTER,
+            CLAUDEAGENTSDK,
+            MOCK,
+            FAGENT,
+            ACUSG,
             FENS,
             FVVOTE,
             FCVOTE,
@@ -319,54 +344,67 @@ pub struct Client<
     >,
     /// Fetcher for Function definitions.
     pub function_fetcher:
-        Arc<functions::function_fetcher::FetcherRouter<FFNG, FFNF>>,
+        Arc<functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>>,
     /// Fetcher for Profile definitions.
     pub profile_fetcher:
-        Arc<functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF>>,
+        Arc<functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF, FPFLM>>,
     /// Handler for recording usage after execution.
     pub usage_handler: Arc<FUSG>,
 }
 
 impl<
     CTXEXT,
-    FENSLLM,
-    CUSG,
+    OPENROUTER,
+    CLAUDEAGENTSDK,
+    MOCK,
+    FAGENT,
+    ACUSG,
     FENS,
     FVVOTE,
     FCVOTE,
     VUSG,
     FFNG,
     FFNF,
+    FFNM,
     FPFLG,
     FPFLF,
+    FPFLM,
     FUSG,
 >
     Client<
         CTXEXT,
-        FENSLLM,
-        CUSG,
+        OPENROUTER,
+        CLAUDEAGENTSDK,
+        MOCK,
+        FAGENT,
+        ACUSG,
         FENS,
         FVVOTE,
         FCVOTE,
         VUSG,
         FFNG,
         FFNF,
+        FFNM,
         FPFLG,
         FPFLF,
+        FPFLM,
         FUSG,
     >
 {
     /// Creates a new Function execution client.
     pub fn new(
-        chat_client: Arc<chat::completions::Client<CTXEXT, FENSLLM, CUSG>>,
+        agent_client: Arc<crate::agent::completions::Client<CTXEXT, OPENROUTER, CLAUDEAGENTSDK, MOCK, FAGENT, ACUSG>>,
         ensemble_fetcher: Arc<
             crate::ensemble::fetcher::CachingFetcher<CTXEXT, FENS>,
         >,
         vector_client: Arc<
             vector::completions::Client<
                 CTXEXT,
-                FENSLLM,
-                CUSG,
+                OPENROUTER,
+                CLAUDEAGENTSDK,
+                MOCK,
+                FAGENT,
+                ACUSG,
                 FENS,
                 FVVOTE,
                 FCVOTE,
@@ -374,15 +412,15 @@ impl<
             >,
         >,
         function_fetcher: Arc<
-            functions::function_fetcher::FetcherRouter<FFNG, FFNF>,
+            functions::function_fetcher::FetcherRouter<FFNG, FFNF, FFNM>,
         >,
         profile_fetcher: Arc<
-            functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF>,
+            functions::profile_fetcher::FetcherRouter<FPFLG, FPFLF, FPFLM>,
         >,
         usage_handler: Arc<FUSG>,
     ) -> Self {
         Self {
-            chat_client,
+            agent_client,
             ensemble_fetcher,
             vector_client,
             function_fetcher,
@@ -394,37 +432,49 @@ impl<
 
 impl<
     CTXEXT,
-    FENSLLM,
-    CUSG,
+    OPENROUTER,
+    CLAUDEAGENTSDK,
+    MOCK,
+    FAGENT,
+    ACUSG,
     FENS,
     FVVOTE,
     FCVOTE,
     VUSG,
     FFNG,
     FFNF,
+    FFNM,
     FPFLG,
     FPFLF,
+    FPFLM,
     FUSG,
 >
     Client<
         CTXEXT,
-        FENSLLM,
-        CUSG,
+        OPENROUTER,
+        CLAUDEAGENTSDK,
+        MOCK,
+        FAGENT,
+        ACUSG,
         FENS,
         FVVOTE,
         FCVOTE,
         VUSG,
         FFNG,
         FFNF,
+        FFNM,
         FPFLG,
         FPFLF,
+        FPFLM,
         FUSG,
     >
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    FENSLLM:
-        crate::ensemble_llm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    CUSG: chat::completions::usage_handler::UsageHandler<CTXEXT>
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
+    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    ACUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT>
         + Send
         + Sync
         + 'static,
@@ -443,8 +493,10 @@ where
         + 'static,
     FFNG: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FFNF: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNM: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FPFLG: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FPFLF: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FPFLM: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FUSG: super::usage_handler::UsageHandler<CTXEXT> + Send + Sync + 'static,
 {
     /// Executes a Function and returns the complete response.
@@ -491,7 +543,6 @@ where
             let mut aggregate: Option<
                 objectiveai::functions::executions::response::streaming::FunctionExecutionChunk,
             > = None;
-            let mut any_usage = false;
             let stream = match self
                 .clone()
                 .create_streaming(ctx.clone(), request.clone())
@@ -505,7 +556,6 @@ where
             };
             futures::pin_mut!(stream);
             while let Some(chunk) = stream.next().await {
-                any_usage |= chunk.any_usage();
                 match &mut aggregate {
                     Some(aggregate) => aggregate.push(&chunk),
                     None => aggregate = Some(chunk.clone()),
@@ -514,9 +564,11 @@ where
             }
             drop(stream);
             drop(tx);
-            if any_usage {
+            let response: objectiveai::functions::executions::response::unary::FunctionExecution =
+                aggregate.unwrap().into();
+            if response.usage.any_usage() {
                 self.usage_handler
-                    .handle_usage(ctx, request, aggregate.unwrap().into())
+                    .handle_usage(ctx, request, response)
                     .await;
             }
         });
@@ -534,37 +586,49 @@ where
 
 impl<
     CTXEXT,
-    FENSLLM,
-    CUSG,
+    OPENROUTER,
+    CLAUDEAGENTSDK,
+    MOCK,
+    FAGENT,
+    ACUSG,
     FENS,
     FVVOTE,
     FCVOTE,
     VUSG,
     FFNG,
     FFNF,
+    FFNM,
     FPFLG,
     FPFLF,
+    FPFLM,
     FUSG,
 >
     Client<
         CTXEXT,
-        FENSLLM,
-        CUSG,
+        OPENROUTER,
+        CLAUDEAGENTSDK,
+        MOCK,
+        FAGENT,
+        ACUSG,
         FENS,
         FVVOTE,
         FCVOTE,
         VUSG,
         FFNG,
         FFNF,
+        FFNM,
         FPFLG,
         FPFLF,
+        FPFLM,
         FUSG,
     >
 where
     CTXEXT: ctx::ContextExt + Send + Sync + 'static,
-    FENSLLM:
-        crate::ensemble_llm::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
-    CUSG: chat::completions::usage_handler::UsageHandler<CTXEXT>
+    OPENROUTER: crate::agent::completions::UpstreamClient<objectiveai::agent::openrouter::Agent> + Send + Sync + 'static,
+    CLAUDEAGENTSDK: crate::agent::completions::UpstreamClient<objectiveai::agent::claude_agent_sdk::Agent> + Send + Sync + 'static,
+    MOCK: crate::agent::completions::UpstreamClient<objectiveai::agent::mock::Agent> + Send + Sync + 'static,
+    FAGENT: crate::agent::fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    ACUSG: crate::agent::completions::usage_handler::UsageHandler<CTXEXT>
         + Send
         + Sync
         + 'static,
@@ -583,8 +647,10 @@ where
         + 'static,
     FFNG: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FFNF: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FFNM: functions::function_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FPFLG: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FPFLF: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
+    FPFLM: functions::profile_fetcher::Fetcher<CTXEXT> + Send + Sync + 'static,
     FUSG: Send + Sync + 'static,
 {
     /// Executes a Function with streaming output.
@@ -809,7 +875,7 @@ where
             }
 
             // split input
-            let split_input = input_split.compile_one(
+            let split_input: Vec<objectiveai::functions::expression::InputValue> = input_split.compile_one(
                 &objectiveai::functions::expression::Params::Ref(
                     objectiveai::functions::expression::ParamsRef {
                         input: &request.base().input,
@@ -831,10 +897,10 @@ where
             );
             for chunk in chunks {
                 pool_chunk_sizes.push(chunk.len());
-                let joined_input = input_merge.clone().compile_one(
+                let joined_input: objectiveai::functions::expression::InputValue = input_merge.compile_one(
                     &objectiveai::functions::expression::Params::Owned(
                         objectiveai::functions::expression::ParamsOwned {
-                            input: objectiveai::functions::expression::Input::Array(
+                            input: objectiveai::functions::expression::InputValue::Array(
                                 chunk.to_vec(),
                             ),
                             output: None,
@@ -915,7 +981,7 @@ where
 
             // track usage
             let mut usage =
-                objectiveai::vector::completions::response::Usage::default();
+                objectiveai::agent::completions::response::Usage::default();
 
             // track retry token index
             let mut retry_token_indices = Vec::new();
@@ -1012,7 +1078,7 @@ where
                             FtpStreamChunk::FunctionExecutionChunk(chunk) => {
                                 // check for output
                                 if let Some(ref output) = chunk.inner.output {
-                                    if let objectiveai::functions::expression::FunctionOutput::Vector(scores) = output {
+                                    if let objectiveai::functions::expression::TaskOutputOwned::Vector(scores) = output {
                                         pool_outputs.insert(pool_idx, scores.clone());
                                     }
                                 }
@@ -1116,7 +1182,7 @@ where
                         current_to_original = sorted_indices.clone();
 
                         // rebuild split_input in new sorted order
-                        let sorted_split_input: Vec<objectiveai::functions::expression::Input> =
+                        let sorted_split_input: Vec<objectiveai::functions::expression::InputValue> =
                             sorted_indices.iter()
                                 .map(|&orig_idx| split_input[orig_idx].clone())
                                 .collect();
@@ -1135,10 +1201,10 @@ where
                         let mut ftp_futs = Vec::with_capacity(chunks.len());
                         for chunk in chunks {
                             pool_chunk_sizes.push(chunk.len());
-                            let joined_input = match input_merge.clone().compile_one(
+                            let joined_input: objectiveai::functions::expression::InputValue = match input_merge.compile_one(
                                 &objectiveai::functions::expression::Params::Owned(
                                     objectiveai::functions::expression::ParamsOwned {
-                                        input: objectiveai::functions::expression::Input::Array(
+                                        input: objectiveai::functions::expression::InputValue::Array(
                                             chunk.to_vec(),
                                         ),
                                         output: None,
@@ -1250,8 +1316,8 @@ where
                 {
                     // unpack reasoning params
                     let objectiveai::functions::executions::request::Reasoning {
-                        model,
-                        models,
+                        agent,
+                        agents,
                     } = request.base().reasoning.as_ref().unwrap();
 
                     // iterate over vector completion chunks
@@ -1287,35 +1353,32 @@ where
                                                 .iter_mut()
                                                 .find(|c| c.index == completion_index)
                                                 .expect("missing completion for vote completion index");
-                                            let delta = &mut completion.inner.choices[0].delta;
-                                            if let Some(reasoning) = delta.reasoning.take() {
-                                                confidence_response.reasoning.push(reasoning);
-                                            }
-                                            if let Some(content) = delta.content.take()
-                                                && let Ok(vector::completions::ResponseKey {
-                                                    _think: Some(reasoning),
-                                                    ..
-                                                }) = serde_json::from_str(&content)
-                                            {
-                                                confidence_response.reasoning.push(reasoning);
-                                            }
-                                            if let Some(tool_calls) = delta.tool_calls.take() {
-                                                for tool_call in tool_calls {
-                                                    if let objectiveai::chat::completions::response::streaming::ToolCall {
-                                                        function: Some(
-                                                            objectiveai::chat::completions::response::streaming::ToolCallFunction {
-                                                                arguments: Some(arguments),
-                                                                ..
-                                                            }
-                                                        ),
+                                            // Extract reasoning from the first assistant message chunk
+                                            if let Some(objectiveai::agent::completions::response::streaming::MessageChunk::Assistant(assistant)) = completion.inner.messages.first_mut() {
+                                                if let Some(reasoning) = assistant.reasoning.take() {
+                                                    confidence_response.reasoning.push(reasoning);
+                                                }
+                                                if let Some(objectiveai::agent::completions::message::RichContent::Text(content)) = assistant.content.take()
+                                                    && let Ok(crate::vector::completions::ResponseKey {
+                                                        _think: Some(reasoning),
                                                         ..
-                                                    } = tool_call
-                                                        && let Ok(vector::completions::ResponseKey {
-                                                            _think: Some(reasoning),
+                                                    }) = serde_json::from_str(&content)
+                                                {
+                                                    confidence_response.reasoning.push(reasoning);
+                                                }
+                                                if let Some(tool_calls) = assistant.tool_calls.take() {
+                                                    for tool_call in tool_calls {
+                                                        if let Some(objectiveai::agent::completions::message::AssistantToolCallFunctionDelta {
+                                                            arguments: Some(arguments),
                                                             ..
-                                                        }) = serde_json::from_str(&arguments)
-                                                    {
-                                                        confidence_response.reasoning.push(reasoning);
+                                                        }) = tool_call.function
+                                                            && let Ok(crate::vector::completions::ResponseKey {
+                                                                _think: Some(reasoning),
+                                                                ..
+                                                            }) = serde_json::from_str(&arguments)
+                                                        {
+                                                            confidence_response.reasoning.push(reasoning);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -1337,10 +1400,10 @@ where
                     let reasoning_stream = self.create_reasoning_summary_streaming(
                         ctx,
                         request.clone(),
-                        model.clone(),
-                        models.clone(),
+                        agent.clone(),
+                        agents.clone(),
                         description,
-                        objectiveai::functions::expression::FunctionOutput::Vector(final_output.clone()),
+                        objectiveai::functions::expression::TaskOutputOwned::Vector(final_output.clone()),
                         confidence_responses,
                     ).await;
 
@@ -1349,7 +1412,7 @@ where
                     while let Some(chunk) = reasoning_stream.next().await {
                         // collect usage
                         if let Some(chunk_usage) = &chunk.inner.usage {
-                            usage.push_chat_completion_usage(chunk_usage);
+                            usage.push(chunk_usage);
                         }
 
                         // yield chunk
@@ -1384,7 +1447,7 @@ where
                         None
                     },
                     reasoning: None,
-                    output: Some(objectiveai::functions::expression::FunctionOutput::Vector(final_output)),
+                    output: Some(objectiveai::functions::expression::TaskOutputOwned::Vector(final_output)),
                     error: subsequent_round_error,
                     retry_token: Some(first_round_retry_token.to_string()),
                     created,
@@ -1460,8 +1523,8 @@ where
                 if reasoning {
                     // unpack reasoning data
                     let objectiveai::functions::executions::request::Reasoning {
-                        model,
-                        models,
+                        agent,
+                        agents,
                     } = request.base().reasoning.as_ref().unwrap();
                     let (
                         vector_completions,
@@ -1508,40 +1571,34 @@ where
                                     .expect(
                                         "missing completion for vote completion index",
                                     );
-                                let delta = &mut completion
-                                    .inner
-                                    .choices[0]
-                                    .delta;
-                                if let Some(reasoning) = delta.reasoning.take() {
-                                    confidence_response.reasoning.push(reasoning);
-                                }
-                                if let Some(content) = delta.content.take()
-                                    && let Ok(vector::completions::ResponseKey {
-                                        _think: Some(reasoning),
-                                        ..
-                                    }) = serde_json::from_str(&content)
-                                {
-                                    confidence_response.reasoning.push(reasoning);
-                                }
-                                if let Some(tool_calls) = delta.tool_calls.take() {
-                                    for tool_call in tool_calls {
-                                        if let objectiveai::chat::completions::response::streaming::ToolCall {
-                                            function: Some(
-                                                objectiveai::chat::completions::response::streaming::ToolCallFunction {
-                                                    arguments: Some(arguments),
-                                                    ..
-                                                }
-                                            ),
+                                // Extract reasoning from the first assistant message chunk
+                                if let Some(objectiveai::agent::completions::response::streaming::MessageChunk::Assistant(assistant)) = completion.inner.messages.first_mut() {
+                                    if let Some(reasoning) = assistant.reasoning.take() {
+                                        confidence_response.reasoning.push(reasoning);
+                                    }
+                                    if let Some(objectiveai::agent::completions::message::RichContent::Text(content)) = assistant.content.take()
+                                        && let Ok(crate::vector::completions::ResponseKey {
+                                            _think: Some(reasoning),
                                             ..
-                                        } = tool_call
-                                            && let Ok(vector::completions::ResponseKey {
-                                                _think: Some(reasoning),
+                                        }) = serde_json::from_str(&content)
+                                    {
+                                        confidence_response.reasoning.push(reasoning);
+                                    }
+                                    if let Some(tool_calls) = assistant.tool_calls.take() {
+                                        for tool_call in tool_calls {
+                                            if let Some(objectiveai::agent::completions::message::AssistantToolCallFunctionDelta {
+                                                arguments: Some(arguments),
                                                 ..
-                                            }) = serde_json::from_str(&arguments)
-                                        {
-                                            confidence_response.reasoning.push(
-                                                reasoning,
-                                            );
+                                            }) = tool_call.function
+                                                && let Ok(crate::vector::completions::ResponseKey {
+                                                    _think: Some(reasoning),
+                                                    ..
+                                                }) = serde_json::from_str(&arguments)
+                                            {
+                                                confidence_response.reasoning.push(
+                                                    reasoning,
+                                                );
+                                            }
                                         }
                                     }
                                 }
@@ -1563,8 +1620,8 @@ where
                     let stream = self.create_reasoning_summary_streaming(
                         ctx,
                         request.clone(),
-                        model.clone(),
-                        models.clone(),
+                        agent.clone(),
+                        agents.clone(),
                         description,
                         final_chunk.output.clone().expect("missing output"),
                         confidence_responses,
@@ -1576,10 +1633,10 @@ where
                         // collect usage
                         if let Some(chunk_usage) = &chunk.inner.usage {
                             if let Some(usage) = &mut final_chunk.usage {
-                                usage.push_chat_completion_usage(chunk_usage);
+                                usage.push(chunk_usage);
                             } else {
-                                let mut usage = objectiveai::vector::completions::response::Usage::default();
-                                usage.push_chat_completion_usage(chunk_usage);
+                                let mut usage = objectiveai::agent::completions::response::Usage::default();
+                                usage.push(chunk_usage);
                                 final_chunk.usage = Some(usage);
                             }
                         }
@@ -1612,7 +1669,7 @@ where
         &self,
         ctx: ctx::Context<CTXEXT>,
         request: Arc<objectiveai::functions::executions::request::Request>,
-        input: Option<objectiveai::functions::expression::Input>,
+        input: Option<objectiveai::functions::expression::InputValue>,
     ) -> Result<functions::FunctionFlatTaskProfile, super::Error> {
         match &*request {
             objectiveai::functions::executions::request::Request::FunctionInlineProfileInline {
@@ -1801,10 +1858,8 @@ where
                 .boxed()
             }
             functions::FlatTaskProfile::PlaceholderScalarFunction(_ftp) => {
-                let output = objectiveai::functions::expression::TaskOutputOwned::Function(
-                    objectiveai::functions::expression::FunctionOutput::Scalar(
-                        rust_decimal::Decimal::new(5, 1), // 0.5
-                    ),
+                let output = objectiveai::functions::expression::TaskOutputOwned::Scalar(
+                    rust_decimal::Decimal::new(5, 1), // 0.5
                 );
                 futures::stream::once(async move {
                     FtpStreamChunk::OutputChunk {
@@ -1819,16 +1874,12 @@ where
                 .boxed()
             }
             functions::FlatTaskProfile::MapPlaceholderScalarFunction(ftp) => {
-                let outputs: Vec<objectiveai::functions::expression::FunctionOutput> = ftp
-                    .placeholders
-                    .iter()
-                    .map(|_| {
-                        objectiveai::functions::expression::FunctionOutput::Scalar(
-                            rust_decimal::Decimal::new(5, 1),
-                        )
-                    })
-                    .collect();
-                let output = objectiveai::functions::expression::TaskOutputOwned::MapFunction(outputs);
+                let output = objectiveai::functions::expression::TaskOutputOwned::Vector(
+                    ftp.placeholders
+                        .iter()
+                        .map(|_| rust_decimal::Decimal::new(5, 1))
+                        .collect(),
+                );
                 let retry_len = ftp.task_index_len();
                 futures::stream::once(async move {
                     FtpStreamChunk::OutputChunk {
@@ -1849,10 +1900,8 @@ where
                 } else {
                     rust_decimal::Decimal::ZERO
                 };
-                let output = objectiveai::functions::expression::TaskOutputOwned::Function(
-                    objectiveai::functions::expression::FunctionOutput::Vector(
-                        vec![score; n as usize],
-                    ),
+                let output = objectiveai::functions::expression::TaskOutputOwned::Vector(
+                    vec![score; n as usize],
                 );
                 futures::stream::once(async move {
                     FtpStreamChunk::OutputChunk {
@@ -1867,22 +1916,20 @@ where
                 .boxed()
             }
             functions::FlatTaskProfile::MapPlaceholderVectorFunction(ftp) => {
-                let outputs: Vec<objectiveai::functions::expression::FunctionOutput> = ftp
-                    .placeholders
-                    .iter()
-                    .map(|p| {
-                        let n = p.output_length;
-                        let score = if n > 0 {
-                            rust_decimal::Decimal::ONE / rust_decimal::Decimal::from(n)
-                        } else {
-                            rust_decimal::Decimal::ZERO
-                        };
-                        objectiveai::functions::expression::FunctionOutput::Vector(
-                            vec![score; n as usize],
-                        )
-                    })
-                    .collect();
-                let output = objectiveai::functions::expression::TaskOutputOwned::MapFunction(outputs);
+                let output = objectiveai::functions::expression::TaskOutputOwned::Vectors(
+                    ftp.placeholders
+                        .iter()
+                        .map(|p| {
+                            let n = p.output_length;
+                            let score = if n > 0 {
+                                rust_decimal::Decimal::ONE / rust_decimal::Decimal::from(n)
+                            } else {
+                                rust_decimal::Decimal::ZERO
+                            };
+                            vec![score; n as usize]
+                        })
+                        .collect(),
+                );
                 let retry_len = ftp.task_index_len();
                 futures::stream::once(async move {
                     FtpStreamChunk::OutputChunk {
@@ -1923,7 +1970,7 @@ where
             current_task_index += ftp.task_index_len() as u64;
             // safety: these should all be replaced without exception
             output.push(
-                objectiveai::functions::expression::FunctionOutput::Err(
+                objectiveai::functions::expression::TaskOutputOwned::Err(
                     serde_json::Value::Null,
                 ),
             );
@@ -1980,10 +2027,7 @@ where
                         // insert retry token into correct position
                         retry_token.insert(local_index, chunk_retry_token);
                         // insert output into correct position
-                        output[local_index] = match chunk_output {
-                            objectiveai::functions::expression::TaskOutputOwned::Function(output) => output,
-                            _ => unreachable!(),
-                        };
+                        output[local_index] = chunk_output;
                     }
                     FtpStreamChunk::VectorCompletionTaskChunk(_) => {
                         unreachable!()
@@ -1991,10 +2035,41 @@ where
                 }
             }
 
-            // yield final output chunk
+            // yield final output chunk - collect mapped function sub-outputs
+            let collected_output = {
+                use objectiveai::functions::expression::TaskOutputOwned;
+                // Determine the type from the first non-error output
+                let first_ok = output.iter().find(|o| !matches!(o, TaskOutputOwned::Err(_)));
+                match first_ok {
+                    Some(TaskOutputOwned::Scalar(_)) => {
+                        // All scalars → Vector
+                        TaskOutputOwned::Vector(
+                            output.into_iter().map(|o| match o {
+                                TaskOutputOwned::Scalar(s) => s,
+                                TaskOutputOwned::Err(_) => rust_decimal::Decimal::ZERO,
+                                _ => rust_decimal::Decimal::ZERO,
+                            }).collect()
+                        )
+                    }
+                    Some(TaskOutputOwned::Vector(_)) => {
+                        // All vectors → Vectors
+                        TaskOutputOwned::Vectors(
+                            output.into_iter().map(|o| match o {
+                                TaskOutputOwned::Vector(v) => v,
+                                TaskOutputOwned::Err(_) => Vec::new(),
+                                _ => Vec::new(),
+                            }).collect()
+                        )
+                    }
+                    _ => {
+                        // All errors or empty
+                        TaskOutputOwned::Err(serde_json::Value::Null)
+                    }
+                }
+            };
             yield FtpStreamChunk::OutputChunk {
                 task_index,
-                output: objectiveai::functions::expression::TaskOutputOwned::MapFunction(output),
+                output: collected_output,
                 retry_token,
             };
         }
@@ -2053,11 +2128,11 @@ where
         let ftp_input = ftp.input.clone();
         let ftp_type = ftp.r#type.clone();
 
-        // initialize output_input (stores validated FunctionOutputs directly)
+        // initialize output_input (stores validated TaskOutputOwneds directly)
         // and collect errors from task output expressions
         let tasks_len = ftp.tasks.len();
         let mut output_input: Vec<
-            Option<objectiveai::functions::expression::FunctionOutput>,
+            Option<objectiveai::functions::expression::TaskOutputOwned>,
         > = Vec::with_capacity(tasks_len);
         let mut task_output_errors: Vec<super::TaskOutputExpressionError> =
             Vec::new();
@@ -2067,16 +2142,16 @@ where
                 // empty map task - apply output expression to empty result
                 let raw_output = match task.as_ref() {
                     Some(functions::FlatTaskProfile::MapFunction(_)) => {
-                        objectiveai::functions::expression::TaskOutputOwned::MapFunction(Vec::new())
+                        objectiveai::functions::expression::TaskOutputOwned::Vectors(Vec::new())
                     }
                     Some(functions::FlatTaskProfile::MapVectorCompletion(_)) => {
-                        objectiveai::functions::expression::TaskOutputOwned::MapVectorCompletion(
+                        objectiveai::functions::expression::TaskOutputOwned::Vectors(
                             Vec::new(),
                         )
                     }
                     Some(functions::FlatTaskProfile::MapPlaceholderScalarFunction(_))
                     | Some(functions::FlatTaskProfile::MapPlaceholderVectorFunction(_)) => {
-                        objectiveai::functions::expression::TaskOutputOwned::MapFunction(Vec::new())
+                        objectiveai::functions::expression::TaskOutputOwned::Vectors(Vec::new())
                     }
                     _ => panic!("encountered non-map FlatTaskProfile with length of 0"),
                 };
@@ -2152,7 +2227,7 @@ where
 
         // track usage
         let mut usage =
-            objectiveai::vector::completions::response::Usage::default();
+            objectiveai::agent::completions::response::Usage::default();
 
         // identifiers
         let function =
@@ -2176,7 +2251,7 @@ where
                             .inner
                             .completions
                             .iter()
-                            .any(|v| v.error.is_some());
+                            .any(|v| v.inner.error.is_some());
                         if let Some(completion_usage) = &chunk.inner.usage {
                             usage.push(completion_usage);
                         }
@@ -2268,7 +2343,7 @@ where
                             .unwrap();
                         // insert retry token into correct position
                         retry_token.insert(local_index, chunk_retry_token);
-                        // apply task output expression to transform raw output into FunctionOutput
+                        // apply task output expression to transform raw output into TaskOutputOwned
                         // All non-skipped tasks have required output expressions
                         let (expr, invert_output) = task_output_expressions[local_index]
                             .as_ref()
@@ -2345,7 +2420,7 @@ where
             // yield final output chunk
             yield FtpStreamChunk::OutputChunk {
                 task_index,
-                output: objectiveai::functions::expression::TaskOutputOwned::Function(output),
+                output,
                 retry_token,
             };
         }
@@ -2362,18 +2437,11 @@ where
         task_index: u64,
         choice_indexer: Arc<ChoiceIndexer>,
     ) -> impl Stream<Item = FtpStreamChunk> + Send + 'static {
-        // initialize output
+        // initialize output (each sub-task produces a scores vector)
         let ftp_inner_len = ftp.vector_completions.len();
-        let mut output = Vec::with_capacity(ftp_inner_len);
+        let mut output: Vec<Vec<rust_decimal::Decimal>> = Vec::with_capacity(ftp_inner_len);
         for _ in 0..ftp_inner_len {
-            // safety: these should all be replaced without exception
-            output.push(
-                objectiveai::functions::expression::VectorCompletionOutput {
-                    votes: Vec::new(),
-                    scores: Vec::new(),
-                    weights: Vec::new(),
-                },
-            );
+            output.push(Vec::new());
         }
 
         // intiialize retry token
@@ -2425,7 +2493,7 @@ where
                         retry_token.insert(local_index, chunk_retry_token);
                         // insert output into correct position
                         output[local_index] = match chunk_output {
-                            objectiveai::functions::expression::TaskOutputOwned::VectorCompletion(output) => output,
+                            objectiveai::functions::expression::TaskOutputOwned::Vector(scores) => scores,
                             _ => unreachable!(),
                         };
                     }
@@ -2437,7 +2505,7 @@ where
             // yield final output chunk
             yield FtpStreamChunk::OutputChunk {
                 task_index,
-                output: objectiveai::functions::expression::TaskOutputOwned::MapVectorCompletion(output),
+                output: objectiveai::functions::expression::TaskOutputOwned::Vectors(output),
                 retry_token,
             };
         }
@@ -2468,8 +2536,6 @@ where
                     objectiveai::vector::completions::request::VectorCompletionCreateParams {
                         retry: retry_token.clone(),
                         from_cache: request_base.from_cache,
-                        from_rng: request_base.from_rng,
-                        upstreams: request_base.upstreams.clone(),
                         messages: ftp.messages,
                         provider: request_base.provider,
                         ensemble: objectiveai::vector::completions::request::Ensemble::Provided(
@@ -2478,12 +2544,8 @@ where
                         profile: ftp.profile,
                         seed: request_base.seed,
                         stream: request_base.stream,
-                        tools: ftp.tools,
-                        backoff_max_elapsed_time: request_base
-                            .backoff_max_elapsed_time,
-                        first_chunk_timeout: request_base.first_chunk_timeout,
-                        other_chunk_timeout: request_base.other_chunk_timeout,
                         responses: ftp.responses,
+                        mcp_server_authorization: request_base.mcp_server_authorization.clone(),
                     },
                 ),
             )
@@ -2509,11 +2571,13 @@ where
                     ).chain(StreamOnce::new(
                         FtpStreamChunk::OutputChunk {
                             task_index,
-                            output: objectiveai::functions::expression::TaskOutputOwned::VectorCompletion(
-                                objectiveai::functions::expression::VectorCompletionOutput::default_from_request_responses_len(
-                                    request_responses_len,
-                                ),
-                            ),
+                            output: objectiveai::functions::expression::TaskOutputOwned::Vector({
+                                let n = request_responses_len;
+                                vec![
+                                    rust_decimal::Decimal::ONE / rust_decimal::Decimal::from(n);
+                                    n
+                                ]
+                            }),
                             retry_token: objectiveai::functions::executions::RetryToken(vec![retry_token]),
                         }
                     )),
@@ -2558,7 +2622,7 @@ where
                     let any_ok_completions = aggregate
                         .completions
                         .iter()
-                        .any(|c| c.error.is_none());
+                        .any(|c| c.inner.error.is_none());
                     if any_ok_completions {
                         Some(aggregate.id.clone())
                     } else {
@@ -2567,9 +2631,7 @@ where
                         retry_token
                     }
                 }]),
-                output: objectiveai::functions::expression::TaskOutputOwned::VectorCompletion(
-                    objectiveai::functions::expression::VectorCompletionOutput::from(aggregate),
-                ),
+                output: objectiveai::functions::expression::TaskOutputOwned::Vector(aggregate.scores),
             };
         })
     }
@@ -2578,17 +2640,17 @@ where
         &self,
         ctx: ctx::Context<CTXEXT>,
         request: Arc<objectiveai::functions::executions::request::Request>,
-        model: objectiveai::chat::completions::request::Model,
-        models: Option<Vec<objectiveai::chat::completions::request::Model>>,
+        agent: objectiveai::agent::completions::request::Agent,
+        agents: Option<Vec<objectiveai::agent::completions::request::Agent>>,
         description: Option<String>,
-        output: objectiveai::functions::expression::FunctionOutput,
+        output: objectiveai::functions::expression::TaskOutputOwned,
         confidence_responses: Vec<ConfidenceResponse>,
     ) -> impl Stream<Item = objectiveai::functions::executions::response::streaming::ReasoningSummaryChunk>
     + Send
     + 'static{
         // construct the prompt
         let mut parts = Vec::new();
-        parts.push(objectiveai::chat::completions::request::RichContentPart::Text {
+        parts.push(objectiveai::agent::completions::message::RichContentPart::Text {
             text: match description {
                 Some(description) => format!(
                     "The ObjectiveAI Function has the following description: \"{}\"\n\nThe user provided the following input to the ObjectiveAI Function:\n",
@@ -2598,15 +2660,15 @@ where
             },
         });
         parts.extend(request.base().input.clone().to_rich_content_parts(0));
-        parts.push(objectiveai::chat::completions::request::RichContentPart::Text {
+        parts.push(objectiveai::agent::completions::message::RichContentPart::Text {
             text: match output {
-                objectiveai::functions::expression::FunctionOutput::Scalar(scalar) => {
+                objectiveai::functions::expression::TaskOutputOwned::Scalar(scalar) => {
                     format!(
                         "\n\nThe ObjectiveAI Function produced the following score: {}%\n\n",
                         (scalar * rust_decimal::dec!(100)).round_dp(2),
                     )
                 },
-                objectiveai::functions::expression::FunctionOutput::Vector(vector) => {
+                objectiveai::functions::expression::TaskOutputOwned::Vector(vector) => {
                     format!(
                         "\n\nThe ObjectiveAI Function produced the following vector of scores: [{}]\n\n",
                         vector.iter()
@@ -2620,7 +2682,19 @@ where
                             .join(", ")
                     )
                 },
-                objectiveai::functions::expression::FunctionOutput::Err(serde_json::Value::Number(n)) if {
+                objectiveai::functions::expression::TaskOutputOwned::Vectors(vectors) => {
+                    let formatted: Vec<String> = vectors.iter().map(|vector| {
+                        format!("[{}]", vector.iter()
+                            .map(|v| format!("{}%", (v * rust_decimal::dec!(100)).round_dp(2)))
+                            .collect::<Vec<String>>()
+                            .join(", "))
+                    }).collect();
+                    format!(
+                        "\n\nThe ObjectiveAI Function produced the following vectors of scores: [{}]\n\n",
+                        formatted.join(", ")
+                    )
+                },
+                objectiveai::functions::expression::TaskOutputOwned::Err(serde_json::Value::Number(n)) if {
                     n.as_f64().is_some()
                         && n.as_f64().unwrap() >= 0.0
                         && n.as_f64().unwrap() <= 1.0
@@ -2628,7 +2702,7 @@ where
                     "\n\nThe ObjectiveAI Function erroneously produced the following score: {:.2}%\n\n",
                     n.as_f64().unwrap() * 100.0,
                 ),
-                objectiveai::functions::expression::FunctionOutput::Err(serde_json::Value::Array(arr)) if {
+                objectiveai::functions::expression::TaskOutputOwned::Err(serde_json::Value::Array(arr)) if {
                     arr
                         .iter()
                         .all(|v| v.as_f64().is_some())
@@ -2646,56 +2720,50 @@ where
                         .collect::<Vec<String>>()
                         .join(", ")
                 ),
-                objectiveai::functions::expression::FunctionOutput::Err(err) => format!(
+                objectiveai::functions::expression::TaskOutputOwned::Err(err) => format!(
                     "\n\nThe ObjectiveAI Function erroneously produced the following output:\n{}\n\n",
                     serde_json::to_string_pretty(&err).unwrap(),
                 ),
             }
         });
-        parts.push(objectiveai::chat::completions::request::RichContentPart::Text {
+        parts.push(objectiveai::agent::completions::message::RichContentPart::Text {
             text: "The ObjectiveAI Function used LLM Ensembles to arrive at this output by making assertions with associated confidence scores:\n\n".to_string(),
         });
         parts.extend(ConfidenceResponse::assertions(confidence_responses));
-        parts.push(objectiveai::chat::completions::request::RichContentPart::Text {
+        parts.push(objectiveai::agent::completions::message::RichContentPart::Text {
             text: "\n\nYou are to present the output and summarize the reasoning process used by the ObjectiveAI Function to arrive at the output based on the assertions made above. Focus on the most confident assertions and explain how they contributed to the final output. If there were any low-confidence assertions, mention them with the caveat of low confidence. Provide a clear summary of the overall reasoning process.".to_string(),
         });
 
-        // create the streaming chat completion
+        // create the streaming agent completion
         let mut stream = match self
-            .chat_client
+            .agent_client
             .clone()
-            .create_streaming_for_chat_handle_usage(
+            .create_streaming_handle_usage(
                 ctx,
                 Arc::new(
-                    objectiveai::chat::completions::request::ChatCompletionCreateParams {
-                        upstreams: request.base().upstreams.clone(),
-                        messages: vec![objectiveai::chat::completions::request::Message::User(
-                            objectiveai::chat::completions::request::UserMessage {
+                    objectiveai::agent::completions::request::AgentCompletionCreateParams {
+                        messages: vec![objectiveai::agent::completions::message::Message::User(
+                            objectiveai::agent::completions::message::UserMessage {
                                 content:
-                                    objectiveai::chat::completions::request::RichContent::Parts(
+                                    objectiveai::agent::completions::message::RichContent::Parts(
                                         parts,
                                     ),
                                 name: None,
                             },
                         )],
                         provider: request.base().provider,
-                        model,
-                        models,
-                        top_logprobs: None,
+                        agent,
+                        agents,
                         response_format: None,
                         seed: request.base().seed,
                         stream: Some(true),
-                        tool_choice: None,
-                        tools: None,
-                        parallel_tool_calls: None,
-                        prediction: None,
-                        backoff_max_elapsed_time: request
-                            .base()
-                            .backoff_max_elapsed_time,
-                        first_chunk_timeout: request.base().first_chunk_timeout,
-                        other_chunk_timeout: request.base().other_chunk_timeout,
+                        mcp_server_authorization: request.base().mcp_server_authorization.clone(),
                     },
                 ),
+                None,
+                None,
+                None,
+                None,
             )
             .await
         {
@@ -2703,54 +2771,58 @@ where
             Err(e) => {
                 return futures::future::Either::Left(StreamOnce::new(
                     objectiveai::functions::executions::response::streaming::ReasoningSummaryChunk {
-                        inner: objectiveai::chat::completions::response::streaming::ChatCompletionChunk::default(),
+                        inner: objectiveai::agent::completions::response::streaming::AgentCompletionChunk::default(),
                         error: Some(objectiveai::error::ResponseError::from(&e)),
                     }
                 ));
             }
         };
 
-        // only return error if the very first stream item is an error
-        let mut next_chat_chunk = match stream.try_next().await {
-            Ok(Some(chunk)) => Some(chunk),
-            Err(e) => {
-                return futures::future::Either::Left(StreamOnce::new(
-                    objectiveai::functions::executions::response::streaming::ReasoningSummaryChunk {
-                        inner: objectiveai::chat::completions::response::streaming::ChatCompletionChunk::default(),
-                        error: Some(objectiveai::error::ResponseError::from(&e)),
+        // get the first chunk from the stream
+        let mut next_agent_chunk = match stream.next().await {
+            Some(crate::agent::completions::StreamItem::Chunk(chunk)) => Some(chunk),
+            Some(crate::agent::completions::StreamItem::State(_)) => {
+                // skip state items, try next
+                loop {
+                    match stream.next().await {
+                        Some(crate::agent::completions::StreamItem::Chunk(chunk)) => break Some(chunk),
+                        Some(crate::agent::completions::StreamItem::State(_)) => continue,
+                        None => break None,
                     }
-                ));
+                }
             }
-            Ok(None) => {
-                // chat client will always yield at least one chunk
+            None => {
+                // agent client will always yield at least one chunk
                 unreachable!()
             }
         };
 
-        // stream, buffered by 1 so as to attach errors
+        // stream, buffered by 1 so as to attach errors from chunk.error
         futures::future::Either::Right(async_stream::stream! {
-            while let Some(chat_chunk) = next_chat_chunk.take() {
-                // fetch the next chat chunk or error
-                let error = match stream.next().await {
-                    Some(Ok(ncc)) => {
-                        // set next chat chunk
-                        next_chat_chunk = Some(ncc);
-                        None
-                    }
-                    Some(Err(e)) => {
-                        // end the loop after this iteration
-                        // add error to choices
-                        Some(objectiveai::error::ResponseError::from(&e))
-                    }
-                    None => {
-                        // end the loop after this iteration
-                        None
+            while let Some(agent_chunk) = next_agent_chunk.take() {
+                // fetch the next agent chunk
+                let error = loop {
+                    match stream.next().await {
+                        Some(crate::agent::completions::StreamItem::Chunk(ncc)) => {
+                            // check if the current chunk had an error
+                            let err = ncc.error.clone();
+                            next_agent_chunk = Some(ncc);
+                            break err;
+                        }
+                        Some(crate::agent::completions::StreamItem::State(_)) => {
+                            // skip state items
+                            continue;
+                        }
+                        None => {
+                            // end the loop after this iteration
+                            break None;
+                        }
                     }
                 };
 
                 // yield the reasoning summary chunk
                 yield objectiveai::functions::executions::response::streaming::ReasoningSummaryChunk {
-                    inner: chat_chunk,
+                    inner: agent_chunk,
                     error,
                 };
             }
@@ -2800,7 +2872,7 @@ struct ConfidenceResponse {
     pub confidence_count: rust_decimal::Decimal,
 
     /// The response content.
-    pub response: objectiveai::chat::completions::request::RichContent,
+    pub response: objectiveai::agent::completions::message::RichContent,
     /// Aggregated confidence score.
     pub confidence: rust_decimal::Decimal,
     /// Collected reasoning from LLMs that voted for this response.
@@ -2811,7 +2883,7 @@ impl ConfidenceResponse {
     /// Formats all confidence responses as assertion parts for the reasoning prompt.
     pub fn assertions(
         confidence_responses: Vec<ConfidenceResponse>,
-    ) -> impl Iterator<Item = objectiveai::chat::completions::request::RichContentPart>
+    ) -> impl Iterator<Item = objectiveai::agent::completions::message::RichContentPart>
     {
         confidence_responses
             .into_iter()
@@ -2821,13 +2893,13 @@ impl ConfidenceResponse {
     /// Formats this confidence response as JSON assertion parts.
     pub fn assertion(
         self,
-    ) -> impl Iterator<Item = objectiveai::chat::completions::request::RichContentPart>
+    ) -> impl Iterator<Item = objectiveai::agent::completions::message::RichContentPart>
     {
         if self.confidence < rust_decimal::dec!(0.00005) {
             return None.into_iter().flatten();
         }
         Some(
-            std::iter::once(objectiveai::chat::completions::request::RichContentPart::Text {
+            std::iter::once(objectiveai::agent::completions::message::RichContentPart::Text {
                 text: "{\n    \"assertion\": \"".to_string(),
             })
             .chain({
@@ -2835,15 +2907,15 @@ impl ConfidenceResponse {
                     Text(Option<String>),
                     Parts(P),
                 }
-                impl<P: Iterator<Item = objectiveai::chat::completions::request::RichContentPart>>
+                impl<P: Iterator<Item = objectiveai::agent::completions::message::RichContentPart>>
                     Iterator for Iter<P>
                 {
-                    type Item = objectiveai::chat::completions::request::RichContentPart;
+                    type Item = objectiveai::agent::completions::message::RichContentPart;
                     fn next(&mut self) -> Option<Self::Item> {
                         match self {
                         Iter::Text(opt_text) => {
                             opt_text.take().map(|text| {
-                                objectiveai::chat::completions::request::RichContentPart::Text {
+                                objectiveai::agent::completions::message::RichContentPart::Text {
                                     text,
                                 }
                             })
@@ -2853,17 +2925,17 @@ impl ConfidenceResponse {
                     }
                 }
                 match self.response {
-                    objectiveai::chat::completions::request::RichContent::Text(text) => {
+                    objectiveai::agent::completions::message::RichContent::Text(text) => {
                         Iter::Text(Some(
                             json_escape::escape_str(&text).to_string(),
                         ))
                     }
-                    objectiveai::chat::completions::request::RichContent::Parts(rich_parts) => {
+                    objectiveai::agent::completions::message::RichContent::Parts(rich_parts) => {
                         Iter::Parts(rich_parts.into_iter().map(|part| {
-                            if let objectiveai::chat::completions::request::RichContentPart::Text {
+                            if let objectiveai::agent::completions::message::RichContentPart::Text {
                             text,
                         } = part {
-                            objectiveai::chat::completions::request::RichContentPart::Text {
+                            objectiveai::agent::completions::message::RichContentPart::Text {
                                 text: json_escape::escape_str(&text)
                                     .to_string(),
                             }
@@ -2875,7 +2947,7 @@ impl ConfidenceResponse {
                 }
             })
             .chain(std::iter::once(
-                objectiveai::chat::completions::request::RichContentPart::Text {
+                objectiveai::agent::completions::message::RichContentPart::Text {
                     text: format!(
                         "\",\n    \"confidence\": \"{}%\"",
                         (self.confidence * rust_decimal::dec!(100)).round_dp(2),
@@ -2883,7 +2955,7 @@ impl ConfidenceResponse {
                 },
             ))
             .chain(std::iter::once(
-                objectiveai::chat::completions::request::RichContentPart::Text {
+                objectiveai::agent::completions::message::RichContentPart::Text {
                     text: if self.reasoning.is_empty() {
                         "\n}".to_string()
                     } else {
@@ -2911,12 +2983,12 @@ impl ConfidenceResponse {
 mod invert_output_tests {
     use super::*;
     use objectiveai::functions::expression::{
-        Expression, FunctionOutput, TaskOutputOwned, VectorCompletionOutput,
+        Expression, TaskOutputOwned,
     };
     use rust_decimal::dec;
 
-    fn empty_input() -> objectiveai::functions::expression::Input {
-        objectiveai::functions::expression::Input::Object(
+    fn empty_input() -> objectiveai::functions::expression::InputValue {
+        objectiveai::functions::expression::InputValue::Object(
             indexmap::IndexMap::new(),
         )
     }
@@ -2924,7 +2996,7 @@ mod invert_output_tests {
     #[test]
     fn invert_task_output_scalar() {
         let input = empty_input();
-        let raw = TaskOutputOwned::Function(FunctionOutput::Scalar(dec!(0.75)));
+        let raw = TaskOutputOwned::Scalar(dec!(0.75));
         let expr = Expression::Starlark("output".to_string());
         let (out, err) = apply_task_output_expression(
             &input,
@@ -2935,7 +3007,7 @@ mod invert_output_tests {
         );
         assert!(err.is_none());
         match out {
-            FunctionOutput::Scalar(v) => assert_eq!(v, dec!(0.25)),
+            TaskOutputOwned::Scalar(v) => assert_eq!(v, dec!(0.25)),
             other => panic!("expected scalar output, got {:?}", other),
         }
     }
@@ -2943,11 +3015,11 @@ mod invert_output_tests {
     #[test]
     fn invert_task_output_vector() {
         let input = empty_input();
-        let raw = TaskOutputOwned::Function(FunctionOutput::Vector(vec![
+        let raw = TaskOutputOwned::Vector(vec![
             dec!(0.75),
             dec!(0.25),
             dec!(0.0),
-        ]));
+        ]);
         let expr = Expression::Starlark("output".to_string());
         let (out, err) = apply_task_output_expression(
             &input,
@@ -2962,7 +3034,7 @@ mod invert_output_tests {
         );
         assert!(err.is_none());
         match out {
-            FunctionOutput::Vector(v) => {
+            TaskOutputOwned::Vector(v) => {
                 assert_eq!(v, vec![dec!(0.125), dec!(0.375), dec!(0.5)])
             }
             other => panic!("expected vector output, got {:?}", other),
@@ -2970,14 +3042,10 @@ mod invert_output_tests {
     }
 
     #[test]
-    fn invert_task_output_vector_completion_scores() {
+    fn invert_task_output_vector_scores() {
         let input = empty_input();
-        let raw = TaskOutputOwned::VectorCompletion(VectorCompletionOutput {
-            votes: Vec::new(),
-            scores: vec![dec!(0.75), dec!(0.25), dec!(0.0)],
-            weights: vec![dec!(1.0), dec!(1.0), dec!(1.0)],
-        });
-        let expr = Expression::Starlark("output['scores']".to_string());
+        let raw = TaskOutputOwned::Vector(vec![dec!(0.75), dec!(0.25), dec!(0.0)]);
+        let expr = Expression::Starlark("output".to_string());
         let (out, err) = apply_task_output_expression(
             &input,
             raw,
@@ -2991,7 +3059,7 @@ mod invert_output_tests {
         );
         assert!(err.is_none());
         match out {
-            FunctionOutput::Vector(v) => {
+            TaskOutputOwned::Vector(v) => {
                 assert_eq!(v, vec![dec!(0.125), dec!(0.375), dec!(0.5)])
             }
             other => panic!("expected vector output, got {:?}", other),

@@ -1,0 +1,30 @@
+{
+  "title": "functions.executions.request.FunctionRemoteProfileInlineRequestPath",
+  "description": "Path parameters for remote Function with inline Profile.",
+  "type": "object",
+  "properties": {
+    "fcommit": {
+      "description": "Function Git commit SHA (optional).",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fowner": {
+      "description": "Function repository owner.",
+      "type": "string"
+    },
+    "fremote": {
+      "description": "Function remote source.",
+      "$ref": "functions.Remote"
+    },
+    "frepository": {
+      "description": "Function repository name.",
+      "type": "string"
+    }
+  }
+}

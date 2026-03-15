@@ -1,0 +1,96 @@
+{
+  "title": "agent.completions.message.RichContentPart",
+  "description": "A part of rich content.",
+  "anyOf": [
+    {
+      "description": "Text content.",
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "text"
+          ]
+        }
+      }
+    },
+    {
+      "description": "An image URL.",
+      "type": "object",
+      "properties": {
+        "image_url": {
+          "$ref": "agent.completions.message.ImageUrl"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "image_url"
+          ]
+        }
+      }
+    },
+    {
+      "description": "Audio input.",
+      "type": "object",
+      "properties": {
+        "input_audio": {
+          "$ref": "agent.completions.message.InputAudio"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "input_audio"
+          ]
+        }
+      }
+    },
+    {
+      "description": "Video input.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "input_video"
+          ]
+        },
+        "video_url": {
+          "$ref": "agent.completions.message.VideoUrl"
+        }
+      }
+    },
+    {
+      "description": "A video URL.",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "video_url"
+          ]
+        },
+        "video_url": {
+          "$ref": "agent.completions.message.VideoUrl"
+        }
+      }
+    },
+    {
+      "description": "A file.",
+      "type": "object",
+      "properties": {
+        "file": {
+          "$ref": "agent.completions.message.File"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "file"
+          ]
+        }
+      }
+    }
+  ]
+}

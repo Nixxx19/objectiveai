@@ -4,7 +4,6 @@ use crate::error;
 use eventsource_stream::Event as MessageEvent;
 use futures::{Stream, StreamExt};
 use reqwest_eventsource::{Event, RequestBuilderExt};
-
 /// HTTP client for making requests to the ObjectiveAI API.
 ///
 /// Handles authentication, request building, and response parsing for both
@@ -20,6 +19,9 @@ use reqwest_eventsource::{Event, RequestBuilderExt};
 ///     None, // user_agent
 ///     None, // x_title
 ///     None, // referer
+///     None, // x_github_authorization
+///     None, // x_openrouter_authorization
+///     None, // x_mcp_authorization
 /// );
 /// ```
 #[derive(Debug, Clone)]
@@ -36,6 +38,12 @@ pub struct HttpClient {
     pub x_title: Option<String>,
     /// Value for both `Referer` and `HTTP-Referer` headers.
     pub referer: Option<String>,
+    /// Value for the `X-GITHUB-AUTHORIZATION` header.
+    pub x_github_authorization: Option<std::sync::Arc<String>>,
+    /// Value for the `X-OPENROUTER-AUTHORIZATION` header.
+    pub x_openrouter_authorization: Option<std::sync::Arc<String>>,
+    /// Values for the `X-MCP-AUTHORIZATION` header (JSON-encoded).
+    pub x_mcp_authorization: Option<std::sync::Arc<std::collections::HashMap<String, String>>>,
 }
 
 impl HttpClient {
@@ -56,6 +64,9 @@ impl HttpClient {
         user_agent: Option<impl Into<String>>,
         x_title: Option<impl Into<String>>,
         referer: Option<impl Into<String>>,
+        x_github_authorization: Option<std::sync::Arc<String>>,
+        x_openrouter_authorization: Option<std::sync::Arc<String>>,
+        x_mcp_authorization: Option<std::sync::Arc<std::collections::HashMap<String, String>>>,
     ) -> Self {
         Self {
             http_client,
@@ -67,6 +78,9 @@ impl HttpClient {
             user_agent: user_agent.map(Into::into),
             x_title: x_title.map(Into::into),
             referer: referer.map(Into::into),
+            x_github_authorization,
+            x_openrouter_authorization,
+            x_mcp_authorization,
         }
     }
 
@@ -96,6 +110,17 @@ impl HttpClient {
         if let Some(referer) = &self.referer {
             request = request.header("referer", referer);
             request = request.header("http-referer", referer);
+        }
+        if let Some(token) = &self.x_github_authorization {
+            request = request.header("X-GITHUB-AUTHORIZATION", token.as_str());
+        }
+        if let Some(token) = &self.x_openrouter_authorization {
+            request = request.header("X-OPENROUTER-AUTHORIZATION", token.as_str());
+        }
+        if let Some(headers) = &self.x_mcp_authorization {
+            if let Ok(json) = serde_json::to_string(headers.as_ref()) {
+                request = request.header("X-MCP-AUTHORIZATION", json);
+            }
         }
         if let Some(body) = body {
             request = request.json(&body);

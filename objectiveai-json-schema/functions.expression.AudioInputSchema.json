@@ -1,0 +1,21 @@
+{
+  "title": "functions.expression.AudioInputSchema",
+  "description": "Schema for an audio input.",
+  "type": "object",
+  "properties": {
+    "description": {
+      "description": "Human-readable description of the expected audio.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "type": {
+      "$ref": "functions.expression.AudioInputSchemaType"
+    }
+  }
+}

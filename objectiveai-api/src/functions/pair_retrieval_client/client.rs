@@ -14,23 +14,6 @@ pub trait Client<CTXEXT> {
         objectiveai::error::ResponseError,
     >;
 
-    /// Retrieves a Function-Profile pair.
-    async fn get_function_profile_pair(
-        &self,
-        ctx: ctx::Context<CTXEXT>,
-        fremote: objectiveai::functions::Remote,
-        fowner: &str,
-        frepository: &str,
-        fcommit: Option<&str>,
-        premote: objectiveai::functions::Remote,
-        powner: &str,
-        prepository: &str,
-        pcommit: Option<&str>,
-    ) -> Result<
-        objectiveai::functions::response::GetFunctionProfilePair,
-        objectiveai::error::ResponseError,
-    >;
-
     /// Retrieves usage statistics for a Function-Profile pair.
     async fn get_function_profile_pair_usage(
         &self,

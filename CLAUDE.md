@@ -14,6 +14,7 @@ objectiveai/
 ├── objectiveai-api/                # API server (self-hostable, or import as library)
 ├── objectiveai-rs-wasm-js/         # WASM bindings for browser/Node.js
 ├── objectiveai-js/                 # TypeScript SDK (npm: objectiveai)
+├── objectiveai-json-schema/        # Generated JSON Schema files (built from Rust SDK)
 ├── objectiveai-cli/                # ObjectiveAI CLI
 ├── objectiveai-web/                # Next.js web interface (production)
 ├── objectiveai-scripts/            # Utility scripts (see objectiveai-scripts/README.md)
@@ -258,6 +259,14 @@ Exports:
 - `compileFunctionTasks(function, input)` - Compile tasks client-side
 
 Enables browser-based validation and preview without server round-trips.
+
+## JSON Schema (`objectiveai-json-schema/`)
+
+Generated JSON Schema files for every public serializable type in `objectiveai-rs`. Each file is named `{title}.json` where the title uses dot-separated module paths (e.g. `functions.executions.RetryToken.json`).
+
+**Rebuilding:** `cargo run --package objectiveai-json-schema-builder`
+
+The builder calls `objectiveai::json_schemas()`, strips `$defs` from each schema, rewrites `$ref` targets to bare type names, and writes one file per type. It clears the output directory (except `builder/`) on each run.
 
 ## Development
 

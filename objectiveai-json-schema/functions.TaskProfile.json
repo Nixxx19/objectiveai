@@ -1,0 +1,43 @@
+{
+  "title": "functions.TaskProfile",
+  "description": "Configuration for a single task within a Profile.\n\nEach variant corresponds to a task type in the Function definition.",
+  "anyOf": [
+    {
+      "description": "Profile for a nested function task (references another profile).",
+      "type": "object",
+      "properties": {
+        "commit": {
+          "description": "Git commit SHA. Highly recommended for remote profiles to\nensure compatibility if the referenced profile's shape changes.",
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "owner": {
+          "description": "Repository owner.",
+          "type": "string"
+        },
+        "remote": {
+          "description": "The remote source where the profile is hosted.",
+          "$ref": "functions.Remote"
+        },
+        "repository": {
+          "description": "Repository name.",
+          "type": "string"
+        }
+      }
+    },
+    {
+      "description": "Inline profile for a task (tasks-based or auto).",
+      "$ref": "functions.InlineProfile"
+    },
+    {
+      "description": "Placeholder task — no configuration needed, output is fixed.",
+      "type": "object"
+    }
+  ]
+}

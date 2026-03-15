@@ -1,0 +1,14 @@
+{
+  "title": "agent.completions.request.Agent",
+  "description": "The agent to use for agent completion.\n\nCan be either:\n- An inline [`AgentBase`](super::super::super::AgentBase) configuration\n- The ID of a previously used Agent (22-character base62 string)\n\nSince IDs are content-addressed, ObjectiveAI stores Agent definitions\nwhen they are successfully used. \"Previously used\" means the ID exists in\nObjectiveAI's database from any successful use by anyone.",
+  "anyOf": [
+    {
+      "description": "The content-addressed ID of an Agent stored in ObjectiveAI's database.",
+      "type": "string"
+    },
+    {
+      "description": "An inline Agent configuration.",
+      "$ref": "agent.AgentBase"
+    }
+  ]
+}

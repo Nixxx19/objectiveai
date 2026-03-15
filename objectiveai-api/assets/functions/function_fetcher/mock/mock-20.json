@@ -1,0 +1,35 @@
+{
+  "type": "alpha.vector.branch.function",
+  "description": "Vector super branch with two vector branch sub-functions.",
+  "input_schema": {
+    "items": {
+      "type": "string"
+    }
+  },
+  "tasks": [
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-12",
+      "commit": "mock",
+      "input": {
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    },
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-15",
+      "commit": "mock",
+      "input": {
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    }
+  ]
+}

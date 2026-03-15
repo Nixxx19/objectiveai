@@ -1,0 +1,44 @@
+{
+  "description": "Scalar super branch — fully expanded tasks profile.",
+  "tasks": [
+    {
+      "tasks": [
+        {
+          "ensemble": {
+            "agents": [
+              {
+                "upstream": "mock",
+                "output_mode": "json_schema",
+                "top_logprobs": 5
+              },
+              {
+                "upstream": "mock",
+                "output_mode": "tool_call"
+              }
+            ]
+          },
+          "profile": [0.65, 0.35]
+        },
+        {
+          "ensemble": {
+            "agents": [
+              {
+                "upstream": "mock",
+                "output_mode": "instruction"
+              }
+            ]
+          },
+          "profile": [1.0]
+        }
+      ],
+      "profile": [0.6, 0.4]
+    },
+    {
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-10",
+      "commit": "mock"
+    }
+  ],
+  "profile": [0.55, 0.45]
+}

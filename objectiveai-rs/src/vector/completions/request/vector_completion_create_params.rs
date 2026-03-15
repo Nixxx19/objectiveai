@@ -1,14 +1,17 @@
 //! Vector completion request parameters.
 
-use crate::chat;
+use crate::agent;
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Parameters for creating a vector completion.
 ///
-/// Vector completions run multiple chat completions (one per LLM in the
+/// Vector completions run multiple agent completions (one per LLM in the
 /// ensemble), force each to vote for one of the predefined responses, and
 /// combine votes using the provided profile weights to produce final scores.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "vector.completions.request.VectorCompletionCreateParams")]
 pub struct VectorCompletionCreateParams {
     // --- Caching and retry options ---
     /// If present, reuses votes from a previous request with this ID.
@@ -17,24 +20,18 @@ pub struct VectorCompletionCreateParams {
     /// If true, uses cached votes when available.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub from_cache: Option<bool>,
-    /// If true, remaining votes are generated randomly (for testing/simulation).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub from_rng: Option<bool>,
 
     // --- Core configuration ---
-    /// Available upstreams for this request
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstreams: Option<Vec<crate::chat::completions::Upstream>>,
     /// The conversation messages (the prompt).
-    pub messages: Vec<chat::completions::request::Message>,
+    pub messages: Vec<agent::completions::message::Message>,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub provider: Option<chat::completions::request::Provider>,
-    /// The Ensemble of LLMs to use.
+    pub provider: Option<agent::completions::request::Provider>,
+    /// The Ensemble of agents to use.
     pub ensemble: super::Ensemble,
-    /// The profile weights for each LLM in the ensemble.
+    /// The profile weights for each agent in the ensemble.
     ///
-    /// Must have the same length as the total LLM count in the ensemble.
+    /// Must have the same length as the total agent count in the ensemble.
     /// Can be either:
     /// - A vector of decimals (legacy representation), or
     /// - A vector of objects with `weight` and optional `invert` fields.
@@ -45,20 +42,12 @@ pub struct VectorCompletionCreateParams {
     /// Whether to stream the response.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
-    /// Tools available (read-only context, not callable in vector completions).
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub tools: Option<Vec<chat::completions::request::Tool>>,
     /// The possible responses the LLMs can vote for.
-    pub responses: Vec<chat::completions::request::RichContent>,
+    pub responses: Vec<agent::completions::message::RichContent>,
 
-    // --- Retry configuration ---
-    /// Maximum elapsed time (ms) for exponential backoff retries.
+    // --- MCP server authorization ---
+    /// Map from MCP server URL to authorization header value.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub backoff_max_elapsed_time: Option<u64>,
-    /// Timeout (ms) for receiving the first chunk of a streaming response.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub first_chunk_timeout: Option<u64>,
-    /// Timeout (ms) between subsequent chunks of a streaming response.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub other_chunk_timeout: Option<u64>,
+    pub mcp_server_authorization: Option<IndexMap<String, String>>,
+
 }

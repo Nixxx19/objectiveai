@@ -1,0 +1,98 @@
+{
+  "title": "functions.profiles.computations.request.FunctionRemoteRequestBody",
+  "type": "object",
+  "properties": {
+    "dataset": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.profiles.computations.request.DatasetItem"
+      }
+    },
+    "ensemble": {
+      "$ref": "vector.completions.request.Ensemble"
+    },
+    "from_cache": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "max_retries": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 18446744073709551615
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "n": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "provider": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.Provider"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seed": {
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "stream": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

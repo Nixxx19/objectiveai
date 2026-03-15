@@ -1,0 +1,54 @@
+{
+  "type": "alpha.scalar.branch.function",
+  "description": "Scalar super branch with three scalar branch sub-functions and a skip.",
+  "input_schema": {
+    "type": "object",
+    "properties": {
+      "text": {
+        "type": "string"
+      },
+      "subject": {
+        "type": "string"
+      },
+      "thorough": {
+        "type": "boolean"
+      }
+    },
+    "required": ["text", "subject"]
+  },
+  "tasks": [
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-9",
+      "commit": "mock",
+      "input": {
+        "$starlark": "{'text': input['text'], 'subject': input['subject']}"
+      }
+    },
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-11",
+      "commit": "mock",
+      "skip": {
+        "$starlark": "not input.get('thorough', False)"
+      },
+      "input": {
+        "$starlark": "{'text': input['text'], 'include_sentiment': True}"
+      }
+    },
+    {
+      "type": "alpha.scalar.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-10",
+      "commit": "mock",
+      "input": {
+        "$starlark": "{'text': input['subject']}"
+      }
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+{
+  "title": "functions.RemoteProfile",
+  "description": "A remote profile, either tasks-based or auto.",
+  "anyOf": [
+    {
+      "description": "Tasks-based profile with per-task configuration.",
+      "$ref": "functions.RemoteTasksProfile"
+    },
+    {
+      "description": "Auto profile that applies a single ensemble+weights to all vector completion tasks.",
+      "$ref": "functions.RemoteAutoProfile"
+    }
+  ]
+}

@@ -1,14 +1,15 @@
 //! Complete function execution response.
 
 use crate::{
-    error,
+    agent, error,
     functions::{self, executions::response},
-    vector,
 };
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A complete function execution response (non-streaming).
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.executions.response.unary.FunctionExecution")]
 pub struct FunctionExecution {
     /// Unique identifier for this execution.
     pub id: String,
@@ -19,7 +20,7 @@ pub struct FunctionExecution {
     /// Reasoning summary if reasoning was enabled.
     pub reasoning: Option<super::ReasoningSummary>,
     /// The final output (scalar or vector score).
-    pub output: functions::expression::FunctionOutput,
+    pub output: functions::expression::TaskOutputOwned,
     /// Error details if the execution failed.
     pub error: Option<error::ResponseError>,
     /// Token for retrying this execution with cached votes.
@@ -33,7 +34,7 @@ pub struct FunctionExecution {
     /// Object type identifier.
     pub object: super::Object,
     /// Aggregated token and cost usage.
-    pub usage: vector::completions::response::Usage,
+    pub usage: agent::completions::response::Usage,
 }
 
 impl FunctionExecution {
@@ -65,7 +66,7 @@ impl From<response::streaming::FunctionExecutionChunk> for FunctionExecution {
             tasks_errors: tasks_errors.unwrap_or(false),
             reasoning: reasoning.map(super::ReasoningSummary::from),
             output: output.unwrap_or(
-                functions::expression::FunctionOutput::Err(
+                functions::expression::TaskOutputOwned::Err(
                     serde_json::Value::Null,
                 ),
             ),

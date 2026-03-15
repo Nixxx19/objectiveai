@@ -1,0 +1,57 @@
+{
+  "title": "vector.completions.response.streaming.AgentCompletionChunk",
+  "description": "A streaming agent completion chunk from a single agent within a vector completion.\n\nThe `index` field is used to correlate chunks belonging to the same\nunderlying completion when accumulating via [`push`](Self::push).",
+  "type": "object",
+  "properties": {
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "description": "Error details if this completion failed.",
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "index": {
+      "description": "Index used to correlate chunks from the same completion.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "messages": {
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.response.streaming.MessageChunk"
+      }
+    },
+    "object": {
+      "description": "The object type (always \"agent.completion.chunk\").",
+      "$ref": "agent.completions.response.streaming.Object"
+    },
+    "upstream": {
+      "description": "Upstream provider",
+      "$ref": "agent.Upstream"
+    },
+    "usage": {
+      "description": "Token usage (only present in the final chunk).",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

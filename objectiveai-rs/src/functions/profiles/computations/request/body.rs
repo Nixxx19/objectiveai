@@ -1,14 +1,18 @@
-use crate::{chat, functions, vector};
+use crate::{agent, functions, vector};
+use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.profiles.computations.request.FunctionInlineRequestBody")]
 pub struct FunctionInlineRequestBody {
     pub function: functions::InlineFunction,
     #[serde(flatten)]
     pub base: FunctionRemoteRequestBody,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.profiles.computations.request.FunctionRemoteRequestBody")]
 pub struct FunctionRemoteRequestBody {
     // if present, retries vector completions from previous request
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -16,31 +20,23 @@ pub struct FunctionRemoteRequestBody {
     // if true, vector completions use cached votes when available
     #[serde(skip_serializing_if = "Option::is_none")]
     pub from_cache: Option<bool>,
-    // if true, remaining vector completion votes are RNGed
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub from_rng: Option<bool>,
 
     // core config
-    /// Available upstreams for this request
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub upstreams: Option<Vec<crate::chat::completions::Upstream>>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub max_retries: Option<u64>,
     pub n: u64,
     pub dataset: Vec<super::DatasetItem>,
     pub ensemble: vector::completions::request::Ensemble,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub provider: Option<chat::completions::request::Provider>,
+    pub provider: Option<agent::completions::request::Provider>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed: Option<i64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stream: Option<bool>,
 
-    // retry config
+    // MCP server authorization
+    /// Map from MCP server URL to authorization header value.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub backoff_max_elapsed_time: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub first_chunk_timeout: Option<u64>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub other_chunk_timeout: Option<u64>,
+    pub mcp_server_authorization: Option<IndexMap<String, String>>,
+
 }

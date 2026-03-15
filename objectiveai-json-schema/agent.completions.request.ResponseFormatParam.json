@@ -1,0 +1,17 @@
+{
+  "title": "agent.completions.request.ResponseFormatParam",
+  "description": "Either a single response format or a per-agent map.",
+  "anyOf": [
+    {
+      "description": "A single response format applied to all agents.",
+      "$ref": "agent.completions.request.ResponseFormat"
+    },
+    {
+      "description": "Per-agent response formats, keyed by agent ID.",
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "agent.completions.request.ResponseFormat"
+      }
+    }
+  ]
+}

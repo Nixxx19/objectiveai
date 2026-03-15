@@ -1,0 +1,62 @@
+{
+  "type": "alpha.vector.branch.function",
+  "description": "Vector super branch with three vector branch sub-functions including context.",
+  "input_schema": {
+    "context": {
+      "type": "object",
+      "properties": {
+        "text": {
+          "type": "string"
+        }
+      },
+      "required": ["text"]
+    },
+    "items": {
+      "type": "string"
+    }
+  },
+  "tasks": [
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-12",
+      "commit": "mock",
+      "input": {
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    },
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-13",
+      "commit": "mock",
+      "input": {
+        "context": {
+          "$starlark": "{'query': input['context']['text']}"
+        },
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    },
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-16",
+      "commit": "mock",
+      "input": {
+        "context": {
+          "$starlark": "{'text': input['context']['text']}"
+        },
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    }
+  ]
+}

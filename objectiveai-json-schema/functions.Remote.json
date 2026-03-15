@@ -1,0 +1,27 @@
+{
+  "title": "functions.Remote",
+  "description": "The remote source where a function or profile is hosted.",
+  "anyOf": [
+    {
+      "description": "GitHub repository.",
+      "type": "string",
+      "enum": [
+        "github"
+      ]
+    },
+    {
+      "description": "Local filesystem.",
+      "type": "string",
+      "enum": [
+        "filesystem"
+      ]
+    },
+    {
+      "description": "Mock (for testing).",
+      "type": "string",
+      "enum": [
+        "mock"
+      ]
+    }
+  ]
+}

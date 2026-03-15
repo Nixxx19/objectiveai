@@ -1,0 +1,23 @@
+{
+  "title": "agent.completions.response.ToolResponse",
+  "description": "A tool message containing the result of a tool call.",
+  "type": "object",
+  "properties": {
+    "content": {
+      "description": "The content of the tool response.",
+      "$ref": "agent.completions.message.RichContent"
+    },
+    "index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "role": {
+      "$ref": "agent.completions.response.ToolRole"
+    },
+    "tool_call_id": {
+      "description": "The ID of the tool call this message responds to.",
+      "type": "string"
+    }
+  }
+}

@@ -1,0 +1,41 @@
+{
+  "title": "agent.completions.response.FinishReason",
+  "description": "The reason the model stopped generating.",
+  "anyOf": [
+    {
+      "description": "The model reached a natural stop point or stop sequence.",
+      "type": "string",
+      "enum": [
+        "stop"
+      ]
+    },
+    {
+      "description": "The model reached the maximum token limit.",
+      "type": "string",
+      "enum": [
+        "length"
+      ]
+    },
+    {
+      "description": "The model decided to call one or more tools.",
+      "type": "string",
+      "enum": [
+        "tool_calls"
+      ]
+    },
+    {
+      "description": "The response was filtered due to content policy.",
+      "type": "string",
+      "enum": [
+        "content_filter"
+      ]
+    },
+    {
+      "description": "An error occurred during generation.",
+      "type": "string",
+      "enum": [
+        "error"
+      ]
+    }
+  ]
+}

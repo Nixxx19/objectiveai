@@ -8,12 +8,12 @@ use std::sync::Arc;
 /// Fetches Functions from GitHub via the ObjectiveAI API.
 pub struct ObjectiveAiFetcher {
     /// The HTTP client for API requests.
-    pub client: Arc<objectiveai::HttpClient>,
+    pub client: Arc<crate::objectiveai_http::Client>,
 }
 
 impl ObjectiveAiFetcher {
     /// Creates a new ObjectiveAI GitHub Function fetcher.
-    pub fn new(client: Arc<objectiveai::HttpClient>) -> Self {
+    pub fn new(client: Arc<crate::objectiveai_http::Client>) -> Self {
         Self { client }
     }
 }
@@ -21,7 +21,7 @@ impl ObjectiveAiFetcher {
 #[async_trait::async_trait]
 impl<CTXEXT> super::super::Fetcher<CTXEXT> for ObjectiveAiFetcher
 where
-    CTXEXT: Send + Sync + 'static,
+    CTXEXT: Send + Sync + 'static + ctx::ContextExt,
 {
     async fn fetch(
         &self,
@@ -30,9 +30,10 @@ where
         repository: &str,
         commit: Option<&str>,
     ) -> Result<
-        Option<objectiveai::functions::response::GetFunction>,
+        Option<super::super::FullGetFunction>,
         objectiveai::error::ResponseError,
     > {
+        let http_client = self.client.with_authorization(&ctx).await;
         // Resolve commit (use latest_commit_cache if commit is None)
         let commit = if let Some(c) = commit {
             c.to_owned()
@@ -47,7 +48,7 @@ where
                 ))
                 .or_insert_with(|| {
                     let (tx, rx) = tokio::sync::oneshot::channel();
-                    let client = self.client.clone();
+                    let client = http_client.clone();
                     let owner = owner.to_owned();
                     let repository = repository.to_owned();
                     tokio::spawn(async move {
@@ -72,7 +73,7 @@ where
                                     ))
                                     .or_insert_with(|| {
                                         let (tx, rx) = tokio::sync::oneshot::channel();
-                                        let _ = tx.send(Ok(Some(function.inner)));
+                                        let _ = tx.send(Ok(Some(objectiveai::functions::FullRemoteFunction::Standard(function.inner))));
                                         rx.shared()
                                     });
                                 Ok(Some(commit))
@@ -105,7 +106,7 @@ where
             ))
             .or_insert_with(|| {
                 let (tx, rx) = tokio::sync::oneshot::channel();
-                let client = self.client.clone();
+                let client = http_client.clone();
                 let owner = owner.to_owned();
                 let repository = repository.to_owned();
                 let commit = commit.clone();
@@ -119,7 +120,7 @@ where
                     )
                     .await
                     {
-                        Ok(function) => Ok(Some(function.inner)),
+                        Ok(function) => Ok(Some(objectiveai::functions::FullRemoteFunction::Standard(function.inner))),
                         Err(e) if e.status() == 404 => Ok(None),
                         Err(e) => {
                             Err(objectiveai::error::ResponseError::from(&e))
@@ -132,7 +133,7 @@ where
             .clone();
         match shared.await.unwrap() {
             Ok(Some(inner)) => {
-                Ok(Some(objectiveai::functions::response::GetFunction {
+                Ok(Some(super::super::FullGetFunction {
                     remote: objectiveai::functions::Remote::Github,
                     owner: owner.to_owned(),
                     repository: repository.to_owned(),

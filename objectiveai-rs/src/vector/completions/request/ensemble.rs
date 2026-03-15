@@ -2,6 +2,7 @@
 
 use crate::ensemble;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Specifies which Ensemble to use for a vector completion.
 ///
@@ -27,8 +28,9 @@ use serde::{Deserialize, Serialize};
 /// ```
 ///
 /// [`EnsembleBase`]: crate::ensemble::EnsembleBase
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(untagged)]
+#[schemars(rename = "vector.completions.request.Ensemble")]
 pub enum Ensemble {
     /// Reference an existing Ensemble by its ID.
     Id(String),

@@ -1,0 +1,100 @@
+{
+  "title": "vector.completions.request.VectorCompletionCreateParams",
+  "description": "Parameters for creating a vector completion.\n\nVector completions run multiple agent completions (one per LLM in the\nensemble), force each to vote for one of the predefined responses, and\ncombine votes using the provided profile weights to produce final scores.",
+  "type": "object",
+  "properties": {
+    "ensemble": {
+      "description": "The Ensemble of agents to use.",
+      "$ref": "vector.completions.request.Ensemble"
+    },
+    "from_cache": {
+      "description": "If true, uses cached votes when available.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mcp_server_authorization": {
+      "description": "Map from MCP server URL to authorization header value.",
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "messages": {
+      "description": "The conversation messages (the prompt).",
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.Message"
+      }
+    },
+    "profile": {
+      "description": "The profile weights for each agent in the ensemble.\n\nMust have the same length as the total agent count in the ensemble.\nCan be either:\n- A vector of decimals (legacy representation), or\n- A vector of objects with `weight` and optional `invert` fields.",
+      "$ref": "vector.completions.request.Profile"
+    },
+    "provider": {
+      "description": "Provider routing preferences.",
+      "anyOf": [
+        {
+          "$ref": "agent.completions.request.Provider"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "responses": {
+      "description": "The possible responses the LLMs can vote for.",
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.RichContent"
+      }
+    },
+    "retry": {
+      "description": "If present, reuses votes from a previous request with this ID.",
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "seed": {
+      "description": "Random seed for deterministic results.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": -9223372036854775808,
+          "maximum": 9223372036854775807
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "stream": {
+      "description": "Whether to stream the response.",
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

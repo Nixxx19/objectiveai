@@ -1,0 +1,36 @@
+{
+  "title": "functions.expression.TaskOutputOwned",
+  "description": "Owned task output variants.",
+  "anyOf": [
+    {
+      "description": "A single scalar score.",
+      "type": "number",
+      "minimum": -3.4028234663852886e+38,
+      "maximum": 3.4028234663852886e+38
+    },
+    {
+      "description": "A vector of scores.",
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": -3.4028234663852886e+38,
+        "maximum": 3.4028234663852886e+38
+      }
+    },
+    {
+      "description": "Multiple vectors of scores (from mapped tasks).",
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "number",
+          "minimum": -3.4028234663852886e+38,
+          "maximum": 3.4028234663852886e+38
+        }
+      }
+    },
+    {
+      "description": "An error occurred during execution."
+    }
+  ]
+}

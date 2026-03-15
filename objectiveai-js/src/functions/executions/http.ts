@@ -1,349 +1,60 @@
-import { ObjectiveAI, RequestOptions } from "../../client";
+import { ObjectiveAI, type RequestOptions } from "../../client";
 import { Stream } from "../../stream";
-import { FunctionExecutionChunk } from "./response/streaming/function_execution_chunk";
-import { FunctionExecution } from "./response/unary/function_execution";
-import type { Remote } from "../remote";
-import {
-  FunctionExecutionCreateParamsInlineFunctionInlineProfile,
-  FunctionExecutionCreateParamsInlineFunctionInlineProfileStreaming,
-  FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreaming,
-  FunctionExecutionCreateParamsRemoteFunctionInlineProfile,
-  FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreaming,
-  FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreaming,
-  FunctionExecutionCreateParamsInlineFunctionRemoteProfile,
-  FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreaming,
-  FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreaming,
-  FunctionExecutionCreateParamsRemoteFunctionRemoteProfile,
-  FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreaming,
-  FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreaming,
-} from "./request/function_execution_create_params";
-import { InlineFunction } from "../function";
-import { InlineProfile } from "../profile";
+import type { FunctionsExecutionsRequestRequest } from "./request/request";
+import type { FunctionsExecutionsResponseUnaryFunctionExecution } from "./response/unary/functionExecution";
+import type { FunctionsExecutionsResponseStreamingFunctionExecutionChunk } from "./response/streaming/functionExecutionChunk";
 
-export function inlineFunctionInlineProfileCreate(
+function buildExecutionPath(request: FunctionsExecutionsRequestRequest): string {
+  if (!("path" in request)) {
+    return "/functions";
+  }
+  const { path } = request;
+  if ("fremote" in path && "premote" in path) {
+    let url = `/functions/${path.fremote}/${path.fowner}/${path.frepository}`;
+    if (path.fcommit != null) url += `/${path.fcommit}`;
+    url += `/profiles/${path.premote}/${path.powner}/${path.prepository}`;
+    if (path.pcommit != null) url += `/${path.pcommit}`;
+    return url;
+  }
+  if ("fremote" in path) {
+    let url = `/functions/${path.fremote}/${path.fowner}/${path.frepository}`;
+    if (path.fcommit != null) url += `/${path.fcommit}`;
+    return url;
+  }
+  let url = `/functions/profiles/${path.premote}/${path.powner}/${path.prepository}`;
+  if (path.pcommit != null) url += `/${path.pcommit}`;
+  return url;
+}
+
+export function functionsExecutionsCreateFunctionExecution(
   client: ObjectiveAI,
-  body: FunctionExecutionCreateParamsInlineFunctionInlineProfileStreaming,
+  request: FunctionsExecutionsRequestRequest & { body: { stream: true } },
   options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk>>;
-export function inlineFunctionInlineProfileCreate(
+): Promise<Stream<FunctionsExecutionsResponseStreamingFunctionExecutionChunk>>;
+export function functionsExecutionsCreateFunctionExecution(
   client: ObjectiveAI,
-  body: FunctionExecutionCreateParamsInlineFunctionInlineProfileNonStreaming,
+  request: FunctionsExecutionsRequestRequest & { body: { stream?: false | null } },
   options?: RequestOptions,
-): Promise<FunctionExecution>;
-export function inlineFunctionInlineProfileCreate(
+): Promise<FunctionsExecutionsResponseUnaryFunctionExecution>;
+export function functionsExecutionsCreateFunctionExecution(
   client: ObjectiveAI,
-  body: FunctionExecutionCreateParamsInlineFunctionInlineProfile,
+  request: FunctionsExecutionsRequestRequest,
   options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk> | FunctionExecution> {
-  if (body.stream) {
-    return client.post_streaming<FunctionExecutionChunk>(
-      "/functions",
-      body,
+): Promise<
+  | Stream<FunctionsExecutionsResponseStreamingFunctionExecutionChunk>
+  | FunctionsExecutionsResponseUnaryFunctionExecution
+> {
+  const path = buildExecutionPath(request);
+  if (request.body.stream) {
+    return client.post_streaming<FunctionsExecutionsResponseStreamingFunctionExecutionChunk>(
+      path,
+      request.body,
       options,
     );
   }
-  return client.post_unary<FunctionExecution>("/functions", body, options);
-}
-
-export function remoteFunctionInlineProfileCreate(
-  client: ObjectiveAI,
-  fremote: Remote,
-  fowner: string,
-  frepository: string,
-  fcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsRemoteFunctionInlineProfileStreaming,
-  options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk>>;
-export function remoteFunctionInlineProfileCreate(
-  client: ObjectiveAI,
-  fremote: Remote,
-  fowner: string,
-  frepository: string,
-  fcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsRemoteFunctionInlineProfileNonStreaming,
-  options?: RequestOptions,
-): Promise<FunctionExecution>;
-export function remoteFunctionInlineProfileCreate(
-  client: ObjectiveAI,
-  fremote: Remote,
-  fowner: string,
-  frepository: string,
-  fcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsRemoteFunctionInlineProfile,
-  options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk> | FunctionExecution> {
-  const path =
-    fcommit !== null && fcommit !== undefined
-      ? `/functions/${fremote}/${fowner}/${frepository}/${fcommit}`
-      : `/functions/${fremote}/${fowner}/${frepository}`;
-  if (body.stream) {
-    return client.post_streaming<FunctionExecutionChunk>(path, body, options);
-  }
-  return client.post_unary<FunctionExecution>(path, body, options);
-}
-
-export function inlineFunctionRemoteProfileCreate(
-  client: ObjectiveAI,
-  premote: Remote,
-  powner: string,
-  prepository: string,
-  pcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsInlineFunctionRemoteProfileStreaming,
-  options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk>>;
-export function inlineFunctionRemoteProfileCreate(
-  client: ObjectiveAI,
-  premote: Remote,
-  powner: string,
-  prepository: string,
-  pcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsInlineFunctionRemoteProfileNonStreaming,
-  options?: RequestOptions,
-): Promise<FunctionExecution>;
-export function inlineFunctionRemoteProfileCreate(
-  client: ObjectiveAI,
-  premote: Remote,
-  powner: string,
-  prepository: string,
-  pcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsInlineFunctionRemoteProfile,
-  options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk> | FunctionExecution> {
-  const path =
-    pcommit !== null && pcommit !== undefined
-      ? `/functions/profiles/${premote}/${powner}/${prepository}/${pcommit}`
-      : `/functions/profiles/${premote}/${powner}/${prepository}`;
-  if (body.stream) {
-    return client.post_streaming<FunctionExecutionChunk>(path, body, options);
-  }
-  return client.post_unary<FunctionExecution>(path, body, options);
-}
-
-export function remoteFunctionRemoteProfileCreate(
-  client: ObjectiveAI,
-  fremote: Remote,
-  fowner: string,
-  frepository: string,
-  fcommit: string | null | undefined,
-  premote: Remote,
-  powner: string,
-  prepository: string,
-  pcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreaming,
-  options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk>>;
-export function remoteFunctionRemoteProfileCreate(
-  client: ObjectiveAI,
-  fremote: Remote,
-  fowner: string,
-  frepository: string,
-  fcommit: string | null | undefined,
-  premote: Remote,
-  powner: string,
-  prepository: string,
-  pcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreaming,
-  options?: RequestOptions,
-): Promise<FunctionExecution>;
-export function remoteFunctionRemoteProfileCreate(
-  client: ObjectiveAI,
-  fremote: Remote,
-  fowner: string,
-  frepository: string,
-  fcommit: string | null | undefined,
-  premote: Remote,
-  powner: string,
-  prepository: string,
-  pcommit: string | null | undefined,
-  body: FunctionExecutionCreateParamsRemoteFunctionRemoteProfile,
-  options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk> | FunctionExecution> {
-  let path: string;
-  if (fcommit !== null && fcommit !== undefined) {
-    if (pcommit !== null && pcommit !== undefined) {
-      path = `/functions/${fremote}/${fowner}/${frepository}/${fcommit}/profiles/${premote}/${powner}/${prepository}/${pcommit}`;
-    } else {
-      path = `/functions/${fremote}/${fowner}/${frepository}/${fcommit}/profiles/${premote}/${powner}/${prepository}`;
-    }
-  } else if (pcommit !== null && pcommit !== undefined) {
-    path = `/functions/${fremote}/${fowner}/${frepository}/profiles/${premote}/${powner}/${prepository}/${pcommit}`;
-  } else {
-    path = `/functions/${fremote}/${fowner}/${frepository}/profiles/${premote}/${powner}/${prepository}`;
-  }
-  if (body.stream) {
-    return client.post_streaming<FunctionExecutionChunk>(path, body, options);
-  }
-  return client.post_unary<FunctionExecution>(path, body, options);
-}
-
-export function create(
-  client: ObjectiveAI,
-  function_:
-    | InlineFunction
-    | {
-        remote: Remote;
-        owner: string;
-        repository: string;
-        commit?: string | null | undefined;
-      },
-  profile:
-    | InlineProfile
-    | {
-        remote: Remote;
-        owner: string;
-        repository: string;
-        commit?: string | null | undefined;
-      },
-  body: FunctionExecutionCreateParamsRemoteFunctionRemoteProfileStreaming,
-  options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk>>;
-export function create(
-  client: ObjectiveAI,
-  function_:
-    | InlineFunction
-    | {
-        remote: Remote;
-        owner: string;
-        repository: string;
-        commit?: string | null | undefined;
-      },
-  profile:
-    | InlineProfile
-    | {
-        remote: Remote;
-        owner: string;
-        repository: string;
-        commit?: string | null | undefined;
-      },
-  body: FunctionExecutionCreateParamsRemoteFunctionRemoteProfileNonStreaming,
-  options?: RequestOptions,
-): Promise<FunctionExecution>;
-export function create(
-  client: ObjectiveAI,
-  function_:
-    | InlineFunction
-    | {
-        remote: Remote;
-        owner: string;
-        repository: string;
-        commit?: string | null | undefined;
-      },
-  profile:
-    | InlineProfile
-    | {
-        remote: Remote;
-        owner: string;
-        repository: string;
-        commit?: string | null | undefined;
-      },
-  body: FunctionExecutionCreateParamsRemoteFunctionRemoteProfile,
-  options?: RequestOptions,
-): Promise<Stream<FunctionExecutionChunk> | FunctionExecution> {
-  if ("owner" in function_ && "repository" in function_) {
-    if ("owner" in profile && "repository" in profile) {
-      if (body.stream) {
-        return remoteFunctionRemoteProfileCreate(
-          client,
-          function_.remote,
-          function_.owner,
-          function_.repository,
-          function_.commit,
-          profile.remote,
-          profile.owner,
-          profile.repository,
-          profile.commit,
-          body as typeof body & { stream: true },
-          options,
-        );
-      } else {
-        return remoteFunctionRemoteProfileCreate(
-          client,
-          function_.remote,
-          function_.owner,
-          function_.repository,
-          function_.commit,
-          profile.remote,
-          profile.owner,
-          profile.repository,
-          profile.commit,
-          body as typeof body & { stream?: false | null },
-          options,
-        );
-      }
-    } else {
-      const requestBody: FunctionExecutionCreateParamsRemoteFunctionInlineProfile =
-        {
-          ...body,
-          profile,
-        };
-      if (requestBody.stream) {
-        return remoteFunctionInlineProfileCreate(
-          client,
-          function_.remote,
-          function_.owner,
-          function_.repository,
-          function_.commit,
-          requestBody as typeof requestBody & { stream: true },
-          options,
-        );
-      } else {
-        return remoteFunctionInlineProfileCreate(
-          client,
-          function_.remote,
-          function_.owner,
-          function_.repository,
-          function_.commit,
-          requestBody as typeof requestBody & { stream?: false | null },
-          options,
-        );
-      }
-    }
-  } else if ("owner" in profile && "repository" in profile) {
-    const requestBody: FunctionExecutionCreateParamsInlineFunctionRemoteProfile =
-      {
-        ...body,
-        function: function_,
-      };
-    if (requestBody.stream) {
-      return inlineFunctionRemoteProfileCreate(
-        client,
-        profile.remote,
-        profile.owner,
-        profile.repository,
-        profile.commit,
-        requestBody as typeof requestBody & { stream: true },
-        options,
-      );
-    } else {
-      return inlineFunctionRemoteProfileCreate(
-        client,
-        profile.remote,
-        profile.owner,
-        profile.repository,
-        profile.commit,
-        requestBody as typeof requestBody & { stream?: false | null },
-        options,
-      );
-    }
-  } else {
-    const requestBody: FunctionExecutionCreateParamsInlineFunctionInlineProfile =
-      {
-        ...body,
-        function: function_,
-        profile,
-      };
-    if (requestBody.stream) {
-      return inlineFunctionInlineProfileCreate(
-        client,
-        requestBody as typeof requestBody & { stream: true },
-        options,
-      );
-    } else {
-      return inlineFunctionInlineProfileCreate(
-        client,
-        requestBody as typeof requestBody & { stream?: false | null },
-        options,
-      );
-    }
-  }
+  return client.post_unary<FunctionsExecutionsResponseUnaryFunctionExecution>(
+    path,
+    request.body,
+    options,
+  );
 }

@@ -1,0 +1,83 @@
+{
+  "title": "functions.profiles.computations.response.streaming.FunctionProfileComputationChunk",
+  "type": "object",
+  "properties": {
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "executions": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.profiles.computations.response.streaming.FunctionExecutionChunk"
+      }
+    },
+    "executions_errors": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "fitting_stats": {
+      "anyOf": [
+        {
+          "$ref": "functions.profiles.computations.response.FittingStats"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "function": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "object": {
+      "$ref": "functions.profiles.computations.response.streaming.Object"
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "$ref": "functions.InlineTasksProfile"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

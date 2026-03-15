@@ -1,0 +1,50 @@
+{
+  "title": "functions.expression.InputSchema",
+  "description": "Schema for validating Function input.\n\nDefines the expected structure and constraints for input data.\nUsed by remote Functions to document and validate their inputs.",
+  "anyOf": [
+    {
+      "description": "A union of schemas - input must match at least one.",
+      "$ref": "functions.expression.AnyOfInputSchema"
+    },
+    {
+      "description": "An object with named properties.",
+      "$ref": "functions.expression.ObjectInputSchema"
+    },
+    {
+      "description": "An array of items.",
+      "$ref": "functions.expression.ArrayInputSchema"
+    },
+    {
+      "description": "A string value.",
+      "$ref": "functions.expression.StringInputSchema"
+    },
+    {
+      "description": "An integer value.",
+      "$ref": "functions.expression.IntegerInputSchema"
+    },
+    {
+      "description": "A floating-point number.",
+      "$ref": "functions.expression.NumberInputSchema"
+    },
+    {
+      "description": "A boolean value.",
+      "$ref": "functions.expression.BooleanInputSchema"
+    },
+    {
+      "description": "An image (URL or base64).",
+      "$ref": "functions.expression.ImageInputSchema"
+    },
+    {
+      "description": "Audio content.",
+      "$ref": "functions.expression.AudioInputSchema"
+    },
+    {
+      "description": "Video content.",
+      "$ref": "functions.expression.VideoInputSchema"
+    },
+    {
+      "description": "A file.",
+      "$ref": "functions.expression.FileInputSchema"
+    }
+  ]
+}

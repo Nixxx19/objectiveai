@@ -1,0 +1,35 @@
+{
+  "type": "alpha.vector.branch.function",
+  "description": "Vector branch with two vector sub-function rankers.",
+  "input_schema": {
+    "items": {
+      "type": "string"
+    }
+  },
+  "tasks": [
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-4",
+      "commit": "mock",
+      "input": {
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    },
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-7",
+      "commit": "mock",
+      "input": {
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    }
+  ]
+}

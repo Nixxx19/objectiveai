@@ -1,0 +1,103 @@
+{
+  "title": "functions.executions.response.streaming.FunctionExecutionChunk",
+  "type": "object",
+  "properties": {
+    "created": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 18446744073709551615
+    },
+    "error": {
+      "anyOf": [
+        {
+          "$ref": "ResponseError"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "function": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "id": {
+      "type": "string"
+    },
+    "object": {
+      "$ref": "functions.executions.response.streaming.Object"
+    },
+    "output": {
+      "anyOf": [
+        {
+          "$ref": "functions.expression.TaskOutputOwned"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "profile": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "reasoning": {
+      "anyOf": [
+        {
+          "$ref": "functions.executions.response.streaming.ReasoningSummaryChunk"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "retry_token": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "$ref": "functions.executions.response.streaming.TaskChunk"
+      }
+    },
+    "tasks_errors": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "usage": {
+      "anyOf": [
+        {
+          "$ref": "agent.completions.response.Usage"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,66 @@
+{
+  "title": "agent.completions.message.MessageExpression",
+  "description": "A message with expressions for dynamic content.\n\nThis is the expression variant of [`Message`] used in function definitions\nwhere message content can be computed from the function input at runtime.\nSupports both JMESPath and Starlark expressions.",
+  "anyOf": [
+    {
+      "type": "object",
+      "$ref": "agent.completions.message.DeveloperMessageExpression",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "developer"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "agent.completions.message.SystemMessageExpression",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "system"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "agent.completions.message.UserMessageExpression",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "user"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "agent.completions.message.AssistantMessageExpression",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "assistant"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "agent.completions.message.ToolMessageExpression",
+      "properties": {
+        "role": {
+          "type": "string",
+          "enum": [
+            "tool"
+          ]
+        }
+      }
+    }
+  ]
+}

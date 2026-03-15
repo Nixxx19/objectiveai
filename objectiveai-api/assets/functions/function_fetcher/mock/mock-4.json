@@ -1,0 +1,20 @@
+{
+  "type": "alpha.vector.leaf.function",
+  "description": "Simple vector ranker with dynamic responses from items.",
+  "input_schema": {
+    "items": {
+      "type": "string"
+    }
+  },
+  "tasks": [
+    {
+      "type": "vector.completion",
+      "messages": {
+        "$starlark": "[{'role': 'user', 'content': [{'type': 'text', 'text': 'Rank these items.'}]}]"
+      },
+      "responses": {
+        "$starlark": "[[{'type': 'text', 'text': item}] for item in input['items']]"
+      }
+    }
+  ]
+}

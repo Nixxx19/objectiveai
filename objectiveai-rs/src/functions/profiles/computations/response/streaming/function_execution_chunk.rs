@@ -1,7 +1,9 @@
 use crate::functions;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "functions.profiles.computations.response.streaming.FunctionExecutionChunk")]
 pub struct FunctionExecutionChunk {
     pub index: u64,
     pub dataset: u64,

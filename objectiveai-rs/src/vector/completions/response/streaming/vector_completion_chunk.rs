@@ -1,23 +1,27 @@
 //! Streaming vector completion chunk.
 
-use crate::vector::completions::response;
+use crate::{agent, vector::completions::response};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A chunk in a streaming vector completion response.
 ///
 /// Each chunk contains incremental updates to the completion. Use the
 /// [`push`](Self::push) method to accumulate chunks into a complete response.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "vector.completions.response.streaming.VectorCompletionChunk")]
 pub struct VectorCompletionChunk {
     /// Unique identifier for this vector completion.
     pub id: String,
-    /// Incremental chat completion chunks from each LLM.
-    pub completions: Vec<super::ChatCompletionChunk>,
+    /// Incremental agent completion chunks from each agent.
+    pub completions: Vec<super::AgentCompletionChunk>,
     /// Votes received so far. New votes are appended in subsequent chunks.
     pub votes: Vec<response::Vote>,
     /// Current weighted scores. Updated as new votes arrive.
+    #[schemars(with = "Vec<f64>")]
     pub scores: Vec<rust_decimal::Decimal>,
     /// Current weight distribution across responses. Updated as new votes arrive.
+    #[schemars(with = "Vec<f64>")]
     pub weights: Vec<rust_decimal::Decimal>,
     /// Unix timestamp when the completion was created.
     pub created: u64,
@@ -27,7 +31,7 @@ pub struct VectorCompletionChunk {
     pub object: super::Object,
     /// Aggregated usage statistics. Typically present only in the final chunk.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub usage: Option<response::Usage>,
+    pub usage: Option<agent::completions::response::Usage>,
 }
 
 impl VectorCompletionChunk {
@@ -86,16 +90,16 @@ impl VectorCompletionChunk {
 
     fn push_completions(
         &mut self,
-        other_completions: &[super::ChatCompletionChunk],
+        other_completions: &[super::AgentCompletionChunk],
     ) {
         fn push_completion(
-            completions: &mut Vec<super::ChatCompletionChunk>,
-            other: &super::ChatCompletionChunk,
+            completions: &mut Vec<super::AgentCompletionChunk>,
+            other: &super::AgentCompletionChunk,
         ) {
             fn find_completion(
-                completions: &mut Vec<super::ChatCompletionChunk>,
+                completions: &mut Vec<super::AgentCompletionChunk>,
                 index: u64,
-            ) -> Option<&mut super::ChatCompletionChunk> {
+            ) -> Option<&mut super::AgentCompletionChunk> {
                 for completion in completions {
                     if completion.index == index {
                         return Some(completion);

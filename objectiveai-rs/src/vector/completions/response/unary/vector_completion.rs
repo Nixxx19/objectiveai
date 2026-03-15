@@ -1,25 +1,29 @@
 //! Unary (non-streaming) vector completion response.
 
-use crate::vector::completions::response;
+use crate::{agent, vector::completions::response};
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// A complete vector completion response (non-streaming).
 ///
 /// Contains the final scores, all votes from the ensemble, and the underlying
-/// chat completions that produced those votes.
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+/// agent completions that produced those votes.
+#[derive(Debug, Clone, Serialize, Deserialize, Default, JsonSchema)]
+#[schemars(rename = "vector.completions.response.unary.VectorCompletion")]
 pub struct VectorCompletion {
     /// Unique identifier for this vector completion.
     pub id: String,
-    /// The underlying chat completions from each LLM in the ensemble.
-    pub completions: Vec<super::ChatCompletion>,
-    /// Individual votes from each LLM, showing their selections.
+    /// The underlying agent completions from each agent in the ensemble.
+    pub completions: Vec<super::AgentCompletion>,
+    /// Individual votes from each agent, showing their selections.
     pub votes: Vec<response::Vote>,
     /// Final weighted scores for each response option. Sums to 1.
+    #[schemars(with = "Vec<f64>")]
     pub scores: Vec<rust_decimal::Decimal>,
     /// Total weight allocated to each response option. Same length as `scores`.
     /// For discrete votes, an LLM's full weight goes to its selected response.
     /// For probabilistic votes, the weight is divided according to the distribution.
+    #[schemars(with = "Vec<f64>")]
     pub weights: Vec<rust_decimal::Decimal>,
     /// Unix timestamp when the completion was created.
     pub created: u64,
@@ -28,7 +32,7 @@ pub struct VectorCompletion {
     /// Object type identifier (`"vector.completion"`).
     pub object: super::Object,
     /// Aggregated token and cost usage across all completions.
-    pub usage: response::Usage,
+    pub usage: agent::completions::response::Usage,
 }
 
 impl VectorCompletion {
@@ -52,7 +56,7 @@ impl VectorCompletion {
             created: 0,
             ensemble: String::new(),
             object: super::Object::default(),
-            usage: response::Usage::default(),
+            usage: agent::completions::response::Usage::default(),
         }
     }
 }
@@ -75,7 +79,7 @@ impl From<response::streaming::VectorCompletionChunk> for VectorCompletion {
             id,
             completions: completions
                 .into_iter()
-                .map(super::ChatCompletion::from)
+                .map(super::AgentCompletion::from)
                 .collect(),
             votes,
             scores,

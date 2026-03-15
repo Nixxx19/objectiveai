@@ -1,0 +1,53 @@
+{
+  "type": "alpha.vector.branch.function",
+  "description": "Vector branch with skip on one vector sub-function.",
+  "input_schema": {
+    "context": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string"
+        },
+        "include_quality": {
+          "type": "boolean"
+        }
+      },
+      "required": ["query"]
+    },
+    "items": {
+      "type": "string"
+    }
+  },
+  "tasks": [
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-4",
+      "commit": "mock",
+      "input": {
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    },
+    {
+      "type": "alpha.vector.function",
+      "remote": "mock",
+      "owner": "mock",
+      "repository": "mock-5",
+      "commit": "mock",
+      "skip": {
+        "$starlark": "not input['context'].get('include_quality', False)"
+      },
+      "input": {
+        "context": {
+          "$starlark": "input['context']"
+        },
+        "items": {
+          "$starlark": "input['items']"
+        }
+      }
+    }
+  ]
+}

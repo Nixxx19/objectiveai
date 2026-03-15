@@ -1,15 +1,15 @@
 //! GitHub API implementation of the Profile fetcher.
 
-use crate::{ctx, functions};
+use crate::ctx;
 use std::sync::Arc;
 
 /// Fetches Profiles from GitHub directly via the GitHub API.
 pub struct GithubFetcher {
-    pub client: Arc<functions::github::Client>,
+    pub client: Arc<crate::github::Client>,
 }
 
 impl GithubFetcher {
-    pub fn new(client: Arc<functions::github::Client>) -> Self {
+    pub fn new(client: Arc<crate::github::Client>) -> Self {
         Self { client }
     }
 }

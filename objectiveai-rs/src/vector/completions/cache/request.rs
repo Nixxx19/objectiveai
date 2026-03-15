@@ -1,7 +1,10 @@
-use crate::chat;
+use crate::agent;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[serde(untagged)]
+#[schemars(rename = "vector.completions.cache.CacheVoteRequest")]
 pub enum CacheVoteRequest<'a> {
     Ref(CacheVoteRequestRef<'a>),
     Owned(CacheVoteRequestOwned),
@@ -17,20 +20,20 @@ impl<'de> serde::de::Deserialize<'de> for CacheVoteRequest<'static> {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, JsonSchema)]
+#[schemars(rename = "vector.completions.cache.CacheVoteRequestRef")]
 pub struct CacheVoteRequestRef<'a> {
-    pub model: &'a chat::completions::request::Model,
-    pub models: Option<&'a [chat::completions::request::Model]>,
-    pub messages: &'a [chat::completions::request::Message],
-    pub tools: Option<&'a [chat::completions::request::Tool]>,
-    pub responses: &'a [chat::completions::request::RichContent],
+    pub agent: &'a agent::completions::request::Agent,
+    pub agents: Option<&'a [agent::completions::request::Agent]>,
+    pub messages: &'a [agent::completions::message::Message],
+    pub responses: &'a [agent::completions::message::RichContent],
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "vector.completions.cache.CacheVoteRequestOwned")]
 pub struct CacheVoteRequestOwned {
-    pub model: chat::completions::request::Model,
-    pub models: Option<Vec<chat::completions::request::Model>>,
-    pub messages: Vec<chat::completions::request::Message>,
-    pub tools: Option<Vec<chat::completions::request::Tool>>,
-    pub responses: Vec<chat::completions::request::RichContent>,
+    pub agent: agent::completions::request::Agent,
+    pub agents: Option<Vec<agent::completions::request::Agent>>,
+    pub messages: Vec<agent::completions::message::Message>,
+    pub responses: Vec<agent::completions::message::RichContent>,
 }

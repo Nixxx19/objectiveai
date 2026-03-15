@@ -7,12 +7,12 @@ use std::sync::Arc;
 /// Fetches cached votes from the ObjectiveAI API.
 pub struct ObjectiveAiFetcher {
     /// The HTTP client for API requests.
-    pub client: Arc<objectiveai::HttpClient>,
+    pub client: Arc<crate::objectiveai_http::Client>,
 }
 
 impl ObjectiveAiFetcher {
     /// Creates a new ObjectiveAI cache vote fetcher.
-    pub fn new(client: Arc<objectiveai::HttpClient>) -> Self {
+    pub fn new(client: Arc<crate::objectiveai_http::Client>) -> Self {
         Self { client }
     }
 }
@@ -20,31 +20,30 @@ impl ObjectiveAiFetcher {
 #[async_trait::async_trait]
 impl<CTXEXT> super::Fetcher<CTXEXT> for ObjectiveAiFetcher
 where
-    CTXEXT: Send + Sync + 'static,
+    CTXEXT: Send + Sync + 'static + ctx::ContextExt,
 {
     async fn fetch(
         &self,
-        _ctx: ctx::Context<CTXEXT>,
-        model: &objectiveai::chat::completions::request::Model,
-        models: Option<&[objectiveai::chat::completions::request::Model]>,
-        messages: &[objectiveai::chat::completions::request::Message],
-        tools: Option<&[objectiveai::chat::completions::request::Tool]>,
-        responses: &[objectiveai::chat::completions::request::RichContent],
+        ctx: ctx::Context<CTXEXT>,
+        agent: &objectiveai::agent::completions::request::Agent,
+        agents: Option<&[objectiveai::agent::completions::request::Agent]>,
+        messages: &[objectiveai::agent::completions::message::Message],
+        responses: &[objectiveai::agent::completions::message::RichContent],
     ) -> Result<
         Option<objectiveai::vector::completions::response::Vote>,
         objectiveai::error::ResponseError,
     > {
+        let client = self.client.with_authorization(&ctx).await;
         let request = objectiveai::vector::completions::cache::request::CacheVoteRequest::Ref(
             objectiveai::vector::completions::cache::request::CacheVoteRequestRef {
-                model,
-                models,
+                agent,
+                agents,
                 messages,
-                tools,
                 responses,
             },
         );
         match objectiveai::vector::completions::cache::get_cache_vote(
-            &self.client,
+            &client,
             &request,
         )
         .await

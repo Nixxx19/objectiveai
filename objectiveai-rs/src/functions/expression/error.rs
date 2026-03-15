@@ -21,4 +21,7 @@ pub enum ExpressionError {
     /// Expected a single value but the expression returned multiple.
     #[error("expected one value, found many")]
     ExpectedOneValueFoundMany,
+    /// A Special expression variant is not supported for this target type.
+    #[error("unsupported special expression")]
+    UnsupportedSpecial,
 }

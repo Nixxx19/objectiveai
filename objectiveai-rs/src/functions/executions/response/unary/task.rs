@@ -1,8 +1,10 @@
 use crate::functions::executions::response;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
+#[schemars(rename = "functions.executions.response.unary.Task")]
 pub enum Task {
     FunctionExecution(super::FunctionExecutionTask),
     VectorCompletion(super::VectorCompletionTask),

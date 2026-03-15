@@ -1,0 +1,15 @@
+{
+  "title": "functions.InlineAutoProfile",
+  "description": "An inline auto profile definition without metadata.\n\nApplies a single ensemble and weights to every vector completion task\nin the function, with equal task weights.",
+  "type": "object",
+  "properties": {
+    "ensemble": {
+      "description": "The ensemble to use for all vector completion tasks.",
+      "$ref": "vector.completions.request.Ensemble"
+    },
+    "profile": {
+      "description": "Weights for each agent in the ensemble.",
+      "$ref": "vector.completions.request.Profile"
+    }
+  }
+}

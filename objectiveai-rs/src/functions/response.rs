@@ -2,16 +2,19 @@
 
 use crate::functions;
 use serde::{Deserialize, Serialize};
+use schemars::JsonSchema;
 
 /// Response from listing functions.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.ListFunction")]
 pub struct ListFunction {
     /// List of available functions.
     pub data: Vec<ListFunctionItem>,
 }
 
 /// A function in a list response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.ListFunctionItem")]
 pub struct ListFunctionItem {
     /// The remote source where the function is hosted.
     pub remote: functions::Remote,
@@ -23,18 +26,21 @@ pub struct ListFunctionItem {
     pub commit: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.GetFunction")]
 pub struct GetFunction {
     pub remote: functions::Remote,
     pub owner: String,
     pub repository: String,
     pub commit: String,
     #[serde(flatten)]
+    #[schemars(schema_with = "crate::flatten_schema::<functions::RemoteFunction>")]
     pub inner: functions::RemoteFunction,
 }
 
 /// Usage statistics for a function.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.UsageFunction")]
 pub struct UsageFunction {
     /// Total number of requests made with this function.
     pub requests: u64,
@@ -43,18 +49,21 @@ pub struct UsageFunction {
     /// Total prompt tokens used.
     pub prompt_tokens: u64,
     /// Total cost incurred.
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }
 
 /// Response from listing function-profile pairs.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.ListFunctionProfilePair")]
 pub struct ListFunctionProfilePair {
     /// List of available function-profile pairs.
     pub data: Vec<ListFunctionProfilePairItem>,
 }
 
 /// A function-profile pair in a list response.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.ListFunctionProfilePairItem")]
 pub struct ListFunctionProfilePairItem {
     /// The function.
     pub function: ListFunctionItem,
@@ -63,7 +72,8 @@ pub struct ListFunctionProfilePairItem {
 }
 
 /// Response from getting a function-profile pair.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.GetFunctionProfilePair")]
 pub struct GetFunctionProfilePair {
     /// The function.
     pub function: GetFunction,
@@ -72,7 +82,8 @@ pub struct GetFunctionProfilePair {
 }
 
 /// Usage statistics for a function-profile pair.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
+#[schemars(rename = "functions.UsageFunctionProfilePair")]
 pub struct UsageFunctionProfilePair {
     /// Total number of requests made with this function-profile pair.
     pub requests: u64,
@@ -81,5 +92,6 @@ pub struct UsageFunctionProfilePair {
     /// Total prompt tokens used.
     pub prompt_tokens: u64,
     /// Total cost incurred.
+    #[schemars(with = "f64")]
     pub total_cost: rust_decimal::Decimal,
 }

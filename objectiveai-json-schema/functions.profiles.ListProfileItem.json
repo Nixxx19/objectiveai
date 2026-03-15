@@ -1,0 +1,23 @@
+{
+  "title": "functions.profiles.ListProfileItem",
+  "description": "A profile in a list response.",
+  "type": "object",
+  "properties": {
+    "commit": {
+      "description": "Git commit SHA.",
+      "type": "string"
+    },
+    "owner": {
+      "description": "Repository owner.",
+      "type": "string"
+    },
+    "remote": {
+      "description": "The remote source where the profile is hosted.",
+      "$ref": "functions.Remote"
+    },
+    "repository": {
+      "description": "Repository name.",
+      "type": "string"
+    }
+  }
+}

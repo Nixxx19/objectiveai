@@ -4,6 +4,7 @@ use crate::functions::expression::ToStarlarkValue;
 use serde::{Deserialize, Serialize};
 use starlark::values::dict::AllocDict as StarlarkAllocDict;
 use starlark::values::{Heap as StarlarkHeap, Value as StarlarkValue};
+use schemars::JsonSchema;
 
 /// A single LLM's vote in a vector completion.
 ///
@@ -17,20 +18,19 @@ use starlark::values::{Heap as StarlarkHeap, Value as StarlarkValue};
 /// in the request. Typically one element is 1.0 and the rest are 0.0 (discrete
 /// selection), but when `top_logprobs` is used, votes may be probability
 /// distributions.
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[schemars(rename = "vector.completions.response.Vote")]
 pub struct Vote {
     // --- Identifiers ---
 
-    /// The model that produced this vote (e.g., `"openai/gpt-4o"`).
-    pub model: String,
-    /// Index of the LLM configuration within the ensemble.
+    /// The agent that produced this vote (content-addressed ID).
+    pub agent: String,
+    /// Index of the agent configuration within the ensemble.
     pub ensemble_index: u64,
-    /// Flattened index accounting for LLM counts in the ensemble.
+    /// Flattened index accounting for agent counts in the ensemble.
     pub flat_ensemble_index: u64,
     /// Content hash of the request messages (for caching/deduplication).
     pub prompt_id: String,
-    /// Content hash of the request tools, if any.
-    pub tools_id: Option<String>,
     /// Content hashes of each response option in the request.
     pub responses_ids: Vec<String>,
 
@@ -38,9 +38,11 @@ pub struct Vote {
 
     /// The vote distribution. Each index corresponds to a response from the
     /// request. Typically one element is 1.0 (selected) and the rest are 0.0.
+    #[schemars(with = "Vec<f64>")]
     pub vote: Vec<rust_decimal::Decimal>,
 
     /// The weight applied to this vote when computing final scores.
+    #[schemars(with = "f64")]
     pub weight: rust_decimal::Decimal,
 
     // --- Source flags ---
@@ -54,11 +56,6 @@ pub struct Vote {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub from_cache: Option<bool>,
 
-    /// If true, this vote was randomly generated (for testing/simulation).
-    /// Mutually exclusive with `from_cache` and `retry`.
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub from_rng: Option<bool>,
-
     // --- Internal ---
 
     /// Internal index for correlating with completions. Not serialized.
@@ -69,17 +66,15 @@ pub struct Vote {
 impl ToStarlarkValue for Vote {
     fn to_starlark_value<'v>(&self, heap: &'v StarlarkHeap) -> StarlarkValue<'v> {
         heap.alloc(StarlarkAllocDict([
-            ("model", self.model.to_starlark_value(heap)),
+            ("agent", self.agent.to_starlark_value(heap)),
             ("ensemble_index", self.ensemble_index.to_starlark_value(heap)),
             ("flat_ensemble_index", self.flat_ensemble_index.to_starlark_value(heap)),
             ("prompt_id", self.prompt_id.to_starlark_value(heap)),
-            ("tools_id", self.tools_id.to_starlark_value(heap)),
             ("responses_ids", self.responses_ids.to_starlark_value(heap)),
             ("vote", self.vote.to_starlark_value(heap)),
             ("weight", self.weight.to_starlark_value(heap)),
             ("retry", self.retry.to_starlark_value(heap)),
             ("from_cache", self.from_cache.to_starlark_value(heap)),
-            ("from_rng", self.from_rng.to_starlark_value(heap)),
         ]))
     }
 }

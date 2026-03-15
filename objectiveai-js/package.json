@@ -10,8 +10,8 @@
   },
   "type": "module",
   "scripts": {
-    "build": "shx rm -f .schema-cache.json && shx rm -rf dist && node ./scripts/install-wasm.cjs && npx tsx scripts/precompute-schemas.ts && tsup && shx rm -f dist/*.d.mts && shx rm -f dist/*.d.cts && shx rm -f .schema-cache.json",
-    "test": "node test/test-cjs.cjs && node test/test-esm.mjs && vitest run",
+    "build": "shx rm -rf dist && node ./scripts/install-zod.cjs && node ./scripts/install-wasm.cjs && tsup && shx rm -f dist/*.d.mts && shx rm -f dist/*.d.cts",
+    "test": "node tests/test-cjs.cjs && node tests/test-esm.mjs && tsc --noEmit && vitest run",
     "start": "node dist/index.js"
   },
   "author": {
@@ -25,6 +25,8 @@
   "license": "MIT",
   "sideEffects": false,
   "dependencies": {
+    "@esbuild/win32-x64": "^0.27.3",
+    "@rollup/rollup-win32-x64-msvc": "^4.59.0",
     "zod": "^4.3.5"
   },
   "devDependencies": {
@@ -32,7 +34,8 @@
     "shx": "^0.4.0",
     "tsup": "^8.5.1",
     "typescript": "^5.9.3",
-    "vitest": "^4.0.18"
+    "vitest": "^4.0.18",
+    "zocker": "^3.0.0"
   },
   "keywords": [
     "llm",

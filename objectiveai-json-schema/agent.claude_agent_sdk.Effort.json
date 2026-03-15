@@ -1,0 +1,34 @@
+{
+  "title": "agent.claude_agent_sdk.Effort",
+  "description": "The effort level for model output.\n\nThis setting hints to the model how detailed its responses should be.",
+  "anyOf": [
+    {
+      "description": "Minimal output, concise responses.",
+      "type": "string",
+      "enum": [
+        "low"
+      ]
+    },
+    {
+      "description": "Balanced output (default, normalized away during preparation).",
+      "type": "string",
+      "enum": [
+        "medium"
+      ]
+    },
+    {
+      "description": "Detailed output with thorough explanations.",
+      "type": "string",
+      "enum": [
+        "high"
+      ]
+    },
+    {
+      "description": "Maximum effort, most detailed output possible.",
+      "type": "string",
+      "enum": [
+        "max"
+      ]
+    }
+  ]
+}

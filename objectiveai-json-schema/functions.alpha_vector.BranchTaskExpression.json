@@ -1,0 +1,53 @@
+{
+  "title": "functions.alpha_vector.BranchTaskExpression",
+  "anyOf": [
+    {
+      "type": "object",
+      "$ref": "functions.alpha_vector.ScalarFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "alpha.scalar.function"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.alpha_vector.VectorFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "alpha.vector.function"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.alpha_vector.PlaceholderScalarFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.alpha.scalar.function"
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "$ref": "functions.alpha_vector.PlaceholderVectorFunctionTaskExpression",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "placeholder.alpha.vector.function"
+          ]
+        }
+      }
+    }
+  ]
+}

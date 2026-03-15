@@ -1,0 +1,17 @@
+{
+  "title": "agent.completions.message.SimpleContent",
+  "description": "Simple text content for system/developer messages.",
+  "anyOf": [
+    {
+      "description": "Plain text content.",
+      "type": "string"
+    },
+    {
+      "description": "Multi-part text content.",
+      "type": "array",
+      "items": {
+        "$ref": "agent.completions.message.SimpleContentPart"
+      }
+    }
+  ]
+}
