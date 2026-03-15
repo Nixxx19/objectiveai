@@ -1,5 +1,25 @@
 """HTTP functions for function inventions."""
 
+from __future__ import annotations
 
-async def create_function_invention(client, body):
-    raise NotImplementedError
+from typing import TYPE_CHECKING, Union
+
+if TYPE_CHECKING:
+    from objectiveai.client import ObjectiveAI
+    from objectiveai.functions.inventions.request import FunctionInventionCreateParams
+    from objectiveai.functions.inventions.response.streaming import FunctionInventionChunk
+    from objectiveai.functions.inventions.response.unary import FunctionInvention
+    from objectiveai.stream import Stream
+
+
+async def create_function_invention(
+    client: ObjectiveAI,
+    params: FunctionInventionCreateParams,
+) -> Union[FunctionInvention, Stream[FunctionInventionChunk]]:
+    """Create a function invention.
+
+    If ``params.stream`` is true, returns a streaming response.
+    """
+    if getattr(params, "stream", None):
+        return await client.post_streaming("functions/inventions", params)
+    return await client.post_unary("functions/inventions", params)
