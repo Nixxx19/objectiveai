@@ -329,6 +329,14 @@ def _convert_union_member(tp: Any, root_title: str) -> dict:
 
 def _convert_root_model(cls: type, root_title: str) -> dict:
     """Convert a RootModel subclass to JSON Schema."""
+    # Check for expanded $ref (union that was expanded for inheritance).
+    # Reconstruct as $ref + local properties.
+    config = getattr(cls, "model_config", None)
+    if config and isinstance(config, dict):
+        extra = config.get("json_schema_extra")
+        if isinstance(extra, dict) and "_expanded_ref" in extra:
+            return _convert_expanded_ref_model(cls, root_title, extra["_expanded_ref"])
+
     # Plain RootModel — unwrap root type and extract field constraints
     fields = cls.model_fields
     if "root" not in fields:
@@ -351,6 +359,28 @@ def _convert_root_model(cls: type, root_title: str) -> dict:
             result["format"] = fi_extra["format"]
         if "pattern" in fi_extra:
             result["pattern"] = fi_extra["pattern"]
+
+    return result
+
+
+def _convert_expanded_ref_model(cls: type, root_title: str, expanded_ref: str) -> dict:
+    """Convert an expanded union $ref back to $ref + local properties.
+
+    The expanded union has variants that inherit from the original union's
+    inner types with local properties added. We reconstruct the original
+    schema shape: {"type": "object", "$ref": "...", "properties": {...}}.
+    """
+    result: dict = {"type": "object", "$ref": expanded_ref}
+
+    # Find the local properties by looking at what the variants added
+    # on top of their base classes. All variants have the same local
+    # properties, so we can get them from the first variant.
+    variants = _find_variant_types(cls)
+    if variants:
+        first_variant = variants[0]
+        local_props = _convert_local_properties(first_variant, root_title)
+        if local_props:
+            result["properties"] = local_props
 
     return result
 
