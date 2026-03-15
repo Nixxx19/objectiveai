@@ -111,6 +111,45 @@ def compute_global_class_names(all_titles: set[str]) -> dict[str, str]:
 _current_name_map: dict[str, str] = {}
 
 
+# Accumulates helper class code and refs generated during type conversion.
+# Reset per-file before generate_model is called.
+_generated_helpers: list[str] = []
+_generated_helper_refs: set[str] = set()
+
+# All schemas dict, set per-file for access during type conversion.
+_all_schemas: dict[str, dict] = {}
+
+# Current naming context stack for inline type generation.
+# Pushed/popped as we descend into properties, items, etc.
+# E.g., ["Ensemble", "Agents", "Item"] → "EnsembleAgentsItem"
+_naming_context: list[str] = []
+
+
+
+def _generate_inline_type(schema: dict, self_title: str, all_titles: set[str]) -> str:
+    """Generate a helper class for an inline schema that needs its own type.
+
+    Used for $ref + properties (inline inheritance).
+    Names the class based on the current naming context.
+    """
+    class_name = "".join(_naming_context)
+    refs: set[str] = set()
+
+    ref_target = schema["$ref"]
+    if ref_target == "#":
+        ref_target = self_title
+    desc = schema.get("description", "")
+    safe_desc = desc.replace('"""', '\\"\\"\\"') if desc else ""
+    code = _generate_flattened_ref_model(
+        self_title, schema, refs, all_titles,
+        class_name, safe_desc, ref_target, all_schemas=_all_schemas,
+    )
+
+    _generated_helpers.append(code)
+    _generated_helper_refs.update(refs)
+    return class_name
+
+
 def resolve_ref_name(title: str) -> str:
     """Resolve a $ref title to the class name used in the current file."""
     if title in _current_name_map:
@@ -154,6 +193,10 @@ def _convert_type_impl(
 
     # $ref
     if "$ref" in schema:
+        if "properties" in schema:
+            # $ref + properties: inline type that needs its own class.
+            # Generate a helper class and return its name.
+            return _generate_inline_type(schema, self_title, all_titles)
         ref = schema["$ref"]
         ref_title = self_title if ref == "#" else ref
         return resolve_ref_name(ref_title)
@@ -241,7 +284,9 @@ def _convert_single_type(
     if type_ == "array":
         if "items" in schema:
             # Items always use inner type (annotate=True) for constraint preservation
+            _naming_context.append("Item")
             inner = _convert_inner_type(schema["items"], self_title, all_titles)
+            _naming_context.pop()
             return f"list[{inner}]"
         return "list[JsonValue]"
     if type_ == "object":
@@ -712,7 +757,12 @@ def _generate_object_model(
 
     for prop_name, prop_schema in properties.items():
         collect_refs(prop_schema, refs)
+        # Push naming context for inline type generation
+        _naming_context.append(pascal_name)
+        _naming_context.append(prop_name[0].upper() + prop_name[1:] if prop_name else "")
         prop_type = convert_to_type(prop_schema, title, all_titles)
+        _naming_context.pop()
+        _naming_context.pop()
         is_required = not _is_nullable(prop_schema)
         line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
         lines.append(f"    {line}")
@@ -758,7 +808,12 @@ def _generate_flattened_model(
 
     for prop_name, prop_schema in properties.items():
         collect_refs(prop_schema, refs)
+        # Push naming context for inline type generation
+        _naming_context.append(pascal_name)
+        _naming_context.append(prop_name[0].upper() + prop_name[1:] if prop_name else "")
         prop_type = convert_to_type(prop_schema, title, all_titles)
+        _naming_context.pop()
+        _naming_context.pop()
         is_required = not _is_nullable(prop_schema)
         line = _generate_field_line(prop_name, prop_schema, prop_type, is_required)
         lines.append(f"    {line}")
@@ -1155,10 +1210,15 @@ def main() -> None:
         _current_name_map = name_map
 
         # --- Generate model code ---
+        global _generated_helpers, _generated_helper_refs, _all_schemas
+        _generated_helpers = []
+        _generated_helper_refs = set()
+        _all_schemas = schemas
         all_refs: set[str] = set()
         model_codes: list[str] = []
 
         for entry in entries:
+            _naming_context.clear()
             code, refs = generate_model(
                 entry["title"],
                 entry["schema"],
@@ -1167,6 +1227,11 @@ def main() -> None:
             )
             model_codes.append(code)
             all_refs |= refs
+
+        # Prepend inline helper classes (generated during type conversion)
+        if _generated_helpers:
+            model_codes = _generated_helpers + model_codes
+            all_refs |= _generated_helper_refs
 
         # --- Detect base class refs (inheritance, can't be deferred) ---
         # Scan generated code for `class Foo(Bar):` where Bar is not
