@@ -12,7 +12,7 @@ pub struct FunctionExecutionChunk {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoning: Option<super::ReasoningSummaryChunk>,
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub output: Option<functions::expression::TaskOutputOwned>,
+    pub output: Option<super::super::Output>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub error: Option<error::ResponseError>,
     #[serde(skip_serializing_if = "Option::is_none")]

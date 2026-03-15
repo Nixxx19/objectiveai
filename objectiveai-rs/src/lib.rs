@@ -357,6 +357,7 @@ pub fn json_schemas() -> Vec<schemars::Schema> {
         schemars::schema_for!(vector::completions::response::unary::VectorCompletion),
         schemars::schema_for!(vector::completions::response::Vote),
         schemars::schema_for!(vector::completions::VectorResponses),
+        schemars::schema_for!(functions::executions::response::Output),
         schemars::schema_for!(agent::WithFallbacksAndCount<agent::AgentBase>),
         schemars::schema_for!(agent::WithFallbacksAndCount<agent::Agent>),
         schemars::schema_for!(functions::expression::OneOrMany<String>),

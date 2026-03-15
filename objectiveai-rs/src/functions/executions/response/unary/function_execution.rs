@@ -20,7 +20,7 @@ pub struct FunctionExecution {
     /// Reasoning summary if reasoning was enabled.
     pub reasoning: Option<super::ReasoningSummary>,
     /// The final output (scalar or vector score).
-    pub output: functions::expression::TaskOutputOwned,
+    pub output: super::super::Output,
     /// Error details if the execution failed.
     pub error: Option<error::ResponseError>,
     /// Token for retrying this execution with cached votes.
@@ -82,11 +82,11 @@ impl From<response::streaming::FunctionExecutionChunk> for FunctionExecution {
             tasks: tasks.into_iter().map(super::Task::from).collect(),
             tasks_errors: tasks_errors.unwrap_or(false),
             reasoning: reasoning.map(super::ReasoningSummary::from),
-            output: output.unwrap_or(
-                functions::expression::TaskOutputOwned::Err(
+            output: output.unwrap_or(response::Output {
+                output: functions::expression::TaskOutputOwned::Err(
                     serde_json::Value::Null,
                 ),
-            ),
+            }),
             error,
             retry_token,
             created,
