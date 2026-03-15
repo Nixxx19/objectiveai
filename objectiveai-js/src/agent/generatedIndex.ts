@@ -13,4 +13,3 @@ export * from "./mcpServer";
 export * from "./outputMode";
 export * from "./upstream";
 export * from "./usageAgent";
-export * from "./withFallbacksAndCount";

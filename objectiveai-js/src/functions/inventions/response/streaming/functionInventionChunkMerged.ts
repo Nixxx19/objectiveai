@@ -13,20 +13,20 @@ export function functionsInventionsResponseStreamingFunctionInventionChunkMerged
 
   let state = a.state;
   if (b.state != null) {
+    if (b.state !== a.state) changed = true;
     state = b.state;
-    changed = true;
   }
 
   let path = a.path;
   if (b.path != null) {
+    if (b.path !== a.path) changed = true;
     path = b.path;
-    changed = true;
   }
 
   let fn = a.function;
   if (b.function != null) {
+    if (b.function !== a.function) changed = true;
     fn = b.function;
-    changed = true;
   }
 
   let usage = a.usage;
@@ -41,8 +41,8 @@ export function functionsInventionsResponseStreamingFunctionInventionChunkMerged
 
   let error = a.error;
   if (b.error != null) {
+    if (b.error !== a.error) changed = true;
     error = b.error;
-    changed = true;
   }
 
   if (!changed) return [a, false];

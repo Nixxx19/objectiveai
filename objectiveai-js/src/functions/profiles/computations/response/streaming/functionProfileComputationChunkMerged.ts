@@ -19,20 +19,20 @@ export function functionsProfilesComputationsResponseStreamingFunctionProfileCom
 
   let profile = a.profile;
   if (b.profile != null) {
+    if (b.profile !== a.profile) changed = true;
     profile = b.profile;
-    changed = true;
   }
 
   let fitting_stats = a.fitting_stats;
   if (b.fitting_stats != null) {
+    if (b.fitting_stats !== a.fitting_stats) changed = true;
     fitting_stats = b.fitting_stats;
-    changed = true;
   }
 
   let retry_token = a.retry_token;
   if (b.retry_token != null) {
+    if (b.retry_token !== a.retry_token) changed = true;
     retry_token = b.retry_token;
-    changed = true;
   }
 
   let usage = a.usage;

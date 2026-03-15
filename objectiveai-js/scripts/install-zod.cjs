@@ -42,46 +42,13 @@ function titleToPascal(title) {
  * "agent.openrouter.Agent" → { dir: "agent/openrouter", file: "agent" }
  * "ResponseError" → { dir: "", file: "responseError" }
  * "PrefixedUuid" → { dir: "", file: "prefixedUuid" }
- *
- * For generics like "functions.expression.WithExpression.string",
- * we group by the base type: dir = "functions/expression", file = "withExpression"
  */
 function titleToPath(title) {
-  // Detect generic monomorphizations
-  const genericBase = getGenericBase(title);
-  if (genericBase) {
-    const parts = genericBase.split(".");
-    const typeName = parts.pop();
-    const dir = parts.join("/");
-    const file = typeName[0].toLowerCase() + typeName.slice(1);
-    return { dir, file };
-  }
-
   const parts = title.split(".");
   const typeName = parts.pop();
   const dir = parts.join("/");
   const file = typeName[0].toLowerCase() + typeName.slice(1);
   return { dir, file };
-}
-
-/** Returns the generic base if this is a monomorphized generic, else null.
- * "functions.expression.WithExpression.string" → "functions.expression.WithExpression"
- * "agent.WithFallbacksAndCount.agent.Agent" → "agent.WithFallbacksAndCount"
- * "functions.expression.OneOrMany.string" → "functions.expression.OneOrMany"
- * "agent.Agent" → null
- */
-function getGenericBase(title) {
-  const genericPrefixes = [
-    "functions.expression.WithExpression.",
-    "agent.WithFallbacksAndCount.",
-    "functions.expression.OneOrMany.",
-  ];
-  for (const prefix of genericPrefixes) {
-    if (title.startsWith(prefix) && title.length > prefix.length) {
-      return prefix.slice(0, -1); // remove trailing dot
-    }
-  }
-  return null;
 }
 
 /**

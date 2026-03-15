@@ -33,9 +33,9 @@ export function functionsExecutionsResponseStreamingVectorCompletionTaskChunkMer
   }
 
   let error = a.error;
-  if (a.error == null && b.error != null) {
+  if (b.error != null) {
+    if (b.error !== a.error) changed = true;
     error = b.error;
-    changed = true;
   }
 
   if (!changed) return [a, false];

@@ -30,20 +30,20 @@ export function functionsProfilesComputationsResponseStreamingFunctionExecutionC
 
   let output = a.output;
   if (b.output != null) {
+    if (b.output !== a.output) changed = true;
     output = b.output;
-    changed = true;
   }
 
   let retry_token = a.retry_token;
   if (b.retry_token != null) {
+    if (b.retry_token !== a.retry_token) changed = true;
     retry_token = b.retry_token;
-    changed = true;
   }
 
   let error = a.error;
   if (b.error != null) {
+    if (b.error !== a.error) changed = true;
     error = b.error;
-    changed = true;
   }
 
   let usage = a.usage;

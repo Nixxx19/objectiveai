@@ -3,10 +3,10 @@
 import { z } from "zod";
 import { FunctionsExpressionExpressionSchema } from "./expression/expression";
 import { FunctionsExpressionInputSchemaSchema } from "./expression/inputSchema";
-import { FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema } from "./expression/withExpression";
+import { FunctionsExpressionInputValueExpressionSchema } from "./expression/inputValueExpression";
 
 export const FunctionsPlaceholderVectorFunctionTaskExpressionSchema = z.object({
-  input: FunctionsExpressionWithExpressionFunctionsExpressionInputValueExpressionSchema.describe("Expression for the input to pass to the placeholder function.\nReceives: `input`, `map` (if mapped)."),
+  input: z.union([FunctionsExpressionExpressionSchema.describe("An expression (JMESPath or Starlark) to evaluate."), FunctionsExpressionInputValueExpressionSchema.describe("A literal value.")]).describe("A value that can be either a literal or an expression.\n\nThis allows Function definitions to mix static values with dynamic\nexpressions. During compilation, expressions are evaluated while\nliteral values pass through unchanged.\n\n# Example\n\nLiteral value:\n```json\n\"hello world\"\n```\n\nJMESPath expression:\n```json\n{\"$jmespath\": \"input.greeting\"}\n```\n\nStarlark expression:\n```json\n{\"$starlark\": \"input['greeting']\"}\n```"),
   input_merge: FunctionsExpressionExpressionSchema.describe("Expression merging sub-inputs back into one input.\nReceives: `input` (as an array)."),
   input_schema: FunctionsExpressionInputSchemaSchema.describe("JSON Schema defining the expected input structure."),
   input_split: FunctionsExpressionExpressionSchema.describe("Expression transforming input into sub-inputs for swiss system.\nReceives: `input`."),
