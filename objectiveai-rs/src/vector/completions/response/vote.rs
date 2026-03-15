@@ -26,8 +26,10 @@ pub struct Vote {
     /// The agent that produced this vote (content-addressed ID).
     pub agent: String,
     /// Index of the agent configuration within the ensemble.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub ensemble_index: u64,
     /// Flattened index accounting for agent counts in the ensemble.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub flat_ensemble_index: u64,
     /// Content hash of the request messages (for caching/deduplication).
     pub prompt_id: String,
@@ -39,10 +41,12 @@ pub struct Vote {
     /// The vote distribution. Each index corresponds to a response from the
     /// request. Typically one element is 1.0 (selected) and the rest are 0.0.
     #[schemars(with = "Vec<f64>")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)]
     pub vote: Vec<rust_decimal::Decimal>,
 
     /// The weight applied to this vote when computing final scores.
     #[schemars(with = "f64")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub weight: rust_decimal::Decimal,
 
     // --- Source flags ---
@@ -60,6 +64,7 @@ pub struct Vote {
 
     /// Internal index for correlating with completions. Not serialized.
     #[serde(skip)]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub completion_index: Option<u64>,
 }
 

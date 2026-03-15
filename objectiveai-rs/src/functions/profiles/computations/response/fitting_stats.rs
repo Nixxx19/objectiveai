@@ -5,9 +5,14 @@ use schemars::JsonSchema;
 #[schemars(rename = "functions.profiles.computations.response.FittingStats")]
 pub struct FittingStats {
     #[schemars(with = "f64")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub loss: rust_decimal::Decimal,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_usize)]
     pub executions: usize,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_usize)]
     pub starts: usize,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_usize)]
     pub rounds: usize,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_usize)]
     pub errors: usize,
 }

@@ -501,6 +501,7 @@ impl FromStarlarkValue for AssistantToolCallFunction {
 #[schemars(rename = "agent.completions.message.AssistantToolCallDelta")]
 pub struct AssistantToolCallDelta {
     /// The index of this tool call.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
     /// The type of tool call (always "function").
     #[serde(skip_serializing_if = "Option::is_none")]

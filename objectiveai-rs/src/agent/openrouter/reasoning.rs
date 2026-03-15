@@ -21,6 +21,7 @@ pub struct Reasoning {
     ///
     /// Only supported by some models.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub max_tokens: Option<u64>,
     /// The reasoning effort level.
     ///

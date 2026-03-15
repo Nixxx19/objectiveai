@@ -18,6 +18,7 @@ pub struct AgentBase {
     ///
     /// **Vector completions only.** Ignored for agent completions.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub top_logprobs: Option<u64>,
 
     /// If true, the mock client will return an error instead of a response.

@@ -543,7 +543,7 @@ impl RemoteFunction {
 /// Used when embedding function logic directly in requests rather than
 /// referencing a remote function. Lacks description and input
 /// schema fields.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.InlineFunction")]
 pub enum InlineFunction {

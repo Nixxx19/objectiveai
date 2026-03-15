@@ -18,6 +18,7 @@ pub struct FunctionProfileComputationChunk {
     pub fitting_stats: Option<response::FittingStats>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub retry_token: Option<String>,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
     pub function: Option<String>,
     pub object: super::Object,

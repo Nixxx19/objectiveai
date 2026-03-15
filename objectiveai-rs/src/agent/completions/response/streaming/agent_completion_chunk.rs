@@ -13,6 +13,7 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.completions.response.streaming.AgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     pub id: String,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
     pub messages: Vec<super::MessageChunk>,
     /// The object type (always "agent.completion.chunk").

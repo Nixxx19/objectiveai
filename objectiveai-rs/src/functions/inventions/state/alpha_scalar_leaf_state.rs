@@ -18,6 +18,7 @@ pub struct AlphaScalarLeafState {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub tasks: Option<Vec<functions::alpha_scalar::LeafTaskExpression>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub tasks_length: Option<u64>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
@@ -25,6 +26,7 @@ pub struct AlphaScalarLeafState {
     pub readme: Option<String>,
     #[serde(skip_serializing, default)]
     #[schemars(skip)]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_i64)]
     pub checker_seed: Option<i64>,
 }
 

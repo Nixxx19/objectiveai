@@ -11,15 +11,19 @@ use schemars::JsonSchema;
 pub struct CompletionTokensDetails {
     /// Tokens from accepted predictions (speculative decoding).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub accepted_prediction_tokens: Option<u64>,
     /// Audio output tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub audio_tokens: Option<u64>,
     /// Tokens used for reasoning/thinking.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub reasoning_tokens: Option<u64>,
     /// Tokens from rejected predictions (speculative decoding).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub rejected_prediction_tokens: Option<u64>,
 }
 
@@ -56,15 +60,19 @@ impl CompletionTokensDetails {
 pub struct PromptTokensDetails {
     /// Audio input tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub audio_tokens: Option<u64>,
     /// Tokens served from cache.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub cached_tokens: Option<u64>,
     /// Tokens written to cache.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub cache_write_tokens: Option<u64>,
     /// Video input tokens.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub video_tokens: Option<u64>,
 }
 
@@ -95,9 +103,11 @@ impl PromptTokensDetails {
 pub struct CostDetails {
     /// Cost charged by the immediate upstream (e.g., OpenRouter).
     #[schemars(with = "f64")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub upstream_inference_cost: rust_decimal::Decimal,
     /// Cost charged by the upstream's upstream (e.g., the actual model provider).
     #[schemars(with = "f64")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub upstream_upstream_inference_cost: rust_decimal::Decimal,
 }
 

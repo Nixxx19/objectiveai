@@ -116,7 +116,7 @@ impl TaskExpression {
 ///
 /// Produced by compiling a [`TaskExpression`] against input data. All
 /// expressions have been resolved to concrete values.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.Task")]
 pub enum Task {
@@ -234,7 +234,7 @@ impl ScalarFunctionTaskExpression {
 }
 
 /// A compiled scalar function task ready for execution.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.ScalarFunctionTask")]
 pub struct ScalarFunctionTask {
     /// The remote source where the function is hosted.
@@ -347,7 +347,7 @@ impl VectorFunctionTaskExpression {
 }
 
 /// A compiled vector function task ready for execution.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.VectorFunctionTask")]
 pub struct VectorFunctionTask {
     /// The remote source where the function is hosted.
@@ -485,7 +485,7 @@ impl VectorCompletionTaskExpression {
 }
 
 /// A compiled vector completion task ready for execution.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.VectorCompletionTask")]
 pub struct VectorCompletionTask {
     /// The resolved conversation messages.
@@ -568,7 +568,7 @@ impl PlaceholderScalarFunctionTaskExpression {
 ///
 /// Always produces `Scalar(0.5)` before the output expression
 /// is applied.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.PlaceholderScalarFunctionTask")]
 pub struct PlaceholderScalarFunctionTask {
     /// JSON Schema defining the expected input structure.
@@ -662,7 +662,7 @@ impl PlaceholderVectorFunctionTaskExpression {
 ///
 /// Always produces `Vector(vec![1/N; output_length])` before
 /// the output expression is applied.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.PlaceholderVectorFunctionTask")]
 pub struct PlaceholderVectorFunctionTask {
     /// JSON Schema defining the expected input structure.
@@ -704,7 +704,7 @@ impl PlaceholderVectorFunctionTask {
 /// Tasks without a `map` field compile to a single task. Tasks with a `map`
 /// expression are expanded into multiple tasks, one per integer index from
 /// 0 to the evaluated count.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.CompiledTask")]
 pub enum CompiledTask {

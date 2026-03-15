@@ -19,11 +19,14 @@ pub struct VectorCompletionChunk {
     pub votes: Vec<response::Vote>,
     /// Current weighted scores. Updated as new votes arrive.
     #[schemars(with = "Vec<f64>")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)]
     pub scores: Vec<rust_decimal::Decimal>,
     /// Current weight distribution across responses. Updated as new votes arrive.
     #[schemars(with = "Vec<f64>")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)]
     pub weights: Vec<rust_decimal::Decimal>,
     /// Unix timestamp when the completion was created.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
     /// ID of the ensemble used for this completion.
     pub ensemble: String,

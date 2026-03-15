@@ -7,7 +7,7 @@ use schemars::JsonSchema;
 /// Object type for unary vector completion responses.
 ///
 /// Serializes to `"vector.completion"` in JSON.
-#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, JsonSchema)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "vector.completions.response.unary.Object")]
 pub enum Object {
     /// A complete vector completion response.

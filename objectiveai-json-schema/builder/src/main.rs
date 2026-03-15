@@ -332,6 +332,11 @@ fn main() {
             .unwrap_or_else(|| panic!("schema missing title: {json}"))
             .to_string();
 
+        // Generic types are inlined into referencing schemas, not written as files.
+        if is_generic_name(&title) {
+            continue;
+        }
+
         inline_generic_defs(&mut json);
         normalize(&mut json, false, &title);
         order_keys(&mut json, false);
