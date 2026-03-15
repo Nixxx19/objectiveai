@@ -71,10 +71,22 @@ unsafe fn run(
 // Memory Management
 // ---------------------------------------------------------------------------
 
+/// Allocates `len` bytes and returns a pointer to the allocation.
+///
+/// Used by WASM hosts to allocate memory in the WASM linear memory
+/// for writing input data before calling FFI functions.
+#[unsafe(no_mangle)]
+pub extern "C" fn objectiveai_allocate(len: usize) -> *mut u8 {
+    let mut buf = Vec::with_capacity(len);
+    let ptr = buf.as_mut_ptr();
+    std::mem::forget(buf);
+    ptr
+}
+
 /// Frees memory allocated by ObjectiveAI FFI functions.
 ///
 /// Must be called on every non-null output pointer returned by any function
-/// in this library.
+/// in this library, and on pointers returned by [`objectiveai_allocate`].
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn objectiveai_free(ptr: *mut u8, len: usize) {
     if !ptr.is_null() && len > 0 {

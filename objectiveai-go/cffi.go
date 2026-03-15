@@ -1,139 +1,279 @@
-//go:build cgo
-
 package objectiveai
 
-// #cgo CFLAGS: -I${SRCDIR}/../objectiveai-rs-cffi/include
-// #include "objectiveai.h"
-// #include <stdlib.h>
-import "C"
-
 import (
+	"context"
+	_ "embed"
+	"encoding/binary"
 	"encoding/json"
 	"errors"
-	"unsafe"
+	"fmt"
+	"sync"
+
+	"github.com/tetratelabs/wazero"
+	"github.com/tetratelabs/wazero/api"
+	"github.com/tetratelabs/wazero/imports/wasi_snapshot_preview1"
 )
 
-// callCFFI1 marshals one input, calls a single-input C function, and unmarshals the result.
-func callCFFI1[In any, Out any](
-	input In,
-	cfn func(*C.uint8_t, C.size_t, **C.uint8_t, *C.size_t) C.int32_t,
-) (*Out, error) {
-	jsonIn, err := json.Marshal(input)
-	if err != nil {
-		return nil, err
-	}
+//go:embed lib/objectiveai_cffi.wasm
+var cffiWasm []byte
 
-	var outPtr *C.uint8_t
-	var outLen C.size_t
+var (
+	cffiOnce sync.Once
+	cffiMod  api.Module
+	cffiMu   sync.Mutex // serializes WASM calls (single-threaded WASM)
+	cffiErr  error
+)
 
-	rc := cfn(
-		(*C.uint8_t)(unsafe.Pointer(&jsonIn[0])),
-		C.size_t(len(jsonIn)),
-		&outPtr, &outLen,
-	)
-
-	result := C.GoBytes(unsafe.Pointer(outPtr), C.int(outLen))
-	C.objectiveai_free(outPtr, outLen)
-
-	if rc != 0 {
-		return nil, errors.New(string(result))
-	}
-
-	var out Out
-	if err := json.Unmarshal(result, &out); err != nil {
-		return nil, err
-	}
-	return &out, nil
+func cffiInit() {
+	cffiOnce.Do(func() {
+		ctx := context.Background()
+		r := wazero.NewRuntime(ctx)
+		wasi_snapshot_preview1.MustInstantiate(ctx, r)
+		cffiMod, cffiErr = r.Instantiate(ctx, cffiWasm)
+	})
 }
 
-// callCFFI1Bytes marshals one input, calls a single-input C function, returns raw bytes (for string results).
-func callCFFI1Bytes[In any](
-	input In,
-	cfn func(*C.uint8_t, C.size_t, **C.uint8_t, *C.size_t) C.int32_t,
-) ([]byte, error) {
-	jsonIn, err := json.Marshal(input)
+func cffiModule() (api.Module, error) {
+	cffiInit()
+	if cffiErr != nil {
+		return nil, fmt.Errorf("objectiveai: failed to initialize WASM runtime: %w", cffiErr)
+	}
+	return cffiMod, nil
+}
+
+// wasmAlloc allocates len bytes in WASM memory and returns the pointer.
+func wasmAlloc(mod api.Module, ctx context.Context, size uint32) (uint32, error) {
+	fn := mod.ExportedFunction("objectiveai_allocate")
+	results, err := fn.Call(ctx, uint64(size))
+	if err != nil {
+		return 0, err
+	}
+	return uint32(results[0]), nil
+}
+
+// wasmFree frees memory allocated in WASM.
+func wasmFree(mod api.Module, ctx context.Context, ptr, size uint32) {
+	fn := mod.ExportedFunction("objectiveai_free")
+	fn.Call(ctx, uint64(ptr), uint64(size))
+}
+
+// wasmWriteBytes writes bytes to WASM memory, returning the pointer.
+func wasmWriteBytes(mod api.Module, ctx context.Context, data []byte) (uint32, error) {
+	if len(data) == 0 {
+		return 0, nil
+	}
+	ptr, err := wasmAlloc(mod, ctx, uint32(len(data)))
+	if err != nil {
+		return 0, err
+	}
+	if !mod.Memory().Write(ptr, data) {
+		return 0, fmt.Errorf("objectiveai: memory write out of range")
+	}
+	return ptr, nil
+}
+
+// wasmReadU32 reads a uint32 from WASM memory at the given offset.
+func wasmReadU32(mod api.Module, offset uint32) (uint32, bool) {
+	buf, ok := mod.Memory().Read(offset, 4)
+	if !ok {
+		return 0, false
+	}
+	return binary.LittleEndian.Uint32(buf), true
+}
+
+// wasmReadOutput reads the output pointer and length, copies the bytes, and frees the WASM allocation.
+func wasmReadOutput(mod api.Module, ctx context.Context, outPtrPtr, outLenPtr uint32) ([]byte, error) {
+	outPtr, ok := wasmReadU32(mod, outPtrPtr)
+	if !ok {
+		return nil, fmt.Errorf("objectiveai: failed to read output pointer")
+	}
+	outLen, ok := wasmReadU32(mod, outLenPtr)
+	if !ok {
+		return nil, fmt.Errorf("objectiveai: failed to read output length")
+	}
+	if outLen == 0 {
+		return nil, nil
+	}
+	outBytes, ok := mod.Memory().Read(outPtr, outLen)
+	if !ok {
+		return nil, fmt.Errorf("objectiveai: failed to read output bytes")
+	}
+	result := make([]byte, outLen)
+	copy(result, outBytes)
+	wasmFree(mod, ctx, outPtr, outLen)
+	return result, nil
+}
+
+// callWasm1 calls a single-input WASM function (json_in, len, *out, *out_len) -> rc.
+func callWasm1(fnName string, jsonIn []byte) ([]byte, int32, error) {
+	mod, err := cffiModule()
+	if err != nil {
+		return nil, -1, err
+	}
+
+	cffiMu.Lock()
+	defer cffiMu.Unlock()
+
+	ctx := context.Background()
+
+	inPtr, err := wasmWriteBytes(mod, ctx, jsonIn)
+	if err != nil {
+		return nil, -1, err
+	}
+	defer wasmFree(mod, ctx, inPtr, uint32(len(jsonIn)))
+
+	outPtrPtr, err := wasmAlloc(mod, ctx, 4)
+	if err != nil {
+		return nil, -1, err
+	}
+	defer wasmFree(mod, ctx, outPtrPtr, 4)
+
+	outLenPtr, err := wasmAlloc(mod, ctx, 4)
+	if err != nil {
+		return nil, -1, err
+	}
+	defer wasmFree(mod, ctx, outLenPtr, 4)
+
+	fn := mod.ExportedFunction(fnName)
+	if fn == nil {
+		return nil, -1, fmt.Errorf("objectiveai: WASM function %q not found", fnName)
+	}
+
+	results, err := fn.Call(ctx, uint64(inPtr), uint64(len(jsonIn)), uint64(outPtrPtr), uint64(outLenPtr))
+	if err != nil {
+		return nil, -1, err
+	}
+
+	result, err := wasmReadOutput(mod, ctx, outPtrPtr, outLenPtr)
+	if err != nil {
+		return nil, int32(results[0]), err
+	}
+	return result, int32(results[0]), nil
+}
+
+// callWasm2 calls a two-input WASM function (in1, len1, in2, len2, *out, *out_len) -> rc.
+func callWasm2(fnName string, jsonIn1, jsonIn2 []byte) ([]byte, int32, error) {
+	mod, err := cffiModule()
+	if err != nil {
+		return nil, -1, err
+	}
+
+	cffiMu.Lock()
+	defer cffiMu.Unlock()
+
+	ctx := context.Background()
+
+	in1Ptr, err := wasmWriteBytes(mod, ctx, jsonIn1)
+	if err != nil {
+		return nil, -1, err
+	}
+	defer wasmFree(mod, ctx, in1Ptr, uint32(len(jsonIn1)))
+
+	in2Ptr, err := wasmWriteBytes(mod, ctx, jsonIn2)
+	if err != nil {
+		return nil, -1, err
+	}
+	defer wasmFree(mod, ctx, in2Ptr, uint32(len(jsonIn2)))
+
+	outPtrPtr, err := wasmAlloc(mod, ctx, 4)
+	if err != nil {
+		return nil, -1, err
+	}
+	defer wasmFree(mod, ctx, outPtrPtr, 4)
+
+	outLenPtr, err := wasmAlloc(mod, ctx, 4)
+	if err != nil {
+		return nil, -1, err
+	}
+	defer wasmFree(mod, ctx, outLenPtr, 4)
+
+	fn := mod.ExportedFunction(fnName)
+	if fn == nil {
+		return nil, -1, fmt.Errorf("objectiveai: WASM function %q not found", fnName)
+	}
+
+	results, err := fn.Call(ctx,
+		uint64(in1Ptr), uint64(len(jsonIn1)),
+		uint64(in2Ptr), uint64(len(jsonIn2)),
+		uint64(outPtrPtr), uint64(outLenPtr),
+	)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	result, err := wasmReadOutput(mod, ctx, outPtrPtr, outLenPtr)
+	if err != nil {
+		return nil, int32(results[0]), err
+	}
+	return result, int32(results[0]), nil
+}
+
+// callWasmSeed calls a seed-based WASM function (has_seed, seed, *out, *out_len) -> rc.
+func callWasmSeed(fnName string, hasSeed bool, seed int64) ([]byte, error) {
+	mod, err := cffiModule()
 	if err != nil {
 		return nil, err
 	}
 
-	var outPtr *C.uint8_t
-	var outLen C.size_t
+	cffiMu.Lock()
+	defer cffiMu.Unlock()
 
-	rc := cfn(
-		(*C.uint8_t)(unsafe.Pointer(&jsonIn[0])),
-		C.size_t(len(jsonIn)),
-		&outPtr, &outLen,
-	)
+	ctx := context.Background()
 
-	result := C.GoBytes(unsafe.Pointer(outPtr), C.int(outLen))
-	C.objectiveai_free(outPtr, outLen)
+	outPtrPtr, err := wasmAlloc(mod, ctx, 4)
+	if err != nil {
+		return nil, err
+	}
+	defer wasmFree(mod, ctx, outPtrPtr, 4)
 
-	if rc != 0 {
+	outLenPtr, err := wasmAlloc(mod, ctx, 4)
+	if err != nil {
+		return nil, err
+	}
+	defer wasmFree(mod, ctx, outLenPtr, 4)
+
+	var hs uint64
+	if hasSeed {
+		hs = 1
+	}
+
+	fn := mod.ExportedFunction(fnName)
+	if fn == nil {
+		return nil, fmt.Errorf("objectiveai: WASM function %q not found", fnName)
+	}
+
+	results, err := fn.Call(ctx, hs, uint64(seed), uint64(outPtrPtr), uint64(outLenPtr))
+	if err != nil {
+		return nil, err
+	}
+
+	result, err := wasmReadOutput(mod, ctx, outPtrPtr, outLenPtr)
+	if err != nil {
+		return nil, err
+	}
+
+	if int32(results[0]) != 0 {
 		return nil, errors.New(string(result))
 	}
 	return result, nil
 }
 
-// callCFFI1Void marshals one input, calls a single-input C function, expects no output on success.
-func callCFFI1Void[In any](
-	input In,
-	cfn func(*C.uint8_t, C.size_t, **C.uint8_t, *C.size_t) C.int32_t,
-) error {
+// ---------------------------------------------------------------------------
+// Typed helper wrappers
+// ---------------------------------------------------------------------------
+
+func cffi1[In any, Out any](fnName string, input In) (*Out, error) {
 	jsonIn, err := json.Marshal(input)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	var outPtr *C.uint8_t
-	var outLen C.size_t
-
-	rc := cfn(
-		(*C.uint8_t)(unsafe.Pointer(&jsonIn[0])),
-		C.size_t(len(jsonIn)),
-		&outPtr, &outLen,
-	)
-
-	if rc != 0 {
-		result := C.GoBytes(unsafe.Pointer(outPtr), C.int(outLen))
-		C.objectiveai_free(outPtr, outLen)
-		return errors.New(string(result))
-	}
-	C.objectiveai_free(outPtr, outLen)
-	return nil
-}
-
-// callCFFI2 marshals two inputs, calls a two-input C function, and unmarshals the result.
-func callCFFI2[In1 any, In2 any, Out any](
-	input1 In1, input2 In2,
-	cfn func(*C.uint8_t, C.size_t, *C.uint8_t, C.size_t, **C.uint8_t, *C.size_t) C.int32_t,
-) (*Out, error) {
-	jsonIn1, err := json.Marshal(input1)
+	result, rc, err := callWasm1(fnName, jsonIn)
 	if err != nil {
 		return nil, err
 	}
-	jsonIn2, err := json.Marshal(input2)
-	if err != nil {
-		return nil, err
-	}
-
-	var outPtr *C.uint8_t
-	var outLen C.size_t
-
-	rc := cfn(
-		(*C.uint8_t)(unsafe.Pointer(&jsonIn1[0])),
-		C.size_t(len(jsonIn1)),
-		(*C.uint8_t)(unsafe.Pointer(&jsonIn2[0])),
-		C.size_t(len(jsonIn2)),
-		&outPtr, &outLen,
-	)
-
-	result := C.GoBytes(unsafe.Pointer(outPtr), C.int(outLen))
-	C.objectiveai_free(outPtr, outLen)
-
 	if rc != 0 {
 		return nil, errors.New(string(result))
 	}
-
 	var out Out
 	if err := json.Unmarshal(result, &out); err != nil {
 		return nil, err
@@ -141,11 +281,60 @@ func callCFFI2[In1 any, In2 any, Out any](
 	return &out, nil
 }
 
-// callCFFI2Void marshals two inputs, calls a two-input C function, expects no output on success.
-func callCFFI2Void[In1 any, In2 any](
-	input1 In1, input2 In2,
-	cfn func(*C.uint8_t, C.size_t, *C.uint8_t, C.size_t, **C.uint8_t, *C.size_t) C.int32_t,
-) error {
+func cffi1String[In any](fnName string, input In) (string, error) {
+	jsonIn, err := json.Marshal(input)
+	if err != nil {
+		return "", err
+	}
+	result, rc, err := callWasm1(fnName, jsonIn)
+	if err != nil {
+		return "", err
+	}
+	if rc != 0 {
+		return "", errors.New(string(result))
+	}
+	return string(result), nil
+}
+
+func cffi1Void[In any](fnName string, input In) error {
+	jsonIn, err := json.Marshal(input)
+	if err != nil {
+		return err
+	}
+	result, rc, err := callWasm1(fnName, jsonIn)
+	if err != nil {
+		return err
+	}
+	if rc != 0 {
+		return errors.New(string(result))
+	}
+	return nil
+}
+
+func cffi2[In1 any, In2 any, Out any](fnName string, input1 In1, input2 In2) (*Out, error) {
+	jsonIn1, err := json.Marshal(input1)
+	if err != nil {
+		return nil, err
+	}
+	jsonIn2, err := json.Marshal(input2)
+	if err != nil {
+		return nil, err
+	}
+	result, rc, err := callWasm2(fnName, jsonIn1, jsonIn2)
+	if err != nil {
+		return nil, err
+	}
+	if rc != 0 {
+		return nil, errors.New(string(result))
+	}
+	var out Out
+	if err := json.Unmarshal(result, &out); err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func cffi2Void[In1 any, In2 any](fnName string, input1 In1, input2 In2) error {
 	jsonIn1, err := json.Marshal(input1)
 	if err != nil {
 		return err
@@ -154,35 +343,34 @@ func callCFFI2Void[In1 any, In2 any](
 	if err != nil {
 		return err
 	}
-
-	var outPtr *C.uint8_t
-	var outLen C.size_t
-
-	rc := cfn(
-		(*C.uint8_t)(unsafe.Pointer(&jsonIn1[0])),
-		C.size_t(len(jsonIn1)),
-		(*C.uint8_t)(unsafe.Pointer(&jsonIn2[0])),
-		C.size_t(len(jsonIn2)),
-		&outPtr, &outLen,
-	)
-
+	result, rc, err := callWasm2(fnName, jsonIn1, jsonIn2)
+	if err != nil {
+		return err
+	}
 	if rc != 0 {
-		result := C.GoBytes(unsafe.Pointer(outPtr), C.int(outLen))
-		C.objectiveai_free(outPtr, outLen)
 		return errors.New(string(result))
 	}
-	C.objectiveai_free(outPtr, outLen)
 	return nil
+}
+
+func cffiGenerate[Out any](fnName string, hasSeed bool, seed int64) (*Out, error) {
+	result, err := callWasmSeed(fnName, hasSeed, seed)
+	if err != nil {
+		return nil, err
+	}
+	var out Out
+	if err := json.Unmarshal(result, &out); err != nil {
+		return nil, err
+	}
+	return &out, nil
 }
 
 // ---------------------------------------------------------------------------
 // Memory Management
 // ---------------------------------------------------------------------------
 
-// Free releases memory allocated by the Rust FFI layer.
-func Free(ptr *C.uint8_t, len C.size_t) {
-	C.objectiveai_free(ptr, len)
-}
+// Free is a no-op — all WASM memory is managed internally.
+func Free(_ []byte) {}
 
 // ---------------------------------------------------------------------------
 // Validation & ID Computation
@@ -190,38 +378,22 @@ func Free(ptr *C.uint8_t, len C.size_t) {
 
 // ValidateAgent validates an Agent configuration and computes its content-addressed ID.
 func ValidateAgent(agent AgentAgentBase) (*AgentAgent, error) {
-	return callCFFI1[AgentAgentBase, AgentAgent](agent, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_validate_agent(a, b, c, d)
-	})
+	return cffi1[AgentAgentBase, AgentAgent]("objectiveai_validate_agent", agent)
 }
 
 // ValidateEnsemble validates an Ensemble configuration and computes its content-addressed ID.
 func ValidateEnsemble(ensemble EnsembleEnsembleBase) (*EnsembleEnsemble, error) {
-	return callCFFI1[EnsembleEnsembleBase, EnsembleEnsemble](ensemble, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_validate_ensemble(a, b, c, d)
-	})
+	return cffi1[EnsembleEnsembleBase, EnsembleEnsemble]("objectiveai_validate_ensemble", ensemble)
 }
 
 // PromptId computes a content-addressed ID for chat messages.
 func PromptId(prompt []AgentCompletionsMessageMessage) (string, error) {
-	result, err := callCFFI1Bytes(prompt, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_prompt_id(a, b, c, d)
-	})
-	if err != nil {
-		return "", err
-	}
-	return string(result), nil
+	return cffi1String("objectiveai_prompt_id", prompt)
 }
 
 // VectorResponseId computes a content-addressed ID for a vector completion response option.
 func VectorResponseId(response AgentCompletionsMessageRichContent) (string, error) {
-	result, err := callCFFI1Bytes(response, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_vector_response_id(a, b, c, d)
-	})
-	if err != nil {
-		return "", err
-	}
-	return string(result), nil
+	return cffi1String("objectiveai_vector_response_id", response)
 }
 
 // ---------------------------------------------------------------------------
@@ -239,17 +411,10 @@ func ValidateFunctionInput(function FunctionsFunction, input FunctionsExpression
 	if err != nil {
 		return nil, err
 	}
-
-	var outPtr *C.uint8_t
-	var outLen C.size_t
-
-	rc := C.objectiveai_validate_function_input(
-		(*C.uint8_t)(unsafe.Pointer(&jsonFn[0])), C.size_t(len(jsonFn)),
-		(*C.uint8_t)(unsafe.Pointer(&jsonIn[0])), C.size_t(len(jsonIn)),
-		&outPtr, &outLen,
-	)
-	C.objectiveai_free(outPtr, outLen)
-
+	result, rc, err := callWasm2("objectiveai_validate_function_input", jsonFn, jsonIn)
+	if err != nil {
+		return nil, err
+	}
 	switch rc {
 	case 1:
 		v := true
@@ -260,7 +425,7 @@ func ValidateFunctionInput(function FunctionsFunction, input FunctionsExpression
 	case 2:
 		return nil, nil
 	default:
-		return nil, errors.New(string(C.GoBytes(unsafe.Pointer(outPtr), C.int(outLen))))
+		return nil, errors.New(string(result))
 	}
 }
 
@@ -270,9 +435,7 @@ func ValidateFunctionInput(function FunctionsFunction, input FunctionsExpression
 
 // CompileFunctionTasks compiles a Function's task expressions for a given input.
 func CompileFunctionTasks(function FunctionsFunction, input FunctionsExpressionInputValue) ([]FunctionsCompiledTask, error) {
-	out, err := callCFFI2[FunctionsFunction, FunctionsExpressionInputValue, []FunctionsCompiledTask](function, input, func(a *C.uint8_t, b C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_compile_function_tasks(a, b, c, d, e, f)
-	})
+	out, err := cffi2[FunctionsFunction, FunctionsExpressionInputValue, []FunctionsCompiledTask]("objectiveai_compile_function_tasks", function, input)
 	if err != nil {
 		return nil, err
 	}
@@ -281,16 +444,12 @@ func CompileFunctionTasks(function FunctionsFunction, input FunctionsExpressionI
 
 // CompileFunctionOutputLength computes the expected output length for a vector Function.
 func CompileFunctionOutputLength(function FunctionsFunction, input FunctionsExpressionInputValue) (*uint32, error) {
-	return callCFFI2[FunctionsFunction, FunctionsExpressionInputValue, uint32](function, input, func(a *C.uint8_t, b C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_compile_function_output_length(a, b, c, d, e, f)
-	})
+	return cffi2[FunctionsFunction, FunctionsExpressionInputValue, uint32]("objectiveai_compile_function_output_length", function, input)
 }
 
 // CompileFunctionInputSplit compiles the input_split expression.
 func CompileFunctionInputSplit(function FunctionsFunction, input FunctionsExpressionInputValue) ([]FunctionsExpressionInputValue, error) {
-	out, err := callCFFI2[FunctionsFunction, FunctionsExpressionInputValue, []FunctionsExpressionInputValue](function, input, func(a *C.uint8_t, b C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_compile_function_input_split(a, b, c, d, e, f)
-	})
+	out, err := cffi2[FunctionsFunction, FunctionsExpressionInputValue, []FunctionsExpressionInputValue]("objectiveai_compile_function_input_split", function, input)
 	if err != nil {
 		return nil, err
 	}
@@ -302,27 +461,21 @@ func CompileFunctionInputSplit(function FunctionsFunction, input FunctionsExpres
 
 // CompileFunctionInputMerge compiles the input_merge expression.
 func CompileFunctionInputMerge(function FunctionsFunction, input []FunctionsExpressionInputValue) (*FunctionsExpressionInputValue, error) {
-	return callCFFI2[FunctionsFunction, []FunctionsExpressionInputValue, FunctionsExpressionInputValue](function, input, func(a *C.uint8_t, b C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_compile_function_input_merge(a, b, c, d, e, f)
-	})
+	return cffi2[FunctionsFunction, []FunctionsExpressionInputValue, FunctionsExpressionInputValue]("objectiveai_compile_function_input_merge", function, input)
 }
 
 // ---------------------------------------------------------------------------
 // Vector/Scalar Field Validation
 // ---------------------------------------------------------------------------
 
-// CheckVectorFields validates vector function fields (output_length, input_split, input_merge).
+// CheckVectorFields validates vector function fields.
 func CheckVectorFields(fields FunctionsCheckVectorFieldsValidation) error {
-	return callCFFI1Void(fields, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_check_vector_fields(a, b, c, d)
-	})
+	return cffi1Void("objectiveai_check_vector_fields", fields)
 }
 
-// CheckScalarFields validates scalar function fields (input_schema only).
+// CheckScalarFields validates scalar function fields.
 func CheckScalarFields(fields FunctionsCheckScalarFieldsValidation) error {
-	return callCFFI1Void(fields, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_check_scalar_fields(a, b, c, d)
-	})
+	return cffi1Void("objectiveai_check_scalar_fields", fields)
 }
 
 // ---------------------------------------------------------------------------
@@ -331,30 +484,22 @@ func CheckScalarFields(fields FunctionsCheckScalarFieldsValidation) error {
 
 // AlphaCheckLeafScalarFunction validates a leaf scalar function (depth 0).
 func AlphaCheckLeafScalarFunction(function FunctionsAlphaScalarRemoteFunction) error {
-	return callCFFI1Void(function, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_alpha_check_leaf_scalar_function(a, b, c, d)
-	})
+	return cffi1Void("objectiveai_alpha_check_leaf_scalar_function", function)
 }
 
 // AlphaCheckBranchScalarFunction validates a branch scalar function (depth > 0).
 func AlphaCheckBranchScalarFunction(function FunctionsAlphaScalarRemoteFunction, children map[string]FunctionsRemoteFunction) error {
-	return callCFFI2Void(function, children, func(a *C.uint8_t, b C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_alpha_check_branch_scalar_function(a, b, c, d, e, f)
-	})
+	return cffi2Void("objectiveai_alpha_check_branch_scalar_function", function, children)
 }
 
 // AlphaCheckLeafVectorFunction validates a leaf vector function (depth 0).
 func AlphaCheckLeafVectorFunction(function FunctionsAlphaVectorRemoteFunction) error {
-	return callCFFI1Void(function, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_alpha_check_leaf_vector_function(a, b, c, d)
-	})
+	return cffi1Void("objectiveai_alpha_check_leaf_vector_function", function)
 }
 
 // AlphaCheckBranchVectorFunction validates a branch vector function (depth > 0).
 func AlphaCheckBranchVectorFunction(function FunctionsAlphaVectorRemoteFunction, children map[string]FunctionsRemoteFunction) error {
-	return callCFFI2Void(function, children, func(a *C.uint8_t, b C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_alpha_check_branch_vector_function(a, b, c, d, e, f)
-	})
+	return cffi2Void("objectiveai_alpha_check_branch_vector_function", function, children)
 }
 
 // ---------------------------------------------------------------------------
@@ -363,90 +508,66 @@ func AlphaCheckBranchVectorFunction(function FunctionsAlphaVectorRemoteFunction,
 
 // AgentCompletionChunkMerged merges two AgentCompletionChunks via push.
 func AgentCompletionChunkMerged(a, b AgentCompletionsResponseStreamingAgentCompletionChunk) (*AgentCompletionsResponseStreamingAgentCompletionChunk, error) {
-	return callCFFI2[AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunk](a, b, func(a1 *C.uint8_t, b1 C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_agent_completion_chunk_merged(a1, b1, c, d, e, f)
-	})
+	return cffi2[AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunk]("objectiveai_agent_completion_chunk_merged", a, b)
 }
 
 // VectorCompletionChunkMerged merges two VectorCompletionChunks via push.
 func VectorCompletionChunkMerged(a, b VectorCompletionsResponseStreamingVectorCompletionChunk) (*VectorCompletionsResponseStreamingVectorCompletionChunk, error) {
-	return callCFFI2[VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunk](a, b, func(a1 *C.uint8_t, b1 C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_vector_completion_chunk_merged(a1, b1, c, d, e, f)
-	})
+	return cffi2[VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunk]("objectiveai_vector_completion_chunk_merged", a, b)
 }
 
 // FunctionExecutionChunkMerged merges two FunctionExecutionChunks via push.
 func FunctionExecutionChunkMerged(a, b FunctionsExecutionsResponseStreamingFunctionExecutionChunk) (*FunctionsExecutionsResponseStreamingFunctionExecutionChunk, error) {
-	return callCFFI2[FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunk](a, b, func(a1 *C.uint8_t, b1 C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_function_execution_chunk_merged(a1, b1, c, d, e, f)
-	})
+	return cffi2[FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunk]("objectiveai_function_execution_chunk_merged", a, b)
 }
 
 // FunctionInventionChunkMerged merges two FunctionInventionChunks via push.
 func FunctionInventionChunkMerged(a, b FunctionsInventionsResponseStreamingFunctionInventionChunk) (*FunctionsInventionsResponseStreamingFunctionInventionChunk, error) {
-	return callCFFI2[FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunk](a, b, func(a1 *C.uint8_t, b1 C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_function_invention_chunk_merged(a1, b1, c, d, e, f)
-	})
+	return cffi2[FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunk]("objectiveai_function_invention_chunk_merged", a, b)
 }
 
 // FunctionInventionRecursiveChunkMerged merges two FunctionInventionRecursiveChunks via push.
 func FunctionInventionRecursiveChunkMerged(a, b FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk) (*FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, error) {
-	return callCFFI2[FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk](a, b, func(a1 *C.uint8_t, b1 C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_function_invention_recursive_chunk_merged(a1, b1, c, d, e, f)
-	})
+	return cffi2[FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk]("objectiveai_function_invention_recursive_chunk_merged", a, b)
 }
 
 // FunctionProfileComputationChunkMerged merges two FunctionProfileComputationChunks via push.
 func FunctionProfileComputationChunkMerged(a, b FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk) (*FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, error) {
-	return callCFFI2[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk](a, b, func(a1 *C.uint8_t, b1 C.size_t, c *C.uint8_t, d C.size_t, e **C.uint8_t, f *C.size_t) C.int32_t {
-		return C.objectiveai_function_profile_computation_chunk_merged(a1, b1, c, d, e, f)
-	})
+	return cffi2[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk]("objectiveai_function_profile_computation_chunk_merged", a, b)
 }
 
 // ---------------------------------------------------------------------------
 // Streaming Chunk Normalization
 // ---------------------------------------------------------------------------
 
-// AgentCompletionChunkNormalized normalizes an AgentCompletionChunk by round-tripping through serde.
+// AgentCompletionChunkNormalized normalizes an AgentCompletionChunk.
 func AgentCompletionChunkNormalized(chunk AgentCompletionsResponseStreamingAgentCompletionChunk) (*AgentCompletionsResponseStreamingAgentCompletionChunk, error) {
-	return callCFFI1[AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunk](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_agent_completion_chunk_normalized(a, b, c, d)
-	})
+	return cffi1[AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseStreamingAgentCompletionChunk]("objectiveai_agent_completion_chunk_normalized", chunk)
 }
 
 // VectorCompletionChunkNormalized normalizes a VectorCompletionChunk.
 func VectorCompletionChunkNormalized(chunk VectorCompletionsResponseStreamingVectorCompletionChunk) (*VectorCompletionsResponseStreamingVectorCompletionChunk, error) {
-	return callCFFI1[VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunk](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_vector_completion_chunk_normalized(a, b, c, d)
-	})
+	return cffi1[VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseStreamingVectorCompletionChunk]("objectiveai_vector_completion_chunk_normalized", chunk)
 }
 
 // FunctionExecutionChunkNormalized normalizes a FunctionExecutionChunk.
 func FunctionExecutionChunkNormalized(chunk FunctionsExecutionsResponseStreamingFunctionExecutionChunk) (*FunctionsExecutionsResponseStreamingFunctionExecutionChunk, error) {
-	return callCFFI1[FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunk](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_function_execution_chunk_normalized(a, b, c, d)
-	})
+	return cffi1[FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseStreamingFunctionExecutionChunk]("objectiveai_function_execution_chunk_normalized", chunk)
 }
 
 // FunctionInventionChunkNormalized normalizes a FunctionInventionChunk.
 func FunctionInventionChunkNormalized(chunk FunctionsInventionsResponseStreamingFunctionInventionChunk) (*FunctionsInventionsResponseStreamingFunctionInventionChunk, error) {
-	return callCFFI1[FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunk](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_function_invention_chunk_normalized(a, b, c, d)
-	})
+	return cffi1[FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseStreamingFunctionInventionChunk]("objectiveai_function_invention_chunk_normalized", chunk)
 }
 
 // FunctionInventionRecursiveChunkNormalized normalizes a FunctionInventionRecursiveChunk.
 func FunctionInventionRecursiveChunkNormalized(chunk FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk) (*FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, error) {
-	return callCFFI1[FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_function_invention_recursive_chunk_normalized(a, b, c, d)
-	})
+	return cffi1[FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk]("objectiveai_function_invention_recursive_chunk_normalized", chunk)
 }
 
 // FunctionProfileComputationChunkNormalized normalizes a FunctionProfileComputationChunk.
 func FunctionProfileComputationChunkNormalized(chunk FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk) (*FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, error) {
-	return callCFFI1[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_function_profile_computation_chunk_normalized(a, b, c, d)
-	})
+	return cffi1[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk]("objectiveai_function_profile_computation_chunk_normalized", chunk)
 }
 
 // ---------------------------------------------------------------------------
@@ -455,113 +576,98 @@ func FunctionProfileComputationChunkNormalized(chunk FunctionsProfilesComputatio
 
 // AgentCompletionChunkToUnary converts an accumulated chunk to a unary AgentCompletion.
 func AgentCompletionChunkToUnary(chunk AgentCompletionsResponseStreamingAgentCompletionChunk) (*AgentCompletionsResponseUnaryAgentCompletion, error) {
-	return callCFFI1[AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseUnaryAgentCompletion](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_agent_completion_chunk_to_unary(a, b, c, d)
-	})
+	return cffi1[AgentCompletionsResponseStreamingAgentCompletionChunk, AgentCompletionsResponseUnaryAgentCompletion]("objectiveai_agent_completion_chunk_to_unary", chunk)
 }
 
 // VectorCompletionChunkToUnary converts an accumulated chunk to a unary VectorCompletion.
 func VectorCompletionChunkToUnary(chunk VectorCompletionsResponseStreamingVectorCompletionChunk) (*VectorCompletionsResponseUnaryVectorCompletion, error) {
-	return callCFFI1[VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseUnaryVectorCompletion](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_vector_completion_chunk_to_unary(a, b, c, d)
-	})
+	return cffi1[VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCompletionsResponseUnaryVectorCompletion]("objectiveai_vector_completion_chunk_to_unary", chunk)
 }
 
 // FunctionExecutionChunkToUnary converts an accumulated chunk to a unary FunctionExecution.
 func FunctionExecutionChunkToUnary(chunk FunctionsExecutionsResponseStreamingFunctionExecutionChunk) (*FunctionsExecutionsResponseUnaryFunctionExecution, error) {
-	return callCFFI1[FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseUnaryFunctionExecution](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_function_execution_chunk_to_unary(a, b, c, d)
-	})
+	return cffi1[FunctionsExecutionsResponseStreamingFunctionExecutionChunk, FunctionsExecutionsResponseUnaryFunctionExecution]("objectiveai_function_execution_chunk_to_unary", chunk)
 }
 
 // FunctionInventionChunkToUnary converts an accumulated chunk to a unary FunctionInvention.
 func FunctionInventionChunkToUnary(chunk FunctionsInventionsResponseStreamingFunctionInventionChunk) (*FunctionsInventionsResponseUnaryFunctionInvention, error) {
-	return callCFFI1[FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseUnaryFunctionInvention](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_function_invention_chunk_to_unary(a, b, c, d)
-	})
+	return cffi1[FunctionsInventionsResponseStreamingFunctionInventionChunk, FunctionsInventionsResponseUnaryFunctionInvention]("objectiveai_function_invention_chunk_to_unary", chunk)
 }
 
 // FunctionInventionRecursiveChunkToUnary converts an accumulated chunk to a unary FunctionInventionRecursive.
 func FunctionInventionRecursiveChunkToUnary(chunk FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk) (*FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, error) {
-	return callCFFI1[FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_function_invention_recursive_chunk_to_unary(a, b, c, d)
-	})
+	return cffi1[FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive]("objectiveai_function_invention_recursive_chunk_to_unary", chunk)
 }
 
 // FunctionProfileComputationChunkToUnary converts an accumulated chunk to a unary FunctionProfileComputation.
 func FunctionProfileComputationChunkToUnary(chunk FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk) (*FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, error) {
-	return callCFFI1[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation](chunk, func(a *C.uint8_t, b C.size_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_function_profile_computation_chunk_to_unary(a, b, c, d)
-	})
+	return cffi1[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation]("objectiveai_function_profile_computation_chunk_to_unary", chunk)
+}
+
+// ---------------------------------------------------------------------------
+// Normalize Unary Responses (for tests)
+// ---------------------------------------------------------------------------
+
+// NormalizeAgentCompletionForTests normalizes an AgentCompletion by round-tripping through serde.
+func NormalizeAgentCompletionForTests(v AgentCompletionsResponseUnaryAgentCompletion) (*AgentCompletionsResponseUnaryAgentCompletion, error) {
+	return cffi1[AgentCompletionsResponseUnaryAgentCompletion, AgentCompletionsResponseUnaryAgentCompletion]("objectiveai_normalize_agent_completion_for_tests", v)
+}
+
+// NormalizeVectorCompletionForTests normalizes a VectorCompletion by round-tripping through serde.
+func NormalizeVectorCompletionForTests(v VectorCompletionsResponseUnaryVectorCompletion) (*VectorCompletionsResponseUnaryVectorCompletion, error) {
+	return cffi1[VectorCompletionsResponseUnaryVectorCompletion, VectorCompletionsResponseUnaryVectorCompletion]("objectiveai_normalize_vector_completion_for_tests", v)
+}
+
+// NormalizeFunctionExecutionForTests normalizes a FunctionExecution by round-tripping through serde.
+func NormalizeFunctionExecutionForTests(v FunctionsExecutionsResponseUnaryFunctionExecution) (*FunctionsExecutionsResponseUnaryFunctionExecution, error) {
+	return cffi1[FunctionsExecutionsResponseUnaryFunctionExecution, FunctionsExecutionsResponseUnaryFunctionExecution]("objectiveai_normalize_function_execution_for_tests", v)
+}
+
+// NormalizeFunctionInventionForTests normalizes a FunctionInvention by round-tripping through serde.
+func NormalizeFunctionInventionForTests(v FunctionsInventionsResponseUnaryFunctionInvention) (*FunctionsInventionsResponseUnaryFunctionInvention, error) {
+	return cffi1[FunctionsInventionsResponseUnaryFunctionInvention, FunctionsInventionsResponseUnaryFunctionInvention]("objectiveai_normalize_function_invention_for_tests", v)
+}
+
+// NormalizeFunctionInventionRecursiveForTests normalizes a FunctionInventionRecursive by round-tripping through serde.
+func NormalizeFunctionInventionRecursiveForTests(v FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive) (*FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, error) {
+	return cffi1[FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive, FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive]("objectiveai_normalize_function_invention_recursive_for_tests", v)
+}
+
+// NormalizeFunctionProfileComputationForTests normalizes a FunctionProfileComputation by round-tripping through serde.
+func NormalizeFunctionProfileComputationForTests(v FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation) (*FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, error) {
+	return cffi1[FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation, FunctionsProfilesComputationsResponseUnaryFunctionProfileComputation]("objectiveai_normalize_function_profile_computation_for_tests", v)
 }
 
 // ---------------------------------------------------------------------------
 // Generate Arbitrary Chunks
 // ---------------------------------------------------------------------------
 
-func generateChunk[Out any](hasSeed bool, seed int64, cfn func(C.int32_t, C.int64_t, **C.uint8_t, *C.size_t) C.int32_t) (*Out, error) {
-	var hs C.int32_t
-	if hasSeed {
-		hs = 1
-	}
-
-	var outPtr *C.uint8_t
-	var outLen C.size_t
-
-	rc := cfn(hs, C.int64_t(seed), &outPtr, &outLen)
-
-	result := C.GoBytes(unsafe.Pointer(outPtr), C.int(outLen))
-	C.objectiveai_free(outPtr, outLen)
-
-	if rc != 0 {
-		return nil, errors.New(string(result))
-	}
-
-	var out Out
-	if err := json.Unmarshal(result, &out); err != nil {
-		return nil, err
-	}
-	return &out, nil
-}
-
 // GenerateAgentCompletionChunk generates a random AgentCompletionChunk from a seed.
 func GenerateAgentCompletionChunk(hasSeed bool, seed int64) (*AgentCompletionsResponseStreamingAgentCompletionChunk, error) {
-	return generateChunk[AgentCompletionsResponseStreamingAgentCompletionChunk](hasSeed, seed, func(a C.int32_t, b C.int64_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_generate_agent_completion_chunk(a, b, c, d)
-	})
+	return cffiGenerate[AgentCompletionsResponseStreamingAgentCompletionChunk]("objectiveai_generate_agent_completion_chunk", hasSeed, seed)
 }
 
 // GenerateVectorCompletionChunk generates a random VectorCompletionChunk from a seed.
 func GenerateVectorCompletionChunk(hasSeed bool, seed int64) (*VectorCompletionsResponseStreamingVectorCompletionChunk, error) {
-	return generateChunk[VectorCompletionsResponseStreamingVectorCompletionChunk](hasSeed, seed, func(a C.int32_t, b C.int64_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_generate_vector_completion_chunk(a, b, c, d)
-	})
+	return cffiGenerate[VectorCompletionsResponseStreamingVectorCompletionChunk]("objectiveai_generate_vector_completion_chunk", hasSeed, seed)
 }
 
 // GenerateFunctionExecutionChunk generates a random FunctionExecutionChunk from a seed.
 func GenerateFunctionExecutionChunk(hasSeed bool, seed int64) (*FunctionsExecutionsResponseStreamingFunctionExecutionChunk, error) {
-	return generateChunk[FunctionsExecutionsResponseStreamingFunctionExecutionChunk](hasSeed, seed, func(a C.int32_t, b C.int64_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_generate_function_execution_chunk(a, b, c, d)
-	})
+	return cffiGenerate[FunctionsExecutionsResponseStreamingFunctionExecutionChunk]("objectiveai_generate_function_execution_chunk", hasSeed, seed)
 }
 
 // GenerateFunctionInventionChunk generates a random FunctionInventionChunk from a seed.
 func GenerateFunctionInventionChunk(hasSeed bool, seed int64) (*FunctionsInventionsResponseStreamingFunctionInventionChunk, error) {
-	return generateChunk[FunctionsInventionsResponseStreamingFunctionInventionChunk](hasSeed, seed, func(a C.int32_t, b C.int64_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_generate_function_invention_chunk(a, b, c, d)
-	})
+	return cffiGenerate[FunctionsInventionsResponseStreamingFunctionInventionChunk]("objectiveai_generate_function_invention_chunk", hasSeed, seed)
 }
 
 // GenerateFunctionInventionRecursiveChunk generates a random FunctionInventionRecursiveChunk from a seed.
 func GenerateFunctionInventionRecursiveChunk(hasSeed bool, seed int64) (*FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk, error) {
-	return generateChunk[FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk](hasSeed, seed, func(a C.int32_t, b C.int64_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_generate_function_invention_recursive_chunk(a, b, c, d)
-	})
+	return cffiGenerate[FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk]("objectiveai_generate_function_invention_recursive_chunk", hasSeed, seed)
 }
 
 // GenerateFunctionProfileComputationChunk generates a random FunctionProfileComputationChunk from a seed.
 func GenerateFunctionProfileComputationChunk(hasSeed bool, seed int64) (*FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk, error) {
-	return generateChunk[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk](hasSeed, seed, func(a C.int32_t, b C.int64_t, c **C.uint8_t, d *C.size_t) C.int32_t {
-		return C.objectiveai_generate_function_profile_computation_chunk(a, b, c, d)
-	})
+	return cffiGenerate[FunctionsProfilesComputationsResponseStreamingFunctionProfileComputationChunk]("objectiveai_generate_function_profile_computation_chunk", hasSeed, seed)
 }
