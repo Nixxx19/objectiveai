@@ -347,7 +347,9 @@ def _convert_object_type(schema: dict, self_title: str, all_titles: set[str]) ->
             else {}
         )
         # Dict values always use inner type for constraint preservation
+        _naming_context.append("Value")
         val_type = _convert_inner_type(val_schema, self_title, all_titles)
+        _naming_context.pop()
         return f"dict[str, {val_type}]"
     if "properties" not in schema:
         return "dict[str, JsonValue]"
@@ -631,6 +633,7 @@ def _make_root_model(
     *,
     schema_title: str | None = None,
     expanded_ref: str | None = None,
+    expanded_ref_props: list[str] | None = None,
 ) -> str:
     """Generate a plain RootModel."""
     lines = [f"class {pascal_name}(RootModel):"]
@@ -640,7 +643,10 @@ def _make_root_model(
     if schema_title:
         config_parts.append(f"title={schema_title!r}")
     if expanded_ref:
-        config_parts.append(f"json_schema_extra={{'_expanded_ref': {expanded_ref!r}}}")
+        extra = {"_expanded_ref": expanded_ref}
+        if expanded_ref_props:
+            extra["_expanded_ref_props"] = expanded_ref_props
+        config_parts.append(f"json_schema_extra={extra!r}")
     if config_parts:
         lines.append(f"    model_config = ConfigDict({', '.join(config_parts)})")
         lines.append("")
@@ -1019,7 +1025,8 @@ def _generate_expanded_union_ref(
 
     # Generate the main RootModel union
     root_type = _union_type(union_members)
-    main_code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=schema_title, expanded_ref=ref_target)
+    prop_names = list(properties.keys()) if properties else None
+    main_code = _make_root_model(pascal_name, safe_desc, root_type, schema_title=schema_title, expanded_ref=ref_target, expanded_ref_props=prop_names)
     return "\n\n".join(variant_codes + [main_code])
 
 

@@ -36,7 +36,7 @@ class GetFunctionVariant2(BaseModel):
 
 
 class GetFunction(RootModel):
-    model_config = ConfigDict(title='functions.GetFunction', json_schema_extra={'_expanded_ref': 'functions.RemoteFunction'})
+    model_config = ConfigDict(title='functions.GetFunction', json_schema_extra={'_expanded_ref': 'functions.RemoteFunction', '_expanded_ref_props': ['commit', 'owner', 'remote', 'repository']})
 
     root: Union[GetFunctionVariant1, GetFunctionVariant2]
 

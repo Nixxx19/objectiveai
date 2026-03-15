@@ -29,7 +29,7 @@ class EnsembleBaseAgentsItem(RootModel):
 
 Used to specify how many instances of an agent to include in an ensemble,
 along with fallback agents to try if the primary fails."""
-    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'agent.AgentBase'})
+    model_config = ConfigDict(json_schema_extra={'_expanded_ref': 'agent.AgentBase', '_expanded_ref_props': ['count', 'fallbacks']})
 
     root: Union[EnsembleBaseAgentsItemVariant1, EnsembleBaseAgentsItemVariant2, EnsembleBaseAgentsItemVariant3]
 

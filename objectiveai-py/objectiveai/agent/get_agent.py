@@ -23,7 +23,7 @@ class GetAgentVariant3(AgentMockAgent):
 
 class GetAgent(RootModel):
     """Response containing a single Agent with creation timestamp."""
-    model_config = ConfigDict(title='agent.GetAgent', json_schema_extra={'_expanded_ref': 'agent.Agent'})
+    model_config = ConfigDict(title='agent.GetAgent', json_schema_extra={'_expanded_ref': 'agent.Agent', '_expanded_ref_props': ['created']})
 
     root: Union[GetAgentVariant1, GetAgentVariant2, GetAgentVariant3]
 

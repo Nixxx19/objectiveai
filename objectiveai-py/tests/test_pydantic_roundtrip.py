@@ -343,7 +343,14 @@ def _convert_root_model(cls: type, root_title: str) -> dict:
         return {}
     field_info = fields["root"]
     root_type = field_info.annotation
-    result = convert_type(root_type, root_title)
+    result: dict = {}
+
+    # Include description from docstring (for inline generated types)
+    doc = getattr(cls, "__doc__", None)
+    if doc and not _is_known_type(cls):
+        result["description"] = doc
+
+    result.update(convert_type(root_type, root_title))
 
     # Extract constraints from field_info.metadata (Pydantic unwraps Annotated)
     for m in (field_info.metadata or []):
@@ -370,13 +377,34 @@ def _convert_expanded_ref_model(cls: type, root_title: str, expanded_ref: str) -
     inner types with local properties added. We reconstruct the original
     schema shape: {"type": "object", "$ref": "...", "properties": {...}}.
     """
-    result: dict = {"type": "object", "$ref": expanded_ref}
+    result: dict = {}
 
-    # Find the local properties by looking at what the variants added
-    # on top of their base classes. All variants have the same local
-    # properties, so we can get them from the first variant.
+    # Include description from the class docstring
+    doc = getattr(cls, "__doc__", None)
+    if doc:
+        result["description"] = doc
+
+    result["type"] = "object"
+    result["$ref"] = expanded_ref
+
+    # Get the list of local property names from metadata
+    config = getattr(cls, "model_config", None)
+    extra = config.get("json_schema_extra", {}) if config else {}
+    local_prop_names = extra.get("_expanded_ref_props")
+
+    # Find the local properties from the first variant
     variants = _find_variant_types(cls)
-    if variants:
+    if variants and local_prop_names:
+        first_variant = variants[0]
+        all_props = _convert_properties(first_variant, root_title)
+        # Filter to only local properties, preserving order from schema
+        local_props = {}
+        for name in local_prop_names:
+            if name in all_props:
+                local_props[name] = all_props[name]
+        if local_props:
+            result["properties"] = local_props
+    elif variants:
         first_variant = variants[0]
         local_props = _convert_local_properties(first_variant, root_title)
         if local_props:

@@ -24,7 +24,7 @@ class GetProfileVariant2(FunctionsRemoteAutoProfile):
 
 
 class GetProfile(RootModel):
-    model_config = ConfigDict(title='functions.profiles.GetProfile', json_schema_extra={'_expanded_ref': 'functions.RemoteProfile'})
+    model_config = ConfigDict(title='functions.profiles.GetProfile', json_schema_extra={'_expanded_ref': 'functions.RemoteProfile', '_expanded_ref_props': ['commit', 'owner', 'remote', 'repository']})
 
     root: Union[GetProfileVariant1, GetProfileVariant2]
 
