@@ -1,5 +1,7 @@
 # ObjectiveAI
 
+**IMPORTANT: DO NOT RE-EXPORT TYPES.** When fixing import issues, never add re-exports unless explicitly authorized. Fix the import path at the call site instead.
+
 **Score everything. Rank everything. Simulate anyone.**
 
 ObjectiveAI is a REST API platform for scoring, ranking, and simulating preferences using ensembles of LLMs. Instead of asking one model for an answer, it uses multiple LLMs with explicit weights to produce structured numeric outputs.
