@@ -105,6 +105,8 @@ MODULES = [
     'objectiveai.ensemble.list_ensemble',
     'objectiveai.ensemble.list_ensemble_item',
     'objectiveai.ensemble.usage_ensemble',
+    'objectiveai.error.error_create_params',
+    'objectiveai.error.error_response',
     'objectiveai.functions.alpha_inline_function',
     'objectiveai.functions.alpha_remote_function',
     'objectiveai.functions.alpha_scalar.branch_task_expression',
