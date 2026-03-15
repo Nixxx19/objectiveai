@@ -4,6 +4,12 @@
 // by scripts/install_go.go. Do not edit generated files directly.
 package objectiveai
 
+import "github.com/go-playground/validator/v10"
+
+// variantValidator is used by UnmarshalJSON on variant structs to validate
+// that a deserialized value matches the variant's constraints (e.g., oneof).
+var variantValidator = validator.New()
+
 // Described is implemented by every generated type.
 // It provides metadata that cannot be derived from Go's type system.
 // Methods use the Schema prefix to avoid conflicts with struct fields
