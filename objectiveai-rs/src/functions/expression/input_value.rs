@@ -105,6 +105,92 @@ impl super::FromStarlarkValue for InputValue {
     }
 }
 
+impl super::FromSpecial for InputValue {
+    fn from_special(
+        special: &super::Special,
+        params: &super::Params,
+    ) -> Result<Self, super::ExpressionError> {
+        match special {
+            super::Special::Input => {
+                let input = match params {
+                    super::Params::Owned(o) => &o.input,
+                    super::Params::Ref(r) => r.input,
+                };
+                Ok(input.clone())
+            }
+            super::Special::InputItemsOptionalContextMerge => {
+                // Expects input to be an array of objects, each with 'items' (array)
+                // and optionally 'context'. Merges all items into one array and takes
+                // context from the first element.
+                let input = match params {
+                    super::Params::Owned(o) => &o.input,
+                    super::Params::Ref(r) => r.input,
+                };
+                let InputValue::Array(arr) = input else {
+                    return Err(super::ExpressionError::UnsupportedSpecial);
+                };
+                let mut merged_items = Vec::new();
+                let mut context = None;
+                for (i, elem) in arr.iter().enumerate() {
+                    let InputValue::Object(obj) = elem else {
+                        return Err(super::ExpressionError::UnsupportedSpecial);
+                    };
+                    if let Some(InputValue::Array(items)) = obj.get("items") {
+                        merged_items.extend(items.iter().cloned());
+                    }
+                    if i == 0 {
+                        context = obj.get("context").cloned();
+                    }
+                }
+                let mut result = IndexMap::new();
+                result.insert("items".to_string(), InputValue::Array(merged_items));
+                if let Some(ctx) = context {
+                    result.insert("context".to_string(), ctx);
+                }
+                Ok(InputValue::Object(result))
+            }
+            _ => Err(super::ExpressionError::UnsupportedSpecial),
+        }
+    }
+}
+
+impl super::FromSpecial for Vec<InputValue> {
+    fn from_special(
+        special: &super::Special,
+        params: &super::Params,
+    ) -> Result<Self, super::ExpressionError> {
+        match special {
+            super::Special::InputItemsOptionalContextSplit => {
+                // Expects input to be an object with 'items' (array) and optionally
+                // 'context'. Returns an array of objects, each with a 1-element 'items'
+                // array and a duplicated 'context' if present.
+                let input = match params {
+                    super::Params::Owned(o) => &o.input,
+                    super::Params::Ref(r) => r.input,
+                };
+                let InputValue::Object(obj) = input else {
+                    return Err(super::ExpressionError::UnsupportedSpecial);
+                };
+                let Some(InputValue::Array(items)) = obj.get("items") else {
+                    return Err(super::ExpressionError::UnsupportedSpecial);
+                };
+                let context = obj.get("context");
+                let mut result = Vec::with_capacity(items.len());
+                for item in items {
+                    let mut sub = IndexMap::new();
+                    sub.insert("items".to_string(), InputValue::Array(vec![item.clone()]));
+                    if let Some(ctx) = context {
+                        sub.insert("context".to_string(), ctx.clone());
+                    }
+                    result.push(InputValue::Object(sub));
+                }
+                Ok(result)
+            }
+            _ => Err(super::ExpressionError::UnsupportedSpecial),
+        }
+    }
+}
+
 impl Eq for InputValue {}
 
 impl std::hash::Hash for InputValue {
@@ -124,6 +210,36 @@ impl std::hash::Hash for InputValue {
             InputValue::Integer(i) => i.hash(state),
             InputValue::Number(f) => canonical_f64_bits(*f).hash(state),
             InputValue::Boolean(b) => b.hash(state),
+        }
+    }
+}
+
+impl<'a> arbitrary::Arbitrary<'a> for InputValue {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+        if u.arbitrary().unwrap_or(false) {
+            // Compound value
+            if u.arbitrary()? {
+                let mut map = IndexMap::new();
+                while u.arbitrary().unwrap_or(false) {
+                    map.insert(u.arbitrary::<String>()?, u.arbitrary()?);
+                }
+                Ok(InputValue::Object(map))
+            } else {
+                let mut arr = Vec::new();
+                while u.arbitrary().unwrap_or(false) {
+                    arr.push(InputValue::arbitrary(u)?);
+                }
+                Ok(InputValue::Array(arr))
+            }
+        } else {
+            // Leaf value
+            match u.int_in_range(0..=4)? {
+                0 => Ok(InputValue::RichContentPart(u.arbitrary()?)),
+                1 => Ok(InputValue::String(u.arbitrary()?)),
+                2 => Ok(InputValue::Integer(u.arbitrary()?)),
+                3 => Ok(InputValue::Number(u.arbitrary()?)),
+                _ => Ok(InputValue::Boolean(u.arbitrary()?)),
+            }
         }
     }
 }
@@ -487,130 +603,32 @@ impl super::FromStarlarkValue for InputValueExpression {
     }
 }
 
-impl<'a> arbitrary::Arbitrary<'a> for InputValue {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
-        match u.int_in_range(0..=6)? {
-            0 => Ok(InputValue::RichContentPart(u.arbitrary()?)),
-            1 => {
-                let len = u.int_in_range(0..=4)?;
-                let mut map = IndexMap::with_capacity(len);
-                for _ in 0..len {
-                    map.insert(u.arbitrary::<String>()?, u.arbitrary()?);
-                }
-                Ok(InputValue::Object(map))
-            }
-            2 => Ok(InputValue::Array(u.arbitrary()?)),
-            3 => Ok(InputValue::String(u.arbitrary()?)),
-            4 => Ok(InputValue::Integer(u.arbitrary()?)),
-            5 => Ok(InputValue::Number(u.arbitrary()?)),
-            _ => Ok(InputValue::Boolean(u.arbitrary()?)),
-        }
-    }
-}
-
 impl<'a> arbitrary::Arbitrary<'a> for InputValueExpression {
     fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
-        match u.int_in_range(0..=6)? {
-            0 => Ok(InputValueExpression::RichContentPart(u.arbitrary()?)),
-            1 => {
-                let len = u.int_in_range(0..=4)?;
-                let mut map = IndexMap::with_capacity(len);
-                for _ in 0..len {
+        if u.arbitrary().unwrap_or(false) {
+            // Compound value
+            if u.arbitrary()? {
+                let mut map = IndexMap::new();
+                while u.arbitrary().unwrap_or(false) {
                     map.insert(u.arbitrary::<String>()?, u.arbitrary()?);
                 }
                 Ok(InputValueExpression::Object(map))
-            }
-            2 => Ok(InputValueExpression::Array(u.arbitrary()?)),
-            3 => Ok(InputValueExpression::String(u.arbitrary()?)),
-            4 => Ok(InputValueExpression::Integer(u.arbitrary()?)),
-            5 => Ok(InputValueExpression::Number(u.arbitrary()?)),
-            _ => Ok(InputValueExpression::Boolean(u.arbitrary()?)),
-        }
-    }
-}
-
-impl super::FromSpecial for InputValue {
-    fn from_special(
-        special: &super::Special,
-        params: &super::Params,
-    ) -> Result<Self, super::ExpressionError> {
-        match special {
-            super::Special::Input => {
-                let input = match params {
-                    super::Params::Owned(o) => &o.input,
-                    super::Params::Ref(r) => r.input,
-                };
-                Ok(input.clone())
-            }
-            super::Special::InputItemsOptionalContextMerge => {
-                // Expects input to be an array of objects, each with 'items' (array)
-                // and optionally 'context'. Merges all items into one array and takes
-                // context from the first element.
-                let input = match params {
-                    super::Params::Owned(o) => &o.input,
-                    super::Params::Ref(r) => r.input,
-                };
-                let InputValue::Array(arr) = input else {
-                    return Err(super::ExpressionError::UnsupportedSpecial);
-                };
-                let mut merged_items = Vec::new();
-                let mut context = None;
-                for (i, elem) in arr.iter().enumerate() {
-                    let InputValue::Object(obj) = elem else {
-                        return Err(super::ExpressionError::UnsupportedSpecial);
-                    };
-                    if let Some(InputValue::Array(items)) = obj.get("items") {
-                        merged_items.extend(items.iter().cloned());
-                    }
-                    if i == 0 {
-                        context = obj.get("context").cloned();
-                    }
+            } else {
+                let mut arr = Vec::new();
+                while u.arbitrary().unwrap_or(false) {
+                    arr.push(u.arbitrary()?);
                 }
-                let mut result = IndexMap::new();
-                result.insert("items".to_string(), InputValue::Array(merged_items));
-                if let Some(ctx) = context {
-                    result.insert("context".to_string(), ctx);
-                }
-                Ok(InputValue::Object(result))
+                Ok(InputValueExpression::Array(arr))
             }
-            _ => Err(super::ExpressionError::UnsupportedSpecial),
-        }
-    }
-}
-
-impl super::FromSpecial for Vec<InputValue> {
-    fn from_special(
-        special: &super::Special,
-        params: &super::Params,
-    ) -> Result<Self, super::ExpressionError> {
-        match special {
-            super::Special::InputItemsOptionalContextSplit => {
-                // Expects input to be an object with 'items' (array) and optionally
-                // 'context'. Returns an array of objects, each with a 1-element 'items'
-                // array and a duplicated 'context' if present.
-                let input = match params {
-                    super::Params::Owned(o) => &o.input,
-                    super::Params::Ref(r) => r.input,
-                };
-                let InputValue::Object(obj) = input else {
-                    return Err(super::ExpressionError::UnsupportedSpecial);
-                };
-                let Some(InputValue::Array(items)) = obj.get("items") else {
-                    return Err(super::ExpressionError::UnsupportedSpecial);
-                };
-                let context = obj.get("context");
-                let mut result = Vec::with_capacity(items.len());
-                for item in items {
-                    let mut sub = IndexMap::new();
-                    sub.insert("items".to_string(), InputValue::Array(vec![item.clone()]));
-                    if let Some(ctx) = context {
-                        sub.insert("context".to_string(), ctx.clone());
-                    }
-                    result.push(InputValue::Object(sub));
-                }
-                Ok(result)
+        } else {
+            // Leaf value
+            match u.int_in_range(0..=4)? {
+                0 => Ok(InputValueExpression::RichContentPart(u.arbitrary()?)),
+                1 => Ok(InputValueExpression::String(u.arbitrary()?)),
+                2 => Ok(InputValueExpression::Integer(u.arbitrary()?)),
+                3 => Ok(InputValueExpression::Number(u.arbitrary()?)),
+                _ => Ok(InputValueExpression::Boolean(u.arbitrary()?)),
             }
-            _ => Err(super::ExpressionError::UnsupportedSpecial),
         }
     }
 }

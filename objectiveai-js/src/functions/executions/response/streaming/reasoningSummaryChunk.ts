@@ -5,11 +5,11 @@ import { AgentCompletionsResponseStreamingMessageChunkSchema } from "../../../..
 import { AgentCompletionsResponseStreamingObjectSchema } from "../../../../agent/completions/response/streaming/object";
 import { AgentCompletionsResponseUsageSchema } from "../../../../agent/completions/response/usage";
 import { AgentUpstreamSchema } from "../../../../agent/upstream";
-import { ResponseErrorSchema } from "../../../../responseError";
+import { ErrorResponseErrorSchema } from "../../../../error/responseError";
 
 export const FunctionsExecutionsResponseStreamingReasoningSummaryChunkSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
-  error: ResponseErrorSchema.nullable().optional(),
+  error: ErrorResponseErrorSchema.nullable().optional(),
   id: z.string(),
   messages: z.array(AgentCompletionsResponseStreamingMessageChunkSchema),
   object: AgentCompletionsResponseStreamingObjectSchema.describe("The object type (always \"agent.completion.chunk\")."),

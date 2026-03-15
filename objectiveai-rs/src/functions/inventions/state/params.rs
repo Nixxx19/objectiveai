@@ -4,10 +4,15 @@ use schemars::JsonSchema;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.inventions.state.Params")]
 pub struct Params {
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub depth: u64,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub min_branch_width: u64,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub max_branch_width: u64,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub min_leaf_width: u64,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub max_leaf_width: u64,
     pub name: String,
     pub spec: String,

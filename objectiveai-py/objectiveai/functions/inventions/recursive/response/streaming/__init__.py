@@ -8,3 +8,4 @@ def __getattr__(name):
 
 import objectiveai.functions.inventions.recursive.response.streaming.function_invention_chunk_methods  # noqa: F401, E402
 import objectiveai.functions.inventions.recursive.response.streaming.function_invention_recursive_chunk_methods  # noqa: F401, E402
+from objectiveai.functions.inventions.recursive.response.streaming.pyo3 import *  # noqa: F401, F403, E402

@@ -96,11 +96,11 @@ impl<'de> serde::Deserialize<'de> for TaskOutput<'static> {
 #[schemars(rename = "functions.expression.TaskOutputOwned")]
 pub enum TaskOutputOwned {
     /// A single scalar score.
-    Scalar(#[schemars(with = "f64")] rust_decimal::Decimal),
+    Scalar(#[schemars(with = "f64")] #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)] rust_decimal::Decimal),
     /// A vector of scores.
-    Vector(#[schemars(with = "Vec<f64>")] Vec<rust_decimal::Decimal>),
+    Vector(#[schemars(with = "Vec<f64>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_rust_decimal)] Vec<rust_decimal::Decimal>),
     /// Multiple vectors of scores (from mapped tasks).
-    Vectors(#[schemars(with = "Vec<Vec<f64>>")] Vec<Vec<rust_decimal::Decimal>>),
+    Vectors(#[schemars(with = "Vec<Vec<f64>>")] #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_vec_rust_decimal)] Vec<Vec<rust_decimal::Decimal>>),
     /// An error occurred during execution.
     Err(#[arbitrary(with = crate::arbitrary_util::arbitrary_json_value)] serde_json::Value),
 }

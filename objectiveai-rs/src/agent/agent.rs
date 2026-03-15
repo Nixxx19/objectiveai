@@ -202,6 +202,7 @@ impl TryFrom<AgentBase> for Agent {
 pub struct WithFallbacksAndCount<T> {
     /// Number of instances of this agent in the ensemble. Defaults to 1.
     #[serde(default = "WithFallbacksAndCount::<T>::default_count")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub count: u64,
     /// The primary agent configuration.
     #[serde(flatten)]

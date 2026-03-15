@@ -283,7 +283,7 @@ stream_push_test!(
 );
 
 stream_push_test!(
-    first_error_kept,
+    last_error_kept,
     vec![
         AgentCompletionChunk {
             id: "acc-5".into(),
@@ -318,8 +318,8 @@ stream_push_test!(
         usage: None,
         upstream: crate::agent::Upstream::Openrouter,
         error: Some(crate::error::ResponseError {
-            code: 500,
-            message: serde_json::json!("first"),
+            code: 502,
+            message: serde_json::json!("second"),
         }),
     }
 );

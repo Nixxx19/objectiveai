@@ -1,23 +1,22 @@
 import { describe, it, expect } from "vitest";
-import { zocker } from "zocker";
-import { FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema } from "./functionInventionRecursiveChunk";
 import { functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged } from "./functionInventionRecursiveChunkMerged";
-import { functionInventionRecursiveChunkMerged as wasmMerged, functionInventionRecursiveChunkNormalized as wasmNormalized } from "../../../../../wasm/loader.js";
-import { zockerParse } from "../../../../../zockerParse";
-
-const gen = zocker(FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkSchema).array({ max: 3 });
-const parse = () => zockerParse(gen, wasmNormalized);
+import {
+  wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged as wasmMerged,
+  wasmFunctionsInventionsRecursiveResponseStreamingGenerateFunctionInventionRecursiveChunk as generate,
+} from "./wasm";
+import { rounded } from "../../../../../mergeTestUtil";
 
 describe("functionInventionRecursiveChunkMerged fuzz", () => {
   for (let i = 0; i < 20; i++) {
     it(`stream ${i}`, () => {
-      let tsAcc = parse();
+      let seed = i * 1000;
+      let tsAcc = generate(seed++);
       let wasmAcc = structuredClone(tsAcc);
       for (let j = 0; j < 20; j++) {
-        const chunk = parse();
-        [tsAcc] = functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(tsAcc as any, chunk as any);
-        wasmAcc = JSON.parse(wasmMerged(wasmAcc, chunk));
-        expect(tsAcc, `chunk ${j}`).toEqual(wasmAcc);
+        const chunk = generate(seed++);
+        [tsAcc] = functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged(tsAcc, chunk);
+        wasmAcc = wasmMerged(wasmAcc, chunk);
+        expect(rounded(tsAcc), `chunk ${j}`).toEqual(rounded(wasmAcc));
       }
     });
   }

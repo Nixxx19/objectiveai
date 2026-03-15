@@ -216,6 +216,10 @@ func describedForTitle(title string) any {
 		return EnsembleListEnsembleItem{}
 	case "ensemble.UsageEnsemble":
 		return EnsembleUsageEnsemble{}
+	case "error.ErrorCreateParams":
+		return ErrorErrorCreateParams{}
+	case "error.ErrorResponse":
+		return ErrorErrorResponse{}
 	case "functions.AlphaInlineFunction":
 		return FunctionsAlphaInlineFunctionSchema{}
 	case "functions.AlphaRemoteFunction":

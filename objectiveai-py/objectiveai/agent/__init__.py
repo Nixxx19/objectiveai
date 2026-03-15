@@ -7,3 +7,4 @@ def __getattr__(name):
 
 
 from objectiveai.agent.http import *  # noqa: F401, F403, E402
+from objectiveai.agent.pyo3 import *  # noqa: F401, F403, E402

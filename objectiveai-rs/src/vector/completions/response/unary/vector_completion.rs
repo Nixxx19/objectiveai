@@ -36,6 +36,19 @@ pub struct VectorCompletion {
 }
 
 impl VectorCompletion {
+    /// Normalize non-deterministic fields for test snapshot comparison.
+    pub fn normalize_for_tests(&mut self) {
+        self.id = String::new();
+        self.created = 0;
+        for completion in &mut self.completions {
+            completion.inner.normalize_for_tests();
+        }
+        for vote in &mut self.votes {
+            vote.prompt_id = String::new();
+            vote.responses_ids = Vec::new();
+        }
+    }
+
     /// Creates a default completion with uniform scores for the given number of responses.
     pub fn default_from_request_responses_len(
         request_responses_len: usize,

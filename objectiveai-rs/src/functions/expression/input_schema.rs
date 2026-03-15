@@ -129,7 +129,7 @@ pub enum ObjectInputSchemaType {
 }
 
 /// Schema for an object input with named properties.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
 #[serde(rename_all = "camelCase")]
 #[schemars(rename = "functions.expression.ObjectInputSchema")]
 pub struct ObjectInputSchema {
@@ -138,26 +138,11 @@ pub struct ObjectInputSchema {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
     /// Schema for each property in the object.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_indexmap)]
     pub properties: IndexMap<String, InputSchema>,
     /// List of property names that must be present.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub required: Option<Vec<String>>,
-}
-
-impl<'a> arbitrary::Arbitrary<'a> for ObjectInputSchema {
-    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
-        let len = u.int_in_range(0..=4)?;
-        let mut properties = IndexMap::with_capacity(len);
-        for _ in 0..len {
-            properties.insert(u.arbitrary::<String>()?, u.arbitrary()?);
-        }
-        Ok(ObjectInputSchema {
-            r#type: u.arbitrary()?,
-            description: u.arbitrary()?,
-            properties,
-            required: u.arbitrary()?,
-        })
-    }
 }
 
 impl ObjectInputSchema {
@@ -202,9 +187,11 @@ pub struct ArrayInputSchema {
     pub description: Option<String>,
     /// Minimum number of items required.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub min_items: Option<u64>,
     /// Maximum number of items allowed.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_u64)]
     pub max_items: Option<u64>,
     /// Schema for each item in the array.
     pub items: Box<InputSchema>,
@@ -294,9 +281,11 @@ pub struct IntegerInputSchema {
     pub description: Option<String>,
     /// Minimum allowed value (inclusive).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_i64)]
     pub minimum: Option<i64>,
     /// Maximum allowed value (inclusive).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_i64)]
     pub maximum: Option<i64>,
 }
 

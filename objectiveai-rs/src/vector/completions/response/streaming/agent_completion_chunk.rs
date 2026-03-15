@@ -12,6 +12,7 @@ use schemars::JsonSchema;
 #[schemars(rename = "vector.completions.response.streaming.AgentCompletionChunk")]
 pub struct AgentCompletionChunk {
     /// Index used to correlate chunks from the same completion.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
     /// The underlying agent completion chunk.
     #[serde(flatten)]

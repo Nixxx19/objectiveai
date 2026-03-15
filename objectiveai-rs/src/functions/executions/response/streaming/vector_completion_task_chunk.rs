@@ -5,8 +5,11 @@ use schemars::JsonSchema;
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default, JsonSchema, arbitrary::Arbitrary)]
 #[schemars(rename = "functions.executions.response.streaming.VectorCompletionTaskChunk")]
 pub struct VectorCompletionTaskChunk {
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub task_index: u64,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_vec_u64)]
     pub task_path: Vec<u64>,
     #[serde(flatten)]
     pub inner: vector::completions::response::streaming::VectorCompletionChunk,

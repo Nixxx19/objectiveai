@@ -160,15 +160,7 @@ async fn run_and_check<S: 'static>(
 }
 
 fn normalize(mut c: AgentCompletion) -> AgentCompletion {
-    use objectiveai::agent::completions::response::unary::Message;
-    c.id = String::new();
-    c.created = 0;
-    for msg in &mut c.messages {
-        if let Message::Assistant(asst) = msg {
-            asst.upstream_id = String::new();
-            asst.created = 0;
-        }
-    }
+    c.normalize_for_tests();
     c
 }
 

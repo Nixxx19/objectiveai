@@ -20,6 +20,20 @@ pub struct AgentCompletion {
     pub error: Option<crate::error::ResponseError>,
 }
 
+impl AgentCompletion {
+    /// Normalize non-deterministic fields for test snapshot comparison.
+    pub fn normalize_for_tests(&mut self) {
+        self.id = String::new();
+        self.created = 0;
+        for msg in &mut self.messages {
+            if let super::Message::Assistant(asst) = msg {
+                asst.upstream_id = String::new();
+                asst.created = 0;
+            }
+        }
+    }
+}
+
 impl From<response::streaming::AgentCompletionChunk> for AgentCompletion {
     fn from(
         response::streaming::AgentCompletionChunk {

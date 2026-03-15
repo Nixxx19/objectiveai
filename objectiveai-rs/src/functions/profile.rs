@@ -12,7 +12,7 @@ use schemars::JsonSchema;
 ///
 /// Profiles contain the weights and nested configurations needed to execute
 /// a Function. They correspond to a Function's task structure.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.Profile")]
 pub enum Profile {
@@ -23,7 +23,7 @@ pub enum Profile {
 }
 
 /// A remote profile, either tasks-based or auto.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.RemoteProfile")]
 pub enum RemoteProfile {
@@ -34,7 +34,7 @@ pub enum RemoteProfile {
 }
 
 /// An inline profile, either tasks-based or auto.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.InlineProfile")]
 pub enum InlineProfile {
@@ -44,11 +44,21 @@ pub enum InlineProfile {
     Auto(InlineAutoProfile),
 }
 
+impl<'a> arbitrary::Arbitrary<'a> for InlineProfile {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+        if u.arbitrary().unwrap_or(false) {
+            Ok(InlineProfile::Tasks(u.arbitrary()?))
+        } else {
+            Ok(InlineProfile::Auto(u.arbitrary()?))
+        }
+    }
+}
+
 /// A remote tasks-based profile with full metadata.
 ///
 /// Stored as `profile.json` in repositories and referenced by
 /// `remote/owner/repository`.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.RemoteTasksProfile")]
 pub struct RemoteTasksProfile {
     /// Human-readable description of the profile.
@@ -67,7 +77,7 @@ pub struct RemoteTasksProfile {
 ///
 /// Applies a single ensemble and weights to every vector completion task
 /// in the function, with equal task weights.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[schemars(rename = "functions.RemoteAutoProfile")]
 pub struct RemoteAutoProfile {
     /// Human-readable description of the profile.
@@ -108,7 +118,7 @@ pub struct InlineAutoProfile {
 /// Configuration for a single task within a Profile.
 ///
 /// Each variant corresponds to a task type in the Function definition.
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.TaskProfile")]
 pub enum TaskProfile {
@@ -128,6 +138,25 @@ pub enum TaskProfile {
     Inline(InlineProfile),
     /// Placeholder task — no configuration needed, output is fixed.
     Placeholder {},
+}
+
+impl<'a> arbitrary::Arbitrary<'a> for TaskProfile {
+    fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
+        // Inline variant is recursive (InlineProfile → InlineTasksProfile → Vec<TaskProfile>),
+        // so use go-deep bool to make recursion exponentially rare.
+        if u.arbitrary().unwrap_or(false) {
+            Ok(TaskProfile::Inline(u.arbitrary()?))
+        } else if u.arbitrary().unwrap_or(false) {
+            Ok(TaskProfile::Remote {
+                remote: u.arbitrary()?,
+                owner: u.arbitrary()?,
+                repository: u.arbitrary()?,
+                commit: u.arbitrary()?,
+            })
+        } else {
+            Ok(TaskProfile::Placeholder {})
+        }
+    }
 }
 
 impl TaskProfile {

@@ -5,11 +5,11 @@ import { AgentCompletionsResponseUnaryMessageSchema } from "./message";
 import { AgentCompletionsResponseUnaryObjectSchema } from "./object";
 import { AgentCompletionsResponseUsageSchema } from "../usage";
 import { AgentUpstreamSchema } from "../../../upstream";
-import { ResponseErrorSchema } from "../../../../responseError";
+import { ErrorResponseErrorSchema } from "../../../../error/responseError";
 
 export const AgentCompletionsResponseUnaryAgentCompletionSchema = z.object({
   created: z.number().int().min(0).max(18446744073709552000),
-  error: ResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
+  error: ErrorResponseErrorSchema.nullable().describe("Error details if this completion failed.").optional(),
   id: z.string(),
   messages: z.array(AgentCompletionsResponseUnaryMessageSchema),
   object: AgentCompletionsResponseUnaryObjectSchema.describe("The object type (always \"agent.completion\")."),

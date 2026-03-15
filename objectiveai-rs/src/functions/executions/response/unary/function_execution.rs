@@ -20,7 +20,7 @@ pub struct FunctionExecution {
     /// Reasoning summary if reasoning was enabled.
     pub reasoning: Option<super::ReasoningSummary>,
     /// The final output (scalar or vector score).
-    pub output: functions::expression::TaskOutputOwned,
+    pub output: super::super::Output,
     /// Error details if the execution failed.
     pub error: Option<error::ResponseError>,
     /// Token for retrying this execution with cached votes.
@@ -40,6 +40,23 @@ pub struct FunctionExecution {
 impl FunctionExecution {
     pub fn any_usage(&self) -> bool {
         self.usage.any_usage()
+    }
+
+    /// Normalize non-deterministic fields for test snapshot comparison.
+    pub fn normalize_for_tests(&mut self) {
+        self.id = String::new();
+        self.created = 0;
+        self.retry_token = None;
+        for task in &mut self.tasks {
+            match task {
+                super::Task::VectorCompletion(vt) => {
+                    vt.inner.normalize_for_tests();
+                }
+                super::Task::FunctionExecution(ft) => {
+                    ft.inner.normalize_for_tests();
+                }
+            }
+        }
     }
 }
 
@@ -65,11 +82,11 @@ impl From<response::streaming::FunctionExecutionChunk> for FunctionExecution {
             tasks: tasks.into_iter().map(super::Task::from).collect(),
             tasks_errors: tasks_errors.unwrap_or(false),
             reasoning: reasoning.map(super::ReasoningSummary::from),
-            output: output.unwrap_or(
-                functions::expression::TaskOutputOwned::Err(
+            output: output.unwrap_or(response::Output {
+                output: functions::expression::TaskOutputOwned::Err(
                     serde_json::Value::Null,
                 ),
-            ),
+            }),
             error,
             retry_token,
             created,

@@ -241,7 +241,7 @@ impl State {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "type")]
 #[schemars(rename = "functions.inventions.state.ParamsState")]
 pub enum ParamsState {

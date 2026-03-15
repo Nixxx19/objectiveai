@@ -47,6 +47,7 @@ pub struct Logprob {
     pub bytes: Option<Vec<u8>>,
     /// The log probability of this token.
     #[schemars(with = "f64")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub logprob: rust_decimal::Decimal,
     /// The top alternative tokens and their log probabilities.
     pub top_logprobs: Vec<TopLogprob>,
@@ -62,5 +63,6 @@ pub struct TopLogprob {
     pub bytes: Option<Vec<u8>>,
     /// The log probability of this token.
     #[schemars(with = "Option<f64>")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_rust_decimal)]
     pub logprob: Option<rust_decimal::Decimal>,
 }

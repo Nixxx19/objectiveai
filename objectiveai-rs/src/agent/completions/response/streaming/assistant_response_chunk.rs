@@ -13,7 +13,9 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.completions.response.streaming.AssistantResponseChunk")]
 pub struct AssistantResponseChunk {
     pub role: response::AssistantRole,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub created: u64,
     pub agent: String,
     pub model: String,

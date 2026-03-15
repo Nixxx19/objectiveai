@@ -18,7 +18,7 @@ impl FullRemoteFunction {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.FullInlineFunction")]
 pub enum FullInlineFunction {
@@ -52,7 +52,7 @@ impl AlphaRemoteFunction {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema, arbitrary::Arbitrary)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, JsonSchema)]
 #[serde(untagged)]
 #[schemars(rename = "functions.AlphaInlineFunction")]
 pub enum AlphaInlineFunction {

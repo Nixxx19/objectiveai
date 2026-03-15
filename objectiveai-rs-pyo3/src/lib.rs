@@ -488,6 +488,58 @@ fn function_profile_computation_chunk_to_unary(
 }
 
 // ---------------------------------------------------------------------------
+// Normalize for tests
+// ---------------------------------------------------------------------------
+
+/// Normalizes an AgentCompletion for test snapshot stability.
+#[pyfunction]
+fn normalize_agent_completion_for_tests(py: Python<'_>, a: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let mut a: objectiveai::agent::completions::response::unary::AgentCompletion = from_py(a)?;
+    a.normalize_for_tests();
+    to_py(py, &a)
+}
+
+/// Normalizes a VectorCompletion for test snapshot stability.
+#[pyfunction]
+fn normalize_vector_completion_for_tests(py: Python<'_>, a: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let mut a: objectiveai::vector::completions::response::unary::VectorCompletion = from_py(a)?;
+    a.normalize_for_tests();
+    to_py(py, &a)
+}
+
+/// Normalizes a FunctionExecution for test snapshot stability.
+#[pyfunction]
+fn normalize_function_execution_for_tests(py: Python<'_>, a: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let mut a: objectiveai::functions::executions::response::unary::FunctionExecution = from_py(a)?;
+    a.normalize_for_tests();
+    to_py(py, &a)
+}
+
+/// Normalizes a FunctionInvention for test snapshot stability.
+#[pyfunction]
+fn normalize_function_invention_for_tests(py: Python<'_>, a: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let mut a: objectiveai::functions::inventions::response::unary::FunctionInvention = from_py(a)?;
+    a.normalize_for_tests();
+    to_py(py, &a)
+}
+
+/// Normalizes a FunctionInventionRecursive for test snapshot stability.
+#[pyfunction]
+fn normalize_function_invention_recursive_for_tests(py: Python<'_>, a: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let mut a: objectiveai::functions::inventions::recursive::response::unary::FunctionInventionRecursive = from_py(a)?;
+    a.normalize_for_tests();
+    to_py(py, &a)
+}
+
+/// Normalizes a FunctionProfileComputation for test snapshot stability.
+#[pyfunction]
+fn normalize_function_profile_computation_for_tests(py: Python<'_>, a: &Bound<'_, PyAny>) -> PyResult<Py<PyAny>> {
+    let mut a: objectiveai::functions::profiles::computations::response::unary::FunctionProfileComputation = from_py(a)?;
+    a.normalize_for_tests();
+    to_py(py, &a)
+}
+
+// ---------------------------------------------------------------------------
 // Seed → bytes helper
 // ---------------------------------------------------------------------------
 
@@ -629,6 +681,14 @@ fn objectiveai_pyo3(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(function_invention_chunk_to_unary, m)?)?;
     m.add_function(wrap_pyfunction!(function_invention_recursive_chunk_to_unary, m)?)?;
     m.add_function(wrap_pyfunction!(function_profile_computation_chunk_to_unary, m)?)?;
+
+    // Normalize for tests
+    m.add_function(wrap_pyfunction!(normalize_agent_completion_for_tests, m)?)?;
+    m.add_function(wrap_pyfunction!(normalize_vector_completion_for_tests, m)?)?;
+    m.add_function(wrap_pyfunction!(normalize_function_execution_for_tests, m)?)?;
+    m.add_function(wrap_pyfunction!(normalize_function_invention_for_tests, m)?)?;
+    m.add_function(wrap_pyfunction!(normalize_function_invention_recursive_for_tests, m)?)?;
+    m.add_function(wrap_pyfunction!(normalize_function_profile_computation_for_tests, m)?)?;
 
     // Generate arbitrary chunks
     m.add_function(wrap_pyfunction!(generate_agent_completion_chunk, m)?)?;

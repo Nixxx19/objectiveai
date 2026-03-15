@@ -55,9 +55,9 @@ stream_push_test!(
             tasks: vec![],
             tasks_errors: None,
             reasoning: None,
-            output: Some(crate::functions::expression::TaskOutputOwned::Scalar(
+            output: Some(super::super::Output { output: crate::functions::expression::TaskOutputOwned::Scalar(
                 rust_decimal::Decimal::new(75, 2),
-            )),
+            ) }),
             error: None,
             retry_token: None,
             created: 100,
@@ -72,9 +72,9 @@ stream_push_test!(
         tasks: vec![],
         tasks_errors: None,
         reasoning: None,
-        output: Some(crate::functions::expression::TaskOutputOwned::Scalar(
+        output: Some(super::super::Output { output: crate::functions::expression::TaskOutputOwned::Scalar(
             rust_decimal::Decimal::new(75, 2),
-        )),
+        ) }),
         error: None,
         retry_token: None,
         created: 100,
@@ -93,9 +93,9 @@ stream_push_test!(
             tasks: vec![],
             tasks_errors: None,
             reasoning: None,
-            output: Some(crate::functions::expression::TaskOutputOwned::Scalar(
+            output: Some(super::super::Output { output: crate::functions::expression::TaskOutputOwned::Scalar(
                 rust_decimal::Decimal::new(25, 2),
-            )),
+            ) }),
             error: None,
             retry_token: None,
             created: 100,
@@ -109,9 +109,9 @@ stream_push_test!(
             tasks: vec![],
             tasks_errors: None,
             reasoning: None,
-            output: Some(crate::functions::expression::TaskOutputOwned::Scalar(
+            output: Some(super::super::Output { output: crate::functions::expression::TaskOutputOwned::Scalar(
                 rust_decimal::Decimal::new(75, 2),
-            )),
+            ) }),
             error: None,
             retry_token: None,
             created: 100,
@@ -126,9 +126,9 @@ stream_push_test!(
         tasks: vec![],
         tasks_errors: None,
         reasoning: None,
-        output: Some(crate::functions::expression::TaskOutputOwned::Scalar(
+        output: Some(super::super::Output { output: crate::functions::expression::TaskOutputOwned::Scalar(
             rust_decimal::Decimal::new(75, 2),
-        )),
+        ) }),
         error: None,
         retry_token: None,
         created: 100,

@@ -6,6 +6,7 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.completions.response.ToolResponse")]
 pub struct ToolResponse {
     pub role: ToolRole,
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub index: u64,
     #[serde(flatten)]
     pub inner: agent::completions::message::ToolMessage,

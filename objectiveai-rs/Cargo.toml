@@ -19,10 +19,10 @@ http = ["dep:reqwest", "dep:reqwest-eventsource", "dep:eventsource-stream", "dep
 [dependencies]
 base62 = { version = "2.2.1" }
 serde = { version = "1.0.219", features = ["derive"] }
-indexmap = { version = "2.2.3", features = ["arbitrary", "serde"] }
+indexmap = { version = "2.2.3", features = ["serde"] }
 serde_json = { version = "1.0.140", features = ["preserve_order"] }
 twox-hash = { version = "2.1.1", default-features = false, features = ["xxhash3_128", "alloc"] }
-rust_decimal = { version = "1.39.0", features = ["serde-float", "macros", "rust-fuzz"] }
+rust_decimal = { version = "1.39.0", features = ["serde-float", "macros"] }
 jmespath = { version = "0.5.0" }
 thiserror = {  version = "2.0.12" }
 base64 = { version = "0.22.1" }
@@ -42,6 +42,7 @@ arbitrary = { version = "1.4.2", features = ["derive"] }
 
 [dev-dependencies]
 proc-macro2 = { version = "1.0.106", features = ["span-locations"] }
+quote = "1.0.45"
 syn = { version = "2.0.117", features = ["full"] }
 walkdir = "2.5.0"
 

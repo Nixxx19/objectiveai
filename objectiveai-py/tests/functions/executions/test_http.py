@@ -63,8 +63,8 @@ def normalize_vc_task(task: dict) -> dict:
     completions = [normalize_completion(c) for c in task.get("completions", [])]
     completions.sort(
         key=lambda c: (
-            c.get("messages", [{}])[0].get("agent", ""),
-            c.get("messages", [{}])[0].get("content", ""),
+            c.get("messages", [{}])[0].get("agent") or "",
+            c.get("messages", [{}])[0].get("content") or "",
         )
     )
     for i, c in enumerate(completions):

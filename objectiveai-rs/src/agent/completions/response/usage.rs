@@ -12,10 +12,13 @@ use schemars::JsonSchema;
 #[schemars(rename = "agent.completions.response.Usage")]
 pub struct Usage {
     /// Total tokens generated across all assistant responses.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub completion_tokens: u64,
     /// Total prompt tokens across all assistant responses.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub prompt_tokens: u64,
     /// Sum of completion and prompt tokens.
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_u64)]
     pub total_tokens: u64,
     /// Breakdown of completion tokens (reasoning, audio, etc.) if available.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -25,6 +28,7 @@ pub struct Usage {
     pub prompt_tokens_details: Option<PromptTokensDetails>,
     /// Cost charged by ObjectiveAI for this request.
     #[schemars(with = "f64")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub cost: rust_decimal::Decimal,
     /// Breakdown of upstream and upstream_upstream costs if available.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -32,6 +36,7 @@ pub struct Usage {
     /// Total cost including upstream provider charges. Only differs from `cost`
     /// when using BYOK (Bring Your Own Key).
     #[schemars(with = "f64")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_rust_decimal)]
     pub total_cost: rust_decimal::Decimal,
 }
 
