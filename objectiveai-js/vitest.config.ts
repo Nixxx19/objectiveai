@@ -10,6 +10,5 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.ts"],
     testTimeout: 0,
-    globalSetup: ["./scripts/vitest-global-setup.cjs"],
   },
 });
