@@ -272,32 +272,7 @@ async fn run_recursive_invention(
 // ---------------------------------------------------------------------------
 
 fn normalize(mut fi: FunctionInventionRecursive) -> FunctionInventionRecursive {
-    fi.id = String::new();
-    fi.created = 0;
-    for invention in &mut fi.inventions {
-        invention.inner.id = String::new();
-        invention.inner.created = 0;
-        for completion in &mut invention.inner.completions {
-            completion.inner.id = String::new();
-            completion.inner.created = 0;
-            for msg in &mut completion.inner.messages {
-                if let objectiveai::agent::completions::response::unary::Message::Assistant(asst) = msg {
-                    asst.upstream_id = String::new();
-                    asst.created = 0;
-                }
-            }
-        }
-    }
-    // Sort inventions by state name and renumber indices sequentially.
-    // select_all merges concurrent child streams in non-deterministic order,
-    // so both the vec order and ChoiceIndexer indices depend on scheduling.
-    // The state name is deterministic (derived from parent name + path index).
-    fi.inventions.sort_by(|a, b| {
-        a.inner.state.name().cmp(b.inner.state.name())
-    });
-    for (i, inv) in fi.inventions.iter_mut().enumerate() {
-        inv.index = i as u64;
-    }
+    fi.normalize_for_tests();
     fi
 }
 

@@ -162,23 +162,7 @@ async fn run_and_check(
 }
 
 fn normalize(mut vc: VectorCompletion) -> VectorCompletion {
-    vc.id = String::new();
-    vc.created = 0;
-    for completion in &mut vc.completions {
-        completion.inner.id = String::new();
-        completion.inner.created = 0;
-        for msg in &mut completion.inner.messages {
-            if let objectiveai::agent::completions::response::unary::Message::Assistant(asst) = msg
-            {
-                asst.upstream_id = String::new();
-                asst.created = 0;
-            }
-        }
-    }
-    for vote in &mut vc.votes {
-        vote.prompt_id = String::new();
-        vote.responses_ids = Vec::new();
-    }
+    vc.normalize_for_tests();
     vc
 }
 

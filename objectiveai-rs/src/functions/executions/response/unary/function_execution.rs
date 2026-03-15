@@ -41,6 +41,23 @@ impl FunctionExecution {
     pub fn any_usage(&self) -> bool {
         self.usage.any_usage()
     }
+
+    /// Normalize non-deterministic fields for test snapshot comparison.
+    pub fn normalize_for_tests(&mut self) {
+        self.id = String::new();
+        self.created = 0;
+        self.retry_token = None;
+        for task in &mut self.tasks {
+            match task {
+                super::Task::VectorCompletion(vt) => {
+                    vt.inner.normalize_for_tests();
+                }
+                super::Task::FunctionExecution(ft) => {
+                    ft.inner.normalize_for_tests();
+                }
+            }
+        }
+    }
 }
 
 impl From<response::streaming::FunctionExecutionChunk> for FunctionExecution {

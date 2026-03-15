@@ -17,6 +17,17 @@ pub struct FunctionInvention {
     pub error: Option<error::ResponseError>,
 }
 
+impl FunctionInvention {
+    /// Normalize non-deterministic fields for test snapshot comparison.
+    pub fn normalize_for_tests(&mut self) {
+        self.id = String::new();
+        self.created = 0;
+        for completion in &mut self.completions {
+            completion.inner.normalize_for_tests();
+        }
+    }
+}
+
 impl From<response::streaming::FunctionInventionChunk> for FunctionInvention {
     fn from(
         response::streaming::FunctionInventionChunk {

@@ -393,46 +393,8 @@ async fn run_execution(client: &Arc<TestClient>, request: Arc<Request>) -> Funct
 // ---------------------------------------------------------------------------
 
 fn normalize(mut fe: FunctionExecution) -> FunctionExecution {
-    normalize_fe(&mut fe);
+    fe.normalize_for_tests();
     fe
-}
-
-fn normalize_fe(fe: &mut FunctionExecution) {
-    fe.id = String::new();
-    fe.created = 0;
-    fe.retry_token = None;
-    for task in &mut fe.tasks {
-        match task {
-            objectiveai::functions::executions::response::unary::Task::VectorCompletion(vt) => {
-                normalize_vc(&mut vt.inner);
-            }
-            objectiveai::functions::executions::response::unary::Task::FunctionExecution(ft) => {
-                normalize_fe(&mut ft.inner);
-            }
-        }
-    }
-}
-
-fn normalize_vc(
-    vc: &mut objectiveai::vector::completions::response::unary::VectorCompletion,
-) {
-    vc.id = String::new();
-    vc.created = 0;
-    for completion in &mut vc.completions {
-        completion.inner.id = String::new();
-        completion.inner.created = 0;
-        for msg in &mut completion.inner.messages {
-            if let objectiveai::agent::completions::response::unary::Message::Assistant(asst) = msg
-            {
-                asst.upstream_id = String::new();
-                asst.created = 0;
-            }
-        }
-    }
-    for vote in &mut vc.votes {
-        vote.prompt_id = String::new();
-        vote.responses_ids = Vec::new();
-    }
 }
 
 fn assert_snapshot(json: &str, path: &str, expected: &str) {

@@ -14,6 +14,24 @@ pub struct FunctionInventionRecursive {
     pub usage: agent::completions::response::Usage,
 }
 
+impl FunctionInventionRecursive {
+    /// Normalize non-deterministic fields for test snapshot comparison.
+    pub fn normalize_for_tests(&mut self) {
+        self.id = String::new();
+        self.created = 0;
+        for invention in &mut self.inventions {
+            invention.inner.normalize_for_tests();
+        }
+        // Sort inventions by state name and renumber indices sequentially.
+        self.inventions.sort_by(|a, b| {
+            a.inner.state.name().cmp(b.inner.state.name())
+        });
+        for (i, inv) in self.inventions.iter_mut().enumerate() {
+            inv.index = i as u64;
+        }
+    }
+}
+
 impl From<response::streaming::FunctionInventionRecursiveChunk>
     for FunctionInventionRecursive
 {

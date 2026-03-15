@@ -257,19 +257,7 @@ async fn run_invention(
 // ---------------------------------------------------------------------------
 
 fn normalize(mut fi: FunctionInvention) -> FunctionInvention {
-    fi.id = String::new();
-    fi.created = 0;
-    for completion in &mut fi.completions {
-        completion.inner.id = String::new();
-        completion.inner.created = 0;
-        for msg in &mut completion.inner.messages {
-            if let objectiveai::agent::completions::response::unary::Message::Assistant(asst) = msg
-            {
-                asst.upstream_id = String::new();
-                asst.created = 0;
-            }
-        }
-    }
+    fi.normalize_for_tests();
     fi
 }
 
