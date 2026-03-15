@@ -150,6 +150,40 @@ def _generate_inline_type(schema: dict, self_title: str, all_titles: set[str]) -
     return class_name
 
 
+def _generate_inline_anyof(any_of: list[dict], self_title: str, all_titles: set[str],
+                           *, description: str | None = None) -> str:
+    """Generate an inline RootModel for an anyOf that has described variants.
+
+    Creates variant wrapper classes with docstrings to preserve descriptions.
+    """
+    class_name = "".join(_naming_context)
+    safe_desc = description.replace('"""', '\\"\\"\\"') if description else ""
+    refs: set[str] = set()
+    variant_codes: list[str] = []
+    union_members: list[str] = []
+
+    for i, v in enumerate(any_of, 1):
+        if v.get("type") == "null":
+            union_members.append("None")
+            continue
+
+        var_code, var_name, var_refs = _generate_variant_class(
+            v, class_name, i, self_title, all_titles,
+            all_schemas=_all_schemas,
+        )
+        variant_codes.append(var_code)
+        union_members.append(var_name)
+        refs.update(var_refs)
+
+    root_type = _union_type(union_members)
+    main_code = _make_root_model(class_name, safe_desc, root_type)
+    code = "\n\n".join(variant_codes + [main_code])
+
+    _generated_helpers.append(code)
+    _generated_helper_refs.update(refs)
+    return class_name
+
+
 def resolve_ref_name(title: str) -> str:
     """Resolve a $ref title to the class name used in the current file."""
     if title in _current_name_map:
@@ -208,7 +242,8 @@ def _convert_type_impl(
 
     # anyOf — inner types within anyOf always use annotate=True
     if "anyOf" in schema:
-        return _convert_any_of_type(schema["anyOf"], self_title, all_titles)
+        return _convert_any_of_type(schema["anyOf"], self_title, all_titles,
+                                    description=schema.get("description"))
 
     # type handling
     type_ = schema.get("type")
@@ -219,7 +254,8 @@ def _convert_type_impl(
     return "JsonValue"
 
 
-def _convert_any_of_type(any_of: list[dict], self_title: str, all_titles: set[str]) -> str:
+def _convert_any_of_type(any_of: list[dict], self_title: str, all_titles: set[str],
+                         *, description: str | None = None) -> str:
     null_variant = next(
         (v for v in any_of if v.get("type") == "null"),
         None,
@@ -229,6 +265,15 @@ def _convert_any_of_type(any_of: list[dict], self_title: str, all_titles: set[st
         # Nullable — use _convert_inner_type so constraints are preserved
         inner = _convert_inner_type(non_null[0], self_title, all_titles)
         return f"Optional[{inner}]"
+
+    # Check if any variant has a description or nested anyOf — needs inline generation
+    has_described = any(
+        v.get("description") or ("anyOf" in v and v.get("$ref"))
+        for v in any_of if not _is_simple_null_variant(v)
+    )
+    if has_described and _naming_context:
+        return _generate_inline_anyof(any_of, self_title, all_titles, description=description)
+
     # General union — each variant uses inner type
     variants = [_convert_inner_type(v, self_title, all_titles) for v in any_of]
     return _union_type(variants)

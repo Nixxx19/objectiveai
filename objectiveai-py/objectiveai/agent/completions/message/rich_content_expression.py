@@ -7,6 +7,42 @@ from objectiveai.agent.completions.message.rich_content_part_expression import R
 from objectiveai.functions.expression.expression import Expression
 
 
+class ItemVariant1(RootModel):
+    """An expression (JMESPath or Starlark) to evaluate."""
+    root: Expression
+
+
+class ItemVariant2(RootModel):
+    """A literal value."""
+    root: RichContentPartExpression
+
+
+class Item(RootModel):
+    """A value that can be either a literal or an expression.
+
+This allows Function definitions to mix static values with dynamic
+expressions. During compilation, expressions are evaluated while
+literal values pass through unchanged.
+
+# Example
+
+Literal value:
+```json
+"hello world"
+```
+
+JMESPath expression:
+```json
+{"$jmespath": "input.greeting"}
+```
+
+Starlark expression:
+```json
+{"$starlark": "input['greeting']"}
+```"""
+    root: Union[ItemVariant1, ItemVariant2]
+
+
 class RichContentExpressionVariant1(RootModel):
     """Plain text content."""
     root: str
@@ -14,7 +50,7 @@ class RichContentExpressionVariant1(RootModel):
 
 class RichContentExpressionVariant2(RootModel):
     """Multi-part content expressions."""
-    root: list[Union[Expression, RichContentPartExpression]]
+    root: list[Item]
 
 
 class RichContentExpression(RootModel):

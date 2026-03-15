@@ -14,7 +14,7 @@ from .image_input_schema import ImageInputSchema  # noqa: F401
 from .image_input_schema_type import ImageInputSchemaType  # noqa: F401
 from .input_schema import InputSchema, InputSchemaVariant1, InputSchemaVariant10, InputSchemaVariant11, InputSchemaVariant2, InputSchemaVariant3, InputSchemaVariant4, InputSchemaVariant5, InputSchemaVariant6, InputSchemaVariant7, InputSchemaVariant8, InputSchemaVariant9  # noqa: F401
 from .input_value import InputValue, InputValueVariant1, InputValueVariant2, InputValueVariant3, InputValueVariant4, InputValueVariant5, InputValueVariant6, InputValueVariant7  # noqa: F401
-from .input_value_expression import InputValueExpression, InputValueExpressionVariant1, InputValueExpressionVariant2, InputValueExpressionVariant3, InputValueExpressionVariant4, InputValueExpressionVariant5, InputValueExpressionVariant6, InputValueExpressionVariant7  # noqa: F401
+from .input_value_expression import InputValueExpression, InputValueExpressionVariant1, InputValueExpressionVariant2, InputValueExpressionVariant3, InputValueExpressionVariant4, InputValueExpressionVariant5, InputValueExpressionVariant6, InputValueExpressionVariant7, ItemVariant1, ItemVariant2  # noqa: F401
 from .integer_input_schema import IntegerInputSchema  # noqa: F401
 from .integer_input_schema_type import IntegerInputSchemaType  # noqa: F401
 from .number_input_schema import NumberInputSchema  # noqa: F401
