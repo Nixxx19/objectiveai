@@ -1,22 +1,26 @@
 """Fuzz test: Python push vs PyO3 (Rust) push for FunctionInventionChunk."""
+import copy
+
 import pytest
 
 objectiveai_pyo3 = pytest.importorskip("objectiveai_pyo3")
 
-from polyfactory.factories.pydantic_factory import ModelFactory
-
 from objectiveai.functions.inventions.response.streaming import FunctionInventionChunk
-from tests.push_test_utils import run_push_fuzz_test
+from tests.push_test_utils import pydantic_push, rounded
 
 
-class FunctionInventionChunkFactory(ModelFactory):
-    __model__ = FunctionInventionChunk
+@pytest.mark.parametrize("stream", range(20))
+def test_push_fuzz(stream):
+    seed = stream * 1000
+    py_acc = objectiveai_pyo3.generate_function_invention_chunk(seed)
+    pyo3_acc = copy.deepcopy(py_acc)
+    seed += 1
 
+    for j in range(20):
+        chunk = objectiveai_pyo3.generate_function_invention_chunk(seed)
+        seed += 1
 
-def test_push_fuzz():
-    run_push_fuzz_test(
-        factory_cls=FunctionInventionChunkFactory,
-        model_cls=FunctionInventionChunk,
-        normalize_fn=objectiveai_pyo3.function_invention_chunk_normalized,
-        merged_fn=objectiveai_pyo3.function_invention_chunk_merged,
-    )
+        py_acc = pydantic_push(py_acc, chunk, FunctionInventionChunk)
+        pyo3_acc = objectiveai_pyo3.function_invention_chunk_merged(pyo3_acc, chunk)
+
+        assert rounded(py_acc) == rounded(pyo3_acc), f"chunk {j}"
