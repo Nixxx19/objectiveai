@@ -29,7 +29,21 @@ fn inline_generic_refs(
                 .and_then(|r| r.strip_prefix("#/$defs/"))
                 .and_then(|name| generic_defs.get(name).cloned());
 
-            if let Some(def) = should_inline {
+            if let Some(mut def) = should_inline {
+                // Preserve description sibling to $ref, merging with def's description
+                let sibling_desc = map.get("description").and_then(|v| v.as_str()).map(String::from);
+                if let Some(serde_json::Value::Object(inlined)) = Some(&mut def).filter(|v| v.is_object()) {
+                    let def_desc = inlined.get("description").and_then(|v| v.as_str()).map(String::from);
+                    let merged = match (sibling_desc, def_desc) {
+                        (Some(s), Some(d)) => Some(format!("{s}\n\n{d}")),
+                        (Some(s), None) => Some(s),
+                        (None, Some(d)) => Some(d),
+                        (None, None) => None,
+                    };
+                    if let Some(desc) = merged {
+                        inlined.insert("description".to_string(), serde_json::Value::String(desc));
+                    }
+                }
                 *value = def;
                 // The inlined value might itself have refs, recurse
                 inline_generic_refs(value, generic_defs);

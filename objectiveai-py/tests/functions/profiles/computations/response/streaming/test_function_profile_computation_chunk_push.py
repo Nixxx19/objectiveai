@@ -8,21 +8,23 @@ objectiveai_pyo3 = pytest.importorskip("objectiveai_pyo3")
 from objectiveai.functions.profiles.computations.response.streaming import (
     FunctionProfileComputationChunk,
 )
-from tests.push_test_utils import pydantic_push, rounded
+from tests.push_test_utils import rounded
 
 
 @pytest.mark.parametrize("stream", range(20))
 def test_push_fuzz(stream):
     seed = stream * 1000
-    py_acc = objectiveai_pyo3.generate_function_profile_computation_chunk(seed)
-    pyo3_acc = copy.deepcopy(py_acc)
+    init = objectiveai_pyo3.generate_function_profile_computation_chunk(seed)
+    py_acc = FunctionProfileComputationChunk.model_validate(init)
+    pyo3_acc = copy.deepcopy(init)
     seed += 1
 
     for j in range(20):
         chunk = objectiveai_pyo3.generate_function_profile_computation_chunk(seed)
         seed += 1
 
-        py_acc = pydantic_push(py_acc, chunk, FunctionProfileComputationChunk)
+        py_acc.push(FunctionProfileComputationChunk.model_validate(chunk))
         pyo3_acc = objectiveai_pyo3.function_profile_computation_chunk_merged(pyo3_acc, chunk)
 
-        assert rounded(py_acc) == rounded(pyo3_acc), f"chunk {j}"
+        py_dict = py_acc.model_dump(mode="python", by_alias=True, exclude_unset=True)
+        assert rounded(py_dict) == rounded(pyo3_acc), f"chunk {j}"
