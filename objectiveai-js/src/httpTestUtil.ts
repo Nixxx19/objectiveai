@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { ObjectiveAI } from "./client";
+import { rounded } from "./mergeTestUtil";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -31,7 +32,7 @@ export interface HttpTestSuiteOptions<Chunk, Unary> {
   merge: (acc: Chunk, chunk: Chunk) => [Chunk, boolean];
   /** Convert a fully-accumulated chunk into a unary response */
   chunkToUnary: (acc: Chunk) => Unary;
-  /** Normalize non-deterministic fields before comparison */
+  /** WASM normalize for test comparison (zeros non-deterministic fields) */
   normalize: (unary: Unary) => Unary;
   /** The individual test cases */
   cases: HttpTestCase[];
@@ -61,13 +62,13 @@ export function httpTestSuite<Chunk, Unary>(opts: HttpTestSuiteOptions<Chunk, Un
       const endpoint = c.endpoint ?? opts.endpoint;
 
       it(`${c.snapshot} (unary)`, async () => {
-        const expected = opts.normalize(loadSnapshot<Unary>(opts.snapshotsDir, c.snapshot));
-        expect(opts.normalize(await postUnary(endpoint, c.body))).toEqual(expected);
+        const expected = rounded(loadSnapshot<Unary>(opts.snapshotsDir, c.snapshot));
+        expect(rounded(opts.normalize(await postUnary(endpoint, c.body)))).toEqual(expected);
       });
 
       it(`${c.snapshot} (streaming)`, async () => {
-        const expected = opts.normalize(loadSnapshot<Unary>(opts.snapshotsDir, c.snapshot));
-        expect(opts.normalize(await postStreaming(endpoint, c.body))).toEqual(expected);
+        const expected = rounded(loadSnapshot<Unary>(opts.snapshotsDir, c.snapshot));
+        expect(rounded(opts.normalize(await postStreaming(endpoint, c.body)))).toEqual(expected);
       });
     }
   });

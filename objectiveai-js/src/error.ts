@@ -1,34 +1,32 @@
 import type { JsonValue } from "./jsonValue";
-import { ResponseError } from "./responseError";
-
-export { ResponseError };
+import type { ErrorResponseError } from "./error/responseError";
 
 /**
  * Error thrown when an API request fails.
  *
- * - `body`: The complete ResponseError (contains code and message)
+ * - `body`: The complete ErrorResponseError (contains code and message)
  * - `message` (inherited from Error): JSON-serialized body for stack traces
  */
 export class ObjectiveAIFetchError extends Error {
-  readonly body: ResponseError;
+  readonly body: ErrorResponseError;
 
   /**
-   * Construct directly from a ResponseError (e.g., when streaming yields an error).
+   * Construct directly from a ErrorResponseError (e.g., when streaming yields an error).
    */
-  constructor(body: ResponseError);
+  constructor(body: ErrorResponseError);
   /**
    * Construct from a status code and optional raw body string.
    *
    * - If rawBody is missing/null/undefined, constructs with null message
-   * - If rawBody parses to a ResponseError, uses that (ignores code param)
-   * - Otherwise, constructs ResponseError with code and parsed JSON (or raw string) as message
+   * - If rawBody parses to a ErrorResponseError, uses that (ignores code param)
+   * - Otherwise, constructs ErrorResponseError with code and parsed JSON (or raw string) as message
    */
   constructor(code: number, rawBody?: string | null);
-  constructor(codeOrBody: number | ResponseError, rawBody?: string | null) {
-    let body: ResponseError;
+  constructor(codeOrBody: number | ErrorResponseError, rawBody?: string | null) {
+    let body: ErrorResponseError;
 
     if (typeof codeOrBody !== "number") {
-      // Direct ResponseError
+      // Direct ErrorResponseError
       body = codeOrBody;
     } else if (rawBody === null || rawBody === undefined) {
       // No body, construct with null message
@@ -47,9 +45,9 @@ export class ObjectiveAIFetchError extends Error {
         return;
       }
 
-      // Check if parsed is already a ResponseError
+      // Check if parsed is already a ErrorResponseError
       if (isResponseError(parsed)) {
-        // Use the parsed ResponseError, ignore the code param
+        // Use the parsed ErrorResponseError, ignore the code param
         body = parsed;
       } else {
         // Use parsed JSON as the message
@@ -57,7 +55,7 @@ export class ObjectiveAIFetchError extends Error {
       }
     }
 
-    // Error.message is a JSON-serialized ResponseError for complete error info
+    // Error.message is a JSON-serialized ErrorResponseError for complete error info
     super(JSON.stringify(body));
     this.name = "ObjectiveAIFetchError";
     this.body = body;
@@ -71,17 +69,17 @@ export class ObjectiveAIFetchError extends Error {
   }
 
   /**
-   * Serialize to ResponseError JSON format.
+   * Serialize to ErrorResponseError JSON format.
    */
-  toJSON(): ResponseError {
+  toJSON(): ErrorResponseError {
     return this.body;
   }
 }
 
 /**
- * Check if an object looks like a ResponseError.
+ * Check if an object looks like a ErrorResponseError.
  */
-export function isResponseError(obj: unknown): obj is ResponseError {
+export function isResponseError(obj: unknown): obj is ErrorResponseError {
   return (
     typeof obj === "object" &&
     obj !== null &&

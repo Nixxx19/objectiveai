@@ -1,7 +1,10 @@
 import * as path from "path";
 import { httpTestSuite } from "../../httpTestUtil";
 import { agentCompletionsResponseStreamingAgentCompletionChunkMerged } from "./response/streaming/agentCompletionChunkMerged";
-import { wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary } from "./response/streaming/wasm";
+import {
+  wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary,
+  wasmAgentCompletionsResponseStreamingNormalizeAgentCompletionForTests as normalize,
+} from "./response/streaming/wasm";
 import type { AgentCompletionsResponseStreamingAgentCompletionChunk } from "./response/streaming/agentCompletionChunk";
 import type { AgentCompletionsResponseUnaryAgentCompletion } from "./response/unary/agentCompletion";
 
@@ -11,16 +14,7 @@ httpTestSuite<AgentCompletionsResponseStreamingAgentCompletionChunk, AgentComple
   snapshotsDir: path.resolve(__dirname, "../../../../objectiveai-api/assets/agent/completions/client_tests"),
   merge: agentCompletionsResponseStreamingAgentCompletionChunkMerged,
   chunkToUnary: wasmAgentCompletionsResponseStreamingAgentCompletionChunkToUnary,
-  normalize: (c) => ({
-    ...c,
-    id: "",
-    created: 0,
-    messages: c.messages.map((m: any) => ({
-      ...m,
-      upstream_id: "",
-      created: 0,
-    })),
-  }),
+  normalize,
   cases: [
     { snapshot: "test_basic_mock_agent_seed_42", body: { messages: [], agent: { upstream: "mock", output_mode: "instruction" }, seed: 42 } },
     {

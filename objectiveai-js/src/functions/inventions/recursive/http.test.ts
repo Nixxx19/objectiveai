@@ -1,7 +1,10 @@
 import * as path from "path";
 import { httpTestSuite } from "../../../httpTestUtil";
 import { functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged } from "./response/streaming/functionInventionRecursiveChunkMerged";
-import { wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary } from "./response/streaming/wasm";
+import {
+  wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary,
+  wasmFunctionsInventionsRecursiveResponseStreamingNormalizeFunctionInventionRecursiveForTests as normalize,
+} from "./response/streaming/wasm";
 import type { FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunk } from "./response/streaming/functionInventionRecursiveChunk";
 import type { FunctionsInventionsRecursiveResponseUnaryFunctionInventionRecursive } from "./response/unary/functionInventionRecursive";
 
@@ -13,34 +16,7 @@ httpTestSuite<FunctionsInventionsRecursiveResponseStreamingFunctionInventionRecu
   snapshotsDir: path.resolve(__dirname, "../../../../../objectiveai-api/assets/functions/inventions/recursive_client_tests"),
   merge: functionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkMerged,
   chunkToUnary: wasmFunctionsInventionsRecursiveResponseStreamingFunctionInventionRecursiveChunkToUnary,
-  normalize: (fi) => {
-    const result = {
-      ...fi,
-      id: "",
-      created: 0,
-      inventions: fi.inventions.map((inv: any) => ({
-        ...inv,
-        id: "",
-        created: 0,
-        completions: inv.completions.map((c: any) => ({
-          ...c,
-          id: "",
-          created: 0,
-          messages: c.messages.map((m: any) =>
-            m.role === "assistant" ? { ...m, upstream_id: "", created: 0 } : m,
-          ),
-        })),
-      })),
-    };
-    // Sort inventions by state name and renumber indices (matches Rust normalize)
-    result.inventions.sort((a: any, b: any) => {
-      const nameA = a.state?.name ?? "";
-      const nameB = b.state?.name ?? "";
-      return nameA < nameB ? -1 : nameA > nameB ? 1 : 0;
-    });
-    result.inventions.forEach((inv: any, i: number) => { inv.index = i; });
-    return result;
-  },
+  normalize,
   cases: [
     {
       snapshot: "valid_schema_valid_tasks_scalar_leaf",

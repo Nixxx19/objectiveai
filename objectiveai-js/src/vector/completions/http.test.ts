@@ -1,7 +1,10 @@
 import * as path from "path";
 import { httpTestSuite } from "../../httpTestUtil";
 import { vectorCompletionsResponseStreamingVectorCompletionChunkMerged } from "./response/streaming/vectorCompletionChunkMerged";
-import { wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary } from "./response/streaming/wasm";
+import {
+  wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary,
+  wasmVectorCompletionsResponseStreamingNormalizeVectorCompletionForTests as normalize,
+} from "./response/streaming/wasm";
 import type { VectorCompletionsResponseStreamingVectorCompletionChunk } from "./response/streaming/vectorCompletionChunk";
 import type { VectorCompletionsResponseUnaryVectorCompletion } from "./response/unary/vectorCompletion";
 
@@ -13,36 +16,7 @@ httpTestSuite<VectorCompletionsResponseStreamingVectorCompletionChunk, VectorCom
   snapshotsDir: path.resolve(__dirname, "../../../../objectiveai-api/assets/vector/completions/client_tests"),
   merge: vectorCompletionsResponseStreamingVectorCompletionChunkMerged,
   chunkToUnary: wasmVectorCompletionsResponseStreamingVectorCompletionChunkToUnary,
-  normalize: (vc) => {
-    const completions = vc.completions.map((c: any) => ({
-      ...c,
-      id: "",
-      created: 0,
-      messages: c.messages.map((m: any) =>
-        m.role === "assistant" ? { ...m, upstream_id: "", created: 0 } : m,
-      ),
-    }));
-    completions.sort((a: any, b: any) => {
-      const agentA = a.messages[0]?.agent ?? "";
-      const agentB = b.messages[0]?.agent ?? "";
-      if (agentA !== agentB) return agentA < agentB ? -1 : 1;
-      const contentA = a.messages[0]?.content ?? "";
-      const contentB = b.messages[0]?.content ?? "";
-      return contentA < contentB ? -1 : contentA > contentB ? 1 : 0;
-    });
-    completions.forEach((c: any, i: number) => { c.index = i; });
-    const votes = vc.votes.map((v: any) => ({
-      ...v,
-      prompt_id: "",
-      responses_ids: [],
-    }));
-    votes.sort((a: any, b: any) => {
-      const agentA = a.agent ?? "";
-      const agentB = b.agent ?? "";
-      return agentA < agentB ? -1 : agentA > agentB ? 1 : 0;
-    });
-    return { ...vc, id: "", created: 0, completions, votes };
-  },
+  normalize,
   cases: [
     {
       snapshot: "single_agent_2_responses_instruction_seed_42",

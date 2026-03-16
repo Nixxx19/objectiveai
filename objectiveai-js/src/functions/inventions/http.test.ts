@@ -1,7 +1,10 @@
 import * as path from "path";
 import { httpTestSuite } from "../../httpTestUtil";
 import { functionsInventionsResponseStreamingFunctionInventionChunkMerged } from "./response/streaming/functionInventionChunkMerged";
-import { wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary } from "./response/streaming/wasm";
+import {
+  wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary,
+  wasmFunctionsInventionsResponseStreamingNormalizeFunctionInventionForTests as normalize,
+} from "./response/streaming/wasm";
 import type { FunctionsInventionsResponseStreamingFunctionInventionChunk } from "./response/streaming/functionInventionChunk";
 import type { FunctionsInventionsResponseUnaryFunctionInvention } from "./response/unary/functionInvention";
 
@@ -13,19 +16,7 @@ httpTestSuite<FunctionsInventionsResponseStreamingFunctionInventionChunk, Functi
   snapshotsDir: path.resolve(__dirname, "../../../../objectiveai-api/assets/functions/inventions/client_tests"),
   merge: functionsInventionsResponseStreamingFunctionInventionChunkMerged,
   chunkToUnary: wasmFunctionsInventionsResponseStreamingFunctionInventionChunkToUnary,
-  normalize: (fi) => ({
-    ...fi,
-    id: "",
-    created: 0,
-    completions: fi.completions.map((c: any) => ({
-      ...c,
-      id: "",
-      created: 0,
-      messages: c.messages.map((m: any) =>
-        m.role === "assistant" ? { ...m, upstream_id: "", created: 0 } : m,
-      ),
-    })),
-  }),
+  normalize,
   cases: [
     {
       snapshot: "scalar_leaf_s42_0",
