@@ -346,9 +346,11 @@ pub struct NumberInputSchema {
     pub description: Option<String>,
     /// Minimum allowed value (inclusive).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub minimum: Option<f64>,
     /// Maximum allowed value (inclusive).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub maximum: Option<f64>,
 }
 

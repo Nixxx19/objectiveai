@@ -51,6 +51,7 @@ pub struct AgentBase {
     // --- OpenAI-compatible parameters ---
     /// Penalizes tokens based on their frequency in the output so far (-2.0 to 2.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub frequency_penalty: Option<f64>,
     /// Token ID to bias mapping (-100 to 100). Positive values increase likelihood.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -62,15 +63,18 @@ pub struct AgentBase {
     pub max_completion_tokens: Option<u64>,
     /// Penalizes tokens based on their presence in the output so far (-2.0 to 2.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub presence_penalty: Option<f64>,
     /// Stop sequences that halt generation.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stop: Option<super::Stop>,
     /// Sampling temperature (0.0 to 2.0). Higher = more random.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub temperature: Option<f64>,
     /// Nucleus sampling probability (0.0 to 1.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub top_p: Option<f64>,
 
     // --- OpenRouter-specific parameters ---
@@ -80,6 +84,7 @@ pub struct AgentBase {
     pub max_tokens: Option<u64>,
     /// Minimum probability threshold for sampling (0.0 to 1.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub min_p: Option<f64>,
     /// Provider routing preferences.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -89,9 +94,11 @@ pub struct AgentBase {
     pub reasoning: Option<super::Reasoning>,
     /// Repetition penalty (0.0 to 2.0). Values > 1.0 penalize repetition.
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub repetition_penalty: Option<f64>,
     /// Top-a sampling parameter (0.0 to 1.0).
     #[serde(skip_serializing_if = "Option::is_none")]
+    #[arbitrary(with = crate::arbitrary_util::arbitrary_option_f64)]
     pub top_a: Option<f64>,
     /// Top-k sampling: only consider the k most likely tokens.
     #[serde(skip_serializing_if = "Option::is_none")]

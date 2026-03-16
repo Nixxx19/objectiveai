@@ -8,7 +8,7 @@ use std::path::Path;
 use syn::{Attribute, Fields, Item, Type};
 use walkdir::WalkDir;
 
-const NEEDS_CUSTOM_ARBITRARY: &[&str] = &["u64", "i64", "usize", "isize", "Decimal", "rust_decimal", "IndexMap", "indexmap"];
+const NEEDS_CUSTOM_ARBITRARY: &[&str] = &["u64", "i64", "f64", "usize", "isize", "Decimal", "rust_decimal", "IndexMap", "indexmap"];
 
 fn type_to_string(ty: &Type) -> String {
     quote::quote!(#ty).to_string()

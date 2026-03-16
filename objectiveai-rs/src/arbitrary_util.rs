@@ -68,6 +68,16 @@ pub fn arbitrary_vec_vec_rust_decimal(u: &mut arbitrary::Unstructured) -> arbitr
     arbitrary_vec(u, arbitrary_vec_rust_decimal)
 }
 
+/// Generates an arbitrary `f64` from an f32 (bounded range).
+pub fn arbitrary_f64(u: &mut arbitrary::Unstructured) -> arbitrary::Result<f64> {
+    Ok(u.arbitrary::<f32>()? as f64)
+}
+
+/// Generates an arbitrary `Option<f64>` (bounded range).
+pub fn arbitrary_option_f64(u: &mut arbitrary::Unstructured) -> arbitrary::Result<Option<f64>> {
+    arbitrary_option(u, arbitrary_f64)
+}
+
 /// Generates an arbitrary `u64` from a u32 (bounded range).
 pub fn arbitrary_u64(u: &mut arbitrary::Unstructured) -> arbitrary::Result<u64> {
     Ok(u.arbitrary::<u32>()? as u64)
