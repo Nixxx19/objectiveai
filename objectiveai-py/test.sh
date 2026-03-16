@@ -43,4 +43,4 @@ if ! $NO_SERVER && [ -z "${OBJECTIVEAI_TEST_PORT:-}" ]; then
 fi
 
 # Run tests (PYTHONPATH ensures objectiveai package is importable from repo root)
-PYTHONPATH="$SCRIPT_DIR${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m pytest "$SCRIPT_DIR/tests/" --tb=short "${PYTEST_ARGS[@]}"
+PYTHONPATH="$SCRIPT_DIR${PYTHONPATH:+:$PYTHONPATH}" "$PYTHON" -m pytest "$SCRIPT_DIR/tests/" -v --tb=long "${PYTEST_ARGS[@]}"
